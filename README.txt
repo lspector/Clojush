@@ -388,5 +388,5 @@ VERSION HISTORY
             was correct, emulating Common Lisp subst.)
 20100918: - Created Eclipse project.
           - Deleted re-load/backtrace utils.
-          - Removed shuffle, as it is now in clojure.core.
-          - 
+          - Removed shuffle, as it is now in clojure.core (in Clojure 1.2).
+          - Removed gratuitous def in define-registered.

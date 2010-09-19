@@ -263,8 +263,7 @@ list1 is from list2. The calculation is equivalent to the following:
 
 (defmacro define-registered
   [instruction definition]
-  `(do (def ~instruction ~definition)
-       (register-instruction '~instruction)
+  `(do (register-instruction '~instruction)
        (def instruction-table (assoc instruction-table '~instruction ~definition))))
 
 (defn state-pretty-print
@@ -1241,8 +1240,8 @@ the code stack."
     state
     (let [literal-type (recognize-literal instruction)]
       (if literal-type
-	(push-item instruction literal-type state)
-	((instruction instruction-table) state)))))
+        (push-item instruction literal-type state)
+        ((instruction instruction-table) state)))))
 
 (defn eval-push 
   "Executes the contents of the exec stack, aborting prematurely if execution limits are 
