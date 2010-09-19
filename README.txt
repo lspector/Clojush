@@ -390,3 +390,5 @@ VERSION HISTORY
           - Deleted re-load/backtrace utils.
           - Removed shuffle, as it is now in clojure.core (in Clojure 1.2).
           - Removed gratuitous def in define-registered.
+          - Added atom for instruction-table.
+          

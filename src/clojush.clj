@@ -259,12 +259,13 @@ list1 is from list2. The calculation is equivalent to the following:
   [name]
   (def registered-instructions (cons name registered-instructions)))
 
-(def instruction-table (hash-map))
+(def instruction-table (atom (hash-map)))
 
 (defmacro define-registered
   [instruction definition]
   `(do (register-instruction '~instruction)
-       (def instruction-table (assoc instruction-table '~instruction ~definition))))
+     (swap! instruction-table assoc '~instruction ~definition)))
+ ;      (def instruction-table (assoc instruction-table '~instruction ~definition))))
 
 (defn state-pretty-print
   [state]
@@ -1241,7 +1242,7 @@ the code stack."
     (let [literal-type (recognize-literal instruction)]
       (if literal-type
         (push-item instruction literal-type state)
-        ((instruction instruction-table) state)))))
+        ((instruction @instruction-table) state)))))
 
 (defn eval-push 
   "Executes the contents of the exec stack, aborting prematurely if execution limits are 
