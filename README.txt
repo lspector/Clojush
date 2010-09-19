@@ -391,4 +391,9 @@ VERSION HISTORY
           - Removed shuffle, as it is now in clojure.core (in Clojure 1.2).
           - Removed gratuitous def in define-registered.
           - Added atom for instruction-table.
+          - Added atom for registered-instructions; NOTE: requires user
+            code that refers to registered-instructions to refer to 
+            @registered-instructions instead. (Example odd.clj changed
+            to reflect this.)
+            
           

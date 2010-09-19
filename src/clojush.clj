@@ -252,12 +252,12 @@ list1 is from list2. The calculation is equivalent to the following:
   []
   (struct-map push-state))
 
-(def registered-instructions '())
+(def registered-instructions (atom ()))
 
 (defn register-instruction 
   "Add the provided name to the global list of registered instructions."
   [name]
-  (def registered-instructions (cons name registered-instructions)))
+  (swap! registered-instructions conj name))
 
 (def instruction-table (atom (hash-map)))
 
@@ -265,7 +265,6 @@ list1 is from list2. The calculation is equivalent to the following:
   [instruction definition]
   `(do (register-instruction '~instruction)
      (swap! instruction-table assoc '~instruction ~definition)))
- ;      (def instruction-table (assoc instruction-table '~instruction ~definition))))
 
 (defn state-pretty-print
   [state]
@@ -308,7 +307,7 @@ not for use as an instruction in Push programs."
 (defn registered-for-type
   "Returns a list of all registered instructions with the given type name as a prefix."
   [type]
-  (filter #(.startsWith (name %) (name type)) registered-instructions))
+  (filter #(.startsWith (name %) (name type)) @registered-instructions))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ACTUAL INSTRUCTIONS
@@ -1209,13 +1208,15 @@ the code stack."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; print all registered instructions on loading
 
-(printf "\nRegistered instructions: %s\n\n" registered-instructions)
+(printf "\nRegistered instructions: %s\n\n" @registered-instructions)
 (flush)
 
 ;; also set default value for atom-generators
-(def global-atom-generators (concat registered-instructions
-				    (list (fn [] (lrand-int 100))
-					  (fn [] (lrand)))))
+(def global-atom-generators 
+  (concat @registered-instructions
+    (list 
+      (fn [] (lrand-int 100))
+      (fn [] (lrand)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; push interpreter
@@ -1458,9 +1459,11 @@ using the given parameters."
 	error-threshold (get params :error-threshold 0)
 	population-size (get params :population-size 1000)
 	max-points (get params :max-points 50)
-	atom-generators (get params :atom-generators (concat registered-instructions
-							     (list (fn [] (lrand-int 100))
-								   (fn [] (lrand)))))
+	atom-generators (get params :atom-generators 
+                   (concat @registered-instructions
+                     (list 
+                       (fn [] (lrand-int 100))
+                       (fn [] (lrand)))))
 	max-generations (get params :max-generations 1001)
 	mutation-probability (get params :mutation-probability 0.4)
 	mutation-max-points (get params :mutation-max-points 20)
@@ -1536,7 +1539,7 @@ of nil values in execute-instruction, do see if any instructions are introducing
   [n]
   (let [completely-random-program
         (fn []
-          (random-code 100 (concat registered-instructions
+          (random-code 100 (concat @registered-instructions
                                    (list (fn [] (lrand-int 100))
 					 (fn [] (lrand))))))]
     (loop [i 0 p (completely-random-program)]

@@ -30,10 +30,10 @@
 		  (math/abs (- top-int (factorial input)))
 		  1000000000))))) ;; big penalty, since errors can be big
 	 :atom-generators (concat (registered-for-type :integer)
-				  (registered-for-type :exec)
-				  (registered-for-type :boolean)
-				  (list (fn [] (rand-int 100))
-					'in))
+                     (registered-for-type :exec)
+                     (registered-for-type :boolean)
+                     (list (fn [] (rand-int 100))
+                       'in))
 	 :max-points 100
 	 :population-size 5000
 	 :trivial-geography-radius 10})
