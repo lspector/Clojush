@@ -44,8 +44,8 @@
 
 ;; The following globals require values because they are used in Push instructions but they
 ;; may be reset by arguments to pushgp or other systems that use Push.
-(def global-atom-generators ()) ;; the defalult for this will be set below
-(def global-max-points-in-program 100)
+(def global-atom-generators (atom ())) ;; the defalult for this will be set below
+(def global-max-points-in-program (atom 100))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random code generator
@@ -531,10 +531,10 @@ integer to indicate how deep."
   (fn [state]
     (if (not (empty? (:integer state)))
       (push-item (random-code (math/abs (mod (stack-ref :integer 0 state) 
-					     max-points-in-random-expressions)) 
-			      global-atom-generators)
-		 :code
-		 (pop-item :integer state))
+                                          max-points-in-random-expressions)) 
+                   @global-atom-generators)
+        :code
+        (pop-item :integer state))
       state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -798,7 +798,7 @@ boolean stack."
     (if (not (empty? (rest (:code state))))
       (let [new-item (concat (ensure-list (stack-ref :code 0 state))
 			     (ensure-list (stack-ref :code 1 state)))]
-	(if (<= (count-points new-item) global-max-points-in-program)
+	(if (<= (count-points new-item) @global-max-points-in-program)
 	  (push-item new-item
 		     :code
 		     (pop-item :code (pop-item :code state)))
@@ -835,7 +835,7 @@ boolean stack."
     (if (not (empty? (rest (:code state))))
       (let [new-item (cons (stack-ref :code 1 state)
 			   (ensure-list (stack-ref :code 0 state)))]
-	(if (<= (count-points new-item) global-max-points-in-program)
+	(if (<= (count-points new-item) @global-max-points-in-program)
 	  (push-item new-item
 		     :code
 		     (pop-item :code (pop-item :code state)))
@@ -1020,7 +1020,7 @@ the code stack."
     (if (not (empty? (rest (:code state))))
       (let [new-item (list (first (rest (:code state)))
 			   (first (:code state)))]
-	(if (<= (count-points new-item) global-max-points-in-program)
+	(if (<= (count-points new-item) @global-max-points-in-program)
 	  (push-item new-item
 		     :code
 		     (pop-item :code (pop-item :code state)))
@@ -1031,7 +1031,7 @@ the code stack."
   (fn [state]
     (if (not (empty? (:code state)))
       (let [new-item (list (first (:code state)))]
-	(if (<= (count-points new-item) global-max-points-in-program)
+	(if (<= (count-points new-item) @global-max-points-in-program)
 	  (push-item new-item
 		     :code
 		     (pop-item :code state))
@@ -1108,7 +1108,7 @@ the code stack."
       (let [new-item (insert-code-at-point (first (:code state))
 					   (first (:integer state))
 					   (second (:code state)))]
-	(if (<= (count-points new-item) global-max-points-in-program)
+	(if (<= (count-points new-item) @global-max-points-in-program)
 	  (push-item new-item
 		     :code
 		     (pop-item :code (pop-item :code (pop-item :integer state))))
@@ -1121,7 +1121,7 @@ the code stack."
       (let [new-item (subst (stack-ref :code 2 state)
 			    (stack-ref :code 1 state)
 			    (stack-ref :code 0 state))]
-	(if (<= (count-points new-item) global-max-points-in-program)
+	(if (<= (count-points new-item) @global-max-points-in-program)
 	  (push-item new-item
 		     :code
 		     (pop-item :code (pop-item :code (pop-item :code state))))
@@ -1179,7 +1179,7 @@ the code stack."
 	    x (first stk)
 	    y (first (rest stk))
 	    z (first (rest (rest stk)))]
-	(if (<= (count-points (list y z)) global-max-points-in-program)
+	(if (<= (count-points (list y z)) @global-max-points-in-program)
 	  (push-item x
 		     :exec
 		     (push-item z
@@ -1196,7 +1196,7 @@ the code stack."
   (fn [state]
     (if (not (empty? (:exec state)))
       (let [new-item (list 'exec_y (first (:exec state)))]
-	(if (<= (count-points new-item) global-max-points-in-program)
+	(if (<= (count-points new-item) @global-max-points-in-program)
 	  (push-item (first (:exec state))
 		     :exec
 		     (push-item new-item
@@ -1212,11 +1212,11 @@ the code stack."
 (flush)
 
 ;; also set default value for atom-generators
-(def global-atom-generators 
+(reset! global-atom-generators 
   (concat @registered-instructions
-    (list 
-      (fn [] (lrand-int 100))
-      (fn [] (lrand)))))
+          (list 
+            (fn [] (lrand-int 100))
+            (fn [] (lrand)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; push interpreter
@@ -1307,28 +1307,28 @@ normal, or :abnormal otherwise."
       (flush))
     (if (>= step steps)
       (struct-map individual :program program :errors errors :total-error total-errors 
-		  :history (:history ind) 
-		  :ancestors (if maintain-ancestors
-			       (cons (:program ind) (:ancestors ind))
-			       (:ancestors ind)))
+        :history (:history ind) 
+        :ancestors (if maintain-ancestors
+                     (cons (:program ind) (:ancestors ind))
+                     (:ancestors ind)))
       (let [new-program (if (< (lrand-int 5) 4)
-			  ;; remove a small number of random things
-			  (loop [p program how-many (inc (lrand-int 2))]
-			    (if (zero? how-many)
-			      p
-			      (recur (remove-code-at-point p (lrand-int (count-points p)))
-				     (dec how-many))))
-			  ;; flatten something
-			  (let [point-index (lrand-int (count-points program))
-				point (code-at-point program point-index)]
-			    (if (seq? point)
-			      (insert-code-at-point program point-index (seq-utils/flatten point))
-			      program)))
-	    new-errors (error-function new-program)
-	    new-total-errors (apply + new-errors)]
-	(if (<= new-total-errors total-errors)
-	  (recur (inc step) new-program new-errors new-total-errors)
-	  (recur (inc step) program errors total-errors))))))
+                          ;; remove a small number of random things
+                          (loop [p program how-many (inc (lrand-int 2))]
+                            (if (zero? how-many)
+                              p
+                              (recur (remove-code-at-point p (lrand-int (count-points p)))
+                                (dec how-many))))
+                          ;; flatten something
+                          (let [point-index (lrand-int (count-points program))
+                                point (code-at-point program point-index)]
+                            (if (seq? point)
+                              (insert-code-at-point program point-index (seq-utils/flatten point))
+                              program)))
+            new-errors (error-function new-program)
+            new-total-errors (apply + new-errors)]
+        (if (<= new-total-errors total-errors)
+          (recur (inc step) new-program new-errors new-total-errors)
+          (recur (inc step) program errors total-errors))))))
 
 (defn problem-specific-report
   "Customize this for your own problem. It will be called at the end of the generational report."
@@ -1387,9 +1387,9 @@ normal, or :abnormal otherwise."
     (if (> (count-points new-program) max-points)
       ind
       (struct-map individual :program new-program :history (:history ind)
-		  :ancestors (if maintain-ancestors
-			       (cons (:program ind) (:ancestors ind))
-			       (:ancestors ind))))))
+        :ancestors (if maintain-ancestors
+                     (cons (:program ind) (:ancestors ind))
+                     (:ancestors ind))))))
 
 (defn crossover 
   "Returns a copy of parent1 with a random subprogram replaced with a random 
@@ -1454,77 +1454,79 @@ using the given parameters."
 
 (defn pushgp
   "The top-level routine of pushgp."
-  [params]
-  (let [error-function (get params :error-function (fn [p] '(0))) ;; pgm -> list of errors (1 per case)
-	error-threshold (get params :error-threshold 0)
-	population-size (get params :population-size 1000)
-	max-points (get params :max-points 50)
-	atom-generators (get params :atom-generators 
-                   (concat @registered-instructions
-                     (list 
-                       (fn [] (lrand-int 100))
-                       (fn [] (lrand)))))
-	max-generations (get params :max-generations 1001)
-	mutation-probability (get params :mutation-probability 0.4)
-	mutation-max-points (get params :mutation-max-points 20)
-	crossover-probability (get params :crossover-probability 0.4)
-	simplification-probability (get params :simplification-probability 0.1)
-	tournament-size (get params :tournament-size 7)
-	report-simplifications (get params :report-simplifications 100)
-	final-report-simplifications (get params :final-report-simplifications 1000)
-	reproduction-simplifications (get params :reproduction-simplifications 1)
-	trivial-geography-radius (get params :trivial-geography-radius 0)]
+  [& {:keys [error-function error-threshold population-size max-points atom-generators max-generations
+             max-mutations mutation-probability mutation-max-points crossover-probability 
+             simplification-probability tournament-size report-simplifications final-report-simplifications
+             reproduction-simplifications trivial-geography-radius]
+      :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
+           error-threshold 0
+           population-size 1000
+           max-points 50
+           atom-generators (concat @registered-instructions
+                             (list 
+                               (fn [] (lrand-int 100))
+                               (fn [] (lrand))))
+           max-generations 1001
+           mutation-probability 0.4
+           mutation-max-points 20
+           crossover-probability 0.4
+           simplification-probability 0.1
+           tournament-size 7
+           report-simplifications 100
+           final-report-simplifications 1000
+           reproduction-simplifications 1
+           trivial-geography-radius 0}}]
     ;; set globals from parameters
-    (def global-atom-generators atom-generators)
-    (def global-max-points-in-program max-points)
+    (reset! global-atom-generators atom-generators)
+    (reset! global-max-points-in-program max-points)
     (printf "\nStarting PushGP run.\n\n") (flush)
     (print-params 
-     (error-function error-threshold population-size max-points atom-generators max-generations 
-		     mutation-probability mutation-max-points crossover-probability
-		     simplification-probability tournament-size report-simplifications
-		     final-report-simplifications trivial-geography-radius))
+      (error-function error-threshold population-size max-points atom-generators max-generations 
+        mutation-probability mutation-max-points crossover-probability
+        simplification-probability tournament-size report-simplifications
+        final-report-simplifications trivial-geography-radius))
     (printf "\nGenerating initial population...\n") (flush)
     (let [pop-agents (vec (doall (for [_ (range population-size)] 
-				   (agent (struct-map individual 
-					    :program (random-code max-points atom-generators))))))
-	  child-agents (vec (doall (for [_ (range population-size)] 
-				     (agent (struct-map individual)))))
-	  rand-gens (vec (doall (for [_ (range population-size)]
-				  (java.util.Random.))))]
+                                   (agent (struct-map individual 
+                                            :program (random-code max-points atom-generators))))))
+          child-agents (vec (doall (for [_ (range population-size)] 
+                                     (agent (struct-map individual)))))
+          rand-gens (vec (doall (for [_ (range population-size)]
+                                  (java.util.Random.))))]
       (loop [generation 0]
-	(printf "\n\n-----\nProcessing generation: %s\nComputing errors..." generation) (flush)
-	(dorun (map #(send % evaluate-individual error-function %2) pop-agents rand-gens))
-	(apply await pop-agents) ;; SYNCHRONIZE
-	(printf "\nDone computing errors.") (flush)
-	;; report and check for success
-	(let [best (report (vec (doall (map deref pop-agents))) generation error-function report-simplifications)]
-	  (if (<= (:total-error best) error-threshold)
-	    (do (printf "\n\nSUCCESS at generation %s\nSuccessful program: %s\nErrors: %s\nTotal error: %s\nHistory: %s\nSize: %s\n\n"
-			generation (not-lazy (:program best)) (not-lazy (:errors best)) (:total-error best) 
-			(not-lazy (:history best)) (count-points (:program best)))
-		(when print-ancestors-of-solution
-		  (printf "\nAncestors of solution:\n")
-		  (println (:ancestors best)))
-					;(shutdown-agents)
-		(auto-simplify best error-function final-report-simplifications true 500))
-	    (do (if (>= generation max-generations)
-		  (do (printf "\nFAILURE\n")
-					;(shutdown-agents)
-		      )
-		  (do (printf "\nProducing offspring...") (flush)
-		      (let [pop (vec (doall (map deref pop-agents)))]
-			(dotimes [i population-size]
-			  (send (nth child-agents i) 
-				breed i (nth rand-gens i) pop error-function population-size max-points atom-generators 
-				mutation-probability mutation-max-points crossover-probability 
-				simplification-probability tournament-size reproduction-simplifications 
-				trivial-geography-radius)))
-		      (apply await child-agents) ;; SYNCHRONIZE
-		      (printf "\nInstalling next generation...") (flush)
-		      (dotimes [i population-size]
-			(send (nth pop-agents i) (fn [av] (deref (nth child-agents i)))))
-		      (apply await pop-agents) ;; SYNCHRONIZE
-		      (recur (inc generation)))))))))))
+        (printf "\n\n-----\nProcessing generation: %s\nComputing errors..." generation) (flush)
+        (dorun (map #(send % evaluate-individual error-function %2) pop-agents rand-gens))
+        (apply await pop-agents) ;; SYNCHRONIZE
+        (printf "\nDone computing errors.") (flush)
+        ;; report and check for success
+        (let [best (report (vec (doall (map deref pop-agents))) generation error-function report-simplifications)]
+          (if (<= (:total-error best) error-threshold)
+            (do (printf "\n\nSUCCESS at generation %s\nSuccessful program: %s\nErrors: %s\nTotal error: %s\nHistory: %s\nSize: %s\n\n"
+                  generation (not-lazy (:program best)) (not-lazy (:errors best)) (:total-error best) 
+                  (not-lazy (:history best)) (count-points (:program best)))
+              (when print-ancestors-of-solution
+                (printf "\nAncestors of solution:\n")
+                (println (:ancestors best)))
+              ;(shutdown-agents)
+              (auto-simplify best error-function final-report-simplifications true 500))
+            (do (if (>= generation max-generations)
+                  (do (printf "\nFAILURE\n")
+                    ;(shutdown-agents)
+                    )
+                  (do (printf "\nProducing offspring...") (flush)
+                    (let [pop (vec (doall (map deref pop-agents)))]
+                      (dotimes [i population-size]
+                        (send (nth child-agents i) 
+                          breed i (nth rand-gens i) pop error-function population-size max-points atom-generators 
+                          mutation-probability mutation-max-points crossover-probability 
+                          simplification-probability tournament-size reproduction-simplifications 
+                          trivial-geography-radius)))
+                    (apply await child-agents) ;; SYNCHRONIZE
+                    (printf "\nInstalling next generation...") (flush)
+                    (dotimes [i population-size]
+                      (send (nth pop-agents i) (fn [av] (deref (nth child-agents i)))))
+                    (apply await pop-agents) ;; SYNCHRONIZE
+                    (recur (inc generation))))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; stress test
@@ -1552,36 +1554,3 @@ of nil values in execute-instruction, do see if any instructions are introducing
 
 ;(stress-test 10000)
 
-;;;;;;;;;;;;
-;; Integer symbolic regression of x^3 - 2x^2 - x (problem 5 from the 
-;; trivial geography chapter) with minimal integer instructions and an 
-;; input instruction that uses the auxiliary stack.
-(comment
-
-(define-registered in 
-  (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
-
-(pushgp {:error-function 
-	 (fn [program]
-	   (doall
-	    (for [input (range 10)]
-	      (let [state (run-push program 
-				    (push-item input :auxiliary 
-					       (push-item input :integer
-							  (make-push-state))))
-		    top-int (top-item :integer state)]
-		(if (number? top-int)
-		  (math/abs (- top-int 
-			       (- (* input input input) 
-				  (* 2 input input) input)))
-		  1000)))))
-	 :atom-generators (list (fn [] (rand-int 10))
-				'in
-				'integer_div
-				'integer_mult
-				'integer_add
-				'integer_sub)
-	 :tournament-size 3
-	 })
-
-)

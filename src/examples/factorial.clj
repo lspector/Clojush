@@ -17,18 +17,18 @@
     1
     (* n (factorial (- n 1)))))
 
-(pushgp {:error-function 
-	 (fn [program]
-	   (doall
-	    (for [input (range 1 6)]
-	      (let [state (run-push program
-				    (push-item input :auxiliary
-					       (push-item input :integer
-							  (make-push-state))))
-		    top-int (top-item :integer state)]
-		(if (number? top-int)
-		  (math/abs (- top-int (factorial input)))
-		  1000000000))))) ;; big penalty, since errors can be big
+(pushgp 
+  :error-function (fn [program]
+                    (doall
+                      (for [input (range 1 6)]
+                        (let [state (run-push program
+                                      (push-item input :auxiliary
+                                        (push-item input :integer
+                                          (make-push-state))))
+                              top-int (top-item :integer state)]
+                          (if (number? top-int)
+                            (math/abs (- top-int (factorial input)))
+                            1000000000))))) ;; big penalty, since errors can be big
 	 :atom-generators (concat (registered-for-type :integer)
                      (registered-for-type :exec)
                      (registered-for-type :boolean)
@@ -36,4 +36,4 @@
                        'in))
 	 :max-points 100
 	 :population-size 5000
-	 :trivial-geography-radius 10})
+	 :trivial-geography-radius 10)

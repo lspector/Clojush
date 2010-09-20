@@ -299,6 +299,9 @@ TO DO (SOMETIME, MAYBE)
 - Possibly rename the auxiliary stack the "input" stack if no other
   uses are developed for it.
 - Write a "sufficient-args" fn/macro to clean up Push instruction definitions.
+- Convert structs to records, which should be faster. Experiments
+  with Clojure 1.2 show this to be faster but there are not good
+  examples yet to serve as the basis for changes.
 
 VERSION HISTORY
 20100227: - First distributed version.
@@ -395,5 +398,16 @@ VERSION HISTORY
             code that refers to registered-instructions to refer to 
             @registered-instructions instead. (Example odd.clj changed
             to reflect this.)
+          - Added to-do item "Convert structs to records, which should be
+			faster. Experiments with Clojure 1.2 show this to be faster
+            but there are not good examples yet to serve as the basis for 
+            changes.
+          - Added atoms for global-atom-generators and 
+            global-max-points-in-program.
+          - Changed pushgp to take keyword arguments rather than a parameter
+            map. NOTE: this requires calls to pushgp to be written differently.
+            Updated examples to reflect this.
+
+
             
           
