@@ -15,7 +15,7 @@
                       (for [input (range 10)]
                         (let [state (run-push program 
                                       (push-item input :auxiliary 
-                                        (push-item input :integer
+                                        (push-item input :integer 
                                           (make-push-state))))
                               top-int (top-item :integer state)]
                           (if (number? top-int)
