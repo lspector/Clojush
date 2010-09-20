@@ -34,7 +34,7 @@
 
 (println objective hand)
 
-(pushgp 
+(pushgp
   :error-function (fn [program]
                     (doall
                       (list
