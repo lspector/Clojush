@@ -1,5 +1,10 @@
-(load "clojush")
-(in-ns 'clojush)
+;; factorial.clj
+;; an example problem for clojush, a Push/PushGP system written in Clojure
+;; Lee Spector, lspector@hampshire.edu, 2010
+
+(ns simple-regression
+  (:require [clojush] [clojure.contrib.math])
+  (:use [clojush] [clojure.contrib.math]))
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of factorial, using an input instruction and 
@@ -27,7 +32,7 @@
                                           (make-push-state))))
                               top-int (top-item :integer state)]
                           (if (number? top-int)
-                            (math/abs (- top-int (factorial input)))
+                            (abs (- top-int (factorial input)))
                             1000000000))))) ;; big penalty, since errors can be big
 	 :atom-generators (concat (registered-for-type :integer)
                      (registered-for-type :exec)

@@ -1,5 +1,10 @@
-(load "clojush")
-(in-ns 'clojush)
+;; sextic.clj
+;; an example problem for clojush, a Push/PushGP system written in Clojure
+;; Lee Spector, lspector@hampshire.edu, 2010
+
+(ns simple-regression
+  (:require [clojush] [clojure.contrib.math])
+  (:use [clojush] [clojure.contrib.math]))
 
 ;;;;;;;;;;;;
 ;; Floating point symbolic regression of the "sextic polynomial" y=x^6-2x^4+x^2. This uses
@@ -23,10 +28,10 @@
                                                (= (:termination state) :abnormal))]
                           (if invalid-output
                             1000
-                            (math/abs (- top-float
-                                        (+ (* input input input input input input)
-                                          (- (* 2 input input input input))
-                                          (* input input)))))))))
+                            (abs (- top-float
+                                   (+ (* input input input input input input)
+                                     (- (* 2 input input input input))
+                                     (* input input)))))))))
 	 :atom-generators (concat 
                      '(float_div float_mult float_sub float_add
                         float_rot float_swap float_dup float_pop)

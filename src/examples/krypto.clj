@@ -1,5 +1,10 @@
-(load "clojush")
-(in-ns 'clojush)
+;; krypto.clj
+;; an example problem for clojush, a Push/PushGP system written in Clojure
+;; Lee Spector, lspector@hampshire.edu, 2010
+
+(ns simple-regression
+  (:require [clojush] [clojure.contrib.math])
+  (:use [clojush] [clojure.contrib.math]))
 
 ;; Chooses and then tries to solve (via pushgp) a game of Krypto.
 ;; See http://en.wikipedia.org/wiki/Krypto_(game)
@@ -32,7 +37,7 @@
 
 (def hand (into () (subvec deck 1 6)))
 
-(println objective hand)
+(println "Objective: " objective ", Hand (top of stack listed first): " hand)
 
 (pushgp
   :error-function (fn [program]
@@ -42,7 +47,7 @@
                                       (assoc (make-push-state) :integer hand))
                               top-int (top-item :integer state)]
                           (if (and (empty? (rest (:integer state))) (number? top-int))
-                            (math/abs (- top-int objective))
+                            (abs (- top-int objective))
                             1000)))))
 	 :atom-generators (list 'integer_div 'integer_mult 'integer_add 'integer_sub)
 	 :tournament-size 3)

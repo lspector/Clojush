@@ -1,5 +1,10 @@
-(load "clojush")
-(in-ns 'clojush)
+;; simple_regression.clj
+;; an example problem for clojush, a Push/PushGP system written in Clojure
+;; Lee Spector, lspector@hampshire.edu, 2010
+
+(ns simple-regression
+  (:require [clojush] [clojure.contrib.math])
+  (:use [clojush] [clojure.contrib.math]))
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of x^3 - 2x^2 - x (problem 5 from the 
@@ -19,9 +24,9 @@
                                           (make-push-state))))
                               top-int (top-item :integer state)]
                           (if (number? top-int)
-                            (math/abs (- top-int 
-                                        (- (* input input input) 
-                                          (* 2 input input) input)))
+                            (abs (- top-int 
+                                   (- (* input input input) 
+                                     (* 2 input input) input)))
                             1000)))))
 	 :atom-generators (list (fn [] (rand-int 10))
                      'in

@@ -59,14 +59,13 @@ provided n. Arguments greater than 2^31-1 are treated as if they were 2^31-1 (21
   (if (<= n 1)
     0
     (if (= (type n) java.lang.Integer)
-        (. thread-local-random-generator (nextInt n))
-	(. thread-local-random-generator (nextInt 2147483647))))) ;; biggest java.lang.Integer
+      (. thread-local-random-generator (nextInt n))
+      (. thread-local-random-generator (nextInt 2147483647))))) ;; biggest java.lang.Integer
 
 (defn lrand
   "Return a random float between 0 and 1 usng the thread-local random generator."
   ([] (. thread-local-random-generator (nextFloat)))
   ([n] (* n (lrand))))
-
 
 (defn decompose
   "Returns a list of at most max-parts numbers that sum to number.
@@ -76,24 +75,20 @@ The order of the numbers is not random (you may want to shuffle it)."
     (list number)
     (let [this-part (inc (lrand-int (dec number)))]
       (cons this-part (decompose (- number this-part)
-				 (dec max-parts))))))
-
-(defn random-element
-  [lst]
-  (nth lst (lrand-int (count lst))))
+                        (dec max-parts))))))
 
 (defn random-code-with-size
   "Returns a random expression containing the given number of points."
   [points atom-generators]
   (if (< points 2)
-    (let [element (random-element atom-generators)]
+    (let [element (rand-nth atom-generators)]
       (if (fn? element)
-	(element)
-	element))
+        (element)
+        element))
     (let [elements-this-level 
-	  (shuffle (decompose (dec points) (dec points)))]
+          (shuffle (decompose (dec points) (dec points)))]
       (doall (map (fn [size] (random-code-with-size size atom-generators))
-		  elements-this-level)))))
+               elements-this-level)))))
 
 (defn random-code 
   "Returns a random expression with size limited by max-points."
@@ -118,13 +113,15 @@ The order of the numbers is not random (you may want to shuffle it)."
   "Returns a version of n that obeys limit parameters."
   [n]
   (if (integer? n)
-    (cond (> n max-number-magnitude) max-number-magnitude
-	  (< n (- max-number-magnitude)) (- max-number-magnitude)
-	  true n)
-    (cond (> n max-number-magnitude) (* 1.0 max-number-magnitude)
-	  (< n (- max-number-magnitude)) (* 1.0 (- max-number-magnitude))
-	  (and (< n min-number-magnitude) (> n (- min-number-magnitude))) 0.0
-	  true n)))
+    (cond 
+      (> n max-number-magnitude) max-number-magnitude
+      (< n (- max-number-magnitude)) (- max-number-magnitude)
+      :else n)
+    (cond 
+      (> n max-number-magnitude) (* 1.0 max-number-magnitude)
+      (< n (- max-number-magnitude)) (* 1.0 (- max-number-magnitude))
+      (and (< n min-number-magnitude) (> n (- min-number-magnitude))) 0.0
+      :else n)))
 
 (defn count-points 
   "Returns the number of points in tree, where each atom and each pair of parentheses 
@@ -138,22 +135,22 @@ counts as a point."
   "Returns a subtree of tree indexed by point-index in a depth first traversal."
   [tree point-index]
   (let [index (mod (math/abs point-index) (count-points tree))
-	zipper (zip/seq-zip tree)]
+        zipper (zip/seq-zip tree)]
     (loop [z zipper i index]
       (if (zero? i)
-	(zip/node z)
-	(recur (zip/next z) (dec i))))))
+        (zip/node z)
+        (recur (zip/next z) (dec i))))))
 
 (defn insert-code-at-point 
   "Returns a copy of tree with the subtree formerly indexed by
 point-index (in a depth-first traversal) replaced by new-subtree."
   [tree point-index new-subtree]
   (let [index (mod (math/abs point-index) (count-points tree))
-	zipper (zip/seq-zip tree)]
+        zipper (zip/seq-zip tree)]
     (loop [z zipper i index]
       (if (zero? i)
-	(zip/root (zip/replace z new-subtree))
-	(recur (zip/next z) (dec i))))))
+        (zip/root (zip/replace z new-subtree))
+        (recur (zip/next z) (dec i))))))
 
 (defn remove-code-at-point 
   "Returns a copy of tree with the subtree formerly indexed by
@@ -162,17 +159,17 @@ result in an empty list then it is not performed. (NOTE: this is different
 from the behavior in other implementations of Push.)"
   [tree point-index]
   (let [index (mod (math/abs point-index) (count-points tree))
-	zipper (zip/seq-zip tree)]
+        zipper (zip/seq-zip tree)]
     (if (zero? index)
       tree ;; can't remove entire tree
       (loop [z zipper i index]
-	(if (zero? i)
-	  (zip/root (zip/remove z))
-	  (if (and (= i 1) ;; can't remove only item from list
-		   (seq? (zip/node z))
-		   (= 1 (count (zip/node z))))
-	    (zip/root z) ;(zip/remove z))
-	    (recur (zip/next z) (dec i))))))))
+        (if (zero? i)
+          (zip/root (zip/remove z))
+          (if (and (= i 1) ;; can't remove only item from list
+                (seq? (zip/node z))
+                (= 1 (count (zip/node z))))
+            (zip/root z) ;(zip/remove z))
+            (recur (zip/next z) (dec i))))))))
   
 (defn truncate
   "Returns a truncated integer version of n."
@@ -191,8 +188,9 @@ replaced with this. Read as 'subst this for that in list'. "
   "Returns true if tree contains subtree at any level. Inefficient but
 functional implementation."
   [tree subtree]
-  (or (= tree subtree)
-      (not (= tree (subst (gensym) subtree tree)))))
+  (or 
+    (= tree subtree)
+    (not (= tree (subst (gensym) subtree tree)))))
 
 (defn containing-subtree
   "If tree contains subtree at any level then this returns the smallest
@@ -200,12 +198,13 @@ subtree of tree that contains but is not equal to the first instance of
 subtree. For example, (contining-subtree '(b (c (a)) (d (a))) '(a)) => (c (a)).
 Returns nil if tree does not contain subtree."
   [tree subtree]
-  (cond (not (seq? tree)) nil
-	(empty? tree) nil
-	(some #{subtree} tree) tree
-	:else (some (fn [smaller-tree]
-		      (containing-subtree smaller-tree subtree))
-		    tree)))
+  (cond 
+    (not (seq? tree)) nil
+    (empty? tree) nil
+    (some #{subtree} tree) tree
+    :else (some (fn [smaller-tree]
+                  (containing-subtree smaller-tree subtree))
+            tree)))
 
 (defn all-items
   "Returns a list of all of the items in lst, where sublists and atoms all
@@ -213,8 +212,8 @@ count as items. Will contain duplicates if there are duplicates in lst.
 Recursion in implementation could be improved."
   [lst]
   (cons lst (if (seq? lst)
-	      (apply concat (doall (map all-items lst)))
-	      ())))
+              (apply concat (doall (map all-items lst)))
+              ())))
 
 (defn discrepancy
   "Returns a measure of the discrepancy between list1 and list2. This will
@@ -229,8 +228,8 @@ list1 is from list2. The calculation is equivalent to the following:
 4. Return the result."
   [list1 list2]
   (reduce + (vals (merge-with (comp math/abs -)
-			      (seq-utils/frequencies (all-items list1))
-			      (seq-utils/frequencies (all-items list2))))))
+                    (seq-utils/frequencies (all-items list1))
+                    (seq-utils/frequencies (all-items list2))))))
 
 (defn not-lazy
   "Returns lst if it is not a list, or a non-lazy version of lst if it is."
@@ -284,9 +283,9 @@ not for use in Push programs."
 an empty stack. This is a utility, not for use as an instruction in Push programs."
   [type state]
   (let [stack (type state)]
-      (if (empty? stack)
-          :no-stack-item
-          (first stack))))
+    (if (empty? stack)
+      :no-stack-item
+      (first stack))))
 
 (defn stack-ref
   "Returns the indicated item of the type stack in state. Returns :no-stack-item if called 
@@ -348,11 +347,11 @@ stack of the state."
   (fn [state]
     (if (not (empty? (rest (type state))))
       (let [first-item (stack-ref type 0 state)
-	    second-item (stack-ref type 1 state)]
-	(->> (pop-item type state) 
-	     (pop-item type)
-	     (push-item first-item type)
-	     (push-item second-item type)))
+            second-item (stack-ref type 1 state)]
+        (->> (pop-item type state) 
+          (pop-item type)
+          (push-item first-item type)
+          (push-item second-item type)))
       state)))
 
 (define-registered exec_swap (swapper :exec))
@@ -368,14 +367,14 @@ stack of the state."
   (fn [state]
     (if (not (empty? (rest (rest (type state)))))
       (let [first (stack-ref type 0 state)
-	    second (stack-ref type 1 state)
-	    third (stack-ref type 2 state)]
-	(->> (pop-item type state)
-	     (pop-item type)
-	     (pop-item type)
-	     (push-item second type)
-	     (push-item first type)
-	     (push-item third type)))
+            second (stack-ref type 1 state)
+            third (stack-ref type 2 state)]
+        (->> (pop-item type state)
+          (pop-item type)
+          (pop-item type)
+          (push-item second type)
+          (push-item first type)
+          (push-item third type)))
       state)))
 
 (define-registered exec_rot (rotter :exec))
@@ -403,10 +402,10 @@ the given state."
   (fn [state]
     (if (not (empty? (rest (type state))))
       (let [first (stack-ref type 0 state)
-	    second (stack-ref type 1 state)]
-	(->> (pop-item type state)
-	     (pop-item type)
-	     (push-item (= first second) :boolean)))
+            second (stack-ref type 1 state)]
+        (->> (pop-item type state)
+          (pop-item type)
+          (push-item (= first second) :boolean)))
       state)))
 
 (define-registered exec_eq (eqer :exec))
@@ -434,20 +433,20 @@ using the top integer to indicate how deep."
   [type]
   (fn [state]
     (if (or (and (= type :integer)
-		 (not (empty? (rest (type state)))))
-	    (and (not (= type :integer))
-		 (not (empty? (type state)))
-		 (not (empty? (:integer state)))))
+              (not (empty? (rest (type state)))))
+          (and (not (= type :integer))
+            (not (empty? (type state)))
+            (not (empty? (:integer state)))))
       (let [raw-index (stack-ref :integer 0 state)
-	    with-index-popped (pop-item :integer state)
-	    actual-index (max 0 (min raw-index (- (count (type with-index-popped)) 1)))
-	    item (stack-ref type actual-index with-index-popped)
-	    with-item-pulled (assoc with-index-popped 
-			       type 
-			       (let [stk (type with-index-popped)]
-				 (concat (take actual-index stk)
-					 (rest (drop actual-index stk)))))]
-	(push-item item type with-item-pulled))
+            with-index-popped (pop-item :integer state)
+            actual-index (max 0 (min raw-index (- (count (type with-index-popped)) 1)))
+            item (stack-ref type actual-index with-index-popped)
+            with-item-pulled (assoc with-index-popped 
+                               type 
+                               (let [stk (type with-index-popped)]
+                                 (concat (take actual-index stk)
+                                   (rest (drop actual-index stk)))))]
+        (push-item item type with-item-pulled))
       state)))
 
 (define-registered exec_yank (yanker :exec))
@@ -462,15 +461,15 @@ using the top integer to indicate how deep."
   [type]
   (fn [state]
     (if (or (and (= type :integer)
-		 (not (empty? (rest (type state)))))
-	    (and (not (= type :integer))
-		 (not (empty? (type state)))
-		 (not (empty? (:integer state)))))
+              (not (empty? (rest (type state)))))
+          (and (not (= type :integer))
+            (not (empty? (type state)))
+            (not (empty? (:integer state)))))
       (let [raw-index (stack-ref :integer 0 state)
-	    with-index-popped (pop-item :integer state)
-	    actual-index (max 0 (min raw-index (- (count (type with-index-popped)) 1)))
-	    item (stack-ref type actual-index with-index-popped)]
-	(push-item item type with-index-popped))
+            with-index-popped (pop-item :integer state)
+            actual-index (max 0 (min raw-index (- (count (type with-index-popped)) 1)))
+            item (stack-ref type actual-index with-index-popped)]
+        (push-item item type with-index-popped))
       state)))
 
 (define-registered exec_yankdup (yankduper :exec))
@@ -485,19 +484,19 @@ integer to indicate how deep."
   [type]
   (fn [state]
     (if (or (and (= type :integer)
-		 (not (empty? (rest (type state)))))
-	    (and (not (= type :integer))
-		 (not (empty? (type state)))
-		 (not (empty? (:integer state)))))
+              (not (empty? (rest (type state)))))
+          (and (not (= type :integer))
+            (not (empty? (type state)))
+            (not (empty? (:integer state)))))
       (let [raw-index (stack-ref :integer 0 state)
-	    with-index-popped (pop-item :integer state)
-	    item (top-item type with-index-popped)
-	    with-args-popped (pop-item type with-index-popped)
-	    actual-index (max 0 (min raw-index (count (type with-args-popped))))]
-	(assoc with-args-popped type (let [stk (type with-args-popped)]
-				       (concat (take actual-index stk)
-					       (list item)
-					       (drop actual-index stk)))))
+            with-index-popped (pop-item :integer state)
+            item (top-item type with-index-popped)
+            with-args-popped (pop-item type with-index-popped)
+            actual-index (max 0 (min raw-index (count (type with-args-popped))))]
+        (assoc with-args-popped type (let [stk (type with-args-popped)]
+                                       (concat (take actual-index stk)
+                                         (list item)
+                                         (drop actual-index stk)))))
       state)))
 
 (define-registered exec_shove (shover :exec))
@@ -511,21 +510,21 @@ integer to indicate how deep."
 
 (define-registered boolean_rand
   (fn [state]
-    (push-item (random-element [true false]) :boolean state)))
+    (push-item (rand-nth [true false]) :boolean state)))
 
 (define-registered integer_rand
   (fn [state]
     (push-item (+ (lrand-int (+ 1 (- max-random-integer min-random-integer)))
-		  min-random-integer)
-	       :integer
-	       state)))
+                 min-random-integer)
+      :integer
+      state)))
 
 (define-registered float_rand
   (fn [state]
     (push-item (+ (lrand (- max-random-float min-random-float))
-		  min-random-float)
-	       :float
-	       state)))
+                 min-random-float)
+      :float
+      state)))
 
 (define-registered code_rand
   (fn [state]
@@ -546,10 +545,10 @@ integer to indicate how deep."
   (fn [state]
     (if (not (empty? (rest (type state))))
       (let [first (stack-ref type 0 state)
-	    second (stack-ref type 1 state)]
-	(->> (pop-item type state)
-	     (pop-item type)
-	     (push-item (keep-number-reasonable (+ first second)) type)))
+            second (stack-ref type 1 state)]
+        (->> (pop-item type state)
+          (pop-item type)
+          (push-item (keep-number-reasonable (+ first second)) type)))
       state)))
 
 (define-registered integer_add (adder :integer))
@@ -561,10 +560,10 @@ integer to indicate how deep."
   (fn [state]
     (if (not (empty? (rest (type state))))
       (let [first (stack-ref type 0 state)
-	    second (stack-ref type 1 state)]
-	(->> (pop-item type state)
-	     (pop-item type)
-	     (push-item (keep-number-reasonable (- second first)) type)))
+            second (stack-ref type 1 state)]
+        (->> (pop-item type state)
+          (pop-item type)
+          (push-item (keep-number-reasonable (- second first)) type)))
       state)))
 
 (define-registered integer_sub (subtracter :integer))
@@ -576,10 +575,10 @@ integer to indicate how deep."
   (fn [state]
     (if (not (empty? (rest (type state))))
       (let [first (stack-ref type 0 state)
-	    second (stack-ref type 1 state)]
-	(->> (pop-item type state)
-	     (pop-item type)
-	     (push-item (keep-number-reasonable (* second first)) type)))
+            second (stack-ref type 1 state)]
+        (->> (pop-item type state)
+          (pop-item type)
+          (push-item (keep-number-reasonable (* second first)) type)))
       state)))
 
 (define-registered integer_mult (multiplier :integer))
@@ -591,15 +590,15 @@ nothing if the denominator would be zero."
   [type]
   (fn [state]
     (if (and (not (empty? (rest (type state))))
-	     (not (zero? (stack-ref type 0 state))))
+          (not (zero? (stack-ref type 0 state))))
       (let [first (stack-ref type 0 state)
-	    second (stack-ref type 1 state)]
-	(->> (pop-item type state)
-	     (pop-item type)
-	     (push-item (if (= type :integer)
-			  (truncate (keep-number-reasonable (/ second first)))
-			  (keep-number-reasonable (/ second first)))
-			type)))
+            second (stack-ref type 1 state)]
+        (->> (pop-item type state)
+          (pop-item type)
+          (push-item (if (= type :integer)
+                       (truncate (keep-number-reasonable (/ second first)))
+                       (keep-number-reasonable (/ second first)))
+            type)))
       state)))
 
 (define-registered integer_div (divider :integer))
@@ -611,15 +610,15 @@ nothing if the denominator would be zero."
   [type]
   (fn [state]
     (if (and (not (empty? (rest (type state))))
-	     (not (zero? (stack-ref type 0 state))))
+          (not (zero? (stack-ref type 0 state))))
       (let [first (stack-ref type 0 state)
-	    second (stack-ref type 1 state)]
-	(->> (pop-item type state)
-	     (pop-item type)
-	     (push-item (if (= type :integer)
-			  (truncate (keep-number-reasonable (mod second first)))
-			  (keep-number-reasonable (mod second first)))
-			type)))
+            second (stack-ref type 1 state)]
+        (->> (pop-item type state)
+          (pop-item type)
+          (push-item (if (= type :integer)
+                       (truncate (keep-number-reasonable (mod second first)))
+                       (keep-number-reasonable (mod second first)))
+            type)))
       state)))
 
 (define-registered integer_mod (modder :integer))
@@ -632,10 +631,10 @@ boolean stack."
   (fn [state]
     (if (not (empty? (rest (type state))))
       (let [first (stack-ref type 0 state)
-	    second (stack-ref type 1 state)]
-	(->> (pop-item type state)
-	     (pop-item type)
-	     (push-item (< second first) :boolean)))
+            second (stack-ref type 1 state)]
+        (->> (pop-item type state)
+          (pop-item type)
+          (push-item (< second first) :boolean)))
       state)))
 
 (define-registered integer_lt (lessthaner :integer))
@@ -648,10 +647,10 @@ boolean stack."
   (fn [state]
     (if (not (empty? (rest (type state))))
       (let [first (stack-ref type 0 state)
-	    second (stack-ref type 1 state)]
-	(->> (pop-item type state)
-	     (pop-item type)
-	     (push-item (> second first) :boolean)))
+            second (stack-ref type 1 state)]
+        (->> (pop-item type state)
+          (pop-item type)
+          (push-item (> second first) :boolean)))
       state)))
 
 (define-registered integer_gt (greaterthaner :integer))
@@ -662,8 +661,8 @@ boolean stack."
     [state]
     (if (not (empty? (:boolean state)))
       (let [item (stack-ref :boolean 0 state)]
-	(->> (pop-item :boolean state)
-	     (push-item (if item 1 0) :integer)))
+        (->> (pop-item :boolean state)
+          (push-item (if item 1 0) :integer)))
       state)))
 
 (define-registered float_fromboolean
@@ -671,24 +670,24 @@ boolean stack."
     [state]
     (if (not (empty? (:boolean state)))
       (let [item (stack-ref :boolean 0 state)]
-	(->> (pop-item :boolean state)
-	     (push-item (if item 1.0 0.0) :float)))
+        (->> (pop-item :boolean state)
+          (push-item (if item 1.0 0.0) :float)))
       state)))
 
 (define-registered integer_fromfloat
   (fn [state]
     (if (not (empty? (:float state)))
       (let [item (stack-ref :float 0 state)]
-	(->> (pop-item :float state)
-	     (push-item (truncate item) :integer)))
+        (->> (pop-item :float state)
+          (push-item (truncate item) :integer)))
       state)))
 
 (define-registered float_frominteger
   (fn [state]
     (if (not (empty? (:integer state)))
       (let [item (stack-ref :integer 0 state)]
-	(->> (pop-item :integer state)
-	     (push-item (* 1.0 item) :float)))
+        (->> (pop-item :integer state)
+          (push-item (* 1.0 item) :float)))
       state)))
 
 (defn minner
@@ -697,10 +696,10 @@ boolean stack."
   (fn [state]
     (if (not (empty? (rest (type state))))
       (let [first (stack-ref type 0 state)
-	    second (stack-ref type 1 state)]
-	(->> (pop-item type state)
-	     (pop-item type)
-	     (push-item (min second first) type)))
+            second (stack-ref type 1 state)]
+        (->> (pop-item type state)
+          (pop-item type)
+          (push-item (min second first) type)))
       state)))
 
 (define-registered integer_min (minner :integer))
@@ -712,10 +711,10 @@ boolean stack."
   (fn [state]
     (if (not (empty? (rest (type state))))
       (let [first (stack-ref type 0 state)
-	    second (stack-ref type 1 state)]
-	(->> (pop-item type state)
-	     (pop-item type)
-	     (push-item (max second first) type)))
+            second (stack-ref type 1 state)]
+        (->> (pop-item type state)
+          (pop-item type)
+          (push-item (max second first) type)))
       state)))
 
 (define-registered integer_max (maxer :integer))
@@ -725,24 +724,24 @@ boolean stack."
   (fn [state]
     (if (not (empty? (:float state)))
       (push-item (keep-number-reasonable (Math/sin (stack-ref :float 0 state)))
-		 :float
-		 (pop-item :float state))
+        :float
+        (pop-item :float state))
       state)))
 
 (define-registered float_cos
   (fn [state]
     (if (not (empty? (:float state)))
       (push-item (keep-number-reasonable (Math/cos (stack-ref :float 0 state)))
-		 :float
-		 (pop-item :float state))
+        :float
+        (pop-item :float state))
       state)))
 
 (define-registered float_tan
   (fn [state]
     (if (not (empty? (:float state)))
       (push-item (keep-number-reasonable (Math/tan (stack-ref :float 0 state)))
-		 :float
-		 (pop-item :float state))
+        :float
+        (pop-item :float state))
       state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -752,42 +751,42 @@ boolean stack."
   (fn [state]
     (if (not (empty? (rest (:boolean state))))
       (push-item (and (stack-ref :boolean 0 state)
-		      (stack-ref :boolean 1 state))
-		 :boolean
-		 (pop-item :boolean (pop-item :boolean state)))
+                   (stack-ref :boolean 1 state))
+        :boolean
+        (pop-item :boolean (pop-item :boolean state)))
       state)))
 
 (define-registered boolean_or
   (fn [state]
     (if (not (empty? (rest (:boolean state))))
       (push-item (or (stack-ref :boolean 0 state)
-		      (stack-ref :boolean 1 state))
-		 :boolean
-		 (pop-item :boolean (pop-item :boolean state)))
+                   (stack-ref :boolean 1 state))
+        :boolean
+        (pop-item :boolean (pop-item :boolean state)))
       state)))
 
 (define-registered boolean_not
   (fn [state]
     (if (not (empty? (:boolean state)))
       (push-item (not (stack-ref :boolean 0 state))
-		 :boolean
-		 (pop-item :boolean state))
+        :boolean
+        (pop-item :boolean state))
       state)))
 
 (define-registered boolean_frominteger
   (fn [state]
     (if (not (empty? (:integer state)))
       (push-item (not (zero? (stack-ref :integer 0 state)))
-		 :boolean
-		 (pop-item :integer state))
+        :boolean
+        (pop-item :integer state))
       state)))
 
 (define-registered boolean_fromfloat
   (fn [state]
     (if (not (empty? (:float state)))
       (push-item (not (zero? (stack-ref :float 0 state)))
-		 :boolean
-		 (pop-item :float state))
+        :boolean
+        (pop-item :float state))
       state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -797,175 +796,175 @@ boolean stack."
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (let [new-item (concat (ensure-list (stack-ref :code 0 state))
-			     (ensure-list (stack-ref :code 1 state)))]
-	(if (<= (count-points new-item) @global-max-points-in-program)
-	  (push-item new-item
-		     :code
-		     (pop-item :code (pop-item :code state)))
-	  state))
+                       (ensure-list (stack-ref :code 1 state)))]
+        (if (<= (count-points new-item) @global-max-points-in-program)
+          (push-item new-item
+            :code
+            (pop-item :code (pop-item :code state)))
+          state))
       state)))
 
 (define-registered code_atom
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (not (seq? (stack-ref :code 0 state)))
-		 :boolean
-		 (pop-item :code state))
+        :boolean
+        (pop-item :code state))
       state)))
 
 (define-registered code_car
   (fn [state]
     (if (and (not (empty? (:code state)))
-	     (> (count (ensure-list (stack-ref :code 0 state))) 0))
+          (> (count (ensure-list (stack-ref :code 0 state))) 0))
       (push-item (first (ensure-list (stack-ref :code 0 state)))
-		 :code
-		 (pop-item :code state))
+        :code
+        (pop-item :code state))
       state)))
 
 (define-registered code_cdr
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (rest (ensure-list (stack-ref :code 0 state)))
-		 :code
-		 (pop-item :code state))
+        :code
+        (pop-item :code state))
       state)))
 
 (define-registered code_cons
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (let [new-item (cons (stack-ref :code 1 state)
-			   (ensure-list (stack-ref :code 0 state)))]
-	(if (<= (count-points new-item) @global-max-points-in-program)
-	  (push-item new-item
-		     :code
-		     (pop-item :code (pop-item :code state)))
-	  state))
+                       (ensure-list (stack-ref :code 0 state)))]
+        (if (<= (count-points new-item) @global-max-points-in-program)
+          (push-item new-item
+            :code
+            (pop-item :code (pop-item :code state)))
+          state))
       state)))
 
 (define-registered code_do
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (stack-ref :code 0 state) 
-		 :exec
-		 (push-item 'code_pop :exec state))
+        :exec
+        (push-item 'code_pop :exec state))
       state)))
 
 (define-registered code_do*
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (stack-ref :code 0 state)
-		 :exec
-		 (pop-item :code state))
+        :exec
+        (pop-item :code state))
       state)))
 
 (define-registered code_do*range
   (fn [state]
     (if (not (or (empty? (:code state))
-		 (empty? (rest (:integer state)))))
+               (empty? (rest (:integer state)))))
       (let [to-do (first (:code state))
-	    current-index (first (rest (:integer state)))
-	    destination-index (first (:integer state))
-	    args-popped (pop-item :integer
-				  (pop-item :integer
-					    (pop-item :code state)))
-	    increment (cond (< current-index destination-index) 1
-			    (> current-index destination-index) -1
-			    true 0)
-	    continuation (if (zero? increment)
-			   args-popped
-			   (push-item (list (+ current-index increment)
-					    destination-index
-					    'code_quote
-					    to-do
-					    'code_do*range)
-				      :exec
-				      args-popped))]
-	(push-item to-do :exec (push-item current-index :integer continuation)))
+            current-index (first (rest (:integer state)))
+            destination-index (first (:integer state))
+            args-popped (pop-item :integer
+                          (pop-item :integer
+                            (pop-item :code state)))
+            increment (cond (< current-index destination-index) 1
+                        (> current-index destination-index) -1
+                        true 0)
+            continuation (if (zero? increment)
+                           args-popped
+                           (push-item (list (+ current-index increment)
+                                        destination-index
+                                        'code_quote
+                                        to-do
+                                        'code_do*range)
+                             :exec
+                             args-popped))]
+        (push-item to-do :exec (push-item current-index :integer continuation)))
       state)))
 
 (define-registered exec_do*range 
   (fn [state] ; Differs from code.do*range only in the source of the code and the recursive call.
     (if (not (or (empty? (:exec state))
-		 (empty? (rest (:integer state)))))
+               (empty? (rest (:integer state)))))
       (let [to-do (first (:exec state))
-	    current-index (first (rest (:integer state)))
-	    destination-index (first (:integer state))
-	    args-popped (pop-item :integer
-				  (pop-item :integer
-					    (pop-item :exec state)))
-	    increment (cond (< current-index destination-index) 1
-			    (> current-index destination-index) -1
-			    true 0)
-	    continuation (if (zero? increment)
-			   args-popped
-			   (push-item (list (+ current-index increment)
-					    destination-index
-					    'exec_do*range
-					    to-do)
-				      :exec
-				      args-popped))]
-	(push-item to-do :exec (push-item current-index :integer continuation)))
+            current-index (first (rest (:integer state)))
+            destination-index (first (:integer state))
+            args-popped (pop-item :integer
+                          (pop-item :integer
+                            (pop-item :exec state)))
+            increment (cond (< current-index destination-index) 1
+                        (> current-index destination-index) -1
+                        true 0)
+            continuation (if (zero? increment)
+                           args-popped
+                           (push-item (list (+ current-index increment)
+                                        destination-index
+                                        'exec_do*range
+                                        to-do)
+                             :exec
+                             args-popped))]
+        (push-item to-do :exec (push-item current-index :integer continuation)))
       state)))
 
 (define-registered code_do*count
   (fn [state]
     (if (not (or (empty? (:integer state))
-		 (< (first (:integer state)) 1)
-		 (empty? (:code state))))
+               (< (first (:integer state)) 1)
+               (empty? (:code state))))
       (push-item (list 0 (dec (first (:integer state))) 'code_quote (first (:code state)) 'code_do*range)
-		 :exec
-		 (pop-item :integer (pop-item :code state)))
+        :exec
+        (pop-item :integer (pop-item :code state)))
       state)))
 
 (define-registered exec_do*count
   ;; differs from code.do*count only in the source of the code and the recursive call    
   (fn [state] 
     (if (not (or (empty? (:integer state))
-		 (< (first (:integer state)) 1)
-		 (empty? (:exec state))))
+               (< (first (:integer state)) 1)
+               (empty? (:exec state))))
       (push-item (list 0 (dec (first (:integer state))) 'exec_do*range (first (:exec state)))
-		 :exec
-		 (pop-item :integer (pop-item :exec state)))
+        :exec
+        (pop-item :integer (pop-item :exec state)))
       state)))
 
 (define-registered code_do*times
   (fn [state]
     (if (not (or (empty? (:integer state))
-		 (< (first (:integer state)) 1)
-		 (empty? (:code state))))
+               (< (first (:integer state)) 1)
+               (empty? (:code state))))
       (push-item (list 0 (dec (first (:integer state))) 'code_quote 
-		       (cons 'integer_pop 
-			     (ensure-list (first (:code state)))) 'code_do*range)
-		 :exec
-		 (pop-item :integer (pop-item :code state)))
+                   (cons 'integer_pop 
+                     (ensure-list (first (:code state)))) 'code_do*range)
+        :exec
+        (pop-item :integer (pop-item :code state)))
       state)))
 
 (define-registered exec_do*times
   ;; differs from code.do*times only in the source of the code and the recursive call
   (fn [state]
     (if (not (or (empty? (:integer state))
-		 (< (first (:integer state)) 1)
-		 (empty? (:exec state))))
+               (< (first (:integer state)) 1)
+               (empty? (:exec state))))
       (push-item (list 0 (dec (first (:integer state))) 'exec_do*range
-		       (cons 'integer_pop (ensure-list (first (:exec state)))))
-		 :exec
-		 (pop-item :integer (pop-item :exec state)))
+                   (cons 'integer_pop (ensure-list (first (:exec state)))))
+        :exec
+        (pop-item :integer (pop-item :exec state)))
       state)))
 
 (define-registered code_map
   (fn [state]
     (if (not (or (empty? (:code state))
-		 (empty? (:exec state))))
+               (empty? (:exec state))))
       (push-item (concat
-		  (doall (for [item (ensure-list (first (:code state)))]
-			   (list 'code_quote
-				 item
-				 (first (:exec state)))))
-		  '(code_wrap)
-		  (doall (for [item (rest (ensure-list (first (:code state))))]
-			   'code_cons)))
-		 :exec
-		 (pop-item :code (pop-item :exec state)))
+                   (doall (for [item (ensure-list (first (:code state)))]
+                            (list 'code_quote
+                              item
+                              (first (:exec state)))))
+                   '(code_wrap)
+                   (doall (for [item (rest (ensure-list (first (:code state))))]
+                            'code_cons)))
+        :exec
+        (pop-item :code (pop-item :exec state)))
       state)))
 
 (defn codemaker
@@ -975,8 +974,8 @@ the code stack."
   (fn [state]
     (if (not (empty? (type state)))
       (push-item (first (type state))
-		 :code
-		 (pop-item type state))
+        :code
+        (pop-item type state))
       state)))
 
 (define-registered code_fromboolean (codemaker :boolean))
@@ -987,64 +986,64 @@ the code stack."
 (define-registered code_if
   (fn [state]
     (if (not (or (empty? (:boolean state))
-		 (empty? (rest (:code state)))))
+               (empty? (rest (:code state)))))
       (push-item (if (first (:boolean state))
-		   (first (rest (:code state)))
-		   (first (:code state)))
-		 :exec
-		 (pop-item :boolean (pop-item :code (pop-item :code state))))
+                   (first (rest (:code state)))
+                   (first (:code state)))
+        :exec
+        (pop-item :boolean (pop-item :code (pop-item :code state))))
       state)))
 
 (define-registered exec_if
   ;; differs from code.if in the source of the code and in the order of the if/then parts
   (fn [state]
     (if (not (or (empty? (:boolean state))
-		 (empty? (rest (:exec state)))))
+               (empty? (rest (:exec state)))))
       (push-item (if (first (:boolean state))
-		   (first (:exec state))
-		   (first (rest (:exec state))))
-		 :exec
-		 (pop-item :boolean (pop-item :exec (pop-item :exec state))))
+                   (first (:exec state))
+                   (first (rest (:exec state))))
+        :exec
+        (pop-item :boolean (pop-item :exec (pop-item :exec state))))
       state)))
 
 (define-registered code_length
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (count (ensure-list (first (:code state))))
-		 :integer
-		 (pop-item :code state))
+        :integer
+        (pop-item :code state))
       state)))
 
 (define-registered code_list
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (let [new-item (list (first (rest (:code state)))
-			   (first (:code state)))]
-	(if (<= (count-points new-item) @global-max-points-in-program)
-	  (push-item new-item
-		     :code
-		     (pop-item :code (pop-item :code state)))
-	  state))
+                       (first (:code state)))]
+        (if (<= (count-points new-item) @global-max-points-in-program)
+          (push-item new-item
+            :code
+            (pop-item :code (pop-item :code state)))
+          state))
       state)))
 
 (define-registered code_wrap
   (fn [state]
     (if (not (empty? (:code state)))
       (let [new-item (list (first (:code state)))]
-	(if (<= (count-points new-item) @global-max-points-in-program)
-	  (push-item new-item
-		     :code
-		     (pop-item :code state))
-	  state))
+        (if (<= (count-points new-item) @global-max-points-in-program)
+          (push-item new-item
+            :code
+            (pop-item :code state))
+          state))
       state)))
 
 (define-registered code_member
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (push-item (not (not (some #{(first (rest (:code state)))} 
-				 (ensure-list (first (:code state))))))
-		 :boolean
-		 (pop-item :code (pop-item :code state)))
+                             (ensure-list (first (:code state))))))
+        :boolean
+        (pop-item :code (pop-item :code state)))
       state)))
 
 (define-registered exec_noop (fn [state] state))
@@ -1053,156 +1052,156 @@ the code stack."
 (define-registered code_nth
   (fn [state]
     (if (not (or (empty? (:integer state))
-		 (empty? (:code state))
-		 (empty? (ensure-list (first (:code state))))))
+               (empty? (:code state))
+               (empty? (ensure-list (first (:code state))))))
       (push-item (nth (ensure-list (first (:code state)))
-		      (mod (math/abs (first (:integer state)))
-			   (count (ensure-list (first (:code state))))))
-		 :code
-		 (pop-item :integer (pop-item :code state)))
+                   (mod (math/abs (first (:integer state)))
+                     (count (ensure-list (first (:code state))))))
+        :code
+        (pop-item :integer (pop-item :code state)))
       state)))
 
 (define-registered code_nthcdr
   (fn [state]
     (if (not (or (empty? (:integer state))
-		 (empty? (:code state))
-		 (empty? (ensure-list (first (:code state))))))
+               (empty? (:code state))
+               (empty? (ensure-list (first (:code state))))))
       (push-item (drop (mod (math/abs (first (:integer state))) 
-			    (count (ensure-list (first (:code state)))))
-		       (ensure-list (first (:code state))))
-		 :code
-		 (pop-item :integer (pop-item :code state)))
+                         (count (ensure-list (first (:code state)))))
+                   (ensure-list (first (:code state))))
+        :code
+        (pop-item :integer (pop-item :code state)))
       state)))
 
 (define-registered code_null
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (let [item (first (:code state))]
-		   (not (not (and (seq? item) (empty? item)))))
-		 :boolean
-		 (pop-item :code state))
+                   (not (not (and (seq? item) (empty? item)))))
+        :boolean
+        (pop-item :code state))
       state)))
 
 (define-registered code_size
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (count-points (first (:code state)))
-		 :integer
-		 (pop-item :code state))
+        :integer
+        (pop-item :code state))
       state))) 
 
 (define-registered code_extract
   (fn [state]
     (if (not (or (empty? (:code state))
-		 (empty? (:integer state))))
+               (empty? (:integer state))))
       (push-item (code-at-point (first (:code state))
-				(first (:integer state)))
-		 :code
-		 (pop-item :code (pop-item :integer state)))
+                   (first (:integer state)))
+        :code
+        (pop-item :code (pop-item :integer state)))
       state)))
 
 (define-registered code_insert
   (fn [state]
     (if (not (or (empty? (rest (:code state)))
-		 (empty? (:integer state))))
+               (empty? (:integer state))))
       (let [new-item (insert-code-at-point (first (:code state))
-					   (first (:integer state))
-					   (second (:code state)))]
-	(if (<= (count-points new-item) @global-max-points-in-program)
-	  (push-item new-item
-		     :code
-		     (pop-item :code (pop-item :code (pop-item :integer state))))
-	  state))
+                       (first (:integer state))
+                       (second (:code state)))]
+        (if (<= (count-points new-item) @global-max-points-in-program)
+          (push-item new-item
+            :code
+            (pop-item :code (pop-item :code (pop-item :integer state))))
+          state))
       state)))
 
 (define-registered code_subst
   (fn [state]
     (if (not (empty? (rest (rest (:code state)))))
       (let [new-item (subst (stack-ref :code 2 state)
-			    (stack-ref :code 1 state)
-			    (stack-ref :code 0 state))]
-	(if (<= (count-points new-item) @global-max-points-in-program)
-	  (push-item new-item
-		     :code
-		     (pop-item :code (pop-item :code (pop-item :code state))))
-	  state))
+                       (stack-ref :code 1 state)
+                       (stack-ref :code 0 state))]
+        (if (<= (count-points new-item) @global-max-points-in-program)
+          (push-item new-item
+            :code
+            (pop-item :code (pop-item :code (pop-item :code state))))
+          state))
       state)))
 
 (define-registered code_contains
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (push-item (contains-subtree (stack-ref :code 1 state)
-				   (stack-ref :code 0 state))
-		 :boolean
-		 (pop-item :code (pop-item :code state)))
+                   (stack-ref :code 0 state))
+        :boolean
+        (pop-item :code (pop-item :code state)))
       state)))
 
 (define-registered code_container
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (push-item (containing-subtree (stack-ref :code 0 state)
-				     (stack-ref :code 1 state))
-		 :code
-		 (pop-item :code (pop-item :code state)))
+                   (stack-ref :code 1 state))
+        :code
+        (pop-item :code (pop-item :code state)))
       state)))
 
 (define-registered code_position
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (push-item (or (first (seq-utils/positions #{(stack-ref :code 1 state)}
-						 (ensure-list (stack-ref :code 0 state))))
-		     -1)
-		 :integer
-		 (pop-item :code (pop-item :code state)))
+                              (ensure-list (stack-ref :code 0 state))))
+                   -1)
+        :integer
+        (pop-item :code (pop-item :code state)))
       state)))
 
 (define-registered code_discrepancy
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (push-item (discrepancy (stack-ref :code 0 state) (stack-ref :code 1 state))
-		 :integer
-		 (pop-item :code (pop-item :code state)))
+        :integer
+        (pop-item :code (pop-item :code state)))
       state)))
 
 (define-registered exec_k
   (fn [state]
     (if (not (empty? (rest (:exec state))))
       (push-item (first (:exec state))
-		 :exec
-		 (pop-item :exec (pop-item :exec state)))
+        :exec
+        (pop-item :exec (pop-item :exec state)))
       state)))
 
 (define-registered exec_s
   (fn [state]
     (if (not (empty? (rest (rest (:exec state)))))
       (let [stk (:exec state)
-	    x (first stk)
-	    y (first (rest stk))
-	    z (first (rest (rest stk)))]
-	(if (<= (count-points (list y z)) @global-max-points-in-program)
-	  (push-item x
-		     :exec
-		     (push-item z
-				:exec
-				(push-item (list y z)
-					   :exec
-					   (pop-item :exec 
-						     (pop-item :exec 
-							       (pop-item :exec state))))))
-	  state))
+            x (first stk)
+            y (first (rest stk))
+            z (first (rest (rest stk)))]
+        (if (<= (count-points (list y z)) @global-max-points-in-program)
+          (push-item x
+            :exec
+            (push-item z
+              :exec
+              (push-item (list y z)
+                :exec
+                (pop-item :exec 
+                  (pop-item :exec 
+                    (pop-item :exec state))))))
+          state))
       state)))
 
 (define-registered exec_y
   (fn [state]
     (if (not (empty? (:exec state)))
       (let [new-item (list 'exec_y (first (:exec state)))]
-	(if (<= (count-points new-item) @global-max-points-in-program)
-	  (push-item (first (:exec state))
-		     :exec
-		     (push-item new-item
-				:exec
-				(pop-item :exec state)))
-	  state))
+        (if (<= (count-points new-item) @global-max-points-in-program)
+          (push-item (first (:exec state))
+            :exec
+            (push-item new-item
+              :exec
+              (pop-item :exec state)))
+          state))
       state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1214,9 +1213,9 @@ the code stack."
 ;; also set default value for atom-generators
 (reset! global-atom-generators 
   (concat @registered-instructions
-          (list 
-            (fn [] (lrand-int 100))
-            (fn [] (lrand)))))
+    (list 
+      (fn [] (lrand-int 100))
+      (fn [] (lrand)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; push interpreter
@@ -1225,10 +1224,10 @@ the code stack."
   "If thing is a literal, return its type -- otherwise return false."
   [thing]
   (cond (integer? thing) :integer
-	(number? thing) :float
-        (or (= thing true) (= thing false)) :boolean
-	;; if names are added then distinguish them from registered instructions here
-	true false))
+    (number? thing) :float
+    (or (= thing true) (= thing false)) :boolean
+    ;; if names are added then distinguish them from registered instructions here
+    true false))
 
 (def debug-recent-instructions ())
 
@@ -1251,39 +1250,39 @@ exceeded. The resulting push state will map :termination to :normal if terminati
 normal, or :abnormal otherwise."
   ([state] (eval-push state false))
   ([state print]
-     (loop [iteration 1 s state
-	    time-limit (+ evalpush-time-limit (System/nanoTime))]
-       (if (or (> iteration evalpush-limit)
-	       (empty? (:exec s))
-	       (> (System/nanoTime) time-limit))
-	   (assoc s :termination (if (<= iteration evalpush-limit) :normal :abnormal))
-	   (let [exec-top (top-item :exec s)
-		 s (pop-item :exec s)]
-	     (let [s (if (seq? exec-top)
-		       (assoc s :exec (concat exec-top (:exec s)))
-		       (execute-instruction exec-top s))]
-	       (when print
-		 (printf "\nState after %s steps (last step: %s):\n" 
-			 iteration (if (seq? exec-top) "(...)" exec-top))
-		 (state-pretty-print s))
-	       (recur (inc iteration) s time-limit)))))))
+    (loop [iteration 1 s state
+           time-limit (+ evalpush-time-limit (System/nanoTime))]
+      (if (or (> iteration evalpush-limit)
+            (empty? (:exec s))
+            (> (System/nanoTime) time-limit))
+        (assoc s :termination (if (<= iteration evalpush-limit) :normal :abnormal))
+        (let [exec-top (top-item :exec s)
+              s (pop-item :exec s)]
+          (let [s (if (seq? exec-top)
+                    (assoc s :exec (concat exec-top (:exec s)))
+                    (execute-instruction exec-top s))]
+            (when print
+              (printf "\nState after %s steps (last step: %s):\n" 
+                iteration (if (seq? exec-top) "(...)" exec-top))
+              (state-pretty-print s))
+            (recur (inc iteration) s time-limit)))))))
 
 (defn run-push 
   "The top level of the push interpreter; calls eval-schush between appropriate code/exec 
 pushing/popping. The resulting push state will map :termination to :normal if termination was 
 normal, or :abnormal otherwise."
   ([code state]
-     (run-push code state false))
+    (run-push code state false))
   ([code state print]
-     (let [s (if top-level-push-code (push-item code :code state) state)]
-       (let [s (push-item code :exec s)]
-	 (when print
-	   (printf "\nState after 0 steps:\n")
-	   (state-pretty-print s))
-	 (let [s (eval-push s print)]
-	   (if top-level-pop-code
-	     (pop-item :code s)
-	     s))))))
+    (let [s (if top-level-push-code (push-item code :code state) state)]
+      (let [s (push-item code :exec s)]
+        (when print
+          (printf "\nState after 0 steps:\n")
+          (state-pretty-print s))
+        (let [s (eval-push s print)]
+          (if top-level-pop-code
+            (pop-item :code s)
+            s))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; pushgp
@@ -1300,10 +1299,10 @@ normal, or :abnormal otherwise."
   (when print? (printf "\nAuto-simplifying with starting size: %s" (count-points (:program ind))))
   (loop [step 0 program (:program ind) errors (:errors ind) total-errors (:total-error ind)]
     (when (and print? 
-	       (or (>= step steps)
-		   (zero? (mod step progress-interval))))
+            (or (>= step steps)
+              (zero? (mod step progress-interval))))
       (printf "\nstep: %s\nprogram: %s\nerrors: %s\ntotal: %s\nsize: %s\n" 
-	      step (not-lazy program) (not-lazy errors) total-errors (count-points program))
+        step (not-lazy program) (not-lazy errors) total-errors (count-points program))
       (flush))
     (if (>= step steps)
       (struct-map individual :program program :errors errors :total-error total-errors 
@@ -1342,11 +1341,11 @@ normal, or :abnormal otherwise."
   (printf "\n\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")(flush)
   (printf "\n;; -*- Report at generation %s" generation)(flush)
   (let [sorted (sort-by :total-error < population)
-	best (first sorted)]
+        best (first sorted)]
     (printf "\nBest program: %s" (not-lazy (:program best)))(flush)
     (when (> report-simplifications 0)
       (printf "\nPartial simplification (may beat best): %s"
-	      (not-lazy (:program (auto-simplify best error-function report-simplifications false 1000)))))
+        (not-lazy (:program (auto-simplify best error-function report-simplifications false 1000)))))
     (flush)
     (printf "\nErrors: %s" (not-lazy (:errors best)))(flush)
     (printf "\nTotal: %s" (:total-error best))(flush)
@@ -1355,10 +1354,10 @@ normal, or :abnormal otherwise."
     (print "\n--- Population Statistics ---\nAverage total errors in population: ")(flush)
     (print (* 1.0 (/ (reduce + (map :total-error sorted)) (count population))))(flush)
     (printf "\nMedian total errors in population: %s"
-	    (:total-error (nth sorted (truncate (/ (count sorted) 2)))))(flush)
+      (:total-error (nth sorted (truncate (/ (count sorted) 2)))))(flush)
     (printf "\nAverage program size in population (points): %s"
-	    (* 1.0 (/ (reduce + (map count-points (map :program sorted)))
-		      (count population))))(flush)
+      (* 1.0 (/ (reduce + (map count-points (map :program sorted)))
+               (count population))))(flush)
     (printf "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n")
     (flush)
     (problem-specific-report best population generation error-function report-simplifications)
@@ -1368,22 +1367,22 @@ normal, or :abnormal otherwise."
   "Conducts a tournament and returns the individual with the lower total error."
   [pop tournament-size radius location]
   (let [tournament-set 
-	(doall
-	 (for [_ (range tournament-size)]
-	   (nth pop
-		(if (zero? radius)
-		  (lrand-int (count pop))
-		  (mod (+ location (- (lrand-int (+ 1 (* radius 2))) radius))
-		       (count pop))))))]
-     (reduce (fn [i1 i2] (if (< (:total-error i1) (:total-error i2)) i1 i2))
+        (doall
+          (for [_ (range tournament-size)]
+            (nth pop
+              (if (zero? radius)
+                (lrand-int (count pop))
+                (mod (+ location (- (lrand-int (+ 1 (* radius 2))) radius))
+                  (count pop))))))]
+    (reduce (fn [i1 i2] (if (< (:total-error i1) (:total-error i2)) i1 i2))
 	     tournament-set)))
 
 (defn mutate 
   "Returns a mutated version of the given individual."
   [ind mutation-max-points max-points atom-generators]
   (let [new-program (insert-code-at-point (:program ind) 
-					  (lrand-int (count-points (:program ind)))
-					  (random-code mutation-max-points atom-generators))]
+                      (lrand-int (count-points (:program ind)))
+                      (random-code mutation-max-points atom-generators))]
     (if (> (count-points new-program) max-points)
       ind
       (struct-map individual :program new-program :history (:history ind)
@@ -1396,31 +1395,31 @@ normal, or :abnormal otherwise."
 subprogram of parent2."
   [parent1 parent2 max-points]
   (let [new-program (insert-code-at-point 
-		     (:program parent1) 
-		     (lrand-int (count-points (:program parent1)))
-		     (code-at-point (:program parent2)
-				    (lrand-int (count-points (:program parent2)))))]
+                      (:program parent1) 
+                      (lrand-int (count-points (:program parent1)))
+                      (code-at-point (:program parent2)
+                        (lrand-int (count-points (:program parent2)))))]
     (if (> (count-points new-program) max-points)
       parent1
       (struct-map individual :program new-program :history (:history parent1)
-		  :ancestors (if maintain-ancestors
-			       (cons (:program parent1) (:ancestors parent1))
-			       (:ancestors parent1))))))
+        :ancestors (if maintain-ancestors
+                     (cons (:program parent1) (:ancestors parent1))
+                     (:ancestors parent1))))))
 
 (defn evaluate-individual
   "Returns the given individual with errors and total-errors, computing them if necessary."
   [i error-function rand-gen]
   (binding [thread-local-random-generator rand-gen]
     (let [p (:program i)
-	  e (if (seq? (:errors i))
-	      (:errors i)
-	      (error-function p))
-	  te (if (number? (:total-error i))
-	       (:total-error i)
-	       (keep-number-reasonable (reduce + e)))]
+          e (if (seq? (:errors i))
+              (:errors i)
+              (error-function p))
+          te (if (number? (:total-error i))
+               (:total-error i)
+               (keep-number-reasonable (reduce + e)))]
       (struct-map individual :program p :errors e :total-error te 
-		  :history (if maintain-histories (cons te (:history i)) (:history i))
-		  :ancestors (:ancestors i)))))
+        :history (if maintain-histories (cons te (:history i)) (:history i))
+        :ancestors (:ancestors i)))))
 
 (defn breed
   "Replaces the state of the given agent with an individual bred from the given population (pop), 
@@ -1431,22 +1430,22 @@ using the given parameters."
   (binding [thread-local-random-generator rand-gen]
     (let [n (lrand)]
       (cond 
-       ;; mutation
-       (< n mutation-probability)
-       (mutate (select pop tournament-size trivial-geography-radius location) 
-	       mutation-max-points max-points atom-generators)
-       ;; crossover
-       (< n (+ mutation-probability crossover-probability))
-       (let [first-parent (select pop tournament-size trivial-geography-radius location)
-	     second-parent (select pop tournament-size trivial-geography-radius location)]
-	 (crossover first-parent second-parent max-points))
-       ;; simplification
-       (< n (+ mutation-probability crossover-probability simplification-probability))
-       (auto-simplify (select pop tournament-size trivial-geography-radius location)
-		      error-function reproduction-simplifications false 1000)
-       ;; replication
-       true 
-       (select pop tournament-size trivial-geography-radius location)))))
+        ;; mutation
+        (< n mutation-probability)
+        (mutate (select pop tournament-size trivial-geography-radius location) 
+          mutation-max-points max-points atom-generators)
+        ;; crossover
+        (< n (+ mutation-probability crossover-probability))
+        (let [first-parent (select pop tournament-size trivial-geography-radius location)
+              second-parent (select pop tournament-size trivial-geography-radius location)]
+          (crossover first-parent second-parent max-points))
+        ;; simplification
+        (< n (+ mutation-probability crossover-probability simplification-probability))
+        (auto-simplify (select pop tournament-size trivial-geography-radius location)
+          error-function reproduction-simplifications false 1000)
+        ;; replication
+        true 
+        (select pop tournament-size trivial-geography-radius location)))))
 
 (defmacro print-params
   [params]
@@ -1476,57 +1475,57 @@ using the given parameters."
            final-report-simplifications 1000
            reproduction-simplifications 1
            trivial-geography-radius 0}}]
-    ;; set globals from parameters
-    (reset! global-atom-generators atom-generators)
-    (reset! global-max-points-in-program max-points)
-    (printf "\nStarting PushGP run.\n\n") (flush)
-    (print-params 
-      (error-function error-threshold population-size max-points atom-generators max-generations 
-        mutation-probability mutation-max-points crossover-probability
-        simplification-probability tournament-size report-simplifications
-        final-report-simplifications trivial-geography-radius))
-    (printf "\nGenerating initial population...\n") (flush)
-    (let [pop-agents (vec (doall (for [_ (range population-size)] 
-                                   (agent (struct-map individual 
-                                            :program (random-code max-points atom-generators))))))
-          child-agents (vec (doall (for [_ (range population-size)] 
-                                     (agent (struct-map individual)))))
-          rand-gens (vec (doall (for [_ (range population-size)]
-                                  (java.util.Random.))))]
-      (loop [generation 0]
-        (printf "\n\n-----\nProcessing generation: %s\nComputing errors..." generation) (flush)
-        (dorun (map #(send % evaluate-individual error-function %2) pop-agents rand-gens))
-        (apply await pop-agents) ;; SYNCHRONIZE
-        (printf "\nDone computing errors.") (flush)
-        ;; report and check for success
-        (let [best (report (vec (doall (map deref pop-agents))) generation error-function report-simplifications)]
-          (if (<= (:total-error best) error-threshold)
-            (do (printf "\n\nSUCCESS at generation %s\nSuccessful program: %s\nErrors: %s\nTotal error: %s\nHistory: %s\nSize: %s\n\n"
-                  generation (not-lazy (:program best)) (not-lazy (:errors best)) (:total-error best) 
-                  (not-lazy (:history best)) (count-points (:program best)))
-              (when print-ancestors-of-solution
-                (printf "\nAncestors of solution:\n")
-                (println (:ancestors best)))
-              ;(shutdown-agents)
-              (auto-simplify best error-function final-report-simplifications true 500))
-            (do (if (>= generation max-generations)
-                  (do (printf "\nFAILURE\n")
-                    ;(shutdown-agents)
-                    )
-                  (do (printf "\nProducing offspring...") (flush)
-                    (let [pop (vec (doall (map deref pop-agents)))]
-                      (dotimes [i population-size]
-                        (send (nth child-agents i) 
-                          breed i (nth rand-gens i) pop error-function population-size max-points atom-generators 
-                          mutation-probability mutation-max-points crossover-probability 
-                          simplification-probability tournament-size reproduction-simplifications 
-                          trivial-geography-radius)))
-                    (apply await child-agents) ;; SYNCHRONIZE
-                    (printf "\nInstalling next generation...") (flush)
+  ;; set globals from parameters
+  (reset! global-atom-generators atom-generators)
+  (reset! global-max-points-in-program max-points)
+  (printf "\nStarting PushGP run.\n\n") (flush)
+  (print-params 
+    (error-function error-threshold population-size max-points atom-generators max-generations 
+      mutation-probability mutation-max-points crossover-probability
+      simplification-probability tournament-size report-simplifications
+      final-report-simplifications trivial-geography-radius))
+  (printf "\nGenerating initial population...\n") (flush)
+  (let [pop-agents (vec (doall (for [_ (range population-size)] 
+                                 (agent (struct-map individual 
+                                          :program (random-code max-points atom-generators))))))
+        child-agents (vec (doall (for [_ (range population-size)] 
+                                   (agent (struct-map individual)))))
+        rand-gens (vec (doall (for [_ (range population-size)]
+                                (java.util.Random.))))]
+    (loop [generation 0]
+      (printf "\n\n-----\nProcessing generation: %s\nComputing errors..." generation) (flush)
+      (dorun (map #(send % evaluate-individual error-function %2) pop-agents rand-gens))
+      (apply await pop-agents) ;; SYNCHRONIZE
+      (printf "\nDone computing errors.") (flush)
+      ;; report and check for success
+      (let [best (report (vec (doall (map deref pop-agents))) generation error-function report-simplifications)]
+        (if (<= (:total-error best) error-threshold)
+          (do (printf "\n\nSUCCESS at generation %s\nSuccessful program: %s\nErrors: %s\nTotal error: %s\nHistory: %s\nSize: %s\n\n"
+                generation (not-lazy (:program best)) (not-lazy (:errors best)) (:total-error best) 
+                (not-lazy (:history best)) (count-points (:program best)))
+            (when print-ancestors-of-solution
+              (printf "\nAncestors of solution:\n")
+              (println (:ancestors best)))
+            ;(shutdown-agents)
+            (auto-simplify best error-function final-report-simplifications true 500))
+          (do (if (>= generation max-generations)
+                (do (printf "\nFAILURE\n")
+                  ;(shutdown-agents)
+                  )
+                (do (printf "\nProducing offspring...") (flush)
+                  (let [pop (vec (doall (map deref pop-agents)))]
                     (dotimes [i population-size]
-                      (send (nth pop-agents i) (fn [av] (deref (nth child-agents i)))))
-                    (apply await pop-agents) ;; SYNCHRONIZE
-                    (recur (inc generation))))))))))
+                      (send (nth child-agents i) 
+                        breed i (nth rand-gens i) pop error-function population-size max-points atom-generators 
+                        mutation-probability mutation-max-points crossover-probability 
+                        simplification-probability tournament-size reproduction-simplifications 
+                        trivial-geography-radius)))
+                  (apply await child-agents) ;; SYNCHRONIZE
+                  (printf "\nInstalling next generation...") (flush)
+                  (dotimes [i population-size]
+                    (send (nth pop-agents i) (fn [av] (deref (nth child-agents i)))))
+                  (apply await pop-agents) ;; SYNCHRONIZE
+                  (recur (inc generation))))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; stress test
@@ -1542,15 +1541,15 @@ of nil values in execute-instruction, do see if any instructions are introducing
   (let [completely-random-program
         (fn []
           (random-code 100 (concat @registered-instructions
-                                   (list (fn [] (lrand-int 100))
-					 (fn [] (lrand))))))]
+                             (list (fn [] (lrand-int 100))
+                               (fn [] (lrand))))))]
     (loop [i 0 p (completely-random-program)]
       (if (>= i n)
         (println :no-errors-found-in-stress-test)
         (let [result (run-push p (make-push-state) false)]
           (if result
-	    (recur (inc i) (completely-random-program))
-	    (println p)))))))
+            (recur (inc i) (completely-random-program))
+            (println p)))))))
 
 ;(stress-test 10000)
 
