@@ -241,15 +241,22 @@ list1 is from list2. The calculation is equivalent to the following:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; states, stacks, and instructions
 
-(defmacro define-push-state-structure []
-  `(defstruct push-state ~@push-types))
+;; useful for define-push-state-structure
+(defn keyword->symbol [kwd]
+  "Returns the symbol obtained by removing the : from a keyword."
+  (read-string (name kwd)))
 
-(define-push-state-structure)
+(defmacro define-push-state-record-type []
+  "Defines the pushstate record type. The odd trick with read-string was a hack to 
+avoid namespace qualification on the pushstate symbol."
+  `(defrecord ~(read-string "pushstate") [~@(map keyword->symbol push-types)]))
 
-(defn make-push-state
+(define-push-state-record-type)
+
+(defmacro make-push-state
   "Returns an empty push state."
   []
-  (struct-map push-state))
+  `(pushstate. ~@(map (fn [_] nil) push-types)))
 
 (def registered-instructions (atom ()))
 
@@ -1287,11 +1294,19 @@ normal, or :abnormal otherwise."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; pushgp
 
-;; Individuals are structure maps.
+;; Individuals are records.
 ;; Populations are vectors of agents with individuals as their states (along with error and
 ;; history information).
 
-(defstruct individual :program :errors :total-error :history :ancestors)
+(defrecord individual [program errors total-error history ancestors])
+
+(defn make-individual [& {:keys [program errors total-error history ancestors]
+                          :or {program nil
+                               errors nil
+                               total-error nil ;; a non-number is used to indicate no value
+                               history nil
+                               ancestors nil}}]
+  (individual. program errors total-error history ancestors))
 
 (defn auto-simplify 
   "Auto-simplifies the provided individual."
@@ -1305,7 +1320,7 @@ normal, or :abnormal otherwise."
         step (not-lazy program) (not-lazy errors) total-errors (count-points program))
       (flush))
     (if (>= step steps)
-      (struct-map individual :program program :errors errors :total-error total-errors 
+      (make-individual :program program :errors errors :total-error total-errors 
         :history (:history ind) 
         :ancestors (if maintain-ancestors
                      (cons (:program ind) (:ancestors ind))
@@ -1385,7 +1400,7 @@ normal, or :abnormal otherwise."
                       (random-code mutation-max-points atom-generators))]
     (if (> (count-points new-program) max-points)
       ind
-      (struct-map individual :program new-program :history (:history ind)
+      (make-individual :program new-program :history (:history ind)
         :ancestors (if maintain-ancestors
                      (cons (:program ind) (:ancestors ind))
                      (:ancestors ind))))))
@@ -1401,7 +1416,7 @@ subprogram of parent2."
                         (lrand-int (count-points (:program parent2)))))]
     (if (> (count-points new-program) max-points)
       parent1
-      (struct-map individual :program new-program :history (:history parent1)
+      (make-individual :program new-program :history (:history parent1)
         :ancestors (if maintain-ancestors
                      (cons (:program parent1) (:ancestors parent1))
                      (:ancestors parent1))))))
@@ -1417,7 +1432,7 @@ subprogram of parent2."
           te (if (number? (:total-error i))
                (:total-error i)
                (keep-number-reasonable (reduce + e)))]
-      (struct-map individual :program p :errors e :total-error te 
+      (make-individual :program p :errors e :total-error te 
         :history (if maintain-histories (cons te (:history i)) (:history i))
         :ancestors (:ancestors i)))))
 
@@ -1486,10 +1501,10 @@ using the given parameters."
       final-report-simplifications trivial-geography-radius))
   (printf "\nGenerating initial population...\n") (flush)
   (let [pop-agents (vec (doall (for [_ (range population-size)] 
-                                 (agent (struct-map individual 
+                                 (agent (make-individual 
                                           :program (random-code max-points atom-generators))))))
         child-agents (vec (doall (for [_ (range population-size)] 
-                                   (agent (struct-map individual)))))
+                                   (agent (make-individual)))))
         rand-gens (vec (doall (for [_ (range population-size)]
                                 (java.util.Random.))))]
     (loop [generation 0]

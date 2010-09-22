@@ -402,3 +402,5 @@ VERSION HISTORY
           - Added namespaces for all example files.
           - Updated README to mention requirement for clojure 1.2 and to
             remove mention of ClojureX which has been discontinued.
+          - Converted structures to records (a clojure 1.2 feature, should
+            be faster).
