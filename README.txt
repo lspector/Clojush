@@ -11,16 +11,18 @@ Java's -XX:+UseParallelGC option to take maximum advantage of this feature.
 
 REQUIREMENTS
 
-To use this code you must have a clojure programming environment; see 
-http://clojure.org/.
+To use this code you must have a Clojure programming environment; see 
+http://clojure.org/. The current version of clojush requires clojure 1.2
+and clojure-contrib 1.2.
 
-Clojure is available for most OS platforms. If you are using Mac OS X
-then you might want to check out http://github.com/citizen428/ClojureX.
+Clojure is available for most OS platforms. Good starting points for
+obtaining and using Clojure include http://clojure.org/getting_started
+and http://www.assembla.com/wiki/show/clojure/Getting_Started.
 
 QUICKSTART
 
 To run the system on a simple example start a clojure REPL (read, evaluate,
-printloop) in the directory that contains clojush.clj and the examples 
+print loop) in the directory that contains clojush.clj and the examples 
 subdirectory and type the following to the REPL prompt: 
 
     (load "examples/simple-regression")
@@ -30,27 +32,15 @@ regression problem (symbolic regression of y=x^3-2x^2-x). Although the
 details will vary from run to run, and it's possible that it will fail, 
 this usually succeeds in a few generations. 
 
-Details of starting the clojure REPL will depend on your programming 
-environment, but if you're using Mac OS X and the installation mentioned 
-above then you would use the Terminal application, use "cd" to get to the 
-right directory, and then type "clj" to start the REPL. You can quit the 
-REPL with control-D.
+In some IDEs there will be other ways to run the examples. For example,
+in Eclipse/Counterclockwise you can simply open an example and select
+Clojure > Load clojure file in REPL.
 
-If your Clojure installation provides a clj command-line script (as does
-ClojureX) then you can run an example from the OS command line, without
-starting a REPL, by using a command like:
-
-    clj -i examples/simple-regression.clj
-
-You may want to provide additional arguments to clj (or to java if you
-are invoking it without a clj script) in order to allow access to more
-memory and/or to take maximal advantage of Clojure's concurrency support
-in the context of Clojush's reliance on garbage collection. For example,
-you might want to issue your call as:
-
-    clj -Xmx2000m -XX:+UseParallelGC -i examples/simple-regression.clj
-
-
+You may want to provide additional arguments to java in order to allow 
+access to more memory and/or to take maximal advantage of Clojure's
+concurrency support in the context of clojush's reliance on garbage 
+collection. For example, you might want to provide arguments such 
+as -Xmx2000m and -XX:+UseParallelGC.
 
 DESCRIPTION
 
@@ -150,7 +140,7 @@ the resulting interpreter state:
 (let [s (make-push-state)
       c (random-code 
           100                                  ;; size limit of 100 points
-          (concat registered-instructions      ;; all registered instrs 
+          (concat @registered-instructions     ;; all registered instrs 
                   (list (fn [] (rand-int 100)) ;;  random integers from 0-99
                         (fn [] (rand)))))]     ;; random floats from 0.0-1.0
   (printf "\n\nCode: %s\n\n" (apply list c))
@@ -410,3 +400,5 @@ VERSION HISTORY
 10200921: - Removed random-element in favor of rand-nth.
           - Cleaned up indentation, miscellaneous other cosmetic things.
           - Added namespaces for all example files.
+          - Updated README to mention requirement for clojure 1.2 and to
+            remove mention of ClojureX which has been discontinued.
