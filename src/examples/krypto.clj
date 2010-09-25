@@ -2,7 +2,7 @@
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
-(ns simple-regression
+(ns examples.krypto
   (:require [clojush] [clojure.contrib.math])
   (:use [clojush] [clojure.contrib.math]))
 
