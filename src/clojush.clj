@@ -1502,9 +1502,11 @@ using the given parameters."
   (printf "\nGenerating initial population...\n") (flush)
   (let [pop-agents (vec (doall (for [_ (range population-size)] 
                                  (agent (make-individual 
-                                          :program (random-code max-points atom-generators))))))
-        child-agents (vec (doall (for [_ (range population-size)] 
-                                   (agent (make-individual)))))
+                                          :program (random-code max-points atom-generators))
+                                   :error-handler (fn [agnt except] (println except))))))
+        child-agents (vec (doall (for [_ (range population-size)]
+                                   (agent (make-individual)
+                                     :error-handler (fn [agnt except] (println except))))))
         rand-gens (vec (doall (for [_ (range population-size)]
                                 (java.util.Random.))))]
     (loop [generation 0]

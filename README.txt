@@ -397,10 +397,11 @@ VERSION HISTORY
           - Changed pushgp to take keyword arguments rather than a parameter
             map. NOTE: this requires calls to pushgp to be written differently.
             Updated examples to reflect this.
-10200921: - Removed random-element in favor of rand-nth.
+20100921: - Removed random-element in favor of rand-nth.
           - Cleaned up indentation, miscellaneous other cosmetic things.
           - Added namespaces for all example files.
           - Updated README to mention requirement for clojure 1.2 and to
             remove mention of ClojureX which has been discontinued.
           - Converted structures to records (a clojure 1.2 feature, should
             be faster).
+20101005: - Added error-handlers to agents.
