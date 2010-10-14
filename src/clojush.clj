@@ -1466,12 +1466,39 @@ using the given parameters."
   [params]
   (cons 'do (doall (map #(list 'println (str %) "=" %) params))))
 
+(defn decimate
+  "Returns the subset of the provided population remaining after sufficiently many
+elimination tournaments to reach the provided target-size."
+  [population target-size tournament-size radius]
+  (let [popsize (count population)]
+    (if (<= popsize target-size)
+      population
+      (recur (let [tournament-index-set 
+                   (let [first-location (lrand-int popsize)]
+                     (cons first-location
+                       (doall
+                         (for [_ (range (dec tournament-size))]
+                           (if (zero? radius)
+                             (lrand-int popsize)
+                             (mod (+ first-location (- (lrand-int (+ 1 (* radius 2))) radius))
+                               popsize))))))
+                   victim-index
+                   (reduce (fn [i1 i2] 
+                             (if (> (:total-error (nth population i1))
+                                   (:total-error (nth population i2)))
+                               i1 
+                               i2))
+                     tournament-index-set)]
+               (vec (concat (subvec population 0 victim-index)
+                      (subvec population (inc victim-index)))))
+        target-size tournament-size radius))))
+
 (defn pushgp
   "The top-level routine of pushgp."
   [& {:keys [error-function error-threshold population-size max-points atom-generators max-generations
              max-mutations mutation-probability mutation-max-points crossover-probability 
              simplification-probability tournament-size report-simplifications final-report-simplifications
-             reproduction-simplifications trivial-geography-radius]
+             reproduction-simplifications trivial-geography-radius decimation-ratio decimation-tournament-size]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
            population-size 1000
@@ -1489,7 +1516,9 @@ using the given parameters."
            report-simplifications 100
            final-report-simplifications 1000
            reproduction-simplifications 1
-           trivial-geography-radius 0}}]
+           trivial-geography-radius 0
+           decimation-ratio 1
+           decimation-tournament-size 2}}]
   ;; set globals from parameters
   (reset! global-atom-generators atom-generators)
   (reset! global-max-points-in-program max-points)
@@ -1498,7 +1527,8 @@ using the given parameters."
     (error-function error-threshold population-size max-points atom-generators max-generations 
       mutation-probability mutation-max-points crossover-probability
       simplification-probability tournament-size report-simplifications
-      final-report-simplifications trivial-geography-radius))
+      final-report-simplifications trivial-geography-radius decimation-ratio
+      decimation-tournament-size))
   (printf "\nGenerating initial population...\n") (flush)
   (let [pop-agents (vec (doall (for [_ (range population-size)] 
                                  (agent (make-individual 
@@ -1523,14 +1553,14 @@ using the given parameters."
             (when print-ancestors-of-solution
               (printf "\nAncestors of solution:\n")
               (println (:ancestors best)))
-            ;(shutdown-agents)
             (auto-simplify best error-function final-report-simplifications true 500))
           (do (if (>= generation max-generations)
-                (do (printf "\nFAILURE\n")
-                  ;(shutdown-agents)
-                  )
+                (printf "\nFAILURE\n")
                 (do (printf "\nProducing offspring...") (flush)
-                  (let [pop (vec (doall (map deref pop-agents)))]
+                  (let [pop (decimate (vec (doall (map deref pop-agents))) 
+                              (int (* decimation-ratio population-size))
+                              decimation-tournament-size 
+                              trivial-geography-radius)]
                     (dotimes [i population-size]
                       (send (nth child-agents i) 
                         breed i (nth rand-gens i) pop error-function population-size max-points atom-generators 

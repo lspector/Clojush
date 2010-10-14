@@ -405,3 +405,15 @@ VERSION HISTORY
           - Converted structures to records (a clojure 1.2 feature, should
             be faster).
 20101005: - Added error-handlers to agents.
+20101014: - [Artificial ant, krypto, tg8, decimation]
+          - Added articial ant example from Koza (via Luke).
+          - Added "tg8" integer symbolic regression problem.
+          - Added krypto number puzzle example.
+          - Added pushgp "decimation" feature, in which elimination 
+            tournaments, conducted after fitness testing, reduce the
+            size of the population to a specified fraction of its original
+            size (specified in a decimation-ratio argument to pushgp;
+            the tournament sized is specified via decimation-tournament-size).
+            The ordinary tournament-size parameter is still used for subsequent
+            selection from the decimated population. Any specified trivial
+            geography applies both to decimation and to subsequent selection.
