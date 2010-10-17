@@ -417,6 +417,8 @@ VERSION HISTORY
             The ordinary tournament-size parameter is still used for subsequent
             selection from the decimated population. Any specified trivial
             geography applies both to decimation and to subsequent selection.
+20101017: - Reverted from records to structs; wasn't significantly faster and
+            structs allow for greater flexibility in use of state as map.
             
 
 ACKNOWLEDGEMENTS
