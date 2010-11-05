@@ -18,21 +18,25 @@
 ;;;;;
 ;; namespace declaration and access to needed libraries
 (ns clojush
-  (:require [clojure.zip :as zip] 
-	    [clojure.contrib.math :as math]
-	    [clojure.contrib.seq-utils :as seq-utils]
-	    [clojure.walk :as walk]))
+  (:require 
+    [clojure.zip :as zip] 
+    [clojure.contrib.math :as math]
+    [clojure.contrib.seq-utils :as seq-utils]
+    [clojure.walk :as walk]
+    [clojure.contrib.string :as string]))
+
+;; backtrace abbreviation, to ease debugging
+(defn bt []
+  (.printStackTrace *e))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; globals
 
-(def push-types '(:exec :integer :float :code :boolean :auxiliary))
+(def push-types '(:exec :integer :float :code :boolean :auxiliary :tag))
 (def max-number-magnitude 1000000000000)
 (def min-number-magnitude 1.0E-10)
 (def top-level-push-code true)
 (def top-level-pop-code true)
-(def evalpush-limit 150)
-(def evalpush-time-limit 10000000) ;; in nanoseconds
 (def min-random-integer -10)
 (def max-random-integer 10)
 (def min-random-float -1.0)
@@ -46,6 +50,8 @@
 ;; may be reset by arguments to pushgp or other systems that use Push.
 (def global-atom-generators (atom ())) ;; the defalult for this will be set below
 (def global-max-points-in-program (atom 100))
+(def global-evalpush-limit (atom 150))
+(def global-evalpush-time-limit (atom 10000000)) ;; in nanoseconds
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random code generator
@@ -228,8 +234,8 @@ list1 is from list2. The calculation is equivalent to the following:
 4. Return the result."
   [list1 list2]
   (reduce + (vals (merge-with (comp math/abs -)
-                    (seq-utils/frequencies (all-items list1))
-                    (seq-utils/frequencies (all-items list2))))))
+                    (frequencies (all-items list1))
+                    (frequencies (all-items list2))))))
 
 (defn not-lazy
   "Returns lst if it is not a list, or a non-lazy version of lst if it is."
@@ -343,14 +349,17 @@ not for use as an instruction in Push programs."
 
 (defn registered-for-type
   "Returns a list of all registered instructions with the given type name as a prefix."
-  [type]
-  (filter #(.startsWith (name %) (name type)) @registered-instructions))
+  [type & {:keys [include-randoms] :or {include-randoms true}}]
+  (let [for-type (filter #(.startsWith (name %) (name type)) @registered-instructions)]
+    (if include-randoms
+      for-type
+      (filter #(not (.endsWith (name %) "_rand")) for-type))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ACTUAL INSTRUCTIONS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; instructions for all types (except auxiliary)
+;; instructions for all types (except auxiliary and tag)
 
 (defn popper 
   "Returns a function that takes a state and pops the appropriate stack of the state."
@@ -1256,6 +1265,88 @@ the code stack."
       (fn [] (lrand)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; tag pseudo-instructions
+
+(defn tag-instruction? 
+  [i]
+  (and (symbol? i) 
+    (or
+      (.startsWith (name i) "tag")
+      (.startsWith (name i) "untag"))))
+
+(defn closest-association
+  "Returns the key-val pair for the closest match to the given tag
+in the given state."
+  [tag state]
+  (loop [associations (conj (vec (:tag state)) (first (:tag state)))] ;; conj does wrap
+    (if (or (empty? (rest associations))
+          (>= tag (ffirst associations)))
+      (first associations)
+      (recur (rest associations)))))
+
+(defn handle-tag-instruction
+  "Executes the tag instruction i in the state. Tag instructions take one of
+the following forms:
+  tag_<type>_<number> 
+     create tage/value association, with the value taken from the stack
+     of the given type and the number serving as the tag
+  untag_<number>
+     remove the association for the closest-matching tag
+  tagged_<number> 
+     push the value associated with the closest-matching tag onto the
+     exec stack (or no-op if no associations).
+"
+  [i state]
+  (let [iparts (string/partition #"_" (name i))]
+    (cond
+      ;; if it's of the form tag_<type>_<number>: CREATE TAG/VALUE ASSOCIATION
+      (= (first iparts) "tag") 
+      (let [source-type (read-string (str ":" (nth iparts 2)))
+            the-tag (read-string (nth iparts 4))]
+        (if (empty? (source-type state))
+          state
+          (pop-item source-type
+            (assoc state :tag (assoc (or (:tag state) (sorted-map))
+                                the-tag 
+                                (first (source-type state)))))))
+      ;; if it's of the form untag_<number>: REMOVE TAG ASSOCIATION
+      (= (first iparts) "untag")
+      (if (empty? (:tag state))
+        state
+        (let [the-tag (read-string (nth iparts 2))]
+          (assoc state :tag (dissoc (:tag state) (first (closest-association the-tag state))))))
+      ;; else it must be of the form tagged_<number> -- PUSH VALUE
+      :else
+      (if (empty? (:tag state))
+        state ;; no-op if no associations
+        (let [the-tag (read-string (nth iparts 2))]
+          (push-item (second (closest-association the-tag state)) :exec state))))))
+
+(defn tag-instruction-erc
+  "Returns a function which, when called on no arguments, returns a symbol of the form
+tag_<type>_<number> where type is one of the specified types and number is in the range 
+from 0 to the specified limit (exclusive)."
+  [types limit]
+  (fn [] (symbol (str "tag_"
+                   (name (rand-nth types))
+                   "_"
+                   (str (rand-int limit))))))
+
+(defn untag-instruction-erc
+  "Returns a function which, when called on no arguments, returns a symbol of the form
+untag_<number> where number is in the range from 0 to the specified limit (exclusive)."
+  [limit]
+  (fn [] (symbol (str "untag_"
+                   (str (rand-int limit))))))
+
+(defn tagged-instruction-erc
+  "Returns a function which, when called on no arguments, returns a symbol of the form
+tagged_<number> where number is in the range from 0 to the specified limit (exclusive)."
+  [limit]
+  (fn [] (symbol (str "tagged_"
+                   (str (rand-int limit))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; push interpreter
 
 (defn recognize-literal
@@ -1264,7 +1355,6 @@ the code stack."
   (cond (integer? thing) :integer
     (number? thing) :float
     (or (= thing true) (= thing false)) :boolean
-    ;; if names are added then distinguish them from registered instructions here
     true false))
 
 (def debug-recent-instructions ())
@@ -1278,9 +1368,10 @@ the code stack."
   (if (not instruction) ;; tests for nil and ignores it
     state
     (let [literal-type (recognize-literal instruction)]
-      (if literal-type
-        (push-item instruction literal-type state)
-        ((instruction @instruction-table) state)))))
+      (cond 
+        literal-type (push-item instruction literal-type state)
+        (tag-instruction? instruction) (handle-tag-instruction instruction state)
+        :else ((instruction @instruction-table) state)))))
 
 (defn eval-push 
   "Executes the contents of the exec stack, aborting prematurely if execution limits are 
@@ -1289,11 +1380,11 @@ normal, or :abnormal otherwise."
   ([state] (eval-push state false))
   ([state print]
     (loop [iteration 1 s state
-           time-limit (+ evalpush-time-limit (System/nanoTime))]
-      (if (or (> iteration evalpush-limit)
+           time-limit (+ @global-evalpush-time-limit (System/nanoTime))]
+      (if (or (> iteration @global-evalpush-limit)
             (empty? (:exec s))
             (> (System/nanoTime) time-limit))
-        (assoc s :termination (if (<= iteration evalpush-limit) :normal :abnormal))
+        (assoc s :termination (if (<= iteration @global-evalpush-limit) :normal :abnormal))
         (let [exec-top (top-item :exec s)
               s (pop-item :exec s)]
           (let [s (if (seq? exec-top)
@@ -1367,7 +1458,7 @@ normal, or :abnormal otherwise."
                           (let [point-index (lrand-int (count-points program))
                                 point (code-at-point program point-index)]
                             (if (seq? point)
-                              (insert-code-at-point program point-index (seq-utils/flatten point))
+                              (insert-code-at-point program point-index (flatten point))
                               program)))
             new-errors (error-function new-program)
             new-total-errors (apply + new-errors)]
@@ -1529,7 +1620,8 @@ elimination tournaments to reach the provided target-size."
   [& {:keys [error-function error-threshold population-size max-points atom-generators max-generations
              max-mutations mutation-probability mutation-max-points crossover-probability 
              simplification-probability tournament-size report-simplifications final-report-simplifications
-             reproduction-simplifications trivial-geography-radius decimation-ratio decimation-tournament-size]
+             reproduction-simplifications trivial-geography-radius decimation-ratio decimation-tournament-size
+             evalpush-limit evalpush-time-limit]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
            population-size 1000
@@ -1549,17 +1641,21 @@ elimination tournaments to reach the provided target-size."
            reproduction-simplifications 1
            trivial-geography-radius 0
            decimation-ratio 1
-           decimation-tournament-size 2}}]
+           decimation-tournament-size 2
+           evalpush-limit 150
+           evalpush-time-limit 10000000}}]
   ;; set globals from parameters
   (reset! global-atom-generators atom-generators)
   (reset! global-max-points-in-program max-points)
+  (reset! global-evalpush-limit evalpush-limit)
+  (reset! global-evalpush-time-limit evalpush-time-limit)
   (printf "\nStarting PushGP run.\n\n") (flush)
   (print-params 
     (error-function error-threshold population-size max-points atom-generators max-generations 
       mutation-probability mutation-max-points crossover-probability
       simplification-probability tournament-size report-simplifications
       final-report-simplifications trivial-geography-radius decimation-ratio
-      decimation-tournament-size))
+      decimation-tournament-size evalpush-limit evalpush-time-limit))
   (printf "\nGenerating initial population...\n") (flush)
   (let [pop-agents (vec (doall (for [_ (range population-size)] 
                                  (agent (make-individual 

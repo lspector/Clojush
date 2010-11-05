@@ -1,8 +1,8 @@
-;; tg8.clj
+;; tagged-tg8.clj
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
-(ns examples.tg8
+(ns examples.tagged-tg8
   (:require [clojush] [clojure.contrib.math])
   (:use [clojush] [clojure.contrib.math]))
 
@@ -13,12 +13,12 @@
 ;; This is example 8 from the "trivial geography" chapter, 
 ;; http://hampshire.edu/lspector/pubs/trivial-geography-toappear.pdf
 ;; (Hence the name tg8.)
-
+;; Also uses tags.
 
 (define-registered in 
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
-(pushgp 
+#_(pushgp 
   :error-function (fn [program]
                     (doall
                       (for [input (range 10)]
@@ -37,10 +37,13 @@
                                      (* -5 input input input)
                                      (* 3 input input)
                                      5))))))))
-	 :atom-generators (concat 
+  :atom-generators (concat 
                      '(integer_add integer_sub integer_mult integer_div)
                      (list 
                        (fn [] (- (rand-int 21) 10))
+                       (tag-instruction-erc [:exec :integer] 1000) ;; added for tagged version
+                       ;(untag-instruction-erc 1000) ;; added for tagged version
+                       (tagged-instruction-erc 1000) ;; added for tagged version
                        'in))
   :mutation-probability 0.3
   :crossover-probability 0.3
@@ -48,4 +51,6 @@
   :reproduction-simplifications 10
   :max-points 100
   :population-size 5000)
+
+
 

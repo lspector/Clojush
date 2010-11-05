@@ -419,6 +419,43 @@ VERSION HISTORY
             geography applies both to decimation and to subsequent selection.
 20101017: - Reverted from records to structs; wasn't significantly faster and
             structs allow for greater flexibility in use of state as map.
+20101102: - Switched to new clojure.core/frequencies from depricated 
+            seq-utils/frequencies (h/t Kyle Harrington), and similarly
+            for flatten.
+          - Added :include-randoms keyword argument for registered-for-type.
+            Defaults to true, but if specified as false then instructions 
+            ending with "_rand" will be excluded.
+          - Raised invalid output penalty in tg8 (it was lower than reasonable
+            errors for that problem).
+20101103: - Converted evalpush-limit and evalpush-time-limit into vars 
+ 			(global-evalupush-limit and global-evalpush-time-limit) bound
+            to atoms that are reset by calls to pushgp (keyword arguments
+            :evalpush-limit and :evalpush-time-limit).
+          - Changed pushgp parameters in the tg8.clj example.
+20101104: - Implemented stackless tagging (see http://push.i3ci.hampshire.edu/
+            2010/10/28/stackless-tagging/). Tag instructions take one of
+            the following forms:
+              tag_<type>_<number> 
+                create tage/value association, with the value taken from the 
+                stack of the given type and the number serving as the tag
+              untag_<number>
+                remove the association for the closest-matching tag
+              tagged_<number> 
+                push the value associated with the closest-matching tag onto 
+                the exec stack (or no-op if no associations).
+            Here "closest-matching" means the tag with lowest number that 
+            is greater than or equal to the number of the tag being matched,
+            or the lowest-numbered tag if none meet this criterion. Tag
+            instructions are not implemented in the same way as other 
+            instructions; they are detected and handled specially by the
+            interpreter (see execute-instruction). Tag instructions
+            can be included in pushgp runs by using the new ephemeral
+            random constant functions tag-instruction-erc, 
+            untag-instruction-erc, and tagged-instruction-erc, each of
+            which takes a limit (for the numerical part) as an 
+            argument.
+          - Added examples using tags: tagged_ant, tagged_regression, and
+            tagged_tg8.
             
 
 ACKNOWLEDGEMENTS
