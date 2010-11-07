@@ -119,7 +119,8 @@ or false otherwise."
         (assoc :steps (inc (:steps state)))
         (assoc :row new-row)
         (assoc :column new-column)
-        (assoc :eaten (if (= 1 (nth (nth (:grid state) new-row) new-column))
+        (assoc :eaten (if (and (= 1 (nth (nth (:grid state) new-row) new-column))
+                            (not (contains? (:eaten state) [new-row new-column])))
                         (conj (:eaten state) [new-row new-column])
                         (:eaten state)))))
     state))
@@ -194,6 +195,7 @@ or false otherwise."
 
 ;; Code to conduct a run on the santafe trail problem with just the ant-specific instructions.
 ;; Note that the santafe trail includes 89 pellets of food.
+
 #_(pushgp
   :error-function (fn [program]
                     (doall
@@ -202,15 +204,16 @@ or false otherwise."
                                                (new-santafe-state))))))))
   :atom-generators (list 'left 'right 'move 'if_food_ahead
                      (tag-instruction-erc [:exec] 1000) ;; added for tagged version
-                     (untag-instruction-erc 1000) ;; added for tagged version
                      (tagged-instruction-erc 1000)) ;; added for tagged version
-  :max-points 100
-  :tournament-size 2)
+  :mutation-probability 0.3
+  :crossover-probability 0.3
+  :simplification-probability 0.3
+  :reproduction-simplifications 10
+  :max-points 100)
 
 ;; test of an evolved solution
 #_(count (:eaten (run-ant-push-pgm-to-limit 
-                 '((move) ((if_food_ahead (if_food_ahead) (right if_food_ahead)
-                             (left) (left left)) if_food_ahead if_food_ahead right))
+                 '((move right if_food_ahead tagged_698) (left) ((if_food_ahead) tag_exec_683 (left if_food_ahead tagged_739 right)))
                  (new-santafe-state))))
 
 
@@ -222,40 +225,48 @@ or false otherwise."
                       (list (- 89
                               (count (:eaten (run-ant-push-pgm-to-limit program 
                                                (new-santafe-state))))))))
-  :atom-generators (concat (registered-for-type :integer :include-randoms false)
+  :atom-generators (concat 
+                     (registered-for-type :integer :include-randoms false)
                      (registered-for-type :exec :include-randoms false)
                      (registered-for-type :boolean :include-randoms false) 
                      (list 
                        (tag-instruction-erc [:exec :integer :boolean] 1000)
-                       (untag-instruction-erc 1000)
                        (tagged-instruction-erc 1000))
                      '(left right move if_food_ahead))
-  :max-points 100
-  :tournament-size 2)
+  :mutation-probability 0.3
+  :crossover-probability 0.3
+  :simplification-probability 0.3
+  :reproduction-simplifications 10
+  :max-points 100)
 
 ;; Code to conduct a pushgp run on the santafe trail problem with the ant-specific 
 ;; instructions but also with decimation.
+
 #_(pushgp
   :error-function (fn [program]
                     (doall
                       (list (- 89
                               (count (:eaten (run-ant-push-pgm-to-limit program 
                                                (new-santafe-state))))))))
-  :atom-generators '(left right move if_food_ahead
-                      (tag-instruction-erc [:exec] 1000)
-                      (untag-instruction-erc 1000)
-                      (tagged-instruction-erc 1000))
+  :atom-generators (list 'left 'right 'move 'if_food_ahead
+                     (tag-instruction-erc [:exec] 1000) ;; added for tagged version
+                     (tagged-instruction-erc 1000)) ;; added for tagged version
+  :mutation-probability 0.3
+  :crossover-probability 0.3
+  :simplification-probability 0.3
+  :reproduction-simplifications 10
   :max-points 100
   :tournament-size 1
   :decimation-ratio 0.1
   :decimation-tournament-size 2)
 
+
 ;; Code to conduct a run on the losaltos trail problem with just the ant-specific 
 ;; instructions. Note that the losaltos trail includes 156 pellets of food. (Koza 
 ;; says 157 but Luke's file only includes 156!) More steps are allowed (which
 ;; is specified in the definition of new-losaltos-state above), and we also increase
-;; the population size.
-#_(pushgp
+;; the population size and the evalpush-limit.
+(pushgp
   :error-function (fn [program]
                     (doall
                       (list (- 156
@@ -265,7 +276,12 @@ or false otherwise."
                      (tag-instruction-erc [:exec] 1000)
                      (untag-instruction-erc 1000)
                      (tagged-instruction-erc 1000))
+  :mutation-probability 0.3
+  :crossover-probability 0.3
+  :simplification-probability 0.3
   :max-points 100
   :population-size 5000
-  :simplification-probability 0.2
-  :tournament-size 7)
+  :evalpush-limit 10000)
+
+;; An evolved solution: (move (tagged_373 if_food_ahead tagged_932 ((tagged_718 right) tagged_613 tagged_397) ((if_food_ahead untag_912 tag_exec_300) ((tag_exec_87) tag_exec_267) (right (move (if_food_ahead if_food_ahead)) (left untag_77) tagged_146) move left tagged_954)) (tag_exec_715) (tagged_671 (move if_food_ahead untag_195) left (untag_622 right)))
+

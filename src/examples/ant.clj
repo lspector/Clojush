@@ -119,7 +119,7 @@ or false otherwise."
         (assoc :row new-row)
         (assoc :column new-column)
         (assoc :eaten (if (= 1 (nth (nth (:grid state) new-row) new-column))
-                        (conj (:eaten state) [new-row new-column])
+                        (conj (:eaten state) [new-row new-column]) ;; set, won't add twice
                         (:eaten state)))))
     state))
 
@@ -200,16 +200,13 @@ or false otherwise."
                               (count (:eaten (run-ant-push-pgm-to-limit program 
                                                (new-santafe-state))))))))
   :atom-generators (list 'left 'right 'move 'if_food_ahead)
-  :max-points 100
-  :tournament-size 2)
+  :mutation-probability 0.3
+  :crossover-probability 0.3
+  :simplification-probability 0.3
+  :reproduction-simplifications 10
+  :max-points 100)
 
-;; test of an evolved solution
-#_(count (:eaten (run-ant-push-pgm-to-limit 
-                 '((move) ((if_food_ahead (if_food_ahead) (right if_food_ahead)
-                             (left) (left left)) if_food_ahead if_food_ahead right))
-                 (new-santafe-state))))
-
-
+;; An evolved solution: ((right) (if_food_ahead move) (right right if_food_ahead move right) move)
 
 ;; Code to conduct a pushgp run on the santafe trail problem with additional instructions too
 #_(pushgp
@@ -218,12 +215,17 @@ or false otherwise."
                       (list (- 89
                               (count (:eaten (run-ant-push-pgm-to-limit program 
                                                (new-santafe-state))))))))
-  :atom-generators (concat (registered-for-type :integer)
-                     (registered-for-type :exec)
-                     (registered-for-type :boolean) 
+  :atom-generators (concat (registered-for-type :integer :include-randoms false)
+                     (registered-for-type :exec :include-randoms false)
+                     (registered-for-type :boolean  :include-randoms false) 
                      '(left right move if_food_ahead))
-  :max-points 100
-  :tournament-size 2)
+  :mutation-probability 0.3
+  :crossover-probability 0.3
+  :simplification-probability 0.3
+  :reproduction-simplifications 10
+  :max-points 100)
+
+;; An evolved solution: ((move exec_dup) ((((right (((if_food_ahead ((exec_stackdepth (exec_y exec_shove move exec_rot integer_pop))) integer_min)) (exec_do*times))))) (right)))
 
 ;; Code to conduct a pushgp run on the santafe trail problem with the ant-specific 
 ;; instructions but also with decimation.
@@ -234,16 +236,21 @@ or false otherwise."
                               (count (:eaten (run-ant-push-pgm-to-limit program 
                                                (new-santafe-state))))))))
   :atom-generators '(left right move if_food_ahead)
+  :mutation-probability 0.3
+  :crossover-probability 0.3
+  :simplification-probability 0.3
   :max-points 100
   :tournament-size 1
   :decimation-ratio 0.1
   :decimation-tournament-size 2)
 
+;; An evolved solution: (if_food_ahead (if_food_ahead) (right right) (if_food_ahead move left move left))
+
 ;; Code to conduct a run on the losaltos trail problem with just the ant-specific 
 ;; instructions. Note that the losaltos trail includes 156 pellets of food. (Koza 
 ;; says 157 but Luke's file only includes 156!) More steps are allowed (which
 ;; is specified in the definition of new-losaltos-state above), and we also increase
-;; the population size.
+;; the population size and the evalpush-limit.
 #_(pushgp
   :error-function (fn [program]
                     (doall
@@ -251,7 +258,11 @@ or false otherwise."
                               (count (:eaten (run-ant-push-pgm-to-limit program 
                                                (new-losaltos-state))))))))
   :atom-generators (list 'left 'right 'move 'if_food_ahead)
+  :mutation-probability 0.3
+  :crossover-probability 0.3
+  :simplification-probability 0.3
   :max-points 100
   :population-size 5000
-  :simplification-probability 0.2
-  :tournament-size 7)
+  :evalpush-limit 10000)
+
+;; An evolved solution: ((move left) (if_food_ahead) if_food_ahead ((left) if_food_ahead if_food_ahead left) (if_food_ahead (right if_food_ahead) if_food_ahead) ((move (left if_food_ahead)) move (if_food_ahead) right) left)

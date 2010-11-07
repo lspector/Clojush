@@ -456,7 +456,12 @@ VERSION HISTORY
             argument.
           - Added examples using tags: tagged_ant, tagged_regression, and
             tagged_tg8.
-            
+20101106: - Tweaked parameters in ant examples; among other things,
+            increased simplification since bloat was an issue. Also
+            added some evolved solutions in comments.     
+20101107: - Added Koza's lawnmower problem example; this demonstrates how
+            to add a new type/stack on a problem-specific basis, without
+            altering clojush.clj.    
 
 ACKNOWLEDGEMENTS
 
