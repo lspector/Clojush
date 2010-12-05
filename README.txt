@@ -466,7 +466,7 @@ VERSION HISTORY
             time-limit (thanks Kyle Harrington).
 20101205: - Added modified version of Kyle's version of the intertwined
             spirals problem.
-          - Minor changes to this README.
+          - Minor changes to this README. 
             
 
 ACKNOWLEDGEMENTS
