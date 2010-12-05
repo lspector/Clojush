@@ -9,7 +9,6 @@
 ;; intertwined-spirals-demo.
 ;; For Kyle's full version see https://github.com/kephale/Clojush
 
-
 (ns examples.intertwined-spirals
   (:require [clojush] [clojure.contrib.duck-streams :as ds])
   (:use [clojush]))
