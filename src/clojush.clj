@@ -18,6 +18,7 @@
 ;;;;;
 ;; namespace declaration and access to needed libraries
 (ns clojush
+  (:gen-class)
   (:require 
     [clojure.zip :as zip] 
     [clojure.contrib.math :as math]
@@ -1384,7 +1385,7 @@ normal, or :abnormal otherwise."
       (if (or (> iteration @global-evalpush-limit)
             (empty? (:exec s))
             (> (System/nanoTime) time-limit))
-        (assoc s :termination (if (<= iteration @global-evalpush-limit) :normal :abnormal))
+        (assoc s :termination (if (empty? (:exec s)) :normal :abnormal))
         (let [exec-top (top-item :exec s)
               s (pop-item :exec s)]
           (let [s (if (seq? exec-top)
@@ -1701,6 +1702,11 @@ elimination tournaments to reach the provided target-size."
                   (apply await pop-agents) ;; SYNCHRONIZE
                   (recur (inc generation))))))))))
 
+(defn pushgp-map
+  "Calls pushgp with the args in argmap."
+  [argmap]
+  (apply pushgp (apply concat argmap)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; stress test
 
@@ -1726,4 +1732,11 @@ of nil values in execute-instruction, do see if any instructions are introducing
             (println p)))))))
 
 ;(stress-test 10000)
+
+(defn -main 
+  "A main function for clojush, which assumes that the first/only argument is the name
+  of a problem file that contains a top level call. Exits after completion of the call."
+  [& args]
+  (use (symbol (first args)))
+  (System/exit 0))
 

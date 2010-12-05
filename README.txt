@@ -265,7 +265,7 @@ specification:
   false and the empty list (both NIL in Common Lisp).
 - Clojush adds exec_noop (same as code_noop).
 - Clojush includes an execution time limit (via the parameter 
-  evalpush-time-limit that may save you from exponential code growth or other
+  evalpush-time-limit) that may save you from exponential code growth or other
   hazards. But don't forget to increase it if you expect legitimate programs
   to take a long time.
 
@@ -289,9 +289,6 @@ TO DO (SOMETIME, MAYBE)
 - Possibly rename the auxiliary stack the "input" stack if no other
   uses are developed for it.
 - Write a "sufficient-args" fn/macro to clean up Push instruction definitions.
-- Convert structs to records, which should be faster. Experiments
-  with Clojure 1.2 show this to be faster but there are not good
-  examples yet to serve as the basis for changes.
 
 VERSION HISTORY
 20100227: - First distributed version.
@@ -462,6 +459,15 @@ VERSION HISTORY
 20101107: - Added Koza's lawnmower problem example; this demonstrates how
             to add a new type/stack on a problem-specific basis, without
             altering clojush.clj.    
+20101204: - Added pushgp-map, which allows pushgp calls on maps of arguments,
+            and a demonstration of its use in argmap_regression.clj.
+          - Added :gen-class and -main definition (thanks Kyle Harrington).
+          - Fixed eval-push termination to return :abnormal for exceeding
+            time-limit (thanks Kyle Harrington).
+20101205: - Added modified version of Kyle's version of the intertwined
+            spirals problem.
+          - Minor changes to this README.
+            
 
 ACKNOWLEDGEMENTS
 
