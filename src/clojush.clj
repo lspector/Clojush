@@ -53,6 +53,9 @@
 (def global-max-points-in-program (atom 100))
 (def global-evalpush-limit (atom 150))
 (def global-evalpush-time-limit (atom 10000000)) ;; in nanoseconds
+(def global-node-selection-method (atom :unbiased))
+(def global-node-selection-leaf-probability (atom 0.1))
+(def global-node-selection-tournament-size (atom 2))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random code generator
@@ -1431,6 +1434,39 @@ normal, or :abnormal otherwise."
                                ancestors nil}}]
   (individual. program errors total-error history ancestors))
 
+(defn choose-node-index-with-leaf-probability
+  "Returns an index into tree, choosing a leaf with probability 
+@global-node-selection-leaf-probability."
+  [tree]
+  (if (seq? tree)
+    (if (> (lrand) @global-node-selection-leaf-probability)
+      (second (rand-nth (filter #(seq? (first %)) (map #(list %1 %2) (all-items tree) (iterate inc 0)))))
+      (let [indexed-leaves (filter #(not (seq? (first %))) (map #(list %1 %2) (all-items tree) (iterate inc 0)))]
+        (if (empty? indexed-leaves) 0 (second (rand-nth indexed-leaves)))))
+    0))
+
+(defn choose-node-index-by-tournament
+  "Returns an index into tree, choosing the largest subtree found in 
+a tournament of size @global-node-selection-tournament-size."
+  [tree]
+  (let [c (count-points tree)
+        tournament-set
+        (for [_ (range @global-node-selection-tournament-size)]
+          (let [point-index (lrand-int c)
+                subtree-size (count-points (code-at-point tree point-index))]
+            {:i point-index :size subtree-size}))]
+    (:i (last (sort-by :size tournament-set)))))
+
+(defn select-node-index
+  "Returns an index into tree using the node selection method indicated
+by @global-node-selection-method."
+  [tree]
+  (let [method @global-node-selection-method]
+    (cond 
+      (= method :unbiased) (lrand-int (count-points tree))
+      (= method :leaf-probability) (choose-node-index-with-leaf-probability tree)
+      (= method :size-tournament) (choose-node-index-by-tournament tree))))
+
 (defn auto-simplify 
   "Auto-simplifies the provided individual."
   [ind error-function steps print? progress-interval]
@@ -1519,7 +1555,7 @@ normal, or :abnormal otherwise."
   "Returns a mutated version of the given individual."
   [ind mutation-max-points max-points atom-generators]
   (let [new-program (insert-code-at-point (:program ind) 
-                      (lrand-int (count-points (:program ind)))
+                      (select-node-index (:program ind))
                       (random-code mutation-max-points atom-generators))]
     (if (> (count-points new-program) max-points)
       ind
@@ -1534,9 +1570,9 @@ subprogram of parent2."
   [parent1 parent2 max-points]
   (let [new-program (insert-code-at-point 
                       (:program parent1) 
-                      (lrand-int (count-points (:program parent1)))
+                      (select-node-index (:program parent1))
                       (code-at-point (:program parent2)
-                        (lrand-int (count-points (:program parent2)))))]
+                        (select-node-index (:program parent2))))]
     (if (> (count-points new-program) max-points)
       parent1
       (make-individual :program new-program :history (:history parent1)
@@ -1622,7 +1658,8 @@ elimination tournaments to reach the provided target-size."
              max-mutations mutation-probability mutation-max-points crossover-probability 
              simplification-probability tournament-size report-simplifications final-report-simplifications
              reproduction-simplifications trivial-geography-radius decimation-ratio decimation-tournament-size
-             evalpush-limit evalpush-time-limit]
+             evalpush-limit evalpush-time-limit node-selection-method node-selection-leaf-probability
+             node-selection-tournament-size]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
            population-size 1000
@@ -1644,19 +1681,26 @@ elimination tournaments to reach the provided target-size."
            decimation-ratio 1
            decimation-tournament-size 2
            evalpush-limit 150
-           evalpush-time-limit 10000000}}]
+           evalpush-time-limit 10000000
+           node-selection-method :unbiased
+           node-selection-leaf-probability 0.1
+           node-selection-tournament-size 2}}]
   ;; set globals from parameters
   (reset! global-atom-generators atom-generators)
   (reset! global-max-points-in-program max-points)
   (reset! global-evalpush-limit evalpush-limit)
   (reset! global-evalpush-time-limit evalpush-time-limit)
+  (reset! global-node-selection-method node-selection-method)
+  (reset! global-node-selection-leaf-probability node-selection-leaf-probability)
+  (reset! global-node-selection-tournament-size node-selection-tournament-size)
   (printf "\nStarting PushGP run.\n\n") (flush)
   (print-params 
     (error-function error-threshold population-size max-points atom-generators max-generations 
       mutation-probability mutation-max-points crossover-probability
       simplification-probability tournament-size report-simplifications
       final-report-simplifications trivial-geography-radius decimation-ratio
-      decimation-tournament-size evalpush-limit evalpush-time-limit))
+      decimation-tournament-size evalpush-limit evalpush-time-limit node-selection-method
+      node-selection-tournament-size node-selection-leaf-probability))
   (printf "\nGenerating initial population...\n") (flush)
   (let [pop-agents (vec (doall (for [_ (range population-size)] 
                                  (agent (make-individual 

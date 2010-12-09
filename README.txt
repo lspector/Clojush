@@ -467,6 +467,24 @@ VERSION HISTORY
 20101205: - Added modified version of Kyle's version of the intertwined
             spirals problem.
           - Minor changes to this README. 
+20101208: - Added alternative methods for node selection, used in mutation
+            and crossover (drafted by Brian Martin, with suggestions
+            from Kyle Harrington). This introduced three new globals:
+            global-node-selection-method, global-node-selection-leaf-probability,
+            and global-node-selection-tournament-size, each of which holds
+            an atom, and three new parameters to pushgp: node-selection-method,
+            node-selection-leaf-probability, and node-selection-tournament-size.
+            The node-selection-method can be :unbiased (in which case nodes
+            are selected using the uniform distribution that was previously
+            used -- this is the default), :leaf-probability (in which case
+            the value of the node-selection-leaf-probability argument,
+            which defaults to 0.1, specifies the probability that leaves,
+            as opposed to internal nodes, will be selected -- this is the
+            method used by Koza and others in tree-based GP), or
+            :size-tournament (in which case the value of the 
+            node-selection-tournament-size argument, which defaults to 2,
+            determines the tournament size for node tournaments, with the
+            largest subtree in the tournament set being selected).
             
 
 ACKNOWLEDGEMENTS
