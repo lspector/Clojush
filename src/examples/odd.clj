@@ -21,11 +21,11 @@
                         (let [state (run-push program
                                       (push-item input :auxiliary
                                         (push-item input :integer
-                                          (make-push-state))))
+                                          (make-push-state))) )
                               top-bool (top-item :boolean state)]
                           (if (not (= top-bool :no-stack-item))
                             (if (= top-bool (odd? input)) 0 1)
                             1000)))))
-  :atom-generators (concat @registered-instructions
+  :atom-generators (concat (registered-nonrandom)
                      (list (fn [] (rand-int 100))
                        'in)))

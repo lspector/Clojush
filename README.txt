@@ -485,6 +485,17 @@ VERSION HISTORY
             node-selection-tournament-size argument, which defaults to 2,
             determines the tournament size for node tournaments, with the
             largest subtree in the tournament set being selected).
+20110111: - Added zipper stack and functions (thanks to Kyle Harrington for
+            draft code, although this was re-written).
+          - Added registered-nonrandom function.
+          - Modified odd.clj example to use registered-nonrandom.
+          - Added examples/dsoar.clj, a version of the "Dirt-Sensing,
+            Obstacle-Avoiding Robot" (DSOAR) problem first described in:
+              Spector, L. 1996. Simultaneous Evolution of Programs and their
+              Control Structures. In Advances in Genetic Programming 2, edited
+              by P. Angeline and K. Kinnear, pp. 137-154. Cambridge, MA: MIT Press.
+              http://helios.hampshire.edu/lspector/pubs/AiGP2-post-final-e.pdf
+            This version was written by Brian Martin in 2010-2011.
             
 
 ACKNOWLEDGEMENTS

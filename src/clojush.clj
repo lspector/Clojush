@@ -33,7 +33,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; globals
 
-(def push-types '(:exec :integer :float :code :boolean :auxiliary :tag))
+(def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :zip))
 (def max-number-magnitude 1000000000000)
 (def min-number-magnitude 1.0E-10)
 (def top-level-push-code true)
@@ -359,6 +359,11 @@ not for use as an instruction in Push programs."
       for-type
       (filter #(not (.endsWith (name %) "_rand")) for-type))))
 
+(defn registered-nonrandom
+  "Returns a list of all registered instructions aside from random instructions."
+  []
+  (filter #(not (.endsWith (name %) "_rand")) @registered-instructions))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ACTUAL INSTRUCTIONS
 
@@ -375,6 +380,7 @@ not for use as an instruction in Push programs."
 (define-registered float_pop (popper :float))
 (define-registered code_pop (popper :code))
 (define-registered boolean_pop (popper :boolean))
+(define-registered zip_pop (popper :zip))
 
 (defn duper 
   "Returns a function that takes a state and duplicates the top item of the appropriate 
@@ -390,6 +396,7 @@ stack of the state."
 (define-registered float_dup (duper :float))
 (define-registered code_dup (duper :code))
 (define-registered boolean_dup (duper :boolean))
+(define-registered zip_dup (duper :zip))
 
 (defn swapper 
   "Returns a function that takes a state and swaps the top 2 items of the appropriate 
@@ -410,6 +417,7 @@ stack of the state."
 (define-registered float_swap (swapper :float))
 (define-registered code_swap (swapper :code))
 (define-registered boolean_swap (swapper :boolean))
+(define-registered zip_swap (swapper :zip))
 
 (defn rotter 
   "Returns a function that takes a state and rotates the top 3 items of the appropriate 
@@ -433,6 +441,7 @@ stack of the state."
 (define-registered float_rot (rotter :float))
 (define-registered code_rot (rotter :code))
 (define-registered boolean_rot (rotter :boolean))
+(define-registered bzip_rot (rotter :zip))
 
 (defn flusher
   "Returns a function that empties the stack of the given state."
@@ -445,6 +454,7 @@ stack of the state."
 (define-registered float_flush (flusher :float))
 (define-registered code_flush (flusher :code))
 (define-registered boolean_flush (flusher :boolean))
+(define-registered zip_flush (flusher :zip))
 
 (defn eqer 
   "Returns a function that compares the top two items of the appropriate stack of 
@@ -464,6 +474,7 @@ the given state."
 (define-registered float_eq (eqer :float))
 (define-registered code_eq (eqer :code))
 (define-registered boolean_eq (eqer :boolean))
+(define-registered zip_eq (eqer :zip))
 
 (defn stackdepther
   "Returns a function that pushes the depth of the appropriate stack of the 
@@ -477,6 +488,7 @@ given state."
 (define-registered float_stackdepth (stackdepther :float))
 (define-registered code_stackdepth (stackdepther :code))
 (define-registered boolean_stackdepth (stackdepther :boolean))
+(define-registered zip_stackdepth (stackdepther :zip))
 
 (defn yanker
   "Returns a function that yanks an item from deep in the specified stack,
@@ -505,6 +517,7 @@ using the top integer to indicate how deep."
 (define-registered float_yank (yanker :float))
 (define-registered code_yank (yanker :code))
 (define-registered boolean_yank (yanker :boolean))
+(define-registered zip_yank (yanker :zip))
 
 (defn yankduper
   "Returns a function that yanks a copy of an item from deep in the specified stack,
@@ -528,6 +541,7 @@ using the top integer to indicate how deep."
 (define-registered float_yankdup (yankduper :float))
 (define-registered code_yankdup (yankduper :code))
 (define-registered boolean_yankdup (yankduper :boolean))
+(define-registered zip_yankdup (yankduper :zip))
 
 (defn shover
   "Returns a function that shoves an item deep in the specified stack, using the top
@@ -555,6 +569,7 @@ integer to indicate how deep."
 (define-registered float_shove (shover :float))
 (define-registered code_shove (shover :code))
 (define-registered boolean_shove (shover :boolean))
+(define-registered zip_shove (shover :zip))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; rand instructions
@@ -1254,6 +1269,130 @@ the code stack."
               (pop-item :exec state)))
           state))
       state)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; zip instructions
+
+(defmacro ignore-errors
+  "Returns the result of evaluating e, or nil if it throws an exception."
+  [e]
+  `(try ~e (catch java.lang.Exception _# nil)))
+
+(defn zip-mover
+  "Returns a function that moves the top zipper in the specified way,
+acting as a no-op if the movement would produce an error."
+  [move-fn]
+  (fn [state]
+    (if (or (empty? (:zip state))
+          (nil? (ignore-errors (move-fn (top-item :zip state)))))
+      state
+      (push-item (move-fn (top-item :zip state)) :zip (pop-item :zip state)))))
+
+(define-registered zip_next (zip-mover zip/next))
+(define-registered zip_prev (zip-mover zip/prev))
+(define-registered zip_down (zip-mover zip/down))
+(define-registered zip_up (zip-mover zip/up))
+(define-registered zip_left (zip-mover zip/left))
+(define-registered zip_leftmost (zip-mover zip/leftmost))
+(define-registered zip_right (zip-mover zip/right))
+(define-registered zip_rightmost (zip-mover zip/rightmost))
+
+(define-registered zip_end?
+  (fn [state]
+    (if (empty? (:zip state))
+      state
+      (push-item (zip/end? (top-item :zip state))
+        :boolean 
+        (pop-item :zip state)))))
+
+(define-registered zip_branch?
+  (fn [state]
+    (if (empty? (:zip state))
+      state
+      (push-item (zip/branch? (top-item :zip state))
+        :boolean 
+        (pop-item :zip state)))))
+
+(defn zip-inserter
+  [source inserter]
+  (fn [state]
+    (if (or (empty? (:zip state)) (empty? (source state)))
+      state
+      (let [z (stack-ref :zip 0 state)
+            c (stack-ref source 0 state)
+            result (ignore-errors (inserter z c))]
+        (if result
+          (push-item result :zip (pop-item :zip (pop-item source state)))
+          state)))))
+
+(define-registered zip_replace_fromcode (zip-inserter :code zip/replace))
+(define-registered zip_replace_fromexec (zip-inserter :exec zip/replace))
+
+(define-registered zip_insert_right_fromcode (zip-inserter :code zip/insert-right))
+(define-registered zip_insert_right_fromexec (zip-inserter :exec zip/insert-right))
+
+(define-registered zip_insert_left_fromcode (zip-inserter :code zip/insert-left))
+(define-registered zip_insert_left_fromexec (zip-inserter :exec zip/insert-left))
+
+(define-registered zip_insert_child_fromcode (zip-inserter :code zip/insert-child))
+(define-registered zip_insert_child_fromexec (zip-inserter :exec zip/insert-child))
+
+(define-registered zip_append_child_fromcode (zip-inserter :code zip/append-child))
+(define-registered zip_append_child_fromexec (zip-inserter :exec zip/append-child))
+
+(define-registered zip_remove
+  (fn [state]
+    (if (or (empty? (:zip state))
+          (nil? (ignore-errors (zip/remove (top-item :zip state)))))
+      state
+      (push-item (zip/remove (top-item :zip state)) :zip (pop-item :zip state)))))
+
+(define-registered zip_fromcode
+  (fn [state]
+    (if (empty? (:code state))
+      state
+      (let [result (ignore-errors (zip/seq-zip (top-item :code state)))]
+        (if result
+          (push-item result :zip (pop-item :code state))
+          state)))))
+
+(define-registered zip_fromexec
+  (fn [state]
+    (if (empty? (:exec state))
+      state
+      (let [result (ignore-errors (zip/seq-zip (top-item :exec state)))]
+        (if result
+          (push-item result :zip (pop-item :exec state))
+          state)))))
+
+(defn zip-extractor
+  [destination extractor]
+  (fn [state]
+    (if (empty? (:zip state))
+      state
+      (let [z (stack-ref :zip 0 state)
+            result (ignore-errors (extractor z))]
+        (if result
+          (push-item result destination (pop-item :zip state))
+          state)))))
+
+(define-registered code_fromzipnode (zip-extractor :code zip/node))
+(define-registered exec_fromzipnode (zip-extractor :exec zip/node))
+
+(define-registered code_fromziproot (zip-extractor :code zip/root))
+(define-registered exec_fromziproot (zip-extractor :exec zip/root))
+
+(define-registered code_fromzipchildren (zip-extractor :code zip/children))
+(define-registered exec_fromzipchildren (zip-extractor :exec zip/children))
+
+(define-registered code_fromziplefts (zip-extractor :code zip/lefts))
+(define-registered exec_fromziplefts (zip-extractor :exec zip/lefts))
+
+(define-registered code_fromziprights (zip-extractor :code zip/rights))
+(define-registered exec_fromziprights (zip-extractor :exec zip/rights))
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; print all registered instructions on loading
