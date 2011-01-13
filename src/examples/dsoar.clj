@@ -272,6 +272,6 @@ obstacle."
       :limit 100 
       :instruction-set :tag 
       :node-selection :unbiased
-      :torunament-size 5})
+      :tournament-size 5})
 
 #'examples.dsoar/run
