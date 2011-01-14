@@ -441,7 +441,7 @@ stack of the state."
 (define-registered float_rot (rotter :float))
 (define-registered code_rot (rotter :code))
 (define-registered boolean_rot (rotter :boolean))
-(define-registered bzip_rot (rotter :zip))
+(define-registered zip_rot (rotter :zip))
 
 (defn flusher
   "Returns a function that empties the stack of the given state."
