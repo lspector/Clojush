@@ -3,8 +3,15 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns examples.lawnmower
+  (:gen-class)
   (:require [clojush] [clojure.contrib.math])
   (:use [clojush] [clojure.contrib.math]))
+
+(defn push-state-timeout-exception
+  [state]
+  (if (= :timeout (:termination state))
+    (throw (Exception. "Push state returned with an :timeout termination state"))
+    state))
 
 ;;;;;;;;;;;;
 ;; Koza's lawnmower problem, described in Chapter 8 of Genetic Programmin II:
@@ -185,14 +192,15 @@ to the location indicated by the top intvec2D."
   [x y limit]
   (fn [program]
     (doall
-      (list (- (* x y)
+     (list (- (* x y)
               (count
-                (:mowed 
-                  (first 
-                    (:auxiliary
-                      (run-push program 
-                        (push-item (new-lawn-state x y limit) 
-                          :auxiliary (make-push-state))))))))))))
+	       (:mowed 
+		(first 
+		 (:auxiliary
+		  (push-state-timeout-exception
+		   (run-push program 
+			     (push-item (new-lawn-state x y limit) 
+					:auxiliary (make-push-state)))))))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; code for actual runs

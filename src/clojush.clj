@@ -33,7 +33,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; globals
 
-(def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :zip))
+(def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :zip :trace))
 (def max-number-magnitude 1000000000000)
 (def min-number-magnitude 1.0E-10)
 (def top-level-push-code true)
@@ -1538,21 +1538,24 @@ normal, or :abnormal otherwise."
            time-limit (if (zero? @global-evalpush-time-limit)
                         0
                         (+ @global-evalpush-time-limit (System/nanoTime)))]
-      (if (or (> iteration @global-evalpush-limit)
-            (empty? (:exec s))
+      
+      (cond (or (> iteration @global-evalpush-limit)
+		(empty? (:exec s)))
+	    (assoc s :termination (if (empty? (:exec s)) :normal :abnormal))
             (and (not (zero? time-limit))
-              (> (System/nanoTime) time-limit)))
-        (assoc s :termination (if (empty? (:exec s)) :normal :abnormal))
-        (let [exec-top (top-item :exec s)
-              s (pop-item :exec s)]
-          (let [s (if (seq? exec-top)
-                    (assoc s :exec (concat exec-top (:exec s)))
-                    (execute-instruction exec-top s))]
-            (when print
-              (printf "\nState after %s steps (last step: %s):\n" 
-                iteration (if (seq? exec-top) "(...)" exec-top))
-              (state-pretty-print s))
-            (recur (inc iteration) s time-limit)))))))
+              (> (System/nanoTime) time-limit))
+	    (assoc s :termination :timeout)
+	    :else
+	    (let [exec-top (top-item :exec s)
+		  s (push-item exec-top :trace (pop-item :exec s))]
+	      (let [s (if (seq? exec-top)
+			(assoc s :exec (concat exec-top (:exec s)))
+			(execute-instruction exec-top s))]
+		(when print
+		  (printf "\nState after %s steps (last step: %s):\n" 
+			  iteration (if (seq? exec-top) "(...)" exec-top))
+		  (state-pretty-print s))
+		(recur (inc iteration) s time-limit)))))))
 
 (defn run-push 
   "The top level of the push interpreter; calls eval-schush between appropriate code/exec 
