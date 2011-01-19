@@ -52,7 +52,7 @@
 (def global-atom-generators (atom ())) ;; the defalult for this will be set below
 (def global-max-points-in-program (atom 100))
 (def global-evalpush-limit (atom 150))
-(def global-evalpush-time-limit (atom 10000000)) ;; in nanoseconds
+(def global-evalpush-time-limit (atom 0)) ;; in nanoseconds, 0 => no time limit
 (def global-node-selection-method (atom :unbiased))
 (def global-node-selection-leaf-probability (atom 0.1))
 (def global-node-selection-tournament-size (atom 2))
@@ -1437,6 +1437,9 @@ the following forms:
   tagged_<number> 
      push the value associated with the closest-matching tag onto the
      exec stack (or no-op if no associations).
+  tagged_code_<number> 
+     push the value associated with the closest-matching tag onto the
+     code stack (or no-op if no associations).
 "
   [i state]
   (let [iparts (string/partition #"_" (name i))]
@@ -1461,8 +1464,11 @@ the following forms:
       :else
       (if (empty? (:tag state))
         state ;; no-op if no associations
-        (let [the-tag (read-string (nth iparts 2))]
-          (push-item (second (closest-association the-tag state)) :exec state))))))
+        (if (= (nth iparts 2) "code") ;; it's tagged_code_<number>
+          (let [the-tag (read-string (nth iparts 4))]
+            (push-item (second (closest-association the-tag state)) :code state))
+          (let [the-tag (read-string (nth iparts 2))] ;; it's just tagged_<number>, result->exec
+            (push-item (second (closest-association the-tag state)) :exec state)))))))
 
 (defn tag-instruction-erc
   "Returns a function which, when called on no arguments, returns a symbol of the form
@@ -1486,6 +1492,13 @@ untag_<number> where number is in the range from 0 to the specified limit (exclu
 tagged_<number> where number is in the range from 0 to the specified limit (exclusive)."
   [limit]
   (fn [] (symbol (str "tagged_"
+                   (str (rand-int limit))))))
+
+(defn tagged-code-instruction-erc
+  "Returns a function which, when called on no arguments, returns a symbol of the form
+tagged_code_<number> where number is in the range from 0 to the specified limit (exclusive)."
+  [limit]
+  (fn [] (symbol (str "tagged_code_"
                    (str (rand-int limit))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1522,10 +1535,13 @@ normal, or :abnormal otherwise."
   ([state] (eval-push state false))
   ([state print]
     (loop [iteration 1 s state
-           time-limit (+ @global-evalpush-time-limit (System/nanoTime))]
+           time-limit (if (zero? @global-evalpush-time-limit)
+                        0
+                        (+ @global-evalpush-time-limit (System/nanoTime)))]
       (if (or (> iteration @global-evalpush-limit)
             (empty? (:exec s))
-            (> (System/nanoTime) time-limit))
+            (and (not (zero? time-limit))
+              (> (System/nanoTime) time-limit)))
         (assoc s :termination (if (empty? (:exec s)) :normal :abnormal))
         (let [exec-top (top-item :exec s)
               s (pop-item :exec s)]
@@ -1819,7 +1835,7 @@ elimination tournaments to reach the provided target-size."
            decimation-ratio 1
            decimation-tournament-size 2
            evalpush-limit 150
-           evalpush-time-limit 10000000
+           evalpush-time-limit 0
            node-selection-method :unbiased
            node-selection-leaf-probability 0.1
            node-selection-tournament-size 2}}]

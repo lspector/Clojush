@@ -500,3 +500,5 @@
 ;(let [c '(+ (* 1 2) (/ 3 4))] (code-at-point c (choose-node-index-with-leaf-probability c)))
 ;(let [c (random-code-with-size 1000 '(1))] (time (dotimes [_ 10] (choose-node-index-with-leaf-probability c))))
 ;(do (dotimes [_ 1000] (choose-node-index-with-leaf-probability (random-code 100 '(1)))) :no-failures)
+
+;(println (run-push '(1 2 integer_add tag_integer_123 99 tagged_code_001 code_dup) (make-push-state)))

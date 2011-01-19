@@ -496,6 +496,20 @@ VERSION HISTORY
               by P. Angeline and K. Kinnear, pp. 137-154. Cambridge, MA: MIT Press.
               http://helios.hampshire.edu/lspector/pubs/AiGP2-post-final-e.pdf
             This version was written by Brian Martin in 2010-2011.
+20110118: - Added support for tagged_code_<number> instructions. These are like
+            tagged_<number> instructions except that retrieved values are pushed
+            onto the code stack rather than the exec stack. Without these the
+            only way to get tagged values onto the code stack is to wrap
+            values with code_quote prior to tagging. An alternative approach
+            is to add new tagging instructions that automatically perform
+            code_quote wrapping, but for full generality that would require
+            new instructions for each type; also quote-tagged values would 
+            always be destined for the code stack, while the scheme adopted
+            here allows any stored value to be retrieved either to exec or to
+            code.
+          - A value of 0 for the evalpush-time-limit parameter of pushgp
+            now means that no time limit will be enforced. This is also
+            now the default.
             
 
 ACKNOWLEDGEMENTS
