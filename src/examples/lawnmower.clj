@@ -22,7 +22,11 @@
 (in-ns 'clojush)
 
 ;; Redefine push-types to include :intvec2D and then redefine the push state structure.
-(def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :intvec2D))
+(def push-types
+     (if (reduce #(or %1 %2) 
+		 (map #(= :intvec2D %) push-types))
+       push-types
+       (cons :intvec2D push-types)))
 (define-push-state-structure)
 
 ;; Redefine recognize-literal to support intvec2Ds of the form [x y].
