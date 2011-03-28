@@ -268,20 +268,25 @@ or false otherwise."
 ;; the population size and the evalpush-limit.
 (pushgp
   :error-function (fn [program]
+                    (print ".") (flush);;;****
                     (doall
                       (list (- 156
                               (count (:eaten (run-ant-push-pgm-to-limit program 
                                                (new-losaltos-state))))))))
   :atom-generators (list 'left 'right 'move 'if_food_ahead                     
                      (tag-instruction-erc [:exec] 1000)
-                     (untag-instruction-erc 1000)
+                     ;(untag-instruction-erc 1000) ;;;***
                      (tagged-instruction-erc 1000))
   :mutation-probability 0.3
   :crossover-probability 0.3
   :simplification-probability 0.3
   :max-points 100
   :population-size 5000
-  :evalpush-limit 10000)
+  ;:evalpush-limit 10000
+  )
 
 ;; An evolved solution: (move (tagged_373 if_food_ahead tagged_932 ((tagged_718 right) tagged_613 tagged_397) ((if_food_ahead untag_912 tag_exec_300) ((tag_exec_87) tag_exec_267) (right (move (if_food_ahead if_food_ahead)) (left untag_77) tagged_146) move left tagged_954)) (tag_exec_715) (tagged_671 (move if_food_ahead untag_195) left (untag_622 right)))
 
+
+
+  

@@ -1422,7 +1422,7 @@ in the given state."
   [tag state]
   (loop [associations (conj (vec (:tag state)) (first (:tag state)))] ;; conj does wrap
     (if (or (empty? (rest associations))
-          (>= tag (ffirst associations)))
+          (<= tag (ffirst associations)))
       (first associations)
       (recur (rest associations)))))
 

@@ -18,7 +18,7 @@
 (define-registered in 
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
-#_(pushgp 
+(pushgp 
   :error-function (fn [program]
                     (doall
                       (for [input (range 10)]

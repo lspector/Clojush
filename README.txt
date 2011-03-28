@@ -510,6 +510,8 @@ VERSION HISTORY
           - A value of 0 for the evalpush-time-limit parameter of pushgp
             now means that no time limit will be enforced. This is also
             now the default.
+20110322: - Tag reference bug fixed in closest-association (>= changed to <=).
+          - Added mux (multiplexer) example (a couple of approaches in one file).
             
 
 ACKNOWLEDGEMENTS
