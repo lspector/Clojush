@@ -512,7 +512,15 @@ VERSION HISTORY
             now the default.
 20110322: - Tag reference bug fixed in closest-association (>= changed to <=).
           - Added mux (multiplexer) example (a couple of approaches in one file).
-            
+20110409: - Added support for no-pop tagging through a var called
+            global-pop-when-tagging (holding an atom with a boolean value)
+            and a boolean argument to pushgp called pop-when-tagging. 
+            The defaults are true, for backwards compatibility. If 
+            @global-pop-when-tagging is false (which will result from 
+            passing false as a :pop-when-tagging keyword argument to pushgp)
+            then executing instructions of the form tag_<type>_<number>
+            will tag a value as usual, but the tagged item will not be popped
+            from its source stack.
 
 ACKNOWLEDGEMENTS
 

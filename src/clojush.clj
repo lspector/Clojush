@@ -56,6 +56,7 @@
 (def global-node-selection-method (atom :unbiased))
 (def global-node-selection-leaf-probability (atom 0.1))
 (def global-node-selection-tournament-size (atom 2))
+(def global-pop-when-tagging (atom true))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random code generator
@@ -1450,7 +1451,8 @@ the following forms:
             the-tag (read-string (nth iparts 4))]
         (if (empty? (source-type state))
           state
-          (pop-item source-type
+          ((if @global-pop-when-tagging pop-item (fn [type state] state))
+            source-type
             (assoc state :tag (assoc (or (:tag state) (sorted-map))
                                 the-tag 
                                 (first (source-type state)))))))
@@ -1813,7 +1815,7 @@ elimination tournaments to reach the provided target-size."
              simplification-probability tournament-size report-simplifications final-report-simplifications
              reproduction-simplifications trivial-geography-radius decimation-ratio decimation-tournament-size
              evalpush-limit evalpush-time-limit node-selection-method node-selection-leaf-probability
-             node-selection-tournament-size]
+             node-selection-tournament-size pop-when-tagging]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
            population-size 1000
@@ -1838,7 +1840,8 @@ elimination tournaments to reach the provided target-size."
            evalpush-time-limit 0
            node-selection-method :unbiased
            node-selection-leaf-probability 0.1
-           node-selection-tournament-size 2}}]
+           node-selection-tournament-size 2
+           pop-when-tagging true}}]
   ;; set globals from parameters
   (reset! global-atom-generators atom-generators)
   (reset! global-max-points-in-program max-points)
@@ -1847,6 +1850,7 @@ elimination tournaments to reach the provided target-size."
   (reset! global-node-selection-method node-selection-method)
   (reset! global-node-selection-leaf-probability node-selection-leaf-probability)
   (reset! global-node-selection-tournament-size node-selection-tournament-size)
+  (reset! global-pop-when-tagging pop-when-tagging)
   (printf "\nStarting PushGP run.\n\n") (flush)
   (print-params 
     (error-function error-threshold population-size max-points atom-generators max-generations 
@@ -1854,7 +1858,7 @@ elimination tournaments to reach the provided target-size."
       simplification-probability tournament-size report-simplifications
       final-report-simplifications trivial-geography-radius decimation-ratio
       decimation-tournament-size evalpush-limit evalpush-time-limit node-selection-method
-      node-selection-tournament-size node-selection-leaf-probability))
+      node-selection-tournament-size node-selection-leaf-probability pop-when-tagging))
   (printf "\nGenerating initial population...\n") (flush)
   (let [pop-agents (vec (doall (for [_ (range population-size)] 
                                  (agent (make-individual 
