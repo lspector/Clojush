@@ -521,6 +521,7 @@ VERSION HISTORY
             then executing instructions of the form tag_<type>_<number>
             will tag a value as usual, but the tagged item will not be popped
             from its source stack.
+          - Removed no-pop hackage from mux example (thanks Kyle).
 
 ACKNOWLEDGEMENTS
 

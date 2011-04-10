@@ -37,51 +37,6 @@ subprogram of parent2."
                        (cons (:program parent2) (:ancestors parent2)))) ;;; CHANGED HERE
                      (:ancestors parent1))))))
 
-;; Hack to prevent popping when tagging
-(defn handle-tag-instruction
-  "Executes the tag instruction i in the state. Tag instructions take one of
-the following forms:
-  tag_<type>_<number> 
-     create tage/value association, with the value taken from the stack
-     of the given type and the number serving as the tag
-  untag_<number>
-     remove the association for the closest-matching tag
-  tagged_<number> 
-     push the value associated with the closest-matching tag onto the
-     exec stack (or no-op if no associations).
-  tagged_code_<number> 
-     push the value associated with the closest-matching tag onto the
-     code stack (or no-op if no associations).
-"
-  [i state]
-  (let [iparts (string/partition #"_" (name i))]
-    (cond
-      ;; if it's of the form tag_<type>_<number>: CREATE TAG/VALUE ASSOCIATION
-      (= (first iparts) "tag") 
-      (let [source-type (read-string (str ":" (nth iparts 2)))
-            the-tag (read-string (nth iparts 4))]
-        (if (empty? (source-type state))
-          state
-          ;(pop-item source-type ;***
-            (assoc state :tag (assoc (or (:tag state) (sorted-map))
-                                the-tag 
-                                (first (source-type state)))))) ;) ;***
-      ;; if it's of the form untag_<number>: REMOVE TAG ASSOCIATION
-      (= (first iparts) "untag")
-      (if (empty? (:tag state))
-        state
-        (let [the-tag (read-string (nth iparts 2))]
-          (assoc state :tag (dissoc (:tag state) (first (closest-association the-tag state))))))
-      ;; else it must be of the form tagged_<number> -- PUSH VALUE
-      :else
-      (if (empty? (:tag state))
-        state ;; no-op if no associations
-        (if (= (nth iparts 2) "code") ;; it's tagged_code_<number>
-          (let [the-tag (read-string (nth iparts 4))]
-            (push-item (second (closest-association the-tag state)) :code state))
-          (let [the-tag (read-string (nth iparts 2))] ;; it's just tagged_<number>, result->exec
-            (push-item (second (closest-association the-tag state)) :exec state)))))))
-
 (in-ns 'examples.mux) ;; end of hacks to clojush.clj
 
 ;; We store address bits in a vector on top of the auxiliary stack
