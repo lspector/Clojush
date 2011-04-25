@@ -26,6 +26,8 @@
     [clojure.walk :as walk]
     [clojure.contrib.string :as string]))
 
+(import java.lang.Math)
+
 ;; backtrace abbreviation, to ease debugging
 (defn bt []
   (.printStackTrace *e))
@@ -1720,6 +1722,40 @@ by @global-node-selection-method."
                      (cons (:program ind) (:ancestors ind))
                      (:ancestors ind))))))
 
+;; some utilities are required for gaussian mutation
+
+(defn gaussian-noise-factor
+  "Returns gaussian noise of mean 0, std dev 1."
+  []
+  (* (Math/sqrt (* -2.0 (Math/log (rand))))
+    (Math/cos (* 2.0 Math/PI (rand)))))
+
+(defn perturb-with-gaussian-noise 
+  "Returns n perturbed with std dev sd."
+  [sd n]
+  (+ n (* sd (gaussian-noise-factor))))
+
+(defn perturb-code-with-gaussian-noise
+  "Returns code with each float literal perturbed with std dev sd and perturbation probability
+num-perturb-probability."
+  [code per-num-perturb-probability sd]
+  (walk/postwalk (fn [item]
+              (if (and (float? item)
+                    (< (rand) per-num-perturb-probability))
+                (perturb-with-gaussian-noise sd item)
+                item))
+    code))
+
+(defn gaussian-mutate 
+  "Returns a gaussian-mutated version of the given individual."
+  [ind per-num-perturb-probability sd]
+  (make-individual 
+    :program (perturb-code-with-gaussian-noise (:program ind) per-num-perturb-probability sd)
+    :history (:history ind)
+    :ancestors (if maintain-ancestors
+                 (cons (:program ind) (:ancestors ind))
+                 (:ancestors ind))))
+
 (defn crossover 
   "Returns a copy of parent1 with a random subprogram replaced with a random 
 subprogram of parent2."
@@ -1756,7 +1792,9 @@ subprogram of parent2."
 using the given parameters."
   [agt location rand-gen pop error-function population-size max-points atom-generators 
    mutation-probability  mutation-max-points crossover-probability simplification-probability 
-   tournament-size reproduction-simplifications trivial-geography-radius]
+   tournament-size reproduction-simplifications trivial-geography-radius
+   gaussian-mutation-probability gaussian-mutation-per-number-mutation-probability 
+   gaussian-mutation-standard-deviation]
   (binding [thread-local-random-generator rand-gen]
     (let [n (lrand)]
       (cond 
@@ -1773,6 +1811,11 @@ using the given parameters."
         (< n (+ mutation-probability crossover-probability simplification-probability))
         (auto-simplify (select pop tournament-size trivial-geography-radius location)
           error-function reproduction-simplifications false 1000)
+        ;; gaussian mutation
+        (< n (+ mutation-probability crossover-probability simplification-probability 
+               gaussian-mutation-probability))
+        (gaussian-mutate (select pop tournament-size trivial-geography-radius location) 
+          gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation)
         ;; replication
         true 
         (select pop tournament-size trivial-geography-radius location)))))
@@ -1815,7 +1858,8 @@ elimination tournaments to reach the provided target-size."
              simplification-probability tournament-size report-simplifications final-report-simplifications
              reproduction-simplifications trivial-geography-radius decimation-ratio decimation-tournament-size
              evalpush-limit evalpush-time-limit node-selection-method node-selection-leaf-probability
-             node-selection-tournament-size pop-when-tagging]
+             node-selection-tournament-size pop-when-tagging gaussian-mutation-probability 
+             gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
            population-size 1000
@@ -1841,7 +1885,11 @@ elimination tournaments to reach the provided target-size."
            node-selection-method :unbiased
            node-selection-leaf-probability 0.1
            node-selection-tournament-size 2
-           pop-when-tagging true}}]
+           pop-when-tagging true
+           gaussian-mutation-probability 0.0
+           gaussian-mutation-per-number-mutation-probability 0.5
+           gaussian-mutation-standard-deviation 0.1
+           }}]
   ;; set globals from parameters
   (reset! global-atom-generators atom-generators)
   (reset! global-max-points-in-program max-points)
@@ -1855,10 +1903,13 @@ elimination tournaments to reach the provided target-size."
   (print-params 
     (error-function error-threshold population-size max-points atom-generators max-generations 
       mutation-probability mutation-max-points crossover-probability
-      simplification-probability tournament-size report-simplifications
-      final-report-simplifications trivial-geography-radius decimation-ratio
-      decimation-tournament-size evalpush-limit evalpush-time-limit node-selection-method
-      node-selection-tournament-size node-selection-leaf-probability pop-when-tagging))
+      simplification-probability gaussian-mutation-probability 
+      gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
+      tournament-size report-simplifications final-report-simplifications
+      trivial-geography-radius decimation-ratio decimation-tournament-size evalpush-limit
+      evalpush-time-limit node-selection-method node-selection-tournament-size
+      node-selection-leaf-probability pop-when-tagging
+      ))
   (printf "\nGenerating initial population...\n") (flush)
   (let [pop-agents (vec (doall (for [_ (range population-size)] 
                                  (agent (make-individual 
@@ -1896,7 +1947,8 @@ elimination tournaments to reach the provided target-size."
                         breed i (nth rand-gens i) pop error-function population-size max-points atom-generators 
                         mutation-probability mutation-max-points crossover-probability 
                         simplification-probability tournament-size reproduction-simplifications 
-                        trivial-geography-radius)))
+                        trivial-geography-radius gaussian-mutation-probability 
+                        gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation)))
                   (apply await child-agents) ;; SYNCHRONIZE
                   (printf "\nInstalling next generation...") (flush)
                   (dotimes [i population-size]

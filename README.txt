@@ -522,6 +522,23 @@ VERSION HISTORY
             will tag a value as usual, but the tagged item will not be popped
             from its source stack.
           - Removed no-pop hackage from mux example (thanks Kyle).
+20110424: - Added Gaussian mutation for floating point literals. This is 
+            a genetic operator on par with ordinary mutation, crossover,
+            and simplification, with the probability for applying this operator
+            set with the gaussian-mutation-probability argument to pushgp
+            (which defaults to zero). The behavior of this operator, when used,
+            is controlled by two other arguments to pushgp, 
+            gaussian-mutation-per-number-mutation-probability (which is the
+            probability that any particular floating point number in the 
+            program will actually be mutated -- this defaults to 0.5) and
+            gaussian-mutation-standard-deviation (which specifies the standard
+            deviation of the Gaussian noise generator that is used to 
+            produce changes to numbers -- this defaults to 0.1).
+          - Added examples/gaussian_mutation_demo.clj to demonstrate Gaussian
+            mutation.
+          - Added examples/korns_regression_p12.clj, a symbolic regression
+            problem based on Michael Korns's draft chapter from GPTP11.
+            
 
 ACKNOWLEDGEMENTS
 
