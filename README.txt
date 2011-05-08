@@ -538,7 +538,12 @@ VERSION HISTORY
             mutation.
           - Added examples/korns_regression_p12.clj, a symbolic regression
             problem based on Michael Korns's draft chapter from GPTP11.
-            
+20110505: - Added complex number support.  New instructions for the 'complex' 
+            stack include: pop, dup, swap, rot, flush, eq, stackdepth, yank, 
+            yankdup, shove, rand, add, sub, mult, divide, fromfloat, 
+            frominteger, fromfloats, fromintegers, conjugate, magnitude, 
+            and principal_sqrt. (Brian Martin)
+
 
 ACKNOWLEDGEMENTS
 

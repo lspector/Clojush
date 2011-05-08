@@ -19,12 +19,17 @@
 ;; namespace declaration and access to needed libraries
 (ns clojush
   (:gen-class)
-  (:require 
-    [clojure.zip :as zip] 
+  (:refer-clojure :exclude [+ - * /])
+  (:require
+    [clojure.zip :as zip]
     [clojure.contrib.math :as math]
     [clojure.contrib.seq-utils :as seq-utils]
     [clojure.walk :as walk]
-    [clojure.contrib.string :as string]))
+    [clojure.contrib.string :as string])
+  (:use
+    [clojure.contrib.generic.arithmetic]
+    [clojure.contrib.generic.math-functions]
+    [clojure.contrib.complex-numbers]))
 
 (import java.lang.Math)
 
@@ -35,7 +40,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; globals
 
-(def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :zip))
+(def push-types '(:exec :integer :float :complex :code :boolean :auxiliary :tag :zip))
 (def max-number-magnitude 1000000000000)
 (def min-number-magnitude 1.0E-10)
 (def top-level-push-code true)
@@ -125,23 +130,27 @@ The order of the numbers is not random (you may want to shuffle it)."
 (defn keep-number-reasonable
   "Returns a version of n that obeys limit parameters."
   [n]
-  (if (integer? n)
-    (cond 
-      (> n max-number-magnitude) max-number-magnitude
-      (< n (- max-number-magnitude)) (- max-number-magnitude)
-      :else n)
-    (cond 
-      (> n max-number-magnitude) (* 1.0 max-number-magnitude)
-      (< n (- max-number-magnitude)) (* 1.0 (- max-number-magnitude))
-      (and (< n min-number-magnitude) (> n (- min-number-magnitude))) 0.0
-      :else n)))
+  (cond
+    (integer? n)
+      (cond
+        (> n max-number-magnitude) max-number-magnitude
+        (< n (- max-number-magnitude)) (- max-number-magnitude)
+        :else n)
+    (map? n) ; maybe I should be more specific with this test (?)
+      (complex (keep-number-reasonable (n :real)) (keep-number-reasonable (n :imag)))
+    :else
+      (cond
+        (> n max-number-magnitude) (* 1.0 max-number-magnitude)
+        (< n (- max-number-magnitude)) (* 1.0 (- max-number-magnitude))
+        (and (< n min-number-magnitude) (> n (- min-number-magnitude))) 0.0
+        :else n)))
 
 (defn count-points 
   "Returns the number of points in tree, where each atom and each pair of parentheses 
 counts as a point."
   [tree]
   (if (seq? tree)
-    (inc (apply + (map count-points tree)))
+    (+ 1 (apply + (map count-points tree)))
     1))
 
 (defn code-at-point 
@@ -381,6 +390,7 @@ not for use as an instruction in Push programs."
 (define-registered exec_pop (popper :exec))
 (define-registered integer_pop (popper :integer))
 (define-registered float_pop (popper :float))
+(define-registered complex_pop (popper :complex))
 (define-registered code_pop (popper :code))
 (define-registered boolean_pop (popper :boolean))
 (define-registered zip_pop (popper :zip))
@@ -397,6 +407,7 @@ stack of the state."
 (define-registered exec_dup (duper :exec))
 (define-registered integer_dup (duper :integer))
 (define-registered float_dup (duper :float))
+(define-registered complex_dup (duper :complex))
 (define-registered code_dup (duper :code))
 (define-registered boolean_dup (duper :boolean))
 (define-registered zip_dup (duper :zip))
@@ -418,6 +429,7 @@ stack of the state."
 (define-registered exec_swap (swapper :exec))
 (define-registered integer_swap (swapper :integer))
 (define-registered float_swap (swapper :float))
+(define-registered complex_swap (swapper :complex))
 (define-registered code_swap (swapper :code))
 (define-registered boolean_swap (swapper :boolean))
 (define-registered zip_swap (swapper :zip))
@@ -442,6 +454,7 @@ stack of the state."
 (define-registered exec_rot (rotter :exec))
 (define-registered integer_rot (rotter :integer))
 (define-registered float_rot (rotter :float))
+(define-registered complex_rot (rotter :complex))
 (define-registered code_rot (rotter :code))
 (define-registered boolean_rot (rotter :boolean))
 (define-registered zip_rot (rotter :zip))
@@ -455,6 +468,7 @@ stack of the state."
 (define-registered exec_flush (flusher :exec))
 (define-registered integer_flush (flusher :integer))
 (define-registered float_flush (flusher :float))
+(define-registered complex_flush (flusher :complex))
 (define-registered code_flush (flusher :code))
 (define-registered boolean_flush (flusher :boolean))
 (define-registered zip_flush (flusher :zip))
@@ -475,6 +489,7 @@ the given state."
 (define-registered exec_eq (eqer :exec))
 (define-registered integer_eq (eqer :integer))
 (define-registered float_eq (eqer :float))
+(define-registered complex_eq (eqer :complex))
 (define-registered code_eq (eqer :code))
 (define-registered boolean_eq (eqer :boolean))
 (define-registered zip_eq (eqer :zip))
@@ -489,6 +504,7 @@ given state."
 (define-registered exec_stackdepth (stackdepther :exec))
 (define-registered integer_stackdepth (stackdepther :integer))
 (define-registered float_stackdepth (stackdepther :float))
+(define-registered complex_stackdepth (stackdepther :complex))
 (define-registered code_stackdepth (stackdepther :code))
 (define-registered boolean_stackdepth (stackdepther :boolean))
 (define-registered zip_stackdepth (stackdepther :zip))
@@ -518,6 +534,7 @@ using the top integer to indicate how deep."
 (define-registered exec_yank (yanker :exec))
 (define-registered integer_yank (yanker :integer))
 (define-registered float_yank (yanker :float))
+(define-registered complex_yank (yanker :complex))
 (define-registered code_yank (yanker :code))
 (define-registered boolean_yank (yanker :boolean))
 (define-registered zip_yank (yanker :zip))
@@ -542,6 +559,7 @@ using the top integer to indicate how deep."
 (define-registered exec_yankdup (yankduper :exec))
 (define-registered integer_yankdup (yankduper :integer))
 (define-registered float_yankdup (yankduper :float))
+(define-registered complex_yankdup (yankduper :complex))
 (define-registered code_yankdup (yankduper :code))
 (define-registered boolean_yankdup (yankduper :boolean))
 (define-registered zip_yankdup (yankduper :zip))
@@ -570,6 +588,7 @@ integer to indicate how deep."
 (define-registered exec_shove (shover :exec))
 (define-registered integer_shove (shover :integer))
 (define-registered float_shove (shover :float))
+(define-registered complex_shove (shover :complex))
 (define-registered code_shove (shover :code))
 (define-registered boolean_shove (shover :boolean))
 (define-registered zip_shove (shover :zip))
@@ -593,6 +612,15 @@ integer to indicate how deep."
     (push-item (+ (lrand (- max-random-float min-random-float))
                  min-random-float)
       :float
+      state)))
+
+(define-registered complex_rand
+  (fn [state]
+    (push-item (complex (+ (lrand (- max-random-float min-random-float))
+                           min-random-float)
+                        (+ (lrand (- max-random-float min-random-float))
+                           min-random-float))
+      :complex
       state)))
 
 (define-registered code_rand
@@ -622,6 +650,7 @@ integer to indicate how deep."
 
 (define-registered integer_add (adder :integer))
 (define-registered float_add (adder :float))
+(define-registered complex_add (adder :complex))
 
 (defn subtracter
   "Returns a function that pushes the difference of the top two items."
@@ -637,6 +666,7 @@ integer to indicate how deep."
 
 (define-registered integer_sub (subtracter :integer))
 (define-registered float_sub (subtracter :float))
+(define-registered complex_sub (subtracter :complex))
 
 (defn multiplier
   "Returns a function that pushes the product of the top two items."
@@ -652,6 +682,7 @@ integer to indicate how deep."
 
 (define-registered integer_mult (multiplier :integer))
 (define-registered float_mult (multiplier :float))
+(define-registered complex_mult (multiplier :complex))
 
 (defn divider
   "Returns a function that pushes the quotient of the top two items. Does
@@ -659,19 +690,23 @@ nothing if the denominator would be zero."
   [type]
   (fn [state]
     (if (and (not (empty? (rest (type state))))
-          (not (zero? (stack-ref type 0 state))))
-      (let [first (stack-ref type 0 state)
-            second (stack-ref type 1 state)]
+          (let [item (stack-ref type 0 state)]
+            (if (= type :complex)
+              (and (not (zero? (item :real))) (not (zero? (item :imag))))
+              (not (zero? (stack-ref type 0 state))))))
+      (let [frst (stack-ref type 0 state)
+            scnd (stack-ref type 1 state)]
         (->> (pop-item type state)
-          (pop-item type)
-          (push-item (if (= type :integer)
-                       (truncate (keep-number-reasonable (/ second first)))
-                       (keep-number-reasonable (/ second first)))
-            type)))
+             (pop-item type)
+             (push-item (if (= type :integer)
+                          (truncate (keep-number-reasonable (/ scnd frst)))
+                          (keep-number-reasonable (/ scnd frst)))
+               type)))
       state)))
 
 (define-registered integer_div (divider :integer))
 (define-registered float_div (divider :float))
+(define-registered complex_div (divider :complex))
 
 (defn modder
   "Returns a function that pushes the modulus of the top two items. Does
@@ -680,13 +715,13 @@ nothing if the denominator would be zero."
   (fn [state]
     (if (and (not (empty? (rest (type state))))
           (not (zero? (stack-ref type 0 state))))
-      (let [first (stack-ref type 0 state)
-            second (stack-ref type 1 state)]
+      (let [frst (stack-ref type 0 state)
+            scnd (stack-ref type 1 state)]
         (->> (pop-item type state)
           (pop-item type)
           (push-item (if (= type :integer)
-                       (truncate (keep-number-reasonable (mod second first)))
-                       (keep-number-reasonable (mod second first)))
+                       (truncate (keep-number-reasonable (mod scnd frst)))
+                       (keep-number-reasonable (mod scnd frst)))
             type)))
       state)))
 
@@ -757,6 +792,46 @@ boolean stack."
       (let [item (stack-ref :integer 0 state)]
         (->> (pop-item :integer state)
           (push-item (* 1.0 item) :float)))
+      state)))
+
+(define-registered complex_fromfloat
+  (fn [state]
+    (if (not (empty? (:float state)))
+      (let [item (stack-ref :float 0 state)]
+        (->> (pop-item :float state)
+          (push-item (complex 0 item) :complex)))
+      state)))
+
+(define-registered complex_fromfloats
+  (fn [state]
+    (if (not (empty? (:float state)))
+      (let [item1 (stack-ref :float 0 state)
+            popped1 (pop-item :float state)]
+        (if (not (empty? (:float popped1)))
+          (let [item2 (stack-ref :float 0 popped1)]
+            (->> (pop-item :float popped1)
+              (push-item (complex item1 item2) :complex)))
+          state))
+      state)))
+
+(define-registered complex_frominteger
+  (fn [state]
+    (if (not (empty? (:integer state)))
+      (let [item (stack-ref :integer 0 state)]
+        (->> (pop-item :integer state)
+          (push-item (complex 0 item) :complex)))
+      state)))
+
+(define-registered complex_fromintegers
+  (fn [state]
+    (if (not (empty? (:integer state)))
+      (let [item1 (* 1.0 (stack-ref :integer 0 state))
+            popped1 (pop-item :integer state)]
+        (if (not (empty? (:integer popped1)))
+          (let [item2 (* 1.0 (stack-ref :integer 0 popped1))]
+            (->> (pop-item :integer popped1)
+              (push-item (complex item1 item2) :complex)))
+          state))
       state)))
 
 (defn minner
@@ -1273,7 +1348,6 @@ the code stack."
           state))
       state)))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; zip instructions
 
@@ -1395,6 +1469,61 @@ acting as a no-op if the movement would produce an error."
 
 (define-registered code_fromziprights (zip-extractor :code zip/rights))
 (define-registered exec_fromziprights (zip-extractor :exec zip/rights))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; complex number instructions
+
+(define-registered complex_conjugate
+  (fn [state]
+    (if (not (empty? (:complex state)))
+      (let [{a :real b :imag} (stack-ref :complex 0 state)]
+        (->> (pop-item :complex state)
+          (push-item (complex a (- b)) :complex)))
+      state)))
+
+(defn sum-squares [& xs] (apply + (map #(* % %) xs)))
+
+(defn complex-mag [a b] (sqrt (sum-squares a b)))
+
+(define-registered complex_magnitude
+  (fn [state]
+    (if (not (empty? (:complex state)))
+      (let [{a :real b :imag} (stack-ref :complex 0 state)]
+        (->> (pop-item :complex state)
+             (push-item (complex-mag a b) :float)))
+      state)))
+
+(defn complex-div [c1 c2]
+  (let [{a :real b :imag} c1
+        {c :real d :imag} c2
+        denom (sum-squares c d)]
+    (if (zero? denom)
+      nil
+      (complex (/ (+ (* a c) (* b d)) denom) (/ (- (* b c) (* a d)) denom)))))
+
+(define-registered complex_divide
+  (fn [state]
+    (if (not (empty? (:complex state)))
+      (let [item1 (stack-ref :complex 0 state)
+            popped1 (pop-item :complex state)]
+        (if (not (empty? (:complex popped1)))
+          (let [item2 (stack-ref :complex 0 popped1)
+                result (complex-div item1 item2)]
+            (if result
+              (->> (pop-item :complex popped1)
+                   (push-item result :complex))
+              state))
+          state))
+      state)))
+
+(define-registered complex_principal_sqrt
+  (fn [state]
+    (if (not (empty? (:complex state)))
+      (let [{a :real b :imag} (stack-ref :complex 0 state)]
+        (->> (pop-item :complex state)
+             (push-item (sqrt (/ (+ a (complex-mag a b)) 2)) :float)))
+      state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; print all registered instructions on loading
@@ -1656,7 +1785,7 @@ by @global-node-selection-method."
                               (insert-code-at-point program point-index (flatten point))
                               program)))
             new-errors (error-function new-program)
-            new-total-errors (apply + new-errors)]
+            new-total-errors (reduce + new-errors)]
         (if (<= new-total-errors total-errors)
           (recur (inc step) new-program new-errors new-total-errors)
           (recur (inc step) program errors total-errors))))))
