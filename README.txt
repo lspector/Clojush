@@ -543,6 +543,19 @@ VERSION HISTORY
             yankdup, shove, rand, add, sub, mult, divide, fromfloat, 
             frominteger, fromfloats, fromintegers, conjugate, magnitude, 
             and principal_sqrt. (Brian Martin)
+20110517: - Added a "scaled-errors" function to support error-scaling as 
+            described by Maarten Keijzer in Scaled Symbolic Regression, in
+            Genetic Programming and Evolvable Machines 5(3), pp. 259-269, 
+            September 2004. This must be used in a problem's error function,
+            and then the outputs of the evolved program must be "unscaled."
+            See the documentation string for scaled-errors and also
+            examples/scaled_sextic.clj for details.
+          - Added examples/scaled_sextic.clj to demonstrate the use of
+            scaled-errors.
+          - Changed examples/sextic.clj to use squared errors and an error
+            threshold, in order to facilitate comparisons between the
+            versions that do and don't use error scaling.
+          - Made minor changes to the korns_regression_p12 example.
 
 
 ACKNOWLEDGEMENTS
