@@ -556,6 +556,7 @@ VERSION HISTORY
             threshold, in order to facilitate comparisons between the
             versions that do and don't use error scaling.
           - Made minor changes to the korns_regression_p12 example.
+20110526: - Enforce size limits on zipper manipulation results.
 
 
 ACKNOWLEDGEMENTS

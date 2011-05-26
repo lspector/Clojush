@@ -39,7 +39,7 @@
                      '(float_div float_mult float_sub float_add
                         float_rot float_swap float_dup float_pop)
                      (list 
-                       (fn [] (* 1.0 (- (rand-int 21) 10)))
+                       (fn [] (- (rand 20.0) 10))
                        'in))
   :population-size 10000)
 

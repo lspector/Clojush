@@ -1399,7 +1399,7 @@ acting as a no-op if the movement would produce an error."
       (let [z (stack-ref :zip 0 state)
             c (stack-ref source 0 state)
             result (ignore-errors (inserter z c))]
-        (if result
+        (if (and result (<= (count-points (zip/root result)) @global-max-points-in-program))
           (push-item result :zip (pop-item :zip (pop-item source state)))
           state)))))
 
