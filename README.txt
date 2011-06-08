@@ -557,7 +557,19 @@ VERSION HISTORY
             versions that do and don't use error scaling.
           - Made minor changes to the korns_regression_p12 example.
 20110526: - Enforce size limits on zipper manipulation results.
-
+20110607: - Added overlap utility function, overlap-demo (which just prints
+            some examples to show how overlap works), and code_overlap
+            instruction. Overlap can be applied to any two (possibly
+            nested) things and it returns a number between 0 (meaning
+            no overlap) and 1 (meaning exact match). The overlap utility
+            function returns a ratio, but the code_overlap instruction
+            pushes a float.
+          - Removed complex number support from 20110505. There were previous
+            reports of problems and I've noticed problems from the fact that
+            (apply + ()) => zero (as opposed to 0) in the clojush namespace
+            defined by the code as revised for complex number support. If
+            someone knows how to re-introduce complex number support without
+            such problems then please let me know.
 
 ACKNOWLEDGEMENTS
 

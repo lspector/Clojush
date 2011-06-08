@@ -19,18 +19,12 @@
 ;; namespace declaration and access to needed libraries
 (ns clojush
   (:gen-class)
-  (:refer-clojure :exclude [+ - * /])
   (:require
     [clojure.zip :as zip]
     [clojure.contrib.math :as math]
     [clojure.contrib.seq-utils :as seq-utils]
     [clojure.walk :as walk]
-    [clojure.contrib.string :as string])
-  (:use
-    [clojure.contrib.generic.arithmetic]
-    [clojure.contrib.generic.math-functions]
-    [clojure.contrib.complex-numbers]
-    [clojure.contrib.math :only (expt)]))
+    [clojure.contrib.string :as string]))
 
 (import java.lang.Math)
 
@@ -41,7 +35,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; globals
 
-(def push-types '(:exec :integer :float :complex :code :boolean :auxiliary :tag :zip))
+(def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :zip))
 (def max-number-magnitude 1000000000000)
 (def min-number-magnitude 1.0E-10)
 (def top-level-push-code true)
@@ -137,8 +131,6 @@ The order of the numbers is not random (you may want to shuffle it)."
         (> n max-number-magnitude) max-number-magnitude
         (< n (- max-number-magnitude)) (- max-number-magnitude)
         :else n)
-    (map? n) ; maybe I should be more specific with this test (?)
-      (complex (keep-number-reasonable (n :real)) (keep-number-reasonable (n :imag)))
     :else
       (cond
         (> n max-number-magnitude) (* 1.0 max-number-magnitude)
@@ -253,6 +245,54 @@ list1 is from list2. The calculation is equivalent to the following:
   (reduce + (vals (merge-with (comp math/abs -)
                     (frequencies (all-items list1))
                     (frequencies (all-items list2))))))
+
+(defn overlap
+  [thing1 thing2]
+  "Returns a measure of the similarity of the arguments, which may be                       
+nested sequences. The overlap is defined in terms of the collections of                     
+the items contained in each of the arguments, including nested items at                     
+all levels. The overlap is then the maximal number of pairings by identity                  
+across the two collections, divided by the size of the larger collection.                   
+The returned value will range from 0 (for entirely distinct arguments)                      
+to 1 (for identical arguments). Run (overlap-demo) to see some examples."
+  (let [items1 (all-items thing1)
+        items2 (all-items thing2)]
+    (/ (apply +
+              (map first
+                   (filter seq?
+                           (vals (merge-with (fn [count1 count2]
+                                               (list (min count1 count2)))
+                                             (frequencies items1)
+                                             (frequencies items2))))))
+       (max (count items1) (count items2)))))
+
+(defn overlap-demo
+  "Prints some demo output to demonstrate the behavior of the overlap function.             
+The overlap function returns ratios, but these are printed as floating point                
+numbers in the demo output."
+  []
+  (doall (map (fn [[x y]] (print x "," y "--- float overlap:" (float (overlap x y)) "\n"))
+              '((a ())
+                (a a)
+                (a b)
+                (a (a b))
+                (a (a a))
+                ((a) (a b))
+                ((a b) (a c))
+                ((a b) (a b c))
+		((a b c) (a b d))
+		((a b c	d) (a b	c e))
+		((a b c	d) (d c	b a))
+		((a b c	d e f g) (a b c	d e f h))
+                ((a b) (a b c d e f))
+                ((a (b (c))) (a (b (c))))
+                ((a (b (c))) (a (b (x))))
+                ((a (b (c))) (a (x (c))))
+                ((a (b (c))) (x (b (c))))
+                ((a (b c) (d (e f))) ((d (e f)) a))
+                ((a (b c) (d (e f))) (a a (b c) (d (e f))))
+                )))
+  (println :end-of-demo))
 
 (defn not-lazy
   "Returns lst if it is not a list, or a non-lazy version of lst if it is."
@@ -391,7 +431,6 @@ not for use as an instruction in Push programs."
 (define-registered exec_pop (popper :exec))
 (define-registered integer_pop (popper :integer))
 (define-registered float_pop (popper :float))
-(define-registered complex_pop (popper :complex))
 (define-registered code_pop (popper :code))
 (define-registered boolean_pop (popper :boolean))
 (define-registered zip_pop (popper :zip))
@@ -408,7 +447,6 @@ stack of the state."
 (define-registered exec_dup (duper :exec))
 (define-registered integer_dup (duper :integer))
 (define-registered float_dup (duper :float))
-(define-registered complex_dup (duper :complex))
 (define-registered code_dup (duper :code))
 (define-registered boolean_dup (duper :boolean))
 (define-registered zip_dup (duper :zip))
@@ -430,7 +468,6 @@ stack of the state."
 (define-registered exec_swap (swapper :exec))
 (define-registered integer_swap (swapper :integer))
 (define-registered float_swap (swapper :float))
-(define-registered complex_swap (swapper :complex))
 (define-registered code_swap (swapper :code))
 (define-registered boolean_swap (swapper :boolean))
 (define-registered zip_swap (swapper :zip))
@@ -455,7 +492,6 @@ stack of the state."
 (define-registered exec_rot (rotter :exec))
 (define-registered integer_rot (rotter :integer))
 (define-registered float_rot (rotter :float))
-(define-registered complex_rot (rotter :complex))
 (define-registered code_rot (rotter :code))
 (define-registered boolean_rot (rotter :boolean))
 (define-registered zip_rot (rotter :zip))
@@ -469,7 +505,6 @@ stack of the state."
 (define-registered exec_flush (flusher :exec))
 (define-registered integer_flush (flusher :integer))
 (define-registered float_flush (flusher :float))
-(define-registered complex_flush (flusher :complex))
 (define-registered code_flush (flusher :code))
 (define-registered boolean_flush (flusher :boolean))
 (define-registered zip_flush (flusher :zip))
@@ -490,7 +525,6 @@ the given state."
 (define-registered exec_eq (eqer :exec))
 (define-registered integer_eq (eqer :integer))
 (define-registered float_eq (eqer :float))
-(define-registered complex_eq (eqer :complex))
 (define-registered code_eq (eqer :code))
 (define-registered boolean_eq (eqer :boolean))
 (define-registered zip_eq (eqer :zip))
@@ -505,7 +539,6 @@ given state."
 (define-registered exec_stackdepth (stackdepther :exec))
 (define-registered integer_stackdepth (stackdepther :integer))
 (define-registered float_stackdepth (stackdepther :float))
-(define-registered complex_stackdepth (stackdepther :complex))
 (define-registered code_stackdepth (stackdepther :code))
 (define-registered boolean_stackdepth (stackdepther :boolean))
 (define-registered zip_stackdepth (stackdepther :zip))
@@ -535,7 +568,6 @@ using the top integer to indicate how deep."
 (define-registered exec_yank (yanker :exec))
 (define-registered integer_yank (yanker :integer))
 (define-registered float_yank (yanker :float))
-(define-registered complex_yank (yanker :complex))
 (define-registered code_yank (yanker :code))
 (define-registered boolean_yank (yanker :boolean))
 (define-registered zip_yank (yanker :zip))
@@ -560,7 +592,6 @@ using the top integer to indicate how deep."
 (define-registered exec_yankdup (yankduper :exec))
 (define-registered integer_yankdup (yankduper :integer))
 (define-registered float_yankdup (yankduper :float))
-(define-registered complex_yankdup (yankduper :complex))
 (define-registered code_yankdup (yankduper :code))
 (define-registered boolean_yankdup (yankduper :boolean))
 (define-registered zip_yankdup (yankduper :zip))
@@ -589,7 +620,6 @@ integer to indicate how deep."
 (define-registered exec_shove (shover :exec))
 (define-registered integer_shove (shover :integer))
 (define-registered float_shove (shover :float))
-(define-registered complex_shove (shover :complex))
 (define-registered code_shove (shover :code))
 (define-registered boolean_shove (shover :boolean))
 (define-registered zip_shove (shover :zip))
@@ -613,15 +643,6 @@ integer to indicate how deep."
     (push-item (+ (lrand (- max-random-float min-random-float))
                  min-random-float)
       :float
-      state)))
-
-(define-registered complex_rand
-  (fn [state]
-    (push-item (complex (+ (lrand (- max-random-float min-random-float))
-                           min-random-float)
-                        (+ (lrand (- max-random-float min-random-float))
-                           min-random-float))
-      :complex
       state)))
 
 (define-registered code_rand
@@ -651,7 +672,6 @@ integer to indicate how deep."
 
 (define-registered integer_add (adder :integer))
 (define-registered float_add (adder :float))
-(define-registered complex_add (adder :complex))
 
 (defn subtracter
   "Returns a function that pushes the difference of the top two items."
@@ -667,7 +687,6 @@ integer to indicate how deep."
 
 (define-registered integer_sub (subtracter :integer))
 (define-registered float_sub (subtracter :float))
-(define-registered complex_sub (subtracter :complex))
 
 (defn multiplier
   "Returns a function that pushes the product of the top two items."
@@ -683,7 +702,6 @@ integer to indicate how deep."
 
 (define-registered integer_mult (multiplier :integer))
 (define-registered float_mult (multiplier :float))
-(define-registered complex_mult (multiplier :complex))
 
 (defn divider
   "Returns a function that pushes the quotient of the top two items. Does
@@ -691,23 +709,19 @@ nothing if the denominator would be zero."
   [type]
   (fn [state]
     (if (and (not (empty? (rest (type state))))
-          (let [item (stack-ref type 0 state)]
-            (if (= type :complex)
-              (and (not (zero? (item :real))) (not (zero? (item :imag))))
-              (not (zero? (stack-ref type 0 state))))))
-      (let [frst (stack-ref type 0 state)
-            scnd (stack-ref type 1 state)]
+          (not (zero? (stack-ref type 0 state))))
+      (let [first (stack-ref type 0 state)
+            second (stack-ref type 1 state)]
         (->> (pop-item type state)
-             (pop-item type)
-             (push-item (if (= type :integer)
-                          (truncate (keep-number-reasonable (/ scnd frst)))
-                          (keep-number-reasonable (/ scnd frst)))
-               type)))
+          (pop-item type)
+          (push-item (if (= type :integer)
+                       (truncate (keep-number-reasonable (/ second first)))
+                       (keep-number-reasonable (/ second first)))
+            type)))
       state)))
 
 (define-registered integer_div (divider :integer))
 (define-registered float_div (divider :float))
-(define-registered complex_div (divider :complex))
 
 (defn modder
   "Returns a function that pushes the modulus of the top two items. Does
@@ -793,46 +807,6 @@ boolean stack."
       (let [item (stack-ref :integer 0 state)]
         (->> (pop-item :integer state)
           (push-item (* 1.0 item) :float)))
-      state)))
-
-(define-registered complex_fromfloat
-  (fn [state]
-    (if (not (empty? (:float state)))
-      (let [item (stack-ref :float 0 state)]
-        (->> (pop-item :float state)
-          (push-item (complex 0 item) :complex)))
-      state)))
-
-(define-registered complex_fromfloats
-  (fn [state]
-    (if (not (empty? (:float state)))
-      (let [item1 (stack-ref :float 0 state)
-            popped1 (pop-item :float state)]
-        (if (not (empty? (:float popped1)))
-          (let [item2 (stack-ref :float 0 popped1)]
-            (->> (pop-item :float popped1)
-              (push-item (complex item1 item2) :complex)))
-          state))
-      state)))
-
-(define-registered complex_frominteger
-  (fn [state]
-    (if (not (empty? (:integer state)))
-      (let [item (stack-ref :integer 0 state)]
-        (->> (pop-item :integer state)
-          (push-item (complex 0 item) :complex)))
-      state)))
-
-(define-registered complex_fromintegers
-  (fn [state]
-    (if (not (empty? (:integer state)))
-      (let [item1 (* 1.0 (stack-ref :integer 0 state))
-            popped1 (pop-item :integer state)]
-        (if (not (empty? (:integer popped1)))
-          (let [item2 (* 1.0 (stack-ref :integer 0 popped1))]
-            (->> (pop-item :integer popped1)
-              (push-item (complex item1 item2) :complex)))
-          state))
       state)))
 
 (defn minner
@@ -1308,6 +1282,14 @@ the code stack."
         (pop-item :code (pop-item :code state)))
       state)))
 
+(define-registered code_overlap
+  (fn [state]
+    (if (not (empty? (rest (:code state))))
+      (push-item (float (overlap (stack-ref :code 0 state) (stack-ref :code 1 state)))
+        :float
+        (pop-item :code (pop-item :code state)))
+      state)))
+
 (define-registered exec_k
   (fn [state]
     (if (not (empty? (rest (:exec state))))
@@ -1470,61 +1452,6 @@ acting as a no-op if the movement would produce an error."
 
 (define-registered code_fromziprights (zip-extractor :code zip/rights))
 (define-registered exec_fromziprights (zip-extractor :exec zip/rights))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; complex number instructions
-
-(define-registered complex_conjugate
-  (fn [state]
-    (if (not (empty? (:complex state)))
-      (let [{a :real b :imag} (stack-ref :complex 0 state)]
-        (->> (pop-item :complex state)
-          (push-item (complex a (- b)) :complex)))
-      state)))
-
-(defn sum-squares [& xs] (apply + (map #(* % %) xs)))
-
-(defn complex-mag [a b] (sqrt (sum-squares a b)))
-
-(define-registered complex_magnitude
-  (fn [state]
-    (if (not (empty? (:complex state)))
-      (let [{a :real b :imag} (stack-ref :complex 0 state)]
-        (->> (pop-item :complex state)
-             (push-item (complex-mag a b) :float)))
-      state)))
-
-(defn complex-div [c1 c2]
-  (let [{a :real b :imag} c1
-        {c :real d :imag} c2
-        denom (sum-squares c d)]
-    (if (zero? denom)
-      nil
-      (complex (/ (+ (* a c) (* b d)) denom) (/ (- (* b c) (* a d)) denom)))))
-
-(define-registered complex_divide
-  (fn [state]
-    (if (not (empty? (:complex state)))
-      (let [item1 (stack-ref :complex 0 state)
-            popped1 (pop-item :complex state)]
-        (if (not (empty? (:complex popped1)))
-          (let [item2 (stack-ref :complex 0 popped1)
-                result (complex-div item1 item2)]
-            (if result
-              (->> (pop-item :complex popped1)
-                   (push-item result :complex))
-              state))
-          state))
-      state)))
-
-(define-registered complex_principal_sqrt
-  (fn [state]
-    (if (not (empty? (:complex state)))
-      (let [{a :real b :imag} (stack-ref :complex 0 state)]
-        (->> (pop-item :complex state)
-             (push-item (sqrt (/ (+ a (complex-mag a b)) 2)) :float)))
-      state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; print all registered instructions on loading
@@ -2007,13 +1934,13 @@ example."
                         targets
                         outputs))
                     (reduce +
-                      (map (fn [output] (expt (- output average-output) 2))
+                      (map (fn [output] (math/expt (- output average-output) 2))
                         outputs)))
             intercept (- average-target  (* slope average-output))]
         (when print-slope-and-intercept 
           (println "slope " slope ", intercept " intercept))
         (doall (map (fn [target output]
-                      (expt (float (- target (+ intercept (* slope output)))) 2))
+                      (math/expt (float (- target (+ intercept (* slope output)))) 2))
                  targets
                  outputs))))))
 
@@ -2159,4 +2086,3 @@ of nil values in execute-instruction, do see if any instructions are introducing
   [& args]
   (use (symbol (first args)))
   (System/exit 0))
-
