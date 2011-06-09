@@ -570,6 +570,8 @@ VERSION HISTORY
             defined by the code as revised for complex number support. If
             someone knows how to re-introduce complex number support without
             such problems then please let me know.
+20110609: - Readded complex numbers with a fix making (= (apply + ()) 0).
+            (Brian Martin)
 
 ACKNOWLEDGEMENTS
 
