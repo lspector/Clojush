@@ -247,24 +247,23 @@ list1 is from list2. The calculation is equivalent to the following:
                     (frequencies (all-items list2))))))
 
 (defn overlap
-  [thing1 thing2]
-  "Returns a measure of the similarity of the arguments, which may be                       
-nested sequences. The overlap is defined in terms of the collections of                     
-the items contained in each of the arguments, including nested items at                     
-all levels. The overlap is then the maximal number of pairings by identity                  
-across the two collections, divided by the size of the larger collection.                   
-The returned value will range from 0 (for entirely distinct arguments)                      
+ [thing1 thing2]
+ "Returns a measure of the similarity of the arguments, which may be                                                                                                                                                                                                         
+nested sequences. The overlap is defined in terms of the collections of                                                                                                                                                                                                       
+the items contained in each of the arguments, including nested items at                                                                                                                                                                                                       
+all levels. The overlap is then the maximal number of pairings by identity                                                                                                                                                                                                    
+across the two collections, divided by the size of the larger collection.                                                                                                                                                                                                     
+The returned value will range from 0 (for entirely distinct arguments)                                                                                                                                                                                                        
 to 1 (for identical arguments). Run (overlap-demo) to see some examples."
-  (let [items1 (all-items thing1)
-        items2 (all-items thing2)]
-    (/ (apply +
-              (map first
-                   (filter seq?
-                           (vals (merge-with (fn [count1 count2]
-                                               (list (min count1 count2)))
-                                             (frequencies items1)
-                                             (frequencies items2))))))
-       (max (count items1) (count items2)))))
+ (let [items1 (all-items thing1)
+       items2 (all-items thing2)
+       freq1 (frequencies items1)
+       freq2 (frequencies items2)]
+   (/ (apply +
+              (vals (merge-with min
+                                (select-keys freq1 (keys freq2))
+                                (select-keys freq2 (keys freq1)))))
+      (max (count items1) (count items2)))))
 
 (defn overlap-demo
   "Prints some demo output to demonstrate the behavior of the overlap function.             

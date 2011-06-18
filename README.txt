@@ -570,6 +570,9 @@ VERSION HISTORY
             defined by the code as revised for complex number support. If
             someone knows how to re-introduce complex number support without
             such problems then please let me know.
+20110618: - Switched to Kyle Harrington's version of overlap; it's more clear,
+            possibly faster, and may fix a hard-to-trace bug that cropped up
+            in a long evolutionary run (?).
 
 ACKNOWLEDGEMENTS
 
