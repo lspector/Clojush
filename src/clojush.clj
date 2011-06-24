@@ -193,11 +193,28 @@ from the behavior in other implementations of Push.)"
     (math/round (math/ceil n))
     (math/round (math/floor n))))
 
+(defn walklist
+  "Like walk, but only for lists."
+  [inner outer form]
+  (cond
+   (list? form) (outer (apply list (map inner form)))
+   :else (outer form)))
+
+(defn postwalklist
+  "Like postwalk, but only for lists"
+  [f form]
+  (walklist (partial postwalklist f) f form))
+
+(defn postwalklist-replace
+  "Like postwalk-replace, but only for lists."
+  [smap form]
+  (postwalklist (fn [x] (if (contains? smap x) (smap x) x)) form))
+
 (defn subst
   "Returns the given list but with all instances of that (at any depth)                                   
 replaced with this. Read as 'subst this for that in list'. "
   [this that lst]
-  (walk/postwalk-replace {that this} lst))
+  (postwalklist-replace {that this} lst))
 
 (defn contains-subtree 
   "Returns true if tree contains subtree at any level. Inefficient but
@@ -1599,7 +1616,7 @@ which is a map."
   "Returns a copy of program with macros abbreviated as symbols. The returned program will
 not run as-is."
   [program]
-  (walk/postwalk (fn [item]
+  (postwalklist (fn [item]
                    (if (tagged-code-macro? item)
                      (symbol (str "TCM_"
                                (:instruction item)
@@ -1845,11 +1862,11 @@ by @global-node-selection-method."
   "Returns code with each float literal perturbed with std dev sd and perturbation probability
 num-perturb-probability."
   [code per-num-perturb-probability sd]
-  (walk/postwalk (fn [item]
-              (if (and (float? item)
-                    (< (rand) per-num-perturb-probability))
-                (perturb-with-gaussian-noise sd item)
-                item))
+  (postwalklist (fn [item]
+                  (if (and (float? item)
+                        (< (rand) per-num-perturb-probability))
+                    (perturb-with-gaussian-noise sd item)
+                    item))
     code))
 
 (defn gaussian-mutate 

@@ -604,6 +604,10 @@ VERSION HISTORY
             A tagged-code-macro-erc is provided to generate random tagged-code
             macros in pushgp runs. A new example, codesize20, provides 
             a simple demonstration of the use of tagged-code macros.
+          - Replaced walk-based code-manipulation with walklist functions
+            that only traverse list structure. This fixes an interaction
+            between map literals (e.g. tagged-code macros) and program
+            structure.
 
 ACKNOWLEDGEMENTS
 

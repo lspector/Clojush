@@ -401,8 +401,16 @@
 	      (push-item 2 :integer)
 	      (code_insert)))
 
-#_(println (subst 1 2 '(1 2 3)))
-#_(println (subst '(a b) '(x y) '(1 2 (x y) (3 4 ((x y))) (x y))))
+;(println (subst 1 2 '(1 2 3)))
+;(println (subst '(a b) '(x y) '(1 2 (x y) (3 4 ((x y))) (x y))))
+
+
+;(in-ns 'clojush)
+;(def top-level-push-code false)
+;(def top-level-pop-code false)
+;(in-ns 'clojush-tests)
+
+;(println (run-push '(code_quote (a b) code_quote (x y) code_quote (1 2 (x y) (3 4 ((x y))) (x y)) code_subst) (make-push-state)))
 
 #_(println (->> (make-push-state)
 	      (push-item '(1 2 3) :code)
