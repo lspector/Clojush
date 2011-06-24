@@ -573,6 +573,37 @@ VERSION HISTORY
 20110618: - Switched to Kyle Harrington's version of overlap; it's more clear,
             possibly faster, and may fix a hard-to-trace bug that cropped up
             in a long evolutionary run (?).
+20110624: - Replaced lawnmower and dsoar examples with bugfixed versions
+            (thanks to Kyle Harrington).
+          - Added namespace and made miscellaneous other changes to 
+            clojush-tests.clj.
+          - Added support for tagged-code macros. Tagged-code macro calls
+            have the effect of code instructions, but they take their
+            code arguments from the tag space and they tag their code return
+            values. They are implemented as macros to leverage the existing
+            code instruction set; note that this means that a single call
+            will contribute more than one iteration step toward the 
+            evalpush-limit. Tagged-code macros appear in programs as hash maps
+            that map :tagged_code_macro to true, :instruction to a code
+            instruction, :argument_tags to a sequence of tags to be used
+            to acquire arguments, and :result_tags to a sequence of tags
+            to be used for tagging results. Execution of a macro expands
+            the needed code onto the exec stack to grab arguments from the tag 
+            space and push them on the code stack, execute the code instruction, 
+            and tag results. Note that results will also be left on the code
+            stack if global-pop-when-tagging is false. Conceptually, tag values
+            are "baked in" to these macros in much the same way that tag values
+            are "baked in" to the instruction names for stackless tag
+            instructions; we use hash maps simply because there is more
+            information to bake in and this prevents us from having to parse
+            the names (which would get messy and also waste time). Because
+            the maps make it difficult to read programs, however, a utility
+            function called abbreviate-tagged-code-macros is provided to
+            produce copies of programs with more human-readable (but not 
+            currently executable) representations of tagged-macro calls.
+            A tagged-code-macro-erc is provided to generate random tagged-code
+            macros in pushgp runs. A new example, codesize20, provides 
+            a simple demonstration of the use of tagged-code macros.
 
 ACKNOWLEDGEMENTS
 

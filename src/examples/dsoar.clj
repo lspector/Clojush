@@ -8,10 +8,11 @@
 
 ;; This version was written by Brian Martin in 2010-2011.
 
-
 (ns examples.dsoar
-  (:require [clojush] [clojure.contrib.math])
-  (:use [clojush] [clojure.contrib.math]))
+  (:require [clojush]
+	    [clojure.contrib.math])
+  (:use [clojush] 
+    [clojure.contrib.math]))
 
 (in-ns 'clojush)
 
@@ -50,22 +51,23 @@
                 12 [#{[5 6] [0 2] [0 5] [9 0] [8 0] [10 2] [9 5] [10 6] [7 4]}
                     #{[6 6] [1 4] [0 4] [9 1] [7 0] [8 3] [11 6] [5 1] [6 4]}]})
 
-
 (define-registered intvec2D_pop (popper :intvec2D))
 (define-registered intvec2D_dup (duper :intvec2D))
 (define-registered intvec2D_swap (swapper :intvec2D))
 (define-registered intvec2D_rot (rotter :intvec2D))
 
 (define-registered v8a
-  (fn [state]
-    (if (not (empty? (rest (:intvec2D state))))
-      (let [topvec (stack-ref :intvec2D 0 state)
+  (fn [state] 
+    (if (and (not (empty? (rest (:intvec2D state))))
+          (not (empty? (:auxiliary state))))
+      (let [floorstate (stack-ref :auxiliary 0 state)
+            topvec (stack-ref :intvec2D 0 state)
             nxtvec (stack-ref :intvec2D 1 state)]
         (->> (pop-item :intvec2D state)
           (pop-item :intvec2D)
-          (push-item [(mod (+ (first topvec) (first nxtvec)) 8)
-                      (mod (+ (second topvec) (second nxtvec)) 8)]
-            :intVec2D)))
+          (push-item [(mod (+ (first topvec) (first nxtvec)) (:max-row floorstate))
+                      (mod (+ (second topvec) (second nxtvec)) (:max-column floorstate))]
+            :intvec2D)))
       state)))
 
 (defstruct floor-state
@@ -115,51 +117,31 @@
 
 (defn left-in
   "Returns a copy of the given floor-state with the mopper having made a left turn."
-  [state]
-  (if (and (< (:turns state) (:turns-limit state))
-        (< (:moves state) (:moves-limit state)))
-    (-> state
-      (assoc :orientation (get {:east :north, :north :west, :west :south, :south :east}
-                            (:orientation state)))
-      (assoc :turns (inc (:turns state))))
-    state))
+  [floor-state]
+  (if (and (< (:turns floor-state) (:turns-limit floor-state))
+	   (< (:moves floor-state) (:moves-limit floor-state)))
+    (-> floor-state
+	(assoc :orientation (get {:east :north, :north :west, :west :south, :south :east}
+				 (:orientation floor-state)))
+	(assoc :turns (inc (:turns floor-state))))
+    floor-state))
 
 (defn mop-in
   "Returns a copy of the given floor-state with the mower having moved one step forward
   if it hasn't run into an obstacle."
-  [state]
-  (let [[new-row new-column] (loc-ahead state)]
-    (if (and (< (:turns state) (:turns-limit state))
-             (< (:moves state) (:moves-limit state))
-             (not (obstacle? [new-row new-column] state)))
-      (-> state
-        (assoc :moves (inc (:moves state)))
-        (assoc :row new-row)
-        (assoc :column new-column)
-        (assoc :mopped (if (= 1 (nth (nth (:grid state) new-row) new-column))
-                        (conj (:mopped state) [new-row new-column])
-                        (:mopped state))))
-      state)))
-
-(defn frog-in
-  "Returns a copy of the given floor-state with the mopper having frogged
-to the location indicated by the top intvec2D (unless that location is an
-obstacle."
-  [state]
-  (let [[new-row new-column] (first (:intvec2D state))]
-    (if (and (< (:turns state) (:turns-limit state))
-             (< (:moves state) (:moves-limit state))
-             (not (empty? (:intvec2D state)))
-             (not (obstacle? [new-row new-column] state)))
-        (-> state
-          (pop-item :intvec2D)
-          (assoc :moves (inc (:moves state)))
-          (assoc :row new-row)
-          (assoc :column new-column)
-          (assoc :mopped (if (= 1 (nth (nth (:grid state) new-row) new-column))
-                          (conj (:mopped state) [new-row new-column])
-                          (:mopped state))))
-        state)))
+  [floor-state]
+  (let [[new-row new-column] (loc-ahead floor-state)]
+    (if (and (< (:turns floor-state) (:turns-limit floor-state))
+             (< (:moves floor-state) (:moves-limit floor-state))
+             (not (obstacle? [new-row new-column] floor-state)))
+      (-> floor-state
+	  (assoc :moves (inc (:moves floor-state)))
+	  (assoc :row new-row)
+	  (assoc :column new-column)
+	  (assoc :mopped (if (= 1 (nth (nth (:grid floor-state) new-row) new-column))
+			   (conj (:mopped floor-state) [new-row new-column])
+			   (:mopped floor-state))))
+      floor-state)))
 
 (defn if-obstacle-in
   [push-state]
@@ -191,32 +173,61 @@ obstacle."
 
 (define-registered left
   (fn [state]
-    (let [floor-state (stack-ref :auxiliary 0 state)]
-       (->> state
-         (pop-item :auxiliary)
-         (push-item (left-in floor-state) :auxiliary)))))
+    (if-not (empty? (:auxiliary state))
+      (let [floor-state (stack-ref :auxiliary 0 state)]
+	(->> state
+	     (pop-item :auxiliary)
+	     (push-item (left-in floor-state) :auxiliary)))
+      state)))
 
 (define-registered mop
   (fn [state]
-    (let [floor-state (stack-ref :auxiliary 0 state)]
-       (->> state
-         (pop-item :auxiliary)
-         (push-item (mop-in floor-state) :auxiliary)))))
+    (if-not (empty? (:auxiliary state))
+      (let [floor-state (stack-ref :auxiliary 0 state)]
+	(->> state
+	     (pop-item :auxiliary)
+	     (push-item (mop-in floor-state) :auxiliary)))
+      state)))
 
-(define-registered frog
+(define-registered frog 
   (fn [state]
-    (let [floor-state (stack-ref :auxiliary 0 state)]
-       (->> state
-         (pop-item :auxiliary)
-         (push-item (frog-in floor-state) :auxiliary)))))
+    (if-not (empty? (:auxiliary state))
+      (let [floorstate (stack-ref :auxiliary 0 state)]    
+        (if (and (< (:turns floorstate) (:turns-limit floorstate))
+              (< (:moves floorstate) (:moves-limit floorstate))
+              (not (empty? (:intvec2D state))))
+          (let [[shift-row shift-column] (first (:intvec2D state))
+                new-row (mod (+ (:row floorstate) shift-row) 
+                          (:max-row floorstate))
+                new-column (mod (+ (:column floorstate) shift-column)
+                             (:max-column floorstate))]
+            (if-not (obstacle? [new-row new-column] state)	   
+              (->> state
+                (pop-item :intvec2D)
+                (pop-item :auxiliary)
+                (push-item (assoc floorstate
+                             :moves (inc (:moves floorstate))
+                             :row new-row
+                             :column new-column
+                             :mowed (if (= 1 (nth (nth (:grid floorstate) new-row) new-column))
+                                      (conj (:mowed floorstate) [new-row new-column])
+                                      (:mowed floorstate)))
+                  :auxiliary))
+              state))
+          state))
+      state)))
 
 (define-registered if-obstacle
-  (fn [push-state]
-    (if-obstacle-in push-state)))
+  (fn [state]
+    (if-not (empty? (:auxiliary state))
+      (if-obstacle-in state)
+      state)))
 
 (define-registered if-dirty
-  (fn [push-state]
-    (if-dirty-in push-state)))
+  (fn [state]
+    (if-not (empty? (:auxiliary state))
+      (if-dirty-in state)
+      state)))
 
 (defn mopper-fitness
   "Returns a fitness function for the dsoar problem with a floor of the
@@ -225,12 +236,6 @@ obstacle."
   [x y limit]
   (fn [program]
     (let [num-obs-per-set (count (first (obstacles y)))]
-;      (println
-;        (first
-;          (:auxiliary
-;            (run-push program
-;              (push-item (new-floor-state x y limit 1)
-;                :auxiliary (make-push-state))))))
       (doall
         (map (partial - (* x y) num-obs-per-set)
           (for [i '(0 1)]
@@ -240,38 +245,34 @@ obstacle."
                   (:auxiliary
                     (run-push program
                       (push-item (new-floor-state x y limit i)
-                        :auxiliary (make-push-state)))))))))))))
+                        :auxiliary (make-push-state)) ;true
+		      )))))))))))
 
-(defn run [params]
-  (let [[floor-rows floor-cols] (params :lawn-dimensions)
-        limit (params :limit)
-        instruction-set (params :instruction-set)
-        node-selection (params :node-selection)
-        tournament-size (params :tournament-size)]
-    (pushgp
-      :error-function (mopper-fitness floor-rows floor-cols limit)
-      :atom-generators (cond (= :basic instruction-set)
-                                 (list 'if-dirty 'if-obstacle 'left 'mop 'v8a 'frog (fn [] [(rand-int 8) (rand-int 8)]))
-                             (= :exec instruction-set)
-                                 (list 'if-dirty 'if-obstacle 'left 'mop 'v8a 'frog (fn [] [(rand-int 8) (rand-int 8)])
-                                       'exec_dup 'exec_pop 'exec_rot 'exec_swap 'exec_k 'exec_s 'exec_y)
-                             (= :tag instruction-set)
-                                 (list 'if-dirty 'if-obstacle 'left 'mop 'v8a 'frog (fn [] [(rand-int 8) (rand-int 8)])
-                                       (tag-instruction-erc [:exec] 1000)
-                                       (tagged-instruction-erc 1000)))
-      :mutation-probability 0.45
-      :crossover-probability 0.45
-      :node-selection-method (if node-selection node-selection :unbiased)
-      :node-selection-tournament-size tournament-size
-      :simplification-probability 0.0
-      :reproduction-simplifications 10
-      :max-points (* 10 limit)
-      :evalpush-limit (* 10 limit))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; code for actual runs
 
-(run {:lawn-dimensions [8 8] 
-      :limit 100 
-      :instruction-set :tag 
-      :node-selection :unbiased
-      :tournament-size 5})
+;; standard 8x8 dsoar problem
+#_(pushgp
+  :error-function (mopper-fitness 8 8 100)
+  :atom-generators (list 'if-dirty 'if-obstacle 'left 'mop 'v8a 'frog
+                     (fn [] [(rand-int 8) (rand-int 8)]))
+  :mutation-probability 0.3
+  :crossover-probability 0.3
+  :simplification-probability 0.3
+  :reproduction-simplifications 10
+  :max-points 200
+  :evalpush-limit 1000)
 
-#'examples.dsoar/run
+;; standard 8x8 dsoar problem but with tags
+(pushgp
+  :error-function (mopper-fitness 8 8 100)
+  :atom-generators (list 'if-dirty 'if-obstacle 'left 'mop 'v8a 'frog
+                     (fn [] [(rand-int 8) (rand-int 8)])
+                     (tag-instruction-erc [:exec] 1000)
+                     (tagged-instruction-erc 1000))
+  :mutation-probability 0.3
+  :crossover-probability 0.3
+  :simplification-probability 0.3
+  :reproduction-simplifications 10
+  :max-points 200
+  :evalpush-limit 1000)

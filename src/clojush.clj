@@ -1562,6 +1562,55 @@ tagged_code_<number> where number is in the range from 0 to the specified limit 
                    (str (rand-int limit))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; tagged-code macros
+
+(defn tagged-code-macro?
+  "Retruns true if i is a tagged-code macro call."
+  [i]
+  (and (map? i)
+       (:tagged_code_macro i)))
+
+(defn handle-tag-code-macro
+  "Given a tagged-code macro call and a push state, this returns the push state with the
+call expanded on the exec stack."
+  [i state]
+  (if (empty? (:tag state))
+    state
+    (assoc state :exec
+           (concat (concat
+                    ;; possibly grab arguments from tag space and push them on the code stack
+                    (map #(symbol (str "tagged_code_" (str %))) (:argument_tags i))
+                    ;; execute the code instruction
+                    (list (:instruction i))
+                    ;; possibly tag results
+                    (map #(symbol (str "tag_code_" (str %))) (:result_tags i))
+                    )
+                   (:exec state)))))
+
+(defn tagged-code-macro-erc
+  "Returns a function which, when called on no arguments, returns a tagged-code macro,
+which is a map."
+  [instruction tag-limit num-argument-tags num-result-tags]
+  (fn [] {:tagged_code_macro true :instruction instruction
+          :argument_tags (repeatedly num-argument-tags #(rand-int tag-limit))
+          :result_tags (repeatedly num-result-tags #(rand-int tag-limit))}))
+
+(defn abbreviate-tagged-code-macros
+  "Returns a copy of program with macros abbreviated as symbols. The returned program will
+not run as-is."
+  [program]
+  (walk/postwalk (fn [item]
+                   (if (tagged-code-macro? item)
+                     (symbol (str "TCM_"
+                               (:instruction item)
+                               "_"
+                               (:argument_tags item)
+                               "_"
+                               (:result_tags item)))
+                     item))
+    program))
+  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; push interpreter
 
 (defn recognize-literal
@@ -1586,6 +1635,7 @@ tagged_code_<number> where number is in the range from 0 to the specified limit 
       (cond 
         literal-type (push-item instruction literal-type state)
         (tag-instruction? instruction) (handle-tag-instruction instruction state)
+        (tagged-code-macro? instruction) (handle-tag-code-macro instruction state)
         :else ((instruction @instruction-table) state)))))
 
 (defn eval-push 

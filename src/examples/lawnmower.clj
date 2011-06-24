@@ -3,11 +3,13 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns examples.lawnmower
-  (:require [clojush] [clojure.contrib.math])
-  (:use [clojush] [clojure.contrib.math]))
+  (:require [clojush]
+	    [clojure.contrib.math])
+  (:use [clojush]
+    [clojure.contrib.math]))
 
 ;;;;;;;;;;;;
-;; Koza's lawnmower problem, described in Chapter 8 of Genetic Programmin II:
+;; Koza's lawnmower problem, described in Chapter 8 of Genetic Programming II:
 ;; Automatic Discovery of Reusable Programs, by John Koza, MIT Press, 1994.
 ;;
 ;; This example shows how to extend the core Clojush system with an additional
@@ -15,7 +17,6 @@
 ;;
 ;; A couple of top-level calls are provided, commented out, at the bottom;
 ;; uncomment one to run it.
-
 
 ;;;;;;;;;;;;
 ;; A few things must be done in the clojush namespace.
@@ -25,7 +26,7 @@
 (def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :intvec2D))
 (define-push-state-structure)
 
-;; Redefine recognize-literal to support intvec2Ds of the form [x y].
+;; Redefine recognize-literal to support intvec2Ds of the form [row column
 
 (defn recognize-literal
   "If thing is a literal, return its type -- otherwise return false."
@@ -47,17 +48,20 @@
 (define-registered intvec2D_rot (rotter :intvec2D))
 ;; Other possibilities: flush, eq, stackdepth, yank, yankdup, shove
 
-;; Define Koza's v8a "vector addition mod 8" function.
+;; Define Koza's v8a "vector addition mod 8" function. This is a modified v8a
+;;   that takes the modulo with respect to the lawn size.
 (define-registered v8a
   (fn [state] 
-    (if (not (empty? (rest (:intvec2D state))))
-      (let [topvec (stack-ref :intvec2D 0 state)
+    (if (and (not (empty? (rest (:intvec2D state))))
+	     (not (empty? (:auxiliary state))))
+      (let [lawnstate (stack-ref :auxiliary 0 state)
+	    topvec (stack-ref :intvec2D 0 state)
             nxtvec (stack-ref :intvec2D 1 state)]
         (->> (pop-item :intvec2D state)
-          (pop-item :intvec2D)
-          (push-item [(mod (+ (first topvec) (first nxtvec)) 8)
-                      (mod (+ (second topvec) (second nxtvec)) 8)]
-            :intVec2D)))
+	     (pop-item :intvec2D)
+	     (push-item [(mod (+ (first topvec) (first nxtvec)) (:max-row lawnstate))
+			 (mod (+ (second topvec) (second nxtvec)) (:max-column lawnstate))]
+			:intvec2D)))
       state)))
 
 ; test
@@ -129,47 +133,52 @@
                         (:mowed state)))))
     state))
 
-(defn frog-in
-  "Returns a copy of the given lawn-state with the mower having frogged
-to the location indicated by the top intvec2D."
-  [state]
-  (if (and (< (:turns state) (:turns-limit state))
-        (< (:moves state) (:moves-limit state))
-        (not (empty? (:intvec2D state))))
-    (let [[new-row new-column] (first (:intvec2D state))]
-      (-> state
-        (pop-item :intvec2D)
-        (assoc :moves (inc (:moves state)))
-        (assoc :row new-row)
-        (assoc :column new-column)
-        (assoc :mowed (if (= 1 (nth (nth (:grid state) new-row) new-column))
-                        (conj (:mowed state) [new-row new-column])
-                        (:mowed state)))))
-    state))
-
 ;;;;;;;;;;;;
 ;; Define actual Push instructions for lawnmower functions.
 
 (define-registered left 
   (fn [state]
-    (let [lawnstate (stack-ref :auxiliary 0 state)]
-       (->> state
-         (pop-item :auxiliary)
-         (push-item (left-in lawnstate) :auxiliary)))))
+    (if-not (empty? (:auxiliary state))
+      (let [lawnstate (stack-ref :auxiliary 0 state)]
+	(->> state
+	     (pop-item :auxiliary)
+	     (push-item (left-in lawnstate) :auxiliary)))
+      state)))
 
 (define-registered mow 
   (fn [state]
-    (let [lawnstate (stack-ref :auxiliary 0 state)]
-       (->> state
-         (pop-item :auxiliary)
-         (push-item (mow-in lawnstate) :auxiliary)))))
+    (if-not (empty? (:auxiliary state))
+      (let [lawnstate (stack-ref :auxiliary 0 state)]
+	(->> state
+	     (pop-item :auxiliary)
+	     (push-item (mow-in lawnstate) :auxiliary)))
+      state)))
 
 (define-registered frog 
   (fn [state]
-    (let [lawnstate (stack-ref :auxiliary 0 state)]
-       (->> state
-         (pop-item :auxiliary)
-         (push-item (frog-in lawnstate) :auxiliary)))))
+    (if-not (empty? (:auxiliary state))
+      (let [lawnstate (stack-ref :auxiliary 0 state)]    
+	(if (and (< (:turns lawnstate) (:turns-limit lawnstate))
+		 (< (:moves lawnstate) (:moves-limit lawnstate))
+		 (not (empty? (:intvec2D state))))
+	  (let [[shift-row shift-column] (first (:intvec2D state))
+		new-row (mod (+ (:row lawnstate) shift-row) 
+			     (:max-row lawnstate))
+		new-column (mod (+ (:column lawnstate) shift-column)
+				(:max-column lawnstate))
+		new-lawnstate (assoc lawnstate
+				:moves (inc (:moves lawnstate))
+				:row new-row
+				:column new-column
+				:mowed (if (= 1 (nth (nth (:grid lawnstate) new-row) new-column))
+					 (conj (:mowed lawnstate) [new-row new-column])
+					 (:mowed lawnstate)))]
+	    (->> state
+		 (pop-item :intvec2D)
+		 (pop-item :auxiliary)
+		 (push-item new-lawnstate :auxiliary)))
+	  state))
+      state)))
 
 ;;;;;;;;;;;;
 ;; Define a high level fitness function so code for runs is cleaner.
@@ -188,7 +197,8 @@ to the location indicated by the top intvec2D."
                     (:auxiliary
                       (run-push program 
                         (push-item (new-lawn-state x y limit) 
-                          :auxiliary (make-push-state))))))))))))
+                          :auxiliary (make-push-state)) ;true
+			))))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; code for actual runs
@@ -205,7 +215,7 @@ to the location indicated by the top intvec2D."
   :evalpush-limit 1000)
 
 ;; standard 8x8 lawnmower problem but with tags
-#_(pushgp
+(pushgp
   :error-function (lawnmower-fitness 8 8 100)
   :atom-generators (list 'left 'mow 'v8a 'frog (fn [] [(rand-int 8) (rand-int 8)])
                      (tag-instruction-erc [:exec] 1000)

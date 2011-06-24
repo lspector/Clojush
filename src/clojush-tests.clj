@@ -1,7 +1,10 @@
 ;; This is a file of commented-out informal tests (without outputs...) 
 ;; of functions in coljush.clj.
 
-(in-ns 'clojush)
+(ns clojush-tests
+  (:use [clojush] ))
+    
+;(in-ns 'clojush)
 
 ;(println (random-element '(a b c d e)))
 ;(println (shuffle '(a b c d e)))
@@ -243,155 +246,149 @@
 		     )))
 ;)
 
-(comment
-  (defn new-pgm 
-    []
-    (random-code 100 (concat registered-instructions
-			     (list (fn [] (- (rand 2) 1))
-				   (fn [] (- (rand-int 20) 10))))))
-  
-  (def population (doall (for [i (range 1000)] (agent ['(), -1]))))
 
-  (defn print-incomplete 
-    []
-    (printf "\nIncomplete: %s\n" (reduce + (map #(if (< (nth % 1) 0) 1 0)
-						(map deref population)))))
+;(defn new-pgm 
+;  []
+;  (random-code 100 (concat registered-instructions
+;                           (list (fn [] (- (rand 2) 1))
+;                                 (fn [] (- (rand-int 20) 10))))))
+;
+;(def population (doall (for [i (range 1000)] (agent ['(), -1]))))
+;
+;(defn print-incomplete 
+;  []
+;  (printf "\nIncomplete: %s\n" (reduce + (map #(if (< (nth % 1) 0) 1 0)
+;                                              (map deref population)))))
+;
+;(time
+; (do
+;     (print-incomplete)
+;   (dorun (map #(send % (fn [[p f]] [(new-pgm) f])) population)) 
+;   (apply await population)
+;   (dorun (map #(send % (fn [[p f]] [p (count (:integer (run-push p (make-push-state))))])) population))
+;   (apply await population)
+;   (print-incomplete)
+;   ))
 
-  (time
-   (do
-     (print-incomplete)
-     (dorun (map #(send % (fn [[p f]] [(new-pgm) f])) population)) 
-     (apply await population)
-     (dorun (map #(send % (fn [[p f]] [p (count (:integer (run-push p (make-push-state))))])) population))
-     (apply await population)
-     (print-incomplete)
-     ))
-  )
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of x^3 - 2x^2 - x (problem 5 from the trivial geography chapter) with 
 ;; minimal integer instructions and an input instruction that uses the auxiliary stack.
 
-(comment
-(define-registered in (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
-(pushgp {
-	 :error-function 
-	 (fn [program]
-	   (doall
-	    (for [input (range 10)]
-	      (let [state (run-push program 
-				    (push-item input :auxiliary 
-					       (push-item input :integer
-							  (make-push-state))))
-		    top-int (top-item :integer state)]
-		(if (number? top-int)
-		  (math/abs (- top-int (- (* input input input) (* 2 input input) input)))
-		  1000)))))
-          :atom-generators (list (fn [] (rand-int 10))
-				 'in
-				 'integer_div
-				 'integer_mult
-				 'integer_add
-				 'integer_sub)
-	 })
-)
+;(define-registered in (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
+;
+;(pushgp {
+;         :error-function 
+;         (fn [program]
+;             (doall
+;              (for [input (range 10)]
+;                (let [state (run-push program 
+;                                      (push-item input :auxiliary 
+;                                                 (push-item input :integer
+;                                                            (make-push-state))))
+;                            top-int (top-item :integer state)]
+;                  (if (number? top-int)
+;                      (math/abs (- top-int (- (* input input input) (* 2 input input) input)))
+;                      1000)))))
+;         :atom-generators (list (fn [] (rand-int 10))
+;                                'in
+;                                'integer_div
+;                                'integer_mult
+;                                'integer_add
+;                                'integer_sub)
+;         })
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of factorial, using an input instruction and lots of
 ;; other instructions. Hard but solvable. 
 
-(comment
 
-(define-registered in (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
+;(define-registered in (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
+;
+;(defn factorial 
+;  [n]
+;  ;; Returns the factorial of n. 
+;  (if (< n 2)
+;      1
+;      (* n (factorial (- n 1)))))
+;
+;(pushgp {:error-function (fn [program]
+;                             (doall
+;                              (for [input (range 1 6)]
+;                                (let [state (run-push program
+;                                                      (push-item input :auxiliary
+;                                                                 (push-item input :integer
+;                                                                            (make-push-state))))
+;                                            top-int (top-item :integer state)]
+;                                  (if (number? top-int)
+;                                      (math/abs (- top-int (factorial input)))
+;                                      1000000000))))) ;; big penalty, since errors can be big
+;                         :atom-generators (concat (registered-for-type :integer)
+;                                                  (registered-for-type :exec)
+;                                                  (registered-for-type :boolean)
+;                                                  (list (fn [] (rand-int 100))
+;                                                        'in))
+;                         :max-points 100
+;                         :population-size 10000
+;                         :reproduction-simplifications 2})
+;
+;(let [population (into [] (for [_ (range 1000)] (struct-map individual :program (random-code 100 '(a b c)) 
+;                                                            :total-error (rand-int 100))))]
+;  (time (dotimes [_ 10000] (select population 7 0 0))))
+;
+;(println (->> (make-push-state)
+;              (push-item 'a :code)
+;              (push-item 'b :code)
+;              (push-item 'c :code)
+;              (push-item 'd :code)
+;              (push-item 1 :integer)
+;              (code_shove)
+;              ))
+;
+;(println (->> (make-push-state)
+;              (push-item 'a :code)
+;              (push-item 'b :code)
+;              (push-item 'c :code)
+;              (push-item 'd :code)
+;              (push-item 3 :integer)
+;              (code_shove)
+;              ))
+;
+;(println (->> (make-push-state)
+;              (push-item 'a :code)
+;              (push-item 'b :code)
+;              (push-item 'c :code)
+;              (push-item 'd :code)
+;              (push-item 55 :integer)
+;              (code_shove)
+;              ))
+;
+;(println (->> (make-push-state)
+;              (push-item 'a :code)
+;              (push-item 'b :code)
+;              (push-item 'c :code)
+;              (push-item 'd :code)
+;              (push-item -2 :integer)
+;              (code_shove)
+;              ))
+;
+;(println (->> (make-push-state)
+;              (push-item 101 :integer)
+;              (push-item 102 :integer)
+;              (push-item 103 :integer)
+;              (push-item 0 :integer)
+;              (integer_shove)
+;              ))
+;
+;(println (->> (make-push-state)
+;              (push-item 101 :integer)
+;              (push-item 102 :integer)
+;              (push-item 103 :integer)
+;              (push-item 1 :integer)
+;              (integer_shove)
+;              ))
 
-(defn factorial 
-  [n]
-  ;; Returns the factorial of n. 
-  (if (< n 2)
-    1
-    (* n (factorial (- n 1)))))
-
-(pushgp {:error-function (fn [program]
-			   (doall
-			    (for [input (range 1 6)]
-			      (let [state (run-push program
-						    (push-item input :auxiliary
-							       (push-item input :integer
-									  (make-push-state))))
-				    top-int (top-item :integer state)]
-				(if (number? top-int)
-				  (math/abs (- top-int (factorial input)))
-				  1000000000))))) ;; big penalty, since errors can be big
-	 :atom-generators (concat (registered-for-type :integer)
-				  (registered-for-type :exec)
-				  (registered-for-type :boolean)
-				  (list (fn [] (rand-int 100))
-					'in))
-	 :max-points 100
-	 :population-size 10000
-	 :reproduction-simplifications 2})
-)
-
-(comment
-(let [population (into [] (for [_ (range 1000)] (struct-map individual :program (random-code 100 '(a b c)) 
-							  :total-error (rand-int 100))))]
-  (time (dotimes [_ 10000] (select population 7 0 0))))
-)
-
-(comment
-(println (->> (make-push-state)
-	      (push-item 'a :code)
-	      (push-item 'b :code)
-	      (push-item 'c :code)
-	      (push-item 'd :code)
-	      (push-item 1 :integer)
-	      (code_shove)
-	      ))
-
-(println (->> (make-push-state)
-	      (push-item 'a :code)
-	      (push-item 'b :code)
-	      (push-item 'c :code)
-	      (push-item 'd :code)
-	      (push-item 3 :integer)
-	      (code_shove)
-	      ))
-
-(println (->> (make-push-state)
-	      (push-item 'a :code)
-	      (push-item 'b :code)
-	      (push-item 'c :code)
-	      (push-item 'd :code)
-	      (push-item 55 :integer)
-	      (code_shove)
-	      ))
-
-(println (->> (make-push-state)
-	      (push-item 'a :code)
-	      (push-item 'b :code)
-	      (push-item 'c :code)
-	      (push-item 'd :code)
-	      (push-item -2 :integer)
-	      (code_shove)
-	      ))
-
-(println (->> (make-push-state)
-	      (push-item 101 :integer)
-	      (push-item 102 :integer)
-	      (push-item 103 :integer)
-	      (push-item 0 :integer)
-	      (integer_shove)
-	      ))
-
-(println (->> (make-push-state)
-	      (push-item 101 :integer)
-	      (push-item 102 :integer)
-	      (push-item 103 :integer)
-	      (push-item 1 :integer)
-	      (integer_shove)
-	      ))
-) ;; end of shove tests
 
 #_(println (->> (make-push-state)
 	      (push-item '(a b c) :code)
@@ -502,3 +499,20 @@
 ;(do (dotimes [_ 1000] (choose-node-index-with-leaf-probability (random-code 100 '(1)))) :no-failures)
 
 ;(println (run-push '(1 2 integer_add tag_integer_123 99 tagged_code_001 code_dup) (make-push-state)))
+
+;(println (run-push '(1 2 tag_integer_123) (make-push-state)))
+
+#_(println ((tagged-code-macro-erc 'code_append 1000 2 1)))
+
+#_{:tagged_code_macro true :instruction 'clojush/code_append
+                                  :argument_tags [10 20] :result_tags [30]}
+
+#_(println (run-push '(tag_exec_15 (1 2 3) tag_exec_25 (4 5 6)
+                                 {:tagged_code_macro true :instruction code_append
+                                  :argument_tags [10 20] :result_tags [30]})
+                   (make-push-state)))
+#_(println (run-push '(code_quote (1 2 3) code_quote (4 5 6) code_append code_swap) (make-push-state)))
+
+#_(println (run-push (concat '(tag_exec_0 (1 2 3) tag_exec_500 (4 5 6))
+                           (list ((tagged-code-macro-erc 'code_append 1000 2 1))))
+                   (make-push-state)))
