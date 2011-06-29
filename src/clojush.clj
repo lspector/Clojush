@@ -198,6 +198,7 @@ from the behavior in other implementations of Push.)"
   [inner outer form]
   (cond
    (list? form) (outer (apply list (map inner form)))
+   (seq? form) (outer (doall (map inner form)))
    :else (outer form)))
 
 (defn postwalklist
@@ -1621,9 +1622,9 @@ not run as-is."
                      (symbol (str "TCM_"
                                (:instruction item)
                                "_"
-                               (:argument_tags item)
+                               (print-str (:argument_tags item))
                                "_"
-                               (:result_tags item)))
+                               (print-str (:result_tags item))))
                      item))
     program))
   

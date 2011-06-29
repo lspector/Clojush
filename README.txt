@@ -608,6 +608,9 @@ VERSION HISTORY
             that only traverse list structure. This fixes an interaction
             between map literals (e.g. tagged-code macros) and program
             structure.
+20110629: - Fixed abbreviate-tagged-code-macros printing of empty lists.
+          - Added seq condition to walklist to permit walking of seqs that
+            aren't actually full-fledged lists.
 
 ACKNOWLEDGEMENTS
 
