@@ -611,6 +611,18 @@ VERSION HISTORY
 20110629: - Fixed abbreviate-tagged-code-macros printing of empty lists.
           - Added seq condition to walklist to permit walking of seqs that
             aren't actually full-fledged lists.
+20110702: - Several fixes/refinements to tagged-code macros: 
+            - Fixed incorrect no-op of arg-free calls with empty tag space.
+            - Added :additional_args to tagged-code macro structure; the
+              value should be a list of items and these will be executed
+              in order before calling the macro's instruction.
+            - Added optional 5th arg to tagged-code-macro-erc; this should
+              be a function of zero args that will be called to produce
+              the value of :additional_args (e.g. if you want to have one
+              random integer arg then you could specify a 5th arg of
+              (fn [] (list (lrand-int 101))).
+            - Changed format produced by abbreviate-tagged-code-macros to
+              handle :additional_args and to be slightly more concise.
 
 ACKNOWLEDGEMENTS
 
