@@ -623,6 +623,11 @@ VERSION HISTORY
               (fn [] (list (lrand-int 101))).
             - Changed format produced by abbreviate-tagged-code-macros to
               handle :additional_args and to be slightly more concise.
+20110714: - Added "trace" argument to eval-push and run-push. If this is
+            true then the resulting state will map :trace to a list of
+            executed instructions and literals, in reverse order of
+            execution. If the argument is :changes then instructions that
+            have no effect on the state will be excluded.
 
 ACKNOWLEDGEMENTS
 

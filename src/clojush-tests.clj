@@ -524,3 +524,11 @@
 #_(println (run-push (concat '(tag_exec_0 (1 2 3) tag_exec_500 (4 5 6))
                            (list ((tagged-code-macro-erc 'code_append 1000 2 1))))
                    (make-push-state)))
+
+;(println (run-push '(1 (2) ((integer_add))) (make-push-state)  false false))
+
+;(println (run-push '(1 (2) ((integer_add))) (make-push-state)  false true))
+
+;(println (run-push '(1 (2) float_add ((integer_add))) (make-push-state)  false true))
+
+;(println (run-push '(1 (2) float_add ((integer_add))) (make-push-state)  false :changes))
