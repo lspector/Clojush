@@ -59,6 +59,7 @@
 (def global-node-selection-leaf-probability (atom 0.1))
 (def global-node-selection-tournament-size (atom 2))
 (def global-pop-when-tagging (atom true))
+(def global-reuse-errors (atom true))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random code generator
@@ -1662,6 +1663,7 @@ not run as-is."
         (tagged-code-macro? instruction) (handle-tag-code-macro instruction state)
         :else ((instruction @instruction-table) state)))))
 
+
 (defn eval-push 
   "Executes the contents of the exec stack, aborting prematurely if execution limits are 
 exceeded. The resulting push state will map :termination to :normal if termination was 
@@ -1804,7 +1806,7 @@ by @global-node-selection-method."
           (recur (inc step) new-program new-errors new-total-errors)
           (recur (inc step) program errors total-errors))))))
 
-(defn problem-specific-report
+(defn default-problem-specific-report
   "Customize this for your own problem. It will be called at the end of the generational report."
   [best population generation error-function report-simplifications]
   :no-problem-specific-report-function-defined)
@@ -1812,11 +1814,14 @@ by @global-node-selection-method."
 (defn report 
   "Reports on the specified generation of a pushgp run. Returns the best
   individual of the generation."
-  [population generation error-function report-simplifications]
+  ([population generation error-function report-simplifications]
+  (report population generation error-function report-simplifications default-problem-specific-report))
+  ([population generation error-function report-simplifications problem-specific-report]
   (printf "\n\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")(flush)
   (printf "\n;; -*- Report at generation %s" generation)(flush)
   (let [sorted (sort-by :total-error < population)
         best (first sorted)]
+    (printf "\nCurrent time: %s" (System/currentTimeMillis))
     (printf "\nBest program: %s" (not-lazy (:program best)))(flush)
     (when (> report-simplifications 0)
       (printf "\nPartial simplification (may beat best): %s"
@@ -1833,10 +1838,15 @@ by @global-node-selection-method."
     (printf "\nAverage program size in population (points): %s"
       (* 1.0 (/ (reduce + (map count-points (map :program sorted)))
                (count population))))(flush)
+    (let [frequency-map (frequencies (map :program population))]
+      (println "\nNumber of unique programs in population: " (count frequency-map))
+      (println "Max copy number of one program: " (apply max (vals frequency-map)))
+      (println "Min copy number of one program: " (apply min (vals frequency-map)))
+      (println "Median copy number: " (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
     (printf "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n")
     (flush)
     (problem-specific-report best population generation error-function report-simplifications)
-    best))
+    best)))
 
 (defn select
   "Conducts a tournament and returns the individual with the lower total error."
@@ -1920,10 +1930,10 @@ subprogram of parent2."
   [i error-function rand-gen]
   (binding [thread-local-random-generator rand-gen]
     (let [p (:program i)
-          e (if (seq? (:errors i))
+          e (if (and (seq? (:errors i)) @global-reuse-errors)
               (:errors i)
               (error-function p))
-          te (if (number? (:total-error i))
+          te (if (and (number? (:total-error i)) @global-reuse-errors)
                (:total-error i)
                (keep-number-reasonable (reduce + e)))]
       (make-individual :program p :errors e :total-error te 
@@ -2038,7 +2048,8 @@ example."
              reproduction-simplifications trivial-geography-radius decimation-ratio decimation-tournament-size
              evalpush-limit evalpush-time-limit node-selection-method node-selection-leaf-probability
              node-selection-tournament-size pop-when-tagging gaussian-mutation-probability 
-             gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation]
+             gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
+	     reuse-errors problem-specific-report]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
            population-size 1000
@@ -2068,6 +2079,8 @@ example."
            gaussian-mutation-probability 0.0
            gaussian-mutation-per-number-mutation-probability 0.5
            gaussian-mutation-standard-deviation 0.1
+	   reuse-errors true
+	   problem-specific-report default-problem-specific-report
            }}]
   ;; set globals from parameters
   (reset! global-atom-generators atom-generators)
@@ -2078,6 +2091,7 @@ example."
   (reset! global-node-selection-leaf-probability node-selection-leaf-probability)
   (reset! global-node-selection-tournament-size node-selection-tournament-size)
   (reset! global-pop-when-tagging pop-when-tagging)
+  (reset! global-reuse-errors reuse-errors)
   (printf "\nStarting PushGP run.\n\n") (flush)
   (print-params 
     (error-function error-threshold population-size max-points atom-generators max-generations 
@@ -2087,7 +2101,7 @@ example."
       tournament-size report-simplifications final-report-simplifications
       trivial-geography-radius decimation-ratio decimation-tournament-size evalpush-limit
       evalpush-time-limit node-selection-method node-selection-tournament-size
-      node-selection-leaf-probability pop-when-tagging
+      node-selection-leaf-probability pop-when-tagging reuse-errors
       ))
   (printf "\nGenerating initial population...\n") (flush)
   (let [pop-agents (vec (doall (for [_ (range population-size)] 
@@ -2105,7 +2119,8 @@ example."
       (apply await pop-agents) ;; SYNCHRONIZE
       (printf "\nDone computing errors.") (flush)
       ;; report and check for success
-      (let [best (report (vec (doall (map deref pop-agents))) generation error-function report-simplifications)]
+      (let [best (report (vec (doall (map deref pop-agents))) generation error-function 
+			 report-simplifications problem-specific-report)]
         (if (<= (:total-error best) error-threshold)
           (do (printf "\n\nSUCCESS at generation %s\nSuccessful program: %s\nErrors: %s\nTotal error: %s\nHistory: %s\nSize: %s\n\n"
                 generation (not-lazy (:program best)) (not-lazy (:errors best)) (:total-error best) 

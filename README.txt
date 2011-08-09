@@ -628,6 +628,17 @@ VERSION HISTORY
             executed instructions and literals, in reverse order of
             execution. If the argument is :changes then instructions that
             have no effect on the state will be excluded.
+20110809: - Several additions/enhancements by Kyle Harrington:
+            - Converted problem-specific-report to a parameter in pushgp.
+            - Added reporting of program repeat counts in population.
+            - Added "error-reuse" parameter to pushgp for use in stochastic
+              and dynamic problems (for which reuse would be turned off).
+            - Added examples/mackey_glass_int.clj, a symbolic regression 
+              problem as described in Langdon & Banzhaf's 2005 paper 
+              (citation in file).
+            - Added examples/pagie_hogeweg.clj problem, a difficult 
+              symbolic regression problem when coevolution is not used.
+              Introduced by Pagie & Hogeweg's 1997 paper (citation in file).
 
 ACKNOWLEDGEMENTS
 
