@@ -15,7 +15,7 @@
 (define-registered in 
                    (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
 
-(pushgp 
+#_(pushgp 
   :error-function (fn [program]
                     (doall
                       (for [input (map #(float (- % 10)) (range 21))]

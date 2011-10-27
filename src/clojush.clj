@@ -692,7 +692,7 @@ integer to indicate how deep."
                      (push-item (apply str (repeatedly (+ min-random-string-length
                                                           (lrand-int (- max-random-string-length min-random-string-length)))
                                                        #(rand-nth "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")))
-                                :float
+                                :string
                                 state)))
 
 
