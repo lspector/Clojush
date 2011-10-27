@@ -452,6 +452,7 @@ not for use as an instruction in Push programs."
 (define-registered code_pop (popper :code))
 (define-registered boolean_pop (popper :boolean))
 (define-registered zip_pop (popper :zip))
+(define-registered string_pop (popper :string))
 
 (defn duper 
   "Returns a function that takes a state and duplicates the top item of the appropriate 
@@ -468,6 +469,7 @@ stack of the state."
 (define-registered code_dup (duper :code))
 (define-registered boolean_dup (duper :boolean))
 (define-registered zip_dup (duper :zip))
+(define-registered string_dup (duper :string))
 
 (defn swapper 
   "Returns a function that takes a state and swaps the top 2 items of the appropriate 
@@ -489,6 +491,7 @@ stack of the state."
 (define-registered code_swap (swapper :code))
 (define-registered boolean_swap (swapper :boolean))
 (define-registered zip_swap (swapper :zip))
+(define-registered string_swap (swapper :string))
 
 (defn rotter 
   "Returns a function that takes a state and rotates the top 3 items of the appropriate 
@@ -513,6 +516,7 @@ stack of the state."
 (define-registered code_rot (rotter :code))
 (define-registered boolean_rot (rotter :boolean))
 (define-registered zip_rot (rotter :zip))
+(define-registered string_rot (rotter :string))
 
 (defn flusher
   "Returns a function that empties the stack of the given state."
@@ -526,6 +530,8 @@ stack of the state."
 (define-registered code_flush (flusher :code))
 (define-registered boolean_flush (flusher :boolean))
 (define-registered zip_flush (flusher :zip))
+(define-registered string_flush (flusher :string))
+
 
 (defn eqer 
   "Returns a function that compares the top two items of the appropriate stack of 
@@ -546,6 +552,7 @@ the given state."
 (define-registered code_eq (eqer :code))
 (define-registered boolean_eq (eqer :boolean))
 (define-registered zip_eq (eqer :zip))
+(define-registered string_eq (eqer :string))
 
 (defn stackdepther
   "Returns a function that pushes the depth of the appropriate stack of the 
@@ -560,6 +567,7 @@ given state."
 (define-registered code_stackdepth (stackdepther :code))
 (define-registered boolean_stackdepth (stackdepther :boolean))
 (define-registered zip_stackdepth (stackdepther :zip))
+(define-registered string_stackdepth (stackdepther :string))
 
 (defn yanker
   "Returns a function that yanks an item from deep in the specified stack,
@@ -589,6 +597,7 @@ using the top integer to indicate how deep."
 (define-registered code_yank (yanker :code))
 (define-registered boolean_yank (yanker :boolean))
 (define-registered zip_yank (yanker :zip))
+(define-registered string_yank (yanker :string))
 
 (defn yankduper
   "Returns a function that yanks a copy of an item from deep in the specified stack,
@@ -613,6 +622,7 @@ using the top integer to indicate how deep."
 (define-registered code_yankdup (yankduper :code))
 (define-registered boolean_yankdup (yankduper :boolean))
 (define-registered zip_yankdup (yankduper :zip))
+(define-registered string_yankdup (yankduper :string))
 
 (defn shover
   "Returns a function that shoves an item deep in the specified stack, using the top
@@ -641,6 +651,7 @@ integer to indicate how deep."
 (define-registered code_shove (shover :code))
 (define-registered boolean_shove (shover :boolean))
 (define-registered zip_shove (shover :zip))
+(define-registered string_shove (shover :string))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; rand instructions
