@@ -44,6 +44,8 @@
 (def max-random-integer 10)
 (def min-random-float -1.0)
 (def max-random-float 1.0)
+(def min-random-string-length 1)
+(def max-random-string-length 10)
 (def max-points-in-random-expressions 50) ;; for code_rand
 (def maintain-histories true) ;; histories are lists of total-error values for ancestors
 (def maintain-ancestors false) ;; if true save all ancestors in each individual (costly)
@@ -683,6 +685,16 @@ integer to indicate how deep."
         :code
         (pop-item :integer state))
       state)))
+
+;trh
+(define-registered string-rand
+                   (fn [state]
+                     (push-item (apply str (repeatedly (+ min-random-string-length
+                                                          (lrand-int (- max-random-string-length min-random-string-length)))
+                                                       #(rand-nth "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")))
+                                :float
+                                state)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; instructions for numbers
