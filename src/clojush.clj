@@ -1666,6 +1666,7 @@ not run as-is."
   [thing]
   (cond (integer? thing) :integer
     (number? thing) :float
+    (string? thing) :string
     (or (= thing true) (= thing false)) :boolean
     true false))
 
