@@ -687,7 +687,7 @@ integer to indicate how deep."
       state)))
 
 ;trh
-(define-registered string-rand
+(define-registered string_rand
                    (fn [state]
                      (push-item (apply str (repeatedly (+ min-random-string-length
                                                           (lrand-int (- max-random-string-length min-random-string-length)))
