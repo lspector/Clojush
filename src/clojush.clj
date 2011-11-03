@@ -960,6 +960,16 @@ boolean stack."
                                   (pop-item :string (pop-item :string state)))
                        state)))
 
+(define-registered string_take
+                   (fn [state]
+                     (if (and (not (empty? (:string state)))
+                              (not (empty? (:integer state))))
+                       (push-item (apply str (take (stack-ref :integer 0 state)
+                                             (stack-ref :string 0 state)))
+                                  :string
+                                  (pop-item :string (pop-item :integer state)))
+                       state)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; code and exec instructions
 
