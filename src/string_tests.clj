@@ -8,4 +8,5 @@
 
 
 ; Test strings inserted into code
-(println (run-push '("this" "is" "a" "string" 2 5 integer_add string_rand) (make-push-state)  false false))
+(println (run-push '(string_rand "these" "are" "strings" string_concat)
+                   (make-push-state)  false false))

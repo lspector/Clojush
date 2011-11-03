@@ -686,7 +686,6 @@ integer to indicate how deep."
         (pop-item :integer state))
       state)))
 
-;trh
 (define-registered string_rand
                    (fn [state]
                      (push-item (apply str (repeatedly (+ min-random-string-length
@@ -948,6 +947,18 @@ boolean stack."
         :boolean
         (pop-item :float state))
       state)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; instructions for strings
+
+(define-registered string_concat
+                   (fn [state]
+                     (if (not (empty? (rest (:string state))))
+                       (push-item (str (stack-ref :string 1 state)
+                                       (stack-ref :string 0 state))
+                                  :string
+                                  (pop-item :string (pop-item :string state)))
+                       state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; code and exec instructions
