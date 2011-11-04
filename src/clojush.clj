@@ -970,6 +970,14 @@ boolean stack."
                                   (pop-item :string (pop-item :integer state)))
                        state)))
 
+(define-registered string_length
+                   (fn [state]
+                     (if (not (empty? (:string state)))
+                       (push-item (count (stack-ref :string 0 state))
+                                  :integer
+                                  (pop-item :string state))
+                       state)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; code and exec instructions
 

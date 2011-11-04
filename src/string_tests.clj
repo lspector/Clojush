@@ -8,9 +8,12 @@
 
 
 ; Test strings inserted into code
-(println (run-push '(string_rand "these" "are" "strings" string_concat)
+#_(println (run-push '(string_rand "these" "are" "strings" string_concat)
                    (make-push-state)  false false))
 
 
-(println (run-push '("abcde" "HelloWorld" 7 string_take)
+#_(println (run-push '("abcde" "HelloWorld" 7 string_take)
+                   (make-push-state)))
+
+#_(println (run-push '("d2" string_length)
                    (make-push-state)))

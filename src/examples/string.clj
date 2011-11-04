@@ -23,3 +23,10 @@
 
 ; Add string_concat to this example, and make the number of unique characters higher. Maybe only use
 ; upper case, and try to evolve a string with all 26 letters.
+
+
+
+; New GP problem: Take the input string, remove the last 2 characters, and then concat this result with itself.
+; The fitness will be the number of non-matching characters in the resulting string. For example,
+; desired result of "abcde" would be "abcabc", and a string of "abcabcrrr" would have an error of 3, for
+; 3 too many characters, and the string "aaaaaa" would have error of 4, since it gets 2 of the characters right.
