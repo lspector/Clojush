@@ -17,3 +17,8 @@
 
 #_(println (run-push '("d2" string_length)
                    (make-push-state)))
+
+
+; This is a solution to the string GP problem
+(println (run-push '(string_dup string_length 2 integer_sub string_take string_dup string_concat)
+                   (push-item "abcde" :string (make-push-state))))
