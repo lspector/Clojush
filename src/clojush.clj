@@ -35,7 +35,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; globals
 
-(def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :zip))
+(def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :zip :string))
 (def max-number-magnitude 1000000000000)
 (def min-number-magnitude 1.0E-10)
 (def top-level-push-code true)
@@ -44,6 +44,8 @@
 (def max-random-integer 10)
 (def min-random-float -1.0)
 (def max-random-float 1.0)
+(def min-random-string-length 1)
+(def max-random-string-length 10)
 (def max-points-in-random-expressions 50) ;; for code_rand
 (def maintain-histories true) ;; histories are lists of total-error values for ancestors
 (def maintain-ancestors false) ;; if true save all ancestors in each individual (costly)
@@ -251,28 +253,28 @@ Recursion in implementation could be improved."
 
 (defn discrepancy
   "Returns a measure of the discrepancy between list1 and list2. This will
-be zero if list1 and list2 are equal, and will be higher the 'more different'
-list1 is from list2. The calculation is equivalent to the following:
-1. Construct a list of all of the unique items in both of the lists. Sublists 
+   be zero if list1 and list2 are equal, and will be higher the 'more different'
+   list1 is from list2. The calculation is equivalent to the following:
+   1. Construct a list of all of the unique items in both of the lists. Sublists 
    and atoms all count as items.                               
-2. Initialize the result to zero.
-3. For each unique item increment the result by the difference between the
+   2. Initialize the result to zero.
+   3. For each unique item increment the result by the difference between the
    number of occurrences of the item in list1 and the number of occurrences
    of the item in list2.
-4. Return the result."
+   4. Return the result."
   [list1 list2]
   (reduce + (vals (merge-with (comp math/abs -)
-                    (frequencies (all-items list1))
+                              (frequencies (all-items list1))
                     (frequencies (all-items list2))))))
 
 (defn overlap
  [thing1 thing2]
- "Returns a measure of the similarity of the arguments, which may be                                                                                                                                                                                                         
-nested sequences. The overlap is defined in terms of the collections of                                                                                                                                                                                                       
-the items contained in each of the arguments, including nested items at                                                                                                                                                                                                       
-all levels. The overlap is then the maximal number of pairings by identity                                                                                                                                                                                                    
-across the two collections, divided by the size of the larger collection.                                                                                                                                                                                                     
-The returned value will range from 0 (for entirely distinct arguments)                                                                                                                                                                                                        
+ "Returns a measure of the similarity of the arguments, which may be
+nested sequences. The overlap is defined in terms of the collections of
+the items contained in each of the arguments, including nested items at
+all levels. The overlap is then the maximal number of pairings by identity
+across the two collections, divided by the size of the larger collection.
+The returned value will range from 0 (for entirely distinct arguments)
 to 1 (for identical arguments). Run (overlap-demo) to see some examples."
  (let [items1 (all-items thing1)
        items2 (all-items thing2)
@@ -452,6 +454,7 @@ not for use as an instruction in Push programs."
 (define-registered code_pop (popper :code))
 (define-registered boolean_pop (popper :boolean))
 (define-registered zip_pop (popper :zip))
+(define-registered string_pop (popper :string))
 
 (defn duper 
   "Returns a function that takes a state and duplicates the top item of the appropriate 
@@ -468,6 +471,7 @@ stack of the state."
 (define-registered code_dup (duper :code))
 (define-registered boolean_dup (duper :boolean))
 (define-registered zip_dup (duper :zip))
+(define-registered string_dup (duper :string))
 
 (defn swapper 
   "Returns a function that takes a state and swaps the top 2 items of the appropriate 
@@ -489,6 +493,7 @@ stack of the state."
 (define-registered code_swap (swapper :code))
 (define-registered boolean_swap (swapper :boolean))
 (define-registered zip_swap (swapper :zip))
+(define-registered string_swap (swapper :string))
 
 (defn rotter 
   "Returns a function that takes a state and rotates the top 3 items of the appropriate 
@@ -513,6 +518,7 @@ stack of the state."
 (define-registered code_rot (rotter :code))
 (define-registered boolean_rot (rotter :boolean))
 (define-registered zip_rot (rotter :zip))
+(define-registered string_rot (rotter :string))
 
 (defn flusher
   "Returns a function that empties the stack of the given state."
@@ -526,6 +532,8 @@ stack of the state."
 (define-registered code_flush (flusher :code))
 (define-registered boolean_flush (flusher :boolean))
 (define-registered zip_flush (flusher :zip))
+(define-registered string_flush (flusher :string))
+
 
 (defn eqer 
   "Returns a function that compares the top two items of the appropriate stack of 
@@ -546,6 +554,7 @@ the given state."
 (define-registered code_eq (eqer :code))
 (define-registered boolean_eq (eqer :boolean))
 (define-registered zip_eq (eqer :zip))
+(define-registered string_eq (eqer :string))
 
 (defn stackdepther
   "Returns a function that pushes the depth of the appropriate stack of the 
@@ -560,6 +569,7 @@ given state."
 (define-registered code_stackdepth (stackdepther :code))
 (define-registered boolean_stackdepth (stackdepther :boolean))
 (define-registered zip_stackdepth (stackdepther :zip))
+(define-registered string_stackdepth (stackdepther :string))
 
 (defn yanker
   "Returns a function that yanks an item from deep in the specified stack,
@@ -589,6 +599,7 @@ using the top integer to indicate how deep."
 (define-registered code_yank (yanker :code))
 (define-registered boolean_yank (yanker :boolean))
 (define-registered zip_yank (yanker :zip))
+(define-registered string_yank (yanker :string))
 
 (defn yankduper
   "Returns a function that yanks a copy of an item from deep in the specified stack,
@@ -613,6 +624,7 @@ using the top integer to indicate how deep."
 (define-registered code_yankdup (yankduper :code))
 (define-registered boolean_yankdup (yankduper :boolean))
 (define-registered zip_yankdup (yankduper :zip))
+(define-registered string_yankdup (yankduper :string))
 
 (defn shover
   "Returns a function that shoves an item deep in the specified stack, using the top
@@ -641,6 +653,7 @@ integer to indicate how deep."
 (define-registered code_shove (shover :code))
 (define-registered boolean_shove (shover :boolean))
 (define-registered zip_shove (shover :zip))
+(define-registered string_shove (shover :string))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; rand instructions
@@ -672,6 +685,15 @@ integer to indicate how deep."
         :code
         (pop-item :integer state))
       state)))
+
+(define-registered string_rand
+                   (fn [state]
+                     (push-item (apply str (repeatedly (+ min-random-string-length
+                                                          (lrand-int (- max-random-string-length min-random-string-length)))
+                                                       #(rand-nth "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")))
+                                :string
+                                state)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; instructions for numbers
@@ -925,6 +947,36 @@ boolean stack."
         :boolean
         (pop-item :float state))
       state)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; instructions for strings
+
+(define-registered string_concat
+                   (fn [state]
+                     (if (not (empty? (rest (:string state))))
+                       (push-item (str (stack-ref :string 1 state)
+                                       (stack-ref :string 0 state))
+                                  :string
+                                  (pop-item :string (pop-item :string state)))
+                       state)))
+
+(define-registered string_take
+                   (fn [state]
+                     (if (and (not (empty? (:string state)))
+                              (not (empty? (:integer state))))
+                       (push-item (apply str (take (stack-ref :integer 0 state)
+                                                   (stack-ref :string 0 state)))
+                                  :string
+                                  (pop-item :string (pop-item :integer state)))
+                       state)))
+
+(define-registered string_length
+                   (fn [state]
+                     (if (not (empty? (:string state)))
+                       (push-item (count (stack-ref :string 0 state))
+                                  :integer
+                                  (pop-item :string state))
+                       state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; code and exec instructions
@@ -1643,6 +1695,7 @@ not run as-is."
   [thing]
   (cond (integer? thing) :integer
     (number? thing) :float
+    (string? thing) :string
     (or (= thing true) (= thing false)) :boolean
     true false))
 
