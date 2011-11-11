@@ -268,11 +268,11 @@ list1 is from list2. The calculation is equivalent to the following:
 (defn overlap
  [thing1 thing2]
  "Returns a measure of the similarity of the arguments, which may be                                                                                                                                                                                                         
-nested sequences. The overlap is defined in terms of the collections of                                                                                                                                                                                                       
-the items contained in each of the arguments, including nested items at                                                                                                                                                                                                       
-all levels. The overlap is then the maximal number of pairings by identity                                                                                                                                                                                                    
-across the two collections, divided by the size of the larger collection.                                                                                                                                                                                                     
-The returned value will range from 0 (for entirely distinct arguments)                                                                                                                                                                                                        
+nested sequences. The overlap is defined in terms of the collections of
+the items contained in each of the arguments, including nested items at
+all levels. The overlap is then the maximal number of pairings by identity
+across the two collections, divided by the size of the larger collection.
+The returned value will range from 0 (for entirely distinct arguments) 
 to 1 (for identical arguments). Run (overlap-demo) to see some examples."
  (let [items1 (all-items thing1)
        items2 (all-items thing2)
