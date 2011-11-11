@@ -653,6 +653,9 @@ VERSION HISTORY
           - Added local-file dependency and used file* for file access.
           - Removed ant and tagged-ant examples because of bugs related
             to confusion of push interpreted states and ant world states.
+20111104: - Added string stack and a variety of string stack instructions.
+          - Added two example pushgp runs that use the string stack in
+            the file examples/string.clj.
           
 
 ACKNOWLEDGEMENTS
