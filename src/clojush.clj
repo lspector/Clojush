@@ -390,8 +390,9 @@ numbers in the demo output."
 
 (defmacro define-registered
   [instruction definition]
-  `(do (register-instruction '~instruction)
-     (swap! instruction-table assoc '~instruction ~definition)))
+  `(when-not (contains? instruction-table '~instruction)
+     (do (register-instruction '~instruction)
+         (swap! instruction-table assoc '~instruction ~definition))))
 
 (defn state-pretty-print
   [state]
