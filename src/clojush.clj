@@ -379,7 +379,7 @@ numbers in the demo output."
 ;"Elapsed time: 52389.016 msecs"
 ;"Elapsed time: 54706.127 msecs"
 
-(def registered-instructions (atom ()))
+(def registered-instructions (atom #{}))
 
 (defn register-instruction 
   "Add the provided name to the global list of registered instructions."
@@ -390,8 +390,7 @@ numbers in the demo output."
 
 (defmacro define-registered
   [instruction definition]
-  `(do (when-not (contains? instruction-table '~instruction) 
-	 (register-instruction '~instruction))
+  `(do (register-instruction '~instruction)
        (swap! instruction-table assoc '~instruction ~definition)))
 
 (defn state-pretty-print
