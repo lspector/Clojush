@@ -1,13 +1,17 @@
 README.txt
 
 Lee Spector (lspector@hampshire.edu), started 20100227
-See version history at the end of this file.
+See version history at https://github.com/lspector/Clojush/commits/master
 
-This is the README file accompanying clojush.clj, an implementation of the 
+This is the README file accompanying Clojush, an implementation of the 
 Push programming language and the PushGP genetic programming system in the 
 Clojure programming language. Among other features this implementation
 takes advantage of Clojure's facilities for multi-core concurrency. Use
 Java's -XX:+UseParallelGC option to take maximum advantage of this feature.
+
+AVAILABILITY
+
+https://github.com/lspector/Clojush/
 
 REQUIREMENTS
 
@@ -295,7 +299,7 @@ TO DO (SOMETIME, MAYBE)
   uses are developed for it.
 - Write a "sufficient-args" fn/macro to clean up Push instruction definitions.
 
-VERSION HISTORY
+VERSION HISTORY -- NOW OBSELETE. See https://github.com/lspector/Clojush/commits/master
 20100227: - First distributed version.
 20100301: - Added (shutdown-agents) for proper termination.
 20100306: - Added history (of total errors of ancestors) to individuals.
@@ -656,6 +660,8 @@ VERSION HISTORY
 20111104: - Added string stack and a variety of string stack instructions.
           - Added two example pushgp runs that use the string stack in
             the file examples/string.clj.
+20111112: - Obsoleted this version history in favor of the commit logs
+            at https://github.com/lspector/Clojush/commits/master
           
 
 ACKNOWLEDGEMENTS
