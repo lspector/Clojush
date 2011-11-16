@@ -24,7 +24,8 @@
     [clojure.contrib.math :as math]
     [clojure.contrib.seq-utils :as seq-utils]
     [clojure.walk :as walk]
-    [clojure.contrib.string :as string]))
+    [clojure.contrib.string :as string]
+    [local-file]))
 
 (import java.lang.Math)
 
@@ -2112,15 +2113,15 @@ example."
              evalpush-limit evalpush-time-limit node-selection-method node-selection-leaf-probability
              node-selection-tournament-size pop-when-tagging gaussian-mutation-probability 
              gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
-	     reuse-errors problem-specific-report use-single-thread random-seed]
+             	     reuse-errors problem-specific-report use-single-thread random-seed]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
            population-size 1000
            max-points 50
            atom-generators (concat @registered-instructions
                                    (list 
-                                    (fn [] (lrand-int 100))
-                                    (fn [] (lrand))))
+                                     (fn [] (lrand-int 100))
+                                     (fn [] (lrand))))
            max-generations 1001
            mutation-probability 0.4
            mutation-max-points 20
@@ -2142,8 +2143,8 @@ example."
            gaussian-mutation-probability 0.0
            gaussian-mutation-per-number-mutation-probability 0.5
            gaussian-mutation-standard-deviation 0.1
-	   reuse-errors true
-	   problem-specific-report default-problem-specific-report
+           	   reuse-errors true
+           	   problem-specific-report default-problem-specific-report
            use-single-thread false
            random-seed (System/nanoTime)           
            }}]
@@ -2159,27 +2160,30 @@ example."
     (reset! global-pop-when-tagging pop-when-tagging)
     (reset! global-reuse-errors reuse-errors)
     (printf "\nStarting PushGP run.\n\n") (flush)
+    (printf "Clojush version = ")
+    (printf (str (string/drop 1 (string/chop (re-find #"\"[0-9]+\.[0-9]+\.[0-9]+.*\""
+                                                 (first (string/split-lines (local-file/slurp* "project.clj")))))) "\n")) (flush)
     (print-params 
-     (error-function error-threshold population-size max-points atom-generators max-generations 
-                     mutation-probability mutation-max-points crossover-probability
-                     simplification-probability gaussian-mutation-probability 
-                     gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
-                     tournament-size report-simplifications final-report-simplifications
-                     trivial-geography-radius decimation-ratio decimation-tournament-size evalpush-limit
-                     evalpush-time-limit node-selection-method node-selection-tournament-size
-                     node-selection-leaf-probability pop-when-tagging reuse-errors
-                     use-single-thread random-seed
-                     ))
+      (error-function error-threshold population-size max-points atom-generators max-generations 
+                      mutation-probability mutation-max-points crossover-probability
+                      simplification-probability gaussian-mutation-probability 
+                      gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
+                      tournament-size report-simplifications final-report-simplifications
+                      trivial-geography-radius decimation-ratio decimation-tournament-size evalpush-limit
+                      evalpush-time-limit node-selection-method node-selection-tournament-size
+                      node-selection-leaf-probability pop-when-tagging reuse-errors
+                      use-single-thread random-seed
+                      ))
     (printf "\nGenerating initial population...\n") (flush)
     (let [pop-agents (vec (doall (for [_ (range population-size)] 
                                    ((if use-single-thread atom agent)
-                                    (make-individual 
-                                     :program (random-code max-points atom-generators))
-                                    :error-handler (fn [agnt except] (println except))))))
+                                        (make-individual 
+                                          :program (random-code max-points atom-generators))
+                                        :error-handler (fn [agnt except] (println except))))))
           child-agents (vec (doall (for [_ (range population-size)]
                                      ((if use-single-thread atom agent)
-                                      (make-individual)
-                                      :error-handler (fn [agnt except] (println except))))))
+                                          (make-individual)
+                                          :error-handler (fn [agnt except] (println except))))))
           rand-gens (vec (doall (for [k (range population-size)]
                                   (java.util.Random. (+ random-seed (inc k))))))]
       (loop [generation 0]
@@ -2187,14 +2191,14 @@ example."
         (dorun (map #((if use-single-thread swap! send) % evaluate-individual error-function %2) pop-agents rand-gens))
         (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE ; might this need a dorun?
         (printf "\nDone computing errors.") (flush)
-        
+        ;
         ;; some debugging code trying to track down nil agent results.... leaving in case not fixed
-                                        ;(println (map :total-error (vec (doall (map deref pop-agents)))))(flush) ;***
-                                        ;(loop [ers (map :total-error (vec (doall (map deref pop-agents))))] ;***
-                                        ;  (when (some not ers) 
-                                        ;    (println (map :total-error (vec (doall (map deref pop-agents)))))(flush) 
-                                        ;    (recur (map :total-error (vec (doall (map deref pop-agents)))))))
-        
+        ;(println (map :total-error (vec (doall (map deref pop-agents)))))(flush) ;***
+        ;(loop [ers (map :total-error (vec (doall (map deref pop-agents))))] ;***
+        ;  (when (some not ers) 
+        ;    (println (map :total-error (vec (doall (map deref pop-agents)))))(flush) 
+        ;    (recur (map :total-error (vec (doall (map deref pop-agents)))))))
+        ;
         ;; report and check for success
         (let [best (report (vec (doall (map deref pop-agents))) generation error-function 
                            report-simplifications problem-specific-report)]
@@ -2215,17 +2219,17 @@ example."
                                           trivial-geography-radius)]
                         (dotimes [i population-size]
                           ((if use-single-thread swap! send)
-                           (nth child-agents i) 
-                           breed i (nth rand-gens i) pop error-function population-size max-points atom-generators 
-                           mutation-probability mutation-max-points crossover-probability 
-                           simplification-probability tournament-size reproduction-simplifications 
-                           trivial-geography-radius gaussian-mutation-probability 
-                           gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation)))
+                               (nth child-agents i) 
+                               breed i (nth rand-gens i) pop error-function population-size max-points atom-generators 
+                               mutation-probability mutation-max-points crossover-probability 
+                               simplification-probability tournament-size reproduction-simplifications 
+                               trivial-geography-radius gaussian-mutation-probability 
+                               gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation)))
                       (when-not use-single-thread (apply await child-agents)) ;; SYNCHRONIZE
                       (printf "\nInstalling next generation...") (flush)
                       (dotimes [i population-size]
                         ((if use-single-thread swap! send)
-                         (nth pop-agents i) (fn [av] (deref (nth child-agents i)))))
+                             (nth pop-agents i) (fn [av] (deref (nth child-agents i)))))
                       (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
                       (recur (inc generation)))))))))))
 
