@@ -2161,8 +2161,18 @@ example."
     (reset! global-reuse-errors reuse-errors)
     (printf "\nStarting PushGP run.\n\n") (flush)
     (printf "Clojush version = ")
-    (printf (str (string/drop 1 (string/chop (re-find #"\"[0-9]+\.[0-9]+\.[0-9]+.*\""
-                                                 (first (string/split-lines (local-file/slurp* "project.clj")))))) "\n")) (flush)
+    (try
+      (let [version-number (string/drop 1 (string/chop
+                                            (re-find #"\".*\""
+                                                     (first (string/split-lines
+                                                              (local-file/slurp* "project.clj"))))))]
+        (if (empty? version-number)
+          (throw Exception)
+          (printf (str version-number "\n"))))
+      (flush)
+      (catch Exception e
+             (printf "version number unavailable\n")
+             (flush)))
     (print-params 
       (error-function error-threshold population-size max-points atom-generators max-generations 
                       mutation-probability mutation-max-points crossover-probability
