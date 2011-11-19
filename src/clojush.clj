@@ -1831,6 +1831,12 @@ by @global-node-selection-method."
       (= method :leaf-probability) (choose-node-index-with-leaf-probability tree)
       (= method :size-tournament) (choose-node-index-by-tournament tree))))
 
+(defn flatten-seqs
+  "A version of flatten that only flattens nested seqs."
+  [x]
+  (filter (complement seq?)
+          (rest (tree-seq seq? seq x))))
+
 (defn auto-simplify 
   "Auto-simplifies the provided individual."
   [ind error-function steps print? progress-interval]
@@ -1859,7 +1865,7 @@ by @global-node-selection-method."
                           (let [point-index (lrand-int (count-points program))
                                 point (code-at-point program point-index)]
                             (if (seq? point)
-                              (insert-code-at-point program point-index (flatten point))
+                              (insert-code-at-point program point-index (flatten-seqs point))
                               program)))
             new-errors (error-function new-program)
             new-total-errors (reduce + new-errors)]
