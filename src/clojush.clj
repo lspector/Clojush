@@ -98,7 +98,7 @@ provided n. Arguments greater than 2^31-1 are treated as if they were 2^31-1 (21
          shuf (vec coll)]
     (if (zero? i)
       (cond (vector? coll) shuf
-            (list? coll) (reverse (into (list) shuf))
+            (list? coll) (into (list) shuf)
             :else
             (seq shuf))
       (recur (dec i)
