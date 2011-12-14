@@ -91,6 +91,22 @@ provided n. Arguments greater than 2^31-1 are treated as if they were 2^31-1 (21
   [coll]
   (nth coll (. thread-local-random-generator (nextInt (count coll)))))
 
+(defn lshuffle
+  "Return a random permutation of coll. Implements a Fisher-Yates shuffle."
+  [coll]
+  (loop [i (dec (count coll))
+         shuf (vec coll)]
+    (if (zero? i)
+      (cond (vector? coll) shuf
+            (list? coll) (reverse (into (list) shuf))
+            :else
+            (seq shuf))
+      (recur (dec i)
+             (let [j (lrand-int (inc i))]
+               (assoc shuf
+                 j (shuf i)
+                 i (shuf j)))))))
+
 (defn decompose
   "Returns a list of at most max-parts numbers that sum to number.
 The order of the numbers is not random (you may want to shuffle it)."
@@ -110,7 +126,7 @@ The order of the numbers is not random (you may want to shuffle it)."
         (element)
         element))
     (let [elements-this-level 
-          (shuffle (decompose (dec points) (dec points)))]
+          (lshuffle (decompose (dec points) (dec points)))]
       (doall (map (fn [size] (random-code-with-size size atom-generators))
                elements-this-level)))))
 
