@@ -92,20 +92,12 @@ provided n. Arguments greater than 2^31-1 are treated as if they were 2^31-1 (21
   (nth coll (. thread-local-random-generator (nextInt (count coll)))))
 
 (defn lshuffle
-  "Return a random permutation of coll. Implements a Fisher-Yates shuffle."
-  [coll]
-  (loop [i (dec (count coll))
-         shuf (vec coll)]
-    (if (zero? i)
-      (cond (vector? coll) shuf
-            (list? coll) (into (list) shuf)
-            :else
-            (seq shuf))
-      (recur (dec i)
-             (let [j (lrand-int (inc i))]
-               (assoc shuf
-                 j (shuf i)
-                 i (shuf j)))))))
+  "Return a random permutation of coll (Adapted from clojure.core)"
+  {:static true}
+  [^java.util.Collection coll]
+  (let [al (java.util.ArrayList. coll)]
+    (java.util.Collections/shuffle al thread-local-random-generator)
+    (clojure.lang.RT/vector (.toArray al))))
 
 (defn decompose
   "Returns a list of at most max-parts numbers that sum to number.
