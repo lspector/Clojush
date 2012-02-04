@@ -2118,6 +2118,20 @@ example."
                  targets
                  outputs))))))
 
+(defn git-last-commit-hash
+  "Returns the last Git commit hash"
+  []
+  (let [dir (local-file/project-dir)]
+    (string/trim
+      (slurp
+        (str dir
+             "/.git/"
+             (subs
+               (string/trim
+                 (slurp
+                   (str dir "/.git/HEAD")))
+               5))))))
+
 (defn pushgp
   "The top-level routine of pushgp."
   [& {:keys [error-function error-threshold population-size max-points atom-generators max-generations
@@ -2186,6 +2200,24 @@ example."
       (flush)
       (catch Exception e
              (printf "version number unavailable\n")
+             (flush)))
+    (try
+      (let [git-hash (git-last-commit-hash)]
+        (if (empty? git-hash)
+          (throw Exception)
+          (do
+            ;; NOTES: - Last commit hash will only be correct if this code has
+            ;;          been committed already.
+            ;;        - GitHub link will only work if commit has been pushed
+            ;;          to GitHub.
+            (printf (str "Hash of last Git commit = " git-hash "\n"))
+            (printf (str "GitHub link = https://github.com/lspector/Clojush/commit/"
+                         git-hash
+                         "\n"))
+            (flush))))
+      (catch Exception e
+             (printf "Hash of last Git commit = unavailable\n")
+             (printf "GitHub link = unavailable\n")
              (flush)))
     (print-params 
       (error-function error-threshold population-size max-points atom-generators max-generations 
