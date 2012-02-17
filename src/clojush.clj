@@ -2171,8 +2171,8 @@ example."
            gaussian-mutation-probability 0.0
            gaussian-mutation-per-number-mutation-probability 0.5
            gaussian-mutation-standard-deviation 0.1
-           	   reuse-errors true
-           	   problem-specific-report default-problem-specific-report
+           reuse-errors true
+           problem-specific-report default-problem-specific-report
            use-single-thread false
            random-seed (System/nanoTime)           
            }}]
