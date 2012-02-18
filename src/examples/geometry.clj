@@ -192,7 +192,7 @@
   :error-function e
   :population-size 1000
   :use-single-thread false
-  :error-threshold 0.01
+  :error-threshold 0.00001
   :max-points 150
   :max-generations 1001
   :mutation-probability 0.4
@@ -215,6 +215,7 @@
   :gaussian-mutation-probability 0.0
   :gaussian-mutation-per-number-mutation-probability 0.5
   :gaussian-mutation-standard-deviation 0.1
-  :reuse-errors true
+  :reuse-errors false
+  :use-historically-assessed-hardness true
   )
 
