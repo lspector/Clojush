@@ -1805,7 +1805,7 @@ normal, or :abnormal otherwise."
 
 (defrecord individual [program errors total-error history ancestors])
 
-(defn make-individual [& {:keys [program errors total-error history ancestors]
+(defn make-individual [& {:keys [program errors total-error adjusted-error history ancestors]
                           :or {program nil
                                errors nil
                                total-error nil ;; a non-number is used to indicate no value
@@ -1816,9 +1816,9 @@ normal, or :abnormal otherwise."
 (defn compute-total-error
   [errors]
   (if @global-use-historically-assessed-hardness
-    (reduce + (map (fn [rate e] (* (- 1.01 rate) e))
-                   @solution-rates
-                   errors))
+    (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
+                          @solution-rates
+                          errors)))
     (reduce + errors)))
 
 (defn choose-node-index-with-leaf-probability
