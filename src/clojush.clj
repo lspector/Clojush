@@ -1851,7 +1851,6 @@ normal, or :abnormal otherwise."
   (let [similarities (map similarity
                           (repeat tc1)
                           test-cases)]
-    (println similarities)
     (/ (reduce + similarities)
        (count similarities))))
 
@@ -2319,13 +2318,10 @@ example."
                   (let [error-seqs (map :errors (map deref pop-agents))
                         test-case-errors (apply map list error-seqs)]
                     (doall (for [i (range (count test-case-errors))]
-                             (average-pairwise-similarity (nth i test-case-errors)
+                             (average-pairwise-similarity (nth test-case-errors i)
                                                           (concat
                                                             (take i test-case-errors)
-                                                            (drop (inc i) test-case-errors)))))
-                    ;(printf "\n\nTest Case Errors:")
-                    ;(printf (apply str (interpose "\n" test-case-errors)))
-                    ))
+                                                            (drop (inc i) test-case-errors)))))))
           (printf "\nSimilarity Rates: ")
           (println (doall (map float @similarity-rates))))
         ;; report and check for success
