@@ -66,10 +66,7 @@
 (def global-use-single-thread (atom false))
 
 ;; Historically-assessed hardness (http://hampshire.edu/lspector/pubs/kleinspector-gptp08-preprint.pdf)
-;; using the "Previous Generation / Difference" method. One should not reuse errors with 
-;; historically-assessed hardness, and one should consider using a smaller error-threshold.
-;; Total errors in individuals will be scaled. (For improved performance one could reuse errors
-;; but just recalculate total errors each generation, but this is not done yet.)
+;; using the "Previous Generation / Difference" method. 
 (def global-use-historically-assessed-hardness (atom false))
 (def solution-rates (atom (repeat 0)))
 
@@ -1803,23 +1800,29 @@ normal, or :abnormal otherwise."
 ;; Populations are vectors of agents with individuals as their states (along with error and
 ;; history information).
 
-(defrecord individual [program errors total-error history ancestors])
 
-(defn make-individual [& {:keys [program errors total-error adjusted-error history ancestors]
+(defrecord individual [program errors total-error hah-error history ancestors])
+
+(defn make-individual [& {:keys [program errors total-error hah-error history ancestors]
                           :or {program nil
                                errors nil
                                total-error nil ;; a non-number is used to indicate no value
+                               hah-error nil
                                history nil
                                ancestors nil}}]
-  (individual. program errors total-error history ancestors))
+  (individual. program errors total-error hah-error history ancestors))
 
 (defn compute-total-error
+  [errors]
+  (reduce + errors))
+
+(defn compute-hah-error
   [errors]
   (if @global-use-historically-assessed-hardness
     (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
                           @solution-rates
                           errors)))
-    (reduce + errors)))
+    nil))
 
 (defn choose-node-index-with-leaf-probability
   "Returns an index into tree, choosing a leaf with probability 
@@ -1920,6 +1923,7 @@ by @global-node-selection-method."
       (flush)
       (printf "\nErrors: %s" (not-lazy (:errors best)))(flush)
       (printf "\nTotal: %s" (:total-error best))(flush)
+      (printf "\nHAH-error: %s" (:hah-error best))(flush)
       (printf "\nHistory: %s" (not-lazy (:history best)))(flush)
       (printf "\nSize: %s" (count-points (:program best)))(flush)
       (print "\n--- Population Statistics ---\nAverage total errors in population: ")(flush)
@@ -2017,9 +2021,9 @@ subprogram of parent2."
                      (:ancestors parent1))))))
 
 (defn evaluate-individual
-  "Returns the given individual with errors and total-errors, computing them if necessary."
+  "Returns the given individual with errors, total-errors, and hah-errors,
+computing them if necessary."
   [i error-function rand-gen]
-; (println "XXXXXX") (flush) ;***
   (binding [thread-local-random-generator rand-gen]
     (let [p (:program i)
           e (if (and (seq? (:errors i)) @global-reuse-errors)
@@ -2027,9 +2031,9 @@ subprogram of parent2."
               (error-function p))
           te (if (and (number? (:total-error i)) @global-reuse-errors)
                (:total-error i)
-               (keep-number-reasonable (compute-total-error e)))]
-;(println te)(flush) ;***
-      (make-individual :program p :errors e :total-error te 
+               (keep-number-reasonable (compute-total-error e)))
+          he (compute-hah-error e)]
+      (make-individual :program p :errors e :total-error te :hah-error he
         :history (if maintain-histories (cons te (:history i)) (:history i))
         :ancestors (:ancestors i)))))
 
