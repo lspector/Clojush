@@ -1831,6 +1831,30 @@ normal, or :abnormal otherwise."
                           errors)))
     nil))
 
+(defn similarity
+  "Takes two test case lists and returns their similarity, which is the count of the
+   indices with equal elements divided by their length"
+  [tc1 tc2]
+  (/ (reduce + (map #(if (or (and (zero? %1) (zero? %2)) ;if both solved
+                             (and (not (zero? %1)) (not (zero? %2)))) ; or if both not solved
+                       1
+                       0)
+                    tc1
+                    tc2))
+     (count tc1)))
+
+(defn average-pairwise-similarity
+  "Takes a test case tc1 which we want to find the average pairwise similarity with all
+   test cases in test-cases. Test cases is a list of test case error results, where each
+   test case is a list of the errors over each individual."
+  [tc1 test-cases]
+  (let [similarities (map similarity
+                          (repeat tc1)
+                          test-cases)]
+    (println similarities)
+    (/ (reduce + similarities)
+       (count similarities))))
+
 (defn choose-node-index-with-leaf-probability
   "Returns an index into tree, choosing a leaf with probability 
 @global-node-selection-leaf-probability."
@@ -2294,9 +2318,16 @@ example."
           (reset! similarity-rates
                   (let [error-seqs (map :errors (map deref pop-agents))
                         test-case-errors (apply map list error-seqs)]
-                    (printf "\nTestCaseErrors(0):")
-                    (println (first test-case-errors))
-                    )))
+                    (doall (for [i (range (count test-case-errors))]
+                             (average-pairwise-similarity (nth i test-case-errors)
+                                                          (concat
+                                                            (take i test-case-errors)
+                                                            (drop (inc i) test-case-errors)))))
+                    ;(printf "\n\nTest Case Errors:")
+                    ;(printf (apply str (interpose "\n" test-case-errors)))
+                    ))
+          (printf "\nSimilarity Rates: ")
+          (println (doall (map float @similarity-rates))))
         ;; report and check for success
         (let [best (report (vec (doall (map deref pop-agents))) generation error-function 
                            report-simplifications problem-specific-report)]
