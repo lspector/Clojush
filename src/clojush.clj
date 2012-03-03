@@ -1950,12 +1950,13 @@ by @global-node-selection-method."
         (doall
           (for [_ (range tournament-size)]
             (nth pop
-              (if (zero? radius)
-                (lrand-int (count pop))
-                (mod (+ location (- (lrand-int (+ 1 (* radius 2))) radius))
-                  (count pop))))))]
-    (reduce (fn [i1 i2] (if (< (:total-error i1) (:total-error i2)) i1 i2))
-	     tournament-set)))
+                 (if (zero? radius)
+                   (lrand-int (count pop))
+                   (mod (+ location (- (lrand-int (+ 1 (* radius 2))) radius))
+                        (count pop))))))
+        err-fn (if @global-use-historically-assessed-hardness :hah-error :total-error)]
+    (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
+            tournament-set)))
 
 (defn mutate 
   "Returns a mutated version of the given individual."
