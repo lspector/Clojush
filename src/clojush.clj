@@ -1808,28 +1808,40 @@ normal, or :abnormal otherwise."
 ;; history information).
 
 
-(defrecord individual [program errors total-error hah-error history ancestors])
+(defrecord individual [program errors total-error historically-scaled-error history
+                       ancestors])
 
-(defn make-individual [& {:keys [program errors total-error hah-error history ancestors]
-                          :or {program nil
-                               errors nil
-                               total-error nil ;; a non-number is used to indicate no value
-                               hah-error nil
-                               history nil
-                               ancestors nil}}]
-  (individual. program errors total-error hah-error history ancestors))
+(defn make-individual
+  [& {:keys [program errors total-error historically-scaled-error history ancestors]
+      :or {program nil
+           errors nil
+           total-error nil ;; a non-number is used to indicate no value
+           historically-scaled-error nil
+           history nil
+           ancestors nil}}]
+  (individual. program errors total-error historically-scaled-error history ancestors))
 
 (defn compute-total-error
   [errors]
   (reduce + errors))
 
-(defn compute-hah-error
+(defn compute-historically-scaled-error
   [errors]
-  (if @global-use-historically-assessed-hardness
-    (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
-                          @solution-rates
-                          errors)))
-    nil))
+  (cond
+    (and @global-use-historically-assessed-hardness
+         @global-use-historically-assessed-similarity) (reduce + (doall (map (fn [h-rate s-rate e] (* (- 1.01 h-rate)
+                                                                                                      (- 1.01 s-rate)
+                                                                                                      e))
+                                                                             @solution-rates
+                                                                             @similarity-rates
+                                                                             errors)))
+    @global-use-historically-assessed-hardness (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
+                                                                     @solution-rates
+                                                                     errors)))
+    @global-use-historically-assessed-similarity (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
+                                                                       @similarity-rates
+                                                                       errors)))
+    true nil))
 
 (defn similarity
   "Takes two test case lists and returns their similarity, which is the count of the
@@ -1953,7 +1965,7 @@ by @global-node-selection-method."
       (flush)
       (printf "\nErrors: %s" (not-lazy (:errors best)))(flush)
       (printf "\nTotal: %s" (:total-error best))(flush)
-      (printf "\nHAH-error: %s" (:hah-error best))(flush)
+      (printf "\nHistorically-scaled-error: %s" (:historically-scaled-error best))(flush)
       (printf "\nHistory: %s" (not-lazy (:history best)))(flush)
       (printf "\nSize: %s" (count-points (:program best)))(flush)
       (print "\n--- Population Statistics ---\nAverage total errors in population: ")(flush)
@@ -1984,7 +1996,10 @@ by @global-node-selection-method."
                    (lrand-int (count pop))
                    (mod (+ location (- (lrand-int (+ 1 (* radius 2))) radius))
                         (count pop))))))
-        err-fn (if @global-use-historically-assessed-hardness :hah-error :total-error)]
+        err-fn (if (or @global-use-historically-assessed-hardness
+                       @global-use-historically-assessed-similarity)
+                 :historically-scaled-error
+                 :total-error)]
     (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
             tournament-set)))
 
@@ -2052,7 +2067,7 @@ subprogram of parent2."
                      (:ancestors parent1))))))
 
 (defn evaluate-individual
-  "Returns the given individual with errors, total-errors, and hah-errors,
+  "Returns the given individual with errors, total-errors, and historically-scaled-errors,
 computing them if necessary."
   [i error-function rand-gen]
   (binding [thread-local-random-generator rand-gen]
@@ -2063,8 +2078,8 @@ computing them if necessary."
           te (if (and (number? (:total-error i)) @global-reuse-errors)
                (:total-error i)
                (keep-number-reasonable (compute-total-error e)))
-          he (compute-hah-error e)]
-      (make-individual :program p :errors e :total-error te :hah-error he
+          hse (compute-historically-scaled-error e)]
+      (make-individual :program p :errors e :total-error te :historically-scaled-error hse
         :history (if maintain-histories (cons te (:history i)) (:history i))
         :ancestors (:ancestors i)))))
 
