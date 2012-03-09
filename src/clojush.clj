@@ -75,6 +75,7 @@
 ;; other test cases are. Similarity is measured over the results from the previous
 ;; generation.
 (def global-use-historically-assessed-similarity (atom false))
+(def global-normalize-HAS-zero-one (atom true))
 (def similarity-rates (atom (repeat 0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1827,21 +1828,30 @@ normal, or :abnormal otherwise."
 
 (defn compute-historically-scaled-error
   [errors]
-  (cond
-    (and @global-use-historically-assessed-hardness
-         @global-use-historically-assessed-similarity) (reduce + (doall (map (fn [h-rate s-rate e] (* (- 1.01 h-rate)
-                                                                                                      (- 1.01 s-rate)
-                                                                                                      e))
-                                                                             @solution-rates
-                                                                             @similarity-rates
-                                                                             errors)))
-    @global-use-historically-assessed-hardness (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
-                                                                     @solution-rates
-                                                                     errors)))
-    @global-use-historically-assessed-similarity (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
-                                                                       @similarity-rates
+  (let [sim-rates (if global-normalize-HAS-zero-one
+                    (let [min-rate (apply min @similarity-rates)
+                          max-rate (apply max @similarity-rates)
+                          rates (map #(/ (- % min-rate) (- max-rate min-rate))
+                                     @similarity-rates)]
+                      (printf "\nNormalized Similarity Rates: ")
+                      (println (doall (map float rates)))
+                      rates)
+                    @similarity-rates)]
+    (cond
+      (and @global-use-historically-assessed-hardness
+           @global-use-historically-assessed-similarity) (reduce + (doall (map (fn [h-rate s-rate e] (* (- 1.01 h-rate)
+                                                                                                        (- 1.01 s-rate)
+                                                                                                        e))
+                                                                               @solution-rates
+                                                                               sim-rates
+                                                                               errors)))
+      @global-use-historically-assessed-hardness (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
+                                                                       sim-rates
                                                                        errors)))
-    true nil))
+      @global-use-historically-assessed-similarity (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
+                                                                         @similarity-rates
+                                                                         errors)))
+      true nil)))
 
 (defn similarity
   "Takes two test case lists and returns their similarity, which is the count of the
