@@ -75,7 +75,7 @@
 ;; other test cases are. Similarity is measured over the results from the previous
 ;; generation.
 (def global-use-historically-assessed-similarity (atom false))
-(def global-normalize-HAS-zero-one (atom true))
+(def global-normalize-HAS-zero-one (atom false))
 (def similarity-rates (atom (repeat 10 0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2208,7 +2208,8 @@ example."
              node-selection-tournament-size pop-when-tagging gaussian-mutation-probability 
              gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
              reuse-errors problem-specific-report use-single-thread random-seed 
-             use-historically-assessed-hardness use-historically-assessed-similarity]
+             use-historically-assessed-hardness use-historically-assessed-similarity
+             use-historically-assessed-similarity-normalization]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
            population-size 1000
@@ -2244,6 +2245,7 @@ example."
            random-seed (System/nanoTime)
            use-historically-assessed-hardness false
            use-historically-assessed-similarity false
+           use-historically-assessed-similarity-normalization false
            }}]
   (binding [thread-local-random-generator (java.util.Random. random-seed)]
     ;; set globals from parameters
@@ -2258,6 +2260,7 @@ example."
     (reset! global-reuse-errors reuse-errors)
     (reset! global-use-historically-assessed-hardness use-historically-assessed-hardness)
     (reset! global-use-historically-assessed-similarity use-historically-assessed-similarity)
+    (reset! global-normalize-HAS-zero-one use-historically-assessed-similarity-normalization)
     (printf "\nStarting PushGP run.\n\n") (flush)
     (printf "Clojush version = ")
     (try
@@ -2300,7 +2303,7 @@ example."
                       evalpush-time-limit node-selection-method node-selection-tournament-size
                       node-selection-leaf-probability pop-when-tagging reuse-errors
                       use-single-thread random-seed use-historically-assessed-hardness
-                      use-historically-assessed-similarity
+                      use-historically-assessed-similarity use-historically-assessed-similarity-normalization
                       ))
     (printf "\nGenerating initial population...\n") (flush)
     (let [pop-agents (vec (doall (for [_ (range population-size)] 
