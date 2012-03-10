@@ -76,7 +76,7 @@
 ;; generation.
 (def global-use-historically-assessed-similarity (atom false))
 (def global-normalize-HAS-zero-one (atom true))
-(def similarity-rates (atom (repeat 0)))
+(def similarity-rates (atom (repeat 10 0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random code generator
@@ -1828,11 +1828,13 @@ normal, or :abnormal otherwise."
 
 (defn compute-historically-scaled-error
   [errors]
-  (let [sim-rates (if global-normalize-HAS-zero-one
+  (let [sim-rates (if @global-normalize-HAS-zero-one
                     (let [min-rate (apply min @similarity-rates)
                           max-rate (apply max @similarity-rates)
-                          rates (map #(/ (- % min-rate) (- max-rate min-rate))
-                                     @similarity-rates)]
+                          rates (if (= min-rate max-rate)
+                                  @similarity-rates
+                                  (map #(/ (- % min-rate) (- max-rate min-rate))
+                                       @similarity-rates))]
                       (printf "\nNormalized Similarity Rates: ")
                       (println (doall (map float rates)))
                       rates)
@@ -1846,10 +1848,10 @@ normal, or :abnormal otherwise."
                                                                                sim-rates
                                                                                errors)))
       @global-use-historically-assessed-hardness (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
-                                                                       sim-rates
+                                                                       @solution-rates
                                                                        errors)))
       @global-use-historically-assessed-similarity (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
-                                                                         @similarity-rates
+                                                                         sim-rates
                                                                          errors)))
       true nil)))
 
