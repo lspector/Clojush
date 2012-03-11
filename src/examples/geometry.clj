@@ -6,7 +6,7 @@
   (:use [clojush]))
 
 ;;;;;;;;;;;;
-;; Multiple geometric formulae. An integer indicates the desired formula and
+;; Multiple geometric formulae. Boolean mode queries indicate the desired formula and
 ;; inputs are provided on the float stack.
 
 ;; Using just circle-related ones for now:
@@ -33,29 +33,26 @@
 
 (def fitness-cases
   (concat
-    ;0: circumference of a circle: 2 pi R
+    ;circumference of a circle: 2 pi R
     (doall (for [r (range 1 5 0.25)]
-             [0 [r 0] (* 2 Math/PI r)]))
+             [:circle-circumference [r 0] (* 2 Math/PI r)]))
     ;1: area of a circle: pi R^2
     (doall (for [r (range 1 5 0.25)]
-             [1 [r 0] (* Math/PI r r)]))
+             [:circle-area [r 0] (* Math/PI r r)]))
     ;2: volume of a cylinder: pi R^2 H
     (doall (for [r (range 1 2 0.25)
                  h (range 1 2 0.25)]
-             [2 [r h] (* Math/PI r r h)]))
+             [:cylinder-volume [r h] (* Math/PI r r h)]))
     ;3: volume of a cone: 1/3 pi R^2 H
     (doall (for [r (range 1 2 0.25)
                  h (range 1 2 0.25)]
-             [3 [r h] (* 1/3 Math/PI r r h)]))
+             [:cone-volume [r h] (* 1/3 Math/PI r r h)]))
     ;4: volume of a sphere: 4/3 pi R^3
     (doall (for [r (range 1 5 0.25)]
-             [4 [r 0] (* 4/3 Math/PI r r r)]))
+             [:sphere-volume [r 0] (* 4/3 Math/PI r r r)]))
     ))
  
 ;; input instructions
-
-(define-registered formula
-                   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
 (define-registered r 
                    (fn [state] (push-item (first (stack-ref :auxiliary 1 state)) :float state)))
@@ -63,13 +60,25 @@
 (define-registered h
                    (fn [state] (push-item (second (stack-ref :auxiliary 1 state)) :float state)))
 
+(def modes (distinct (vec (map first fitness-cases))))
+
+(def mode-test-instructions (vec (map #(symbol (str (name %) "?")) modes)))
+
+(doseq [[mode instruction] (map vector modes mode-test-instructions)]
+  (register-instruction instruction)
+  (swap! instruction-table assoc instruction 
+         (fn [state]
+           (push-item (if (= mode (stack-ref :auxiliary 0 state)) true false)
+                      :boolean
+                      state))))
+
 ;; error function
 
 (def e (fn [program]
          (doall 
-           (for [[formula-number inputs target] fitness-cases]
+           (for [[mode inputs target] fitness-cases]
              (let [state (run-push program 
-                                   (push-item formula-number 
+                                   (push-item mode 
                                               :auxiliary 
                                               (push-item inputs 
                                                          :auxiliary
@@ -80,29 +89,33 @@
                  1000000))))))
      
 ;; a solution, for testing purposes
-#_(reduce + (e '(formula 4 integer_eq exec_if 
-                         (r r float_mult r float_mult 3.141592 float_mult 4.0 float_mult 3.0 float_div)
-                         (formula 0 integer_eq exec_if
-                                  (r 3.141592 float_mult 2.0 float_mult)
-                                  (formula 1 integer_eq exec_if
-                                           (r r float_mult 3.141592 float_mult)
-                                           (formula 2 integer_eq exec_if
-                                                    (r r float_mult h float_mult 3.141592 float_mult)
-                                                    (r r float_mult h float_mult 3.141592 float_mult 3.0 float_div)))))))
-
-
-
+(reduce + (e '(circle-circumference? 
+                exec_if 
+                (r 3.141592 float_mult 2.0 float_mult)
+                (circle-area? 
+                  exec_if 
+                  (r r float_mult 3.141592 float_mult)
+                  (cylinder-volume? 
+                    exec_if 
+                    (r r float_mult h float_mult 3.141592 float_mult)
+                    (cone-volume? 
+                      exec_if 
+                      (r r float_mult h float_mult 3.141592 float_mult 3.0 float_div)
+                      (r r float_mult r float_mult 3.141592 float_mult 4.0 float_mult 3.0 float_div)))))))
 
 (pushgp 
   :atom-generators (concat (list (fn [] (lrand-int 5))
                                  (fn [] (float (lrand-int 5)))
                                  (fn [] Math/PI)
-                                 'formula
                                  'r
                                  'h
                                  (tag-instruction-erc [:exec :integer :float :boolean] 1000)
                                  (tagged-instruction-erc 1000)
                                  )
+                           (take 30 (cycle [(tag-instruction-erc [:exec :integer :float :boolean] 1000)
+                                            (tagged-instruction-erc 1000)
+                                            'exec_if]))
+                           mode-test-instructions
                            '(integer_add
                               integer_eq
                               integer_swap
@@ -242,11 +255,11 @@
   :error-function e
   :use-single-thread false
   :population-size 1000
-  :trivial-geography-radius 500
+  :trivial-geography-radius 10
   :error-threshold 0.01
   :max-generations 1001
-  :max-points 150
-  :evalpush-limit 300
+  :max-points 250
+  :evalpush-limit 500
   :evalpush-time-limit 0
   :tournament-size 7
   :reuse-errors true
@@ -265,7 +278,7 @@
   :node-selection-method :size-tournament
   :node-selection-tournament-size 2
   :node-selection-leaf-probability 0.1
-  :pop-when-tagging true
+  :pop-when-tagging false ;true
   :use-historically-assessed-hardness false
   )
 
