@@ -114,7 +114,8 @@
                                  )
                            (take 30 (cycle [(tag-instruction-erc [:exec :integer :float :boolean] 1000)
                                             (tagged-instruction-erc 1000)
-                                            'exec_if]))
+                                            'exec_if
+                                            'exec_when]))
                            mode-test-instructions
                            '(integer_add
                               integer_eq
@@ -191,6 +192,7 @@
                               ;exec_do*range
                               ;exec_fromzipnode
                               exec_if
+                              exec_when
                               ;exec_fromziplefts
                               ;exec_fromzipchildren
                               ;exec_k

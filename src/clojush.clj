@@ -1218,7 +1218,6 @@ the code stack."
 (define-registered 
   exec_when
   (fn [state]
-    (println "STATE:" state)
     (if (not (or (empty? (:boolean state))
                  (empty? (:exec state))))
       (if (first (:boolean state))
