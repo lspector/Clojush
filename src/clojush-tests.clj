@@ -532,3 +532,7 @@
 ;(println (run-push '(1 (2) float_add ((integer_add))) (make-push-state)  false true))
 
 ;(println (run-push '(1 (2) float_add ((integer_add))) (make-push-state)  false :changes))
+
+;(println (run-push '(true exec_when 1 2) (make-push-state)))
+
+;(println (run-push '(false exec_when 1 2) (make-push-state)))

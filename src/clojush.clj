@@ -1215,6 +1215,17 @@ the code stack."
         (pop-item :boolean (pop-item :exec (pop-item :exec state))))
       state)))
 
+(define-registered 
+  exec_when
+  (fn [state]
+    (println "STATE:" state)
+    (if (not (or (empty? (:boolean state))
+                 (empty? (:exec state))))
+      (if (first (:boolean state))
+        (pop-item :boolean state)
+        (pop-item :boolean (pop-item :exec state)))
+      state)))
+
 (define-registered code_length
   (fn [state]
     (if (not (empty? (:code state)))
@@ -1727,7 +1738,7 @@ not run as-is."
   ;; for debugging only, e.g. for stress-test
   ;(def debug-recent-instructions (cons instruction debug-recent-instructions))
   ;(def debug-recent-state state)
-  (if (not instruction) ;; tests for nil and ignores it
+  (if (= instruction nil) ;; tests for nil and ignores it
     state
     (let [literal-type (recognize-literal instruction)]
       (cond 
