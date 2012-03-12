@@ -70,6 +70,14 @@
 (def global-use-historically-assessed-hardness (atom false))
 (def solution-rates (atom (repeat 0)))
 
+;; Historically-assessed similarity (of test cases)
+;; Similar in idea to HAH, except it bases weights on how similar a test case is to the
+;; other test cases are. Similarity is measured over the results from the previous
+;; generation.
+(def global-use-historically-assessed-similarity (atom false))
+(def global-normalize-HAS-zero-one (atom false))
+(def similarity-rates (atom (repeat 10 0)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random code generator
 
@@ -1837,28 +1845,63 @@ normal, or :abnormal otherwise."
 ;; history information).
 
 
-(defrecord individual [program errors total-error hah-error history ancestors])
+(defrecord individual [program errors total-error historically-scaled-error history
+                       ancestors])
 
-(defn make-individual [& {:keys [program errors total-error hah-error history ancestors]
-                          :or {program nil
-                               errors nil
-                               total-error nil ;; a non-number is used to indicate no value
-                               hah-error nil
-                               history nil
-                               ancestors nil}}]
-  (individual. program errors total-error hah-error history ancestors))
+(defn make-individual
+  [& {:keys [program errors total-error historically-scaled-error history ancestors]
+      :or {program nil
+           errors nil
+           total-error nil ;; a non-number is used to indicate no value
+           historically-scaled-error nil
+           history nil
+           ancestors nil}}]
+  (individual. program errors total-error historically-scaled-error history ancestors))
 
 (defn compute-total-error
   [errors]
   (reduce + errors))
 
-(defn compute-hah-error
+(defn compute-historically-scaled-error
   [errors]
-  (if @global-use-historically-assessed-hardness
-    (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
-                          @solution-rates
-                          errors)))
-    nil))
+  (cond
+    (and @global-use-historically-assessed-hardness
+         @global-use-historically-assessed-similarity) (reduce + (doall (map (fn [h-rate s-rate e] (* (- 1.01 h-rate)
+                                                                                                      (- 1.01 s-rate)
+                                                                                                      e))
+                                                                             @solution-rates
+                                                                             @similarity-rates
+                                                                             errors)))
+    @global-use-historically-assessed-hardness (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
+                                                                     @solution-rates
+                                                                     errors)))
+    @global-use-historically-assessed-similarity (reduce + (doall (map (fn [rate e] (* (- 1.01 rate) e))
+                                                                       @similarity-rates
+                                                                       errors)))
+    true nil))
+
+(defn similarity
+  "Takes two test case lists and returns their similarity, which is the count of the
+   indices with equal elements divided by their length"
+  [tc1 tc2]
+  (/ (reduce + (map #(if (or (and (zero? %1) (zero? %2)) ;if both solved
+                             (and (not (zero? %1)) (not (zero? %2)))) ; or if both not solved
+                       1
+                       0)
+                    tc1
+                    tc2))
+     (count tc1)))
+
+(defn average-pairwise-similarity
+  "Takes a test case tc1 which we want to find the average pairwise similarity with all
+   test cases in test-cases. Test cases is a list of test case error results, where each
+   test case is a list of the errors over each individual."
+  [tc1 test-cases]
+  (let [similarities (map similarity
+                          (repeat tc1)
+                          test-cases)]
+    (/ (reduce + similarities)
+       (count similarities))))
 
 (defn choose-node-index-with-leaf-probability
   "Returns an index into tree, choosing a leaf with probability 
@@ -1959,7 +2002,7 @@ by @global-node-selection-method."
       (flush)
       (printf "\nErrors: %s" (not-lazy (:errors best)))(flush)
       (printf "\nTotal: %s" (:total-error best))(flush)
-      (printf "\nHAH-error: %s" (:hah-error best))(flush)
+      (printf "\nHistorically-scaled-error: %s" (:historically-scaled-error best))(flush)
       (printf "\nHistory: %s" (not-lazy (:history best)))(flush)
       (printf "\nSize: %s" (count-points (:program best)))(flush)
       (print "\n--- Population Statistics ---\nAverage total errors in population: ")(flush)
@@ -1990,7 +2033,10 @@ by @global-node-selection-method."
                    (lrand-int (count pop))
                    (mod (+ location (- (lrand-int (+ 1 (* radius 2))) radius))
                         (count pop))))))
-        err-fn (if @global-use-historically-assessed-hardness :hah-error :total-error)]
+        err-fn (if (or @global-use-historically-assessed-hardness
+                       @global-use-historically-assessed-similarity)
+                 :historically-scaled-error
+                 :total-error)]
     (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
             tournament-set)))
 
@@ -2058,7 +2104,7 @@ subprogram of parent2."
                      (:ancestors parent1))))))
 
 (defn evaluate-individual
-  "Returns the given individual with errors, total-errors, and hah-errors,
+  "Returns the given individual with errors, total-errors, and historically-scaled-errors,
 computing them if necessary."
   [i error-function rand-gen]
   (binding [thread-local-random-generator rand-gen]
@@ -2069,8 +2115,8 @@ computing them if necessary."
           te (if (and (number? (:total-error i)) @global-reuse-errors)
                (:total-error i)
                (keep-number-reasonable (compute-total-error e)))
-          he (compute-hah-error e)]
-      (make-individual :program p :errors e :total-error te :hah-error he
+          hse (compute-historically-scaled-error e)]
+      (make-individual :program p :errors e :total-error te :historically-scaled-error hse
         :history (if maintain-histories (cons te (:history i)) (:history i))
         :ancestors (:ancestors i)))))
 
@@ -2198,7 +2244,8 @@ example."
              node-selection-tournament-size pop-when-tagging gaussian-mutation-probability 
              gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
              reuse-errors problem-specific-report use-single-thread random-seed 
-             use-historically-assessed-hardness]
+             use-historically-assessed-hardness use-historically-assessed-similarity
+             use-historically-assessed-similarity-normalization]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
            population-size 1000
@@ -2231,8 +2278,10 @@ example."
            reuse-errors true
            problem-specific-report default-problem-specific-report
            use-single-thread false
-           random-seed (System/nanoTime)   
-           use-historically-assessed-hardness false        
+           random-seed (System/nanoTime)
+           use-historically-assessed-hardness false
+           use-historically-assessed-similarity false
+           use-historically-assessed-similarity-normalization false
            }}]
   (binding [thread-local-random-generator (java.util.Random. random-seed)]
     ;; set globals from parameters
@@ -2246,6 +2295,8 @@ example."
     (reset! global-pop-when-tagging pop-when-tagging)
     (reset! global-reuse-errors reuse-errors)
     (reset! global-use-historically-assessed-hardness use-historically-assessed-hardness)
+    (reset! global-use-historically-assessed-similarity use-historically-assessed-similarity)
+    (reset! global-normalize-HAS-zero-one use-historically-assessed-similarity-normalization)
     (printf "\nStarting PushGP run.\n\n") (flush)
     (printf "Clojush version = ")
     (try
@@ -2278,7 +2329,7 @@ example."
              (printf "Hash of last Git commit = unavailable\n")
              (printf "GitHub link = unavailable\n")
              (flush)))
-    (print-params 
+    (print-params
       (error-function error-threshold population-size max-points atom-generators max-generations 
                       mutation-probability mutation-max-points crossover-probability
                       simplification-probability gaussian-mutation-probability 
@@ -2288,6 +2339,7 @@ example."
                       evalpush-time-limit node-selection-method node-selection-tournament-size
                       node-selection-leaf-probability pop-when-tagging reuse-errors
                       use-single-thread random-seed use-historically-assessed-hardness
+                      use-historically-assessed-similarity use-historically-assessed-similarity-normalization
                       ))
     (printf "\nGenerating initial population...\n") (flush)
     (let [pop-agents (vec (doall (for [_ (range population-size)] 
@@ -2316,6 +2368,32 @@ example."
                                 population-size)))))
           (printf "\nSolution rates: ")
           (println (doall (map float @solution-rates))))
+        ;; calculate similarity rates for historically-assessed similarity of test cases
+        (when use-historically-assessed-similarity
+          (reset! similarity-rates
+                  (let [error-seqs (map :errors (map deref pop-agents))
+                        test-case-errors (apply map list error-seqs)
+                        sim-rates (doall (for [i (range (count test-case-errors))]
+                                           (average-pairwise-similarity (nth test-case-errors i)
+                                                                        (concat
+                                                                          (take i test-case-errors)
+                                                                          (drop (inc i) test-case-errors)))))]
+                    (if @global-normalize-HAS-zero-one
+                      (let [min-rate (apply min sim-rates)
+                            max-rate (apply max sim-rates)
+                            rates (if (= min-rate max-rate)
+                                    sim-rates
+                                    (map #(/ (- % min-rate) (- max-rate min-rate))
+                                         sim-rates))]
+                        (printf "\nSimilarity Rates: ")
+                        (println (doall (map float sim-rates)))
+                        (printf "\nNormalized Similarity Rates: ")
+                        (println (doall (map float rates)))
+                        rates)
+                      (do
+                        (printf "\nSimilarity Rates: ")
+                        (println (doall (map float sim-rates)))
+                        sim-rates)))))
         ;; report and check for success
         (let [best (report (vec (doall (map deref pop-agents))) generation error-function 
                            report-simplifications problem-specific-report)]
