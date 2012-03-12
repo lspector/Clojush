@@ -536,3 +536,7 @@
 ;(println (run-push '(true exec_when 1 2) (make-push-state)))
 
 ;(println (run-push '(false exec_when 1 2) (make-push-state)))
+
+;(println (run-push '(1 2 3 tag_integer_123 4 5 6 true tagged_when_123) (make-push-state)))
+
+;(println (run-push '(1 2 3 tag_integer_123 4 5 6 false tagged_when_123) (make-push-state)))

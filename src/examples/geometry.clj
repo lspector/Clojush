@@ -111,12 +111,19 @@
                                  'h
                                  (tag-instruction-erc [:exec :integer :float :boolean] 1000)
                                  (tagged-instruction-erc 1000)
+                                 (untag-instruction-erc 1000)
+                                 (tagged-code-instruction-erc 1000)
+                                 (tagged-when-instruction-erc 1000)
                                  )
-                           (take 30 (cycle [(tag-instruction-erc [:exec :integer :float :boolean] 1000)
+                           mode-test-instructions
+                           ;; fortify with tagging and conditional vitamins
+                           (take 35 (cycle [(tag-instruction-erc [:exec :integer :float :boolean] 1000)
                                             (tagged-instruction-erc 1000)
+                                            (untag-instruction-erc 1000)
+                                            (tagged-code-instruction-erc 1000)
+                                            (tagged-when-instruction-erc 1000)
                                             'exec_if
                                             'exec_when]))
-                           mode-test-instructions
                            '(integer_add
                               integer_eq
                               integer_swap
