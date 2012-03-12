@@ -1223,6 +1223,16 @@ the code stack."
         (pop-item :boolean (pop-item :exec (pop-item :exec state))))
       state)))
 
+(define-registered 
+  exec_when
+  (fn [state]
+    (if (not (or (empty? (:boolean state))
+                 (empty? (:exec state))))
+      (if (first (:boolean state))
+        (pop-item :boolean state)
+        (pop-item :boolean (pop-item :exec state)))
+      state)))
+
 (define-registered code_length
   (fn [state]
     (if (not (empty? (:code state)))
@@ -1584,6 +1594,8 @@ in the given state."
       (first associations)
       (recur (rest associations)))))
 
+  
+  
 (defn handle-tag-instruction
   "Executes the tag instruction i in the state. Tag instructions take one of
 the following forms:
@@ -1598,6 +1610,10 @@ the following forms:
   tagged_code_<number> 
      push the value associated with the closest-matching tag onto the
      code stack (or no-op if no associations).
+  tagged_when_<number>
+     requires a boolean; if true pushes the value associated with the
+     closest-matching tag onto the exec stack (or no-op if no boolean
+     or no associations).
 "
   [i state]
   (let [iparts (string/partition #"_" (name i))]
@@ -1619,15 +1635,28 @@ the following forms:
         state
         (let [the-tag (read-string (nth iparts 2))]
           (assoc state :tag (dissoc (:tag state) (first (closest-association the-tag state))))))
-      ;; else it must be of the form tagged_<number> -- PUSH VALUE
+      ;; if we get here it must be one of the retrieval forms starting with "tagged_", so 
+      ;; we check to see if there are assocations and consider the cases if so
       :else
       (if (empty? (:tag state))
         state ;; no-op if no associations
-        (if (= (nth iparts 2) "code") ;; it's tagged_code_<number>
-          (let [the-tag (read-string (nth iparts 4))]
-            (push-item (second (closest-association the-tag state)) :code state))
-          (let [the-tag (read-string (nth iparts 2))] ;; it's just tagged_<number>, result->exec
-            (push-item (second (closest-association the-tag state)) :exec state)))))))
+        (cond ;; it's tagged_code_<number>
+              (= (nth iparts 2) "code") 
+              (let [the-tag (read-string (nth iparts 4))]
+                (push-item (second (closest-association the-tag state)) :code state))
+              ;; it's tagged_when_<number>
+              (= (nth iparts 2) "when") 
+              (if (empty? (:boolean state))
+                state
+                (if (= true (first (:boolean state)))
+                  (let [the-tag (read-string (nth iparts 4))]
+                    (push-item (second (closest-association the-tag state))
+                               :exec (pop-item :boolean state)))
+                  (pop-item :boolean state)))
+              ;; else it's just tagged_<number>, result->exec
+              :else
+              (let [the-tag (read-string (nth iparts 2))]
+                (push-item (second (closest-association the-tag state)) :exec state)))))))
 
 (defn tag-instruction-erc
   "Returns a function which, when called on no arguments, returns a symbol of the form
@@ -1658,6 +1687,13 @@ tagged_<number> where number is in the range from 0 to the specified limit (excl
 tagged_code_<number> where number is in the range from 0 to the specified limit (exclusive)."
   [limit]
   (fn [] (symbol (str "tagged_code_"
+                   (str (lrand-int limit))))))
+
+(defn tagged-when-instruction-erc
+  "Returns a function which, when called on no arguments, returns a symbol of the form
+tagged_when_<number> where number is in the range from 0 to the specified limit (exclusive)."
+  [limit]
+  (fn [] (symbol (str "tagged_when_"
                    (str (lrand-int limit))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1735,7 +1771,7 @@ not run as-is."
   ;; for debugging only, e.g. for stress-test
   ;(def debug-recent-instructions (cons instruction debug-recent-instructions))
   ;(def debug-recent-state state)
-  (if (not instruction) ;; tests for nil and ignores it
+  (if (= instruction nil) ;; tests for nil and ignores it
     state
     (let [literal-type (recognize-literal instruction)]
       (cond 
