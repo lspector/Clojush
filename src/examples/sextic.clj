@@ -3,8 +3,8 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns examples.sextic
-  (:require [clojush] [clojure.contrib.math])
-  (:use [clojush] [clojure.contrib.math]))
+  (:use [clojush]
+	[clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;
 ;; Floating point symbolic regression of the "sextic polynomial" y=x^6-2x^4+x^2. This uses
