@@ -3,8 +3,8 @@
 ;; Lee Spector, lspector@hampshire.edu, 2011
 
 (ns examples.gaussian-mutation-demo
-  (:require [clojush] [clojure.contrib.math])
-  (:use [clojush] [clojure.contrib.math]))
+  (:use [clojush]
+	[clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;
 ;; Floating point symbolic regression of a polynomial that uses non-integral 
