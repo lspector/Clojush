@@ -13,7 +13,8 @@
 ;; in this file before running it.
 
 (ns examples.mux
-  (:use [clojush] [clojure.contrib.math]))
+  (:use [clojush]
+	[clojure.math.numeric-tower]))
 
 ;;; HACKS to Clojush stuff for experimentation here
 ;;; Hacks for collecting and printing full ancestor lists
