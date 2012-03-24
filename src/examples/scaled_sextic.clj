@@ -1,5 +1,6 @@
 (ns examples.scaled-sextic
-  (:use [clojush] [clojure.contrib.math]))
+  (:use [clojush]
+	[clojure.math.numeric-tower]))
 
 ;; scaled_sextic.clj
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
