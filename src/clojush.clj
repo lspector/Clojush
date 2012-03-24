@@ -21,7 +21,7 @@
   (:gen-class)
   (:require
     [clojure.zip :as zip]
-    [clojure.contrib.math :as math]
+    [clojure.math.numeric-tower :as math]
     [clojure.walk :as walk]
     [clojure.string :as string]
     [local-file]))
