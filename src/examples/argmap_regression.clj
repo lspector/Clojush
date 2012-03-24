@@ -1,6 +1,6 @@
 (ns examples.argmap-regression
-  (:require [clojush] [clojure.contrib.math])
-  (:use [clojush] [clojure.contrib.math]))
+  (:use [clojush]
+	[clojure.math.numeric-tower]))
 
 ;; argmap_regression.clj
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
