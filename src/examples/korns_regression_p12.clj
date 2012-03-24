@@ -3,8 +3,8 @@
 ;; Lee Spector, lspector@hampshire.edu, 2011
 
 (ns examples.korns-regression-p12 
-  (:require [clojush] [clojure.contrib.math])
-  (:use [clojush] [clojure.contrib.math]))
+  (:use [clojush]
+	[clojure.math.numeric-tower]))
 
 (defn generate-data 
   [rows] ;; korns uses 10000! But we won't :-)
