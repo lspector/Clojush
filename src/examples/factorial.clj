@@ -3,8 +3,8 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns examples.factorial
-  (:require [clojush] [clojure.contrib.math])
-  (:use [clojush] [clojure.contrib.math]))
+  (:use [clojush]
+	[clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of factorial, using an input instruction and 
