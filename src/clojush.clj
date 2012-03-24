@@ -2259,7 +2259,7 @@ example."
       (let [version-str (apply str (butlast (re-find #"\".*\""				    
 						     (first (string/split-lines
 							     (local-file/slurp* "project.clj"))))))
-	    version-number (.substring version-str 2 (count version-str))]
+	    version-number (.substring version-str 1 (count version-str))]
         (if (empty? version-number)
           (throw Exception)
           (printf (str version-number "\n"))))
