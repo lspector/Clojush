@@ -24,7 +24,7 @@
     [clojure.contrib.math :as math]
     [clojure.contrib.seq-utils :as seq-utils]
     [clojure.walk :as walk]
-    [clojure.contrib.string :as string]
+    [clojure.string :as string]
     [local-file]))
 
 (import java.lang.Math)
@@ -1608,12 +1608,12 @@ the following forms:
      or no associations).
 "
   [i state]
-  (let [iparts (string/partition #"_" (name i))]
+  (let [iparts (string/split (name i) #"_")]
     (cond
       ;; if it's of the form tag_<type>_<number>: CREATE TAG/VALUE ASSOCIATION
       (= (first iparts) "tag") 
-      (let [source-type (read-string (str ":" (nth iparts 2)))
-            the-tag (read-string (nth iparts 4))]
+      (let [source-type (read-string (str ":" (nth iparts 1)))
+            the-tag (read-string (nth iparts 2))]
         (if (empty? (source-type state))
           state
           ((if @global-pop-when-tagging pop-item (fn [type state] state))
@@ -1625,7 +1625,7 @@ the following forms:
       (= (first iparts) "untag")
       (if (empty? (:tag state))
         state
-        (let [the-tag (read-string (nth iparts 2))]
+        (let [the-tag (read-string (nth iparts 1))]
           (assoc state :tag (dissoc (:tag state) (first (closest-association the-tag state))))))
       ;; if we get here it must be one of the retrieval forms starting with "tagged_", so 
       ;; we check to see if there are assocations and consider the cases if so
@@ -1633,21 +1633,21 @@ the following forms:
       (if (empty? (:tag state))
         state ;; no-op if no associations
         (cond ;; it's tagged_code_<number>
-              (= (nth iparts 2) "code") 
-              (let [the-tag (read-string (nth iparts 4))]
+              (= (nth iparts 1) "code") 
+              (let [the-tag (read-string (nth iparts 2))]
                 (push-item (second (closest-association the-tag state)) :code state))
               ;; it's tagged_when_<number>
-              (= (nth iparts 2) "when") 
+              (= (nth iparts 1) "when") 
               (if (empty? (:boolean state))
                 state
                 (if (= true (first (:boolean state)))
-                  (let [the-tag (read-string (nth iparts 4))]
+                  (let [the-tag (read-string (nth iparts 2))]
                     (push-item (second (closest-association the-tag state))
                                :exec (pop-item :boolean state)))
                   (pop-item :boolean state)))
               ;; else it's just tagged_<number>, result->exec
               :else
-              (let [the-tag (read-string (nth iparts 2))]
+              (let [the-tag (read-string (nth iparts 1))]
                 (push-item (second (closest-association the-tag state)) :exec state)))))))
 
 (defn tag-instruction-erc
@@ -2249,10 +2249,10 @@ example."
     (printf "\nStarting PushGP run.\n\n") (flush)
     (printf "Clojush version = ")
     (try
-      (let [version-number (string/drop 1 (string/chop
-                                            (re-find #"\".*\""
-                                                     (first (string/split-lines
-                                                              (local-file/slurp* "project.clj"))))))]
+      (let [version-str (apply str (butlast (re-find #"\".*\""				    
+						     (first (string/split-lines
+							     (local-file/slurp* "project.clj"))))))
+	    version-number (.substring version-str 2 (count version-str))]
         (if (empty? version-number)
           (throw Exception)
           (printf (str version-number "\n"))))
