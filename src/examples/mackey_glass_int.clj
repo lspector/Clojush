@@ -12,7 +12,7 @@
 
 (ns examples.mackey-glass-int
   (:use [clojush][local-file])
-  (:require [clojure.contrib.math :as math]
+  (:require [clojure.math.numeric-tower :as math]
 	    [clojure.string :as s]))
 
 (defn read-data []
