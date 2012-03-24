@@ -10,24 +10,7 @@
 ;; For Kyle's full version see https://github.com/kephale/Clojush
 
 (ns examples.intertwined-spirals
-  (:require [clojush] [clojure.contrib.duck-streams :as ds])
   (:use [clojush]))
-
-(in-ns 'clojush)
-
-(defn error-to-csv
-  "Write a spiral classification to csv matrix file."
-  [classification filename]
-  (spit filename (reduce (fn [c d]
-			   (str c "\n" d))
-			 (map (fn [x]
-				(reduce (fn [a b] (str a "," b)) x))
-			      classification))))
-
-#_(defn problem-specific-report
-  "Customize this for your own problem. It will be called at the end of the generational report."
-  [best population generation error-function report-simplifications]
-  (error-to-csv (:classification (meta (error-function (:program best)))) (str "best_spiral_timeX" (java.util.Date.) "_genX" generation ".csv")))
 
 (in-ns 'examples.intertwined-spirals)
 
