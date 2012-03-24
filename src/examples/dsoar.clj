@@ -9,10 +9,8 @@
 ;; This version was written by Brian Martin in 2010-2011.
 
 (ns examples.dsoar
-  (:require [clojush]
-	    [clojure.contrib.math])
   (:use [clojush] 
-    [clojure.contrib.math]))
+	[clojure.math.numeric-tower]))
 
 (in-ns 'clojush)
 
