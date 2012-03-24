@@ -3,8 +3,8 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns examples.odd
-  (:require [clojush] [clojure.contrib.math])
-  (:use [clojush] [clojure.contrib.math]))
+  (:use [clojush]
+	[clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;
 ;; The "odd" problem: take a positive integer input and push a Boolean indicating
