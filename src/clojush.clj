@@ -22,7 +22,6 @@
   (:require
     [clojure.zip :as zip]
     [clojure.contrib.math :as math]
-    [clojure.contrib.seq-utils :as seq-utils]
     [clojure.walk :as walk]
     [clojure.string :as string]
     [local-file]))
@@ -1364,10 +1363,18 @@ the code stack."
         (pop-item :code (pop-item :code state)))
       state)))
 
+;; clojure.contrib/positions disappeared from libraries, but this is the function
+;;   with the old indexed function expanded.
+(defn positions
+  "Returns a lazy sequence containing the positions at which pred
+is true for items in coll."
+  [pred coll]
+  (for [[idx elt] (map vector (iterate inc 0) coll) :when (pred elt)] idx))
+
 (define-registered code_position
   (fn [state]
     (if (not (empty? (rest (:code state))))
-      (push-item (or (first (seq-utils/positions #{(stack-ref :code 1 state)}
+      (push-item (or (first (positions #{(stack-ref :code 1 state)}
                               (ensure-list (stack-ref :code 0 state))))
                    -1)
         :integer
