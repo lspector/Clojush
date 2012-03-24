@@ -72,7 +72,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random code generator
 
-(def thread-local-random-generator (new java.util.Random))
+(def ^:dynamic *thread-local-random-generator* (new java.util.Random))
 
 (defn lrand-int
   "Return a random integer, using the thread-local random generator, that is less than the
@@ -80,26 +80,26 @@ provided n. Arguments greater than 2^31-1 are treated as if they were 2^31-1 (21
   [n]
   (if (<= n 1)
     0
-    (if (= (type n) java.lang.Integer)
-      (. thread-local-random-generator (nextInt n))
-      (. thread-local-random-generator (nextInt 2147483647))))) ;; biggest java.lang.Integer
+    (if (integer? n)
+      (. *thread-local-random-generator* (nextInt n))
+      (. *thread-local-random-generator* (nextInt 2147483647))))) ;; biggest java.lang.Integer
 
 (defn lrand
   "Return a random float between 0 and 1 usng the thread-local random generator."
-  ([] (. thread-local-random-generator (nextFloat)))
+  ([] (. *thread-local-random-generator* (nextFloat)))
   ([n] (* n (lrand))))
 
 (defn lrand-nth
   "Return a random element of the collection."  
   [coll]
-  (nth coll (. thread-local-random-generator (nextInt (count coll)))))
+  (nth coll (. *thread-local-random-generator* (nextInt (count coll)))))
 
 (defn lshuffle
   "Return a random permutation of coll (Adapted from clojure.core)"
   {:static true}
   [^java.util.Collection coll]
   (let [al (java.util.ArrayList. coll)]
-    (java.util.Collections/shuffle al thread-local-random-generator)
+    (java.util.Collections/shuffle al *thread-local-random-generator*)
     (clojure.lang.RT/vector (.toArray al))))
 
 (defn decompose
@@ -2068,7 +2068,7 @@ subprogram of parent2."
   "Returns the given individual with errors, total-errors, and hah-errors,
 computing them if necessary."
   [i error-function rand-gen]
-  (binding [thread-local-random-generator rand-gen]
+  (binding [*thread-local-random-generator* rand-gen]
     (let [p (:program i)
           e (if (and (seq? (:errors i)) @global-reuse-errors)
               (:errors i)
@@ -2089,7 +2089,7 @@ using the given parameters."
    tournament-size reproduction-simplifications trivial-geography-radius
    gaussian-mutation-probability gaussian-mutation-per-number-mutation-probability 
    gaussian-mutation-standard-deviation]
-  (binding [thread-local-random-generator rand-gen]
+  (binding [*thread-local-random-generator* rand-gen]
     (let [n (lrand)]
       (cond 
         ;; mutation
@@ -2241,7 +2241,7 @@ example."
            random-seed (System/nanoTime)   
            use-historically-assessed-hardness false        
            }}]
-  (binding [thread-local-random-generator (java.util.Random. random-seed)]
+  (binding [*thread-local-random-generator* (java.util.Random. random-seed)]
     ;; set globals from parameters
     (reset! global-atom-generators atom-generators)
     (reset! global-max-points-in-program max-points)
