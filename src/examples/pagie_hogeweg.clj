@@ -7,7 +7,7 @@
 
 (ns examples.pagie-hogeweg
   (:use [clojush])
-  (:require [clojure.contrib.math :as math]))
+  (:require [clojure.math.numeric-tower :as math]))
 
 (defn data-point-2D "Generate a 2D data point from:
 f(x,y) = 1 / (1 + x^-4) + 1 / ( 1 + y^-4 )"
