@@ -3,8 +3,8 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns examples.krypto
-  (:require [clojush] [clojure.contrib.math])
-  (:use [clojush] [clojure.contrib.math]))
+  (:use [clojush]
+	[clojure.math.numeric-tower]))
 
 ;; Chooses and then tries to solve (via pushgp) a game of Krypto.
 ;; See http://en.wikipedia.org/wiki/Krypto_(game)
