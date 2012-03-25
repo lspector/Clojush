@@ -1,6 +1,6 @@
 (ns examples.string
-  (:require [clojush] [clojure.contrib.math])
-  (:use [clojush] [clojure.contrib.math]))
+  (:use [clojush]
+        [clojure.math.numeric-tower]))
 
 ; Tries to get a string with the most unique characters. If there are at least goal, succeeds.
 #_(pushgp :error-function (fn [program]
@@ -13,12 +13,12 @@
                                           (if (>= unique-chars goal)
                                             0
                                             (- goal unique-chars))))))))
-          	 :atom-generators (list (fn [] (apply str (repeatedly (+ 1 (lrand-int 5))
-                                                                 #(rand-nth (str "ABCDEFGHIJKLMNOPQRSTUVWXYZ")))))
-                                   'string_concat
-                                   'string_dup
-                                   'string_rot)
-          	 :tournament-size 5)
+          :atom-generators (list (fn [] (apply str (repeatedly (+ 1 (lrand-int 5))
+                                                               #(rand-nth (str "ABCDEFGHIJKLMNOPQRSTUVWXYZ")))))
+                                 'string_concat
+                                 'string_dup
+                                 'string_rot)
+          :tournament-size 5)
 
 
 ; New GP problem: Take the input string, remove the last 2 characters, and then concat this result with itself.
@@ -34,7 +34,7 @@
                        1)
                     s1
                     s2))
-     (Math/abs (- (count s1) (count s2)))))
+     (abs (- (count s1) (count s2)))))
 
 (defn string-remove-char
   "Returns s with first instrance of c removed, if c is in s. Otherwise, returns nil"
@@ -42,8 +42,8 @@
   (if (empty? s)
     nil
     (if (= (first s) c)
-      (clojure.contrib.string/drop 1 s)
-      (let [remain (string-remove-char (clojure.contrib.string/drop 1 s) c)]
+      (.substring s 1 (count s))
+      (let [remain (string-remove-char (.substring s 1 (count s)) c)]
         (if (nil? remain)
           nil
           (str (first s) remain))))))
@@ -57,12 +57,13 @@
     (let [first-char (first s1)
           remove-from-s2 (string-remove-char s2 first-char)]
       (if (nil? remove-from-s2)
-        (inc (string-char-counts-difference (clojure.contrib.string/drop 1 s1) s2))
-        (string-char-counts-difference (clojure.contrib.string/drop 1 s1) remove-from-s2)))))
+        (inc (string-char-counts-difference (.substring s1 1 (count s1)) s2))
+        (string-char-counts-difference (.substring s1 1 (count s1)) remove-from-s2)))))
       
 
-(define-registered in 
-                   (fn [state] (push-item (stack-ref :auxiliary 0 state) :string state)))
+(define-registered 
+  in 
+  (fn [state] (push-item (stack-ref :auxiliary 0 state) :string state)))
 
 (pushgp :error-function (fn [program]
                           (doall
@@ -81,7 +82,7 @@
                                                                      (push-item input :string 
                                                                                 (make-push-state))))
                                     top-string (top-item :string final-state)
-                                    desired-output (let [short (clojure.contrib.string/butlast 2 input)]
+                                    desired-output (let [short (.substring input 0 (max (- (count input) 2) 0))]
                                                      (str short short))]
                                 (if (not (string? top-string))
                                   1000

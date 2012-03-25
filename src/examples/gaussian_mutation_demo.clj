@@ -3,8 +3,8 @@
 ;; Lee Spector, lspector@hampshire.edu, 2011
 
 (ns examples.gaussian-mutation-demo
-  (:require [clojush] [clojure.contrib.math])
-  (:use [clojush] [clojure.contrib.math]))
+  (:use [clojush]
+        [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;
 ;; Floating point symbolic regression of a polynomial that uses non-integral 
@@ -16,27 +16,27 @@
 ;; produce it through gaussian mutations.
 
 (define-registered in 
-  (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
+                   (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
 
 (pushgp 
   :error-function (fn [program]
                     (doall
                       (for [input (range -1.0 1.0 0.1)]
                         (let [state (run-push program 
-                                      (push-item input :auxiliary 
-                                        (push-item input :float
-                                          (make-push-state))))
+                                              (push-item input :auxiliary 
+                                                         (push-item input :float
+                                                                    (make-push-state))))
                               top-float (top-item :float state)
                               invalid-output (or (not (number? top-float))
-                                               (= (:termination state) :abnormal))]
+                                                 (= (:termination state) :abnormal))]
                           (if invalid-output
                             1000
                             (abs (- top-float
-                                   (+ (* 1.23 input input)
-                                     0.73))))))))
+                                    (+ (* 1.23 input input)
+                                       0.73))))))))
   :atom-generators (concat 
                      '(float_div float_mult float_sub float_add
-                        float_rot float_swap float_dup float_pop)
+                                 float_rot float_swap float_dup float_pop)
                      (list 
                        (fn [] (* 1.0 (- (rand-int 21) 10)))
                        'in))

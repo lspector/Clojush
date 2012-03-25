@@ -1,6 +1,6 @@
 (ns examples.argmap-regression
-  (:require [clojush] [clojure.contrib.math])
-  (:use [clojush] [clojure.contrib.math]))
+  (:use [clojush]
+        [clojure.math.numeric-tower]))
 
 ;; argmap_regression.clj
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
@@ -15,26 +15,26 @@
 ;; input instruction that uses the auxiliary stack.
 
 (define-registered in 
-  (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
+                   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
 (pushgp-map
   {:error-function (fn [program]
                      (doall
                        (for [input (range 10)]
                          (let [state (run-push program 
-                                       (push-item input :auxiliary 
-                                         (push-item input :integer 
-                                           (make-push-state))))
+                                               (push-item input :auxiliary 
+                                                          (push-item input :integer 
+                                                                     (make-push-state))))
                                top-int (top-item :integer state)]
                            (if (number? top-int)
                              (abs (- top-int 
-                                    (- (* input input input) 
-                                      (* 2 input input) input)))
+                                     (- (* input input input) 
+                                        (* 2 input input) input)))
                              1000)))))
    :atom-generators (list (fn [] (rand-int 10))
-                      'in
-                      'integer_div
-                      'integer_mult
-                      'integer_add
-                      'integer_sub)
+                          'in
+                          'integer_div
+                          'integer_mult
+                          'integer_add
+                          'integer_sub)
    :tournament-size 3})

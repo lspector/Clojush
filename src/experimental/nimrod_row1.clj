@@ -4,7 +4,7 @@
 ;; Lee Spector, lspector@hampshire.edu, 2012
 
 (ns experimental.nimrod_row1
-  (:use [clojush] [clojure.contrib.math]))
+  (:use [clojush] [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression for row r=1 of the r vs p graph for nimrod

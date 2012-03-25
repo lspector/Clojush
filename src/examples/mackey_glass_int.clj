@@ -12,99 +12,100 @@
 
 (ns examples.mackey-glass-int
   (:use [clojush][local-file])
-  (:require [clojure.contrib.math :as math]
-	    [clojure.string :as s]))
+  (:require [clojure.math.numeric-tower :as math]
+            [clojure.string :as s]))
 
 (defn read-data []
   (let [f (slurp (file* "src/examples/mg_int_128.dat"))
-	lines (doall (map #(filter (partial not= "")
-				 (s/split % #" "))
-			  (s/split-lines f)))]
+        lines (doall (map #(filter (partial not= "")
+                                   (s/split % #" "))
+                          (s/split-lines f)))]
     (map #(map read-string %) lines)))
 
 (defn data-with-historical "Take the data and make a sequence:
-t-128 t-64 t-32 t-16 t-8 t-4 t-2 t-1
-where time points
-before the start of the series are set to 0."
+                            t-128 t-64 t-32 t-16 t-8 t-4 t-2 t-1
+                            where time points
+                            before the start of the series are set to 0."
   [data]
   (doall 
-   (for [t (range (count data))]
-     (map #(if (< t %) 0 (second (nth data (- t %))))
-	  '(128 64 32 16 8 4 2 1 0)))))
+    (for [t (range (count data))]
+      (map #(if (< t %) 0 (second (nth data (- t %))))
+           '(128 64 32 16 8 4 2 1 0)))))
 
 (def data (data-with-historical (read-data)))
 
 (define-registered x1 
-  (fn [state] (push-item (stack-ref :auxiliary 7 state) :integer state)))
+                   (fn [state] (push-item (stack-ref :auxiliary 7 state) :integer state)))
 
 (define-registered x2 
-  (fn [state] (push-item (stack-ref :auxiliary 6 state) :integer state)))
+                   (fn [state] (push-item (stack-ref :auxiliary 6 state) :integer state)))
 
 (define-registered x4 
-  (fn [state] (push-item (stack-ref :auxiliary 5 state) :integer state)))
+                   (fn [state] (push-item (stack-ref :auxiliary 5 state) :integer state)))
 
 (define-registered x8 
-  (fn [state] (push-item (stack-ref :auxiliary 4 state) :integer state)))
+                   (fn [state] (push-item (stack-ref :auxiliary 4 state) :integer state)))
 
 (define-registered x16 
-  (fn [state] (push-item (stack-ref :auxiliary 3 state) :integer state)))
+                   (fn [state] (push-item (stack-ref :auxiliary 3 state) :integer state)))
 
 (define-registered x32
-  (fn [state] (push-item (stack-ref :auxiliary 2 state) :integer state)))
+                   (fn [state] (push-item (stack-ref :auxiliary 2 state) :integer state)))
 
 (define-registered x64 
-  (fn [state] (push-item (stack-ref :auxiliary 1 state) :integer state)))
+                   (fn [state] (push-item (stack-ref :auxiliary 1 state) :integer state)))
 
 (define-registered x128
-  (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
+                   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
 (defn error-function
   [num-samples program]
   (doall
-   (for [row (take num-samples (shuffle data))]
-     (let [state (run-push program 
-			   (assoc (make-push-state)
-			     :auxiliary
-			     (butlast row)))
-	   top-integer (top-item :integer state)]
-       (if (number? top-integer)
-	 (math/expt (- top-integer (last row)) 2)
-	 1000)))))
+    (for [row (take num-samples (shuffle data))]
+      (let [state (run-push program 
+                            (assoc (make-push-state)
+                                   :auxiliary
+                                   (butlast row)))
+            top-integer (top-item :integer state)]
+        (if (number? top-integer)
+          (math/expt (- top-integer (last row)) 2)
+          1000)))))
 
 (def atom-generators
-     (list 
-      (fn [] (rand-int 128))
-      'x1 'x2 'x4 'x8 'x16 'x32 'x64 'x128
-      'integer_div
-      'integer_mult
-      'integer_add
-      'integer_sub
-      ))
+  (list 
+    (fn [] (rand-int 128))
+    'x1 'x2 'x4 'x8 'x16 'x32 'x64 'x128
+    'integer_div
+    'integer_mult
+    'integer_add
+    'integer_sub
+    ))
 
 #_(error-function 50 (random-code 50 atom-generators))
 
-(defn problem-specific-report [best population generation sampled-error-function report-simplifications] 
+(defn problem-specific-report 
+  [best population generation sampled-error-function report-simplifications] 
   (let [errors (error-function (count data) (:program best))
-	total-error (apply + errors)]
+        total-error (apply + errors)]
     #_(println "Best's errors on full data set:" errors)
     (println "Best's total-error on full data set:" total-error)))
 
 (defn demo []
   (pushgp
-   :error-function (partial error-function 200);; Use 200 random samples
-   :atom-generators atom-generators
-   :report-simplifications 0
-   :max-points 500
-   :evalpush-limit 500
-   :population-size 1000
-   :mutation-probability 0.10
-   :mutation-max-points 50
-   :crossover-probability 0.80
-   :simplification-probability 0
-   :reproduction-simplifications 10
-   :tournament-size 7
-   :max-generations 1000
-   :reuse-errors false ;; If a sample set is used, then error reuse must be disabled
-   :problem-specific-report problem-specific-report))
+    :error-function (partial error-function 200);; Use 200 random samples
+    :atom-generators atom-generators
+    :report-simplifications 0
+    :max-points 500
+    :evalpush-limit 500
+    :population-size 1000
+    :mutation-probability 0.10
+    :mutation-max-points 50
+    :crossover-probability 0.80
+    :simplification-probability 0
+    :reproduction-simplifications 10
+    :tournament-size 7
+    :max-generations 1000
+    :reuse-errors false ;; If a sample set is used, then error reuse must be disabled
+    :problem-specific-report problem-specific-report))
 
 (demo)

@@ -7,88 +7,90 @@
 
 (ns examples.pagie-hogeweg
   (:use [clojush])
-  (:require [clojure.contrib.math :as math]))
+  (:require [clojure.math.numeric-tower :as math]))
 
 (defn data-point-2D "Generate a 2D data point from:
-f(x,y) = 1 / (1 + x^-4) + 1 / ( 1 + y^-4 )"
+                     f(x,y) = 1 / (1 + x^-4) + 1 / ( 1 + y^-4 )"
   [x y]
   (+ (/ (+ 1 (math/expt x -4)))
      (/ (+ 1 (math/expt y -4)))))
 
 (def data (doall (for [x (range -5 5.01 0.4) ; Range is exclusive on the end
-		       y (range -5 5.01 0.4)]
-		   [x y (data-point-2D x y)])))
+                       y (range -5 5.01 0.4)]
+                   [x y (data-point-2D x y)])))
 
-(define-registered x
+(define-registered 
+  x
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
 
-(define-registered y
+(define-registered 
+  y
   (fn [state] (push-item (stack-ref :auxiliary 1 state) :float state)))
 
 (defn error-function
   [num-samples program]
   (doall
-   (for [row (take num-samples (shuffle data))]
-     (let [state (run-push program 
-			   (assoc (make-push-state)
-			     :auxiliary
-			     (butlast row)))
-	   top-float (top-item :float state)]
-       (if (number? top-float)
-	 (math/expt (- top-float (last row)) 2)
-	 1000)))))
+    (for [row (take num-samples (shuffle data))]
+      (let [state (run-push program 
+                            (assoc (make-push-state)
+                                   :auxiliary
+                                   (butlast row)))
+            top-float (top-item :float state)]
+        (if (number? top-float)
+          (math/expt (- top-float (last row)) 2)
+          1000)))))
 
 (defn hit-error-function
   "Error function based on Koza's hit criteria."
   [num-samples program]
   (doall
-   (for [row (take num-samples (shuffle data))]
-     (let [state (run-push program 
-			   (assoc (make-push-state)
-			     :auxiliary
-			     (butlast row)))
-	   top-float (top-item :float state)]
-       (if (number? top-float)
-	 (if (< (math/expt (- top-float (last row)) 2) 0.01) 0 1)
-	 1000)))))
+    (for [row (take num-samples (shuffle data))]
+      (let [state (run-push program 
+                            (assoc (make-push-state)
+                                   :auxiliary
+                                   (butlast row)))
+            top-float (top-item :float state)]
+        (if (number? top-float)
+          (if (< (math/expt (- top-float (last row)) 2) 0.01) 0 1)
+          1000)))))
 
 (def atom-generators
-     (list 
-      (fn [] (- (rand 2) 1))
-      'x 'y
-      'float_div
-      'float_mult
-      'float_add
-      'float_sub
-      ))
+  (list 
+    (fn [] (- (rand 2) 1))
+    'x 'y
+    'float_div
+    'float_mult
+    'float_add
+    'float_sub
+    ))
 
 #_(println (apply + (error-function 50 (random-code 50 atom-generators))))
 
 (defn problem-specific-report [best population generation sampled-error-function report-simplifications] 
   (let [errors (error-function (count data) (:program best))
-	hit-errors (hit-error-function (count data) (:program best))
-	total-error (apply + errors)
-	hit-total-error (apply + hit-errors)]
+        hit-errors (hit-error-function (count data) (:program best))
+        total-error (apply + errors)
+        hit-total-error (apply + hit-errors)]
     #_(println "Best's errors on full data set:" errors)
     (println "Best's total error on full data set:" total-error)
     (println "Best's total error (hits) on full data set:" hit-total-error)))
 
 (defn demo []
   (pushgp
-   :error-function (partial error-function 50);; Use 50 random samples
-   :atom-generators atom-generators
-   :report-simplifications 0
-   :max-points 500
-   :evalpush-limit 500
-   :population-size 1000
-   :mutation-probability 0.10
-   :mutation-max-points 50
-   :crossover-probability 0.70
-   :simplification-probability 0.1
-   :reproduction-simplifications 10
-   :tournament-size 7
-   :max-generations 1000
-   :reuse-errors false ;; If a sample set is used, then error reuse must be disabled
-   :problem-specific-report problem-specific-report))
+    :error-function (partial error-function 50);; Use 50 random samples
+    :atom-generators atom-generators
+    :report-simplifications 0
+    :max-points 500
+    :evalpush-limit 500
+    :population-size 1000
+    :mutation-probability 0.10
+    :mutation-max-points 50
+    :crossover-probability 0.70
+    :simplification-probability 0.1
+    :reproduction-simplifications 10
+    :tournament-size 7
+    :max-generations 1000
+    :reuse-errors false ;; If a sample set is used, then error reuse must be disabled
+    :problem-specific-report problem-specific-report))
    
 (demo)
