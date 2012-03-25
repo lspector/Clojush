@@ -2,7 +2,7 @@
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Lee Spector, lspector@hampshire.edu, 2012
 
-(ns examples.geometry
+(ns experimental.geometry
   (:use [clojush]))
 
 ;;;;;;;;;;;;
@@ -54,11 +54,13 @@
  
 ;; input instructions
 
-(define-registered r 
-                   (fn [state] (push-item (first (stack-ref :auxiliary 1 state)) :float state)))
+(define-registered 
+  r 
+  (fn [state] (push-item (first (stack-ref :auxiliary 1 state)) :float state)))
 
-(define-registered h
-                   (fn [state] (push-item (second (stack-ref :auxiliary 1 state)) :float state)))
+(define-registered 
+  h
+  (fn [state] (push-item (second (stack-ref :auxiliary 1 state)) :float state)))
 
 (def modes (distinct (vec (map first fitness-cases))))
 
@@ -212,54 +214,54 @@
                               ;exec_shove
                               exec_noop)
                            '(code_nthcdr
-                             code_insert
-                             code_fromfloat
-                             ;code_stackdepth
-                             code_noop
-                             code_subst
-                             code_overlap
-                             ;code_yankdup
-                             ;code_fromziprights
-                             code_null
-                             code_pop
-                             code_swap
-                             code_append
-                             code_member
-                             code_do*
-                             code_dup
-                             code_quote
-                             ;code_shove
-                             code_cons
-                             code_container
-                             code_if
-                             code_extract
-                             code_wrap
-                             ;code_fromziproot
-                             code_nth
-                             code_discrepancy
-                             code_size
-                             code_length
-                             code_cdr
-                             code_map
-                             ;code_rand
-                             code_atom
-                             code_contains
-                             code_list
-                             code_do*range
-                             ;code_fromzipnode
-                             code_eq
-                             ;code_fromzipchildren
-                             ;code_flush
-                             code_fromboolean
-                             ;code_yank
-                             code_frominteger
-                             code_do*count
-                             code_car
-                             code_position
-                             ;code_fromziplefts
-                             code_do
-                             code_do*times
-                             code_rot)
+                              code_insert
+                              code_fromfloat
+                              ;code_stackdepth
+                              code_noop
+                              code_subst
+                              code_overlap
+                              ;code_yankdup
+                              ;code_fromziprights
+                              code_null
+                              code_pop
+                              code_swap
+                              code_append
+                              code_member
+                              code_do*
+                              code_dup
+                              code_quote
+                              ;code_shove
+                              code_cons
+                              code_container
+                              code_if
+                              code_extract
+                              code_wrap
+                              ;code_fromziproot
+                              code_nth
+                              code_discrepancy
+                              code_size
+                              code_length
+                              code_cdr
+                              code_map
+                              ;code_rand
+                              code_atom
+                              code_contains
+                              code_list
+                              code_do*range
+                              ;code_fromzipnode
+                              code_eq
+                              ;code_fromzipchildren
+                              ;code_flush
+                              code_fromboolean
+                              ;code_yank
+                              code_frominteger
+                              code_do*count
+                              code_car
+                              code_position
+                              ;code_fromziplefts
+                              code_do
+                              code_do*times
+                              code_rot)
                            )
   :error-function e
   :use-single-thread false

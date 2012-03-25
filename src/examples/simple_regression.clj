@@ -4,14 +4,15 @@
 
 (ns examples.simple-regression
   (:use [clojush]
-	[clojure.math.numeric-tower]))
+        [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of x^3 - 2x^2 - x (problem 5 from the 
 ;; trivial geography chapter) with minimal integer instructions and an 
 ;; input instruction that uses the auxiliary stack.
 
-(define-registered in 
+(define-registered 
+  in 
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
 (pushgp 

@@ -4,7 +4,7 @@
 
 (ns examples.tagged-regression
   (:use [clojush]
-	[clojure.math.numeric-tower]))
+        [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of x^3 - 2x^2 - x (problem 5 from the 
@@ -13,7 +13,8 @@
 ;; ALSO uses tags, although there is little reason to think they would
 ;; help on such a simple problem.
 
-(define-registered in 
+(define-registered 
+  in 
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
 (pushgp 
@@ -21,22 +22,22 @@
                     (doall
                       (for [input (range 10)]
                         (let [state (run-push program 
-                                      (push-item input :auxiliary 
-                                        (push-item input :integer 
-                                          (make-push-state))))
+                                              (push-item input :auxiliary 
+                                                         (push-item input :integer 
+                                                                    (make-push-state))))
                               top-int (top-item :integer state)]
                           (if (number? top-int)
                             (abs (- top-int 
-                                   (- (* input input input) 
-                                     (* 2 input input) input)))
+                                    (- (* input input input) 
+                                       (* 2 input input) input)))
                             1000)))))
-	 :atom-generators (list (fn [] (rand-int 10))
-                     'in
-                     'integer_div
-                     'integer_mult
-                     'integer_add
-                     'integer_sub
-                     (tag-instruction-erc [:integer :exec] 100)
-                     (untag-instruction-erc 100)
-                     (tagged-instruction-erc 100))
-	 :tournament-size 3)
+  :atom-generators (list (fn [] (rand-int 10))
+                         'in
+                         'integer_div
+                         'integer_mult
+                         'integer_add
+                         'integer_sub
+                         (tag-instruction-erc [:integer :exec] 100)
+                         (untag-instruction-erc 100)
+                         (tagged-instruction-erc 100))
+  :tournament-size 3)

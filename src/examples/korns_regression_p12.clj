@@ -4,7 +4,7 @@
 
 (ns examples.korns-regression-p12 
   (:use [clojush]
-	[clojure.math.numeric-tower]))
+        [clojure.math.numeric-tower]))
 
 (defn generate-data 
   [rows] ;; korns uses 10000! But we won't :-)
@@ -14,9 +14,11 @@
   (println "(def data '(")
   (doall
     (repeatedly rows
-      (fn []
-        (let [inputs (repeatedly 5 #(- (* (rand) 100) 50))]
-          (println (concat inputs (list (- 2.0 (* 2.1 
+                (fn []
+                  (let [inputs (repeatedly 5 #(- (* (rand) 100) 50))]
+                    (println (concat inputs 
+                                     (list (- 2.0 
+                                              (* 2.1 
                                                  (Math/cos (* 9.8 (nth inputs 0)))
                                                  (Math/sin (* 1.3 (nth inputs 4))))))))))))
   (println "))"))
@@ -257,7 +259,7 @@
                           (if (number? top-float)
                             (expt (- top-float (nth row 5)) 2)
                             1000)))))
-	 :atom-generators (list 
+  :atom-generators (list 
                      ;(fn [] (- (* (rand) 100) 50))
                      (fn [] (- (rand) 0.5))
                      'x0

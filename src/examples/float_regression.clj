@@ -13,7 +13,8 @@
 ;; trivial geography chapter) with minimal float instructions and an 
 ;; input instruction that uses the auxiliary stack.
 
-(define-registered in 
+(define-registered 
+  in 
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
 
 (def fitness-cases

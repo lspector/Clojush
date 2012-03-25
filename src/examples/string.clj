@@ -1,6 +1,6 @@
 (ns examples.string
   (:use [clojush]
-	[clojure.math.numeric-tower]))
+        [clojure.math.numeric-tower]))
 
 ; Tries to get a string with the most unique characters. If there are at least goal, succeeds.
 #_(pushgp :error-function (fn [program]
@@ -13,12 +13,12 @@
                                           (if (>= unique-chars goal)
                                             0
                                             (- goal unique-chars))))))))
-          	 :atom-generators (list (fn [] (apply str (repeatedly (+ 1 (lrand-int 5))
-                                                                 #(rand-nth (str "ABCDEFGHIJKLMNOPQRSTUVWXYZ")))))
-                                   'string_concat
-                                   'string_dup
-                                   'string_rot)
-          	 :tournament-size 5)
+          :atom-generators (list (fn [] (apply str (repeatedly (+ 1 (lrand-int 5))
+                                                               #(rand-nth (str "ABCDEFGHIJKLMNOPQRSTUVWXYZ")))))
+                                 'string_concat
+                                 'string_dup
+                                 'string_rot)
+          :tournament-size 5)
 
 
 ; New GP problem: Take the input string, remove the last 2 characters, and then concat this result with itself.
@@ -61,8 +61,9 @@
         (string-char-counts-difference (.substring s1 1 (count s1)) remove-from-s2)))))
       
 
-(define-registered in 
-                   (fn [state] (push-item (stack-ref :auxiliary 0 state) :string state)))
+(define-registered 
+  in 
+  (fn [state] (push-item (stack-ref :auxiliary 0 state) :string state)))
 
 (pushgp :error-function (fn [program]
                           (doall
