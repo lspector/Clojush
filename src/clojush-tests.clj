@@ -540,3 +540,19 @@
 ;(println (run-push '(1 2 3 tag_integer_123 4 5 6 true tagged_when_123) (make-push-state)))
 
 ;(println (run-push '(1 2 3 tag_integer_123 4 5 6 false tagged_when_123) (make-push-state)))
+
+(time (dotimes [i 1000] 
+        (run-push '(123 245 integer_swap integer_swap integer_mult integer_dup integer_div)
+                  (make-push-state))))
+
+(time (dotimes [i 1000] 
+        (run-push '(123 245 tag_integer_123 tagged_123 integer_mult integer_dup integer_div)
+                  (make-push-state))))
+
+(time (dotimes [i 1000] 
+        (run-push '(123 245 integer_swap integer_swap)
+                  (make-push-state))))
+
+(time (dotimes [i 1000] 
+        (run-push '(123 245 tag_integer_123 tagged_123)
+                  (make-push-state))))
