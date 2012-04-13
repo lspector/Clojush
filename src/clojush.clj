@@ -2080,7 +2080,10 @@ normal, or :abnormal otherwise."
                (rest cases))))))
 
 (defn select
-  ([pop] select pop 0 0 0)
+  ([pop]
+    (select pop 1 0 0))
+  ([pop tournament-size]
+    (select pop tournament-size 0 0))
   ([pop tournament-size radius location]
     (if @global-use-lexicase-selection
       (lexicase-selection pop)
