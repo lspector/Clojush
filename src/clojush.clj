@@ -2401,7 +2401,8 @@ normal, or :abnormal otherwise."
         (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE ; might this need a dorun?
         (printf "\nDone computing errors.") (flush)
         ;; calculate solution rates if necessary for historically-assessed hardness
-        (when use-historically-assessed-hardness
+        (when (and use-historically-assessed-hardness
+                   (not use-lexicase-selection))
           (reset! solution-rates
                   (let [error-seqs (map :errors (map deref pop-agents))
                         num-cases (count (first error-seqs))]
