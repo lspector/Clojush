@@ -2067,7 +2067,7 @@ normal, or :abnormal otherwise."
 
 (defn lexicase-selection
   "Returns an individual that does the best on a randomly selected set of fitness cases"
-  [pop tournament-size]
+  [pop]
   (loop [survivors pop
          cases (shuffle (range (count (:errors (first pop)))))]
     (if (or (empty? cases)
@@ -2080,10 +2080,10 @@ normal, or :abnormal otherwise."
                (rest cases))))))
 
 (defn select
-  ([pop tournament-size] select pop tournament-size 0 0)
+  ([pop] select pop 0 0 0)
   ([pop tournament-size radius location]
     (if @global-use-lexicase-selection
-      (lexicase-selection pop tournament-size)
+      (lexicase-selection pop)
       (tournament-selection pop tournament-size radius location))))
 
 (defn mutate 
