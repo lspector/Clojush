@@ -2,7 +2,7 @@
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Lee Spector, lspector@hampshire.edu, 2012
 
-(ns examples.geometry
+(ns experimental.geometry
   (:use [clojush]))
 
 ;;;;;;;;;;;;
@@ -63,26 +63,33 @@
  
 ;; input instructions
 
-(define-registered r 
-                   (fn [state] (push-item (first (stack-ref :auxiliary 0 state)) :float state)))
+(define-registered 
+  r 
+  (fn [state] (push-item (first (stack-ref :auxiliary 0 state)) :float state)))
 
-(define-registered h
-                   (fn [state] (push-item (second (stack-ref :auxiliary 0 state)) :float state)))
+(define-registered
+  h
+  (fn [state] (push-item (second (stack-ref :auxiliary 0 state)) :float state)))
 
-(define-registered f1
-                   (fn [state] (push-item '(r 3.141592 float_mult 2.0 float_mult) :exec state)))
+(define-registered
+  f1
+  (fn [state] (push-item '(r 3.141592 float_mult 2.0 float_mult) :exec state)))
 
-(define-registered f2
-                   (fn [state] (push-item '(r r float_mult 3.141592 float_mult) :exec state)))
+(define-registered 
+  f2
+  (fn [state] (push-item '(r r float_mult 3.141592 float_mult) :exec state)))
 
-(define-registered f3
-                   (fn [state] (push-item '(r r float_mult h float_mult 3.141592 float_mult) :exec state)))
+(define-registered 
+  f3
+  (fn [state] (push-item '(r r float_mult h float_mult 3.141592 float_mult) :exec state)))
 
-(define-registered f4
-                   (fn [state] (push-item '(r r float_mult h float_mult 3.141592 float_mult 3.0 float_div) :exec state)))
+(define-registered 
+  f4
+  (fn [state] (push-item '(r r float_mult h float_mult 3.141592 float_mult 3.0 float_div) :exec state)))
 
-(define-registered f5
-                   (fn [state] (push-item '(r r float_mult r float_mult 3.141592 float_mult 4.0 float_mult 3.0 float_div) :exec state)))
+(define-registered 
+  f5
+  (fn [state] (push-item '(r r float_mult r float_mult 3.141592 float_mult 4.0 float_mult 3.0 float_div) :exec state)))
 
 
 ;; sterile mimics
@@ -430,13 +437,29 @@ subprogram of parent2."
                     %2)
                  group))))
 
-(defn decimate
+#_(defn decimate
   [population target-size tournament-size radius]
   (let [survivors (smallest-distinct-by-errors (filter #(nondominated % population) population))]
     (println " Survivors:" (count survivors))
     survivors))
+
+(defn select
+  [pop tournament-size radius location]
+  "ignore params aside from pop; do lexicase tournament on whole pop"
+  (loop [survivors pop
+         cases (shuffle (range (count (:errors (first pop)))))]
+    (if (or (empty? cases)
+            (empty? (rest survivors)))
+      (first survivors)
+      (let [min-err-for-case (apply min (map #(nth % (first cases))
+                                             (map :errors survivors)))]
+        (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
+                       survivors)
+               (rest cases))))))
+
+
   
-(in-ns 'examples.geometry)
+(in-ns 'experimental.geometry)
 ;;;;;;;;;;;;;;;;;;;;
 
 
@@ -469,7 +492,8 @@ subprogram of parent2."
                                  ;'f1 
                                  ;'f2 
                                  ;'f3 
-                                 'f4 'f5
+                                 ;'f4 
+                                 ;'f5
                                  (tag-instruction-erc [:exec #_:integer #_:float #_:boolean] 1000)
                                  (tagged-instruction-erc 1000)
                                  (untag-instruction-erc 1000)

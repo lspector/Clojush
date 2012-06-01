@@ -69,6 +69,9 @@
 (def global-use-historically-assessed-hardness (atom false))
 (def solution-rates (atom (repeat 0)))
 
+;; Lexicase Parent Selection (see Spector paper in GECCO-UP 2012 workshop proceedings)
+(def global-use-lexicase-selection (atom false)) ;; if true then no other selection params matter
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random code generator
 
@@ -2047,20 +2050,36 @@ normal, or :abnormal otherwise."
       (problem-specific-report best population generation error-function report-simplifications)
       best)))
 
+(defn lexicase-selection
+  "Returns an individual that does the best on a randomly selected set of fitness cases"
+  [pop]
+  (loop [survivors pop
+         cases (shuffle (range (count (:errors (first pop)))))]
+    (if (or (empty? cases)
+            (empty? (rest survivors)))
+      (first survivors)
+      (let [min-err-for-case (apply min (map #(nth % (first cases))
+                                             (map #(:errors %) survivors)))]
+        (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
+                       survivors)
+               (rest cases))))))
+
 (defn select
-  "Conducts a tournament and returns the individual with the lower total error."
+  "Returns a selected parent, using lexicase or tournament selection."
   [pop tournament-size radius location]
-  (let [tournament-set 
-        (doall
-          (for [_ (range tournament-size)]
-            (nth pop
-                 (if (zero? radius)
-                   (lrand-int (count pop))
-                   (mod (+ location (- (lrand-int (+ 1 (* radius 2))) radius))
-                        (count pop))))))
-        err-fn (if @global-use-historically-assessed-hardness :hah-error :total-error)]
-    (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
-            tournament-set)))
+  (if @global-use-lexicase-selection
+    (lexicase-selection pop)
+    (let [tournament-set 
+          (doall
+            (for [_ (range tournament-size)]
+              (nth pop
+                   (if (zero? radius)
+                     (lrand-int (count pop))
+                     (mod (+ location (- (lrand-int (+ 1 (* radius 2))) radius))
+                          (count pop))))))
+          err-fn (if @global-use-historically-assessed-hardness :hah-error :total-error)]
+      (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
+              tournament-set))))
 
 (defn mutate 
   "Returns a mutated version of the given individual."
@@ -2266,7 +2285,7 @@ normal, or :abnormal otherwise."
              node-selection-tournament-size pop-when-tagging gaussian-mutation-probability 
              gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
              reuse-errors problem-specific-report use-single-thread random-seed 
-             use-historically-assessed-hardness]
+             use-historically-assessed-hardness use-lexicase-selection]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
            population-size 1000
@@ -2300,7 +2319,8 @@ normal, or :abnormal otherwise."
            problem-specific-report default-problem-specific-report
            use-single-thread false
            random-seed (System/nanoTime)   
-           use-historically-assessed-hardness false        
+           use-historically-assessed-hardness false    
+           use-lexicase-selection false    
            }}]
   (binding [*thread-local-random-generator* (java.util.Random. random-seed)]
     ;; set globals from parameters
@@ -2314,6 +2334,7 @@ normal, or :abnormal otherwise."
     (reset! global-pop-when-tagging pop-when-tagging)
     (reset! global-reuse-errors reuse-errors)
     (reset! global-use-historically-assessed-hardness use-historically-assessed-hardness)
+    (reset! global-use-lexicase-selection use-lexicase-selection)
     (printf "\nStarting PushGP run.\n\n") (flush)
     (printf "Clojush version = ")
     (try
@@ -2356,6 +2377,7 @@ normal, or :abnormal otherwise."
                       evalpush-time-limit node-selection-method node-selection-tournament-size
                       node-selection-leaf-probability pop-when-tagging reuse-errors
                       use-single-thread random-seed use-historically-assessed-hardness
+                      use-lexicase-selection
                       ))
     (printf "\nGenerating initial population...\n") (flush)
     (let [pop-agents (vec (doall (for [_ (range population-size)] 
@@ -2375,7 +2397,8 @@ normal, or :abnormal otherwise."
         (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE ; might this need a dorun?
         (printf "\nDone computing errors.") (flush)
         ;; calculate solution rates if necessary for historically-assessed hardness
-        (when use-historically-assessed-hardness
+        (when (and use-historically-assessed-hardness
+                   (not use-lexicase-selection))
           (reset! solution-rates
                   (let [error-seqs (map :errors (map deref pop-agents))
                         num-cases (count (first error-seqs))]
