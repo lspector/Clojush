@@ -1019,6 +1019,17 @@
                  (pop-item :string state))
       state)))
 
+(define-registered
+  string_atoi
+  (fn [state]
+    (if (not (empty? (:string state)))
+      (try (pop-item :string
+                     (push-item (Integer/parseInt (top-item :string state))
+                                :integer state))
+           (catch Exception e state))
+      state)))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; code and exec instructions
 
