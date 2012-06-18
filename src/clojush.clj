@@ -46,6 +46,7 @@
 (def max-random-float 1.0)
 (def min-random-string-length 1)
 (def max-random-string-length 10)
+(def max-string-length 100)
 (def max-points-in-random-expressions 50) ;; for code_rand
 (def maintain-histories true) ;; histories are lists of total-error values for ancestors
 (def maintain-ancestors false) ;; if true save all ancestors in each individual (costly)
@@ -996,10 +997,13 @@
   string_concat
   (fn [state]
     (if (not (empty? (rest (:string state))))
-      (push-item (str (stack-ref :string 1 state)
-                      (stack-ref :string 0 state))
-                 :string
-                 (pop-item :string (pop-item :string state)))
+      (if (>= max-string-length (+ (len (stack-ref :string 1 state))
+                                   (stack-ref :string 0 state)))
+        (push-item (str (stack-ref :string 1 state)
+                        (stack-ref :string 0 state))
+                   :string
+                   (pop-item :string (pop-item :string state)))
+        state)
       state)))
 
 (define-registered 
