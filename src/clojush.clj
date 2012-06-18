@@ -997,8 +997,8 @@
   string_concat
   (fn [state]
     (if (not (empty? (rest (:string state))))
-      (if (>= max-string-length (+ (len (stack-ref :string 1 state))
-                                   (stack-ref :string 0 state)))
+      (if (>= max-string-length (+ (count (stack-ref :string 1 state))
+                                   (count (stack-ref :string 0 state))))
         (push-item (str (stack-ref :string 1 state)
                         (stack-ref :string 0 state))
                    :string
