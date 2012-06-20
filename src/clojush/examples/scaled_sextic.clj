@@ -1,4 +1,4 @@
-(ns examples.scaled-sextic
+(ns clojush.examples.scaled-sextic
   (:use [clojush]
         [clojure.math.numeric-tower]))
 

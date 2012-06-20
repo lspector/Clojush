@@ -8,7 +8,7 @@
 
 ;; This version was written by Brian Martin in 2010-2011.
 
-(ns examples.dsoar
+(ns clojush.examples.dsoar
   (:use [clojush] 
         [clojure.math.numeric-tower]))
 

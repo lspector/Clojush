@@ -1,4 +1,4 @@
-(ns examples.argmap-regression
+(ns clojush.examples.argmap-regression
   (:use [clojush]
         [clojure.math.numeric-tower]))
 

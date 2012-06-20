@@ -10,7 +10,7 @@
 ;;
 ;; Kyle Harrington, kyleh@cs.brandeis.edu, 2011
 
-(ns examples.mackey-glass-int
+(ns clojush.examples.mackey-glass-int
   (:use [clojush][local-file])
   (:require [clojure.math.numeric-tower :as math]
             [clojure.string :as s]))

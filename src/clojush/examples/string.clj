@@ -1,4 +1,4 @@
-(ns examples.string
+(ns clojush.examples.string
   (:use [clojush]
         [clojure.math.numeric-tower]))
 

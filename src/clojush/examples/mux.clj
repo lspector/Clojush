@@ -12,7 +12,7 @@
 ;; too because I've been experimenting. So you really have to look through the code
 ;; in this file before running it.
 
-(ns examples.mux
+(ns clojush.examples.mux
   (:use [clojush]
         [clojure.math.numeric-tower]))
 

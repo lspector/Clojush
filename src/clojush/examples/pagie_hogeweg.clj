@@ -5,7 +5,7 @@
 ;;
 ;; Kyle Harrington, kyleh@cs.brandeis.edu, 2011
 
-(ns examples.pagie-hogeweg
+(ns clojush.examples.pagie-hogeweg
   (:use [clojush])
   (:require [clojure.math.numeric-tower :as math]))
 

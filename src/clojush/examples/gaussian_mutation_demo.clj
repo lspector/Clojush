@@ -2,7 +2,7 @@
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Lee Spector, lspector@hampshire.edu, 2011
 
-(ns examples.gaussian-mutation-demo
+(ns clojush.examples.gaussian-mutation-demo
   (:use [clojush]
         [clojure.math.numeric-tower]))
 

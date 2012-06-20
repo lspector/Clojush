@@ -17,7 +17,7 @@
 
 ;;;;;
 ;; namespace declaration and access to needed libraries
-(ns clojush
+(ns clojush.clojush
   (:gen-class)
   (:require
     [clojure.zip :as zip]

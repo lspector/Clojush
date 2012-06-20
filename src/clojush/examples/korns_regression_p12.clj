@@ -2,7 +2,7 @@
 ;; a symbolic regression problem based on Michael Korns's draft chapter from GPTP11
 ;; Lee Spector, lspector@hampshire.edu, 2011
 
-(ns examples.korns-regression-p12 
+(ns clojush.examples.korns-regression-p12 
   (:use [clojush]
         [clojure.math.numeric-tower]))
 

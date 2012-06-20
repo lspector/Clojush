@@ -9,7 +9,7 @@
 ;; intertwined-spirals-demo.
 ;; For Kyle's full version see https://github.com/kephale/Clojush
 
-(ns examples.intertwined-spirals
+(ns clojush.examples.intertwined-spirals
   (:use [clojush]))
 
 (in-ns 'examples.intertwined-spirals)
