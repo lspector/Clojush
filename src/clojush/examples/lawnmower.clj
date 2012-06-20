@@ -3,7 +3,7 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns clojush.examples.lawnmower
-  (:use [clojush]))
+  (:use [clojush.clojush]))
 
 ;;;;;;;;;;;;
 ;; Koza's lawnmower problem, described in Chapter 8 of Genetic Programming II:

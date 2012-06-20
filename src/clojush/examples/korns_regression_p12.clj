@@ -3,7 +3,7 @@
 ;; Lee Spector, lspector@hampshire.edu, 2011
 
 (ns clojush.examples.korns-regression-p12 
-  (:use [clojush]
+  (:use [clojush.clojush]
         [clojure.math.numeric-tower]))
 
 (defn generate-data 

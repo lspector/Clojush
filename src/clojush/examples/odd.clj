@@ -3,7 +3,7 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns clojush.examples.odd
-  (:use [clojush]
+  (:use [clojush.clojush]
         [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;

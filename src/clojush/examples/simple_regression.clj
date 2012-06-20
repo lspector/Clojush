@@ -3,7 +3,7 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns clojush.examples.simple-regression
-  (:use [clojush]
+  (:use [clojush.clojush]
         [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;

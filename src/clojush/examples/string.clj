@@ -1,5 +1,5 @@
 (ns clojush.examples.string
-  (:use [clojush]
+  (:use [clojush.clojush]
         [clojure.math.numeric-tower]))
 
 ; Tries to get a string with the most unique characters. If there are at least goal, succeeds.

@@ -10,7 +10,7 @@
 ;; For Kyle's full version see https://github.com/kephale/Clojush
 
 (ns clojush.examples.intertwined-spirals
-  (:use [clojush]))
+  (:use [clojush.clojush]))
 
 (in-ns 'examples.intertwined-spirals)
 

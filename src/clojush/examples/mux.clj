@@ -13,7 +13,7 @@
 ;; in this file before running it.
 
 (ns clojush.examples.mux
-  (:use [clojush]
+  (:use [clojush.clojush]
         [clojure.math.numeric-tower]))
 
 ;;; HACKS to Clojush stuff for experimentation here

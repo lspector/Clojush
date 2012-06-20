@@ -9,7 +9,7 @@
 ;; This version was written by Brian Martin in 2010-2011.
 
 (ns clojush.examples.dsoar
-  (:use [clojush] 
+  (:use [clojush.clojush] 
         [clojure.math.numeric-tower]))
 
 (in-ns 'clojush)

@@ -1,5 +1,5 @@
 (ns clojush.examples.argmap-regression
-  (:use [clojush]
+  (:use [clojush.clojush]
         [clojure.math.numeric-tower]))
 
 ;; argmap_regression.clj

@@ -3,7 +3,7 @@
 ;; Lee Spector, lspector@hampshire.edu, 2011
 
 (ns clojush.examples.gaussian-mutation-demo
-  (:use [clojush]
+  (:use [clojush.clojush]
         [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;

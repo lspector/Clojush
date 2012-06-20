@@ -2,7 +2,7 @@
 ;; of functions in coljush.clj.
 
 (ns clojush.test.clojush-tests
-  (:use [clojush] ))
+  (:use [clojush.clojush] ))
     
 ;(in-ns 'clojush)
 
