@@ -4,6 +4,7 @@
 
 (ns clojush.examples.gaussian-mutation-demo
   (:use [clojush.clojush]
+        [clojush.pushstate]
         [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;

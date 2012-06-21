@@ -6,7 +6,8 @@
 ;; Kyle Harrington, kyleh@cs.brandeis.edu, 2011
 
 (ns clojush.examples.pagie-hogeweg
-  (:use [clojush.clojush])
+  (:use [clojush.clojush]
+        [clojush.pushstate])
   (:require [clojure.math.numeric-tower :as math]))
 
 (defn data-point-2D "Generate a 2D data point from:

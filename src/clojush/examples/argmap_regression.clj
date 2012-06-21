@@ -1,5 +1,6 @@
 (ns clojush.examples.argmap-regression
   (:use [clojush.clojush]
+        [clojush.pushstate]
         [clojure.math.numeric-tower]))
 
 ;; argmap_regression.clj

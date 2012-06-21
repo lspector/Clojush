@@ -12,6 +12,7 @@
 
 (ns clojush.examples.mackey-glass-int
   (:use [clojush.clojush]
+        [clojush.pushstate]
         [local-file])
   (:require [clojure.math.numeric-tower :as math]
             [clojure.string :as s]))

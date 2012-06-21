@@ -4,6 +4,7 @@
 
 (ns clojush.examples.factorial
   (:use [clojush.clojush]
+        [clojush.pushstate]
         [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;

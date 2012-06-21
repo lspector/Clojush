@@ -14,6 +14,7 @@
 
 (ns clojush.examples.mux
   (:use [clojush.clojush]
+        [clojush.pushstate]
         [clojure.math.numeric-tower]))
 
 ;;; HACKS to Clojush stuff for experimentation here

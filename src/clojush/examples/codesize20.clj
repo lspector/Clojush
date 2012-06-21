@@ -3,7 +3,8 @@
 ;; Lee Spector, lspector@hampshire.edu, 2011
 
 (ns clojush.examples.codesize20
-  (:use [clojush.clojush]))
+  (:use [clojush.clojush]
+        [clojush.pushstate]))
 
 (import java.lang.Math)
 

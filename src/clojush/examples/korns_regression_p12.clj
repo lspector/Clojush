@@ -4,6 +4,7 @@
 
 (ns clojush.examples.korns-regression-p12 
   (:use [clojush.clojush]
+        [clojush.pushstate]
         [clojure.math.numeric-tower]))
 
 (defn generate-data 

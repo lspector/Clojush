@@ -6,7 +6,8 @@
 ;; the fitness cases.
 
 (ns clojush.examples.float-regression
-  (:use [clojush.clojush]))
+  (:use [clojush.clojush]
+        [clojush.pushstate]))
 
 ;;;;;;;;;;;;
 ;; Float symbolic regression of x^3 - 2x^2 - x (problem 5 from the 

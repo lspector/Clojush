@@ -4,6 +4,7 @@
 
 (ns clojush.examples.tagged-tg8
   (:use [clojush.clojush]
+        [clojush.pushstate]
         [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;

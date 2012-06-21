@@ -4,6 +4,7 @@
 
 (ns clojush.examples.tagged-regression
   (:use [clojush.clojush]
+        [clojush.pushstate]
         [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;
