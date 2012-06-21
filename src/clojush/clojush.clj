@@ -39,34 +39,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; states, stacks, and instructions
 
-;; 20101017 
-;; record-based states, should be faster but aren't measurably so (see measurements)
-;; reverting to structs for greater flexibility in use of state as map
-
-;; useful for define-push-state-record-type
-;(defn keyword->symbol [kwd]
-;  "Returns the symbol obtained by removing the : from a keyword."
-;  (read-string (name kwd)))
-;
-;(defmacro define-push-state-record-type []
-;  "Defines the pushstate record type. The odd trick with read-string was a hack to 
-;avoid namespace qualification on the pushstate symbol."
-;  `(defrecord ~(read-string "pushstate") [~@(map keyword->symbol push-types)]))
-;
-;(define-push-state-record-type)
-;
-;(defmacro make-push-state
-;  "Returns an empty push state."
-;  []
-;  `(pushstate. ~@(map (fn [_] nil) push-types)))
-
-;1:3 clojush=> (time (stress-test 100000))
-;:no-errors-found-in-stress-test
-;"Elapsed time: 57673.781 msecs"
-; more runs:
-;"Elapsed time: 57682.971 msecs"
-;"Elapsed time: 55129.614 msecs"
-
 ;; struct-based states follow
 
 (defmacro define-push-state-structure []
@@ -79,13 +51,6 @@
   []
   (struct-map push-state))
 
-;; corresponding results for struct-based states
-;1:3 clojush=> (time (stress-test 100000))
-;:no-errors-found-in-stress-test
-;"Elapsed time: 59194.123 msecs"
-; more runs:
-;"Elapsed time: 52389.016 msecs"
-;"Elapsed time: 54706.127 msecs"
 
 (def registered-instructions (atom #{}))
 
