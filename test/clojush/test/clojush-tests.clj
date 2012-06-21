@@ -2,7 +2,11 @@
 ;; of functions in coljush.clj.
 
 (ns clojush.test.clojush-tests
-  (:use [clojush.clojush] ))
+  (:use [clojush.clojush]
+        [clojush.globals]
+        [clojush.random]
+        [clojush.util]
+        [clojush.pushstate]))
     
 ;(in-ns 'clojush)
 
