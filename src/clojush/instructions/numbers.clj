@@ -1,5 +1,6 @@
 (ns clojush.instructions.numbers
-  (:use [clojush.pushstate]))
+  (:use [clojush.pushstate]
+        [clojush.util]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; instructions for numbers

@@ -1,5 +1,6 @@
 (ns clojush.instructions.string
-  (:use [clojush.pushstate]))
+  (:use [clojush.pushstate]
+        [clojush.globals]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; instructions for strings

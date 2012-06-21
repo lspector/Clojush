@@ -1,5 +1,8 @@
 (ns clojush.instructions.code
-  (:use [clojush.pushstate]))
+  (:use [clojush.pushstate]
+        [clojush.util]
+        [clojush.globals])
+  (:require [clojure.math.numeric-tower :as math]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; code and exec instructions
