@@ -32,6 +32,7 @@
     [clojush.instructions.code]
     [clojush.instructions.common]
     [clojush.instructions.numbers]
+    [clojush.instructions.random]
     [clojush.instructions.string]
     [clojush.instructions.zip]))
 
@@ -43,57 +44,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ACTUAL INSTRUCTIONS
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; rand instructions
-
-(define-registered 
-  boolean_rand
-  (fn [state]
-    (push-item (lrand-nth [true false]) :boolean state)))
-
-(define-registered 
-  integer_rand
-  (fn [state]
-    (push-item (+' (lrand-int (+ 1 (- max-random-integer min-random-integer)))
-                   min-random-integer)
-               :integer
-               state)))
-
-(define-registered 
-  float_rand
-  (fn [state]
-    (push-item (+' (lrand (- max-random-float min-random-float))
-                   min-random-float)
-               :float
-               state)))
-
-(define-registered 
-  code_rand
-  (fn [state]
-    (if (not (empty? (:integer state)))
-      (push-item (random-code (math/abs (mod (stack-ref :integer 0 state) 
-                                             max-points-in-random-expressions)) 
-                              @global-atom-generators)
-                 :code
-                 (pop-item :integer state))
-      state)))
-
-(define-registered 
-  string_rand
-  (fn [state]
-    (push-item 
-      (apply str (repeatedly 
-                   (+' min-random-string-length
-                       (lrand-int (- max-random-string-length 
-                                     min-random-string-length)))
-                   #(rand-nth 
-                      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")))
-      :string
-      state)))
-
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; print all registered instructions on loading
