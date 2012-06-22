@@ -12,13 +12,16 @@
   (:use [clojush.clojush]
         [clojush.pushstate]
         [clojure.math.numeric-tower]
+        [clojush.instructions.common]
         [clojush.instructions.tag]))
 
-(in-ns 'clojush)
-
+(in-ns 'clojush.globals)
 (def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :intvec2D))
+
+(in-ns 'clojush.pushstate)
 (define-push-state-structure)
 
+(in-ns 'clojush.clojush)
 (defn recognize-literal
   "If thing is a literal, return its type -- otherwise return false."
   [thing]
@@ -28,7 +31,7 @@
         (vector? thing) :intvec2D ;; just assume length is right
         true false))
 
-(in-ns 'examples.dsoar)
+(in-ns 'clojush.examples.dsoar)
 
 ;the obstacles, created with:
 #_(apply hash-map (interleave (filter even? (range 4 13))

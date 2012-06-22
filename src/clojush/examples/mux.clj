@@ -20,9 +20,11 @@
 
 ;;; HACKS to Clojush stuff for experimentation here
 ;;; Hacks for collecting and printing full ancestor lists
-(in-ns 'clojush)
+(in-ns 'clojush.globals)
 (def maintain-ancestors true)
 (def print-ancestors-of-solution true)
+
+(in-ns 'clojush.clojush)
 (defn crossover 
   "Returns a copy of parent1 with a random subprogram replaced with a random 
    subprogram of parent2."
@@ -40,7 +42,7 @@
                                                 (cons (:program parent2) (:ancestors parent2)))) ;;; CHANGED HERE
                                     (:ancestors parent1))))))
 
-(in-ns 'examples.mux) ;; end of hacks to clojush.clj
+(in-ns 'clojush.examples.mux) ;; end of hacks to clojush.clj
 
 ;; We store address bits in a vector on top of the auxiliary stack
 ;; and data bits in a vector under the address bits vector.

@@ -5,6 +5,8 @@
 (ns clojush.examples.lawnmower
   (:use [clojush.clojush]
         [clojush.pushstate]
+        [clojush.globals]
+        [clojush.instructions.common]
         [clojush.instructions.tag]))
 
 ;;;;;;;;;;;;
@@ -18,15 +20,17 @@
 ;; uncomment one to run it.
 
 ;;;;;;;;;;;;
-;; A few things must be done in the clojush namespace.
-(in-ns 'clojush)
+;; A few things must be done in other namespaces
 
 ;; Redefine push-types to include :intvec2D and then redefine the push state structure.
+(in-ns 'clojush.globals)
 (def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :intvec2D))
+
+(in-ns 'clojush.pushstate)
 (define-push-state-structure)
 
 ;; Redefine recognize-literal to support intvec2Ds of the form [row column
-
+(in-ns 'clojush.clojush)
 (defn recognize-literal
   "If thing is a literal, return its type -- otherwise return false."
   [thing]
@@ -38,7 +42,7 @@
   
 ;;;;;;;;;;;;
 ;; Return to the lawnmower namespace
-(in-ns 'examples.lawnmower) 
+(in-ns 'clojush.examples.lawnmower) 
 
 ;; Define standard stack instructions for the new intvec2D type.
 (define-registered intvec2D_pop (popper :intvec2D))

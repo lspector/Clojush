@@ -14,8 +14,6 @@
         [clojush.pushstate]
         [clojush.instructions.tag]))
 
-(in-ns 'examples.intertwined-spirals)
-
 ;;;;;;;;;;;;
 ;; Intertwined Spirals problem
 ;; Introduced in "Learning to tell two spirals apart," Lang, K.J. and Witbrock, M.J., Proceedings of the 1988 Connectionist models summer school, 1988.
