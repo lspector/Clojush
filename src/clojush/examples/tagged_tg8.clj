@@ -5,7 +5,8 @@
 (ns clojush.examples.tagged-tg8
   (:use [clojush.clojush]
         [clojush.pushstate]
-        [clojure.math.numeric-tower]))
+        [clojure.math.numeric-tower]
+        [clojush.instructions.tag]))
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of the y=5x^6-2x^5-5x^3+3x^2+5. This uses

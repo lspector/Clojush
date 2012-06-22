@@ -11,7 +11,8 @@
 
 (ns clojush.examples.intertwined-spirals
   (:use [clojush.clojush]
-        [clojush.pushstate]))
+        [clojush.pushstate]
+        [clojush.instructions.tag]))
 
 (in-ns 'examples.intertwined-spirals)
 

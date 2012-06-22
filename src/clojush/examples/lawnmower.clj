@@ -4,7 +4,8 @@
 
 (ns clojush.examples.lawnmower
   (:use [clojush.clojush]
-        [clojush.pushstate]))
+        [clojush.pushstate]
+        [clojush.instructions.tag]))
 
 ;;;;;;;;;;;;
 ;; Koza's lawnmower problem, described in Chapter 8 of Genetic Programming II:

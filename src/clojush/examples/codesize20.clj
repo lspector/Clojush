@@ -4,7 +4,8 @@
 
 (ns clojush.examples.codesize20
   (:use [clojush.clojush]
-        [clojush.pushstate]))
+        [clojush.pushstate]
+        [clojush.instructions.tag]))
 
 (import java.lang.Math)
 

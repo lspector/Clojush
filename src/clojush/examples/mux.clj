@@ -15,7 +15,8 @@
 (ns clojush.examples.mux
   (:use [clojush.clojush]
         [clojush.pushstate]
-        [clojure.math.numeric-tower]))
+        [clojure.math.numeric-tower]
+        [clojush.instructions.tag]))
 
 ;;; HACKS to Clojush stuff for experimentation here
 ;;; Hacks for collecting and printing full ancestor lists

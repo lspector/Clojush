@@ -11,7 +11,8 @@
 (ns clojush.examples.dsoar
   (:use [clojush.clojush]
         [clojush.pushstate]
-        [clojure.math.numeric-tower]))
+        [clojure.math.numeric-tower]
+        [clojush.instructions.tag]))
 
 (in-ns 'clojush)
 

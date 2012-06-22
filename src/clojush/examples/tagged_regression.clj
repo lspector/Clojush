@@ -5,7 +5,8 @@
 (ns clojush.examples.tagged-regression
   (:use [clojush.clojush]
         [clojush.pushstate]
-        [clojure.math.numeric-tower]))
+        [clojure.math.numeric-tower]
+        [clojush.instructions.tag]))
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of x^3 - 2x^2 - x (problem 5 from the 
