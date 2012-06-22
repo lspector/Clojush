@@ -1,4 +1,7 @@
-(ns clojush.experimental.overlap)
+(ns clojush.experimental.overlap
+  (:use [clojush.pushstate]
+        [clojush.util])
+  (:require [clojure.math.numeric-tower :as math]))
 
 (defn discrepancy
   "Returns a measure of the discrepancy between list1 and list2. This will
