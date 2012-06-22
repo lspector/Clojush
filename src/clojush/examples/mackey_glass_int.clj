@@ -18,7 +18,7 @@
             [clojure.string :as s]))
 
 (defn read-data []
-  (let [f (slurp (file* "src/examples/mg_int_128.dat"))
+  (let [f (slurp (file* "src/clojush/examples/mg_int_128.dat"))
         lines (doall (map #(filter (partial not= "")
                                    (s/split % #" "))
                           (s/split-lines f)))]
