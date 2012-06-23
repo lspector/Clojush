@@ -2132,7 +2132,7 @@ normal, or :abnormal otherwise."
          survivors (first (nth @global-lexicase-case-cohorts (first cases)))]
     (if (or (empty? (rest survivors))
             (empty? (rest cases)))
-      (first survivors)
+      (lrand-nth (vec survivors))
       (recur (rest cases)
              (let [next-case (second cases)]
                (loop [cohorts (nth @global-lexicase-case-cohorts next-case)  ]
