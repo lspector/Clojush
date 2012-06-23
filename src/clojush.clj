@@ -2128,7 +2128,7 @@ normal, or :abnormal otherwise."
   "Returns an individual that does the best on a randomly selected set of fitness cases.
    Assumes that setup-fast-lexicase-selection has been run, setting up global-lexicase-case-cohorts."
   [pop]
-  (loop [cases (shuffle (range (count (:errors (first pop)))))
+  (loop [cases (lshuffle (range (count (:errors (first pop)))))
          survivors (first (nth @global-lexicase-case-cohorts (first cases)))]
     (if (or (empty? (rest survivors))
             (empty? (rest cases)))
