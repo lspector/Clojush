@@ -24,6 +24,7 @@
     [clojure.math.numeric-tower :as math]
     [clojure.walk :as walk]
     [clojure.string :as string]
+    [clojure.set :as set]
     [local-file]))
 
 (import java.lang.Math)
@@ -72,6 +73,8 @@
 
 ;; Lexicase Parent Selection (see Spector paper in GECCO-UP 2012 workshop proceedings)
 (def global-use-lexicase-selection (atom false)) ;; if true then no other selection params matter
+(def global-use-fast-lexicase-selection (atom false))
+(def global-lexicase-case-cohorts (atom [])) ;; used for fast-lexicase-selection
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random code generator
@@ -2100,22 +2103,62 @@ normal, or :abnormal otherwise."
                        survivors)
                (rest cases))))))
 
+(defn setup-fast-lexicase-selection
+  "Sets global-lexicase-case-cohorts to be the data structure needed for fast-lexicase-selection.
+   The value is a vector of copies of the population, one for each fitness case, with each 
+   sorted by error on the specified case and then partitioned into sets of individuals with the
+   same fitness for that case."
+  [pop]
+  (print "Setting up for fast lexicase selection... ")(flush)
+  (reset! global-lexicase-case-cohorts
+          (vec (map (fn [case-index]
+                      (map set 
+                           (partition-by 
+                             #(nth (:errors %) case-index)
+                             (sort #(< (nth (:errors %1) case-index) 
+                                       (nth (:errors %2) case-index)) 
+                                   pop))))
+                    (range (count (:errors (first pop)))))))
+  ;; this prints a lot but it's a good sanity check and maybe useful information some day
+  ;(println "Cohort sizes:" (map (fn [cohorts] (map count cohorts)) @global-lexicase-case-cohorts))
+  (println "Done.")(flush)
+  )
+
+(defn fast-lexicase-selection
+  "Returns an individual that does the best on a randomly selected set of fitness cases.
+   Assumes that setup-fast-lexicase-selection has been run, setting up global-lexicase-case-cohorts."
+  [pop]
+  (loop [cases (shuffle (range (count (:errors (first pop)))))
+         survivors (first (nth @global-lexicase-case-cohorts (first cases)))]
+    (if (or (empty? (rest survivors))
+            (empty? (rest cases)))
+      (first survivors)
+      (recur (rest cases)
+             (let [next-case (second cases)]
+               (loop [cohorts (nth @global-lexicase-case-cohorts next-case)  ]
+                 (let [hits (set/intersection survivors (first cohorts))]
+                   (if (empty? hits)
+                     (recur (rest cohorts))
+                     hits))))))))
+
 (defn select
   "Returns a selected parent, using lexicase or tournament selection."
   [pop tournament-size radius location]
-  (if @global-use-lexicase-selection
-    (lexicase-selection pop)
-    (let [tournament-set 
-          (doall
-            (for [_ (range tournament-size)]
-              (nth pop
-                   (if (zero? radius)
-                     (lrand-int (count pop))
-                     (mod (+ location (- (lrand-int (+ 1 (* radius 2))) radius))
-                          (count pop))))))
-          err-fn (if @global-use-historically-assessed-hardness :hah-error :total-error)]
-      (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
-              tournament-set))))
+  (if @global-use-fast-lexicase-selection
+    (fast-lexicase-selection pop)
+    (if @global-use-lexicase-selection
+      (lexicase-selection pop)
+      (let [tournament-set 
+            (doall
+              (for [_ (range tournament-size)]
+                (nth pop
+                     (if (zero? radius)
+                       (lrand-int (count pop))
+                       (mod (+ location (- (lrand-int (+ 1 (* radius 2))) radius))
+                            (count pop))))))
+            err-fn (if @global-use-historically-assessed-hardness :hah-error :total-error)]
+        (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
+                tournament-set)))))
 
 (defn mutate 
   "Returns a mutated version of the given individual."
@@ -2321,7 +2364,7 @@ normal, or :abnormal otherwise."
              node-selection-tournament-size pop-when-tagging gaussian-mutation-probability 
              gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
              reuse-errors problem-specific-report use-single-thread random-seed 
-             use-historically-assessed-hardness use-lexicase-selection]
+             use-historically-assessed-hardness use-lexicase-selection use-fast-lexicase-selection]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
            population-size 1000
@@ -2357,6 +2400,7 @@ normal, or :abnormal otherwise."
            random-seed (System/nanoTime)   
            use-historically-assessed-hardness false    
            use-lexicase-selection false    
+           use-fast-lexicase-selection false
            }}]
   (binding [*thread-local-random-generator* (java.util.Random. random-seed)]
     ;; set globals from parameters
@@ -2371,6 +2415,7 @@ normal, or :abnormal otherwise."
     (reset! global-reuse-errors reuse-errors)
     (reset! global-use-historically-assessed-hardness use-historically-assessed-hardness)
     (reset! global-use-lexicase-selection use-lexicase-selection)
+    (reset! global-use-fast-lexicase-selection use-fast-lexicase-selection)
     (printf "\nStarting PushGP run.\n\n") (flush)
     (printf "Clojush version = ")
     (try
@@ -2413,7 +2458,7 @@ normal, or :abnormal otherwise."
                       evalpush-time-limit node-selection-method node-selection-tournament-size
                       node-selection-leaf-probability pop-when-tagging reuse-errors
                       use-single-thread random-seed use-historically-assessed-hardness
-                      use-lexicase-selection
+                      use-lexicase-selection use-fast-lexicase-selection
                       ))
     (printf "\nGenerating initial population...\n") (flush)
     (let [pop-agents (vec (doall (for [_ (range population-size)] 
@@ -2434,7 +2479,7 @@ normal, or :abnormal otherwise."
         (printf "\nDone computing errors.") (flush)
         ;; calculate solution rates if necessary for historically-assessed hardness
         (when (and use-historically-assessed-hardness
-                   (not use-lexicase-selection))
+                   (not (or use-lexicase-selection use-fast-lexicase-selection)))
           (reset! solution-rates
                   (let [error-seqs (map :errors (map deref pop-agents))
                         num-cases (count (first error-seqs))]
@@ -2461,6 +2506,7 @@ normal, or :abnormal otherwise."
                                           (int (* decimation-ratio population-size))
                                           decimation-tournament-size 
                                           trivial-geography-radius)]
+                        (if use-fast-lexicase-selection (setup-fast-lexicase-selection pop))
                         (dotimes [i population-size]
                           ((if use-single-thread swap! send)
                                (nth child-agents i) 
