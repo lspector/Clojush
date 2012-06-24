@@ -2096,7 +2096,7 @@ normal, or :abnormal otherwise."
          cases (shuffle (range (count (:errors (first pop)))))]
     (if (or (empty? cases)
             (empty? (rest survivors)))
-      (first survivors)
+      (lrand-nth survivors)
       (let [min-err-for-case (apply min (map #(nth % (first cases))
                                              (map #(:errors %) survivors)))]
         (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
