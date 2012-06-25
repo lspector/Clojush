@@ -18,7 +18,8 @@
         [clojush.interpreter]
         [clojure.math.numeric-tower]
         [clojush.instructions.tag]
-        [clojush.pushgp.node_selection]))
+        [clojush.pushgp.node_selection]
+        [clojush.pushgp.individual]))
 
 ;;; HACKS to Clojush stuff for experimentation here
 ;;; Hacks for collecting and printing full ancestor lists

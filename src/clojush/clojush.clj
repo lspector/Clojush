@@ -37,7 +37,10 @@
     [clojush.instructions.string]
     [clojush.instructions.tag]
     [clojush.instructions.zip]
+    [clojush.pushgp.individual]
+    [clojush.pushgp.evaluate]
     [clojush.pushgp.node_selection]
+    [clojush.pushgp.simplification]
     [clojush.experimental.tagged_code_macros]))
 
 (import java.lang.Math)
@@ -59,77 +62,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; pushgp
 
-;; Individuals are records.
-;; Populations are vectors of agents with individuals as their states (along with error and
-;; history information).
-
-
-(defrecord individual [program errors total-error hah-error history ancestors])
-
-(defn make-individual [& {:keys [program errors total-error hah-error history ancestors]
-                          :or {program nil
-                               errors nil
-                               total-error nil ;; a non-number is used to indicate no value
-                               hah-error nil
-                               history nil
-                               ancestors nil}}]
-  (individual. program errors total-error hah-error history ancestors))
-
-(defn compute-total-error
-  [errors]
-  (reduce +' errors))
-
-(defn compute-hah-error
-  [errors]
-  (if @global-use-historically-assessed-hardness
-    (reduce +' (doall (map (fn [rate e] (*' (- 1.01 rate) e))
-                           @solution-rates
-                           errors)))
-    nil))
-
-
-
-(defn flatten-seqs
-  "A version of flatten that only flattens nested seqs."
-  [x]
-  (filter (complement seq?)
-          (rest (tree-seq seq? seq x))))
-
-(defn auto-simplify 
-  "Auto-simplifies the provided individual."
-  [ind error-function steps print? progress-interval]
-  (when print? (printf "\nAuto-simplifying with starting size: %s" (count-points (:program ind))))
-  (loop [step 0 program (:program ind) errors (:errors ind) total-errors (:total-error ind)]
-    (when (and print? 
-               (or (>= step steps)
-                   (zero? (mod step progress-interval))))
-      (printf "\nstep: %s\nprogram: %s\nerrors: %s\ntotal: %s\nsize: %s\n" 
-              step (not-lazy program) (not-lazy errors) total-errors (count-points program))
-      (flush))
-    (if (>= step steps)
-      (make-individual :program program :errors errors :total-error total-errors 
-                       :history (:history ind) 
-                       :ancestors (if maintain-ancestors
-                                    (cons (:program ind) (:ancestors ind))
-                                    (:ancestors ind)))
-      (let [new-program (if (< (lrand-int 5) 4)
-                          ;; remove a small number of random things
-                          (loop [p program how-many (inc (lrand-int 2))]
-                            (if (zero? how-many)
-                              p
-                              (recur (remove-code-at-point p (lrand-int (count-points p)))
-                                     (dec how-many))))
-                          ;; flatten something
-                          (let [point-index (lrand-int (count-points program))
-                                point (code-at-point program point-index)]
-                            (if (seq? point)
-                              (insert-code-at-point program point-index (flatten-seqs point))
-                              program)))
-            new-errors (error-function new-program)
-            new-total-errors (compute-total-error new-errors)]
-        (if (<= new-total-errors total-errors)
-          (recur (inc step) new-program new-errors new-total-errors)
-          (recur (inc step) program errors total-errors))))))
 
 (defn default-problem-specific-report
   "Customize this for your own problem. It will be called at the end of the generational report."
@@ -268,23 +200,6 @@
                        :ancestors (if maintain-ancestors
                                     (cons (:program parent1) (:ancestors parent1))
                                     (:ancestors parent1))))))
-
-(defn evaluate-individual
-  "Returns the given individual with errors, total-errors, and hah-errors,
-   computing them if necessary."
-  [i error-function rand-gen]
-  (binding [*thread-local-random-generator* rand-gen]
-    (let [p (:program i)
-          e (if (and (seq? (:errors i)) @global-reuse-errors)
-              (:errors i)
-              (error-function p))
-          te (if (and (number? (:total-error i)) @global-reuse-errors)
-               (:total-error i)
-               (keep-number-reasonable (compute-total-error e)))
-          he (compute-hah-error e)]
-      (make-individual :program p :errors e :total-error te :hah-error he
-                       :history (if maintain-histories (cons te (:history i)) (:history i))
-                       :ancestors (:ancestors i)))))
 
 (defn breed
   "Replaces the state of the given agent with an individual bred from the given population (pop), 
