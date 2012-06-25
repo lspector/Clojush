@@ -2106,18 +2106,17 @@ normal, or :abnormal otherwise."
 (defn setup-fast-lexicase-selection
   "Sets global-lexicase-case-cohorts to be the data structure needed for fast-lexicase-selection.
    The value is a vector of copies of the population, one for each fitness case, with each 
-   sorted by error on the specified case and then partitioned into sets of individuals with the
+   sorted by error on the specified case and then partitioned into sequences of individuals with the
    same fitness for that case."
   [pop]
   (print "Setting up for fast lexicase selection... ")(flush)
   (reset! global-lexicase-case-cohorts
           (vec (map (fn [case-index]
-                      (map set 
-                           (partition-by 
-                             #(nth (:errors %) case-index)
-                             (sort #(< (nth (:errors %1) case-index) 
-                                       (nth (:errors %2) case-index)) 
-                                   pop))))
+                      (partition-by 
+                        #(nth (:errors %) case-index)
+                        (sort #(< (nth (:errors %1) case-index) 
+                                  (nth (:errors %2) case-index)) 
+                              pop)))
                     (range (count (:errors (first pop)))))))
   ;; this prints a lot but it's a good sanity check and maybe useful information some day
   ;(println "Cohort sizes:" (map (fn [cohorts] (map count cohorts)) @global-lexicase-case-cohorts))
@@ -2130,16 +2129,14 @@ normal, or :abnormal otherwise."
   [pop]
   (loop [cases (lshuffle (range (count (:errors (first pop)))))
          survivors (first (nth @global-lexicase-case-cohorts (first cases)))]
-    (if (or (empty? (rest survivors))
-            (empty? (rest cases)))
-      (lrand-nth (vec survivors))
-      (recur (rest cases)
-             (let [next-case (second cases)]
-               (loop [cohorts (nth @global-lexicase-case-cohorts next-case)  ]
-                 (let [hits (set/intersection survivors (first cohorts))]
-                   (if (empty? hits)
-                     (recur (rest cohorts))
-                     hits))))))))
+    (if (or (empty? (rest cases))
+            (empty? (rest survivors)))
+      (lrand-nth survivors)
+      (let [min-err-for-next-case (apply min (map #(nth % (second cases))
+                                                  (map #(:errors %) survivors)))]
+        (recur (rest cases)
+               (filter #(= (nth (:errors %) (second cases)) min-err-for-next-case)
+                       survivors))))))
 
 (defn select
   "Returns a selected parent, using lexicase or tournament selection."
