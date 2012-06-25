@@ -15,6 +15,7 @@
 (ns clojush.examples.mux
   (:use [clojush.clojush]
         [clojush.pushstate]
+        [clojush.interpreter]
         [clojure.math.numeric-tower]
         [clojush.instructions.tag]))
 

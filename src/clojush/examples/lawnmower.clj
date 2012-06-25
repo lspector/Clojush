@@ -5,6 +5,7 @@
 (ns clojush.examples.lawnmower
   (:use [clojush.clojush]
         [clojush.pushstate]
+        [clojush.interpreter]
         [clojush.globals]
         [clojush.instructions.common]
         [clojush.instructions.tag]))
@@ -29,8 +30,8 @@
 (in-ns 'clojush.pushstate)
 (define-push-state-structure)
 
-;; Redefine recognize-literal to support intvec2Ds of the form [row column
-(in-ns 'clojush.clojush)
+;; Redefine recognize-literal to support intvec2Ds of the form [row column]
+(in-ns 'clojush.interpreter)
 (defn recognize-literal
   "If thing is a literal, return its type -- otherwise return false."
   [thing]

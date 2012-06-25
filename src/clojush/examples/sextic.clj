@@ -5,6 +5,7 @@
 (ns clojush.examples.sextic
   (:use [clojush.clojush]
         [clojush.pushstate]
+        [clojush.interpreter]
         [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;

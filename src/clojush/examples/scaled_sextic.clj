@@ -1,6 +1,7 @@
 (ns clojush.examples.scaled-sextic
   (:use [clojush.clojush]
         [clojush.pushstate]
+        [clojush.interpreter]
         [clojure.math.numeric-tower]))
 
 ;; scaled_sextic.clj

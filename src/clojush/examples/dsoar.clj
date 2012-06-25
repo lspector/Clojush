@@ -11,6 +11,7 @@
 (ns clojush.examples.dsoar
   (:use [clojush.clojush]
         [clojush.pushstate]
+        [clojush.interpreter]
         [clojure.math.numeric-tower]
         [clojush.instructions.common]
         [clojush.instructions.tag]))
@@ -21,7 +22,7 @@
 (in-ns 'clojush.pushstate)
 (define-push-state-structure)
 
-(in-ns 'clojush.clojush)
+(in-ns 'clojush.interpreter)
 (defn recognize-literal
   "If thing is a literal, return its type -- otherwise return false."
   [thing]

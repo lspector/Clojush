@@ -7,7 +7,8 @@
 
 (ns clojush.examples.pagie-hogeweg
   (:use [clojush.clojush]
-        [clojush.pushstate])
+        [clojush.pushstate]
+        [clojush.interpreter])
   (:require [clojure.math.numeric-tower :as math]))
 
 (defn data-point-2D "Generate a 2D data point from:

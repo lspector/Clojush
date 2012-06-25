@@ -5,6 +5,7 @@
 (ns clojush.examples.odd
   (:use [clojush.clojush]
         [clojush.pushstate]
+        [clojush.interpreter]
         [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;
@@ -24,7 +25,7 @@
                         (let [state (run-push program
                                               (push-item input :auxiliary
                                                          (push-item input :integer
-                                                                    (make-push-state))) )
+                                                                    (make-push-state))))
                               top-bool (top-item :boolean state)]
                           (if (not (= top-bool :no-stack-item))
                             (if (= top-bool (odd? input)) 0 1)

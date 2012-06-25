@@ -7,7 +7,8 @@
 
 (ns clojush.examples.float-regression
   (:use [clojush.clojush]
-        [clojush.pushstate]))
+        [clojush.pushstate]
+        [clojush.interpreter]))
 
 ;;;;;;;;;;;;
 ;; Float symbolic regression of x^3 - 2x^2 - x (problem 5 from the 

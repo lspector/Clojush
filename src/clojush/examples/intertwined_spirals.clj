@@ -12,6 +12,7 @@
 (ns clojush.examples.intertwined-spirals
   (:use [clojush.clojush]
         [clojush.pushstate]
+        [clojush.interpreter]
         [clojush.instructions.tag]))
 
 ;;;;;;;;;;;;

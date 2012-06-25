@@ -5,6 +5,7 @@
 (ns clojush.examples.codesize20
   (:use [clojush.clojush]
         [clojush.pushstate]
+        [clojush.interpreter]
         [clojush.util]
         [clojush.instructions.tag]
         [clojush.experimental.tagged_code_macros]))

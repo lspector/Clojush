@@ -5,6 +5,7 @@
 (ns clojush.examples.krypto
   (:use [clojush.clojush]
         [clojush.pushstate]
+        [clojush.interpreter]
         [clojure.math.numeric-tower]))
 
 ;; Chooses and then tries to solve (via pushgp) a game of Krypto.

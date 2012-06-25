@@ -1,6 +1,7 @@
 (ns clojush.examples.string
   (:use [clojush.clojush]
         [clojush.pushstate]
+        [clojush.interpreter]
         [clojush.random]
         [clojure.math.numeric-tower]))
 
