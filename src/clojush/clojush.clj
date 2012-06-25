@@ -191,10 +191,6 @@
         true 
         (select pop tournament-size trivial-geography-radius location)))))
 
-(defmacro print-params
-  [params]
-  (cons 'do (doall (map #(list 'println (str %) "=" %) params))))
-
 (defn decimate
   "Returns the subset of the provided population remaining after sufficiently many
    elimination tournaments to reach the provided target-size."

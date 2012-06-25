@@ -60,3 +60,11 @@
     (printf "\nAncestors of solution:\n")
     (println (:ancestors best)))
   (auto-simplify best error-function final-report-simplifications true 500))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; also, this seems like the best spot for print-params
+(defmacro print-params
+  [params]
+  (cons 'do (doall (map #(list 'println (str %) "=" %) params))))
+
