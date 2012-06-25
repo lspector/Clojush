@@ -40,17 +40,14 @@
 
 (import java.lang.Math)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; small things during initialization
+
 ;; backtrace abbreviation, to ease debugging
 (defn bt []
   (.printStackTrace *e))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; print all registered instructions on loading
-
-(printf "\nRegistered instructions: %s\n\n" @registered-instructions)
-(flush)
-
-;; also set default value for atom-generators
+;; set default value for atom-generators
 (reset! global-atom-generators 
         (concat @registered-instructions
                 (list 
@@ -578,6 +575,7 @@ normal, or :abnormal otherwise."
     (reset! global-reuse-errors reuse-errors)
     (reset! global-use-historically-assessed-hardness use-historically-assessed-hardness)
     (reset! global-use-lexicase-selection use-lexicase-selection)
+    (printf "\nRegistered instructions: %s\n\n" @registered-instructions) (flush)
     (printf "\nStarting PushGP run.\n\n") (flush)
     (printf "Clojush version = ")
     (try
