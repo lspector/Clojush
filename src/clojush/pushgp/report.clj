@@ -1,4 +1,5 @@
 (ns clojush.pushgp.report
+  (:require [clojure.string :as string])
   (:use [clojush.util]
         [clojush.globals]
         [clojush.pushgp.simplification]))
@@ -63,8 +64,21 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; also, this seems like the best spot for print-params
+;; also, this seems like the best spot for print-params and git-last-commit-hash
 (defmacro print-params
   [params]
   (cons 'do (doall (map #(list 'println (str %) "=" %) params))))
 
+(defn git-last-commit-hash
+  "Returns the last Git commit hash"
+  []
+  (let [dir (local-file/project-dir)]
+    (string/trim
+      (slurp
+        (str dir
+             "/.git/"
+             (subs
+               (string/trim
+                 (slurp
+                   (str dir "/.git/HEAD")))
+               5))))))

@@ -224,19 +224,6 @@
                     targets
                     outputs))))))
 
-(defn git-last-commit-hash
-  "Returns the last Git commit hash"
-  []
-  (let [dir (local-file/project-dir)]
-    (string/trim
-      (slurp
-        (str dir
-             "/.git/"
-             (subs
-               (string/trim
-                 (slurp
-                   (str dir "/.git/HEAD")))
-               5))))))
 
 (defn pushgp
   "The top-level routine of pushgp."
