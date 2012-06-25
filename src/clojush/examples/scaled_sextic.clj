@@ -2,6 +2,7 @@
   (:use [clojush.clojush]
         [clojush.pushstate]
         [clojush.interpreter]
+        [clojush.experimental.scaled_errors]
         [clojure.math.numeric-tower]))
 
 ;; scaled_sextic.clj
