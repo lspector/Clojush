@@ -39,11 +39,14 @@
     [clojush.instructions.zip]
     [clojush.pushgp.individual]
     [clojush.pushgp.evaluate]
-    [clojush.pushgp.parent_selection]
+    [clojush.pushgp.breed]
     [clojush.pushgp.node_selection]
     [clojush.pushgp.simplification]
     [clojush.pushgp.report]
     [clojush.experimental.tagged_code_macros]))
+
+;;;WHEN DONE ADDDING TO USE: LIST, comment them all out, then add back only the necessary ones.
+;;; do the same for the require things.
 
 (import java.lang.Math)
 
@@ -65,101 +68,8 @@
 ;; pushgp
 
 
-(defn mutate 
-  "Returns a mutated version of the given individual."
-  [ind mutation-max-points max-points atom-generators]
-  (let [new-program (insert-code-at-point (:program ind) 
-                                          (select-node-index (:program ind))
-                                          (random-code mutation-max-points atom-generators))]
-    (if (> (count-points new-program) max-points)
-      ind
-      (make-individual :program new-program :history (:history ind)
-                       :ancestors (if maintain-ancestors
-                                    (cons (:program ind) (:ancestors ind))
-                                    (:ancestors ind))))))
 
-;; some utilities are required for gaussian mutation
 
-(defn gaussian-noise-factor
-  "Returns gaussian noise of mean 0, std dev 1."
-  []
-  (* (Math/sqrt (* -2.0 (Math/log (lrand))))
-     (Math/cos (* 2.0 Math/PI (lrand)))))
-
-(defn perturb-with-gaussian-noise 
-  "Returns n perturbed with std dev sd."
-  [sd n]
-  (+' n (* sd (gaussian-noise-factor))))
-
-(defn perturb-code-with-gaussian-noise
-  "Returns code with each float literal perturbed with std dev sd and perturbation probability
-   num-perturb-probability."
-  [code per-num-perturb-probability sd]
-  (postwalklist (fn [item]
-                  (if (and (float? item)
-                           (< (lrand) per-num-perturb-probability))
-                    (perturb-with-gaussian-noise sd item)
-                    item))
-                code))
-
-(defn gaussian-mutate 
-  "Returns a gaussian-mutated version of the given individual."
-  [ind per-num-perturb-probability sd]
-  (make-individual 
-    :program (perturb-code-with-gaussian-noise (:program ind) per-num-perturb-probability sd)
-    :history (:history ind)
-    :ancestors (if maintain-ancestors
-                 (cons (:program ind) (:ancestors ind))
-                 (:ancestors ind))))
-
-(defn crossover 
-  "Returns a copy of parent1 with a random subprogram replaced with a random 
-   subprogram of parent2."
-  [parent1 parent2 max-points]
-  (let [new-program (insert-code-at-point 
-                      (:program parent1) 
-                      (select-node-index (:program parent1))
-                      (code-at-point (:program parent2)
-                                     (select-node-index (:program parent2))))]
-    (if (> (count-points new-program) max-points)
-      parent1
-      (make-individual :program new-program :history (:history parent1)
-                       :ancestors (if maintain-ancestors
-                                    (cons (:program parent1) (:ancestors parent1))
-                                    (:ancestors parent1))))))
-
-(defn breed
-  "Replaces the state of the given agent with an individual bred from the given population (pop), 
-   using the given parameters."
-  [agt location rand-gen pop error-function population-size max-points atom-generators 
-   mutation-probability  mutation-max-points crossover-probability simplification-probability 
-   tournament-size reproduction-simplifications trivial-geography-radius
-   gaussian-mutation-probability gaussian-mutation-per-number-mutation-probability 
-   gaussian-mutation-standard-deviation]
-  (binding [*thread-local-random-generator* rand-gen]
-    (let [n (lrand)]
-      (cond 
-        ;; mutation
-        (< n mutation-probability)
-        (mutate (select pop tournament-size trivial-geography-radius location) 
-                mutation-max-points max-points atom-generators)
-        ;; crossover
-        (< n (+ mutation-probability crossover-probability))
-        (let [first-parent (select pop tournament-size trivial-geography-radius location)
-              second-parent (select pop tournament-size trivial-geography-radius location)]
-          (crossover first-parent second-parent max-points))
-        ;; simplification
-        (< n (+ mutation-probability crossover-probability simplification-probability))
-        (auto-simplify (select pop tournament-size trivial-geography-radius location)
-                       error-function reproduction-simplifications false 1000)
-        ;; gaussian mutation
-        (< n (+ mutation-probability crossover-probability simplification-probability 
-                gaussian-mutation-probability))
-        (gaussian-mutate (select pop tournament-size trivial-geography-radius location) 
-                         gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation)
-        ;; replication
-        true 
-        (select pop tournament-size trivial-geography-radius location)))))
 
 (defn decimate
   "Returns the subset of the provided population remaining after sufficiently many
