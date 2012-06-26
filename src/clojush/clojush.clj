@@ -43,7 +43,8 @@
     [clojush.pushgp.node_selection]
     [clojush.pushgp.simplification]
     [clojush.pushgp.report]
-    [clojush.experimental.tagged_code_macros]))
+    [clojush.experimental.tagged_code_macros]
+    [clojush.experimental.decimation]))
 
 ;;;WHEN DONE ADDDING TO USE: LIST, comment them all out, then add back only the necessary ones.
 ;;; do the same for the require things.
@@ -66,38 +67,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; pushgp
-
-
-
-
-
-(defn decimate
-  "Returns the subset of the provided population remaining after sufficiently many
-   elimination tournaments to reach the provided target-size."
-  [population target-size tournament-size radius]
-  (let [popsize (count population)]
-    (if (<= popsize target-size)
-      population
-      (recur (let [tournament-index-set 
-                   (let [first-location (lrand-int popsize)]
-                     (cons first-location
-                           (doall
-                             (for [_ (range (dec tournament-size))]
-                               (if (zero? radius)
-                                 (lrand-int popsize)
-                                 (mod (+ first-location (- (lrand-int (+ 1 (* radius 2))) radius))
-                                      popsize))))))
-                   victim-index
-                   (reduce (fn [i1 i2] 
-                             (if (> (:total-error (nth population i1))
-                                    (:total-error (nth population i2)))
-                               i1 
-                               i2))
-                           tournament-index-set)]
-               (vec (concat (subvec population 0 victim-index)
-                            (subvec population (inc victim-index)))))
-             target-size tournament-size radius))))
-
 
 (defn pushgp
   "The top-level routine of pushgp."
@@ -240,10 +209,12 @@
             (do (if (>= generation max-generations)
                   (printf "\nFAILURE\n")
                   (do (printf "\nProducing offspring...") (flush)
-                      (let [pop (decimate (vec (doall (map deref pop-agents))) 
-                                          (int (* decimation-ratio population-size))
-                                          decimation-tournament-size 
-                                          trivial-geography-radius)]
+                      (let [pop (if (>= decimation-ratio 1)
+                                  (vec (doall (map deref pop-agents)))
+                                  (decimate (vec (doall (map deref pop-agents)))
+                                            (int (* decimation-ratio population-size))
+                                            decimation-tournament-size
+                                            trivial-geography-radius))]
                         (dotimes [i population-size]
                           ((if use-single-thread swap! send)
                                (nth child-agents i) 
