@@ -11,7 +11,7 @@
 ;; Kyle Harrington, kyleh@cs.brandeis.edu, 2011
 
 (ns clojush.examples.mackey-glass-int
-  (:use [clojush.clojush]
+  (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
         [local-file])

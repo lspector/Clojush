@@ -3,7 +3,7 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns clojush.examples.lawnmower
-  (:use [clojush.clojush]
+  (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
         [clojush.globals]

@@ -1,5 +1,5 @@
 (ns clojush.examples.string
-  (:use [clojush.clojush]
+  (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
         [clojush.random]

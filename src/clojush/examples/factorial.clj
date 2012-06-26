@@ -3,7 +3,7 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns clojush.examples.factorial
-  (:use [clojush.clojush]
+  (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
         [clojure.math.numeric-tower]))

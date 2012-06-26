@@ -3,7 +3,7 @@
 ;; Lee Spector, lspector@hampshire.edu, 2011
 
 (ns clojush.examples.gaussian-mutation-demo
-  (:use [clojush.clojush]
+  (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
         [clojure.math.numeric-tower]))

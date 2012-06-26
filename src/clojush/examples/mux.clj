@@ -13,7 +13,7 @@
 ;; in this file before running it.
 
 (ns clojush.examples.mux
-  (:use [clojush.clojush]
+  (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
         [clojure.math.numeric-tower]
@@ -27,7 +27,7 @@
 (def maintain-ancestors true)
 (def print-ancestors-of-solution true)
 
-(in-ns 'clojush.clojush)
+(in-ns 'clojush.pushgp.genetic_operators)
 (defn crossover 
   "Returns a copy of parent1 with a random subprogram replaced with a random 
    subprogram of parent2."

@@ -1,5 +1,5 @@
 (ns clojush.experimental.pushgp_map
-  (:use [clojush.clojush]))
+  (:use [clojush.pushgp.pushgp]))
 
 (defn pushgp-map
   "Calls pushgp with the args in argmap."

@@ -1,6 +1,5 @@
 (ns clojush.examples.argmap-regression
-  (:use [clojush.clojush]
-        [clojush.pushstate]
+  (:use [clojush.pushstate]
         [clojush.interpreter]
         [clojush.experimental.pushgp_map]
         [clojure.math.numeric-tower]))

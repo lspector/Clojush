@@ -6,7 +6,7 @@
 ;; the fitness cases.
 
 (ns clojush.examples.float-regression
-  (:use [clojush.clojush]
+  (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]))
 

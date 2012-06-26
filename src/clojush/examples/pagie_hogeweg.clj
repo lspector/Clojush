@@ -6,7 +6,7 @@
 ;; Kyle Harrington, kyleh@cs.brandeis.edu, 2011
 
 (ns clojush.examples.pagie-hogeweg
-  (:use [clojush.clojush]
+  (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter])
   (:require [clojure.math.numeric-tower :as math]))

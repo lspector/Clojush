@@ -3,14 +3,13 @@
 ;; Lee Spector, lspector@hampshire.edu, 2011
 
 (ns clojush.examples.codesize20
-  (:use [clojush.clojush]
+  (:require [clojure.math.numeric-tower :as math])
+  (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
         [clojush.util]
         [clojush.instructions.tag]
         [clojush.experimental.tagged_code_macros]))
-
-(import java.lang.Math)
 
 ;; This simple problem serves only to demonstrate tagged-code macros.
 ;; We seek a piece of code of exactly 20 points, tagged so that it is retrieved
@@ -27,7 +26,7 @@
   (let [pushstate (run-push program (make-push-state))]
     (if (empty? (:tag pushstate)) 
       [1000000]
-      [(Math/abs (- (count-points (second (closest-association 0 pushstate))) 20))])))
+      [(math/abs (- (count-points (second (closest-association 0 pushstate))) 20))])))
 
 ;; actual run
 

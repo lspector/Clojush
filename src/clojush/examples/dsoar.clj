@@ -9,7 +9,7 @@
 ;; This version was written by Brian Martin in 2010-2011.
 
 (ns clojush.examples.dsoar
-  (:use [clojush.clojush]
+  (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
         [clojure.math.numeric-tower]
