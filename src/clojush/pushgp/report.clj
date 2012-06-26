@@ -1,16 +1,39 @@
 (ns clojush.pushgp.report
-  (:require [clojure.string :as string])
+  (:require [clojure.string :as string]
+            [local-file])
   (:use [clojush.util]
         [clojush.globals]
+        [clojush.pushstate]
         [clojush.pushgp.simplification]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; report printing functions
+;; helper functions
 
 (defn default-problem-specific-report
   "Customize this for your own problem. It will be called at the end of the generational report."
   [best population generation error-function report-simplifications]
   :no-problem-specific-report-function-defined)
+
+(defn git-last-commit-hash
+  "Returns the last Git commit hash"
+  []
+  (let [dir (local-file/project-dir)]
+    (string/trim
+      (slurp
+        (str dir
+             "/.git/"
+             (subs
+               (string/trim
+                 (slurp
+                   (str dir "/.git/HEAD")))
+               5))))))
+
+(defmacro print-params
+  [params]
+  (cons 'do (doall (map #(list 'println (str %) "=" %) params))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; report printing functions
 
 (defn report 
   "Reports on the specified generation of a pushgp run. Returns the best
@@ -51,6 +74,44 @@
       (problem-specific-report best population generation error-function report-simplifications)
       best)))
 
+
+(defn initial-report
+  "Prints the initial report of a PushGP run."
+  []
+  (printf "\nRegistered instructions: %s\n\n" @registered-instructions) (flush)
+  (printf "\nStarting PushGP run.\n\n") (flush)
+  (printf "Clojush version = ")
+  (try
+    (let [version-str (apply str (butlast (re-find #"\".*\""
+                                                   (first (string/split-lines
+                                                            (local-file/slurp* "project.clj"))))))
+          version-number (.substring version-str 1 (count version-str))]
+      (if (empty? version-number)
+        (throw Exception)
+        (printf (str version-number "\n"))))
+    (flush)
+    (catch Exception e
+           (printf "version number unavailable\n")
+           (flush)))
+  (try
+    (let [git-hash (git-last-commit-hash)]
+      (if (empty? git-hash)
+        (throw Exception)
+        (do
+          ;; NOTES: - Last commit hash will only be correct if this code has
+          ;;          been committed already.
+          ;;        - GitHub link will only work if commit has been pushed
+          ;;          to GitHub.
+          (printf (str "Hash of last Git commit = " git-hash "\n"))
+          (printf (str "GitHub link = https://github.com/lspector/Clojush/commit/"
+                       git-hash
+                       "\n"))
+          (flush))))
+    (catch Exception e
+           (printf "Hash of last Git commit = unavailable\n")
+           (printf "GitHub link = unavailable\n")
+           (flush))))
+
 (defn final-report
   "Prints the final report of a PushGP run if the run is successful."
   [generation best error-function final-report-simplifications]
@@ -61,24 +122,3 @@
     (printf "\nAncestors of solution:\n")
     (println (:ancestors best)))
   (auto-simplify best error-function final-report-simplifications true 500))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; also, this seems like the best spot for print-params and git-last-commit-hash
-(defmacro print-params
-  [params]
-  (cons 'do (doall (map #(list 'println (str %) "=" %) params))))
-
-(defn git-last-commit-hash
-  "Returns the last Git commit hash"
-  []
-  (let [dir (local-file/project-dir)]
-    (string/trim
-      (slurp
-        (str dir
-             "/.git/"
-             (subs
-               (string/trim
-                 (slurp
-                   (str dir "/.git/HEAD")))
-               5))))))

@@ -1,6 +1,4 @@
 (ns clojush.pushgp.pushgp
-  (:require [clojure.string :as string]
-            [local-file])
   (:use [clojush.globals]
         [clojush.pushstate]
         [clojush.random]
@@ -81,39 +79,7 @@
     (reset! global-reuse-errors reuse-errors)
     (reset! global-use-historically-assessed-hardness use-historically-assessed-hardness)
     (reset! global-use-lexicase-selection use-lexicase-selection)
-    (printf "\nRegistered instructions: %s\n\n" @registered-instructions) (flush)
-    (printf "\nStarting PushGP run.\n\n") (flush)
-    (printf "Clojush version = ")
-    (try
-      (let [version-str (apply str (butlast (re-find #"\".*\""        
-                                                     (first (string/split-lines
-                                                              (local-file/slurp* "project.clj"))))))
-            version-number (.substring version-str 1 (count version-str))]
-        (if (empty? version-number)
-          (throw Exception)
-          (printf (str version-number "\n"))))
-      (flush)
-      (catch Exception e
-             (printf "version number unavailable\n")
-             (flush)))
-    (try
-      (let [git-hash (git-last-commit-hash)]
-        (if (empty? git-hash)
-          (throw Exception)
-          (do
-            ;; NOTES: - Last commit hash will only be correct if this code has
-            ;;          been committed already.
-            ;;        - GitHub link will only work if commit has been pushed
-            ;;          to GitHub.
-            (printf (str "Hash of last Git commit = " git-hash "\n"))
-            (printf (str "GitHub link = https://github.com/lspector/Clojush/commit/"
-                         git-hash
-                         "\n"))
-            (flush))))
-      (catch Exception e
-             (printf "Hash of last Git commit = unavailable\n")
-             (printf "GitHub link = unavailable\n")
-             (flush)))
+    (initial-report) ;; Print the inital report
     (print-params 
       (error-function error-threshold population-size max-points atom-generators max-generations 
                       mutation-probability mutation-max-points crossover-probability
@@ -138,6 +104,7 @@
                                           :error-handler (fn [agnt except] (println except))))))
           rand-gens (vec (doall (for [k (range population-size)]
                                   (java.util.Random. (+ random-seed (inc k))))))]
+      ;; Main loop
       (loop [generation 0]
         (printf "\n\n-----\nProcessing generation: %s\nComputing errors..." generation) (flush)
         (dorun (map #((if use-single-thread swap! send) % evaluate-individual error-function %2) pop-agents rand-gens))
