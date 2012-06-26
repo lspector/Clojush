@@ -150,3 +150,7 @@
   (if (seq? lst)
     (apply list lst)
     lst))
+
+;; backtrace abbreviation, to ease debugging
+(defn bt []
+  (.printStackTrace *e))

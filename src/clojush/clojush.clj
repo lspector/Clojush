@@ -51,19 +51,6 @@
 
 (import java.lang.Math)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; small things during initialization
-
-;; backtrace abbreviation, to ease debugging
-(defn bt []
-  (.printStackTrace *e))
-
-;; set default value for atom-generators
-(reset! global-atom-generators 
-        (concat @registered-instructions
-                (list 
-                  (fn [] (lrand-int 100))
-                  (fn [] (lrand)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; pushgp
