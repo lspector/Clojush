@@ -1,7 +1,7 @@
 ;; This is a file of commented-out informal tests (without outputs...) 
 ;; of functions in coljush.clj.
 
-(ns clojush.test.clojush-tests
+(ns clojush.test.clojush_tests
   (:use [clojush.clojush]
         [clojush.globals]
         [clojush.random]
