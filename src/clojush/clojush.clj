@@ -231,12 +231,9 @@
                       (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
                       (recur (inc generation)))))))))))
 
-(defn pushgp-map
-  "Calls pushgp with the args in argmap."
-  [argmap]
-  (apply pushgp (apply concat argmap)))
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; main function
 
 (defn -main 
   "A main function for clojush, which assumes that the first/only argument is the name

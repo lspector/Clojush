@@ -2,6 +2,7 @@
   (:use [clojush.clojush]
         [clojush.pushstate]
         [clojush.interpreter]
+        [clojush.experimental.pushgp_map]
         [clojure.math.numeric-tower]))
 
 ;; argmap_regression.clj
