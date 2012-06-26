@@ -16,19 +16,23 @@
         [clojush.pushgp.report]
         [clojush.experimental.decimation]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; pushgp
 
 (defn pushgp
   "The top-level routine of pushgp."
-  [& {:keys [error-function error-threshold population-size max-points atom-generators max-generations
-             max-mutations mutation-probability mutation-max-points crossover-probability 
-             simplification-probability tournament-size report-simplifications final-report-simplifications
-             reproduction-simplifications trivial-geography-radius decimation-ratio decimation-tournament-size
-             evalpush-limit evalpush-time-limit node-selection-method node-selection-leaf-probability
-             node-selection-tournament-size pop-when-tagging gaussian-mutation-probability 
-             gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
-             reuse-errors problem-specific-report use-single-thread random-seed 
+  [& {:keys [error-function error-threshold population-size max-points
+             atom-generators max-generations max-mutations mutation-probability
+             mutation-max-points crossover-probability simplification-probability
+             tournament-size report-simplifications final-report-simplifications
+             reproduction-simplifications trivial-geography-radius decimation-ratio
+             decimation-tournament-size evalpush-limit evalpush-time-limit
+             node-selection-method node-selection-leaf-probability
+             node-selection-tournament-size pop-when-tagging
+             gaussian-mutation-probability
+             gaussian-mutation-per-number-mutation-probability
+             gaussian-mutation-standard-deviation reuse-errors
+             problem-specific-report use-single-thread random-seed
              use-historically-assessed-hardness use-lexicase-selection]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
@@ -106,21 +110,18 @@
                                   (java.util.Random. (+ random-seed (inc k))))))]
       ;; Main loop
       (loop [generation 0]
-        (printf "\n\n-----\nProcessing generation: %s\nComputing errors..." generation) (flush)
-        (dorun (map #((if use-single-thread swap! send) % evaluate-individual error-function %2) pop-agents rand-gens))
-        (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE ; might this need a dorun?
+        (printf "\n\n-----\nProcessing generation: %s\nComputing errors..." generation)
+        (flush)
+        (dorun (map #((if use-single-thread swap! send) % evaluate-individual error-function %2)
+                    pop-agents
+                    rand-gens))
+        (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE ;might this need a dorun?
         (printf "\nDone computing errors.") (flush)
-        ;; calculate solution rates if necessary for historically-assessed hardness
-        (when (and use-historically-assessed-hardness
-                   (not use-lexicase-selection))
-          (reset! solution-rates
-                  (let [error-seqs (map :errors (map deref pop-agents))
-                        num-cases (count (first error-seqs))]
-                    (doall (for [i (range num-cases)]
-                             (/ (count (filter #(<= % error-threshold) (map #(nth % i) error-seqs)))
-                                population-size)))))
-          (printf "\nSolution rates: ")
-          (println (doall (map float @solution-rates))))
+        (calculate-hah-solution-rates use-historically-assessed-hardness
+                                      use-lexicase-selection  ;; calculate solution rates
+                                      pop-agents              ;; if necessary for 
+                                      error-threshold         ;; historically-assessed hardness
+                                      population-size)
         ;; report and check for success
         (let [best (report (vec (doall (map deref pop-agents))) generation error-function 
                            report-simplifications problem-specific-report)]

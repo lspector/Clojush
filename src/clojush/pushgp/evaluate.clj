@@ -20,6 +20,21 @@
                            errors)))
     nil))
 
+(defn calculate-hah-solution-rates
+  [use-historically-assessed-hardness use-lexicase-selection pop-agents error-threshold
+   population-size]
+  (when (and use-historically-assessed-hardness
+             (not use-lexicase-selection))
+    (reset! solution-rates
+            (let [error-seqs (map :errors (map deref pop-agents))
+                  num-cases (count (first error-seqs))]
+              (doall (for [i (range num-cases)]
+                       (/ (count (filter #(<= % error-threshold)
+                                         (map #(nth % i) error-seqs)))
+                          population-size)))))
+    (printf "\nSolution rates: ")
+    (println (doall (map float @solution-rates)))))
+
 (defn evaluate-individual
   "Returns the given individual with errors, total-errors, and hah-errors,
    computing them if necessary."
