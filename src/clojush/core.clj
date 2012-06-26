@@ -15,7 +15,7 @@
 ;; PARTICULAR PURPOSE. See the GNU General Public License (http://www.gnu.org/licenses/)
 ;; for more details.
 
-(ns clojush.clojush
+(ns clojush.core
   (:gen-class))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
