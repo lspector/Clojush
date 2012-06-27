@@ -4,8 +4,10 @@
 ;;
 ;; This is code for the 11-bit multiplexer problem.
 
-(ns examples.mux_11
-  (:use [clojush]
+(ns clojush.examples.mux_11
+  (:use [clojush.pushgp.pushgp]
+        [clojush.pushstate]
+        [clojush.interpreter]
         [clojure.math.numeric-tower]))
 
 ;; We store address bits in a vector on top of the auxiliary stack

@@ -21,8 +21,8 @@
     nil))
 
 (defn calculate-hah-solution-rates
-  [use-historically-assessed-hardness use-lexicase-selection pop-agents error-threshold
-   population-size]
+  [use-historically-assessed-hardness use-lexicase-selection use-fast-lexicase-selection
+   pop-agents error-threshold population-size]
   (when (and use-historically-assessed-hardness
              (not (or use-lexicase-selection use-fast-lexicase-selection)))
     (reset! solution-rates

@@ -13,6 +13,7 @@
         [clojush.pushgp.individual]
         [clojush.pushgp.evaluate]
         [clojush.pushgp.breed]
+        [clojush.pushgp.parent_selection]
         [clojush.pushgp.report]
         [clojush.experimental.decimation]))
 
@@ -121,9 +122,10 @@
         (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE ;might this need a dorun?
         (printf "\nDone computing errors.") (flush)
         (calculate-hah-solution-rates use-historically-assessed-hardness
-                                      use-lexicase-selection  ;; calculate solution rates
-                                      pop-agents              ;; if necessary for 
-                                      error-threshold         ;; historically-assessed hardness
+                                      use-lexicase-selection
+                                      use-fast-lexicase-selection  ;; calculate solution rates
+                                      pop-agents                   ;; if necessary for 
+                                      error-threshold              ;; historically-assessed hardness
                                       population-size)
         ;; report and check for success
         (let [best (report (vec (doall (map deref pop-agents))) generation error-function 

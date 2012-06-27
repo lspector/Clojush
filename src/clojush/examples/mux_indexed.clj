@@ -5,8 +5,11 @@
 ;; This is code for multiplexer problems of various sizes, using integers
 ;; to index address and data bits (which are Boolean values).
 
-(ns examples.mux_indexed
-  (:use [clojush]
+(ns clojush.examples.mux_indexed
+  (:use [clojush.pushgp.pushgp]
+        [clojush.pushstate]
+        [clojush.interpreter]
+        [clojush.random]
         [clojure.math.numeric-tower]))
 
 ;; We store address bits in a vector on top of the auxiliary stack
