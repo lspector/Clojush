@@ -33,7 +33,8 @@
              gaussian-mutation-per-number-mutation-probability
              gaussian-mutation-standard-deviation reuse-errors
              problem-specific-report use-single-thread random-seed
-             use-historically-assessed-hardness use-lexicase-selection]
+             use-historically-assessed-hardness use-lexicase-selection
+             use-fast-lexicase-selection]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
            population-size 1000
@@ -68,7 +69,8 @@
            use-single-thread false
            random-seed (System/nanoTime)   
            use-historically-assessed-hardness false    
-           use-lexicase-selection false    
+           use-lexicase-selection false   
+           use-fast-lexicase-selection false 
            }}]
   (binding [*thread-local-random-generator* (java.util.Random. random-seed)]
     ;; set globals from parameters
@@ -83,6 +85,7 @@
     (reset! global-reuse-errors reuse-errors)
     (reset! global-use-historically-assessed-hardness use-historically-assessed-hardness)
     (reset! global-use-lexicase-selection use-lexicase-selection)
+    (reset! global-use-fast-lexicase-selection use-fast-lexicase-selection)
     (initial-report) ;; Print the inital report
     (print-params 
       (error-function error-threshold population-size max-points atom-generators max-generations 
@@ -94,7 +97,7 @@
                       evalpush-time-limit node-selection-method node-selection-tournament-size
                       node-selection-leaf-probability pop-when-tagging reuse-errors
                       use-single-thread random-seed use-historically-assessed-hardness
-                      use-lexicase-selection
+                      use-lexicase-selection use-fast-lexicase-selection
                       ))
     (printf "\nGenerating initial population...\n") (flush)
     (let [pop-agents (vec (doall (for [_ (range population-size)] 
@@ -136,6 +139,7 @@
                                             (int (* decimation-ratio population-size))
                                             decimation-tournament-size
                                             trivial-geography-radius))]
+                        (if use-fast-lexicase-selection (setup-fast-lexicase-selection pop))
                         (dotimes [i population-size]
                           ((if use-single-thread swap! send)
                                (nth child-agents i) 
