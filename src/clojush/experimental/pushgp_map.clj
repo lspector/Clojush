@@ -1,4 +1,4 @@
-(ns clojush.experimental.pushgp_map
+(ns clojush.experimental.pushgp-map
   (:use [clojush.pushgp.pushgp]))
 
 (defn pushgp-map

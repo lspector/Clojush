@@ -2,7 +2,7 @@
   (:use [clojush.pushstate]
         [clojush.globals]
         [clojush.instructions.tag]
-        [clojush.experimental.tagged_code_macros]))
+        [clojush.experimental.tagged-code-macros]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; push interpreter

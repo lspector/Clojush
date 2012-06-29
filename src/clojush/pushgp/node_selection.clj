@@ -1,4 +1,4 @@
-(ns clojush.pushgp.node_selection
+(ns clojush.pushgp.node-selection
   (:use [clojush.util]
         [clojush.random]
         [clojush.globals]))

@@ -4,7 +4,7 @@
 ;;
 ;; This is code for the 11-bit multiplexer problem.
 
-(ns clojush.examples.mux_11
+(ns clojush.examples.mux-11
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]

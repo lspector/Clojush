@@ -1,4 +1,4 @@
-(ns clojush.pushgp.parent_selection
+(ns clojush.pushgp.parent-selection
   (:require [clojure.set :as set])
   (:use [clojush.random]
         [clojush.globals]))

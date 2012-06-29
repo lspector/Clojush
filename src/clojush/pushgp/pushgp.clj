@@ -13,7 +13,7 @@
         [clojush.pushgp.individual]
         [clojush.pushgp.evaluate]
         [clojush.pushgp.breed]
-        [clojush.pushgp.parent_selection]
+        [clojush.pushgp.parent-selection]
         [clojush.pushgp.report]
         [clojush.experimental.decimation]))
 

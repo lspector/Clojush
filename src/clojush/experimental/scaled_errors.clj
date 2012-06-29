@@ -1,4 +1,4 @@
-(ns clojush.experimental.scaled_errors
+(ns clojush.experimental.scaled-errors
   (:require [clojure.math.numeric-tower :as math]))
 
 (defn scaled-errors
