@@ -1,4 +1,4 @@
-(ns clojush.experimental.tagged_code_macros
+(ns clojush.experimental.tagged-code-macros
   (:use [clojush.util]
         [clojush.random]))
 

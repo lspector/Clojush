@@ -1,7 +1,7 @@
 (ns clojush.pushgp.breed
   (:use [clojush.random]
-        [clojush.pushgp.parent_selection]
-        [clojush.pushgp.genetic_operators]
+        [clojush.pushgp.parent-selection]
+        [clojush.pushgp.genetic-operators]
         [clojush.pushgp.simplification]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

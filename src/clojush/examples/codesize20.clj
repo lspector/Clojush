@@ -9,7 +9,7 @@
         [clojush.interpreter]
         [clojush.util]
         [clojush.instructions.tag]
-        [clojush.experimental.tagged_code_macros]))
+        [clojush.experimental.tagged-code-macros]))
 
 ;; This simple problem serves only to demonstrate tagged-code macros.
 ;; We seek a piece of code of exactly 20 points, tagged so that it is retrieved

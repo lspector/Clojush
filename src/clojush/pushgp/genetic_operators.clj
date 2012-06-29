@@ -1,9 +1,9 @@
-(ns clojush.pushgp.genetic_operators
+(ns clojush.pushgp.genetic-operators
   (:use [clojush.util]
         [clojush.random]
         [clojush.globals]
         [clojush.pushgp.individual]
-        [clojush.pushgp.node_selection]))
+        [clojush.pushgp.node-selection]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; genetic operators
