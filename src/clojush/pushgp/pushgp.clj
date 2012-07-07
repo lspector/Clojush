@@ -133,7 +133,7 @@
           (if (<= (:total-error best) error-threshold)
             (final-report generation best error-function final-report-simplifications)
             (do (if (>= generation max-generations)
-                  (printf "\nFAILURE\n")
+                  (do (printf "\nFAILURE\n") (flush))
                   (do (printf "\nProducing offspring...") (flush)
                       (let [pop (if (>= decimation-ratio 1)
                                   (vec (doall (map deref pop-agents)))

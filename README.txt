@@ -16,8 +16,7 @@ https://github.com/lspector/Clojush/
 REQUIREMENTS
 
 To use this code you must have a Clojure programming environment; see 
-http://clojure.org/. The current version of clojush requires clojure 1.2
-and clojure-contrib 1.2.
+http://clojure.org/. The current version of clojush requires clojure 1.3.
 
 Clojure is available for most OS platforms. Good starting points for
 obtaining and using Clojure include http://clojure.org/getting_started
