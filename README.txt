@@ -167,9 +167,9 @@ pushed onto the appropriate stacks when needed. Perhaps you will find other
 uses for it as well, but no instructions are provided for the auxiliary stack 
 in Clojush (aside from the problem-specific input functions in the examples).
 
-The pushgp function is used to run PushGP. It takes all of its arguments
-in a Clojure map, and provides default values for any parameters that are
-not provided. Search clojush.clj for "defn pushgp" for details. The single
+The pushgp function is used to run PushGP. It takes all of its parameters
+as keyword arguments, and provides default values for any parameters that are
+not provided. See the pushgp defn in pushgp/pushgp.clj for details. The single
 argument that must be provided (actually it too has a default, but it makes
 no sense to rely on that) is :error-function, which should be a function that
 takes a Push program and returns a list of errors. Note that this assumes 
@@ -298,7 +298,7 @@ TO DO (SOMETIME, MAYBE)
   uses are developed for it.
 - Write a "sufficient-args" fn/macro to clean up Push instruction definitions.
 
-VERSION HISTORY -- NOW OBSELETE. See https://github.com/lspector/Clojush/commits/master
+VERSION HISTORY -- NOW OBSOLETE. See https://github.com/lspector/Clojush/commits/master
 20100227: - First distributed version.
 20100301: - Added (shutdown-agents) for proper termination.
 20100306: - Added history (of total errors of ancestors) to individuals.
