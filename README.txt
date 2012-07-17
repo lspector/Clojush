@@ -18,37 +18,38 @@ REQUIREMENTS
 To use this code you must have a Clojure programming environment; see 
 http://clojure.org/. The current version of clojush requires clojure 1.3.
 
-Clojure is available for most OS platforms. Good starting points for
-obtaining and using Clojure include http://clojure.org/getting_started
-and http://www.assembla.com/wiki/show/clojure/Getting_Started.
+Clojure is available for most OS platforms. A good starting point for
+obtaining and using Clojure is http://dev.clojure.org/display/doc/Getting+Started.
 
 QUICKSTART
 
-To run the system on a simple example start a clojure REPL (read, evaluate,
-print loop) in the directory that contains clojush.clj and the examples 
-subdirectory and type the following to the REPL prompt: 
+Using Leiningen (from https://github.com/technomancy/leiningen) you can 
+run an example from the OS command line (in the Clojush directory) with 
+a call like:
 
-    (load "examples/simple-regression")
+    lein run examples.simple-regression
 
 This will load everything and run PushGP on a simple symbolic 
 regression problem (symbolic regression of y=x^3-2x^2-x). Although the 
 details will vary from run to run, and it's possible that it will fail, 
 this usually succeeds in a few generations. 
 
-If you have Leiningen (from https://github.com/technomancy/leiningen)
-then you can run an example from the OS command line with a call like:
+Another simple (perhaps simpler) option is to use Clooj. To run an example
+in Clooj, download and launch the latest "standalone" build from 
+https://github.com/arthuredelstein/clooj, open the Clojush project,
+open an example file within Clojush/src/clojush/examples, and select
+REPL > Evaluate entire file.
 
-    lein run examples.simple-regression
-
-In some IDEs there will be other ways to run the examples. For example,
+In other IDEs there will be other ways to run the examples. For example,
 in Eclipse/Counterclockwise you can simply open an example and select
-Clojure > Load clojure file in REPL.
+Clojure > Load clojure file in REPL. Similarly, in Clooj 
 
-You may want to provide additional arguments to java in order to allow 
-access to more memory and/or to take maximal advantage of Clojure's
-concurrency support in the context of clojush's reliance on garbage 
-collection. For example, you might want to provide arguments such 
-as -Xmx2000m and -XX:+UseParallelGC.
+For large-scale runs you may want to provide additional arguments to 
+java in order to allow  access to more memory and/or to take maximal 
+advantage of Clojure's concurrency support in the context of clojush's 
+reliance on garbage  collection. For example, you might want to provide a
+rguments such  as -Xmx2000m and -XX:+UseParallelGC. Details will depend
+on the method that you use to launch your code.
 
 DESCRIPTION
 
@@ -93,9 +94,7 @@ are provided here.
 
 USAGE
 
-Loading clojush.clj as distributed should load everything and print the list 
-of registered Push instructions. Example calls to PushGP are provided in other
-accompanying files.
+Example calls to PushGP are provided in other accompanying files.
 
 Push programs are run calling run-push, which takes as arguments a Push 
 program and a Push interpreter state that can be made with make-push-state. 
@@ -105,11 +104,6 @@ Here is a simple example of a call to run-push, adding 1 and 2 and returning
 the top of the integer stack in the resulting interpreter state:
 
 (top-item :integer (run-push '(1 2 integer_add) (make-push-state)))
-
-To try this paste it below all of the code in clojush.clj and load the file
-in the Clojure REPL, or alternatively load clojush.clj as-is, then tell the
-REPL (in-ns 'clojush), and then type the above expression directly to the
-REPL prompt.
 
 If you want to see every step of execution you can pass an optional third
 argument of true to run-push. This will cause a representation of the
