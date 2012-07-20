@@ -4,7 +4,7 @@
   (:use [clojush.util]
         [clojush.globals]
         [clojush.pushstate]
-        [clojush.pushgp.simplification]))
+        [clojush.simplification]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; helper functions

@@ -10,9 +10,9 @@
         [clojush.instructions.string]
         [clojush.instructions.tag]
         [clojush.instructions.zip]
-        [clojush.pushgp.individual]
-        [clojush.pushgp.evaluate]
-        [clojush.pushgp.breed]
+        [clojush.individual]
+        [clojush.evaluate]
+        [clojush.breed]
         [clojush.pushgp.parent-selection]
         [clojush.pushgp.report]
         [clojush.experimental.decimation]))
