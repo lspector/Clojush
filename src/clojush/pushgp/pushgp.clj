@@ -12,7 +12,7 @@
         [clojush.instructions.zip]
         [clojush.individual]
         [clojush.evaluate]
-        [clojush.breed]
+        [clojush.pushgp.breed]
         [clojush.pushgp.parent-selection]
         [clojush.pushgp.report]
         [clojush.experimental.decimation]))
@@ -157,3 +157,8 @@
                              (nth pop-agents i) (fn [av] (deref (nth child-agents i)))))
                       (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
                       (recur (inc generation)))))))))))
+
+(defn pushgp-map
+  "Calls pushgp with the args in argmap."
+  [argmap]
+  (apply pushgp (apply concat argmap)))
