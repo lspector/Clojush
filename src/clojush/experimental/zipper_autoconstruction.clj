@@ -240,18 +240,21 @@
 
 (define-registered zip_rand
   (fn [state]
-					;    (if (n-on-stack? 1 :zip state)
-    (if-not (empty? (:zip state))
+    (if (n-on-stack? 1 :zip state)
       (if (or (not (seq? (zip/node (top-item :zip state))))
               (empty? (zip/node (top-item :zip state))))
         state
-        (let [top-zip (top-item :zip state)
-              zip-points (count-points (zip/root top-zip))
-              max-subtree-points (- @global-max-points-in-program zip-points)]
-          (push-item (zip/replace top-zip
-                                  (random-code max-subtree-points
-                                               @global-atom-generators))
-                     :zip (pop-item :zip state))))
+	(if (empty? @clojush.globals/global-atom-generators)
+	  (binding [*out* *err*]
+	    (println "code_rand: global-atom-generators is empty.")
+	    state)
+	  (let [top-zip (top-item :zip state)
+		zip-points (count-points (zip/root top-zip))
+		max-subtree-points (- @global-max-points-in-program zip-points)]
+	    (push-item (zip/replace top-zip
+				    (random-code max-subtree-points
+						 @global-atom-generators))
+		       :zip (pop-item :zip state)))))
       state)))
 
 (def global-ace-atom-generators
@@ -318,4 +321,5 @@
 				      [(:program parent1) (:program parent2)]
 				      (cons (:program parent1) (:ancestors parent1)))
 				    (:ancestors parent1))))))
+
 
