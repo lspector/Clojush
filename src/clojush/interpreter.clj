@@ -7,14 +7,24 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; push interpreter
 
+(def literals
+     (atom
+      {:integer integer?
+       :number float?
+       :string string?
+       :boolean (fn [thing] (or (= thing true) (= thing false)))
+       }))
+
 (defn recognize-literal
   "If thing is a literal, return its type -- otherwise return false."
   [thing]
-  (cond (integer? thing) :integer
-        (number? thing) :float
-        (string? thing) :string
-        (or (= thing true) (= thing false)) :boolean
-        true false))
+  (loop [m (seq @literals)]
+    (if-let [[type pred] (first m)]
+      (if (pred thing) type
+          (recur (rest m))))))
+
+;; Add new literals by just assoc'ing on the new predicate. e.g.:
+;; (swap! literals :symbol symbol?)
 
 (def debug-recent-instructions ())
 
