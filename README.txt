@@ -27,7 +27,7 @@ Using Leiningen (from https://github.com/technomancy/leiningen) you can
 run an example from the OS command line (in the Clojush directory) with 
 a call like:
 
-    lein run examples.simple-regression
+    lein run clojush.examples.simple-regression
 
 This will load everything and run PushGP on a simple symbolic 
 regression problem (symbolic regression of y=x^3-2x^2-x). Although the 
