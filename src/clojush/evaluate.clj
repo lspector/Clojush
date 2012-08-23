@@ -21,10 +21,10 @@
     nil))
 
 (defn calculate-hah-solution-rates
-  [use-historically-assessed-hardness use-lexicase-selection use-fast-lexicase-selection
+  [use-historically-assessed-hardness use-lexicase-selection
    pop-agents error-threshold population-size]
   (when (and use-historically-assessed-hardness
-             (not (or use-lexicase-selection use-fast-lexicase-selection)))
+             (not use-lexicase-selection))
     (reset! solution-rates
             (let [error-seqs (map :errors (map deref pop-agents))
                   num-cases (count (first error-seqs))]

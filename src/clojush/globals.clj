@@ -40,5 +40,3 @@
 
 ;; Lexicase Parent Selection (see Spector paper in GECCO-UP 2012 workshop proceedings)
 (def global-use-lexicase-selection (atom false)) ;; if true then no other selection params matter
-(def global-use-fast-lexicase-selection (atom false))
-(def global-lexicase-case-cohorts (atom [])) ;; used for fast-lexicase-selection
