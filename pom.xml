@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>lspector</groupId>
   <artifactId>clojush</artifactId>
-  <version>1.2.8</version>
+  <version>1.2.9</version>
   <name>clojush</name>
   <description>The Push programming language and the PushGP genetic programming
                           system implemented in Clojure. 
@@ -12,7 +12,7 @@
   <scm>
     <connection>scm:git:git://github.com/lspector/Clojush.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/lspector/Clojush.git</developerConnection>
-    <tag>81ddd6a97f1e6ad600353b429a3686ade66419fb</tag>
+    <tag>af0b9c0165498c8d264d93aad9e43f93966c3b9e</tag>
     <url>https://github.com/lspector/Clojush</url>
   </scm>
   <build>
