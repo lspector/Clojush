@@ -35,6 +35,23 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; report printing functions
 
+(def fname "log.csv")
+
+(defn csv-init
+  []
+  (spit fname "generation,individual,total-error,size\n" :append false))
+
+(defn csv-print
+  [population generation]
+  (doseq [[ind p] (map-indexed vector population)]
+    (spit fname
+          (format "%s,%s,%s,%s\n"
+                  generation
+                  ind
+                  (:total-error p)
+                  (count-points (:program p)))
+          :append true)))
+
 (defn report 
   "Reports on the specified generation of a pushgp run. Returns the best
    individual of the generation."
@@ -71,6 +88,7 @@
         (println "Median copy number: " (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
       (printf "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n")
       (flush)
+      (csv-print population generation)
       (problem-specific-report best population generation error-function report-simplifications)
       best)))
 
@@ -110,7 +128,8 @@
     (catch Exception e
            (printf "Hash of last Git commit = unavailable\n")
            (printf "GitHub link = unavailable\n")
-           (flush))))
+           (flush)))
+  (csv-init))
 
 (defn final-report
   "Prints the final report of a PushGP run if the run is successful."
