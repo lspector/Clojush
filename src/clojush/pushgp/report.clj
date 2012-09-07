@@ -36,6 +36,7 @@
 ;; report printing functions
 
 (def fname "log.csv")
+(def printAllTestCases true)
 
 (defn csv-init
   []
@@ -43,14 +44,34 @@
 
 (defn csv-print
   [population generation]
-  (doseq [[ind p] (map-indexed vector population)]
-    (spit fname
-          (format "%s,%s,%s,%s\n"
-                  generation
-                  ind
-                  (:total-error p)
-                  (count-points (:program p)))
-          :append true)))
+  (if (not printAllTestCases)
+    (doseq [[ind p] (map-indexed vector population)]
+      (spit fname
+            (format "%s,%s,%s,%s\n"
+                    generation
+                    ind
+                    (:total-error p)
+                    (count-points (:program p)))
+            :append true))
+    (do
+      (when (zero? generation)
+        (spit fname "generation,individual,total-error,size," :append false)
+        (spit fname
+              (format "%s\n"
+                      (apply str
+                             "TC"
+                             (interpose ",TC"
+                                        (range (count (:errors (first population)))))))
+              :append true))
+      (doseq [[ind p] (map-indexed vector population)]
+        (spit fname
+              (format "%s,%s,%s,%s,%s\n"
+                      generation
+                      ind
+                      (:total-error p)
+                      (count-points (:program p))
+                      (apply str (interpose "," (:errors p))))
+              :append true)))))
 
 (defn report 
   "Reports on the specified generation of a pushgp run. Returns the best
