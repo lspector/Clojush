@@ -1,2 +1,8 @@
 *~
-classes/*
+.DS_Store
+.lein-deps-sum
+/pom.xml
+/clojush*.jar
+classes/
+target/
+results/
