@@ -53,8 +53,8 @@ normal, or :abnormal otherwise."
   ([state] (eval-push state false false))
   ([state print] (eval-push state print false))
   ([state print trace]
-     (when (empty? @global-atom-generators)
-       (println "global-atom-generators is empty. You should do something like: (reset! global-atom-generators '(exec_if boolean_not true false))"))
+     ;(when (empty? @global-atom-generators)
+     ;  (println "global-atom-generators is empty. You should do something like: (reset! global-atom-generators '(exec_if boolean_not true false))"))
     (loop [iteration 1 s state
            time-limit (if (zero? @global-evalpush-time-limit)
                         0
