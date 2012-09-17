@@ -99,6 +99,7 @@
     :atom-generators atom-generators
     :report-simplifications 0
     :max-points 500
+    :max-points-in-initial-program 500
     :evalpush-limit 500
     :population-size 1000
     :mutation-probability 0.10

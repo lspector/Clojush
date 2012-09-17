@@ -73,4 +73,5 @@
                                d0 d1 d2 d3
                                ;boolean_dup boolean_swap boolean_pop boolean_rot
                                )
-  :max-points 200)
+  :max-points 200
+  :max-points-in-initial-program 200)

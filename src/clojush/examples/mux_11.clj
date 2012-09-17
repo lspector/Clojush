@@ -80,4 +80,5 @@
                                )
   :population-size 100
   :max-points 100
+  :max-points-in-initial-program 100
   )
