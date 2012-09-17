@@ -10,7 +10,7 @@
 (def literals
   (atom
     {:integer integer?
-     :number float?
+     :float float?
      :string string?
      :boolean (fn [thing] (or (= thing true) (= thing false)))
      }))
