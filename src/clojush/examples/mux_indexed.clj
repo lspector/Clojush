@@ -87,4 +87,5 @@
                        ;integer_add integer_sub integer_mult integer_div integer_mod
                        ;integer_dup integer_swap integer_pop integer_rot
                        ))
-  :max-points 200)
+  :max-points 200
+  :max-points-in-initial-program 200)
