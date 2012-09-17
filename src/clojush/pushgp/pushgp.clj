@@ -23,8 +23,9 @@
 (defn pushgp
   "The top-level routine of pushgp."
   [& {:keys [error-function error-threshold population-size max-points
-             atom-generators max-generations max-mutations mutation-probability
-             mutation-max-points crossover-probability simplification-probability
+             max-points-in-initial-program atom-generators max-generations 
+             max-mutations mutation-probability mutation-max-points 
+             crossover-probability simplification-probability
              tournament-size report-simplifications final-report-simplifications
              reproduction-simplifications trivial-geography-radius decimation-ratio
              decimation-tournament-size evalpush-limit evalpush-time-limit
@@ -39,6 +40,7 @@
            error-threshold 0
            population-size 1000
            max-points 50
+           max-points-in-initial-program 50
            atom-generators (concat @registered-instructions
                                    (list 
                                      (fn [] (lrand-int 100))
@@ -86,22 +88,22 @@
     (reset! global-use-lexicase-selection use-lexicase-selection)
     (initial-report) ;; Print the inital report
     (print-params 
-      (error-function error-threshold population-size max-points atom-generators max-generations 
+      (error-function error-threshold population-size max-points max-points-in-initial-program
+                      atom-generators max-generations 
                       mutation-probability mutation-max-points crossover-probability
                       simplification-probability gaussian-mutation-probability 
                       gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
                       tournament-size report-simplifications final-report-simplifications
-                      trivial-geography-radius decimation-ratio decimation-tournament-size evalpush-limit
-                      evalpush-time-limit node-selection-method node-selection-tournament-size
-                      node-selection-leaf-probability pop-when-tagging reuse-errors
-                      use-single-thread random-seed use-historically-assessed-hardness
-                      use-lexicase-selection
-                      ))
+                      reproduction-simplifications trivial-geography-radius decimation-ratio 
+                      decimation-tournament-size evalpush-limit evalpush-time-limit node-selection-method 
+                      node-selection-tournament-size node-selection-leaf-probability pop-when-tagging 
+                      reuse-errors use-single-thread random-seed use-historically-assessed-hardness
+                      use-lexicase-selection))
     (printf "\nGenerating initial population...\n") (flush)
     (let [pop-agents (vec (doall (for [_ (range population-size)] 
                                    ((if use-single-thread atom agent)
                                         (make-individual 
-                                          :program (random-code max-points atom-generators))
+                                          :program (random-code max-points-in-initial-program atom-generators))
                                         :error-handler (fn [agnt except] (println except))))))
           child-agents (vec (doall (for [_ (range population-size)]
                                      ((if use-single-thread atom agent)
