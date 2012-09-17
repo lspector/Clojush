@@ -53,6 +53,7 @@
   :simplification-probability 0.3
   :reproduction-simplifications 10
   :max-points 100
+  :max-points-in-initial-program 100
   :population-size 5000)
 
 

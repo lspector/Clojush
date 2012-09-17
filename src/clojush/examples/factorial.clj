@@ -43,5 +43,6 @@
                            (list (fn [] (rand-int 100))
                                  'in))
   :max-points 100
+  :max-points-in-initial-program 100
   :population-size 5000
   :trivial-geography-radius 10)

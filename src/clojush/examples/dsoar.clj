@@ -265,6 +265,7 @@
     :simplification-probability 0.3
     :reproduction-simplifications 10
     :max-points 200
+    :max-points-in-initial-program 200
     :evalpush-limit 1000)
 
 ;; standard 8x8 dsoar problem but with tags
@@ -279,4 +280,5 @@
   :simplification-probability 0.3
   :reproduction-simplifications 10
   :max-points 200
+  :max-points-in-initial-program 200
   :evalpush-limit 1000)

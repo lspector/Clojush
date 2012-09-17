@@ -40,6 +40,7 @@ depth and number of nodes."
         atom-generators (make-majority-instructions size)
 	args (-> argmap
 		 (assoc :max-points (* 10 size))
+		 (assoc :max-points-in-initial-program (* 10 size))
 		 (assoc :error-function majority-fitness)
 		 (assoc :atom-generators atom-generators))]
     (println "problem-size =" size)
