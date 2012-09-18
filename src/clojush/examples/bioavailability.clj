@@ -16,4 +16,17 @@
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
-        [local-file]))
+        [local-file])
+  (:require [clojure.string :as string]
+            [clojure-csv.core :as csv]))
+
+(defn read-data []
+  (let [f (slurp* "src/clojush/examples/data/bioavailability.txt")
+        lines (csv/parse-csv f :delimiter \tab)]
+    (map #(map (fn [x] (float (read-string x)))
+               %)
+         lines)))
+
+(count (read-data))
+
+(map last (read-data))
