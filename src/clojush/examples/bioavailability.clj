@@ -31,11 +31,13 @@
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
+        [clojush.random]
         [local-file])
   (:require [clojure.string :as string]
             [clojure-csv.core :as csv]))
 
 (defn read-data []
+  "Reads data from data/bioavailability.txt into a sequence of sequences."
   (let [f (slurp* "src/clojush/examples/data/bioavailability.txt")
         lines (csv/parse-csv f :delimiter \tab)]
     (map #(map (fn [x] (float (read-string x)))
@@ -51,18 +53,48 @@
 ;(def test-cases-shuffled
 ;  (shuffle (read-data)))
 
-
 (defn define-test-cases
+  "Returns a map with two keys: train and test. Train maps to a
+   subset of 251 random test cases (70%), and test maps to the
+   remaining 108 test cases (30%). These sets are different each
+   time this is called."
   []
   (let [test-cases-shuffled (shuffle (read-data))
         train-num 251]
     {:train (subvec test-cases-shuffled 0 train-num)
      :test (subvec test-cases-shuffled train-num)}))
 
+;(count (:test (define-test-cases)))
 
-(count (:test (define-test-cases)))
+
+;(run-push '(4 5 integer_add yyy6) (make-push-state))
 
 
+;(define-registered (symbol (str "x" (+ 4 2))) (fn [state] (push-item 2999 :integer state)))
+
+;(doseq [a (map #(symbol (str "x" %)) (range 241))]
+;  (define-registered a (fn [state] (push-item 2999 :integer state))))
+
+
+;(sort (map str (vec @registered-instructions)))
+
+
+;; I want x0 through x240 to be instructions that, when executed, push
+;; the float from that column onto the float stack.
+
+
+;; This definition of atom-generators makes it so that choosing a terminal
+;; has equivalent probability of choosing one of the operators. This is
+;; the method used in the paper above.
+(def bioavailability-atom-generators
+  (list
+    (fn [] (lrand-nth (list 'integer_div 'integer_mult 'integer_add 'integer_sub)))
+    (fn [] (lrand-nth (for [n (range 241)]
+                        (symbol (str "x" n)))))
+    ))
+
+;; Test random code generation
+;(random-code 100 bioavailability-atom-generators)
 
 
 
