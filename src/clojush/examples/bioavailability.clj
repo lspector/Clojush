@@ -32,6 +32,7 @@
         [clojush.pushstate]
         [clojush.interpreter]
         [clojush.random]
+        [clojush.util]
         [local-file]
         ;[clojush.evaluate] ;;remove later
         ;[clojush.individual] ;;remove later
@@ -69,7 +70,6 @@
 ;; subsets stay the same throughout a run.
 (def bioavailability-fitness-cases (define-fitness-cases))
 
-
 ;; Helper functions to get specific train and test cases
 ;(defn train-fitness-case
 ;  "Returns train fitness case number n for this run."
@@ -106,9 +106,9 @@
 
 
 (defn bioavailability-error-function
-  [program]
+  [fitness-set program]
     (doall
-      (for [fitness-case (:train bioavailability-fitness-cases)]
+      (for [fitness-case (get bioavailability-fitness-cases fitness-set)]
         (let [input (butlast fitness-case)
               output (last fitness-case)
               state (run-push program
@@ -130,11 +130,34 @@
 ;                     (new java.util.Random))
 ;
 ;(evaluate-individual (make-individual :program '(x2 x19 float_mult))
-;                     bioavailability-error-function
+;                     (partial bioavailability-error-function :train)
 ;                     (new java.util.Random))
 
+(defn rmse
+  "Returns the root of the mean square error for use in error reporting."
+  [errors]
+  (sqrt (/ (apply + (map #(* % %)
+                         errors))
+           (count errors))))
+  
+
+(defn bioavailability-report
+  "Customize generational report."
+  [best population generation error-function report-simplifications]
+  (let [best-program (not-lazy (:program best))
+        best-test-errors (bioavailability-error-function :test best-program)] ;;not working
+    (printf ";; -*- Bioavailability problem report generation %s" generation)(flush)
+    (printf  "\nMean error on test set: %.4f"
+            (float (/ (apply + best-test-errors)
+                      (count best-test-errors))))(flush)
+    (printf "\nRMSE Train: %.3f" (rmse (:errors best)))(flush)
+    (printf "\nRMSE Test: %.3f" (rmse best-test-errors))(flush)
+    (printf "\n\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n")(flush)
+    ))
+
+
 (pushgp
-  :error-function bioavailability-error-function
+  :error-function (partial bioavailability-error-function :train)
   :atom-generators bioavailability-atom-generators
   :max-points 500
   :evalpush-limit 500
@@ -149,4 +172,5 @@
   :node-selection-tournament-size 2
   :report-simplifications 0
   :final-report-simplifications 1000
+  :problem-specific-report bioavailability-report
   )
