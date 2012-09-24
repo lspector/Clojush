@@ -57,6 +57,7 @@
       (printf "\nMean: %.4f" (float (/ (:total-error best)
                                        (count (:errors best)))))(flush)
       (printf "\nHAH-error: %s" (:hah-error best))(flush)
+      (printf "\nRMS-error: %s" (:rms-error best))(flush)
       (printf "\nHistory: %s" (not-lazy (:history best)))(flush)
       (printf "\nSize: %s" (count-points (:program best)))(flush)
       (print "\n--- Population Statistics ---\nAverage total errors in population: ")(flush)
