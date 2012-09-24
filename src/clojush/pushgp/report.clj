@@ -92,6 +92,8 @@
       (flush)
       (printf "\nErrors: %s" (not-lazy (:errors best)))(flush)
       (printf "\nTotal: %s" (:total-error best))(flush)
+      (printf "\nMean: %.4f" (float (/ (:total-error best)
+                                       (count (:errors best)))))(flush)
       (printf "\nHAH-error: %s" (:hah-error best))(flush)
       (printf "\nHistory: %s" (not-lazy (:history best)))(flush)
       (printf "\nSize: %s" (count-points (:program best)))(flush)
