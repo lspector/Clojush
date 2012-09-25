@@ -3,7 +3,8 @@
         [clojush.pushstate]
         [clojush.random]
         [clojush.globals]
-        [clojush.individual]))
+        [clojush.individual])
+  (:require [clojure.math.numeric-tower :as math]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; evaluate individuals
@@ -11,6 +12,14 @@
 (defn compute-total-error
   [errors]
   (reduce +' errors))
+
+(defn compute-root-mean-square-error
+  [errors]
+  (if @global-use-rmse
+    (math/sqrt (/ (apply +' (map #(* % %)
+                                 errors))
+                  (count errors)))
+    nil))
 
 (defn compute-hah-error
   [errors]
@@ -47,7 +56,8 @@
           te (if (and (number? (:total-error i)) @global-reuse-errors)
                (:total-error i)
                (keep-number-reasonable (compute-total-error e)))
-          he (compute-hah-error e)]
-      (make-individual :program p :errors e :total-error te :hah-error he
+          he (compute-hah-error e)
+          rmse (compute-root-mean-square-error e)]
+      (make-individual :program p :errors e :total-error te :hah-error he :rms-error rmse
                        :history (if maintain-histories (cons te (:history i)) (:history i))
                        :ancestors (:ancestors i)))))

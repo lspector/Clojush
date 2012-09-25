@@ -35,6 +35,9 @@
                      (lrand-int (count pop))
                      (mod (+ location (- (lrand-int (+ 1 (* radius 2))) radius))
                           (count pop))))))
-          err-fn (if @global-use-historically-assessed-hardness :hah-error :total-error)]
+          err-fn (cond
+                   @global-use-historically-assessed-hardness :hah-error
+                   @global-use-rmse :rms-error
+                   true :total-error)]
       (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
               tournament-set))))
