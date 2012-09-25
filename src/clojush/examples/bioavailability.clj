@@ -20,7 +20,7 @@
 ;; prediction. In Proceedings of the 11th Annual conference on
 ;; Genetic and evolutionary computation (GECCO '09). ACM,
 ;; New York, NY, USA, 1115-1122. DOI=10.1145/1569901.1570051
-;; http://doi.acm.org/10.1145/1569901.1570051 
+;; http://doi.acm.org/10.1145/1569901.1570051
 ;;
 ;; Data available from:
 ;;  http://personal.disco.unimib.it/Vanneschi/bioavailability.txt
@@ -34,11 +34,20 @@
         [clojush.random]
         [clojush.util]
         [local-file]
-        ;[clojush.evaluate] ;;remove later
-        ;[clojush.individual] ;;remove later
         [clojure.math.numeric-tower])
   (:require [clojure.string :as string]
             [clojure-csv.core :as csv]))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Helper functions
+
+(defn rmse
+  "Returns the root of the mean square error for use in error reporting."
+  [errors]
+  (sqrt (/ (apply + (map #(* % %)
+                         errors))
+           (count errors))))
 
 (defn read-data []
   "Reads data from data/bioavailability.txt into a sequence of sequences."
@@ -47,13 +56,6 @@
     (map #(map (fn [x] (float (read-string x)))
                %)
          lines)))
-
-;(count (read-data))
-
-;(count (first (read-data)))
-
-;(map last (read-data))
-
 
 (defn define-fitness-cases
   "Returns a map with two keys: train and test. Train maps to a
@@ -66,29 +68,22 @@
     {:train (subvec fitness-cases-shuffled 0 train-num)
      :test (subvec fitness-cases-shuffled train-num)}))
 
-;; Define the fitness cases. Do this once per run, so that train and test
-;; subsets stay the same throughout a run.
-(def bioavailability-fitness-cases (define-fitness-cases))
 
-;; Helper functions to get specific train and test cases
-;(defn train-fitness-case
-;  "Returns train fitness case number n for this run."
-;  [n]
-;  (nth (:train bioavailability-fitness-cases) n))
-;
-;(defn test-fitness-case
-;  "Returns test fitness case number n for this run."
-;  [n]
-;  (nth (:test bioavailability-fitness-cases) n))
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Define instructions and fitness cases
 
 ;; I want x0 through x240 to be instructions that, when executed, push
 ;; the float from that column onto the float stack.
 (doseq [[numb symb] (map #(vector % (symbol (str "x" %))) (range 241))]
   (eval `(define-registered ~symb (fn [state#] (push-item (stack-ref :auxiliary ~numb state#) :float state#)))))
-  
-;(sort (map str (vec @registered-instructions)))
 
+;; Define the fitness cases. Do this once per run, so that train and test
+;; subsets stay the same throughout a run.
+(def bioavailability-fitness-cases (define-fitness-cases))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Main functions to pass to pushgp
 
 ;; This definition of atom-generators makes it so that choosing a terminal
 ;; has equivalent probability of choosing one of the operators. This is
@@ -100,12 +95,8 @@
                         (symbol (str "x" n)))))
     ))
 
-;; Test random code generation
-;(random-code 100 bioavailability-atom-generators)
-
-
-
 (defn bioavailability-error-function
+  "Error function for the bioavailability problem."
   [fitness-set program]
     (doall
       (for [fitness-case (get bioavailability-fitness-cases fitness-set)]
@@ -120,41 +111,22 @@
             (abs (- output top-float))
             10000.0)))))
 
-;(run-push '(4 5 integer_add x0 x1 x2 float_add x240)
-;          (assoc (make-push-state)
-;                 :auxiliary
-;                 (butlast (first (:train (define-fitness-cases))))))
-;
-;(evaluate-individual (make-individual :program (random-code 100 bioavailability-atom-generators))
-;                     bioavailability-error-function
-;                     (new java.util.Random))
-;
-;(evaluate-individual (make-individual :program '(x2 x19 float_mult))
-;                     (partial bioavailability-error-function :train)
-;                     (new java.util.Random))
-
-(defn rmse
-  "Returns the root of the mean square error for use in error reporting."
-  [errors]
-  (sqrt (/ (apply + (map #(* % %)
-                         errors))
-           (count errors))))
-  
-
 (defn bioavailability-report
   "Customize generational report."
   [best population generation error-function report-simplifications]
   (let [best-program (not-lazy (:program best))
         best-test-errors (bioavailability-error-function :test best-program)] ;;not working
     (printf ";; -*- Bioavailability problem report generation %s" generation)(flush)
-    (printf  "\nMean error on test set: %.4f"
+    (printf  "\nTest mean: %.4f"
             (float (/ (apply + best-test-errors)
                       (count best-test-errors))))(flush)
-    (printf "\nRMSE Train: %.3f" (rmse (:errors best)))(flush)
-    (printf "\nRMSE Test: %.3f" (rmse best-test-errors))(flush)
+    (printf "\nTest RMSE: %.4f" (rmse best-test-errors))(flush)
     (printf "\n\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n")(flush)
     ))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Main call
 
 (pushgp
   :error-function (partial bioavailability-error-function :train)
@@ -172,5 +144,6 @@
   :node-selection-tournament-size 2
   :report-simplifications 0
   :final-report-simplifications 1000
+  :use-rmse true
   :problem-specific-report bioavailability-report
   )
