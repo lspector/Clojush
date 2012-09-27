@@ -78,7 +78,7 @@
    for the json logs."
   [log-fitnesses-for-all-cases json-log-program-strings generation individual]
   (let [part1-ind (-> (if log-fitnesses-for-all-cases
-                        {:error (:errors individual)}
+                        {:errors (:errors individual)}
                         {})
                       (assoc :total-error (:total-error individual))
                       (assoc :generation generation)
