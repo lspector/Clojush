@@ -36,7 +36,10 @@
              gaussian-mutation-standard-deviation reuse-errors
              problem-specific-report use-single-thread random-seed
              use-historically-assessed-hardness use-lexicase-selection
-             use-rmse]
+             use-rmse print-csv-logs print-json-logs csv-log-filename
+             json-log-filename log-fitnesses-for-all-cases
+             json-log-program-strings
+             ]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
            population-size 1000
@@ -69,6 +72,12 @@
            gaussian-mutation-standard-deviation 0.1
            reuse-errors true
            problem-specific-report default-problem-specific-report
+           print-csv-logs false
+           print-json-logs false
+           csv-log-filename "log.csv"
+           json-log-filename "log.json"
+           log-fitnesses-for-all-cases false
+           json-log-program-strings false
            use-single-thread false
            random-seed (System/nanoTime)
            use-historically-assessed-hardness false
@@ -91,17 +100,20 @@
     (reset! global-use-rmse use-rmse)
     (initial-report) ;; Print the inital report
     (print-params 
-      (error-function error-threshold population-size max-points max-points-in-initial-program
-                      atom-generators max-generations 
-                      mutation-probability mutation-max-points crossover-probability
-                      simplification-probability gaussian-mutation-probability 
-                      gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
-                      tournament-size report-simplifications final-report-simplifications
-                      reproduction-simplifications trivial-geography-radius decimation-ratio 
-                      decimation-tournament-size evalpush-limit evalpush-time-limit node-selection-method 
-                      node-selection-tournament-size node-selection-leaf-probability pop-when-tagging 
-                      reuse-errors use-single-thread random-seed use-historically-assessed-hardness
-                      use-lexicase-selection use-rmse))
+      (atom-generators print-csv-logs csv-log-filename print-json-logs
+                       json-log-filename log-fitnesses-for-all-cases
+                       json-log-program-strings error-function error-threshold
+                       population-size max-generations max-points
+                       max-points-in-initial-program
+                       mutation-probability mutation-max-points crossover-probability
+                       simplification-probability gaussian-mutation-probability 
+                       gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
+                       tournament-size report-simplifications final-report-simplifications
+                       reproduction-simplifications trivial-geography-radius decimation-ratio 
+                       decimation-tournament-size evalpush-limit evalpush-time-limit node-selection-method 
+                       node-selection-tournament-size node-selection-leaf-probability pop-when-tagging 
+                       reuse-errors use-single-thread random-seed use-historically-assessed-hardness
+                       use-lexicase-selection use-rmse))
     (printf "\nGenerating initial population...\n") (flush)
     (let [pop-agents (vec (doall (for [_ (range population-size)] 
                                    ((if use-single-thread atom agent)
@@ -130,7 +142,10 @@
                                       population-size)
         ;; report and check for success
         (let [best (report (vec (doall (map deref pop-agents))) generation error-function 
-                           report-simplifications problem-specific-report)]
+                           report-simplifications print-csv-logs print-json-logs
+                           csv-log-filename json-log-filename
+                           log-fitnesses-for-all-cases json-log-program-strings
+                           problem-specific-report)]
           (if (<= (:total-error best) error-threshold)
             (final-report generation best error-function final-report-simplifications)
             (do (if (>= generation max-generations)
