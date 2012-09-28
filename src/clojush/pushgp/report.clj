@@ -1,10 +1,11 @@
 (ns clojush.pushgp.report
-  (:require [clojure.string :as string]
-            [local-file])
   (:use [clojush.util]
         [clojush.globals]
         [clojush.pushstate]
-        [clojush.simplification]))
+        [clojush.simplification]
+        [clojure.data.json :only (json-str)])
+  (:require [clojure.string :as string]
+            [local-file]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; helper functions
@@ -33,14 +34,98 @@
   (cons 'do (doall (map #(list 'println (str %) "=" %) params))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; log printing (csv and json)
+
+(defn csv-print
+  "Prints a csv of the population, with each individual's fitness and size.
+   If log-fitnesses-for-all-cases is true, it also prints the value
+   of each fitness case."
+  [population generation csv-log-filename log-fitnesses-for-all-cases]
+  (if (not log-fitnesses-for-all-cases)
+    (do
+      (when (zero? generation)
+        (spit csv-log-filename "generation,individual,total-error,size\n" :append false))
+      (doseq [[ind p] (map-indexed vector population)]
+        (spit csv-log-filename
+              (format "%s,%s,%s,%s\n"
+                      generation
+                      ind
+                      (:total-error p)
+                      (count-points (:program p)))
+              :append true)))
+    (do
+      (when (zero? generation)
+        (spit csv-log-filename "generation,individual,total-error,size," :append false)
+        (spit csv-log-filename
+              (format "%s\n"
+                      (apply str
+                             "TC"
+                             (interpose ",TC"
+                                        (range (count (:errors (first population)))))))
+              :append true))
+      (doseq [[ind p] (map-indexed vector population)]
+        (spit csv-log-filename
+              (format "%s,%s,%s,%s,%s\n"
+                      generation
+                      ind
+                      (:total-error p)
+                      (count-points (:program p))
+                      (apply str (interpose "," (:errors p))))
+              :append true)))))
+
+(defn jsonize-individual
+  "Takes an individual and returns it with only the items of interest
+   for the json logs."
+  [log-fitnesses-for-all-cases json-log-program-strings generation individual]
+  (let [part1-ind (-> (if log-fitnesses-for-all-cases
+                        {:errors (:errors individual)}
+                        {})
+                      (assoc :total-error (:total-error individual))
+                      (assoc :generation generation)
+                      (assoc :size (count-points (:program individual))))
+        part2-ind (if json-log-program-strings
+                    (assoc part1-ind :program (str (not-lazy (:program individual))))
+                    part1-ind)
+        part3-ind (if (:hah-error individual)
+                    (assoc part2-ind :hah-error (:hah-error individual))
+                    part2-ind)]
+    (if (:rms-error individual)
+      (assoc part3-ind :rms-error (:rms-error individual))
+      part3-ind)))
+
+(defn json-print
+  "Prints a json file of the population, with each individual's fitness and size.
+   If log-fitnesses-for-all-cases is true, it also prints the value
+   of each fitness case."
+  [population generation json-log-filename log-fitnesses-for-all-cases
+   json-log-program-strings]
+  (let [pop-json-string (json-str (map #(jsonize-individual
+                                          log-fitnesses-for-all-cases
+                                          json-log-program-strings
+                                          generation
+                                          %)
+                                       population))]
+  (if (zero? generation)
+    (spit json-log-filename (str pop-json-string "\n") :append false)
+    (spit json-log-filename (str "," pop-json-string "\n") :append true))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; report printing functions
 
 (defn report 
   "Reports on the specified generation of a pushgp run. Returns the best
    individual of the generation."
-  ([population generation error-function report-simplifications]
-    (report population generation error-function report-simplifications default-problem-specific-report))
-  ([population generation error-function report-simplifications problem-specific-report]
+  ([population generation error-function report-simplifications
+    print-csv-logs print-json-logs csv-log-filename json-log-filename
+    log-fitnesses-for-all-cases json-log-program-strings]
+    (report population generation error-function report-simplifications
+            print-csv-logs print-json-logs csv-log-filename json-log-filename
+            log-fitnesses-for-all-cases json-log-program-strings
+            default-problem-specific-report))
+  ([population generation error-function report-simplifications
+    print-csv-logs print-json-logs csv-log-filename json-log-filename
+    log-fitnesses-for-all-cases json-log-program-strings problem-specific-report]
     (printf "\n\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")(flush)
     ;(println (map :total-error population))(flush) ;***
     (printf "\n;; -*- Report at generation %s" generation)(flush)
@@ -74,6 +159,10 @@
         (println "Median copy number: " (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
       (printf "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n")
       (flush)
+      (when print-csv-logs (csv-print population generation csv-log-filename
+                                      log-fitnesses-for-all-cases))
+      (when print-json-logs (json-print population generation json-log-filename
+                                      log-fitnesses-for-all-cases json-log-program-strings))
       (problem-specific-report best population generation error-function report-simplifications)
       best)))
 
