@@ -135,11 +135,9 @@
   :evalpush-limit 500
   :population-size 500
   :max-generations 100
-  :mutation-probability 0.1
-  :crossover-probability 0.8
-  :simplification-probability 0.05
-  :tournament-size 6
-  :trivial-geography-radius 10
+  :mutation-probability 0.09
+  :crossover-probability 0.81
+  :tournament-size 10
   :node-selection-method :size-tournament
   :node-selection-tournament-size 2
   :report-simplifications 0
