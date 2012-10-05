@@ -132,6 +132,7 @@
   :error-function (partial bioavailability-error-function :train)
   :atom-generators bioavailability-atom-generators
   :max-points 500
+  :max-points-in-initial-program 500
   :evalpush-limit 500
   :population-size 500
   :max-generations 100
