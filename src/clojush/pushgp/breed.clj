@@ -14,7 +14,8 @@
    mutation-probability  mutation-max-points crossover-probability simplification-probability 
    tournament-size reproduction-simplifications trivial-geography-radius
    gaussian-mutation-probability gaussian-mutation-per-number-mutation-probability 
-   gaussian-mutation-standard-deviation]
+   gaussian-mutation-standard-deviation boolean-gsxover-probability
+   boolean-gsxover-new-code-max-points]
   (binding [*thread-local-random-generator* rand-gen]
     (let [n (lrand)]
       (cond 
@@ -36,6 +37,12 @@
                 gaussian-mutation-probability))
         (gaussian-mutate (select pop tournament-size trivial-geography-radius location) 
                          gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation)
+        ;; boolean gsxover
+        (< n (+ mutation-probability crossover-probability simplification-probability 
+                gaussian-mutation-probability boolean-gsxover-probability))
+        (let [first-parent (select pop tournament-size trivial-geography-radius location)
+              second-parent (select pop tournament-size trivial-geography-radius location)]
+          (boolean-gsxover first-parent second-parent boolean-gsxover-new-code-max-points max-points atom-generators))
         ;; replication
         true 
         (select pop tournament-size trivial-geography-radius location)))))
