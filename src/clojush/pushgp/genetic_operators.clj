@@ -21,8 +21,6 @@
                                     (cons (:program ind) (:ancestors ind))
                                     (:ancestors ind))))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defn crossover 
   "Returns a copy of parent1 with a random subprogram replaced with a random 
    subprogram of parent2."
@@ -32,6 +30,22 @@
                       (select-node-index (:program parent1))
                       (code-at-point (:program parent2)
                                      (select-node-index (:program parent2))))]
+    (if (> (count-points new-program) max-points)
+      parent1
+      (make-individual :program new-program :history (:history parent1)
+                       :ancestors (if maintain-ancestors
+                                    (cons (:program parent1) (:ancestors parent1))
+                                    (:ancestors parent1))))))
+
+(defn boolean-gsxover 
+  "Returns a child produced from parent1 and parent2 using boolean geometric
+   semantic crossover. The child will be of the form:
+   (new-random-code exec_if parent1-code parent2-code)."
+  [parent1 parent2 new-code-max-points max-points atom-generators]
+  (let [new-program (list (random-code new-code-max-points atom-generators) 
+                          'exec_if 
+                          (:program parent1) 
+                          (:program parent2))]
     (if (> (count-points new-program) max-points)
       parent1
       (make-individual :program new-program :history (:history parent1)
