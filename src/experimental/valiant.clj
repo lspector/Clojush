@@ -55,30 +55,34 @@
 
 ;(reduce + (valiant-fitness '(input1 input4 input0 input7 input9 boolean_and boolean_and boolean_and boolean_and)))
 
-(in-ns 'clojush.pushgp.genetic-operators)
-(defn crossover 
-  "Returns a copy of parent1 with a random subprogram replaced with a random 
-   subprogram of parent2."
-  [parent1 parent2 max-points]
-  (let [new-program (case (lrand-int 2)
-                      0 (insert-code-at-point 
-                          (:program parent1) 
-                          (select-node-index (:program parent1))
-                          (code-at-point (:program parent2)
-                                         (select-node-index (:program parent2))))
-                      1 (list (random-code 10 @global-atom-generators) 'exec_if (:program parent1) (:program parent2)))]
-    (if (> (count-points new-program) max-points)
-      ;parent1
-      (make-individual :program (random-code 10 @global-atom-generators) :history (:history parent1)
-                       :ancestors (if maintain-ancestors
-                                    (cons (:program parent1) (:ancestors parent1))
-                                    (:ancestors parent1)))
-      (make-individual :program new-program :history (:history parent1)
-                       :ancestors (if maintain-ancestors
-                                    (cons (:program parent1) (:ancestors parent1))
-                                    (:ancestors parent1))))))
-(in-ns 'experimental.valiant)
-
+;; oversized-offspring-fail-to-random? -- take fail to random code from here and use right
+;; parameters
+;(in-ns 'clojush.pushgp.genetic-operators)
+;(defn crossover 
+;  "Returns a copy of parent1 with a random subprogram replaced with a random 
+;   subprogram of parent2."
+;  [parent1 parent2 max-points]
+;  (let [new-program (case (lrand-int 2)
+;                      0 (insert-code-at-point 
+;                          (:program parent1) 
+;                          (select-node-index (:program parent1))
+;                          (code-at-point (:program parent2)
+;                                         (select-node-index (:program parent2))))
+;                      1 (list (random-code 10 @global-atom-generators) 'exec_if (:program parent1) (:program parent2)))]
+;    (if (> (count-points new-program) max-points)
+;      ;parent1
+;      (make-individual :program (random-code 10 @global-atom-generators) :history (:history parent1)
+;                       :ancestors (if maintain-ancestors
+;                                    (cons (:program parent1) (:ancestors parent1))
+;                                    (:ancestors parent1)))
+;      (make-individual :program new-program :history (:history parent1)
+;                       :ancestors (if maintain-ancestors
+;                                    (cons (:program parent1) (:ancestors parent1))
+;                                    (:ancestors parent1))))))
+;(in-ns 'experimental.valiant)
+;; 
+;; Probabilistic Pseudo Hillclimbing (persistence)
+;;
 (pushgp 
   :error-function valiant-fitness
   :atom-generators (concat (vec (registered-for-type "input"))
@@ -86,13 +90,15 @@
                                   (repeat 25 
                                           '(boolean_and boolean_or boolean_not exec_if))))
   :use-lexicase-selection true
-  :max-points 1000
+  :max-points 10000
   :max-points-in-initial-program 10
-  :population-size 1000
-  :evalpush-limit 1000
+  :population-size 100
+  :evalpush-limit 10000
   :mutation-probability 0.1
-  :mutation-max-points 10
-  :crossover-probability 0.5
-  :simplification-probability 0.4
-  :reproduction-simplifications 1000
+  :mutation-max-points 50
+  :crossover-probability 0.3
+  :simplification-probability 0.3
+  :reproduction-simplifications 10
+  :boolean-gsxover-probability 0.3
+  :boolean-gsxover-new-code-max-points 50
   )
