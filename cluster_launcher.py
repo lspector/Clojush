@@ -1,17 +1,20 @@
 import os, stat
 
 # Settings
-number_runs = 50
+number_runs = 10
 
 clojush_directory = "/home/thelmuth/Clojush/"
-output_directory = "results/bio2/"
+output_directory = "../Results/odd/"
 output_prefix = "log"
 output_postfix = ".txt"
 
-title_string = "Test of bioavailability problem - fixed init pop"
-command = "/home/thelmuth/bin/lein run clojush.examples.bioavailability"
+title_string = "Test of cluster runs with odd problem"
+command = "/home/thelmuth/bin/lein run clojush.examples.odd"
+
 
 ##########################################################################
+# You don't need to change anything below here
+
 # Check to make sure directory doesn't exist; if not, create it
 if os.path.isdir(clojush_directory + output_directory):
     raise RuntimeError, "Output directory already exists"
