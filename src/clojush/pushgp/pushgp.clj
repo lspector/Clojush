@@ -41,6 +41,7 @@
              json-log-program-strings
              boolean-gsxover-probability
              boolean-gsxover-new-code-max-points
+             deletion-mutation-probability
              ]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
@@ -74,6 +75,7 @@
            gaussian-mutation-standard-deviation 0.1
            boolean-gsxover-probability 0.0
            boolean-gsxover-new-code-max-points 20
+           deletion-mutation-probability 0.0
            reuse-errors true
            problem-specific-report default-problem-specific-report
            print-csv-logs false
@@ -113,6 +115,7 @@
                        simplification-probability gaussian-mutation-probability 
                        gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
                        boolean-gsxover-probability boolean-gsxover-new-code-max-points
+                       deletion-mutation-probability
                        tournament-size report-simplifications final-report-simplifications
                        reproduction-simplifications trivial-geography-radius decimation-ratio 
                        decimation-tournament-size evalpush-limit evalpush-time-limit node-selection-method 
@@ -165,12 +168,13 @@
                         (dotimes [i population-size]
                           ((if use-single-thread swap! send)
                                (nth child-agents i) 
-                               breed i (nth rand-gens i) pop error-function population-size max-points atom-generators 
+                               breed i (nth rand-gens i) pop error-function max-points atom-generators 
                                mutation-probability mutation-max-points crossover-probability 
                                simplification-probability tournament-size reproduction-simplifications 
                                trivial-geography-radius gaussian-mutation-probability 
                                gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
-                               boolean-gsxover-probability boolean-gsxover-new-code-max-points)))
+                               boolean-gsxover-probability boolean-gsxover-new-code-max-points
+                               deletion-mutation-probability)))
                       (when-not use-single-thread (apply await child-agents)) ;; SYNCHRONIZE
                       (printf "\nInstalling next generation...") (flush)
                       (dotimes [i population-size]
