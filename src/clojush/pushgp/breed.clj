@@ -10,12 +10,12 @@
 (defn breed
   "Replaces the state of the given agent with an individual bred from the given population (pop), 
    using the given parameters."
-  [agt location rand-gen pop error-function population-size max-points atom-generators 
-   mutation-probability  mutation-max-points crossover-probability simplification-probability 
+  [agt location rand-gen pop error-function max-points atom-generators 
+   mutation-probability mutation-max-points crossover-probability simplification-probability 
    tournament-size reproduction-simplifications trivial-geography-radius
    gaussian-mutation-probability gaussian-mutation-per-number-mutation-probability 
    gaussian-mutation-standard-deviation boolean-gsxover-probability
-   boolean-gsxover-new-code-max-points]
+   boolean-gsxover-new-code-max-points deletion-mutation-probability]
   (binding [*thread-local-random-generator* rand-gen]
     (let [n (lrand)]
       (cond 
@@ -43,6 +43,10 @@
         (let [first-parent (select pop tournament-size trivial-geography-radius location)
               second-parent (select pop tournament-size trivial-geography-radius location)]
           (boolean-gsxover first-parent second-parent boolean-gsxover-new-code-max-points max-points atom-generators))
+        ;; deletion mutation
+        (< n (+ mutation-probability crossover-probability simplification-probability 
+                gaussian-mutation-probability boolean-gsxover-probability deletion-mutation-probability))
+        (delete-mutate (select pop tournament-size trivial-geography-radius location))
         ;; replication
         true 
         (select pop tournament-size trivial-geography-radius location)))))

@@ -53,6 +53,34 @@
                                     (cons (:program parent1) (:ancestors parent1))
                                     (:ancestors parent1))))))
 
+(defn delete-mutate
+  "Returns the individual with between 1 and 4 points deleted. The points can be
+   single instructions or parenthetical pairs. The number of points is based
+   roughly on a binomial distribution with n=4 and p=0.25, moved up one so that
+   0 is never chosen. This results in the following probabilities for numbers
+   of deletions:
+   p(1) = 0.32
+   p(2) = 0.42
+   p(3) = 0.21
+   p(4) = 0.05"
+  [ind]
+  (println "hihihihihihi")
+  (let [new-program (loop [prog (:program ind)
+                           how-many (let [prob (lrand)]
+                                      (cond
+                                        (< prob 0.32) 1
+                                        (< prob 0.74) 2
+                                        (< prob 0.95) 3
+                                        true 4))]
+                      (if (zero? how-many)
+                        prog
+                        (recur (remove-code-at-point prog (lrand-int (count-points prog)))
+                               (dec how-many))))]
+    (make-individual :program new-program :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:program ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; some utilities are required for gaussian mutation
 
