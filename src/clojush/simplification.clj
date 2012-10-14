@@ -47,6 +47,6 @@
                               program)))
             new-errors (error-function new-program)
             new-total-errors (compute-total-error new-errors)] ;simplification bases its decision on raw error; HAH-error could also be used here
-        (if (<= new-total-errors total-errors)
+        (if (= new-errors errors)
           (recur (inc step) new-program new-errors new-total-errors)
           (recur (inc step) program errors total-errors))))))

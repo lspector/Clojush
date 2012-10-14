@@ -134,7 +134,7 @@
       (printf "\nCurrent time: %s" (System/currentTimeMillis))
       (printf "\nBest program: %s" (not-lazy (:program best)))(flush)
       (when (> report-simplifications 0)
-        (printf "\nPartial simplification (may beat best): %s"
+        (printf "\nPartial simplification: %s"
                 (not-lazy (:program (auto-simplify best error-function report-simplifications false 1000)))))
       (flush)
       (printf "\nErrors: %s" (not-lazy (:errors best)))(flush)
