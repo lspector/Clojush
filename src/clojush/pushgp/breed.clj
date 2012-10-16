@@ -21,32 +21,38 @@
       (cond 
         ;; mutation
         (< n mutation-probability)
-        (mutate (select pop tournament-size trivial-geography-radius location) 
-                mutation-max-points max-points atom-generators)
+        (let [parent (select pop tournament-size trivial-geography-radius location)]
+          (assoc (mutate parent mutation-max-points max-points atom-generators) :parent parent))
         ;; crossover
         (< n (+ mutation-probability crossover-probability))
         (let [first-parent (select pop tournament-size trivial-geography-radius location)
               second-parent (select pop tournament-size trivial-geography-radius location)]
-          (crossover first-parent second-parent max-points))
+          (assoc (crossover first-parent second-parent max-points) :parent first-parent))
         ;; simplification
         (< n (+ mutation-probability crossover-probability simplification-probability))
-        (auto-simplify (select pop tournament-size trivial-geography-radius location)
-                       error-function reproduction-simplifications false 1000)
+        (let [parent (select pop tournament-size trivial-geography-radius location)]
+          (assoc (auto-simplify parent error-function reproduction-simplifications false 1000)
+                 :parent parent))
         ;; gaussian mutation
         (< n (+ mutation-probability crossover-probability simplification-probability 
                 gaussian-mutation-probability))
-        (gaussian-mutate (select pop tournament-size trivial-geography-radius location) 
-                         gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation)
+        (let [parent (select pop tournament-size trivial-geography-radius location)]
+          (assoc (gaussian-mutate 
+                   parent gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation)
+                 :parent parent))
         ;; boolean gsxover
         (< n (+ mutation-probability crossover-probability simplification-probability 
                 gaussian-mutation-probability boolean-gsxover-probability))
         (let [first-parent (select pop tournament-size trivial-geography-radius location)
               second-parent (select pop tournament-size trivial-geography-radius location)]
-          (boolean-gsxover first-parent second-parent boolean-gsxover-new-code-max-points max-points atom-generators))
+          (assoc (boolean-gsxover first-parent second-parent boolean-gsxover-new-code-max-points max-points atom-generators)
+                 :parent first-parent))
         ;; deletion mutation
         (< n (+ mutation-probability crossover-probability simplification-probability 
                 gaussian-mutation-probability boolean-gsxover-probability deletion-mutation-probability))
-        (delete-mutate (select pop tournament-size trivial-geography-radius location))
+        (let [parent (select pop tournament-size trivial-geography-radius location)]
+          (assoc (delete-mutate parent) :parent parent))
         ;; replication
         true 
-        (select pop tournament-size trivial-geography-radius location)))))
+        (let [parent (select pop tournament-size trivial-geography-radius location)]
+          (assoc parent :parent parent))))))

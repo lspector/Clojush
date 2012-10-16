@@ -42,6 +42,7 @@
              boolean-gsxover-probability
              boolean-gsxover-new-code-max-points
              deletion-mutation-probability
+             parent-reversion-probability
              ]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
@@ -89,6 +90,7 @@
            use-historically-assessed-hardness false
            use-lexicase-selection false
            use-rmse false
+           parent-reversion-probability 0.0
            }}]
   (binding [*thread-local-random-generator* (java.util.Random. random-seed)]
     ;; set globals from parameters
@@ -121,7 +123,7 @@
                        decimation-tournament-size evalpush-limit evalpush-time-limit node-selection-method 
                        node-selection-tournament-size node-selection-leaf-probability pop-when-tagging 
                        reuse-errors use-single-thread random-seed use-historically-assessed-hardness
-                       use-lexicase-selection use-rmse))
+                       use-lexicase-selection use-rmse parent-reversion-probability))
     (printf "\nGenerating initial population...\n") (flush)
     (let [pop-agents (vec (doall (for [_ (range population-size)] 
                                    ((if use-single-thread atom agent)
@@ -143,10 +145,25 @@
                     rand-gens))
         (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE ;might this need a dorun?
         (printf "\nDone computing errors.") (flush)
+        ;; possible parent reversion
+        (if (and (> generation 0) (> parent-reversion-probability 0))
+          (let [err-fn (if @global-use-rmse :rms-error :total-error)]
+            (printf "\nPerforming parent reversion...") (flush)
+            (dorun (map #((if use-single-thread swap! send) 
+                              % 
+                              (fn [i]  
+                                (if (or (< (err-fn i) (err-fn (:parent i)))
+                                        (> (lrand) parent-reversion-probability))
+                                  (assoc i :parent nil)  ;; don't store whole ancestry
+                                  (:parent i))))
+                        pop-agents))
+            (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
+            (printf "\nDone performing parental reversion.") (flush)))
+        ;; calculate solution rates if necessary for historically-assessed hardness
         (calculate-hah-solution-rates use-historically-assessed-hardness
-                                      use-lexicase-selection  ;; calculate solution rates
-                                      pop-agents              ;; if necessary for 
-                                      error-threshold         ;; historically-assessed hardness
+                                      use-lexicase-selection
+                                      pop-agents
+                                      error-threshold
                                       population-size)
         ;; report and check for success
         (let [best (report (vec (doall (map deref pop-agents))) generation error-function 
