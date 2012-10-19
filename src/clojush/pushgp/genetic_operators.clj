@@ -64,7 +64,6 @@
    p(3) = 0.21
    p(4) = 0.05"
   [ind]
-  (println "hihihihihihi")
   (let [new-program (loop [prog (:program ind)
                            how-many (let [prob (lrand)]
                                       (cond
