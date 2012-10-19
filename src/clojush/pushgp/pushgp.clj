@@ -1,5 +1,6 @@
 (ns clojush.pushgp.pushgp
   (:use [clojush.globals]
+        [clojush.util]
         [clojush.pushstate]
         [clojush.random]
         [clojush.instructions.boolean]
@@ -153,6 +154,9 @@
                               % 
                               (fn [i]  
                                 (if (or (< (err-fn i) (err-fn (:parent i)))
+                                        (and (= (err-fn i) (err-fn (:parent i)))
+                                             (< (count-points (:program i))
+                                                (count-points (:program (:parent i)))))
                                         (> (lrand) parent-reversion-probability))
                                   (assoc i :parent nil)  ;; don't store whole ancestry
                                   (:parent i))))
