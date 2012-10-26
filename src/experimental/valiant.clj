@@ -92,13 +92,14 @@
   :use-lexicase-selection true
   :max-points 10000
   :max-points-in-initial-program 10
-  :population-size 100
+  :population-size 1000
   :evalpush-limit 10000
-  :mutation-probability 0.1
+  :mutation-probability 0.45
   :mutation-max-points 50
-  :crossover-probability 0.3
-  :simplification-probability 0.3
+  :crossover-probability 0.0
+  :simplification-probability 0.1
   :reproduction-simplifications 10
-  :boolean-gsxover-probability 0.3
-  :boolean-gsxover-new-code-max-points 50
+  :boolean-gsxover-probability 0.45
+  :boolean-gsxover-new-code-max-points 10
+  :parent-reversion-probability 0.9
   )
