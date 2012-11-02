@@ -96,11 +96,7 @@
       (let [z-found (loop [z zipper i index]
                       (if (zero? i)
                         z
-                        (if (and (= i 1) ;; can't remove only item from list
-                                 (seq? (zip/node z))
-                                 (= 1 (count (zip/node z))))
-                          (zip/root z) ;(zip/remove z))
-                          (recur (zip/next z) (dec i)))))]
+                        (recur (zip/next z) (dec i))))]
         (if (not (seq? (zip/node z-found))) ;can't un-paren non-seq things
           (zip/root z-found)
           (if (empty? (zip/children z-found)) ;seq is empty, just remove it
