@@ -462,3 +462,16 @@
                                 (pop-item :exec state)))
           state))
       state)))
+
+(define-registered
+  environment_push
+  (fn [state]
+    (if (empty? (:exec state))
+      state
+      (let [new-exec (first (:exec state))
+            parent-env (pop-item :exec state)]
+        (push-item new-exec
+                   :exec
+                   (assoc (assoc (push-item parent-env :environment state)
+                                 :return '())
+                          :exec '()))))))
