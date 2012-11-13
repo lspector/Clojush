@@ -9,7 +9,10 @@
         ))
 
 
-(run-push '(5 2 4.3 2.3 6 environment_push (integer_add float_mult) integer_sub)
-          (push-item "hi there" :auxiliary
-                     (push-item "hi there" :string
-                                (make-push-state))))
+(run-push '(5 2 29999 4.3 2.3
+              environment_new (integer_add float_mult return_frominteger )
+              integer_sub)
+          (push-item "hi" :auxiliary
+                     (push-item "hi" :string
+                                (make-push-state)))
+          true)

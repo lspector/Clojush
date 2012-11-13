@@ -464,7 +464,7 @@
       state)))
 
 (define-registered
-  environment_push
+  environment_new
   (fn [state]
     (if (empty? (:exec state))
       state
