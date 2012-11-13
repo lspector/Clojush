@@ -468,10 +468,24 @@
   (fn [state]
     (if (empty? (:exec state))
       state
-      (let [new-exec (first (:exec state))
+      (let [new-exec (top-item :exec state)
             parent-env (pop-item :exec state)]
         (push-item new-exec
                    :exec
                    (assoc (assoc (push-item parent-env :environment state)
                                  :return '())
                           :exec '()))))))
+
+(define-registered
+  environment_begin
+  (fn [state]
+    (assoc (push-item (assoc state :exec '())
+                      :environment state)
+           :return '())))
+
+(define-registered
+  environment_end
+  (fn [state]
+    (if (empty? (:environment state))
+      state
+      (end-environment state))))
