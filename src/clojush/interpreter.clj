@@ -46,18 +46,6 @@
                 		(println "Undefined instruction:" instruction)
                 		state)))))
 
-(defn end-environment
-  "Ends the current environment by popping the :environment stack and replacing
-   all stacks with those on the environment stack. Then, everything on the old
-   :return stack is pushed onto the :exec stack."
-  [state]
-  (loop [old-return (:return state)
-        new-state (top-item :environment state)]
-    (if (empty? old-return)
-      new-state
-      (recur (rest old-return)
-             (push-item (first old-return) :exec new-state)))))
-
 (defn eval-push 
   "Executes the contents of the exec stack, aborting prematurely if execution limits are 
    exceeded. The resulting push state will map :termination to :normal if termination was 
