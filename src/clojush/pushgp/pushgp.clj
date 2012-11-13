@@ -11,6 +11,7 @@
         [clojush.instructions.string]
         [clojush.instructions.tag]
         [clojush.instructions.zip]
+        [clojush.instructions.return]
         [clojush.individual]
         [clojush.evaluate]
         [clojush.pushgp.breed]

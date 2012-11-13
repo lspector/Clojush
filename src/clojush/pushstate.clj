@@ -69,6 +69,21 @@
   [type state]
   (assoc state type (rest (type state))))
 
+(defn end-environment
+  "Ends the current environment by popping the :environment stack and replacing
+   all stacks with those on the environment stack. Then, everything on the old
+   :return stack is pushed onto the :exec stack."
+  [state]
+  (let [new-env (top-item :environment state)
+        new-exec (concat (:exec state)
+                         (:exec new-env))]
+    (loop [old-return (:return state)
+           new-state (assoc new-env :exec new-exec)]
+      (if (empty? old-return)
+        new-state
+        (recur (rest old-return)
+               (push-item (first old-return) :exec new-state))))))
+
 (defn registered-for-type
   "Returns a list of all registered instructions with the given type name as a prefix."
   [type & {:keys [include-randoms] :or {include-randoms true}}]
