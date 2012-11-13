@@ -26,3 +26,45 @@
       state
       (let [item (list 'code_quote (top-item :code state))]
         (push-item item :return (pop-item :code state))))))
+
+(define-registered
+  return_exec_pop
+  (fn [state]
+    (assoc state :return (concat (:return state)
+                                 (list 'exec_pop)))))
+
+(define-registered
+  return_code_pop
+  (fn [state]
+    (assoc state :return (concat (:return state)
+                                 (list 'code_pop)))))
+
+(define-registered
+  return_integer_pop
+  (fn [state]
+    (assoc state :return (concat (:return state)
+                                 (list 'integer_pop)))))
+
+(define-registered
+  return_float_pop
+  (fn [state]
+    (assoc state :return (concat (:return state)
+                                 (list 'float_pop)))))
+
+(define-registered
+  return_boolean_pop
+  (fn [state]
+    (assoc state :return (concat (:return state)
+                                 (list 'boolean_pop)))))
+
+(define-registered
+  return_zip_pop
+  (fn [state]
+    (assoc state :return (concat (:return state)
+                                 (list 'zip_pop)))))
+
+(define-registered
+  return_string_pop
+  (fn [state]
+    (assoc state :return (concat (:return state)
+                                 (list 'string_pop)))))

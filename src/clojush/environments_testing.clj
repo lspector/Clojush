@@ -20,3 +20,7 @@
 (run-push '(3 environment_begin 4 return_frominteger environment_end 5 6)
           (make-push-state)
           true)
+
+(run-push '(5 environment_new (2999 return_frominteger return_integer_pop))
+          (make-push-state)
+          true)
