@@ -12,7 +12,8 @@
   (and (symbol? i) 
        (or
          (.startsWith (name i) "tag")
-         (.startsWith (name i) "untag"))))
+         (.startsWith (name i) "untag")
+         (.startsWith (name i) "return_tag"))))
 
 (defn closest-association
   "Returns the key-val pair for the closest match to the given tag
@@ -32,6 +33,8 @@
    of the given type and the number serving as the tag
    untag_<number>
    remove the association for the closest-matching tag
+   return_tag_<type>_<number>
+   pushes (item_from_<type>_stack tag_<type>_<number>) onto the return stack.
    tagged_<number> 
    push the value associated with the closest-matching tag onto the
    exec stack (or no-op if no associations).
@@ -63,6 +66,20 @@
         state
         (let [the-tag (read-string (nth iparts 1))]
           (assoc state :tag (dissoc (:tag state) (first (closest-association the-tag state))))))
+      ;; if it's return_tag_<type>_<number>: Push
+      ;; (item_from_<type>_stack tag_<type>_<number>) onto the return stack. Pop the
+      ;; item if @global-pop-when-tagging
+      (and (= (first iparts) "return")
+           (= (second iparts) "tag"))
+      (let [source-type (read-string (str ":" (nth iparts 2)))
+            the-tag (read-string (nth iparts 3))
+            new-tag-instr (symbol (subs (name i) (count "return_")))]
+        (if (empty? (source-type state))
+          state
+          (let [item (list (top-item source-type state) new-tag-instr)]
+            ((if @global-pop-when-tagging pop-item (fn [type state] state))
+                 source-type
+                 (push-item item :return state)))))
       ;; if we get here it must be one of the retrieval forms starting with "tagged_", so 
       ;; we check to see if there are assocations and consider the cases if so
       :else
@@ -122,4 +139,13 @@
    tagged_when_<number> where number is in the range from 0 to the specified limit (exclusive)."
   [limit]
   (fn [] (symbol (str "tagged_when_"
+                      (str (lrand-int limit))))))
+
+(defn return-tag-instruction-erc
+  "Returns a function which, when called on no arguments, returns a function of Push
+   state that pushes a literal followed by a tagging instruction of the same type."
+  [types limit]
+  (fn [] (symbol (str "return_tag_"
+                      (name (lrand-nth types))
+                      "_"
                       (str (lrand-int limit))))))
