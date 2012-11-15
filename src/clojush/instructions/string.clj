@@ -69,3 +69,17 @@
           loop-state
           (recur (rest char-list)
                  (push-item (str (first char-list)) :string loop-state)))))))
+
+(define-registered 
+  string_contained ;;true if top string is a substring of second string; false otherwise
+  (fn [state]
+    (if (empty? (rest (:string state)))
+      state
+      (let [sub (top-item :string state)
+            full (stack-ref :string 1 state)
+            result-boolean         (if (<= 0 (.indexOf full sub))
+                                     true
+                                     false)]
+        (push-item result-boolean
+                   :boolean
+                   (pop-item :string (pop-item :string state)))))))
