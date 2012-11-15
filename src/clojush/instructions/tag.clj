@@ -13,7 +13,7 @@
        (or
          (.startsWith (name i) "tag")
          (.startsWith (name i) "untag")
-         (.startsWith (name i) "return-tag"))))
+         (.startsWith (name i) "return_tag"))))
 
 (defn closest-association
   "Returns the key-val pair for the closest match to the given tag
@@ -73,10 +73,10 @@
            (= (second iparts) "tag"))
       (let [source-type (read-string (str ":" (nth iparts 2)))
             the-tag (read-string (nth iparts 3))
-            new-tag-instr (subs i (count "return_"))]
+            new-tag-instr (symbol (subs (name i) (count "return_")))]
         (if (empty? (source-type state))
           state
-          (let [item (list new-tag-instr (top-item source-type state))]
+          (let [item (list (top-item source-type state) new-tag-instr)]
             ((if @global-pop-when-tagging pop-item (fn [type state] state))
                  source-type
                  (push-item item :return state)))))
