@@ -74,4 +74,6 @@
 (define-registered
   return_tagspace
   (fn [state]
-    (assoc-in state [:environment :tag] (:tag state))))
+    (let [top-env (top-item :environment state)
+          new-env (assoc top-env :tag (:tag state))]
+      (push-item new-env :environment (pop-item :environment state)))))
