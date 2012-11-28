@@ -13,7 +13,7 @@
        (or
          (.startsWith (name i) "tag")
          (.startsWith (name i) "untag")
-         (.startsWith (name i) "return_tag"))))
+         (.startsWith (name i) "return_tag_"))))
 
 (defn closest-association
   "Returns the key-val pair for the closest match to the given tag

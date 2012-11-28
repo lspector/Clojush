@@ -68,3 +68,12 @@
   (fn [state]
     (assoc state :return (concat (:return state)
                                  (list 'string_pop)))))
+
+; Immediately copies the current tagspace to the environment on the top
+; of the :environment stack.
+(define-registered
+  return_tagspace
+  (fn [state]
+    (let [top-env (top-item :environment state)
+          new-env (assoc top-env :tag (:tag state))]
+      (push-item new-env :environment (pop-item :environment state)))))
