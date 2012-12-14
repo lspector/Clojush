@@ -1,4 +1,4 @@
-(ns clojush.instructions.random
+(ns clojush.instructions.random-instructions
   (:use [clojush.pushstate]
         [clojush.random]
         [clojush.globals])
@@ -7,12 +7,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random instructions
 
-(define-registered 
+(define-registered
   boolean_rand
   (fn [state]
     (push-item (lrand-nth [true false]) :boolean state)))
 
-(define-registered 
+(define-registered
   integer_rand
   (fn [state]
     (push-item (+' (lrand-int (+ 1 (- max-random-integer min-random-integer)))
@@ -20,7 +20,7 @@
                :integer
                state)))
 
-(define-registered 
+(define-registered
   float_rand
   (fn [state]
     (push-item (+' (lrand (- max-random-float min-random-float))
@@ -28,7 +28,7 @@
                :float
                state)))
 
-(define-registered 
+(define-registered
   code_rand
   (fn [state]
     (if (not (empty? (:integer state)))
@@ -36,22 +36,22 @@
 	(binding [*out* *err*]
 	  (println "code_rand: global-atom-generators is empty.")
 	  state)
-	(push-item (random-code (math/abs (mod (stack-ref :integer 0 state) 
-					       max-points-in-random-expressions)) 
+	(push-item (random-code (math/abs (mod (stack-ref :integer 0 state)
+					       max-points-in-random-expressions))
 				@global-atom-generators)
 		   :code
 		   (pop-item :integer state)))
       state)))
 
-(define-registered 
+(define-registered
   string_rand
   (fn [state]
-    (push-item 
-      (apply str (repeatedly 
+    (push-item
+      (apply str (repeatedly
                    (+' min-random-string-length
-                       (lrand-int (- max-random-string-length 
+                       (lrand-int (- max-random-string-length
                                      min-random-string-length)))
-                   #(rand-nth 
+                   #(rand-nth
                       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")))
       :string
       state)))

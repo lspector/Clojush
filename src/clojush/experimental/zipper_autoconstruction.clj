@@ -23,7 +23,7 @@
         [clojush.instructions.code]
         [clojush.instructions.common]
         [clojush.instructions.numbers]
-        [clojush.instructions.random]
+        [clojush.instructions.random-instructions]
         [clojush.instructions.string]
         [clojush.instructions.tag]
         [clojush.instructions.zip]
