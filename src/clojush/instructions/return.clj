@@ -16,7 +16,7 @@
 (define-registered return_frominteger (returner :integer))
 (define-registered return_fromfloat (returner :float))
 (define-registered return_fromboolean (returner :boolean))
-(define-registered return_fromzip (returner :zip))
+;(define-registered return_fromzip (returner :zip)) ;; won't work, reconsider
 (define-registered return_fromstring (returner :string))
 
 (define-registered 
