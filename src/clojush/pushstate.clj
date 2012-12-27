@@ -6,20 +6,35 @@
 
 ;; struct-based states follow
 
-(defmacro define-push-state-structure []
-  `(defstruct push-state ~@push-types))
+;(defmacro define-push-state-structure []
+;  `(defstruct push-state ~@push-types))
 
-(define-push-state-structure)
+;(define-push-state-structure)
 
-(defn make-push-state
-  "Returns an empty push state."
-  []
-  (struct-map push-state))
+;(defn make-push-state
+;  "Returns an empty push state."
+;  []
+;  (struct-map push-state))
 
+;; record-based states (apparently faster)
+
+(defn keyword->symbol [kwd]
+ "Returns the symbol obtained by removing the : from a keyword."
+ (symbol (name kwd)))
+
+(defmacro define-push-state-record-type []
+ `(defrecord ~'PushState [~@(map keyword->symbol push-types)]))
+
+(define-push-state-record-type)
+
+(let [empty-state (map->PushState {})]
+  (defn make-push-state
+    "Returns an empty push state."
+    [] empty-state))
 
 (def registered-instructions (atom #{}))
 
-(defn register-instruction 
+(defn register-instruction
   "Add the provided name to the global list of registered instructions."
   [name]
   (swap! registered-instructions conj name))
@@ -45,7 +60,7 @@
   (assoc state type (cons value (type state))))
 
 (defn top-item
-  "Returns the top item of the type stack in state. Returns :no-stack-item if called on 
+  "Returns the top item of the type stack in state. Returns :no-stack-item if called on
    an empty stack. This is a utility, not for use as an instruction in Push programs."
   [type state]
   (let [stack (type state)]
@@ -54,7 +69,7 @@
       (first stack))))
 
 (defn stack-ref
-  "Returns the indicated item of the type stack in state. Returns :no-stack-item if called 
+  "Returns the indicated item of the type stack in state. Returns :no-stack-item if called
    on an empty stack. This is a utility, not for use as an instruction in Push programs.
    NOT SAFE for invalid positions."
   [type position state]
