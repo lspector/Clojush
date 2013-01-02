@@ -6,3 +6,6 @@
 classes/
 target/
 results/
+.classpath
+.project
+.settings
