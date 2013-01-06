@@ -1,4 +1,4 @@
-(defproject lspector/clojush "1.2.35"
+(defproject lspector/clojush "1.2.36"
             :description "The Push programming language and the PushGP genetic programming
                           system implemented in Clojure.
                           See http://hampshire.edu/lspector/push.html"
