@@ -44,7 +44,12 @@
              boolean-gsxover-probability
              boolean-gsxover-new-code-max-points
              deletion-mutation-probability
+             parentheses-addition-mutation-probability
+             tagging-mutation-probability
+             tag-branch-mutation-probability
+             tag-branch-mutation-type-instruction-pairs
              parent-reversion-probability
+             tag-limit
              ]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
@@ -79,6 +84,10 @@
            boolean-gsxover-probability 0.0
            boolean-gsxover-new-code-max-points 20
            deletion-mutation-probability 0.0
+           parentheses-addition-mutation-probability 0.0
+           tagging-mutation-probability 0.0
+           tag-branch-mutation-probability 0.0
+           tag-branch-mutation-type-instruction-pairs []
            reuse-errors true
            problem-specific-report default-problem-specific-report
            print-csv-logs false
@@ -93,6 +102,7 @@
            use-lexicase-selection false
            use-rmse false
            parent-reversion-probability 0.0
+           tag-limit 10000
            }}]
   (binding [*thread-local-random-generator* (java.util.Random. random-seed)]
     ;; set globals from parameters
@@ -108,6 +118,7 @@
     (reset! global-use-historically-assessed-hardness use-historically-assessed-hardness)
     (reset! global-use-lexicase-selection use-lexicase-selection)
     (reset! global-use-rmse use-rmse)
+    (reset! global-tag-limit tag-limit)
     (initial-report) ;; Print the inital report
     (print-params 
       (atom-generators print-csv-logs csv-log-filename print-json-logs
@@ -119,13 +130,16 @@
                        simplification-probability gaussian-mutation-probability 
                        gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
                        boolean-gsxover-probability boolean-gsxover-new-code-max-points
-                       deletion-mutation-probability
+                       deletion-mutation-probability parentheses-addition-mutation-probability
+                       tagging-mutation-probability tag-branch-mutation-probability
+                       tag-branch-mutation-type-instruction-pairs
                        tournament-size report-simplifications final-report-simplifications
                        reproduction-simplifications trivial-geography-radius decimation-ratio 
                        decimation-tournament-size evalpush-limit evalpush-time-limit node-selection-method 
                        node-selection-tournament-size node-selection-leaf-probability pop-when-tagging 
                        reuse-errors use-single-thread random-seed use-historically-assessed-hardness
-                       use-lexicase-selection use-rmse parent-reversion-probability))
+                       use-lexicase-selection use-rmse parent-reversion-probability
+                       tag-limit))
     (printf "\nGenerating initial population...\n") (flush)
     (let [pop-agents (vec (doall (for [_ (range population-size)] 
                                    ((if use-single-thread atom agent)
@@ -190,13 +204,16 @@
                         (dotimes [i population-size]
                           ((if use-single-thread swap! send)
                                (nth child-agents i) 
-                               breed i (nth rand-gens i) pop error-function max-points atom-generators 
-                               mutation-probability mutation-max-points crossover-probability 
-                               simplification-probability tournament-size reproduction-simplifications 
-                               trivial-geography-radius gaussian-mutation-probability 
-                               gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
-                               boolean-gsxover-probability boolean-gsxover-new-code-max-points
-                               deletion-mutation-probability)))
+                               breed 
+                               [i (nth rand-gens i) pop error-function max-points atom-generators 
+                                mutation-probability mutation-max-points crossover-probability 
+                                simplification-probability tournament-size reproduction-simplifications 
+                                trivial-geography-radius gaussian-mutation-probability 
+                                gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
+                                boolean-gsxover-probability boolean-gsxover-new-code-max-points
+                                deletion-mutation-probability parentheses-addition-mutation-probability
+                                tagging-mutation-probability tag-branch-mutation-probability
+                                tag-branch-mutation-type-instruction-pairs])))
                       (when-not use-single-thread (apply await child-agents)) ;; SYNCHRONIZE
                       (printf "\nInstalling next generation...") (flush)
                       (dotimes [i population-size]

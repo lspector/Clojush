@@ -344,21 +344,30 @@
     :use-lexicase-selection true
     :population-size 1000
     :max-generations 10001
-    :evalpush-limit 1000
+    :evalpush-limit 100
+    :tag-limit 10000
     :max-points 1000
-    :max-points-in-initial-program 10
+    :max-points-in-initial-program 25
     ;:parent-reversion-probability 0.9
-    :mutation-probability 0.45
-    :mutation-max-points 10
-    :crossover-probability 0.15
-    :simplification-probability 0.0
-    ;:reproduction-simplifications 10
-    :report-simplifications 0
-    :deletion-mutation-probability 0.4
+    :crossover-probability 0.25
+    :mutation-probability 0.25
+    :mutation-max-points 25
+    :simplification-probability 0.2
+    :reproduction-simplifications 1
+    :deletion-mutation-probability 0.0
+    :parentheses-addition-mutation-probability 0.1
+    :tagging-mutation-probability 0.1
+    :tag-branch-mutation-probability 0.1
+    :tag-branch-mutation-type-instruction-pairs [[:boolean 'boolean_eq]
+                                                 [:float 'float_eq]
+                                                 [:float 'float_lt]
+                                                 [:float 'float_gt]]
     :node-selection-method :size-tournament ;:unbiased
     ;node-selection-leaf-probability 0.1
     :node-selection-tournament-size 2
     ;:pop-when-tagging false
+    :report-simplifications 0
+
     ))
 
 

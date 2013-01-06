@@ -107,45 +107,51 @@
   "Returns a function which, when called on no arguments, returns a symbol of the form
    tag_<type>_<number> where type is one of the specified types and number is in the range 
    from 0 to the specified limit (exclusive)."
-  [types limit]
-  (fn [] (symbol (str "tag_"
-                      (name (lrand-nth types))
-                      "_"
-                      (str (lrand-int limit))))))
-
+  ([types limit]
+    (fn [] (symbol (str "tag_"
+                        (name (lrand-nth types))
+                        "_"
+                        (str (lrand-int limit))))))
+  ([types] (tag-instruction-erc types @global-tag-limit)))
+  
 (defn untag-instruction-erc
   "Returns a function which, when called on no arguments, returns a symbol of the form
    untag_<number> where number is in the range from 0 to the specified limit (exclusive)."
-  [limit]
-  (fn [] (symbol (str "untag_"
-                      (str (lrand-int limit))))))
-
+  ([limit]
+    (fn [] (symbol (str "untag_"
+                        (str (lrand-int limit))))))
+  ([] (untag-instruction-erc @global-tag-limit)))
+  
 (defn tagged-instruction-erc
   "Returns a function which, when called on no arguments, returns a symbol of the form
    tagged_<number> where number is in the range from 0 to the specified limit (exclusive)."
-  [limit]
-  (fn [] (symbol (str "tagged_"
-                      (str (lrand-int limit))))))
-
+  ([limit]
+    (fn [] (symbol (str "tagged_"
+                        (str (lrand-int limit))))))
+  ([] (tagged-instruction-erc @global-tag-limit)))
+  
 (defn tagged-code-instruction-erc
   "Returns a function which, when called on no arguments, returns a symbol of the form
    tagged_code_<number> where number is in the range from 0 to the specified limit (exclusive)."
-  [limit]
-  (fn [] (symbol (str "tagged_code_"
-                      (str (lrand-int limit))))))
+  ([limit]
+    (fn [] (symbol (str "tagged_code_"
+                        (str (lrand-int limit))))))
+  ([] (tagged-code-instruction-erc @global-tag-limit)))
 
 (defn tagged-when-instruction-erc
   "Returns a function which, when called on no arguments, returns a symbol of the form
    tagged_when_<number> where number is in the range from 0 to the specified limit (exclusive)."
-  [limit]
-  (fn [] (symbol (str "tagged_when_"
-                      (str (lrand-int limit))))))
+  ([limit]
+    (fn [] (symbol (str "tagged_when_"
+                        (str (lrand-int limit))))))
+  ([] (tagged-when-instruction-erc @global-tag-limit)))
 
 (defn return-tag-instruction-erc
   "Returns a function which, when called on no arguments, returns a function of Push
    state that pushes a literal followed by a tagging instruction of the same type."
-  [types limit]
-  (fn [] (symbol (str "return_tag_"
-                      (name (lrand-nth types))
-                      "_"
-                      (str (lrand-int limit))))))
+  ([types limit]
+    (fn [] (symbol (str "return_tag_"
+                        (name (lrand-nth types))
+                        "_"
+                        (str (lrand-int limit))))))
+  ([types] (return-tag-instruction-erc types @global-tag-limit)))

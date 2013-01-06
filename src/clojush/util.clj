@@ -2,7 +2,8 @@
   (:require [clojure.math.numeric-tower :as math]
             [clojure.zip :as zip]
             [clojure.walk :as walk])
-  (:use [clojush.globals]))
+  (:use [clojush.globals]
+        [clojush.random]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utilities
@@ -181,3 +182,18 @@
 ;; backtrace abbreviation, to ease debugging
 (defn bt []
   (.printStackTrace *e))
+
+(defn insert-randomly
+  "Returns lst with thing inserted in a random location. If lst is not a list then
+it will first be wrapped in a list."
+  [thing lst]
+  (let [tree (ensure-list lst)
+        loc (inc (lrand-int (dec (count-points tree))))]
+    (zip/root
+      ((lrand-nth [zip/insert-left zip/insert-right])
+        (loop [z (zip/seq-zip tree) i 0]
+          (if (= i loc)
+            z
+            (recur (zip/next z) (inc i))))
+        thing))))
+                             

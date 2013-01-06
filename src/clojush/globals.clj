@@ -34,6 +34,7 @@
 (def global-reuse-errors (atom true))
 (def global-use-rmse (atom false))
 (def global-use-single-thread (atom false))
+(def global-tag-limit (atom 10000))
 
 ;; Historically-assessed hardness (http://hampshire.edu/lspector/pubs/kleinspector-gptp08-preprint.pdf)
 ;; using the "Previous Generation / Difference" method. 

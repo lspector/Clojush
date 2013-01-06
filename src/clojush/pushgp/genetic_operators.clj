@@ -85,6 +85,78 @@
                                   (cons (:program ind) (:ancestors ind))
                                   (:ancestors ind)))))
 
+(defn add-parentheses-mutate 
+  "Returns a version of the given individual with one pair of parentheses added
+somewhere. Not compatible with (currently 'experimental') tagged code macros."
+  [ind max-points]
+  (let [expression (:program ind) 
+        new-program (let [expstr (str expression)
+                          chars (count expstr)
+                          space-indices (filter #(= (nth expstr %) \space) (range chars))]
+                      (if (< (count space-indices) 2)
+                        expression ;; can't add parentheses if less than two spaces
+                        (let [i (lrand-nth space-indices)
+                              j (lrand-nth (remove #(= % i) space-indices))
+                              start (min i j)
+                              stop (max i j)]
+                          (read-string (str (subs expstr 0 start)
+                                            " ( "
+                                            (subs expstr (inc start) stop)
+                                            " ) "
+                                            (subs expstr (inc stop)))))))]
+    (if (> (count-points new-program) max-points)
+      ind
+      (make-individual :program new-program :history (:history ind)
+                       :ancestors (if maintain-ancestors
+                                    (cons (:program ind) (:ancestors ind))
+                                    (:ancestors ind))))))
+
+(defn tagging-mutate 
+  "Returns a version of the given individual with a piece of code replaced by a tag
+reference, and with an expression that tags the replaced code with the same tag added
+to the beginning of the individual's program."
+  [ind max-points tag-limit]
+  (let [old-program (:program ind)
+        index-to-tag (select-node-index old-program)
+        tag (rand-int tag-limit)
+        tagging-instruction (symbol (str "tag_exec_" (str tag)))
+        tag-ref-instruction (symbol (str "tagged_" (str tag))) 
+        new-program (list (list tagging-instruction
+                                (code-at-point old-program index-to-tag))
+                          (insert-code-at-point old-program
+                                                index-to-tag
+                                                tag-ref-instruction))]
+    (if (> (count-points new-program) max-points)
+      ind
+      (make-individual :program new-program :history (:history ind)
+                       :ancestors (if maintain-ancestors
+                                    (cons (:program ind) (:ancestors ind))
+                                    (:ancestors ind))))))
+
+(defn tag-branch-insertion-mutate 
+  "Returns a version of the given individual with a tag-branch inserted at a random
+location. A tag-branch is a sequence of instructions that 1) produces a boolean
+value by performing a randomly chosen comparison of copies (not popped) of the top 
+two items of a randomly selected type, and 2) branches to one of two tags depending
+on the result. The type-instruction-pairs argument should be a sequence of pairs,
+in which the first element of each is a type and the second element is a Push instruction
+that performs a comparison of the type, as in [:integer 'integer_eq]."
+  [ind max-points type-instruction-pairs tag-limit]
+  (let [old-program (:program ind)
+        tag-ref-instruction-1 (symbol (str "tagged_" (str (lrand-int tag-limit)))) 
+        tag-ref-instruction-2 (symbol (str "tagged_" (str (lrand-int tag-limit))))
+        [type instruction] (lrand-nth type-instruction-pairs)
+        yankdup-instruction (symbol (str (apply str (rest (str type))) "_yankdup"))
+        tag-branch (list 1 yankdup-instruction 1 yankdup-instruction instruction 'exec_if
+                         tag-ref-instruction-1 tag-ref-instruction-2)
+        new-program (insert-randomly tag-branch old-program)]
+    (if (> (count-points new-program) max-points)
+      ind
+      (make-individual :program new-program :history (:history ind)
+                       :ancestors (if maintain-ancestors
+                                    (cons (:program ind) (:ancestors ind))
+                                    (:ancestors ind))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; some utilities are required for gaussian mutation
 

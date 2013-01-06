@@ -1,5 +1,6 @@
 (ns clojush.pushgp.breed
-  (:use [clojush.random]
+  (:use [clojush.globals]
+        [clojush.random]
         [clojush.pushgp.parent-selection]
         [clojush.pushgp.genetic-operators]
         [clojush.simplification]))
@@ -10,12 +11,14 @@
 (defn breed
   "Replaces the state of the given agent with an individual bred from the given population (pop), 
    using the given parameters."
-  [agt location rand-gen pop error-function max-points atom-generators 
-   mutation-probability mutation-max-points crossover-probability simplification-probability 
-   tournament-size reproduction-simplifications trivial-geography-radius
-   gaussian-mutation-probability gaussian-mutation-per-number-mutation-probability 
-   gaussian-mutation-standard-deviation boolean-gsxover-probability
-   boolean-gsxover-new-code-max-points deletion-mutation-probability]
+  [agt [location rand-gen pop error-function max-points atom-generators 
+        mutation-probability mutation-max-points crossover-probability simplification-probability 
+        tournament-size reproduction-simplifications trivial-geography-radius
+        gaussian-mutation-probability gaussian-mutation-per-number-mutation-probability 
+        gaussian-mutation-standard-deviation boolean-gsxover-probability
+        boolean-gsxover-new-code-max-points deletion-mutation-probability
+        parentheses-addition-mutation-probability tagging-mutation-probability 
+        tag-branch-mutation-probability tag-branch-mutation-type-instruction-pairs]]
   (binding [*thread-local-random-generator* rand-gen]
     (let [n (lrand)]
       (cond 
@@ -52,6 +55,29 @@
                 gaussian-mutation-probability boolean-gsxover-probability deletion-mutation-probability))
         (let [parent (select pop tournament-size trivial-geography-radius location)]
           (assoc (delete-mutate parent) :parent parent))
+        ;; parentheses addition mutation
+        (< n (+ mutation-probability crossover-probability simplification-probability 
+                gaussian-mutation-probability boolean-gsxover-probability 
+                deletion-mutation-probability parentheses-addition-mutation-probability))
+        (let [parent (select pop tournament-size trivial-geography-radius location)]
+          (assoc (add-parentheses-mutate parent max-points) :parent parent))
+        ;; tagging mutation
+        (< n (+ mutation-probability crossover-probability simplification-probability 
+                gaussian-mutation-probability boolean-gsxover-probability 
+                deletion-mutation-probability parentheses-addition-mutation-probability
+                tagging-mutation-probability))
+        (let [parent (select pop tournament-size trivial-geography-radius location)]
+          (assoc (tagging-mutate parent max-points @global-tag-limit) :parent parent))
+        ;; tag branch mutation
+        (< n (+ mutation-probability crossover-probability simplification-probability 
+                gaussian-mutation-probability boolean-gsxover-probability 
+                deletion-mutation-probability parentheses-addition-mutation-probability
+                tagging-mutation-probability tag-branch-mutation-probability))
+        (let [parent (select pop tournament-size trivial-geography-radius location)]
+          (assoc (tag-branch-insertion-mutate 
+                   parent max-points tag-branch-mutation-type-instruction-pairs 
+                   @global-tag-limit) 
+                 :parent parent))
         ;; replication
         true 
         (let [parent (select pop tournament-size trivial-geography-radius location)]
