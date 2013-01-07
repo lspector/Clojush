@@ -48,6 +48,8 @@
              tagging-mutation-probability
              tag-branch-mutation-probability
              tag-branch-mutation-type-instruction-pairs
+             amalgamation-probability
+             amalgamation-parameters
              parent-reversion-probability
              tag-limit
              ]
@@ -88,6 +90,8 @@
            tagging-mutation-probability 0.0
            tag-branch-mutation-probability 0.0
            tag-branch-mutation-type-instruction-pairs []
+           amalgamation-probability 0.0
+           amalgamation-parameters {:self 0.6 :other 0.2 :self-other 0.05 :other-self 0.05 :nothing 0.1}
            reuse-errors true
            problem-specific-report default-problem-specific-report
            print-csv-logs false
@@ -119,6 +123,7 @@
     (reset! global-use-lexicase-selection use-lexicase-selection)
     (reset! global-use-rmse use-rmse)
     (reset! global-tag-limit tag-limit)
+    (reset! global-amalgamation-parameters amalgamation-parameters)
     (initial-report) ;; Print the inital report
     (print-params 
       (atom-generators print-csv-logs csv-log-filename print-json-logs
@@ -132,7 +137,8 @@
                        boolean-gsxover-probability boolean-gsxover-new-code-max-points
                        deletion-mutation-probability parentheses-addition-mutation-probability
                        tagging-mutation-probability tag-branch-mutation-probability
-                       tag-branch-mutation-type-instruction-pairs
+                       tag-branch-mutation-type-instruction-pairs amalgamation-probability
+                       amalgamation-parameters
                        tournament-size report-simplifications final-report-simplifications
                        reproduction-simplifications trivial-geography-radius decimation-ratio 
                        decimation-tournament-size evalpush-limit evalpush-time-limit node-selection-method 
@@ -213,7 +219,8 @@
                                 boolean-gsxover-probability boolean-gsxover-new-code-max-points
                                 deletion-mutation-probability parentheses-addition-mutation-probability
                                 tagging-mutation-probability tag-branch-mutation-probability
-                                tag-branch-mutation-type-instruction-pairs])))
+                                tag-branch-mutation-type-instruction-pairs amalgamation-probability
+                                amalgamation-parameters])))
                       (when-not use-single-thread (apply await child-agents)) ;; SYNCHRONIZE
                       (printf "\nInstalling next generation...") (flush)
                       (dotimes [i population-size]

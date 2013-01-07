@@ -349,11 +349,13 @@
     :max-points 1000
     :max-points-in-initial-program 25
     ;:parent-reversion-probability 0.9
-    :crossover-probability 0.25
+    :crossover-probability 0.0           
+    :amalgamation-probability 0.25
+    :amalgamation-parameters {:self 0.6 :other 0.2 :self-other 0.05 :other-self 0.05 :nothing 0.1}
     :mutation-probability 0.25
-    :mutation-max-points 25
-    :simplification-probability 0.2
-    :reproduction-simplifications 1
+    :mutation-max-points 0.1
+    :simplification-probability 0.35
+    :reproduction-simplifications 10
     :deletion-mutation-probability 0.0
     :parentheses-addition-mutation-probability 0.1
     :tagging-mutation-probability 0.1

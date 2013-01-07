@@ -35,6 +35,8 @@
 (def global-use-rmse (atom false))
 (def global-use-single-thread (atom false))
 (def global-tag-limit (atom 10000))
+(def global-amalgamation-parameters 
+  (atom {:self 0.6 :other 0.2 :self-other 0.05 :other-self 0.05 :nothing 0.1}))
 
 ;; Historically-assessed hardness (http://hampshire.edu/lspector/pubs/kleinspector-gptp08-preprint.pdf)
 ;; using the "Previous Generation / Difference" method. 
