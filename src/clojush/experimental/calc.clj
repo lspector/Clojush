@@ -33,23 +33,23 @@
   ;; [inputs answer error]
   ;; answer doesn't matter if error is true
   ;; if no error, answer must be correct on float stack and true cannot be top boolean
-  [[[:one :divided-by :zero :equals] 0.0 true]
+  [;[[:one :divided-by :zero :equals] 0.0 true]
    [[:one] 1.0 false]
-   [[:one :plus] 1.0 false]
-   [[:one :plus :one] 1.0 false]
-   [[:one :plus :one :equals] 2.0 false]
-   [[:two :plus :two :equals] 4.0 false]
-   [[:nine :times :nine :equals] 81.0 false]
-   [[:three :divided-by :four :equals] 0.75 false]
-   [[:one :two :three :four :five :plus :six :seven :eight :nine :zero :equals] 80235.0 false]
-   [[:one :point :two :three :times :four :point :five :six :equals] 5.6088 false]
-   [[:on-clear] 0.0 false]
-   [[:nine :nine :nine :on-clear] 0.0 false]
-   [[:one :point :two] 1.2 false]
-   [[:one :point :two :point :three :point :four] 1.234 false]
-   [[:one :point :two :plus :three :point :four :equals] 4.6 false]
-   [[:one :point :two :times :three :point :four :equals] 4.08 false]
-   [[:one :point :two :divided-by :two :equals] 0.6 false]
+   ;[[:one :plus] 1.0 false]
+   ;[[:one :plus :one] 1.0 false]
+   ;[[:one :plus :one :equals] 2.0 false]
+   ;[[:two :plus :two :equals] 4.0 false]
+   ;[[:nine :times :nine :equals] 81.0 false]
+   ;[[:three :divided-by :four :equals] 0.75 false]
+   ;[[:one :two :three :four :five :plus :six :seven :eight :nine :zero :equals] 80235.0 false]
+   ;[[:one :point :two :three :times :four :point :five :six :equals] 5.6088 false]
+   ;[[:on-clear] 0.0 false]
+   ;[[:nine :nine :nine :on-clear] 0.0 false]
+   ;[[:one :point :two] 1.2 false]
+   ;[[:one :point :two :point :three :point :four] 1.234 false]
+   ;[[:one :point :two :plus :three :point :four :equals] 4.6 false]
+   ;[[:one :point :two :times :three :point :four :equals] 4.08 false]
+   ;[[:one :point :two :divided-by :two :equals] 0.6 false]
    [[:two] 2.0 false]
    [[:three] 3.0 false]
    [[:four] 4.0 false]
@@ -66,7 +66,7 @@
    [[:one :two] 12.0 false]
    [[:three :four :five] 345.0 false]
    [[:six :seven :eight :nine] 6789.0 false]
-   [[:two :two :plus :two :two :equals] 44.0 false]
+   ;[[:two :two :plus :two :two :equals] 44.0 false]
    ])
    
 
@@ -342,24 +342,27 @@
                        )
     :use-single-thread false
     :use-lexicase-selection true
+    :decimation-ratio 0.01
+    :use-lexibehavioral-decimation true
+    ;:tournament-size 1
     :population-size 1000
     :max-generations 10001
     :evalpush-limit 100
     :tag-limit 10000
-    :max-points 1000
+    :max-points 500
     :max-points-in-initial-program 25
     ;:parent-reversion-probability 0.9
     :crossover-probability 0.0           
-    :amalgamation-probability 0.25
-    :amalgamation-parameters {:self 0.6 :other 0.2 :self-other 0.05 :other-self 0.05 :nothing 0.1}
-    :mutation-probability 0.25
-    :mutation-max-points 0.1
-    :simplification-probability 0.35
-    :reproduction-simplifications 10
-    :deletion-mutation-probability 0.0
-    :parentheses-addition-mutation-probability 0.1
-    :tagging-mutation-probability 0.1
-    :tag-branch-mutation-probability 0.1
+    :hybridization-probability 0.2
+    :hybridization-parameters {:self 0.95 :other 0.025 :self-other 0.00625 :other-self 0.00625 :nothing 0.0125}
+    :mutation-probability 0.4
+    :mutation-max-points 5
+    :simplification-probability 0.0
+    ;:reproduction-simplifications 10
+    :deletion-mutation-probability 0.37
+    :parentheses-addition-mutation-probability 0.01
+    :tagging-mutation-probability 0.01
+    :tag-branch-mutation-probability 0.01
     :tag-branch-mutation-type-instruction-pairs [[:boolean 'boolean_eq]
                                                  [:float 'float_eq]
                                                  [:float 'float_lt]
@@ -369,8 +372,6 @@
     :node-selection-tournament-size 2
     ;:pop-when-tagging false
     :report-simplifications 0
-
     ))
-
 
 (run)
