@@ -2,9 +2,9 @@
 
 ;; Lee Spector, 20130101
 
-;; buttons to float answer + boolean error
-;; if no error must have answer on float stack and NOT have true on boolean stack
-;; if error must have error on boolean stack
+;; buttons to float answer (on stack) + boolean error signal (via instruction)
+;; if no error must have answer on float stack and NOT have signal error
+;; if error must signal error
 
 (ns experimental.calc
   (:use [clojush.pushgp.pushgp]
@@ -28,6 +28,10 @@
   (zipmap buttons (iterate #(+ % 100) 0)))
 
 ; button-entrypoints
+
+(define-registered 
+  signal_error 
+  (fn [state] (push-item :error :auxiliary state)))
 
 (def calc-tests
   ;; [inputs answer error]
@@ -69,7 +73,6 @@
    ;[[:two :two :plus :two :two :equals] 44.0 false]
    ])
    
-
 (defn calc-errors
   [program]
   ;; run the program once 
@@ -89,22 +92,20 @@
                     buttons (first t)]
                (if (empty? buttons)
                  (if (nth t 2) 
-                   ;; should signal error
-                   (if (= true (top-item :boolean push-state)) 0 1)
+                   ;; should signal error, via the auxiliary stack
+                   (if (= :error (top-item :auxiliary push-state)) 0 1)
                    ;; shouldn't signal error
-                   (if (and (not (= true (top-item :boolean push-state)))
-                            (= (top-item :float push-state) (nth t 1)))
-                     0 ;; didn't signal error and answer is correct
+                   (if (= :error (top-item :auxiliary push-state))
+                     1 ;; but did
                      (if (= (top-item :float push-state) (nth t 1))
-                       1 ;; right answer but signalled error
+                       0 ;; answer is correct
                        (let [top (top-item :float push-state)
                              target (nth t 1)]
                          (if (not (number? top))
                            1 ;; no number
                            ;; else return error scaled to [0, 1]
                            (/ (Math/abs (- top target))
-                              (+ (Math/abs top) (Math/abs target))))))
-                     ))
+                              (+ (Math/abs top) (Math/abs target))))))))
                  (recur (let [the-tag (get button-entrypoints (first buttons))]
                           (run-push (second (closest-association the-tag push-state))
                                     push-state))
@@ -129,6 +130,7 @@
   (pushgp 
     :error-function calc-errors
     :atom-generators (concat
+                       '(signal_error)
                        ;(list (fn [] (- (lrand-int 21) 10))
                        ;      (fn [] (- (lrand 21) 10)))
                        [0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0]
