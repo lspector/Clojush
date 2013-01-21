@@ -354,7 +354,9 @@
     ;:parent-reversion-probability 0.9
     :crossover-probability 0.0           
     :hybridization-probability 0.2
-    :hybridization-parameters {:self 0.95 :other 0.025 :self-other 0.00625 :other-self 0.00625 :nothing 0.0125}
+    :hybridization-parameters {:self 0.9 :other 0.2}
+    :uniform-crossover-probability 0.2
+    :uniform-crossover-parameters {:self 0.9 :other 0.2}
     :mutation-probability 0.4
     :mutation-max-points 5
     :simplification-probability 0.0

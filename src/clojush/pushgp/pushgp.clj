@@ -93,9 +93,9 @@
            tag-branch-mutation-probability 0.0
            tag-branch-mutation-type-instruction-pairs []
            uniform-crossover-probability 0.0
-           uniform-crossover-parameters {:self 0.95 :other 0.025 :self-other 0.00625 :other-self 0.00625 :nothing 0.0125}
+           uniform-crossover-parameters {:self 0.9 :other 0.2}
            hybridization-probability 0.0
-           hybridization-parameters {:self 0.95 :other 0.025 :self-other 0.00625 :other-self 0.00625 :nothing 0.0125}
+           hybridization-parameters {:self 0.9 :other 0.2}
            reuse-errors true
            problem-specific-report default-problem-specific-report
            print-csv-logs false

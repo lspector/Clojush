@@ -35,10 +35,8 @@
 (def global-use-rmse (atom false))
 (def global-use-single-thread (atom false))
 (def global-tag-limit (atom 10000))
-(def global-uniform-crossover-parameters 
-  (atom {:self 0.95 :other 0.025 :self-other 0.00625 :other-self 0.00625 :nothing 0.0125}))
-(def global-hybridization-parameters 
-  (atom {:self 0.95 :other 0.025 :self-other 0.00625 :other-self 0.00625 :nothing 0.0125}))
+(def global-uniform-crossover-parameters (atom {:self 0.9 :other 0.2}))
+(def global-hybridization-parameters (atom {:self 0.9 :other 0.2}))
 
 ;; Historically-assessed hardness (http://hampshire.edu/lspector/pubs/kleinspector-gptp08-preprint.pdf)
 ;; using the "Previous Generation / Difference" method. 
