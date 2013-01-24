@@ -37,4 +37,4 @@
                          'integer_mult
                          'integer_add
                          'integer_sub)
-  :tournament-size 3)
+  :initial-population "data/1359057013000.ser")

@@ -1,4 +1,5 @@
 (ns clojush.pushgp.pushgp
+  (:require [clojure.java.io :as io])
   (:use [clojush.globals]
         [clojush.util]
         [clojush.pushstate]
@@ -21,6 +22,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; pushgp
+
 
 (defn pushgp
   "The top-level routine of pushgp."
@@ -52,6 +54,7 @@
              amalgamation-parameters
              parent-reversion-probability
              tag-limit
+             initial-population
              ]
       :or {error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
            error-threshold 0
@@ -147,11 +150,16 @@
                        use-lexicase-selection use-rmse parent-reversion-probability
                        tag-limit))
     (printf "\nGenerating initial population...\n") (flush)
-    (let [pop-agents (vec (doall (for [_ (range population-size)] 
-                                   ((if use-single-thread atom agent)
-                                        (make-individual 
-                                          :program (random-code max-points-in-initial-program atom-generators))
-                                        :error-handler (fn [agnt except] (println except))))))
+    (let [pop-agents (if initial-population
+                       (vec (map #(if use-single-thread (atom %) (agent %)) (read-string (slurp initial-population))))
+                       (vec (let [pa (doall (for [_ (range population-size)] 
+                                              (make-individual 
+                                               :program (random-code max-points-in-initial-program atom-generators)
+                                               :error-handler (fn [agnt except] (println except)))))
+                                  f (str "data/" (System/currentTimeMillis) ".ser")]
+                              (io/make-parents f)
+                              (spit f (printable (map individual-string pa)))
+                              (map #(if use-single-thread (atom %) (agent %)) pa))))
           child-agents (vec (doall (for [_ (range population-size)]
                                      ((if use-single-thread atom agent)
                                           (make-individual)

@@ -1,4 +1,5 @@
-(ns clojush.individual)
+(ns clojush.individual
+  (:require [clojure.string :as s]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Individuals are records.
@@ -17,3 +18,19 @@
                                ancestors nil
                                parent nil}}]
   (individual. program errors total-error hah-error rms-error history ancestors parent))
+
+(defn printable [thing]
+  (letfn [(unlazy [[head & tail]]
+                  (cons (if (seq? head) (unlazy head) head)
+                        (if (nil? tail) tail (unlazy tail))))]
+    (cond (seq? thing) (unlazy thing)
+          (nil? thing) 'nil
+          :else thing)))
+
+(defn individual-string [i]
+  (cons 'individual.
+        (let [k '(:program :errors :total-error :hah-error :rms-error :history :ancestors :parent)]
+          (interleave k  (map #(printable (get i %)) k)))))
+         
+       
+       
