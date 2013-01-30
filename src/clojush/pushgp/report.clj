@@ -29,9 +29,9 @@
                    (str dir "/.git/HEAD")))
                5))))))
 
-(defmacro print-params
-  [params]
-  (cons 'do (doall (map #(list 'println (str %) "=" %) params))))
+(defn print-params [push-argmap]
+  (doseq [[param val] push-argmap]
+    (println (name param) "=" val)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; log printing (csv and json)

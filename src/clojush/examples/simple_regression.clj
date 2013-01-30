@@ -17,7 +17,7 @@
   in 
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
-(pushgp 
+(define-push-argmap
   :error-function (fn [program]
                     (doall
                       (for [input (range 10)]
@@ -36,5 +36,4 @@
                          'integer_div
                          'integer_mult
                          'integer_add
-                         'integer_sub)
-  :initial-population "data/1359057013000.ser")
+                         'integer_sub))
