@@ -3,9 +3,7 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns clojush.examples.simple-regression
-  (:use [clojush.pushgp.pushgp]
-        [clojush.pushstate]
-        [clojush.interpreter]
+  (:use [clojush.examples.common]
         [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;
