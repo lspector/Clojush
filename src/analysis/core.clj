@@ -1,31 +1,22 @@
 (ns analysis.core
-  (:require [clojure.java.io :as io])
-
-;; don't assume that we can hold the whole file in memory
-
-;; registered instructions
-;; push parameters
-;; generation reports
-;; summary
-
-;; need a collection report structured object
-;; get the error vectors from the first generation
+  (:require [clojure.java.io :as io]
+            [cosmos.core :as cosmos]))
 
 (defrecord Log [insts params reports summary])
 
-(defn make-inst [inst-chunk]
+(defn- make-inst [inst-chunk]
   (-> inst-chunk
       (s/split #":")
       (second)
       (read-string)))
 
-(defn make-params [param-chunk]
+(defn- make-params [param-chunk]
   (->> param-chunk
        (map #(s/split % #"="))
        (map #(vector (s/trim (% 0)) (s/trim (% 1))))
        (reduce #(assoc %1 (%2 0) (%2 1)) (sorted-map))))
 
-(defn make-reports [reports-chunk]
+(defn- make-reports [reports-chunk]
   (let [pred #(.contains % ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")]   
     (for [chunk (remove pred (partition-by pred reports-chunk))]
       (->> chunk
@@ -35,7 +26,7 @@
            (map s/trim)
            (apply sorted-map)))))
 
-(defn make-summary [summary-chunk]
+(defn- make-summary [summary-chunk]
   (->> summary-chunk
        (map #(s/split % #":"))
        (filter #(= 2 (count %)))
