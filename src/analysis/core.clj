@@ -125,10 +125,10 @@
   [logs]
   (cosmos/recommended-runs (-> (for [log logs]
                                  (for [[report gen] (map #(vector %1 %2) (:reports log) (iterate inc 0))]
-                                   (for [[ord val] (seq (get report "Cosmos Data:"))]
+                                   (for [[ord val] (seq (read-string (get report "Cosmos Data")))]
                                      (struct-map cosmos/cosmos-data
                                        :ord ord
                                        :gen gen
                                        :val val))))
-                               flatten)))
-                               
+                               flatten
+                               cosmos-1)))
