@@ -89,13 +89,13 @@
    all stacks with those on the environment stack. Then, everything on the old
    :return stack is pushed onto the :exec stack."
   [state]
-  (let [new-env (assoc (top-item :environment state)
-                       :auxiliary
-                       (:auxiliary state))
+  (let [new-env (top-item :environment state)
         new-exec (concat (:exec state)
                          (:exec new-env))]
     (loop [old-return (:return state)
-           new-state (assoc new-env :exec new-exec)]
+           new-state (assoc new-env
+                            :exec new-exec
+                            :auxiliary (:auxiliary state))]
       (if (empty? old-return)
         new-state
         (recur (rest old-return)
