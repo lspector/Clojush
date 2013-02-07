@@ -5,6 +5,7 @@
         [clojush.simplification]
         [clojure.data.json :only (json-str)])
   (:require [clojure.string :as string]
+            [config :as config]
             [local-file]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -137,6 +138,8 @@
         (printf "\nPartial simplification: %s"
                 (not-lazy (:program (auto-simplify best error-function report-simplifications false 1000)))))
       (flush)
+      (printf "\nCosmos Data: %s" (let [quants (config/quantiles (count population))]
+                                    (zipmap quants (map #(:total-error (nth (sort-by :total-error population) %)) quants))))
       (printf "\nErrors: %s" (not-lazy (:errors best)))(flush)
       (printf "\nTotal: %s" (:total-error best))(flush)
       (printf "\nMean: %.4f" (float (/ (:total-error best)
