@@ -122,10 +122,10 @@
 
 (defn cosmos
   "Returns a summary of the recommended runs for this data set"
-  [logs cosmos-extraction-fn]
+  [logs]
   (cosmos/recommended-runs (-> (for [log logs]
                                  (for [[report gen] (map #(vector %1 %2) (:reports log) (iterate inc 0))]
-                                   (for [[ord val] (cosmos-extraction-fn report)]
+                                   (for [[ord val] (seq (get report "Cosmos Data:"))]
                                      (struct-map cosmos/cosmos-data
                                        :ord ord
                                        :gen gen
