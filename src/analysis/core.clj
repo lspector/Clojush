@@ -21,14 +21,16 @@
        (reduce #(assoc %1 (%2 0) (%2 1)) (sorted-map))))
 
 (defn- make-reports [reports-chunk]
-  (let [pred #(.contains % ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")]   
-    (for [chunk (remove pred (partition-by pred reports-chunk))]
-      (->> chunk
-           (map #(s/split % #":"))
-           (remove #(not= 2 (count %)))
-           (flatten)
-           (map s/trim)
-           (apply sorted-map)))))
+  (let [pred #(.contains % ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")]
+    (let [reports (for [chunk (remove pred (partition-by pred reports-chunk))]
+                    (->> chunk
+                         (map #(s/split % #":"))
+                         (remove #(not= 2 (count %)))
+                         (flatten)
+                         (map s/trim)
+                         (apply sorted-map)))
+          max-attributes (apply max (map count reports))]
+      (filter #(= max-attributes (count %)) reports))))
 
 (defn- make-summary [summary-chunk]
   (let [outcome (re-find #"SUCCESS|FAILURE" (first summary-chunk))
@@ -117,3 +119,16 @@
                             (map read-string)
                             flatten)]
     (/ (apply + best-fitnesses) (count best-fitnesses))))
+
+(defn cosmos
+  "Returns a summary of the recommended runs for this data set"
+  [logs cosmos-extraction-fn]
+  (cosmos/recommended-runs (-> (for [log logs]
+                                 (for [[report gen] (map #(vector %1 %2) (:reports log) (iterate inc 0))]
+                                   (for [[ord val] (cosmos-extraction-fn report)]
+                                     (struct-map cosmos/cosmos-data
+                                       :ord ord
+                                       :gen gen
+                                       :val val))))
+                               flatten)))
+                               
