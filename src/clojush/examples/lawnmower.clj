@@ -28,7 +28,7 @@
 (def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :intvec2D))
 
 (in-ns 'clojush.pushstate)
-(define-push-state-structure)
+(define-push-state-record-type)
 
 ;; Redefine recognize-literal to support intvec2Ds of the form [row column]
 (in-ns 'clojush.interpreter)

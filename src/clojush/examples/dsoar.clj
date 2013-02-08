@@ -20,7 +20,7 @@
 (def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :intvec2D))
 
 (in-ns 'clojush.pushstate)
-(define-push-state-structure)
+(define-push-state-record-type)
 
 (in-ns 'clojush.interpreter)
 (defn recognize-literal
