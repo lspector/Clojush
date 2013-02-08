@@ -13,3 +13,4 @@
 (def stack-ref pushstate/stack-ref)
 (def top-item pushstate/top-item)
 (def run-push interpreter/run-push)
+(def pushgp pushgp/pushgp)

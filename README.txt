@@ -29,20 +29,26 @@ a call like:
 
     lein run clojush.examples.simple-regression
 
-This will load everything and run PushGP on a simple symbolic 
+If you would like to change a parameter, you may do so at the command line. For example, to change the default population size from 1000 to 50, call:
+
+    lein run clojush.examples.simple-regression :population-size 50
+
+Additional parameters may also be specified. 
+
+The above calls will load everything and run PushGP on a simple symbolic 
 regression problem (symbolic regression of y=x^3-2x^2-x). Although the 
 details will vary from run to run, and it's possible that it will fail, 
 this usually succeeds in a few generations. 
 
-Another simple (perhaps simpler) option is to use Clooj. To run an example
-in Clooj, download and launch the latest "standalone" build from 
-https://github.com/arthuredelstein/clooj, open the Clojush project,
-open an example file within Clojush/src/clojush/examples, and select
-REPL > Evaluate entire file.
+Another option is to evaluate in the leinigen repl:
 
-In other IDEs there will be other ways to run the examples. For example,
-in Eclipse/Counterclockwise you can simply open an example and select
-Clojure > Load clojure file in REPL. Similarly, in Clooj 
+    sh> lein repl
+    ...
+    clojush.core=> (use 'clojush.examples.simple-regression))
+    ...
+    clojush.core=> (pushgp)
+
+Arguments to pushgp may be specified as in the command line case.
 
 For large-scale runs you may want to provide additional arguments to 
 java in order to allow  access to more memory and/or to take maximal 
