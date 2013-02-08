@@ -38,6 +38,10 @@
                        :mutation-probability 0.4
                        :mutation-max-points 20
                        :crossover-probability 0.4
+                       :uniform-crossover-probability 0.0
+                       :uniform-crossover-parameters {:self 0.9 :other 0.2}
+                       :hybridization-probability 0.0
+                       :hybridization-parameters {:self 0.9 :other 0.2}
                        :simplification-probability 0.1
                        :tournament-size 7
                        :report-simplifications 100
@@ -159,15 +163,7 @@
 (defn produce-new-offspring
   [pop-agents child-agents rand-gens
    {:keys [decimation-ratio population-size decimation-tournament-size trivial-geography-radius
-           error-function max-points atom-generators mutation-probability mutation-max-points crossover-probability 
-           simplification-probability tournament-size reproduction-simplifications 
-           trivial-geography-radius gaussian-mutation-probability 
-           gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
-           boolean-gsxover-probability boolean-gsxover-new-code-max-points
-           deletion-mutation-probability parentheses-addition-mutation-probability
-           tagging-mutation-probability tag-branch-mutation-probability
-           tag-branch-mutation-type-instruction-pairs amalgamation-probability
-           amalgamation-parameters use-single-thread
+           use-single-thread
            ]}]
   (let [pop (if (>= decimation-ratio 1)
               (vec (doall (map deref pop-agents)))
@@ -179,17 +175,8 @@
       ((if use-single-thread swap! send)
        (nth child-agents i) 
        breed 
-       [i (nth rand-gens i) pop error-function max-points atom-generators 
-        mutation-probability mutation-max-points crossover-probability 
-        simplification-probability tournament-size reproduction-simplifications 
-        trivial-geography-radius gaussian-mutation-probability 
-        gaussian-mutation-per-number-mutation-probability gaussian-mutation-standard-deviation
-        boolean-gsxover-probability boolean-gsxover-new-code-max-points
-        deletion-mutation-probability parentheses-addition-mutation-probability
-        tagging-mutation-probability tag-branch-mutation-probability
-        tag-branch-mutation-type-instruction-pairs amalgamation-probability
-                                amalgamation-parameters])))
-                      (when-not use-single-thread (apply await child-agents))) ;; SYNCHRONIZE
+       i (nth rand-gens i) pop @push-argmap)))
+  (when-not use-single-thread (apply await child-agents))) ;; SYNCHRONIZE
 
 (defn install-next-generation [pop-agents child-agents {:keys [population-size use-single-thread]}]
   (dotimes [i population-size]
