@@ -7,3 +7,5 @@ classes/
 target/
 results/
 data/
+logs/
+lib/

@@ -158,7 +158,7 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
                                     (:ancestors ind))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; some utilities are required for amalgamation crossover
+;; some utilities are required for uniform crossover and hybridization
 
 (defn remove-empties 
   "Removes empty sequences from tree t."
@@ -174,52 +174,80 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
 a list if necessary."
   (apply list (concat (ensure-list t1) (ensure-list t2))))
 
-(defn self-or-other-or-both-or-neither [self other]
-  (let [n (lrand)]
-    (cond (< n (:self @global-amalgamation-parameters)) self
-          (< n (+ (:self @global-amalgamation-parameters)
-                  (:other @global-amalgamation-parameters))) other
-          (< n (+ (:self @global-amalgamation-parameters)
-                  (:other @global-amalgamation-parameters)
-                  (:self-other @global-amalgamation-parameters))) (list self other)
-          (< n (+ (:self @global-amalgamation-parameters)
-                  (:other @global-amalgamation-parameters)
-                  (:self-other @global-amalgamation-parameters)
-                  (:other-self @global-amalgamation-parameters))) (list other self)
-          :else ())))
-
-(defn null? [thing] (and (seq? thing) (empty? thing)))
-
-(defn amalgamate
-  [t1 t2]
+(defn shmix
+  [self other params]
   (remove-empties
-    (if (or (null? t1)
-            (not (seq? t1))
-            (null? t2))
-      (self-or-other-or-both-or-neither t1 t2)
-      (map amalgamate 
-           t1 
-           (if (seq? t2) 
-             (cycle t2) 
-             (cycle [t2]))))))
+    (if (and (seq? self)
+             (not (empty? self))
+             (> (lrand) (/ 1 (count-points self))))
+      (map (fn [[t1 t2]] (shmix t1 t2 params))
+           ((:pair-function params) self other))
+      ((:mix-function params) self other params))))
 
-;; an example of amalgamating two lists with the same structure
-#_(do ;; print self first for comparison
-  (println '(a (b ((c d) e) f (g h i (j k l) ((m n o p q r) s t u v ((w) x y z))))))
-  (println (amalgamate 
-             '(a (b ((c d) e) f (g h i (j k l) ((m n o p q r) s t u v ((w) x y z)))))
-             '(A (B ((C D) E) F (G H I (J K L) ((M N O P Q R) S T U V ((W) X Y Z))))))))
+(defn uniformly-crossover
+  [t1 t2]
+  (shmix t1
+         t2
+         (merge @global-uniform-crossover-parameters
+                {:pair-function 
+                 (fn [source1 source2] 
+                   (let [s1 (ensure-list source1)
+                         s2 (ensure-list source2)
+                         s1-length (count s1)
+                         s2-length (count s2)]
+                     (map vector s1 (repeat s2))))
+                 :mix-function 
+                 (fn [whole1 whole2 params]
+                   (let [include-1 (< (lrand) (:self params))
+                         include-2 (< (lrand) (:other params))
+                         whole2-subtree (code-at-point whole2 (select-node-index whole2))]
+                     (cond (and include-1 (not include-2)) whole1
+                           (and (not include-1) include-2) whole2-subtree
+                           (and include-1 include-2) (if (< (lrand) 0.5)
+                                                       (combine whole1 whole2-subtree)
+                                                       (combine whole2-subtree whole1))
+                           ; nothing is implicit
+                           :else ())))})))
 
-;; an example of amalgamating two lists with the same structure
-#_(do ;; print self first for comparison
-  (println '(a (b ((c d) e) f (g h i (j k l) ((m n o p q r) s t u v ((w) x y z))))))
-  (amalgamate '(a (b ((c d) e) f (g h i (j k l) ((m n o p q r) s t u v ((w) x y z)))))
-            '((1 2) 3 (4 ((5)) 6 7 8 9 10 11)(12 13 14 (15 16 17 18)(19 20) 21 22 23))))
-
-(defn amalgamation-crossover 
-  "Amalgamation."
+(defn uniform-crossover 
   [parent1 parent2 max-points]
-  (let [new-program (amalgamate (:program parent1) (:program parent2))]
+  (let [new-program (uniformly-crossover (:program parent1) (:program parent2))]
+    (if (> (count-points new-program) max-points)
+      parent1
+      (make-individual :program new-program :history (:history parent1)
+                       :ancestors (if maintain-ancestors
+                                    (cons (:program parent1) (:ancestors parent1))
+                                    (:ancestors parent1))))))
+
+(defn hybridize
+  [t1 t2]
+  (shmix t1
+         t2
+         (merge @global-hybridization-parameters
+                {:pair-function 
+                 (fn [source1 source2] 
+                   (let [s1 (ensure-list source1)
+                         s2 (ensure-list source2)
+                         s1-length (count s1)
+                         s2-length (count s2)]
+                     (map vector 
+                          (concat s1 (repeat (max 0 (- s2-length s1-length)) ()))
+                          (concat s2 (repeat (max 0 (- s1-length s2-length)) ())))))
+                 :mix-function 
+                 (fn [whole1 whole2 params]
+                   (let [include-1 (< (lrand) (:self params))
+                         include-2 (< (lrand) (:other params))]
+                     (cond (and include-1 (not include-2)) whole1
+                           (and (not include-1) include-2) whole2
+                           (and include-1  include-2) (if (< (lrand) 0.5)
+                                                        (combine whole1 whole2)
+                                                        (combine whole2 whole1))
+                           ; nothing is implicit
+                           :else ())))})))
+
+(defn hybridization 
+  [parent1 parent2 max-points]
+  (let [new-program (hybridize (:program parent1) (:program parent2))]
     (if (> (count-points new-program) max-points)
       parent1
       (make-individual :program new-program :history (:history parent1)

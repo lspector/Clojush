@@ -2,9 +2,9 @@
 
 ;; Lee Spector, 20130101
 
-;; buttons to float answer + boolean error
-;; if no error must have answer on float stack and NOT have true on boolean stack
-;; if error must have error on boolean stack
+;; buttons to float answer (on stack) + boolean error signal (via instruction)
+;; if no error must have answer on float stack and NOT have signal error
+;; if error must signal error
 
 (ns experimental.calc
   (:use [clojush.pushgp.pushgp]
@@ -29,27 +29,31 @@
 
 ; button-entrypoints
 
+(define-registered 
+  signal_error 
+  (fn [state] (push-item :error :auxiliary state)))
+
 (def calc-tests
   ;; [inputs answer error]
   ;; answer doesn't matter if error is true
   ;; if no error, answer must be correct on float stack and true cannot be top boolean
-  [[[:one :divided-by :zero :equals] 0.0 true]
+  [;[[:one :divided-by :zero :equals] 0.0 true]
    [[:one] 1.0 false]
-   [[:one :plus] 1.0 false]
-   [[:one :plus :one] 1.0 false]
-   [[:one :plus :one :equals] 2.0 false]
-   [[:two :plus :two :equals] 4.0 false]
-   [[:nine :times :nine :equals] 81.0 false]
-   [[:three :divided-by :four :equals] 0.75 false]
-   [[:one :two :three :four :five :plus :six :seven :eight :nine :zero :equals] 80235.0 false]
-   [[:one :point :two :three :times :four :point :five :six :equals] 5.6088 false]
-   [[:on-clear] 0.0 false]
-   [[:nine :nine :nine :on-clear] 0.0 false]
-   [[:one :point :two] 1.2 false]
-   [[:one :point :two :point :three :point :four] 1.234 false]
-   [[:one :point :two :plus :three :point :four :equals] 4.6 false]
-   [[:one :point :two :times :three :point :four :equals] 4.08 false]
-   [[:one :point :two :divided-by :two :equals] 0.6 false]
+   ;[[:one :plus] 1.0 false]
+   ;[[:one :plus :one] 1.0 false]
+   ;[[:one :plus :one :equals] 2.0 false]
+   ;[[:two :plus :two :equals] 4.0 false]
+   ;[[:nine :times :nine :equals] 81.0 false]
+   ;[[:three :divided-by :four :equals] 0.75 false]
+   ;[[:one :two :three :four :five :plus :six :seven :eight :nine :zero :equals] 80235.0 false]
+   ;[[:one :point :two :three :times :four :point :five :six :equals] 5.6088 false]
+   ;[[:on-clear] 0.0 false]
+   ;[[:nine :nine :nine :on-clear] 0.0 false]
+   ;[[:one :point :two] 1.2 false]
+   ;[[:one :point :two :point :three :point :four] 1.234 false]
+   ;[[:one :point :two :plus :three :point :four :equals] 4.6 false]
+   ;[[:one :point :two :times :three :point :four :equals] 4.08 false]
+   ;[[:one :point :two :divided-by :two :equals] 0.6 false]
    [[:two] 2.0 false]
    [[:three] 3.0 false]
    [[:four] 4.0 false]
@@ -66,10 +70,9 @@
    [[:one :two] 12.0 false]
    [[:three :four :five] 345.0 false]
    [[:six :seven :eight :nine] 6789.0 false]
-   [[:two :two :plus :two :two :equals] 44.0 false]
+   ;[[:two :two :plus :two :two :equals] 44.0 false]
    ])
    
-
 (defn calc-errors
   [program]
   ;; run the program once 
@@ -78,7 +81,9 @@
   ;;   start with the initialized push state
   ;;   retrieve and execute all of the entry points from the pressed buttons
   ;;   determine error from float and boolean stacks
-  (let [initialized-push-state 
+  (let [correct 0
+        incorrect 1
+        initialized-push-state 
         (let [first-run-result (run-push program (make-push-state))]
           (push-item 
             0.0 
@@ -89,22 +94,20 @@
                     buttons (first t)]
                (if (empty? buttons)
                  (if (nth t 2) 
-                   ;; should signal error
-                   (if (= true (top-item :boolean push-state)) 0 1)
+                   ;; should signal error, via the auxiliary stack
+                   (if (= :error (top-item :auxiliary push-state)) correct incorrect)
                    ;; shouldn't signal error
-                   (if (and (not (= true (top-item :boolean push-state)))
-                            (= (top-item :float push-state) (nth t 1)))
-                     0 ;; didn't signal error and answer is correct
+                   (if (= :error (top-item :auxiliary push-state))
+                     incorrect ;; but did
                      (if (= (top-item :float push-state) (nth t 1))
-                       1 ;; right answer but signalled error
+                       correct ;; answer is correct
                        (let [top (top-item :float push-state)
                              target (nth t 1)]
                          (if (not (number? top))
-                           1 ;; no number
+                           incorrect ;; no number
                            ;; else return error scaled to [0, 1]
                            (/ (Math/abs (- top target))
-                              (+ (Math/abs top) (Math/abs target))))))
-                     ))
+                              (+ (Math/abs top) (Math/abs target))))))))
                  (recur (let [the-tag (get button-entrypoints (first buttons))]
                           (run-push (second (closest-association the-tag push-state))
                                     push-state))
@@ -129,12 +132,13 @@
   (pushgp 
     :error-function calc-errors
     :atom-generators (concat
+                       '(signal_error)
                        ;(list (fn [] (- (lrand-int 21) 10))
                        ;      (fn [] (- (lrand 21) 10)))
                        [0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0]
-                       (repeat 1 (tag-instruction-erc [:exec] 10000))
-                       (repeat 1 (tag-instruction-erc [:float :boolean] 10000))
-                       (repeat 1 (tagged-instruction-erc 10000))
+                       (repeat 1 (tag-instruction-erc [:exec]))
+                       (repeat 1 (tag-instruction-erc [:float :boolean]))
+                       (repeat 1 (tagged-instruction-erc))
                        ;(repeat 20 (return-tag-instruction-erc [:float :boolean :exec] 10000))
                        '(boolean_and
                           boolean_dup
@@ -342,6 +346,8 @@
                        )
     :use-single-thread false
     :use-lexicase-selection true
+    ;:decimation-ratio 0.01
+    ;:tournament-size 1
     :population-size 1000
     :max-generations 10001
     :evalpush-limit 100
@@ -350,16 +356,18 @@
     :max-points-in-initial-program 25
     ;:parent-reversion-probability 0.9
     :crossover-probability 0.0           
-    :amalgamation-probability 0.25
-    :amalgamation-parameters {:self 0.6 :other 0.2 :self-other 0.05 :other-self 0.05 :nothing 0.1}
-    :mutation-probability 0.25
-    :mutation-max-points 0.1
-    :simplification-probability 0.35
+    :hybridization-probability 0.5
+    :hybridization-parameters {:self 0.9 :other 0.2}
+    :uniform-crossover-probability 0.0
+    :uniform-crossover-parameters {:self 0.9 :other 0.2}
+    :mutation-probability 0.37
+    :mutation-max-points 25
+    :simplification-probability 0.1
     :reproduction-simplifications 10
-    :deletion-mutation-probability 0.0
-    :parentheses-addition-mutation-probability 0.1
-    :tagging-mutation-probability 0.1
-    :tag-branch-mutation-probability 0.1
+    ;:deletion-mutation-probability 0.3
+    :parentheses-addition-mutation-probability 0.01
+    :tagging-mutation-probability 0.01
+    :tag-branch-mutation-probability 0.01
     :tag-branch-mutation-type-instruction-pairs [[:boolean 'boolean_eq]
                                                  [:float 'float_eq]
                                                  [:float 'float_lt]
@@ -369,8 +377,6 @@
     :node-selection-tournament-size 2
     ;:pop-when-tagging false
     :report-simplifications 0
-
     ))
-
 
 (run)

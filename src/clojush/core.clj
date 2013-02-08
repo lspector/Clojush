@@ -29,19 +29,7 @@
    This allows one to run an example with a call from the OS shell prompt like:
        lein run examples.simple-regression"
   [& args]
-  (let [param-list (rest (map #(if (.endsWith % ".ser") (str %) (read-string %)) args))
-        stuff (->> (str "./src/" (-> (first args)
-                                     (s/replace #"\." "/")
-                                     (s/replace #"-" "_"))
-                        ".clj")
-                   (slurp) ;; read the target file in
-                   (s/split-lines)
-                   (map #(s/replace % #";.*" "")) ;; remove comments
-                   (remove #(.contains % (first args))) ;; remove the name of this namespace
-                   (remove #(.contains % "clojush.examples.common"))
-                   (filter #(.contains % "clojush"))
-                   )]
-    (when (not= (count stuff) 0) (throw (Exception. (str "\n Legacy Crap:\n" (s/join "\n" stuff)))))
+  (let [param-list (rest (map #(if (.endsWith % ".ser") (str %) (read-string %)) args))]
     (use (symbol (first args)))
     (pushgp param-list)
     (System/exit 0)))

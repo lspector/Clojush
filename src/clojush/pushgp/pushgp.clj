@@ -200,7 +200,6 @@
 (defn pushgp
   "The top-level routine of pushgp."
   [args]
-  (println args)
   (apply define-push-argmap args)
   (binding [*thread-local-random-generator* (java.util.Random. (:random-seed @push-argmap))]
     ;; set globals from parameters
