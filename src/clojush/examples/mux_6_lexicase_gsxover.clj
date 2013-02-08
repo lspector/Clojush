@@ -54,7 +54,7 @@
 (define-registered d2 (d 2))
 (define-registered d3 (d 3))
 
-(pushgp 
+(define-push-argmap
   :error-function (fn [program]
                     (doall
                       (for [i (range 64)]

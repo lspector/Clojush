@@ -49,7 +49,8 @@
   in 
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :string state)))
 
-(pushgp :error-function (fn [program]
+(define-push-argmap
+ :error-function (fn [program]
                           (doall
                             (for [input '("abcde"
                                            ""

@@ -78,7 +78,7 @@
     (println "Best's total error (hits) on full data set:" hit-total-error)))
 
 (defn demo []
-  (pushgp
+  (define-push-argmap
     :error-function (partial error-function 50);; Use 50 random samples
     :atom-generators atom-generators
     :report-simplifications 0

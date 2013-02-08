@@ -114,13 +114,8 @@
                     classification)
                {:classification classification})))
 
-(defn intertwined-spirals-demo
-  []
-  (pushgp
+(define-push-argmap
     :trivial-geography-radius 17,
     :population-size 1000,
     :error-function spiral-error,
-    :atom-generators (:basic spiral-instructions)))
-
-(intertwined-spirals-demo)
-
+    :atom-generators (:basic spiral-instructions))

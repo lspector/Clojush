@@ -93,8 +93,7 @@
     #_(println "Best's errors on full data set:" errors)
     (println "Best's total-error on full data set:" total-error)))
 
-(defn demo []
-  (pushgp
+(define-push-argmap
     :error-function (partial error-function 200);; Use 200 random samples
     :atom-generators atom-generators
     :report-simplifications 0
@@ -110,6 +109,4 @@
     :tournament-size 7
     :max-generations 1000
     :reuse-errors false ;; If a sample set is used, then error reuse must be disabled
-    :problem-specific-report problem-specific-report))
-
-(demo)
+    :problem-specific-report problem-specific-report)
