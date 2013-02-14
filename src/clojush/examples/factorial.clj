@@ -25,7 +25,7 @@
     1
     (* n (factorial (- n 1)))))
 
-(pushgp 
+(define-push-argmap
   :error-function (fn [program]
                     (doall
                       (for [input (range 1 6)]

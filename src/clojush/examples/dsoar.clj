@@ -20,7 +20,7 @@
 (def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :intvec2D))
 
 (in-ns 'clojush.pushstate)
-(define-push-state-structure)
+(define-push-state-record-type)
 
 (in-ns 'clojush.interpreter)
 (defn recognize-literal
@@ -269,7 +269,7 @@
     :evalpush-limit 1000)
 
 ;; standard 8x8 dsoar problem but with tags
-(pushgp
+(define-push-argmap
   :error-function (mopper-fitness 8 8 100)
   :atom-generators (list 'if-dirty 'if-obstacle 'left 'mop 'v8a 'frog
                          (fn [] [(rand-int 8) (rand-int 8)])

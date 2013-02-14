@@ -77,7 +77,8 @@
 
 (defn reset-globals []
   (doseq [[gname gatom] (filter (fn [[a _]] (.startsWith (name a) "global-")) (ns-publics 'clojush.globals))]
-    (reset! @gatom (get @push-argmap (keyword (.substring (str gname) (count "global-")))))))
+    (when (contains? @push-argmap (keyword (.substring (name gname) (count "global-"))))
+      (reset! @gatom (get @push-argmap (keyword (.substring (str gname) (count "global-"))))))))
 
 (defn make-agents-and-rng [{:keys [initial-population use-single-thread population-size
                                    max-points-in-initial-program atom-generators random-seed]}]

@@ -28,7 +28,7 @@
 (def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :intvec2D))
 
 (in-ns 'clojush.pushstate)
-(define-push-state-structure)
+(define-push-state-record-type)
 
 ;; Redefine recognize-literal to support intvec2Ds of the form [row column]
 (in-ns 'clojush.interpreter)
@@ -220,7 +220,7 @@
     :evalpush-limit 1000)
 
 ;; standard 8x8 lawnmower problem but with tags
-(pushgp
+(define-push-argmap
   :error-function (lawnmower-fitness 8 8 100)
   :atom-generators (list 'left 'mow 'v8a 'frog (fn [] [(rand-int 8) (rand-int 8)])
                          (tag-instruction-erc [:exec] 1000)
