@@ -1,23 +1,8 @@
 (ns clojush.pushgp.pushgp
   (:require [clojure.java.io :as io])
-  (:use [clojush.globals]
-        [clojush.util]
-        [clojush.pushstate]
-        [clojush.random]
-        [clojush.instructions.boolean]
-        [clojush.instructions.code]
-        [clojush.instructions.common]
-        [clojush.instructions.numbers]
-        [clojush.instructions.random-instructions]
-        [clojush.instructions.string]
-        [clojush.instructions.tag]
-        [clojush.instructions.zip]
-        [clojush.instructions.return]
-        [clojush.individual]
-        [clojush.evaluate]
-        [clojush.pushgp.breed]
-        [clojush.pushgp.parent-selection]
-        [clojush.pushgp.report]
+  (:use [clojush globals util pushstate random individual evaluate]
+        [clojush.instructions boolean code common numbers random-instructions string tag zip return]
+        [clojush.pushgp breed parent-selection report]
         [clojush.experimental.decimation]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -34,7 +19,7 @@
                                                  (fn [] (lrand-int 100))
                                                  (fn [] (lrand))))
                        :max-generations 1001
-                       :max-mutations 'UNDEFINED
+                       :max-mutations nil
                        :mutation-probability 0.4
                        :mutation-max-points 20
                        :crossover-probability 0.4
@@ -83,11 +68,11 @@
                        :amalgamation-parameters {:self 0.6 :other 0.2 :self-other 0.05 :other-self 0.05 :nothing 0.1}
                        :parent-reversion-probability 0.0
                        :tag-limit 10000
-                       :initial-population 'UNDEFINED)))
+                       :initial-population nil)))
 
 (defn define-push-argmap [& args]
   (doseq [[argkey argval] (partition 2 args)]
-    (assert (and (keyword? argkey) (contains? @push-argmap argkey)) (str "Argument key " argkey " is not a recognized argument to pushgp."))
+    (assert (contains? @push-argmap argkey) (str "Argument key " argkey " is not a recognized argument to pushgp."))
     (swap! push-argmap assoc argkey argval)))
 
 (defn reset-globals []
@@ -96,16 +81,18 @@
 
 (defn make-agents-and-rng [{:keys [initial-population use-single-thread population-size
                                    max-points-in-initial-program atom-generators random-seed]}]
-  {:pop-agents (if (not (= initial-population 'UNDEFINED))
-                 (vec (map #(if use-single-thread (atom %) (agent %)) (read-string (slurp (str "data/" initial-population)))))
-                 (vec (let [pa (doall (for [_ (range population-size)] 
-                                        (make-individual 
-                                         :program (random-code max-points-in-initial-program atom-generators)
-                                         :error-handler (fn [agnt except] (println except)))))
-                            f (str "data/" (System/currentTimeMillis) ".ser")]
-                        (io/make-parents f)
-                        (spit f (printable (map individual-string pa)))
-                        (map #(if use-single-thread (atom %) (agent %)) pa))))
+  {:pop-agents (if initial-population
+                 (->> (read-string (slurp (str "data/" initial-population)))
+                      (map #(if use-single-thread (atom %) (agent %)))
+                      (vec))
+                 (let [pa (doall (for [_ (range population-size)] 
+                                   (make-individual 
+                                    :program (random-code max-points-in-initial-program atom-generators)
+                                    :error-handler (fn [agnt except] (println except)))))
+                       f (str "data/" (System/currentTimeMillis) ".ser")]
+                   (io/make-parents f)
+                   (spit f (printable (map individual-string pa)))
+                   (vec (map #(if use-single-thread (atom %) (agent %)) pa))))
    :child-agents (vec (doall (for [_ (range population-size)]
                                ((if use-single-thread atom agent)
                                 (make-individual)
@@ -186,33 +173,34 @@
 
 (defn pushgp
   "The top-level routine of pushgp."
-  [& args]
-  (apply define-push-argmap args)
-  (binding [*thread-local-random-generator* (java.util.Random. (:random-seed @push-argmap))]
-    ;; set globals from parameters
-    (reset-globals)
-    (initial-report) ;; Print the inital report
-    (print-params @push-argmap) 
-    (printf "\nGenerating initial population...\n") (flush)
-    (let [{:keys [pop-agents child-agents rand-gens]} (make-agents-and-rng @push-argmap)]
-      ;; Main loop
-      (loop [generation 0]
-        (printf "\n\n-----\nProcessing generation: %s\nComputing errors..." generation)
-        (compute-errors pop-agents rand-gens @push-argmap)
-        (flush)
-        (printf "\nDone computing errors.") (flush)
-        ;; possible parent reversion
-        (parental-reversion pop-agents generation @push-argmap)
-        ;; calculate solution rates if necessary for historically-assessed hardness
-        ;; change calculate-hah-solution-rates in the future, to destructure the argmap
-        (calculate-hah-solution-rates-wrapper @push-argmap)
-        ;; report and check for success
-        (let [outcome (report-and-check-for-success pop-agents generation @push-argmap)]
-          (cond (= outcome :failure) (do (printf "\nFAILURE\n") (flush))
-                (= outcome :continue) (do (printf "\nProducing offspring...") (flush)
-                                          (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
-                                          (printf "\nInstalling next generation...") (flush)
-                                          (install-next-generation pop-agents child-agents @push-argmap)
-                                          (recur (inc generation)))
-                :else (let [{:keys [error-function final-report-simplifications]} @push-argmap]
-                        (final-report generation outcome error-function final-report-simplifications))))))))
+  ([] (pushgp '()))
+  ([args]
+     (apply define-push-argmap args)
+     (binding [*thread-local-random-generator* (java.util.Random. (:random-seed @push-argmap))]
+       ;; set globals from parameters
+       (reset-globals)
+       (initial-report) ;; Print the inital report
+       (print-params @push-argmap)
+       (printf "\nGenerating initial population...\n") (flush)
+       (let [{:keys [pop-agents child-agents rand-gens]} (make-agents-and-rng @push-argmap)]
+         ;; Main loop
+         (loop [generation 0]
+           (printf "\n\n-----\nProcessing generation: %s\nComputing errors..." generation)
+           (compute-errors pop-agents rand-gens @push-argmap)
+           (flush)
+           (printf "\nDone computing errors.") (flush)
+           ;; possible parent reversion
+           (parental-reversion pop-agents generation @push-argmap)
+           ;; calculate solution rates if necessary for historically-assessed hardness
+           ;; change calculate-hah-solution-rates in the future, to destructure the argmap
+           (calculate-hah-solution-rates-wrapper @push-argmap)
+           ;; report and check for success
+           (let [outcome (report-and-check-for-success pop-agents generation @push-argmap)]
+             (cond (= outcome :failure) (do (printf "\nFAILURE\n") (flush))
+                   (= outcome :continue) (do (printf "\nProducing offspring...") (flush)
+                                             (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
+                                             (printf "\nInstalling next generation...") (flush)
+                                             (install-next-generation pop-agents child-agents @push-argmap)
+                                             (recur (inc generation)))
+                   :else (let [{:keys [error-function final-report-simplifications]} @push-argmap]
+                           (final-report generation outcome error-function final-report-simplifications)))))))))

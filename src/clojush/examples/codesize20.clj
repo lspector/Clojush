@@ -30,7 +30,7 @@
 
 ;; actual run
 
-(pushgp
+(define-push-argmap
   :error-function codesize20-error
   :atom-generators (list
                      ;; allow tagging of items on the exec stack
