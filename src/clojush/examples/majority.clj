@@ -36,16 +36,14 @@ depth and number of nodes."
 (defn majority-pushgp
   "Run Order with pushgp."
   [argmap]
-  (let [size (or (:size argmap) 16)	
-        atom-generators (make-majority-instructions size)
-	args (-> argmap
-		 (assoc :max-points (* 10 size))
-		 (assoc :max-points-in-initial-program (* 10 size))
-		 (assoc :error-function majority-fitness)
-		 (assoc :atom-generators atom-generators))]
-    (println "problem-size =" size)
+  (let [size (or (:size argmap) 16)
+        atom-generators (make-majority-instructions size)]
     (reset! global-problem-size size)
-    (pushgp-map args)))
-;  (System/exit 0))
-
+    (println "problem-size =" size)
+    (define-push-argmap
+      :max-points (* 10 size)
+      :max-points-in-initial-program (* 10 size)
+      :error-function majority-fitness
+      :atom-generators atom-generators)))
+  
 (majority-pushgp {})
