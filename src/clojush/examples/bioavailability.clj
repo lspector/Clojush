@@ -28,11 +28,8 @@
 ;; Tom Helmuth, thelmuth@cs.umass.edu, 2012
 
 (ns clojush.examples.bioavailability
-  (:use [clojush.pushgp.pushgp]
-        [clojush.pushstate]
-        [clojush.interpreter]
-        [clojush.random]
-        [clojush.util]
+  (:use [clojush.examples.common]
+        [clojush random util]
         [local-file]
         [clojure.math.numeric-tower])
   (:require [clojure.string :as string]
@@ -128,7 +125,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Main call
 
-(pushgp
+(define-push-argmap
   :error-function (partial bioavailability-error-function :train)
   :atom-generators bioavailability-atom-generators
   :max-points 500

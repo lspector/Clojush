@@ -41,7 +41,7 @@
 
 (println "Objective: " objective ", Hand (top of stack listed first): " hand)
 
-(pushgp
+(define-push-argmap
   :error-function (fn [program]
                     (doall
                       (list

@@ -62,7 +62,7 @@
 
 (def bits->int (memoize bits->int-unmemoized))
   
-(pushgp 
+(define-push-argmap
   :error-function (fn [program]
                     (let [total-num-bits (+ number-of-address-bits number-of-data-bits)]
                       (doall

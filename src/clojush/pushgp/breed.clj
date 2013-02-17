@@ -11,16 +11,17 @@
 (defn breed
   "Replaces the state of the given agent with an individual bred from the given population (pop), 
    using the given parameters."
-  [agt [location rand-gen pop error-function max-points atom-generators 
-        mutation-probability mutation-max-points crossover-probability simplification-probability 
-        tournament-size reproduction-simplifications trivial-geography-radius
-        gaussian-mutation-probability gaussian-mutation-per-number-mutation-probability 
-        gaussian-mutation-standard-deviation boolean-gsxover-probability
-        boolean-gsxover-new-code-max-points deletion-mutation-probability
-        parentheses-addition-mutation-probability tagging-mutation-probability 
-        tag-branch-mutation-probability tag-branch-mutation-type-instruction-pairs
-        uniform-crossover-probability uniform-crossover-paramaters
-        hybridization-probability hybridization-parameters]]
+  [agt location rand-gen pop
+   {:keys [error-function max-points atom-generators 
+           mutation-probability mutation-max-points crossover-probability simplification-probability 
+           tournament-size reproduction-simplifications trivial-geography-radius
+           gaussian-mutation-probability gaussian-mutation-per-number-mutation-probability 
+           gaussian-mutation-standard-deviation boolean-gsxover-probability
+           boolean-gsxover-new-code-max-points deletion-mutation-probability
+           parentheses-addition-mutation-probability tagging-mutation-probability 
+           tag-branch-mutation-probability tag-branch-mutation-type-instruction-pairs
+           uniform-crossover-probability uniform-crossover-paramaters
+           hybridization-probability hybridization-parameters]}]
   (binding [*thread-local-random-generator* rand-gen]
     (let [n (lrand)]
       (cond 

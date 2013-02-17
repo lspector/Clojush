@@ -20,7 +20,7 @@
 (define-registered in 
                    (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
 
-(pushgp 
+(define-push-argmap
   :error-function (fn [program]
                     (doall
                       (for [input (range -1.0 1.0 0.1)]

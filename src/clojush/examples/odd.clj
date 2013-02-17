@@ -16,7 +16,7 @@
   in 
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
-(pushgp
+(define-push-argmap
   :use-single-thread true
   :error-function (fn [program]
                     (doall

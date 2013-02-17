@@ -37,7 +37,7 @@
         (println "targets" (into [] targets)))
       (scaled-errors outputs targets 1000000 print-scaling-info))))
 
-(pushgp 
+(define-push-argmap
   :error-function sextic-scaled-error-function
   :error-threshold 0.01
   :atom-generators (concat 

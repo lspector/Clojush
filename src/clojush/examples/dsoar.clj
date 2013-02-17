@@ -269,7 +269,7 @@
     :evalpush-limit 1000)
 
 ;; standard 8x8 dsoar problem but with tags
-(pushgp
+(define-push-argmap
   :error-function (mopper-fitness 8 8 100)
   :atom-generators (list 'if-dirty 'if-obstacle 'left 'mop 'v8a 'frog
                          (fn [] [(rand-int 8) (rand-int 8)])

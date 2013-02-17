@@ -26,7 +26,7 @@
         (* 2.0 input input) 
         input)]))
 
-(pushgp 
+(define-push-argmap
   :error-function (fn [program]
                     (doall
                       (for [[input target] fitness-cases]

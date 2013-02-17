@@ -249,7 +249,7 @@
 (define-registered x4 
   (fn [state] (push-item (stack-ref :auxiliary 4 state) :float state)))
 
-(pushgp 
+(define-push-argmap
   :error-function (fn [program]
                     (doall
                       (for [row data]

@@ -3,9 +3,7 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns clojush.examples.simple-regression
-  (:use [clojush.pushgp.pushgp]
-        [clojush.pushstate]
-        [clojush.interpreter]
+  (:use [clojush.examples.common]
         [clojure.math.numeric-tower]))
 
 ;;;;;;;;;;;;
@@ -17,7 +15,7 @@
   in 
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
-(pushgp 
+(define-push-argmap
   :error-function (fn [program]
                     (doall
                       (for [input (range 10)]
@@ -36,5 +34,4 @@
                          'integer_div
                          'integer_mult
                          'integer_add
-                         'integer_sub)
-  :tournament-size 3)
+                         'integer_sub))

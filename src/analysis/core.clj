@@ -8,6 +8,7 @@
   ;;"Data structure for defining a single log."
   Log [insts params reports summary])
 
+
 (defn- make-inst [inst-chunk]
   (-> inst-chunk
       (s/split #":")
@@ -57,7 +58,6 @@
           (make-params param-chunk)
           (make-reports reports-chunk)
           (make-summary summary-chunk))))
-  
 (defn parse-Logs
   "parses the contents of a log folder into a Log data structure, assuming that all files in the folder are logs"
   [log-folder]
