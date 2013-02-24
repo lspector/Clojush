@@ -5,7 +5,7 @@
             :dependencies [[org.clojure/clojure "1.3.0"]
                            [org.clojars.etosch/cosmos "1.0.0"]
                            [org.clojure/math.numeric-tower "0.0.1"]
-                           [local-file "0.0.4"]
+                           [local-file "0.1.0"]
                            [clojure-csv "2.0.0-alpha2"]
                            [org.clojure/data.json "0.1.3"]]
             :dev-dependencies [[lein-ccw "1.2.0"]]
