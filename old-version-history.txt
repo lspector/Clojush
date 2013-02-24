@@ -1,0 +1,364 @@
+VERSION HISTORY -- NOW OBSOLETE. See https://github.com/lspector/Clojush/commits/master
+20100227: - First distributed version.
+20100301: - Added (shutdown-agents) for proper termination.
+20100306: - Added history (of total errors of ancestors) to individuals.
+	  - Commented out (shutdown-agents) because it prevents multiple
+            runs in a single launch of a Clojure REPL.
+20100307: - Fixed bug in history: reproductive auto-simplification added
+            was adding duplicate items.
+20100314: - Added instructions: *_shove, code_extract, code_insert, 
+  	    code_subst, code_contains, code_container, code_position,
+	    code_discrepancy, *_rand. NOTE that the presence of *_rand
+            instructions means that programs produced using the full set
+            of instructions may be non-deterministic. As of this writing
+            pushgp (via evaluate-individual) will evaluate an individual
+            only once, so it will always have whatever fitness value it 
+            had upon first testing.
+	  - Added globals to support integer_rand and float_rand:
+            min-random-integer, max-random-integer, min-random-float
+            max-random-float.
+          - Fixed bug in code_car that could produce nil.
+          - Made execute-instruction safe for nil (although it shouldn't 
+            arise anyway).
+	  - Added stress-test for testing and debugging new Push
+            instructions. See the stress-test documentation string for
+            details.
+          - Implemented size limits on intermediate results on code stack 
+            (in code_cons, code_list, code-append, code_insert, code_subst, 
+            exec_s, exec_y).
+	  - Fixed bug in exec_s (was always a noop previously).
+20100319: - Added problem-specific-report function (to be customized per
+            problem). This can also be a convenient place to put other
+            stuff that you want done once per generation.
+          - Added support for saving lists of ancestors (maternal line
+            only) along with global parameters to turn both this and the
+            saving of total-error histories on and off.
+          - Added missing calls to "keep-number-reasonable" in numeric
+  	    Push instructions. This eliminates some potential crashes from
+            runaway number growth.
+20100320: - Added print-ancestors-of-solution parameter and code.
+          - Print simplification in report only with non-zero value for
+            report-simplifications parameter.
+          - Added sextic polynomial regression example. This example also
+            demonstrates the use of fitness penalties for abnormally
+            terminating programs.
+	  - Added a new argument to problem-specific-report (NOTE: not
+            backward compatible).
+20100417: - Added thread-local random number generator objects to avoid
+            contention.
+          - Print parameters at the start of pushgp.
+          - Added readme comments about concurrency, -Xmx2000m, and
+            -XX:+UseParallelGC.
+          - Converted time limit code to use System/nanoTime (thanks to
+            Brian Martin). This means that time limits must now be
+            expressed in nanoseconds rather than milliseconds, and I
+            believe it will eliminate contention for shared Date objects
+            (but this should be checked; if there is contention then 
+            we should revert to using Date and use thread-local date
+            objects as is being done with the random number generator
+            objects).
+          - Added print-return utility function for debugging.
+          - Added a new Push instruction, code_wrap, which pushes a 1-item
+            list containing the previous top item of the code stack.
+          - Added a new Push instruction, code_map, which acts much like
+            Lisp's (or Scheme's or Clojure's) "map" functions, using the
+            top item on the exec stack as the function to map and the top
+            item on the code stack as the list to map it down. The list of
+            results is left on top of the code stack. This is implemented
+            as a "macro" instruction that expands into a Push code
+            fragment that: 1) for each item in the list on top of the
+            code stack (or for the single non-list item that is there)
+            quotes the item onto the code stack and then runs the code
+            that's on top of the exec stack; 2) uses code_wrap to push a
+            list containing the last result onto the code stack; 3)
+            executes as many instances of code_cons as are necessary to
+            add all of the other results onto the list. Note that this
+            will act like an ordinary "map" function only when the code on
+            the exec stack leaves a single output on the code stack in
+            place of each input on the code stack; if it consumes or
+            produces more or less code then the effect will be quite
+            different.
+20100502: - Made thread-local random integer function (lrand-int) safe for
+            bignums, but arguments greater than 2^31-1 are treated as if
+            they were 2^31-1 (2147483647).
+20100526: - Reimplemented subst to use clojure.walk/postwalk-replace. Also
+            fixed comment, which described args backwards. (The behavior
+            was correct, emulating Common Lisp subst.)
+20100918: - Created Eclipse project.
+          - Deleted re-load/backtrace utils.
+          - Removed shuffle, as it is now in clojure.core (in Clojure 1.2).
+          - Removed gratuitous def in define-registered.
+          - Added atom for instruction-table.
+          - Added atom for registered-instructions; NOTE: requires user
+            code that refers to registered-instructions to refer to 
+            @registered-instructions instead. (Example odd.clj changed
+            to reflect this.)
+          - Added to-do item "Convert structs to records, which should be
+			faster. Experiments with Clojure 1.2 show this to be faster
+            but there are not good examples yet to serve as the basis for 
+            changes.
+          - Added atoms for global-atom-generators and 
+            global-max-points-in-program.
+          - Changed pushgp to take keyword arguments rather than a parameter
+            map. NOTE: this requires calls to pushgp to be written differently.
+            Updated examples to reflect this.
+20100921: - Removed random-element in favor of rand-nth.
+          - Cleaned up indentation, miscellaneous other cosmetic things.
+          - Added namespaces for all example files.
+          - Updated README to mention requirement for clojure 1.2 and to
+            remove mention of ClojureX which has been discontinued.
+          - Converted structures to records (a clojure 1.2 feature, should
+            be faster).
+20101005: - Added error-handlers to agents.
+20101014: - [Artificial ant, krypto, tg8, decimation]
+          - Added articial ant example from Koza (via Luke).
+          - Added "tg8" integer symbolic regression problem.
+          - Added krypto number puzzle example.
+          - Added pushgp "decimation" feature, in which elimination 
+            tournaments, conducted after fitness testing, reduce the
+            size of the population to a specified fraction of its original
+            size (specified in a decimation-ratio argument to pushgp;
+            the tournament sized is specified via decimation-tournament-size).
+            The ordinary tournament-size parameter is still used for subsequent
+            selection from the decimated population. Any specified trivial
+            geography applies both to decimation and to subsequent selection.
+20101017: - Reverted from records to structs; wasn't significantly faster and
+            structs allow for greater flexibility in use of state as map.
+20101102: - Switched to new clojure.core/frequencies from depricated 
+            seq-utils/frequencies (h/t Kyle Harrington), and similarly
+            for flatten.
+          - Added :include-randoms keyword argument for registered-for-type.
+            Defaults to true, but if specified as false then instructions 
+            ending with "_rand" will be excluded.
+          - Raised invalid output penalty in tg8 (it was lower than reasonable
+            errors for that problem).
+20101103: - Converted evalpush-limit and evalpush-time-limit into vars 
+ 			(global-evalupush-limit and global-evalpush-time-limit) bound
+            to atoms that are reset by calls to pushgp (keyword arguments
+            :evalpush-limit and :evalpush-time-limit).
+          - Changed pushgp parameters in the tg8.clj example.
+20101104: - Implemented stackless tagging (see http://push.i3ci.hampshire.edu/
+            2010/10/28/stackless-tagging/). Tag instructions take one of
+            the following forms:
+              tag_<type>_<number> 
+                create tage/value association, with the value taken from the 
+                stack of the given type and the number serving as the tag
+              untag_<number>
+                remove the association for the closest-matching tag
+              tagged_<number> 
+                push the value associated with the closest-matching tag onto 
+                the exec stack (or no-op if no associations).
+            Here "closest-matching" means the tag with lowest number that 
+            is greater than or equal to the number of the tag being matched,
+            or the lowest-numbered tag if none meet this criterion. Tag
+            instructions are not implemented in the same way as other 
+            instructions; they are detected and handled specially by the
+            interpreter (see execute-instruction). Tag instructions
+            can be included in pushgp runs by using the new ephemeral
+            random constant functions tag-instruction-erc, 
+            untag-instruction-erc, and tagged-instruction-erc, each of
+            which takes a limit (for the numerical part) as an 
+            argument.
+          - Added examples using tags: tagged_ant, tagged_regression, and
+            tagged_tg8.
+20101106: - Tweaked parameters in ant examples; among other things,
+            increased simplification since bloat was an issue. Also
+            added some evolved solutions in comments.     
+20101107: - Added Koza's lawnmower problem example; this demonstrates how
+            to add a new type/stack on a problem-specific basis, without
+            altering clojush.clj.    
+20101204: - Added pushgp-map, which allows pushgp calls on maps of arguments,
+            and a demonstration of its use in argmap_regression.clj.
+          - Added :gen-class and -main definition (thanks Kyle Harrington).
+          - Fixed eval-push termination to return :abnormal for exceeding
+            time-limit (thanks Kyle Harrington).
+20101205: - Added modified version of Kyle's version of the intertwined
+            spirals problem.
+          - Minor changes to this README. 
+20101208: - Added alternative methods for node selection, used in mutation
+            and crossover (drafted by Brian Martin, with suggestions
+            from Kyle Harrington). This introduced three new globals:
+            global-node-selection-method, global-node-selection-leaf-probability,
+            and global-node-selection-tournament-size, each of which holds
+            an atom, and three new parameters to pushgp: node-selection-method,
+            node-selection-leaf-probability, and node-selection-tournament-size.
+            The node-selection-method can be :unbiased (in which case nodes
+            are selected using the uniform distribution that was previously
+            used -- this is the default), :leaf-probability (in which case
+            the value of the node-selection-leaf-probability argument,
+            which defaults to 0.1, specifies the probability that leaves,
+            as opposed to internal nodes, will be selected -- this is the
+            method used by Koza and others in tree-based GP), or
+            :size-tournament (in which case the value of the 
+            node-selection-tournament-size argument, which defaults to 2,
+            determines the tournament size for node tournaments, with the
+            largest subtree in the tournament set being selected).
+20110111: - Added zipper stack and functions (thanks to Kyle Harrington for
+            draft code, although this was re-written).
+          - Added registered-nonrandom function.
+          - Modified odd.clj example to use registered-nonrandom.
+          - Added examples/dsoar.clj, a version of the "Dirt-Sensing,
+            Obstacle-Avoiding Robot" (DSOAR) problem first described in:
+              Spector, L. 1996. Simultaneous Evolution of Programs and their
+              Control Structures. In Advances in Genetic Programming 2, edited
+              by P. Angeline and K. Kinnear, pp. 137-154. Cambridge, MA: MIT Press.
+              http://helios.hampshire.edu/lspector/pubs/AiGP2-post-final-e.pdf
+            This version was written by Brian Martin in 2010-2011.
+20110118: - Added support for tagged_code_<number> instructions. These are like
+            tagged_<number> instructions except that retrieved values are pushed
+            onto the code stack rather than the exec stack. Without these the
+            only way to get tagged values onto the code stack is to wrap
+            values with code_quote prior to tagging. An alternative approach
+            is to add new tagging instructions that automatically perform
+            code_quote wrapping, but for full generality that would require
+            new instructions for each type; also quote-tagged values would 
+            always be destined for the code stack, while the scheme adopted
+            here allows any stored value to be retrieved either to exec or to
+            code.
+          - A value of 0 for the evalpush-time-limit parameter of pushgp
+            now means that no time limit will be enforced. This is also
+            now the default.
+20110322: - Tag reference bug fixed in closest-association (>= changed to <=).
+          - Added mux (multiplexer) example (a couple of approaches in one file).
+20110409: - Added support for no-pop tagging through a var called
+            global-pop-when-tagging (holding an atom with a boolean value)
+            and a boolean argument to pushgp called pop-when-tagging. 
+            The defaults are true, for backwards compatibility. If 
+            @global-pop-when-tagging is false (which will result from 
+            passing false as a :pop-when-tagging keyword argument to pushgp)
+            then executing instructions of the form tag_<type>_<number>
+            will tag a value as usual, but the tagged item will not be popped
+            from its source stack.
+          - Removed no-pop hackage from mux example (thanks Kyle).
+20110424: - Added Gaussian mutation for floating point literals. This is 
+            a genetic operator on par with ordinary mutation, crossover,
+            and simplification, with the probability for applying this operator
+            set with the gaussian-mutation-probability argument to pushgp
+            (which defaults to zero). The behavior of this operator, when used,
+            is controlled by two other arguments to pushgp, 
+            gaussian-mutation-per-number-mutation-probability (which is the
+            probability that any particular floating point number in the 
+            program will actually be mutated -- this defaults to 0.5) and
+            gaussian-mutation-standard-deviation (which specifies the standard
+            deviation of the Gaussian noise generator that is used to 
+            produce changes to numbers -- this defaults to 0.1).
+          - Added examples/gaussian_mutation_demo.clj to demonstrate Gaussian
+            mutation.
+          - Added examples/korns_regression_p12.clj, a symbolic regression
+            problem based on Michael Korns's draft chapter from GPTP11.
+20110505: - Added complex number support.  New instructions for the 'complex' 
+            stack include: pop, dup, swap, rot, flush, eq, stackdepth, yank, 
+            yankdup, shove, rand, add, sub, mult, divide, fromfloat, 
+            frominteger, fromfloats, fromintegers, conjugate, magnitude, 
+            and principal_sqrt. (Brian Martin)
+20110517: - Added a "scaled-errors" function to support error-scaling as 
+            described by Maarten Keijzer in Scaled Symbolic Regression, in
+            Genetic Programming and Evolvable Machines 5(3), pp. 259-269, 
+            September 2004. This must be used in a problem's error function,
+            and then the outputs of the evolved program must be "unscaled."
+            See the documentation string for scaled-errors and also
+            examples/scaled_sextic.clj for details.
+          - Added examples/scaled_sextic.clj to demonstrate the use of
+            scaled-errors.
+          - Changed examples/sextic.clj to use squared errors and an error
+            threshold, in order to facilitate comparisons between the
+            versions that do and don't use error scaling.
+          - Made minor changes to the korns_regression_p12 example.
+20110526: - Enforce size limits on zipper manipulation results.
+20110607: - Added overlap utility function, overlap-demo (which just prints
+            some examples to show how overlap works), and code_overlap
+            instruction. Overlap can be applied to any two (possibly
+            nested) things and it returns a number between 0 (meaning
+            no overlap) and 1 (meaning exact match). The overlap utility
+            function returns a ratio, but the code_overlap instruction
+            pushes a float.
+          - Removed complex number support from 20110505. There were previous
+            reports of problems and I've noticed problems from the fact that
+            (apply + ()) => zero (as opposed to 0) in the clojush namespace
+            defined by the code as revised for complex number support. If
+            someone knows how to re-introduce complex number support without
+            such problems then please let me know.
+20110618: - Switched to Kyle Harrington's version of overlap; it's more clear,
+            possibly faster, and may fix a hard-to-trace bug that cropped up
+            in a long evolutionary run (?).
+20110624: - Replaced lawnmower and dsoar examples with bugfixed versions
+            (thanks to Kyle Harrington).
+          - Added namespace and made miscellaneous other changes to 
+            clojush-tests.clj.
+          - Added support for tagged-code macros. Tagged-code macro calls
+            have the effect of code instructions, but they take their
+            code arguments from the tag space and they tag their code return
+            values. They are implemented as macros to leverage the existing
+            code instruction set; note that this means that a single call
+            will contribute more than one iteration step toward the 
+            evalpush-limit. Tagged-code macros appear in programs as hash maps
+            that map :tagged_code_macro to true, :instruction to a code
+            instruction, :argument_tags to a sequence of tags to be used
+            to acquire arguments, and :result_tags to a sequence of tags
+            to be used for tagging results. Execution of a macro expands
+            the needed code onto the exec stack to grab arguments from the tag 
+            space and push them on the code stack, execute the code instruction, 
+            and tag results. Note that results will also be left on the code
+            stack if global-pop-when-tagging is false. Conceptually, tag values
+            are "baked in" to these macros in much the same way that tag values
+            are "baked in" to the instruction names for stackless tag
+            instructions; we use hash maps simply because there is more
+            information to bake in and this prevents us from having to parse
+            the names (which would get messy and also waste time). Because
+            the maps make it difficult to read programs, however, a utility
+            function called abbreviate-tagged-code-macros is provided to
+            produce copies of programs with more human-readable (but not 
+            currently executable) representations of tagged-macro calls.
+            A tagged-code-macro-erc is provided to generate random tagged-code
+            macros in pushgp runs. A new example, codesize20, provides 
+            a simple demonstration of the use of tagged-code macros.
+          - Replaced walk-based code-manipulation with walklist functions
+            that only traverse list structure. This fixes an interaction
+            between map literals (e.g. tagged-code macros) and program
+            structure.
+20110629: - Fixed abbreviate-tagged-code-macros printing of empty lists.
+          - Added seq condition to walklist to permit walking of seqs that
+            aren't actually full-fledged lists.
+20110702: - Several fixes/refinements to tagged-code macros: 
+            - Fixed incorrect no-op of arg-free calls with empty tag space.
+            - Added :additional_args to tagged-code macro structure; the
+              value should be a list of items and these will be executed
+              in order before calling the macro's instruction.
+            - Added optional 5th arg to tagged-code-macro-erc; this should
+              be a function of zero args that will be called to produce
+              the value of :additional_args (e.g. if you want to have one
+              random integer arg then you could specify a 5th arg of
+              (fn [] (list (lrand-int 101))).
+            - Changed format produced by abbreviate-tagged-code-macros to
+              handle :additional_args and to be slightly more concise.
+20110714: - Added "trace" argument to eval-push and run-push. If this is
+            true then the resulting state will map :trace to a list of
+            executed instructions and literals, in reverse order of
+            execution. If the argument is :changes then instructions that
+            have no effect on the state will be excluded.
+20110809: - Several additions/enhancements by Kyle Harrington:
+            - Converted problem-specific-report to a parameter in pushgp.
+            - Added reporting of program repeat counts in population.
+            - Added "error-reuse" parameter to pushgp for use in stochastic
+              and dynamic problems (for which reuse would be turned off).
+            - Added examples/mackey_glass_int.clj, a symbolic regression 
+              problem as described in Langdon & Banzhaf's 2005 paper 
+              (citation in file).
+            - Added examples/pagie_hogeweg.clj problem, a difficult 
+              symbolic regression problem when coevolution is not used.
+              Introduced by Pagie & Hogeweg's 1997 paper (citation in file).
+20110911: - Switched from Eclipse to Clooj/Leiningen for development and  
+            rearranged the project for this.
+          - Added calls to end of all example files.
+          - Examples can be run from the OS command line (assuming 
+            that leiningen is available) with calls like:
+              lein run examples.simple-regression
+          - Added local-file dependency and used file* for file access.
+          - Removed ant and tagged-ant examples because of bugs related
+            to confusion of push interpreted states and ant world states.
+20111104: - Added string stack and a variety of string stack instructions.
+          - Added two example pushgp runs that use the string stack in
+            the file examples/string.clj.
+20111112: - Obsoleted this version history in favor of the commit logs
+            at https://github.com/lspector/Clojush/commits/master
+          
