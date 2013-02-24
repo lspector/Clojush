@@ -28,7 +28,9 @@
 ;; Tom Helmuth, thelmuth@cs.umass.edu, 2012
 
 (ns clojush.examples.bioavailability
-  (:use [clojush.examples.common]
+  (:use [clojush.pushgp.pushgp]
+        [clojush.pushstate]
+        [clojush.interpreter]
         [clojush random util]
         [local-file]
         [clojure.math.numeric-tower])
