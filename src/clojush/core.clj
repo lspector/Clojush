@@ -17,7 +17,6 @@
 
 (ns clojush.core
   (:use [clojush.pushgp.pushgp])
-  (:require [clojure.string :as s])
   (:gen-class))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -29,7 +28,12 @@
    This allows one to run an example with a call from the OS shell prompt like:
        lein run examples.simple-regression"
   [& args]
-  (let [param-list (rest (map #(if (.endsWith % ".ser") (str %) (read-string %)) args))]
-    (use (symbol (first args)))
-    (pushgp param-list)
-    (System/exit 0)))
+  (let [param-list (rest (map #(if (.endsWith % ".ser")
+                                 (str %)
+                                 (read-string %))
+                              args))]
+    (require (symbol (first args)))
+    (let [example-params (eval (symbol (str (first args) "/argmap")))
+          merged-params (merge example-params (apply sorted-map param-list))]
+      (pushgp merged-params)
+      (System/exit 0))))

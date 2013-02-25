@@ -75,6 +75,12 @@
     (assert (contains? @push-argmap argkey) (str "Argument key " argkey " is not a recognized argument to pushgp."))
     (swap! push-argmap assoc argkey argval)))
 
+(defn load-push-argmap
+  [argmap]
+  (doseq [[argkey argval] argmap]
+    (assert (contains? @push-argmap argkey) (str "Argument key " argkey " is not a recognized argument to pushgp."))
+    (swap! push-argmap assoc argkey argval)))
+
 (defn reset-globals []
   (doseq [[gname gatom] (filter (fn [[a _]] (.startsWith (name a) "global-")) (ns-publics 'clojush.globals))]
     (when (contains? @push-argmap (keyword (.substring (name gname) (count "global-"))))
@@ -176,7 +182,7 @@
   "The top-level routine of pushgp."
   ([] (pushgp '()))
   ([args]
-     (apply define-push-argmap args)
+     (load-push-argmap args)
      (binding [*thread-local-random-generator* (java.util.Random. (:random-seed @push-argmap))]
        ;; set globals from parameters
        (reset-globals)
