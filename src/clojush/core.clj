@@ -28,12 +28,12 @@
    This allows one to run an example with a call from the OS shell prompt like:
        lein run examples.simple-regression"
   [& args]
-  (let [param-list (rest (map #(if (.endsWith % ".ser")
-                                 (str %)
-                                 (read-string %))
-                              args))]
+  (let [param-list (map #(if (.endsWith % ".ser")
+                           (str %)
+                           (read-string %))
+                        (rest args))]
     (require (symbol (first args)))
     (let [example-params (eval (symbol (str (first args) "/argmap")))
-          merged-params (merge example-params (apply sorted-map param-list))]
-      (pushgp merged-params)
+          params (merge example-params (apply sorted-map param-list))]
+      (pushgp params)
       (System/exit 0))))

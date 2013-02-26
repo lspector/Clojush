@@ -26,22 +26,23 @@
         (* 2.0 input input) 
         input)]))
 
-(define-push-argmap
-  :error-function (fn [program]
-                    (doall
-                      (for [[input target] fitness-cases]
-                        (let [state (run-push program 
-                                              (push-item input :auxiliary 
-                                                         (push-item input :float 
-                                                                    (make-push-state))))
-                              top-float (top-item :float state)]
-                          (if (number? top-float)
-                            (Math/abs (- top-float target))
-                            1000)))))
-  :atom-generators (list (fn [] (rand 10))
-                         'in
-                         'float_div
-                         'float_mult
-                         'float_add
-                         'float_sub)
-  :tournament-size 3)
+(def argmap
+  {:error-function (fn [program]
+                     (doall
+                       (for [[input target] fitness-cases]
+                         (let [state (run-push program 
+                                               (push-item input :auxiliary 
+                                                          (push-item input :float 
+                                                                     (make-push-state))))
+                               top-float (top-item :float state)]
+                           (if (number? top-float)
+                             (Math/abs (- top-float target))
+                             1000)))))
+   :atom-generators (list (fn [] (rand 10))
+                          'in
+                          'float_div
+                          'float_mult
+                          'float_add
+                          'float_sub)
+   :tournament-size 3
+   })

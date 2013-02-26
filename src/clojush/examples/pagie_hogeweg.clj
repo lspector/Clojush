@@ -77,23 +77,21 @@
     (println "Best's total error on full data set:" total-error)
     (println "Best's total error (hits) on full data set:" hit-total-error)))
 
-(defn demo []
-  (define-push-argmap
-    :error-function (partial error-function 50);; Use 50 random samples
-    :atom-generators atom-generators
-    :report-simplifications 0
-    :max-points 500
-    :max-points-in-initial-program 500
-    :evalpush-limit 500
-    :population-size 1000
-    :mutation-probability 0.10
-    :mutation-max-points 50
-    :crossover-probability 0.70
-    :simplification-probability 0.1
-    :reproduction-simplifications 10
-    :tournament-size 7
-    :max-generations 1000
-    :reuse-errors false ;; If a sample set is used, then error reuse must be disabled
-    :problem-specific-report problem-specific-report))
-   
-(demo)
+(def argmap
+  {:error-function (partial error-function 50);; Use 50 random samples
+   :atom-generators atom-generators
+   :report-simplifications 0
+   :max-points 500
+   :max-points-in-initial-program 500
+   :evalpush-limit 500
+   :population-size 1000
+   :mutation-probability 0.10
+   :mutation-max-points 50
+   :crossover-probability 0.70
+   :simplification-probability 0.1
+   :reproduction-simplifications 10
+   :tournament-size 7
+   :max-generations 1000
+   :reuse-errors false ;; If a sample set is used, then error reuse must be disabled
+   :problem-specific-report problem-specific-report
+   })

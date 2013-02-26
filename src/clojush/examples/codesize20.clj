@@ -30,21 +30,22 @@
 
 ;; actual run
 
-(define-push-argmap
-   :error-function codesize20-error
-;;   :atom-generators (list
-;;                      ;; allow tagging of items on the exec stack
-;;                      (tag-instruction-erc [:exec] 1000) 
-;;                      ;; allow retrieval of tagged items to the exec stack
-;;                      (tagged-instruction-erc 1000)
-;;                      ;; allow code_append tag macros (taking 2 arguments and returning 1 result)
-;;                      (tagged-code-macro-erc 'code_append 1000 2 1) 
-;;                      ;; allow code_subst tag macros (taking 3 arguments and returning 1 result)
-;;                      (tagged-code-macro-erc 'code_subst 1000 3 1)
-;;                      ;; allow code_wrap tag macros (taking 1 argument and returning 1 result)
-;;                      (tagged-code-macro-erc 'code_wrap 1000 1 1)
-;;                      )
-  :population-size 100)
+(def argmap
+  {:error-function codesize20-error
+   :atom-generators (list
+                      ;; allow tagging of items on the exec stack
+                      (tag-instruction-erc [:exec] 1000) 
+                      ;; allow retrieval of tagged items to the exec stack
+                      (tagged-instruction-erc 1000)
+                      ;; allow code_append tag macros (taking 2 arguments and returning 1 result)
+                      (tagged-code-macro-erc 'code_append 1000 2 1) 
+                      ;; allow code_subst tag macros (taking 3 arguments and returning 1 result)
+                      (tagged-code-macro-erc 'code_subst 1000 3 1)
+                      ;; allow code_wrap tag macros (taking 1 argument and returning 1 result)
+                      (tagged-code-macro-erc 'code_wrap 1000 1 1)
+                      )
+   :population-size 100
+   })
 
 
 ;; an evolved solution, passed to the abbreviating function

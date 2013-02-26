@@ -70,11 +70,6 @@
                        :tag-limit 10000
                        :initial-population nil)))
 
-(defn define-push-argmap [& args]
-  (doseq [[argkey argval] (partition 2 args)]
-    (assert (contains? @push-argmap argkey) (str "Argument key " argkey " is not a recognized argument to pushgp."))
-    (swap! push-argmap assoc argkey argval)))
-
 (defn load-push-argmap
   [argmap]
   (doseq [[argkey argval] argmap]

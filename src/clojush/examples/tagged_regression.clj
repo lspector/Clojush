@@ -20,27 +20,28 @@
   in 
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
-(define-push-argmap
-  :error-function (fn [program]
-                    (doall
-                      (for [input (range 10)]
-                        (let [state (run-push program 
-                                              (push-item input :auxiliary 
-                                                         (push-item input :integer 
-                                                                    (make-push-state))))
-                              top-int (top-item :integer state)]
-                          (if (number? top-int)
-                            (abs (- top-int 
-                                    (- (* input input input) 
-                                       (* 2 input input) input)))
-                            1000)))))
-  :atom-generators (list (fn [] (rand-int 10))
-                         'in
-                         'integer_div
-                         'integer_mult
-                         'integer_add
-                         'integer_sub
-                         (tag-instruction-erc [:integer :exec] 100)
-                         (untag-instruction-erc 100)
-                         (tagged-instruction-erc 100))
-  :tournament-size 3)
+(def argmap
+  {:error-function (fn [program]
+                     (doall
+                       (for [input (range 10)]
+                         (let [state (run-push program 
+                                               (push-item input :auxiliary 
+                                                          (push-item input :integer 
+                                                                     (make-push-state))))
+                               top-int (top-item :integer state)]
+                           (if (number? top-int)
+                             (abs (- top-int 
+                                     (- (* input input input) 
+                                        (* 2 input input) input)))
+                             1000)))))
+   :atom-generators (list (fn [] (rand-int 10))
+                          'in
+                          'integer_div
+                          'integer_mult
+                          'integer_add
+                          'integer_sub
+                          (tag-instruction-erc [:integer :exec] 100)
+                          (untag-instruction-erc 100)
+                          (tagged-instruction-erc 100))
+   :tournament-size 3
+   })

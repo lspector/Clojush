@@ -256,29 +256,31 @@
 ;; code for actual runs
 
 ;; standard 8x8 dsoar problem
-#_(pushgp
-    :error-function (mopper-fitness 8 8 100)
-    :atom-generators (list 'if-dirty 'if-obstacle 'left 'mop 'v8a 'frog
-                           (fn [] [(rand-int 8) (rand-int 8)]))
-    :mutation-probability 0.3
-    :crossover-probability 0.3
-    :simplification-probability 0.3
-    :reproduction-simplifications 10
-    :max-points 200
-    :max-points-in-initial-program 200
-    :evalpush-limit 1000)
+#_(def argmap
+  {:error-function (mopper-fitness 8 8 100)
+   :atom-generators (list 'if-dirty 'if-obstacle 'left 'mop 'v8a 'frog
+                          (fn [] [(rand-int 8) (rand-int 8)]))
+   :mutation-probability 0.3
+   :crossover-probability 0.3
+   :simplification-probability 0.3
+   :reproduction-simplifications 10
+   :max-points 200
+   :max-points-in-initial-program 200
+   :evalpush-limit 1000
+   })
 
 ;; standard 8x8 dsoar problem but with tags
-(define-push-argmap
-  :error-function (mopper-fitness 8 8 100)
-  :atom-generators (list 'if-dirty 'if-obstacle 'left 'mop 'v8a 'frog
-                         (fn [] [(rand-int 8) (rand-int 8)])
-                         (tag-instruction-erc [:exec] 1000)
-                         (tagged-instruction-erc 1000))
-  :mutation-probability 0.3
-  :crossover-probability 0.3
-  :simplification-probability 0.3
-  :reproduction-simplifications 10
-  :max-points 200
-  :max-points-in-initial-program 200
-  :evalpush-limit 1000)
+(def argmap
+  {:error-function (mopper-fitness 8 8 100)
+   :atom-generators (list 'if-dirty 'if-obstacle 'left 'mop 'v8a 'frog
+                          (fn [] [(rand-int 8) (rand-int 8)])
+                          (tag-instruction-erc [:exec] 1000)
+                          (tagged-instruction-erc 1000))
+   :mutation-probability 0.3
+   :crossover-probability 0.3
+   :simplification-probability 0.3
+   :reproduction-simplifications 10
+   :max-points 200
+   :max-points-in-initial-program 200
+   :evalpush-limit 1000
+   })

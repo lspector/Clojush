@@ -208,27 +208,29 @@
 ;; code for actual runs
 
 ;; standard 8x8 lawnmower problem
-#_(pushgp
-    :error-function (lawnmower-fitness 8 8 100)
-    :atom-generators (list 'left 'mow 'v8a 'frog (fn [] [(rand-int 8) (rand-int 8)]))
-    :mutation-probability 0.3
-    :crossover-probability 0.3
-    :simplification-probability 0.3
-    :reproduction-simplifications 10
-    :max-points 200
-    :max-points-in-initial-program 200
-    :evalpush-limit 1000)
+#_(def argmap
+  {:error-function (lawnmower-fitness 8 8 100)
+   :atom-generators (list 'left 'mow 'v8a 'frog (fn [] [(rand-int 8) (rand-int 8)]))
+   :mutation-probability 0.3
+   :crossover-probability 0.3
+   :simplification-probability 0.3
+   :reproduction-simplifications 10
+   :max-points 200
+   :max-points-in-initial-program 200
+   :evalpush-limit 1000
+   })
 
 ;; standard 8x8 lawnmower problem but with tags
-(define-push-argmap
-  :error-function (lawnmower-fitness 8 8 100)
-  :atom-generators (list 'left 'mow 'v8a 'frog (fn [] [(rand-int 8) (rand-int 8)])
-                         (tag-instruction-erc [:exec] 1000)
-                         (tagged-instruction-erc 1000))
-  :mutation-probability 0.3
-  :crossover-probability 0.3
-  :simplification-probability 0.3
-  :reproduction-simplifications 10
-  :max-points 200
-  :max-points-in-initial-program 200
-  :evalpush-limit 1000)
+(def argmap
+  {:error-function (lawnmower-fitness 8 8 100)
+   :atom-generators (list 'left 'mow 'v8a 'frog (fn [] [(rand-int 8) (rand-int 8)])
+                          (tag-instruction-erc [:exec] 1000)
+                          (tagged-instruction-erc 1000))
+   :mutation-probability 0.3
+   :crossover-probability 0.3
+   :simplification-probability 0.3
+   :reproduction-simplifications 10
+   :max-points 200
+   :max-points-in-initial-program 200
+   :evalpush-limit 1000
+   })

@@ -249,49 +249,50 @@
 (define-registered x4 
   (fn [state] (push-item (stack-ref :auxiliary 4 state) :float state)))
 
-(define-push-argmap
-  :error-function (fn [program]
-                    (doall
-                      (for [row data]
-                        (let [state (run-push program 
-                                              (assoc (make-push-state)
-                                                     :auxiliary
-                                                     (take 5 row)))
-                              top-float (top-item :float state)]
-                          (if (number? top-float)
-                            (expt (- top-float (nth row 5)) 2)
-                            1000)))))
-  :atom-generators (list 
-                     ;(fn [] (- (* (rand) 100) 50))
-                     (fn [] (- (rand) 0.5))
-                     'x0
-                     ;'x1
-                     ;'x2
-                     ;'x3
-                     'x4
-                     'float_div
-                     'float_mult
-                     'float_add
-                     'float_sub
-                     'float_sin
-                     'float_cos
-                     ;'float_tan
-                     )
-  :max-points 30
-  :max-points-in-initial-program 30
-  :evalpush-limit 50
-  :population-size 500
-  :mutation-probability 0.20
-  :mutation-max-points 10
-  :crossover-probability 0.40
-  :simplification-probability 0.1
-  :reproduction-simplifications 10
-  :gaussian-mutation-probability 0.2
-  :gaussian-mutation-per-number-mutation-probability 0.5
-  :gaussian-mutation-standard-deviation 0.1
-  :tournament-size 1
-  :decimation-ratio 0.1
-  :decimation-tournament-size 2
-  :node-selection-method :size-tournament
-  :node-selection-tournament-size 3
-  :max-generations 10000)
+(def argmap
+  {:error-function (fn [program]
+                     (doall
+                       (for [row data]
+                         (let [state (run-push program 
+                                               (assoc (make-push-state)
+                                                      :auxiliary
+                                                      (take 5 row)))
+                               top-float (top-item :float state)]
+                           (if (number? top-float)
+                             (expt (- top-float (nth row 5)) 2)
+                             1000)))))
+   :atom-generators (list 
+                      ;(fn [] (- (* (rand) 100) 50))
+                      (fn [] (- (rand) 0.5))
+                      'x0
+                      ;'x1
+                      ;'x2
+                      ;'x3
+                      'x4
+                      'float_div
+                      'float_mult
+                      'float_add
+                      'float_sub
+                      'float_sin
+                      'float_cos
+                      ;'float_tan
+                      )
+   :max-points 30
+   :max-points-in-initial-program 30
+   :evalpush-limit 50
+   :population-size 500
+   :mutation-probability 0.20
+   :mutation-max-points 10
+   :crossover-probability 0.40
+   :simplification-probability 0.1
+   :reproduction-simplifications 10
+   :gaussian-mutation-probability 0.2
+   :gaussian-mutation-per-number-mutation-probability 0.5
+   :gaussian-mutation-standard-deviation 0.1
+   :tournament-size 1
+   :decimation-ratio 0.1
+   :decimation-tournament-size 2
+   :node-selection-method :size-tournament
+   :node-selection-tournament-size 3
+   :max-generations 10000
+   })
