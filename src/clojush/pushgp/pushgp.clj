@@ -64,8 +64,6 @@
                        :tagging-mutation-probability 0.0
                        :tag-branch-mutation-probability 0.0
                        :tag-branch-mutation-type-instruction-pairs []
-                       :amalgamation-probability 0.0
-                       :amalgamation-parameters {:self 0.6 :other 0.2 :self-other 0.05 :other-self 0.05 :nothing 0.1}
                        :parent-reversion-probability 0.0
                        :tag-limit 10000
                        :initial-population nil)))
