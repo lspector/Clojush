@@ -47,14 +47,15 @@ Another option is to evaluate in the leinigen REPL (Read Eval Print Loop):
     ...
     clojush.core=> (use 'clojush.examples.simple-regression)
     ...
-    clojush.core=> (pushgp)
+    clojush.core=> (pushgp argmap)
 
-Arguments to pushgp may be specified as in the command line case.
+Arguments to pushgp are specified in the argmap var in the problem's
+namespace.
 
 To run the examples in an IDE (Integrated Development Environment) for 
 Clojure such as Clooj or Eclipse/Counterclockwise, load one of the
-files in src/clojush/examples into the IDE's REPL, type "(pushgp)" into
-the REPL's input area, and hit the enter key.
+files in src/clojush/examples into the IDE's REPL, type "(pushgp argmap)"
+into the REPL's input area, and hit the enter key.
 
 For large-scale runs you may want to provide additional arguments to 
 Java in order to allow  access to more memory and/or to take maximal 
