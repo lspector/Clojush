@@ -37,16 +37,17 @@
         (println "targets" (into [] targets)))
       (scaled-errors outputs targets 1000000 print-scaling-info))))
 
-(define-push-argmap
-  :error-function sextic-scaled-error-function
-  :error-threshold 0.01
-  :atom-generators (concat 
-                     '(float_div float_mult float_sub float_add
-                                 float_rot float_swap float_dup float_pop)
-                     (list 
-                       (fn [] (- (rand 20.0) 10))
-                       'in))
-  :population-size 10000)
+(def argmap
+  {:error-function sextic-scaled-error-function
+   :error-threshold 0.01
+   :atom-generators (concat 
+                      '(float_div float_mult float_sub float_add
+                                  float_rot float_swap float_dup float_pop)
+                      (list 
+                        (fn [] (- (rand 20.0) 10))
+                        'in))
+   :population-size 10000
+   })
 
 ;;;; Here is an evolved solution:
 ;(def result '(float_dup float_mult float_dup float_add 7.0 float_swap float_dup -2.0 float_sub float_swap -10.0 float_sub float_rot float_swap float_div float_swap float_dup float_dup float_mult float_sub float_mult))

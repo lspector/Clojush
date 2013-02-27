@@ -114,8 +114,9 @@
                     classification)
                {:classification classification})))
 
-(define-push-argmap
-    :trivial-geography-radius 17,
-    :population-size 1000,
-    :error-function spiral-error,
-    :atom-generators (:basic spiral-instructions))
+(def argmap
+  {:trivial-geography-radius 17,
+   :population-size 1000,
+   :error-function spiral-error,
+   :atom-generators (:basic spiral-instructions)
+   })

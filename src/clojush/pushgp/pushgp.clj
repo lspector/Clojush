@@ -70,8 +70,9 @@
                        :tag-limit 10000
                        :initial-population nil)))
 
-(defn define-push-argmap [& args]
-  (doseq [[argkey argval] (partition 2 args)]
+(defn load-push-argmap
+  [argmap]
+  (doseq [[argkey argval] argmap]
     (assert (contains? @push-argmap argkey) (str "Argument key " argkey " is not a recognized argument to pushgp."))
     (swap! push-argmap assoc argkey argval)))
 
@@ -176,7 +177,7 @@
   "The top-level routine of pushgp."
   ([] (pushgp '()))
   ([args]
-     (apply define-push-argmap args)
+     (load-push-argmap args)
      (binding [*thread-local-random-generator* (java.util.Random. (:random-seed @push-argmap))]
        ;; set globals from parameters
        (reset-globals)

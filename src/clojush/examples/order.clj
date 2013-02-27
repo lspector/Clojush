@@ -36,16 +36,16 @@ depth and number of nodes."
 
 (defn order-pushgp
   "Run Order with pushgp."
-  [argmap]
-  (let [size (or (:size argmap) 16)	
+  [args]
+  (let [size (or (:size args) 16)	
         atom-generators (make-order-instructions size)]
     (reset! global-problem-size size)
     (println "problem-size =" size)
-    (define-push-argmap
-      :max-points (* 10 size)
+    (def argmap
+      {:max-points (* 10 size)
       :max-points-in-initial-program (* 10 size)
       :error-function order-fitness
-      :atom-generators atom-generators)))
+      :atom-generators atom-generators})))
 
 ;  (System/exit 0))
 

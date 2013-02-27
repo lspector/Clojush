@@ -56,29 +56,29 @@
 (define-registered d6 (d 6))
 (define-registered d7 (d 7))
 
-(define-push-argmap
-  :error-function (fn [program]
-                    (doall
-                      (for [i (range 2048)]
-                        (let [bits (int->bits i 11)
-                              address-bits (vec (take 3 bits))
-                              data-bits (vec (drop 3 bits))
-                              state (run-push program 
-                                              (push-item address-bits :auxiliary 
-                                                         (push-item data-bits :auxiliary 
-                                                                    (make-push-state))))
-                              top-bool (top-item :boolean state)]
-                          (if (= top-bool :no-stack-item)
-                            1000000
-                            (if (= top-bool (nth data-bits (bits->int address-bits)))
-                              0
-                              1))))))
-  :atom-generators '(exec_if boolean_and boolean_or boolean_not
-                               a0 a1 a2
-                               d0 d1 d2 d3 d4 d5 d6 d7
-                               ;boolean_dup boolean_swap boolean_pop boolean_rot
-                               )
-  :population-size 100
-  :max-points 100
-  :max-points-in-initial-program 100
-  )
+(def argmap
+  {:error-function (fn [program]
+                     (doall
+                       (for [i (range 2048)]
+                         (let [bits (int->bits i 11)
+                               address-bits (vec (take 3 bits))
+                               data-bits (vec (drop 3 bits))
+                               state (run-push program 
+                                               (push-item address-bits :auxiliary 
+                                                          (push-item data-bits :auxiliary 
+                                                                     (make-push-state))))
+                               top-bool (top-item :boolean state)]
+                           (if (= top-bool :no-stack-item)
+                             1000000
+                             (if (= top-bool (nth data-bits (bits->int address-bits)))
+                               0
+                               1))))))
+   :atom-generators '(exec_if boolean_and boolean_or boolean_not
+                              a0 a1 a2
+                              d0 d1 d2 d3 d4 d5 d6 d7
+                              ;boolean_dup boolean_swap boolean_pop boolean_rot
+                              )
+   :population-size 100
+   :max-points 100
+   :max-points-in-initial-program 100
+   })

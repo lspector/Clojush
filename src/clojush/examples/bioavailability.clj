@@ -127,21 +127,21 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Main call
 
-(define-push-argmap
-  :error-function (partial bioavailability-error-function :train)
-  :atom-generators bioavailability-atom-generators
-  :max-points 500
-  :max-points-in-initial-program 500
-  :evalpush-limit 500
-  :population-size 500
-  :max-generations 100
-  :mutation-probability 0.09
-  :crossover-probability 0.81
-  :tournament-size 10
-  :node-selection-method :size-tournament
-  :node-selection-tournament-size 2
-  :report-simplifications 0
-  :final-report-simplifications 1000
-  :use-rmse true
-  :problem-specific-report bioavailability-report
-  )
+(def argmap
+  {:error-function (partial bioavailability-error-function :train)
+   :atom-generators bioavailability-atom-generators
+   :max-points 500
+   :max-points-in-initial-program 500
+   :evalpush-limit 500
+   :population-size 500
+   :max-generations 100
+   :mutation-probability 0.09
+   :crossover-probability 0.81
+   :tournament-size 10
+   :node-selection-method :size-tournament
+   :node-selection-tournament-size 2
+   :report-simplifications 0
+   :final-report-simplifications 1000
+   :use-rmse true
+   :problem-specific-report bioavailability-report
+   })

@@ -49,8 +49,13 @@
   in 
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :string state)))
 
-(define-push-argmap
- :error-function (fn [program]
+; This is a solution to the string GP problem
+#_(println (run-push '(string_dup string_length 2 integer_sub string_take string_dup string_concat)
+                     (push-item "abcde" :string (make-push-state))))
+
+; Define the arguments
+(def argmap
+ {:error-function (fn [program]
                           (doall
                             (for [input '("abcde"
                                            ""
@@ -92,11 +97,5 @@
                                                                              "0123456789"))))))
         :population-size 500
         :max-generations 200
-        :tournament-size 5)
-
-
-
-; This is a solution to the string GP problem
-#_(println (run-push '(string_dup string_length 2 integer_sub string_take string_dup string_concat)
-                     (push-item "abcde" :string (make-push-state))))
-        
+        :tournament-size 5
+  })

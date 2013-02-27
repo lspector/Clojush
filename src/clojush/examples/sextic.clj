@@ -17,29 +17,30 @@
 (define-registered in 
                    (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
 
-(define-push-argmap
-  :error-function (fn [program]
-                    (doall
-                      (for [input (range -1.0 1.0 0.1)]
-                        (let [state (run-push program 
-                                              (push-item input :auxiliary 
-                                                         (push-item input :float
-                                                                    (make-push-state))))
-                              top-float (top-item :float state)
-                              invalid-output (or (not (number? top-float))
-                                                 (= (:termination state) :abnormal))]
-                          (if invalid-output
-                            1000
-                            (expt (- top-float
-                                     (+ (* input input input input input input)
-                                        (- (* 2 input input input input))
-                                        (* input input)))
-                                  2))))))
-  :error-threshold 0.01
-  :atom-generators (concat 
-                     '(float_div float_mult float_sub float_add
-                                 float_rot float_swap float_dup float_pop)
-                     (list 
-                       (fn [] (* 1.0 (- (rand-int 21) 10)))
-                       'in))
-  :population-size 10000)
+(def argmap
+  {:error-function (fn [program]
+                     (doall
+                       (for [input (range -1.0 1.0 0.1)]
+                         (let [state (run-push program 
+                                               (push-item input :auxiliary 
+                                                          (push-item input :float
+                                                                     (make-push-state))))
+                               top-float (top-item :float state)
+                               invalid-output (or (not (number? top-float))
+                                                  (= (:termination state) :abnormal))]
+                           (if invalid-output
+                             1000
+                             (expt (- top-float
+                                      (+ (* input input input input input input)
+                                         (- (* 2 input input input input))
+                                         (* input input)))
+                                   2))))))
+   :error-threshold 0.01
+   :atom-generators (concat 
+                      '(float_div float_mult float_sub float_add
+                                  float_rot float_swap float_dup float_pop)
+                      (list 
+                        (fn [] (* 1.0 (- (rand-int 21) 10)))
+                        'in))
+   :population-size 10000
+   })
