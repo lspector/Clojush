@@ -23,10 +23,6 @@
                        :mutation-probability 0.4
                        :mutation-max-points 20
                        :crossover-probability 0.4
-                       :uniform-crossover-probability 0.0
-                       :uniform-crossover-parameters {:self 0.9 :other 0.2}
-                       :hybridization-probability 0.0
-                       :hybridization-parameters {:self 0.9 :other 0.2}
                        :simplification-probability 0.1
                        :tournament-size 7
                        :report-simplifications 100

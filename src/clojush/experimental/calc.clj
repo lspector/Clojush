@@ -128,255 +128,248 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn run []
-  (pushgp 
-    :error-function calc-errors
-    :atom-generators (concat
-                       '(signal_error)
-                       ;(list (fn [] (- (lrand-int 21) 10))
-                       ;      (fn [] (- (lrand 21) 10)))
-                       [0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0]
-                       (repeat 1 (tag-instruction-erc [:exec]))
-                       (repeat 1 (tag-instruction-erc [:float :boolean]))
-                       (repeat 1 (tagged-instruction-erc))
-                       ;(repeat 20 (return-tag-instruction-erc [:float :boolean :exec] 10000))
-                       '(boolean_and
-                          boolean_dup
-                          boolean_eq
-                          ;boolean_flush
-                          boolean_fromfloat
-                          ;boolean_frominteger
-                          boolean_not
-                          boolean_or
-                          boolean_pop
-                          ;boolean_rand
-                          boolean_rot
-                          ;boolean_shove
-                          ;boolean_stackdepth
-                          boolean_swap
-                          ;boolean_yank
-                          ;boolean_yankdup
-                          ;code_append
-                          ;code_atom
-                          ;code_car
-                          ;code_cdr
-                          ;code_cons
-                          ;code_container
-                          ;code_contains
-                          ;code_do
-                          ;code_do*
-                          ;code_do*count
-                          ;code_do*range
-                          ;code_do*times
-                          ;code_dup
-                          ;code_eq
-                          ;code_extract
-                          ;code_flush
-                          ;code_fromboolean
-                          ;code_fromfloat
-                          ;code_frominteger
-                          ;code_fromzipchildren
-                          ;code_fromziplefts
-                          ;code_fromzipnode
-                          ;code_fromziprights
-                          ;code_fromziproot
-                          ;code_if
-                          ;code_insert
-                          ;code_length
-                          ;code_list
-                          ;code_map
-                          ;code_member
-                          ;code_noop
-                          ;code_nth
-                          ;code_nthcdr
-                          ;code_null
-                          ;code_pop
-                          ;code_position
-                          ;code_quote
-                          ;code_rand
-                          ;code_rot
-                          ;code_shove
-                          ;code_size
-                          ;code_stackdepth
-                          ;code_subst
-                          ;code_swap
-                          ;code_wrap
-                          ;code_yank
-                          ;code_yankdup
-                          ;environment_begin
-                          ;environment_end
-                          ;environment_new
-                          ;exec_do*count
-                          ;exec_do*range
-                          ;exec_do*times
-                          exec_dup
-                          exec_eq
-                          ;exec_flush
-                          ;exec_fromzipchildren
-                          ;exec_fromziplefts
-                          ;exec_fromzipnode
-                          ;exec_fromziprights
-                          ;exec_fromziproot
-                          exec_if
-                          exec_k
-                          exec_noop
-                          exec_pop
-                          exec_rot
-                          exec_s
-                          ;exec_shove
-                          ;exec_stackdepth
-                          exec_swap
-                          exec_when
-                          exec_y
-                          ;exec_yank
-                          ;exec_yankdup
-                          float_add
-                          ;float_cos
-                          float_div
-                          float_dup
-                          float_eq
-                          ;float_flush
-                          float_fromboolean
-                          ;float_frominteger
-                          float_gt
-                          float_lt
-                          ;float_max
-                          ;float_min
-                          float_mod
-                          float_mult
-                          float_pop
-                          ;float_rand
-                          float_rot
-                          ;float_shove
-                          ;float_sin
-                          ;float_stackdepth
-                          float_sub
-                          float_swap
-                          ;float_tan
-                          ;float_yank
-                          ;float_yankdup
-                          ;integer_add
-                          ;integer_div
-                          ;integer_dup
-                          ;integer_eq
-                          ;integer_flush
-                          ;integer_fromboolean
-                          ;integer_fromfloat
-                          ;integer_gt
-                          ;integer_lt
-                          ;integer_max
-                          ;integer_min
-                          ;integer_mod
-                          ;integer_mult
-                          ;integer_pop
-                          ;integer_rand
-                          ;integer_rot
-                          ;integer_shove
-                          ;integer_stackdepth
-                          ;integer_sub
-                          ;integer_swap
-                          ;integer_yank
-                          ;integer_yankdup
-                          ;return_boolean_pop
-                          ;return_code_pop
-                          ;return_exec_pop
-                          ;return_float_pop
-                          ;return_fromboolean
-                          ;return_fromcode
-                          ;return_fromexec
-                          ;return_fromfloat
-                          ;return_frominteger
-                          ;return_fromstring
-                          ;return_fromzip
-                          ;return_integer_pop
-                          ;return_string_pop
-                          ;return_zip_pop
-                          ;string_atoi
-                          ;string_concat
-                          ;string_contained
-                          ;string_dup
-                          ;string_eq
-                          ;string_flush
-                          ;string_length
-                          ;string_parse_to_chars
-                          ;string_pop
-                          ;string_rand
-                          ;string_reverse
-                          ;string_rot
-                          ;string_shove
-                          ;string_stackdepth
-                          ;string_swap
-                          ;string_take
-                          ;string_yank
-                          ;string_yankdup
-                          ;zip_append_child_fromcode
-                          ;zip_append_child_fromexec
-                          ;zip_branch?
-                          ;zip_down
-                          ;zip_dup
-                          ;zip_end?
-                          ;zip_eq
-                          ;zip_flush
-                          ;zip_fromcode
-                          ;zip_fromexec
-                          ;zip_insert_child_fromcode
-                          ;zip_insert_child_fromexec
-                          ;zip_insert_left_fromcode
-                          ;zip_insert_left_fromexec
-                          ;zip_insert_right_fromcode
-                          ;zip_insert_right_fromexec
-                          ;zip_left
-                          ;zip_leftmost
-                          ;zip_next
-                          ;zip_pop
-                          ;zip_prev
-                          ;zip_remove
-                          ;zip_replace_fromcode
-                          ;zip_replace_fromexec
-                          ;zip_right
-                          ;zip_rightmost
-                          ;zip_rot
-                          ;zip_shove
-                          ;zip_stackdepth
-                          ;zip_swap
-                          ;zip_up
-                          ;zip_yank
-                          ;zip_yankdup
-                          )
-                       )
-    :use-single-thread false
-    :use-lexicase-selection true
-    ;:decimation-ratio 0.01
-    ;:tournament-size 1
-    :population-size 1000
-    :max-generations 10001
-    :evalpush-limit 100
-    :tag-limit 10000
-    :max-points 1000
-    :max-points-in-initial-program 25
-    ;:parent-reversion-probability 0.9
-    :crossover-probability 0.0           
-    :hybridization-probability 0.5
-    :hybridization-parameters {:self 0.9 :other 0.2}
-    :uniform-crossover-probability 0.0
-    :uniform-crossover-parameters {:self 0.9 :other 0.2}
-    :mutation-probability 0.37
-    :mutation-max-points 25
-    :simplification-probability 0.1
-    :reproduction-simplifications 10
-    ;:deletion-mutation-probability 0.3
-    :parentheses-addition-mutation-probability 0.01
-    :tagging-mutation-probability 0.01
-    :tag-branch-mutation-probability 0.01
-    :tag-branch-mutation-type-instruction-pairs [[:boolean 'boolean_eq]
-                                                 [:float 'float_eq]
-                                                 [:float 'float_lt]
-                                                 [:float 'float_gt]]
-    :node-selection-method :size-tournament ;:unbiased
-    ;node-selection-leaf-probability 0.1
-    :node-selection-tournament-size 2
-    ;:pop-when-tagging false
-    :report-simplifications 0
-    ))
-
-(run)
+(def argmap
+  {:error-function calc-errors
+   :atom-generators (concat
+                      '(signal_error)
+                      ;(list (fn [] (- (lrand-int 21) 10))
+                      ;      (fn [] (- (lrand 21) 10)))
+                      [0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0]
+                      (repeat 1 (tag-instruction-erc [:exec]))
+                      (repeat 1 (tag-instruction-erc [:float :boolean]))
+                      (repeat 1 (tagged-instruction-erc))
+                      ;(repeat 20 (return-tag-instruction-erc [:float :boolean :exec] 10000))
+                      '(boolean_and
+                         boolean_dup
+                         boolean_eq
+                         ;boolean_flush
+                         boolean_fromfloat
+                         ;boolean_frominteger
+                         boolean_not
+                         boolean_or
+                         boolean_pop
+                         ;boolean_rand
+                         boolean_rot
+                         ;boolean_shove
+                         ;boolean_stackdepth
+                         boolean_swap
+                         ;boolean_yank
+                         ;boolean_yankdup
+                         ;code_append
+                         ;code_atom
+                         ;code_car
+                         ;code_cdr
+                         ;code_cons
+                         ;code_container
+                         ;code_contains
+                         ;code_do
+                         ;code_do*
+                         ;code_do*count
+                         ;code_do*range
+                         ;code_do*times
+                         ;code_dup
+                         ;code_eq
+                         ;code_extract
+                         ;code_flush
+                         ;code_fromboolean
+                         ;code_fromfloat
+                         ;code_frominteger
+                         ;code_fromzipchildren
+                         ;code_fromziplefts
+                         ;code_fromzipnode
+                         ;code_fromziprights
+                         ;code_fromziproot
+                         ;code_if
+                         ;code_insert
+                         ;code_length
+                         ;code_list
+                         ;code_map
+                         ;code_member
+                         ;code_noop
+                         ;code_nth
+                         ;code_nthcdr
+                         ;code_null
+                         ;code_pop
+                         ;code_position
+                         ;code_quote
+                         ;code_rand
+                         ;code_rot
+                         ;code_shove
+                         ;code_size
+                         ;code_stackdepth
+                         ;code_subst
+                         ;code_swap
+                         ;code_wrap
+                         ;code_yank
+                         ;code_yankdup
+                         ;environment_begin
+                         ;environment_end
+                         ;environment_new
+                         ;exec_do*count
+                         ;exec_do*range
+                         ;exec_do*times
+                         exec_dup
+                         exec_eq
+                         ;exec_flush
+                         ;exec_fromzipchildren
+                         ;exec_fromziplefts
+                         ;exec_fromzipnode
+                         ;exec_fromziprights
+                         ;exec_fromziproot
+                         exec_if
+                         exec_k
+                         exec_noop
+                         exec_pop
+                         exec_rot
+                         exec_s
+                         ;exec_shove
+                         ;exec_stackdepth
+                         exec_swap
+                         exec_when
+                         exec_y
+                         ;exec_yank
+                         ;exec_yankdup
+                         float_add
+                         ;float_cos
+                         float_div
+                         float_dup
+                         float_eq
+                         ;float_flush
+                         float_fromboolean
+                         ;float_frominteger
+                         float_gt
+                         float_lt
+                         ;float_max
+                         ;float_min
+                         float_mod
+                         float_mult
+                         float_pop
+                         ;float_rand
+                         float_rot
+                         ;float_shove
+                         ;float_sin
+                         ;float_stackdepth
+                         float_sub
+                         float_swap
+                         ;float_tan
+                         ;float_yank
+                         ;float_yankdup
+                         ;integer_add
+                         ;integer_div
+                         ;integer_dup
+                         ;integer_eq
+                         ;integer_flush
+                         ;integer_fromboolean
+                         ;integer_fromfloat
+                         ;integer_gt
+                         ;integer_lt
+                         ;integer_max
+                         ;integer_min
+                         ;integer_mod
+                         ;integer_mult
+                         ;integer_pop
+                         ;integer_rand
+                         ;integer_rot
+                         ;integer_shove
+                         ;integer_stackdepth
+                         ;integer_sub
+                         ;integer_swap
+                         ;integer_yank
+                         ;integer_yankdup
+                         ;return_boolean_pop
+                         ;return_code_pop
+                         ;return_exec_pop
+                         ;return_float_pop
+                         ;return_fromboolean
+                         ;return_fromcode
+                         ;return_fromexec
+                         ;return_fromfloat
+                         ;return_frominteger
+                         ;return_fromstring
+                         ;return_fromzip
+                         ;return_integer_pop
+                         ;return_string_pop
+                         ;return_zip_pop
+                         ;string_atoi
+                         ;string_concat
+                         ;string_contained
+                         ;string_dup
+                         ;string_eq
+                         ;string_flush
+                         ;string_length
+                         ;string_parse_to_chars
+                         ;string_pop
+                         ;string_rand
+                         ;string_reverse
+                         ;string_rot
+                         ;string_shove
+                         ;string_stackdepth
+                         ;string_swap
+                         ;string_take
+                         ;string_yank
+                         ;string_yankdup
+                         ;zip_append_child_fromcode
+                         ;zip_append_child_fromexec
+                         ;zip_branch?
+                         ;zip_down
+                         ;zip_dup
+                         ;zip_end?
+                         ;zip_eq
+                         ;zip_flush
+                         ;zip_fromcode
+                         ;zip_fromexec
+                         ;zip_insert_child_fromcode
+                         ;zip_insert_child_fromexec
+                         ;zip_insert_left_fromcode
+                         ;zip_insert_left_fromexec
+                         ;zip_insert_right_fromcode
+                         ;zip_insert_right_fromexec
+                         ;zip_left
+                         ;zip_leftmost
+                         ;zip_next
+                         ;zip_pop
+                         ;zip_prev
+                         ;zip_remove
+                         ;zip_replace_fromcode
+                         ;zip_replace_fromexec
+                         ;zip_right
+                         ;zip_rightmost
+                         ;zip_rot
+                         ;zip_shove
+                         ;zip_stackdepth
+                         ;zip_swap
+                         ;zip_up
+                         ;zip_yank
+                         ;zip_yankdup
+                         )
+                      )
+   :use-single-thread false
+   :use-lexicase-selection true
+   ;:decimation-ratio 0.01
+   ;:tournament-size 1
+   :population-size 1000
+   :max-generations 10001
+   :evalpush-limit 100
+   :tag-limit 10000
+   :max-points 1000
+   :max-points-in-initial-program 25
+   ;:parent-reversion-probability 0.9
+   :crossover-probability 0.0           
+   :mutation-probability 0.37
+   :mutation-max-points 25
+   :simplification-probability 0.1
+   :reproduction-simplifications 10
+   ;:deletion-mutation-probability 0.3
+   :parentheses-addition-mutation-probability 0.01
+   :tagging-mutation-probability 0.01
+   :tag-branch-mutation-probability 0.01
+   :tag-branch-mutation-type-instruction-pairs [[:boolean 'boolean_eq]
+                                                [:float 'float_eq]
+                                                [:float 'float_lt]
+                                                [:float 'float_gt]]
+   :node-selection-method :size-tournament ;:unbiased
+   ;node-selection-leaf-probability 0.1
+   :node-selection-tournament-size 2
+   ;:pop-when-tagging false
+   :report-simplifications 0
+  })

@@ -19,9 +19,7 @@
            gaussian-mutation-standard-deviation boolean-gsxover-probability
            boolean-gsxover-new-code-max-points deletion-mutation-probability
            parentheses-addition-mutation-probability tagging-mutation-probability 
-           tag-branch-mutation-probability tag-branch-mutation-type-instruction-pairs
-           uniform-crossover-probability uniform-crossover-paramaters
-           hybridization-probability hybridization-parameters]}]
+           tag-branch-mutation-probability tag-branch-mutation-type-instruction-pairs]}]
   (binding [*thread-local-random-generator* rand-gen]
     (let [n (lrand)]
       (cond 
@@ -81,24 +79,6 @@
                    parent max-points tag-branch-mutation-type-instruction-pairs 
                    @global-tag-limit) 
                  :parent parent))
-        ;; uniform crossover
-        (< n (+ mutation-probability crossover-probability simplification-probability 
-                gaussian-mutation-probability boolean-gsxover-probability 
-                deletion-mutation-probability parentheses-addition-mutation-probability
-                tagging-mutation-probability tag-branch-mutation-probability
-                uniform-crossover-probability))
-        (let [first-parent (select pop tournament-size trivial-geography-radius location)
-              second-parent (select pop tournament-size trivial-geography-radius location)]
-          (assoc (uniform-crossover first-parent second-parent max-points) :parent first-parent))
-        ;; hybridization
-        (< n (+ mutation-probability crossover-probability simplification-probability 
-                gaussian-mutation-probability boolean-gsxover-probability 
-                deletion-mutation-probability parentheses-addition-mutation-probability
-                tagging-mutation-probability tag-branch-mutation-probability
-                hybridization-probability))
-        (let [first-parent (select pop tournament-size trivial-geography-radius location)
-              second-parent (select pop tournament-size trivial-geography-radius location)]
-          (assoc (hybridization first-parent second-parent max-points) :parent first-parent))
         ;; replication
         true 
         (let [parent (select pop tournament-size trivial-geography-radius location)]
