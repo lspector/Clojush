@@ -19,7 +19,9 @@
            gaussian-mutation-standard-deviation boolean-gsxover-probability
            boolean-gsxover-new-code-max-points deletion-mutation-probability
            parentheses-addition-mutation-probability tagging-mutation-probability 
-           tag-branch-mutation-probability tag-branch-mutation-type-instruction-pairs]}]
+           tag-branch-mutation-probability tag-branch-mutation-type-instruction-pairs
+           ultra-probability ultra-alternation-rate ultra-alignment-deviation 
+           ultra-mutation-rate]}]
   (binding [*thread-local-random-generator* rand-gen]
     (let [n (lrand)]
       (cond 
@@ -79,6 +81,17 @@
                    parent max-points tag-branch-mutation-type-instruction-pairs 
                    @global-tag-limit) 
                  :parent parent))
+        ;; ultra
+        (< n (+ mutation-probability crossover-probability simplification-probability 
+                gaussian-mutation-probability boolean-gsxover-probability 
+                deletion-mutation-probability parentheses-addition-mutation-probability
+                tagging-mutation-probability tag-branch-mutation-probability
+                ultra-probability))   
+        (let [first-parent (select pop tournament-size trivial-geography-radius location)
+              second-parent (select pop tournament-size trivial-geography-radius location)]
+          (assoc (ultra first-parent second-parent max-points ultra-alternation-rate 
+                        ultra-alignment-deviation ultra-mutation-rate atom-generators)
+                 :parent first-parent))
         ;; replication
         true 
         (let [parent (select pop tournament-size trivial-geography-radius location)]

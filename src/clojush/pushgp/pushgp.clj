@@ -62,7 +62,11 @@
                        :tag-branch-mutation-type-instruction-pairs []
                        :parent-reversion-probability 0.0
                        :tag-limit 10000
-                       :initial-population nil)))
+                       :initial-population nil
+                       :ultra-probability 0.0
+                       :ultra-alternation-rate 0.1
+                       :ultra-alignment-deviation 1
+                       :ultra-mutation-rate 0.1)))
 
 (defn load-push-argmap
   [argmap]
