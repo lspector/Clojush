@@ -3,7 +3,9 @@
         [clojush.random]
         [clojush.globals]
         [clojush.individual]
-        [clojush.node-selection]))
+        [clojush.node-selection])
+  (:require [clojure.walk :as walk]
+            [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; genetic operators
@@ -191,3 +193,233 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
     :ancestors (if maintain-ancestors
                  (cons (:program ind) (:ancestors ind))
                  (:ancestors ind))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; linear operators
+
+(defn remove-empties 
+  "Removes empty sequences from tree t."
+  [t]
+  (walk/postwalk 
+    (fn [node] (if (seq? node) 
+                 (remove #(and (seq? %) (empty? %)) node)
+                 node))
+    t))
+
+(defn list-to-open-close-sequence
+  [lst]
+  (if (seq? lst)
+    (flatten (walk/postwalk #(if (seq? %) (list :open % :close) %) lst))
+    lst))
+
+; (list-to-open-close-sequence '(1 2 (a b (c) ((d)) e)))
+
+(defn open-close-sequence-to-list
+  [sequence]
+  (let [s (str sequence)
+        l (read-string (string/replace (string/replace s ":open" " ( ") ":close" " ) "))]
+    ;; there'll be an extra ( ) around l, which we keep if the number of read things is >1
+    (if (= (count l) 1)
+      (first l)
+      l)))
+    
+;(open-close-sequence-to-list '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close))
+;(open-close-sequence-to-list '(:open 1 :close :open 2 :close))
+;(open-close-sequence-to-list '(:open :open 1 :close :open 2 :close :close))
+
+(defn insert-somewhere 
+  [thing lst]
+  (let [after-how-many (lrand-int (inc (count lst)))]
+    (concat (take after-how-many lst) 
+            (list thing) 
+            (drop after-how-many lst))))
+
+(defn delete-somewhere 
+  [thing lst]
+  (let [locations (->> lst
+                    (map vector (iterate inc 0))
+                    (filter #(= (second %) thing))
+                    (map first))
+        location (lrand-nth locations)]
+    (concat (take location lst)
+            (drop (inc location) lst))))
+
+;(delete-somewhere :right '(0 :right 1 2 :right))
+
+(defn left-balance
+  [s left right]
+  (loop [processed ()
+         to-process s
+         extra-lefts 0]
+    (cond 
+      ;; done
+      (empty? to-process)
+      processed
+      ;; see a left -- keep track of number unmatched
+      (= (first to-process) left)
+      (recur (concat processed (list (first to-process)))
+             (rest to-process)
+             (inc extra-lefts))
+      ;; see a right -- may require fixes
+      (= (first to-process) right)
+      (if (zero? extra-lefts)
+        ;; must fix
+        (if (< (lrand) 0.5)
+          ;; half the time delete a right (possibly this one) and continue
+          (recur () 
+                 (concat (delete-somewhere right (concat processed (list right))) 
+                         (rest to-process))
+                 0)
+          ;; other half, add a left somewhere 
+          (recur () (concat (insert-somewhere left processed) to-process) 0))
+        ;; don't have to fix, keep going with adjusted extras
+        (recur (concat processed (list (first to-process)))
+               (rest to-process)
+               (dec extra-lefts)))
+      ;; anything else -- just keep going
+      :else
+      (recur (concat processed (list (first to-process)))
+             (rest to-process)
+             extra-lefts))))
+
+(defn balance
+  [open-close-sequence]
+  ;(println "balancing:" open-close-sequence)
+  (-> open-close-sequence
+    (left-balance :open :close)
+    (reverse)
+    (left-balance :close :open)
+    (reverse)))
+
+;(let [s '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close)]
+;  (println s)
+;  (println (balance s)))
+;
+;(let [s '(:open 1 2 :open :open a b :open c :close :open :open d :close :close e :close :close)]
+;  (println s)
+;  (println (balance s)))
+;
+;(let [s '(:open :open :close)]
+;  (println s)
+;  (println (balance s)))
+;
+;(let [s '(:close :close)]
+;  (println s)
+;  (println (balance s)))
+;
+;(let [s '(:close :open)]
+;  (println s)
+;  (println (balance s)))
+
+;(defn linearly-mutate-program
+;  [p rate atom-generators]
+;  (if (seq? p)
+;    (remove-empties
+;      (open-close-sequence-to-list
+;        (balance 
+;          (map #(if (< (lrand) rate)
+;                  (let [element (lrand-nth (concat atom-generators 
+;                                                   [:open :close]))]
+;                    (if (fn? element)
+;                      (element)
+;                      element))
+;                  %)
+;               (list-to-open-close-sequence p)))))
+;    p))
+
+; (let [p '(a b (c d) (e f ((g))) h)]
+;   (println p)
+;   (linearly-mutate-program p 0.1 [1 2 3]))
+
+;(defn linearly-mutate 
+;  "Returns a linearly mutated version of the given individual."
+;  [ind max-points rate atom-generators]
+;  (let [new-program (linearly-mutate-program (:program ind) rate atom-generators)]
+;    (if (> (count-points new-program) max-points)
+;      ind
+;      (make-individual :program new-program :history (:history ind)
+;                       :ancestors (if maintain-ancestors
+;                                    (cons (:program ind) (:ancestors ind))
+;                                    (:ancestors ind))))))
+
+;(defn break-up
+;  [s num-parts]
+;  (let [break-points (sort (take (dec num-parts)
+;                                 (lshuffle (map inc (range (dec (count s)))))))
+;        offsets (loop [remaining-break-points (map #(- % (first break-points))
+;                                                   (rest break-points))
+;                       result (list (first break-points))]
+;                  (if (empty? remaining-break-points)
+;                    result
+;                    (recur (map #(- % (first remaining-break-points))
+;                                (rest remaining-break-points))
+;                           (concat result (list (first remaining-break-points))))))]
+;    (loop [remaining-offsets (rest offsets)
+;           remaining-sequence (drop (first offsets) s)
+;           result (list (take (first offsets) s))]
+;      (if (empty? remaining-offsets)
+;        (concat result (list remaining-sequence))
+;        (recur (rest remaining-offsets)
+;               (drop (first remaining-offsets) remaining-sequence)
+;               (concat result (list (take (first remaining-offsets) remaining-sequence))))))))
+    
+; (break-up '(a b c d e) 3)
+
+;(defn linearly-crossover-programs
+;  [p1 p2 switch-probability]
+;  (if (or (not (seq? p1))
+;          (not (seq? p2)))
+;    p1 ;; can't do if either program isn't a list
+;    (let [p1-linear (list-to-open-close-sequence p1)
+;          p2-linear (list-to-open-close-sequence p2)
+;          num-segments (min (count p1-linear) (count p2-linear))
+;          p1-segments (break-up p1-linear num-segments)
+;          p2-segments (break-up p2-linear num-segments)]
+;      (loop [p1-remaining p1-segments
+;             p2-remaining p2-segments
+;             use-p1 (lrand-nth [true false])
+;             result ()]
+;        (if (empty? p1-remaining)
+;          (remove-empties (open-close-sequence-to-list (balance result)))
+;          (recur (rest p1-remaining)
+;                 (rest p2-remaining)
+;                 (if (< (lrand) switch-probability) (not use-p1) use-p1)
+;                 (concat result (first (if use-p1 p1-remaining p2-remaining)))))))))
+  
+;(let [p1 '(a (b c) (d ((e)) f))
+;      p2 '((1 2 3) 4 ((5)) 6)]
+;  (println p1)
+;  (println p2)
+;  (println (linearly-crossover-programs p1 p2 0.1)))
+
+;(defn linearly-crossover 
+;  "Returns the result of a linear crossover of parent1 and parent2."
+;  [parent1 parent2 max-points switch-probability]
+;  (let [new-program (linearly-crossover-programs (:program parent1) 
+;                                                 (:program parent2)
+;                                                 switch-probability)]
+;    (if (> (count-points new-program) max-points)
+;      parent1
+;      (make-individual :program new-program :history (:history parent1)
+;                       :ancestors (if maintain-ancestors
+;                                    (cons (:program parent1) (:ancestors parent1))
+;                                    (:ancestors parent1))))))
+
+;(defn linearly-cross-mutate
+;  "Returns the result of a linear crossover of parent1 and parent2."
+;  [parent1 parent2 max-points switch-probability rate atom-generators]
+;  (let [new-program (linearly-mutate-program
+;                      (linearly-crossover-programs (:program parent1) 
+;                                                   (:program parent2)
+;                                                   switch-probability)
+;                      rate
+;                      atom-generators)]
+;    (if (> (count-points new-program) max-points)
+;      parent1
+;      (make-individual :program new-program :history (:history parent1)
+;                       :ancestors (if maintain-ancestors
+;                                    (cons (:program parent1) (:ancestors parent1))
+;                                    (:ancestors parent1))))))
+
+
+        
