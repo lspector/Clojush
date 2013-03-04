@@ -215,12 +215,14 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
 
 (defn open-close-sequence-to-list
   [sequence]
-  (let [s (str sequence)
-        l (read-string (string/replace (string/replace s ":open" " ( ") ":close" " ) "))]
-    ;; there'll be an extra ( ) around l, which we keep if the number of read things is >1
-    (if (= (count l) 1)
-      (first l)
-      l)))
+  (cond (not (seq? sequence)) sequence
+        (empty? sequence) ()
+        :else (let [s (str sequence)
+                    l (read-string (string/replace (string/replace s ":open" " ( ") ":close" " ) "))]
+                ;; there'll be an extra ( ) around l, which we keep if the number of read things is >1
+                (if (= (count l) 1) 
+                  (first l)
+                  l))))
     
 ;(open-close-sequence-to-list '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close))
 ;(open-close-sequence-to-list '(:open 1 :close :open 2 :close))

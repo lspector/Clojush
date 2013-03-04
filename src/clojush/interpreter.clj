@@ -42,9 +42,10 @@
         (tag-instruction? instruction) (handle-tag-instruction instruction state)
         (tagged-code-macro? instruction) (handle-tag-code-macro instruction state)
         (contains? @instruction-table instruction) ((instruction @instruction-table) state)
-        :else (binding [*out* *err*]
+        :else (do (println "Undefined instruction:" instruction)
+                (binding [*out* *err*]
                 		(println "Undefined instruction:" instruction)
-                		state)))))
+                		state))))))
 
 (defn eval-push 
   "Executes the contents of the exec stack, aborting prematurely if execution limits are 

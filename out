@@ -1,0 +1,1221 @@
+
+Registered instructions: #{code_nthcdr exec_y code_insert zip_insert_left_fromexec zip_shove float_lt exec_fromziprights code_fromfloat boolean_swap integer_add code_stackdepth integer_eq zip_replace_fromcode environment_new exec_pop integer_swap zip_yank return_fromfloat code_noop float_rot boolean_eq string_pop float_yank code_subst string_take zip_fromcode code_yankdup float_sin zip_end? code_fromziprights integer_yank boolean_yank zip_insert_right_fromexec zip_insert_child_fromexec float_frominteger zip_swap boolean_fromfloat zip_yankdup string_eq zip_insert_left_fromcode environment_begin exec_eq zip_fromexec integer_dup float_cos float_stackdepth zip_stackdepth zip_right code_null integer_yankdup return_zip_pop zip_append_child_fromexec code_pop code_swap return_integer_pop float_swap code_append return_boolean_pop code_member boolean_flush return_fromstring code_do* code_dup code_quote boolean_rot boolean_and code_shove integer_lt integer_flush exec_stackdepth exec_rot string_stackdepth code_cons string_rot return_code_pop float_div code_container code_if exec_when exec_do*times return_fromboolean code_extract integer_shove float_rand environment_end boolean_rand float_shove code_wrap integer_mult zip_prev integer_stackdepth return_fromcode float_sub integer_div code_fromziproot code_nth zip_replace_fromexec string_parse_to_chars exec_do*count code_size zip_up string_rand exec_s code_length return_frominteger string_contained boolean_shove return_string_pop code_cdr zip_dup exec_do*range exec_fromzipnode exec_if float_flush zip_eq code_map float_yankdup code_rand string_reverse exec_fromziplefts integer_gt integer_max code_atom exec_fromzipchildren zip_remove return_tagspace zip_flush float_fromboolean signal_error code_contains boolean_not integer_fromfloat code_list boolean_or code_do*range exec_k integer_fromboolean code_fromzipnode boolean_frominteger float_gt exec_yank float_add float_tan code_eq string_yank zip_pop code_fromzipchildren float_mult boolean_stackdepth zip_left code_flush integer_sub zip_branch? string_swap integer_mod zip_append_child_fromcode code_fromboolean zip_rightmost float_max integer_rot exec_flush exec_yankdup string_yankdup exec_fromziproot exec_swap string_flush return_fromexec zip_down code_yank string_length float_pop boolean_yankdup zip_insert_child_fromcode float_eq code_frominteger zip_leftmost float_min boolean_dup string_concat code_do*count code_car zip_insert_right_fromcode exec_dup integer_min string_atoi zip_next string_shove code_position float_dup integer_rand exec_shove string_dup exec_noop code_fromziplefts code_do integer_pop boolean_pop zip_rot code_do*times return_float_pop return_exec_pop code_rot float_mod}
+
+
+Starting PushGP run.
+
+Clojush version = 1.3.3
+Hash of last Git commit = acb22b9edbf32c5d83d52b328d011937c0a59fe0
+GitHub link = https://github.com/lspector/Clojush/commit/acb22b9edbf32c5d83d52b328d011937c0a59fe0
+atom-generators = (signal_error 0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 #<tag$tag_instruction_erc$fn__680 clojush.instructions.tag$tag_instruction_erc$fn__680@60487c5f> #<tag$tag_instruction_erc$fn__680 clojush.instructions.tag$tag_instruction_erc$fn__680@36dd725b> #<tag$tagged_instruction_erc$fn__686 clojush.instructions.tag$tagged_instruction_erc$fn__686@21aac775> boolean_and boolean_dup boolean_eq boolean_fromfloat boolean_not boolean_or boolean_pop boolean_rot boolean_swap environment_begin environment_end exec_dup exec_eq exec_if exec_noop exec_rot exec_swap exec_when float_add float_div float_dup float_eq float_fromboolean float_gt float_lt float_mult float_pop float_rot float_sub float_swap return_exec_pop return_float_pop return_fromexec return_fromfloat)
+boolean-gsxover-new-code-max-points = 20
+boolean-gsxover-probability = 0.0
+crossover-probability = 0.0
+csv-log-filename = log.csv
+decimation-ratio = 1
+decimation-tournament-size = 2
+deletion-mutation-probability = 0
+error-function = #<calc$calc_errors clojush.experimental.calc$calc_errors@7331f919>
+error-threshold = 0
+evalpush-limit = 100
+evalpush-time-limit = 0
+final-report-simplifications = 1000
+gaussian-mutation-per-number-mutation-probability = 0.5
+gaussian-mutation-probability = 0.0
+gaussian-mutation-standard-deviation = 0.1
+initial-population = nil
+json-log-filename = log.json
+json-log-program-strings = false
+log-fitnesses-for-all-cases = false
+max-generations = 10001
+max-mutations = nil
+max-points = 1000
+max-points-in-initial-program = 25
+mutation-max-points = 20
+mutation-probability = 0.0
+node-selection-leaf-probability = 0.1
+node-selection-method = :unbiased
+node-selection-tournament-size = 2
+parent-reversion-probability = 0.0
+parentheses-addition-mutation-probability = 0
+pop-when-tagging = true
+population-size = 1000
+print-csv-logs = false
+print-json-logs = false
+problem-specific-report = #<report$default_problem_specific_report clojush.pushgp.report$default_problem_specific_report@a2ba05>
+random-seed = 1362365614311026000
+report-simplifications = 10
+reproduction-simplifications = 1
+reuse-errors = true
+simplification-probability = 0.0
+tag-branch-mutation-probability = 0
+tag-branch-mutation-type-instruction-pairs = [[:boolean boolean_eq] [:float float_eq] [:float float_lt] [:float float_gt]]
+tag-limit = 10000
+tagging-mutation-probability = 0
+tournament-size = 7
+trivial-geography-radius = 0
+ultra-alignment-deviation = 10
+ultra-alternation-rate = 0.01
+ultra-mutation-rate = 0.01
+ultra-probability = 1
+use-historically-assessed-hardness = false
+use-lexicase-selection = true
+use-rmse = false
+use-single-thread = false
+
+Generating initial population...
+
+
+-----
+Processing generation: 0
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 0
+Current time: 1362365615371
+Best program: ((((boolean_eq (7.0 (float_eq)) 9.0 8.0) (return_fromfloat) 10.0) 10.0 signal_error) tag_exec_5121 7.0)
+Partial simplification: (((((7.0 (float_eq))) 10.0) 10.0 signal_error) tag_exec_5121 7.0)
+Cosmos Data: {999 17.0000034, 750 16.0, 500 16.0, 250 16.0, 0 8.72466264447046}
+Errors: [1.6999999999999998E-6 0.75 0.5555555555555556 0.4 0.2727272727272727 0.16666666666666666 0.07692307692307693 0 0.06666666666666667 0.125 1.0 0.2222222222222222 0.8813559322033898 0.9874776386404294 0.9987407807159561 0.2631578947368421 0.9602272727272727 0.9979399646851089]
+Total: 8.72466264447046
+Mean: 0.4847
+HAH-error: null
+RMS-error: null
+History: (8.72466264447046)
+Size: 18
+--- Population Statistics ---
+Average total errors in population: 15.695214429666814
+Median total errors in population: 16.0
+Average program size in population (points): 13.171
+Number of unique programs in population:  981
+Max copy number of one program:  3
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 1
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 1
+Current time: 1362365617312
+Best program: (tag_exec_1271 ((6.0) float_add boolean_pop) (1.0 (boolean_not) (5.0 boolean_pop) 9.0) 10.0 return_fromfloat)
+Partial simplification: (tag_exec_1271 ((6.0) float_add boolean_pop))
+Cosmos Data: {999 17.0000034, 750 12.795641784310472, 500 9.269749395982167, 250 9.0121902501284, 0 7.86882338167887}
+Errors: [1.6999999999999998E-6 0.7142857142857143 0.5 0.3333333333333333 0.2 0.09090909090909091 0 0.07692307692307693 0.14285714285714285 0.2 1.0 0.043478260869565216 0.7209302325581395 0.9577092511013215 0.9946144870298896 0 0.9008264462809917 0.9929546455306033]
+Total: 7.86882338167887
+Mean: 0.4372
+HAH-error: null
+RMS-error: null
+History: (7.86882338167887 10.942283942071214)
+Size: 17
+--- Population Statistics ---
+Average total errors in population: 10.953506243919216
+Median total errors in population: 9.269749395982167
+Average program size in population (points): 17.453
+Number of unique programs in population:  496
+Max copy number of one program:  46
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 2
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 2
+Current time: 1362365618467
+Best program: ((tag_exec_1271 ((6.0) float_add return_exec_pop) (1.0 (boolean_not) float_swap 5.0 boolean_pop) 9.0) 10.0 return_fromfloat)
+Partial simplification: ((tag_exec_1271 ((6.0) float_add) 9.0) return_fromfloat)
+Cosmos Data: {999 17.0000017, 750 13.33408733973799, 500 9.269749395982167, 250 8.824798572845314, 0 7.86882338167887}
+Errors: [1.6999999999999998E-6 0.7142857142857143 0.5 0.3333333333333333 0.2 0.09090909090909091 0 0.07692307692307693 0.14285714285714285 0.2 1.0 0.043478260869565216 0.7209302325581395 0.9577092511013215 0.9946144870298896 0 0.9008264462809917 0.9929546455306033]
+Total: 7.86882338167887
+Mean: 0.4372
+HAH-error: null
+RMS-error: null
+History: (7.86882338167887 9.0121902501284 8.72466264447046)
+Size: 18
+--- Population Statistics ---
+Average total errors in population: 11.053390651565405
+Median total errors in population: 9.269749395982167
+Average program size in population (points): 18.292
+Number of unique programs in population:  515
+Max copy number of one program:  166
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 3
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 3
+Current time: 1362365619601
+Best program: (float_sub 10.0 (exec_dup) ((tagged_5340 float_eq tag_float_1951) (return_fromexec float_sub) (tag_exec_9962) exec_rot return_exec_pop tagged_7037) (return_fromexec float_swap 5.0) 6.0)
+Partial simplification: (10.0 (exec_dup) ((tagged_5340 float_eq tag_float_1951) (tag_exec_9962) exec_rot return_exec_pop tagged_7037) (5.0) 6.0)
+Cosmos Data: {999 17.0000034, 750 14.13142241146165, 500 9.269749395982167, 250 8.72466264447046, 0 7.73542210785755}
+Errors: [3.3999999999999996E-6 0.7142857142857143 0.5 0.3333333333333333 0.2 0.09090909090909091 0 0.07692307692307693 0.14285714285714285 0.2 0 0.29411764705882354 0.8974358974358975 0.9892569382273948 0.9989205720967888 0.3333333333333333 0.9658119658119658 0.9982339955849889]
+Total: 7.73542210785755
+Mean: 0.4297
+HAH-error: null
+RMS-error: null
+History: (7.73542210785755 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 23
+--- Population Statistics ---
+Average total errors in population: 11.092318555861675
+Median total errors in population: 9.269749395982167
+Average program size in population (points): 19.511
+Number of unique programs in population:  540
+Max copy number of one program:  154
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 4
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 4
+Current time: 1362365620662
+Best program: (tag_exec_1271 ((6.0 (tag_exec_1271 (10.0 (10.0 float_mult) tag_float_4486 9.0 float_mult 8.0 return_float_pop)) boolean_swap (exec_eq) float_pop float_gt) 5.0 environment_begin) environment_end return_exec_pop)
+Partial simplification: (tag_exec_1271 (((tag_exec_1271 (10.0 (10.0 float_mult) tag_float_4486 9.0 float_mult 8.0)) boolean_swap (exec_eq) float_pop float_gt) 5.0 environment_begin) environment_end return_exec_pop)
+Cosmos Data: {999 17.0000034, 750 10.942283942071214, 500 8.99509059708762, 250 8.236158192031242, 0 7.005653748619417}
+Errors: [2.4E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.15789473684210525 0.052132701421800945 0.8348472336911643 0.9821603781999821 0.2 0.550561797752809 0.9976460203030749]
+Total: 7.005653748619417
+Mean: 0.3892
+HAH-error: null
+RMS-error: null
+History: (7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 26
+--- Population Statistics ---
+Average total errors in population: 10.040342477874871
+Median total errors in population: 8.99509059708762
+Average program size in population (points): 21.21
+Number of unique programs in population:  585
+Max copy number of one program:  51
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 5
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 5
+Current time: 1362365621681
+Best program: (tag_exec_1271 ((6.0 (tag_exec_1271 (10.0 (float_mult float_mult) tag_float_4486 9.0 float_mult 8.0 return_float_pop)) boolean_swap (exec_eq) float_pop float_gt) 5.0 environment_begin) environment_end return_exec_pop)
+Partial simplification: (tag_exec_1271 ((6.0 (tag_exec_1271 (10.0 (float_mult float_mult) tag_float_4486 9.0 float_mult 8.0 return_float_pop)) (exec_eq) float_pop float_gt) 5.0 environment_begin) return_exec_pop)
+Cosmos Data: {999 17.0000034, 750 10.942283942071214, 500 8.99698070582357, 250 8.26975109598217, 0 6.637761917869389}
+Errors: [2.4E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.15789473684210525 0.45985401459854014 0.5747696669029058 0.9474191569538165 0.2 0.06976744186046512 0.9976460203030749]
+Total: 6.637761917869389
+Mean: 0.3688
+HAH-error: null
+RMS-error: null
+History: (6.637761917869389 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 26
+--- Population Statistics ---
+Average total errors in population: 10.121702517744662
+Median total errors in population: 8.99698070582357
+Average program size in population (points): 23.032
+Number of unique programs in population:  638
+Max copy number of one program:  58
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 6
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 6
+Current time: 1362365622715
+Best program: (tag_exec_1271 ((6.0 (tag_exec_1271 (10.0 (float_mult float_mult) tag_float_4486 9.0 float_mult 8.0 return_float_pop)) environment_end (exec_eq) float_pop float_gt) 5.0 environment_begin) environment_end return_exec_pop)
+Partial simplification: (tag_exec_1271 ((6.0 (tag_exec_1271 (10.0 (float_mult float_mult) tag_float_4486 9.0 float_mult 8.0 return_float_pop)) (exec_eq) float_pop float_gt) 5.0 environment_begin) environment_end return_exec_pop)
+Cosmos Data: {999 17.0000036, 750 10.014535231720783, 500 8.72466264447046, 250 7.861817163055409, 0 6.637761917869389}
+Errors: [2.4E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.15789473684210525 0.45985401459854014 0.5747696669029058 0.9474191569538165 0.2 0.06976744186046512 0.9976460203030749]
+Total: 6.637761917869389
+Mean: 0.3688
+HAH-error: null
+RMS-error: null
+History: (6.637761917869389 6.637761917869389 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 26
+--- Population Statistics ---
+Average total errors in population: 9.476712236851053
+Median total errors in population: 8.72466264447046
+Average program size in population (points): 24.309
+Number of unique programs in population:  611
+Max copy number of one program:  84
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 7
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 7
+Current time: 1362365623794
+Best program: (tag_exec_1271 ((6.0 float_add boolean_pop 8.0) ((tag_exec_1271 (6.0 float_div tag_exec_2720 (10.0 (10.0 float_mult) tag_float_4486 9.0 float_mult) 8.0 return_float_pop)) boolean_swap (exec_eq) float_pop float_gt) 5.0 environment_begin) environment_end return_exec_pop)
+Partial simplification: (tag_exec_1271 ((6.0 float_add boolean_pop 8.0) ((tag_exec_1271 (6.0 float_div tag_exec_2720 (10.0 (10.0 float_mult) tag_float_4486 9.0 float_mult) 8.0 return_float_pop)) boolean_swap (exec_eq) float_pop float_gt) 5.0 environment_begin) environment_end return_exec_pop)
+Cosmos Data: {999 17.0000034, 750 10.619855938509781, 500 8.72466264447046, 250 7.86882338167887, 0 6.028534889394403}
+Errors: [2.8E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.15789473684210525 0.21311475409836064 0.2632177373507675 0.31157410139880776 0.2 0.6546762589928058 0.9976460203030749]
+Total: 6.028534889394403
+Mean: 0.3349
+HAH-error: null
+RMS-error: null
+History: (6.028534889394403 8.80439219265216 7.609529124027569 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 34
+--- Population Statistics ---
+Average total errors in population: 9.648684214912333
+Median total errors in population: 8.72466264447046
+Average program size in population (points): 26.593
+Number of unique programs in population:  641
+Max copy number of one program:  48
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 8
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 8
+Current time: 1362365625105
+Best program: (tag_exec_1271 ((6.0 (tag_exec_1271 (10.0 (float_mult) 9.0 7.0 9.0 tag_exec_1271 (6.0 (tag_exec_1271 (10.0 float_mult float_mult) tag_float_4486 9.0 float_mult 8.0 return_float_pop)) (tag_exec_1271 (tag_exec_3315 (10.0 float_mult) tag_float_4486) 9.0 float_mult) 8.0 return_float_pop)) boolean_swap environment_begin) environment_end return_exec_pop))
+Partial simplification: (tag_exec_1271 ((6.0 (tag_exec_1271 (10.0 (float_mult) 9.0 7.0 9.0 tag_exec_1271 (6.0 (tag_exec_1271 10.0 float_mult tag_float_4486 9.0 float_mult 8.0 return_float_pop)) (tag_exec_1271 (tag_exec_3315 (10.0 float_mult) tag_float_4486) 9.0 float_mult) 8.0)) boolean_swap) environment_end))
+Cosmos Data: {999 17.0000035, 750 10.636468843950798, 500 8.72466264447046, 250 7.861817163055409, 0 5.703536415706095}
+Errors: [2.7E-6 0.7142857142857143 0.5 0.3333333333333333 0.2 0.09090909090909091 0 0.07692307692307693 0.14285714285714285 0.2 1.0 0.15789473684210525 0.15625 0.1566892243623113 0.15673312164905523 0.2 0.6197183098591549 0.9979399646851089]
+Total: 5.703536415706095
+Mean: 0.3169
+HAH-error: null
+RMS-error: null
+History: (5.703536415706095 6.786836064001709 8.156792933727292 7.609529124027569 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 44
+--- Population Statistics ---
+Average total errors in population: 9.652757519969738
+Median total errors in population: 8.72466264447046
+Average program size in population (points): 27.681
+Number of unique programs in population:  695
+Max copy number of one program:  35
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 9
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 9
+Current time: 1362365626176
+Best program: (tag_exec_1271 (((6.0) float_add boolean_pop 8.0) ((tag_exec_1271 (6.0 tag_exec_1271 (10.0 (float_mult)) float_mult) 8.0 return_float_pop)) boolean_swap (exec_eq) float_pop float_gt 5.0 environment_begin) boolean_or signal_error 1.0)
+Partial simplification: (tag_exec_1271 (((6.0) float_add boolean_pop) ((tag_exec_1271 (6.0 tag_exec_1271 (10.0 (float_mult)) float_mult) 8.0 return_float_pop)) (exec_eq) float_pop float_gt 5.0 environment_begin) boolean_or signal_error 1.0)
+Cosmos Data: {999 17.0000051, 750 10.777797721675775, 500 8.68134162203169, 250 7.861817163055409, 0 5.958047125067004}
+Errors: [1.6999999999999998E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.4634146341463415 0.45985401459854014 0.45949890537582094 0.45946340395514584 0.42857142857142855 0.06976744186046512 0.3870671161507815]
+Total: 5.958047125067004
+Mean: 0.3310
+HAH-error: null
+RMS-error: null
+History: (5.958047125067004 7.731723766072029 13.093948628663522 7.324357109072003 8.72466264447046 8.72466264447046 8.72466264447046 10.942283942071214 10.942283942071214 10.942283942071214)
+Size: 32
+--- Population Statistics ---
+Average total errors in population: 9.679219102882419
+Median total errors in population: 8.68134162203169
+Average program size in population (points): 29.635
+Number of unique programs in population:  693
+Max copy number of one program:  30
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 10
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 10
+Current time: 1362365627493
+Best program: (tag_exec_1271 (((6.0) float_add boolean_pop 8.0) ((tag_exec_1271 (6.0 tag_exec_1271 (10.0 (float_mult)) float_mult) 8.0) return_float_pop) 10.0 boolean_swap (exec_eq) float_pop float_gt 5.0 environment_begin) boolean_or signal_error 1.0)
+Partial simplification: (tag_exec_1271 (((tag_exec_1271 (6.0 tag_exec_1271 (10.0 (float_mult)) float_mult))) boolean_swap (exec_eq) float_pop float_gt 5.0))
+Cosmos Data: {999 17.0000036, 750 11.277632492751989, 500 8.767049976558557, 250 7.86882338167887, 0 5.958047125067004}
+Errors: [1.6999999999999998E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.4634146341463415 0.45985401459854014 0.45949890537582094 0.45946340395514584 0.42857142857142855 0.06976744186046512 0.3870671161507815]
+Total: 5.958047125067004
+Mean: 0.3310
+HAH-error: null
+RMS-error: null
+History: (5.958047125067004 6.690004864802001 7.891066196557733 7.891066196557733 7.891066196557733 7.891066196557733 13.418335001035274 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 33
+--- Population Statistics ---
+Average total errors in population: 9.775473859317968
+Median total errors in population: 8.767049976558557
+Average program size in population (points): 30.061
+Number of unique programs in population:  709
+Max copy number of one program:  35
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 11
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 11
+Current time: 1362365628735
+Best program: (tag_exec_1271 (((6.0) float_add boolean_pop 8.0) ((tag_exec_1271 (6.0 tag_exec_1271 (10.0 (float_mult)) float_mult) 8.0 return_float_pop)) boolean_swap (exec_eq) float_pop float_gt 5.0 environment_begin) boolean_or signal_error 1.0)
+Partial simplification: (tag_exec_1271 (((6.0) float_add) ((tag_exec_1271 (6.0 tag_exec_1271 (10.0 (float_mult)) float_mult) 8.0 return_float_pop)) boolean_swap (exec_eq) float_pop float_gt 5.0 environment_begin) boolean_or signal_error 1.0)
+Cosmos Data: {999 17.0000022, 750 11.277632492751989, 500 8.767049976558557, 250 7.8679215043750395, 0 5.958047125067004}
+Errors: [1.6999999999999998E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.4634146341463415 0.45985401459854014 0.45949890537582094 0.45946340395514584 0.42857142857142855 0.06976744186046512 0.3870671161507815]
+Total: 5.958047125067004
+Mean: 0.3310
+HAH-error: null
+RMS-error: null
+History: (5.958047125067004 5.958047125067004 8.941238003604452 6.86077779487787 6.86077779487787 11.148990539835323 7.228669625627898 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 32
+--- Population Statistics ---
+Average total errors in population: 9.769507590425551
+Median total errors in population: 8.767049976558557
+Average program size in population (points): 30.554
+Number of unique programs in population:  725
+Max copy number of one program:  35
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 12
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 12
+Current time: 1362365630125
+Best program: (tag_exec_1271 (((6.0) float_add boolean_pop 8.0) ((tag_exec_1271 (6.0 tag_exec_1271 (10.0 (float_mult)) float_mult) 8.0 return_float_pop)) boolean_swap (exec_eq) float_pop float_gt 5.0 environment_begin) boolean_or signal_error 1.0)
+Partial simplification: (tag_exec_1271 (((6.0) float_add boolean_pop 8.0) ((tag_exec_1271 (6.0 tag_exec_1271 (10.0 (float_mult)) float_mult) return_float_pop)) boolean_swap (exec_eq) float_pop float_gt 5.0) signal_error)
+Cosmos Data: {999 17.0000051, 750 11.464039710556357, 500 8.816409796035032, 250 7.86882338167887, 0 5.958047125067004}
+Errors: [1.6999999999999998E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.4634146341463415 0.45985401459854014 0.45949890537582094 0.45946340395514584 0.42857142857142855 0.06976744186046512 0.3870671161507815]
+Total: 5.958047125067004
+Mean: 0.3310
+HAH-error: null
+RMS-error: null
+History: (5.958047125067004 6.932468806554353 8.141648515734063 7.555981198946867 11.412374617447524 12.111149208707644 8.80439219265216 7.609529124027569 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 32
+--- Population Statistics ---
+Average total errors in population: 10.026383263170398
+Median total errors in population: 8.816409796035032
+Average program size in population (points): 31.038
+Number of unique programs in population:  715
+Max copy number of one program:  37
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 13
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 13
+Current time: 1362365631520
+Best program: (tag_exec_1271 (((6.0) float_add boolean_pop 8.0) ((tag_exec_1271 (6.0 tag_exec_1271 (10.0 (float_mult)) float_mult) 8.0 return_float_pop)) boolean_swap (exec_eq) float_pop float_gt 5.0 environment_begin) boolean_or signal_error 1.0)
+Partial simplification: (tag_exec_1271 (((6.0) float_add boolean_pop 8.0) ((tag_exec_1271 (6.0 tag_exec_1271 (10.0 (float_mult)) float_mult) 8.0 return_float_pop)) boolean_swap (exec_eq) float_pop float_gt 5.0 environment_begin) boolean_or signal_error)
+Cosmos Data: {999 17.0000068, 750 11.277632492751989, 500 8.917044460285547, 250 7.86882338167887, 0 5.958047125067004}
+Errors: [1.6999999999999998E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.4634146341463415 0.45985401459854014 0.45949890537582094 0.45946340395514584 0.42857142857142855 0.06976744186046512 0.3870671161507815]
+Total: 5.958047125067004
+Mean: 0.3310
+HAH-error: null
+RMS-error: null
+History: (5.958047125067004 5.958047125067004 5.958047125067004 7.861817163055409 7.861817163055409 7.861817163055409 7.861817163055409 7.861817163055409 7.861817163055409 8.761243210222503 9.489504010312901 7.86882338167887 16.0 16.0)
+Size: 32
+--- Population Statistics ---
+Average total errors in population: 9.95234965608369
+Median total errors in population: 8.917044460285547
+Average program size in population (points): 32.603
+Number of unique programs in population:  768
+Max copy number of one program:  21
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 14
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 14
+Current time: 1362365633038
+Best program: (tag_exec_1271 (((6.0) float_add boolean_pop 8.0) ((tag_exec_1271 (6.0 tag_exec_1271 (10.0 (float_mult)) float_mult) 8.0 return_float_pop)) boolean_swap (exec_eq) float_pop float_gt 5.0 environment_begin) boolean_or signal_error 1.0)
+Partial simplification: (tag_exec_1271 (((6.0) float_add 8.0) ((tag_exec_1271 (6.0 tag_exec_1271 (10.0 (float_mult)) float_mult) 8.0 return_float_pop)) boolean_swap (exec_eq) float_pop float_gt 5.0 environment_begin) boolean_or 1.0)
+Cosmos Data: {999 17.0000024, 750 11.277632492751989, 500 8.918843509810536, 250 8.00198044311089, 0 5.958047125067004}
+Errors: [1.6999999999999998E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.4634146341463415 0.45985401459854014 0.45949890537582094 0.45946340395514584 0.42857142857142855 0.06976744186046512 0.3870671161507815]
+Total: 5.958047125067004
+Mean: 0.3310
+HAH-error: null
+RMS-error: null
+History: (5.958047125067004 8.917044460285547 8.917044460285547 9.383413908119168 8.79395514151493 9.004786608111319 8.4895074103129 11.795643484310473 7.891066196557733 7.891066196557733 13.418335001035274 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 32
+--- Population Statistics ---
+Average total errors in population: 9.863193394207796
+Median total errors in population: 8.918843509810536
+Average program size in population (points): 33.609
+Number of unique programs in population:  746
+Max copy number of one program:  13
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 15
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 15
+Current time: 1362365634350
+Best program: (tag_exec_1271 ((float_sub (tag_exec_1271) ((6.0 tag_exec_1271 10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) tagged_7037) exec_when float_swap 5.0 (tag_exec_1271) 10.0 (float_mult) 9.0 7.0 9.0 tag_exec_1271) (6.0 tag_exec_1271 (10.0 float_mult) 9.0 8.0 return_fromfloat)))
+Partial simplification: (tag_exec_1271 ((float_sub (tag_exec_1271) ((6.0 tag_exec_1271 10.0 (10.0 float_mult) 10.0 tag_float_4486 9.0 float_mult return_float_pop)) exec_when float_swap 5.0 (tag_exec_1271) 10.0 (float_mult) 9.0 7.0 9.0 tag_exec_1271) (6.0 tag_exec_1271 (10.0 float_mult) 9.0 8.0 return_fromfloat)))
+Cosmos Data: {999 17.0000051, 750 11.143839766595992, 500 8.880344655756621, 250 7.86882338167887, 0 5.8998498788467595}
+Errors: [1.6999999999999998E-6 0.8 0.6363636363636364 0.5 0.38461538461538464 0.2857142857142857 0.2 0.125 0.058823529411764705 0 1.0 0.1 0.1044776119402985 0.10492292391844853 0.10496743075928597 0.14285714285714285 0.5862068965517241 0.7658993367147874]
+Total: 5.8998498788467595
+Mean: 0.3278
+HAH-error: null
+RMS-error: null
+History: (5.8998498788467595 7.562213217194552 7.4963261513946575 7.241637293277541 7.241637293277541 6.824362830156929 12.659913816323604 12.659913816323604 8.955110765322637 8.80439219265216 7.609529124027569 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 44
+--- Population Statistics ---
+Average total errors in population: 9.87149966681065
+Median total errors in population: 8.880344655756621
+Average program size in population (points): 33.897
+Number of unique programs in population:  748
+Max copy number of one program:  17
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 16
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 16
+Current time: 1362365635777
+Best program: (tag_exec_1271 (6.0 (tag_exec_1271 (10.0 (10.0 float_mult) boolean_swap tag_exec_1271 tag_exec_4370 (float_eq tag_exec_1271 return_fromfloat boolean_fromfloat 10.0 float_mult 3.0 7.0 9.0 tag_exec_1271) 6.0 tag_exec_1271 (10.0 float_mult) exec_if return_float_pop))))
+Partial simplification: (tag_exec_1271 (6.0 (tag_exec_1271 (10.0 (10.0) boolean_swap tag_exec_1271 tag_exec_4370 (float_eq tag_exec_1271 return_fromfloat boolean_fromfloat 10.0 3.0 7.0 9.0 tag_exec_1271) 6.0 tag_exec_1271 (10.0 float_mult) exec_if return_float_pop))))
+Cosmos Data: {999 17.0000051, 750 11.036384824537105, 500 8.835382214045582, 250 7.833155895821585, 0 5.167641401050046}
+Errors: [1.6999999999999998E-6 0.7142857142857143 0.5 0.3333333333333333 0.2 0.09090909090909091 0 0.07692307692307693 0.14285714285714285 0.2 1.0 0.1 0.1044776119402985 0.10492292391844853 0.10496743075928597 0.14285714285714285 0.5862068965517241 0.7658993367147874]
+Total: 5.167641401050046
+Mean: 0.2871
+HAH-error: null
+RMS-error: null
+History: (5.167641401050046 8.677430752268078 8.677430752268078 9.110187946670292 9.110187946670292 5.958047125067004 5.958047125067004 7.861817163055409 7.731723766072029 13.093948628663522 7.324357109072003 8.72466264447046 8.72466264447046 8.72466264447046 10.942283942071214 10.942283942071214 10.942283942071214)
+Size: 32
+--- Population Statistics ---
+Average total errors in population: 9.81668966907538
+Median total errors in population: 8.835382214045582
+Average program size in population (points): 35.18
+Number of unique programs in population:  746
+Max copy number of one program:  15
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 17
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 17
+Current time: 1362365637243
+Best program: ((tag_exec_1271 (6.0 tag_exec_1271 exec_dup ((float_sub (tag_exec_1271) (float_pop 6.0 tag_exec_1271 ((10.0 10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop)) boolean_swap 2.0 exec_eq) float_pop float_gt) 5.0 4.0)) environment_end return_exec_pop)
+Partial simplification: ((tag_exec_1271 (6.0 exec_dup ((float_sub (tag_exec_1271) (float_pop 6.0 tag_exec_1271 ((10.0 10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop)) boolean_swap 2.0 exec_eq) float_pop) 5.0 4.0)) environment_end return_exec_pop)
+Cosmos Data: {999 17.0000034, 750 11.37896819045836, 500 9.091192518358001, 250 8.034841498761844, 0 5.597741010823589}
+Errors: [2.2E-6 0.6 0.3333333333333333 0.14285714285714285 0 0.1111111111111111 0.2 0.2727272727272727 0.3333333333333333 0.38461538461538464 1.0 0.29411764705882354 0.41732283464566927 0.052581714827096164 0.8348608702832137 0.3333333333333333 0.12195121951219512 0.16559361318568117]
+Total: 5.597741010823589
+Mean: 0.3110
+HAH-error: null
+RMS-error: null
+History: (5.597741010823589 8.478246219119704 6.374486820950981 8.807122139458428 7.731723766072029 7.731723766072029 7.731723766072029 12.414823155953599 7.861817163055409 7.861817163055409 9.171757597760575 9.171757597760575 9.880971951631167 10.324629807057548 10.463653163438735 10.463653163438735 10.463653163438735 10.463653163438735)
+Size: 37
+--- Population Statistics ---
+Average total errors in population: 10.078957029253568
+Median total errors in population: 9.091192518358001
+Average program size in population (points): 35.345
+Number of unique programs in population:  746
+Max copy number of one program:  28
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 18
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 18
+Current time: 1362365638658
+Best program: ((tag_exec_1271 (6.0 tag_exec_1271 exec_dup ((float_sub (tag_exec_1271) (float_pop 6.0 tag_exec_1271 ((10.0 10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop)) boolean_swap 2.0 exec_eq) float_pop float_gt) 5.0 4.0)) environment_end return_exec_pop)
+Partial simplification: ((tag_exec_1271 (6.0 tag_exec_1271 exec_dup ((float_sub (tag_exec_1271) (float_pop 6.0 tag_exec_1271 ((10.0 10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult)) boolean_swap 2.0 exec_eq) float_pop float_gt) 5.0 4.0)) environment_end return_exec_pop)
+Cosmos Data: {999 17.0000017, 750 11.09680660229644, 500 9.102053052659752, 250 8.00389981588517, 0 5.597741010823589}
+Errors: [2.2E-6 0.6 0.3333333333333333 0.14285714285714285 0 0.1111111111111111 0.2 0.2727272727272727 0.3333333333333333 0.38461538461538464 1.0 0.29411764705882354 0.41732283464566927 0.052581714827096164 0.8348608702832137 0.3333333333333333 0.12195121951219512 0.16559361318568117]
+Total: 5.597741010823589
+Mean: 0.3110
+HAH-error: null
+RMS-error: null
+History: (5.597741010823589 8.278227901365685 9.091192518358001 10.639837526394238 9.433659862309703 10.089054745389424 6.645231636362084 8.65404806059182 10.918596632516975 10.918596632516975 10.918596632516975 6.86077779487787 11.148990539835323 7.228669625627898 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 37
+--- Population Statistics ---
+Average total errors in population: 9.966303310202514
+Median total errors in population: 9.102053052659752
+Average program size in population (points): 36.831
+Number of unique programs in population:  809
+Max copy number of one program:  24
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 19
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 19
+Current time: 1362365640200
+Best program: (tag_exec_1271 (6.0 (return_exec_pop (10.0 0.0 (6.0 tag_exec_1271 (exec_dup 10.0) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult exec_swap))) boolean_swap 2.0 exec_eq) float_pop float_gt 5.0)) boolean_fromfloat)
+Partial simplification: (tag_exec_1271 (6.0 (return_exec_pop (0.0 (6.0 tag_exec_1271 (exec_dup 10.0) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult exec_swap))) boolean_swap 2.0 exec_eq) float_pop float_gt 5.0)))
+Cosmos Data: {999 17.0000034, 750 10.681872968084672, 500 8.774178859358296, 250 7.816329318810091, 0 5.450171913254493}
+Errors: [2.2E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.29411764705882354 0.41732283464566927 0.052581714827096164 0.8348608702832137 0.3333333333333333 0.12195121951219512 0.16559361318568117]
+Total: 5.450171913254493
+Mean: 0.3028
+HAH-error: null
+RMS-error: null
+History: (5.450171913254493 7.382612719702182 9.330495861421758 8.807122139458428 7.638930490743759 8.00389981588517 8.00389981588517 9.383413908119168 7.241637293277541 6.824362830156929 12.659913816323604 12.659913816323604 8.955110765322637 8.80439219265216 7.609529124027569 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 39
+--- Population Statistics ---
+Average total errors in population: 9.681337817821598
+Median total errors in population: 8.774178859358296
+Average program size in population (points): 38.058
+Number of unique programs in population:  765
+Max copy number of one program:  32
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 20
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 20
+Current time: 1362365641779
+Best program: (tag_exec_1271 (6.0 (return_exec_pop (10.0 0.0 (6.0 tag_exec_1271 (exec_dup 10.0) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult exec_swap))) boolean_swap 2.0 exec_eq) float_pop float_gt 5.0)) boolean_fromfloat)
+Partial simplification: (tag_exec_1271 (6.0 ((10.0 0.0 (6.0 tag_exec_1271 (10.0) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult exec_swap))) boolean_swap 2.0 exec_eq) float_pop float_gt 5.0)) boolean_fromfloat)
+Cosmos Data: {999 17.0000034, 750 10.99586997143641, 500 8.884838168578682, 250 7.837792319870125, 0 5.450171913254493}
+Errors: [2.2E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.29411764705882354 0.41732283464566927 0.052581714827096164 0.8348608702832137 0.3333333333333333 0.12195121951219512 0.16559361318568117]
+Total: 5.450171913254493
+Mean: 0.3028
+HAH-error: null
+RMS-error: null
+History: (5.450171913254493 5.450171913254493 7.382612719702182 9.330495861421758 8.807122139458428 7.638930490743759 8.00389981588517 8.00389981588517 9.383413908119168 7.241637293277541 6.824362830156929 12.659913816323604 12.659913816323604 8.955110765322637 8.80439219265216 7.609529124027569 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 39
+--- Population Statistics ---
+Average total errors in population: 9.745422828720441
+Median total errors in population: 8.884838168578682
+Average program size in population (points): 38.736
+Number of unique programs in population:  789
+Max copy number of one program:  22
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 21
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 21
+Current time: 1362365643431
+Best program: (tag_exec_1271 ((tag_exec_1271 (exec_dup 10.0) (tag_exec_1271 (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop)) boolean_swap 2.0 exec_eq) float_pop float_gt 5.0)) boolean_fromfloat)
+Partial simplification: (tag_exec_1271 (((exec_dup 10.0) (tag_exec_1271 (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop)) boolean_swap 2.0 exec_eq) float_pop float_gt 5.0)))
+Cosmos Data: {999 17.0000017, 750 10.990518536105071, 500 9.007889771273701, 250 7.945053124788585, 0 5.450171913254493}
+Errors: [2.2E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.29411764705882354 0.41732283464566927 0.052581714827096164 0.8348608702832137 0.3333333333333333 0.12195121951219512 0.16559361318568117]
+Total: 5.450171913254493
+Mean: 0.3028
+HAH-error: null
+RMS-error: null
+History: (5.450171913254493 11.43950902836541 11.43950902836541 11.43950902836541 8.328909053028553 14.941947047619989 6.71992438437395 8.744590044115395 11.277632492751989 10.896136700073816 10.896136700073816 10.896136700073816 8.941238003604452 6.86077779487787 6.86077779487787 11.148990539835323 7.228669625627898 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 32
+--- Population Statistics ---
+Average total errors in population: 9.766009005002964
+Median total errors in population: 9.007889771273701
+Average program size in population (points): 39.398
+Number of unique programs in population:  794
+Max copy number of one program:  23
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 22
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 22
+Current time: 1362365645055
+Best program: ((tag_exec_1271 (6.0 tag_exec_1271 exec_dup ((float_sub (tag_exec_1271) (float_pop 6.0 tag_exec_1271 ((10.0 10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop)) boolean_swap 2.0 exec_eq) float_pop 7.0) 5.0 4.0)) environment_end return_exec_pop)
+Partial simplification: ((tag_exec_1271 (6.0 tag_exec_1271 exec_dup ((float_sub (tag_exec_1271) (float_pop 6.0 tag_exec_1271 ((10.0 10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop)) 2.0 exec_eq) float_pop 7.0) 5.0 4.0)) environment_end return_exec_pop)
+Cosmos Data: {999 17.0000017, 750 11.086511034044971, 500 9.273504052042924, 250 8.125477004554499, 0 5.597741010823589}
+Errors: [2.2E-6 0.6 0.3333333333333333 0.14285714285714285 0 0.1111111111111111 0.2 0.2727272727272727 0.3333333333333333 0.38461538461538464 1.0 0.29411764705882354 0.41732283464566927 0.052581714827096164 0.8348608702832137 0.3333333333333333 0.12195121951219512 0.16559361318568117]
+Total: 5.597741010823589
+Mean: 0.3110
+HAH-error: null
+RMS-error: null
+History: (5.597741010823589 5.597741010823589 5.597741010823589 5.597741010823589 7.560612393334569 8.278227901365685 9.091192518358001 10.639837526394238 9.433659862309703 10.089054745389424 6.645231636362084 8.65404806059182 10.918596632516975 10.918596632516975 10.918596632516975 6.86077779487787 11.148990539835323 7.228669625627898 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 37
+--- Population Statistics ---
+Average total errors in population: 9.998445540978322
+Median total errors in population: 9.273504052042924
+Average program size in population (points): 40.788
+Number of unique programs in population:  808
+Max copy number of one program:  20
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 23
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 23
+Current time: 1362365646860
+Best program: ((6.0) tag_exec_1271 (6.0) tag_exec_1271 (((tag_exec_1271 (6.0 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup) 10.0) (tag_exec_1271) 6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop)))) boolean_swap 2.0 exec_eq) float_pop float_gt 5.0)) boolean_fromfloat)
+Partial simplification: ((6.0) tag_exec_1271 (6.0) tag_exec_1271 (((tag_exec_1271 (6.0 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup)) (tag_exec_1271) 6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop)))) boolean_swap 2.0 exec_eq) float_pop float_gt 5.0)) boolean_fromfloat)
+Cosmos Data: {999 16.438828392086986, 750 10.963684935525706, 500 8.864158867931003, 250 7.869716412458852, 0 5.356427348978247}
+Errors: [2.2E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0.2222222222222222 0.26 0.052581714827096164 0.8348608702832137 0.2631578947368421 0.29213483146067415 0.20105913503971756]
+Total: 5.356427348978247
+Mean: 0.2976
+HAH-error: null
+RMS-error: null
+History: (5.356427348978247 6.699209613609891 9.491241184391448 9.538088762208263 8.328909053028553 8.328909053028553 8.328909053028553 14.941947047619989 6.71992438437395 8.744590044115395 11.277632492751989 10.896136700073816 10.896136700073816 10.896136700073816 8.941238003604452 6.86077779487787 6.86077779487787 11.148990539835323 7.228669625627898 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 48
+--- Population Statistics ---
+Average total errors in population: 9.670181402795905
+Median total errors in population: 8.864158867931003
+Average program size in population (points): 41.738
+Number of unique programs in population:  814
+Max copy number of one program:  17
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 24
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 24
+Current time: 1362365648525
+Best program: (tag_exec_1271 ((float_sub (tag_exec_1271) (6.0 tag_exec_1271 10.0 (10.0 float_mult) 6.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop 9.0 tag_exec_1271 (6.0 (tag_exec_1271 (10.0 float_pop float_mult) tag_float_4486 9.0 float_mult 8.0 environment_end float_mult 9.0 return_float_pop)) 10.0 boolean_dup exec_eq) float_pop float_gt 5.0 4.0) environment_end return_exec_pop))
+Partial simplification: (tag_exec_1271 ((float_sub (tag_exec_1271) (6.0 tag_exec_1271 10.0 (10.0 float_mult) 6.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop tag_exec_1271 (6.0 (tag_exec_1271 (10.0 float_pop float_mult) tag_float_4486 9.0 float_mult 8.0 environment_end float_mult 9.0 return_float_pop)) 10.0 exec_eq) float_pop float_gt 4.0) return_exec_pop))
+Cosmos Data: {999 17.0000051, 750 11.046147389297653, 500 8.924393116089117, 250 8.1320507859879, 0 5.537504566182322}
+Errors: [2.4E-6 0.6 0.3333333333333333 0.14285714285714285 0 0.1111111111111111 0.2 0.2727272727272727 0.3333333333333333 0.38461538461538464 1.0 0.047619047619047616 0.5286624203821656 0.5105370496261047 0.9372330224043239 0.09090909090909091 0.02127659574468085 0.023287361519330772]
+Total: 5.537504566182322
+Mean: 0.3076
+HAH-error: null
+RMS-error: null
+History: (5.537504566182322 8.40940534683076 8.001840999051161 11.015705523889423 6.39848018791091 6.39848018791091 7.780583452432662 9.08921445685827 9.091192518358001 10.639837526394238 9.433659862309703 10.089054745389424 6.645231636362084 8.65404806059182 10.918596632516975 10.918596632516975 10.918596632516975 6.86077779487787 11.148990539835323 7.228669625627898 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 48
+--- Population Statistics ---
+Average total errors in population: 9.921648714194841
+Median total errors in population: 8.924393116089117
+Average program size in population (points): 42.336
+Number of unique programs in population:  817
+Max copy number of one program:  24
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 25
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 25
+Current time: 1362365650172
+Best program: (((tag_exec_1271 (6.0 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup) float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 1.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 8.0 return_fromfloat)) boolean_fromfloat)
+Partial simplification: (((tag_exec_1271 (6.0 3.0 ((tag_exec_1271 (float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 1.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 return_fromfloat)))
+Cosmos Data: {999 17.0000064, 750 11.09680660229644, 500 8.861829874859072, 250 7.9844816884188035, 0 5.297782365451254}
+Errors: [2.2E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0 0.2815533980582524 0.052581714827096164 0.8348608702832137 0.043478260869565216 0.27071823204419887 0.5841792089604481]
+Total: 5.297782365451254
+Mean: 0.2943
+HAH-error: null
+RMS-error: null
+History: (5.297782365451254 7.9844816884188035 8.55415870960713 8.560610693334569 8.560610693334569 8.560610693334569 8.560610693334569 9.32434114915518 9.330495861421758 8.807122139458428 7.638930490743759 8.00389981588517 8.00389981588517 9.383413908119168 7.241637293277541 6.824362830156929 12.659913816323604 12.659913816323604 8.955110765322637 8.80439219265216 7.609529124027569 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 46
+--- Population Statistics ---
+Average total errors in population: 9.827237004025646
+Median total errors in population: 8.861829874859072
+Average program size in population (points): 41.618
+Number of unique programs in population:  822
+Max copy number of one program:  19
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 26
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 26
+Current time: 1362365651824
+Best program: (((tag_exec_1271 (6.0 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup) float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 1.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 8.0 return_fromfloat)) boolean_fromfloat)
+Partial simplification: (((tag_exec_1271 (6.0 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup)) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 1.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 return_fromfloat)) boolean_fromfloat)
+Cosmos Data: {999 17.0000064, 750 11.09622025394063, 500 8.93626857528863, 250 7.9132381606336555, 0 5.297782365451254}
+Errors: [2.2E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0 0.2815533980582524 0.052581714827096164 0.8348608702832137 0.043478260869565216 0.27071823204419887 0.5841792089604481]
+Total: 5.297782365451254
+Mean: 0.2943
+HAH-error: null
+RMS-error: null
+History: (5.297782365451254 7.18644509172002 8.317623135773399 8.317623135773399 8.317623135773399 8.317623135773399 8.364470713590215 8.364470713590215 8.364470713590215 8.328909053028553 14.941947047619989 6.71992438437395 8.744590044115395 11.277632492751989 10.896136700073816 10.896136700073816 10.896136700073816 8.941238003604452 6.86077779487787 6.86077779487787 11.148990539835323 7.228669625627898 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 46
+--- Population Statistics ---
+Average total errors in population: 9.84146936380778
+Median total errors in population: 8.93626857528863
+Average program size in population (points): 42.487
+Number of unique programs in population:  823
+Max copy number of one program:  10
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 27
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 27
+Current time: 1362365653608
+Best program: (((tag_exec_1271 (6.0 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup) float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 1.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 8.0 return_fromfloat)) boolean_fromfloat)
+Partial simplification: (((tag_exec_1271 (6.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup) float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 1.0)) 2.0 5.0 boolean_pop) 9.0 8.0 return_fromfloat)) boolean_fromfloat)
+Cosmos Data: {999 17.0000064, 750 11.391374063341834, 500 8.891064496557734, 250 7.891066196557733, 0 5.297782365451254}
+Errors: [2.2E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0 0.2815533980582524 0.052581714827096164 0.8348608702832137 0.043478260869565216 0.27071823204419887 0.5841792089604481]
+Total: 5.297782365451254
+Mean: 0.2943
+HAH-error: null
+RMS-error: null
+History: (5.297782365451254 5.297782365451254 7.222619005167729 7.222619005167729 8.16239225554252 7.519342242923311 7.112241841450842 8.16239225554252 9.926720528175016 9.806238187052415 8.585001543069456 8.585001543069456 10.681872968084672 10.681872968084672 8.204376450691875 8.253372008866338 13.926527624180476 7.646809549006137 8.16923712143371 8.274672399509726 8.887211657637218 8.887211657637218 7.228669625627898 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 46
+--- Population Statistics ---
+Average total errors in population: 9.883268856748826
+Median total errors in population: 8.891064496557734
+Average program size in population (points): 42.685
+Number of unique programs in population:  831
+Max copy number of one program:  11
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 28
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 28
+Current time: 1362365655491
+Best program: (((tag_exec_1271 ((tag_exec_1271 (((exec_dup 5.0 tag_exec_1271 (environment_begin ((6.0) boolean_pop float_pop (1.0 boolean_not) environment_end 5.0 float_add) (6.0) float_add float_mult) 1.0 environment_end 5.0 float_add ((6.0)) float_add) (10.0 environment_begin boolean_not float_mult) boolean_eq)) (6.0 float_add) float_mult)) 1.0)) float_gt boolean_eq 0.0)
+Partial simplification: (((tag_exec_1271 ((tag_exec_1271 (((exec_dup 5.0 tag_exec_1271 (environment_begin ((6.0) boolean_pop (1.0 boolean_not) environment_end 5.0 float_add) (6.0) float_add float_mult) 1.0 environment_end 5.0 float_add (6.0) float_add) (10.0 environment_begin boolean_not float_mult))) (6.0 float_add) float_mult)) 1.0)) float_gt boolean_eq 0.0)
+Cosmos Data: {999 17.0000102, 750 11.01973908153341, 500 8.772966380236307, 250 7.9132381606336555, 0 4.953183555404359}
+Errors: [1.6999999999999998E-6 0.7142857142857143 0.5 0.3333333333333333 0.2 0.09090909090909091 0 0.07692307692307693 0.14285714285714285 0.2 1.0 0.047619047619047616 0.3884297520661157 0.08408903544929926 0.2525787723352686 0.09090909090909091 0.15577889447236182 0.6754689042448174]
+Total: 4.953183555404359
+Mean: 0.2752
+HAH-error: null
+RMS-error: null
+History: (4.953183555404359 7.836938689159492 5.915129250067847 5.915129250067847 8.208960951204636 6.39848018791091 7.86882338167887 7.86882338167887 7.86882338167887 6.690004864802001 6.690004864802001 6.690004864802001 6.690004864802001 6.690004864802001 6.690004864802001 7.683200668920197 8.121139958267339 7.623638410284241 7.562213217194552 7.562213217194552 7.235116725479331 6.86077779487787 11.148990539835323 7.228669625627898 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 52
+--- Population Statistics ---
+Average total errors in population: 9.729084765983872
+Median total errors in population: 8.772966380236307
+Average program size in population (points): 43.352
+Number of unique programs in population:  825
+Max copy number of one program:  12
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 29
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 29
+Current time: 1362365657229
+Best program: (((tag_exec_1271 (6.0 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup) float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 4.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 8.0 return_fromfloat)) boolean_fromfloat)
+Partial simplification: (((tag_exec_1271 (6.0 3.0 ((tag_exec_1271 ((tag_exec_1271 tag_exec_1271 exec_dup) float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 4.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 return_fromfloat)) boolean_fromfloat)
+Cosmos Data: {999 17.0000017, 750 11.180049791927678, 500 8.873722950261664, 250 7.943777394696342, 0 4.7379618544860636}
+Errors: [2.2E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0 0.2815533980582524 0.052581714827096164 0.8348608702832137 0.043478260869565216 0.27071823204419887 0.024358697995257597]
+Total: 4.7379618544860636
+Mean: 0.2632
+HAH-error: null
+RMS-error: null
+History: (4.7379618544860636 6.640033999902885 6.605613349225573 6.605615049225573 5.915129250067847 8.208960951204636 6.39848018791091 7.86882338167887 7.86882338167887 7.86882338167887 6.690004864802001 6.690004864802001 6.690004864802001 6.690004864802001 6.690004864802001 6.690004864802001 7.683200668920197 8.121139958267339 7.623638410284241 7.562213217194552 7.562213217194552 7.235116725479331 6.86077779487787 11.148990539835323 7.228669625627898 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 46
+--- Population Statistics ---
+Average total errors in population: 9.803808443894551
+Median total errors in population: 8.873722950261664
+Average program size in population (points): 43.471
+Number of unique programs in population:  878
+Max copy number of one program:  7
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 30
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 30
+Current time: 1362365658968
+Best program: (((tag_exec_1271 (6.0 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup) float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 4.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 8.0 return_fromfloat)) boolean_fromfloat)
+Partial simplification: (((tag_exec_1271 (6.0 3.0 ((tag_exec_1271 (tag_exec_1271 6.0 tag_exec_1271 exec_dup float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 4.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 8.0 return_fromfloat)) boolean_fromfloat)
+Cosmos Data: {999 17.0000017, 750 11.09680660229644, 500 8.752001219809042, 250 7.9132381606336555, 0 4.7379618544860636}
+Errors: [2.2E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0 0.2815533980582524 0.052581714827096164 0.8348608702832137 0.043478260869565216 0.27071823204419887 0.024358697995257597]
+Total: 4.7379618544860636
+Mean: 0.2632
+HAH-error: null
+RMS-error: null
+History: (4.7379618544860636 4.7379618544860636 6.640033999902885 6.605613349225573 6.605615049225573 5.915129250067847 8.208960951204636 6.39848018791091 7.86882338167887 7.86882338167887 7.86882338167887 6.690004864802001 6.690004864802001 6.690004864802001 6.690004864802001 6.690004864802001 6.690004864802001 7.683200668920197 8.121139958267339 7.623638410284241 7.562213217194552 7.562213217194552 7.235116725479331 6.86077779487787 11.148990539835323 7.228669625627898 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 46
+--- Population Statistics ---
+Average total errors in population: 9.766540110829892
+Median total errors in population: 8.752001219809042
+Average program size in population (points): 43.33
+Number of unique programs in population:  841
+Max copy number of one program:  19
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 31
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 31
+Current time: 1362365660693
+Best program: (((tag_exec_1271 (6.0 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup) float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 4.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 8.0 return_fromfloat)) boolean_fromfloat)
+Partial simplification: (((tag_exec_1271 (6.0 3.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup)) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 4.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 8.0)) boolean_fromfloat)
+Cosmos Data: {999 17.0000034, 750 11.119647323480235, 500 9.068017535110503, 250 7.991892864112453, 0 4.7379618544860636}
+Errors: [2.2E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0 0.2815533980582524 0.052581714827096164 0.8348608702832137 0.043478260869565216 0.27071823204419887 0.024358697995257597]
+Total: 4.7379618544860636
+Mean: 0.2632
+HAH-error: null
+RMS-error: null
+History: (4.7379618544860636 4.7379618544860636 6.580389480186616 6.580389480186616 7.861077481389456 7.861077481389456 8.125477004554499 8.16239225554252 8.16239225554252 7.519342242923311 7.112241841450842 8.16239225554252 9.926720528175016 9.806238187052415 8.585001543069456 8.585001543069456 10.681872968084672 10.681872968084672 8.204376450691875 8.253372008866338 13.926527624180476 7.646809549006137 8.16923712143371 8.274672399509726 8.887211657637218 8.887211657637218 7.228669625627898 7.005653748619417 8.669640754246288 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 46
+--- Population Statistics ---
+Average total errors in population: 9.94202817872508
+Median total errors in population: 9.068017535110503
+Average program size in population (points): 43.643
+Number of unique programs in population:  832
+Max copy number of one program:  29
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 32
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 32
+Current time: 1362365662510
+Best program: (((tag_exec_1271 (float_dup 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup) float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 4.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 8.0 return_fromfloat)) boolean_fromfloat)
+Partial simplification: (((tag_exec_1271 (float_dup 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup) float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 4.0) boolean_eq) 2.0 5.0 boolean_pop) 8.0 return_fromfloat)) boolean_fromfloat)
+Cosmos Data: {999 17.0000051, 750 11.256335314288545, 500 9.106317878753321, 250 8.096312466200812, 0 4.7379618544860636}
+Errors: [2.2E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0 0.2815533980582524 0.052581714827096164 0.8348608702832137 0.043478260869565216 0.27071823204419887 0.024358697995257597]
+Total: 4.7379618544860636
+Mean: 0.2632
+HAH-error: null
+RMS-error: null
+History: (4.7379618544860636 16.0 16.0 6.418758098386703 5.686351570388277 6.640033999902885 9.273504052042924 6.970694466004841 5.721149562547044 8.767049976558557 8.767049976558557 8.767049976558557 8.767049976558557 8.767049976558557 8.767049976558557 7.86882338167887 7.86882338167887 7.86882338167887 9.45952201850383 9.45952201850383 6.690004864802001 6.690004864802001 9.481478619630899 9.481478619630899 9.481478619630899 7.84956732706291 6.983578965257895 12.775245268210934 8.669640754246288 7.73542210785755 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 46
+--- Population Statistics ---
+Average total errors in population: 9.96165745058328
+Median total errors in population: 9.106317878753321
+Average program size in population (points): 44.375
+Number of unique programs in population:  839
+Max copy number of one program:  17
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 33
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 33
+Current time: 1362365664419
+Best program: (((tag_exec_1271 (6.0 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup) float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 4.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 8.0 return_fromfloat)) boolean_fromfloat)
+Partial simplification: (((tag_exec_1271 (6.0 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 tag_exec_1271 exec_dup) float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add) 4.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 8.0 return_fromfloat)) boolean_fromfloat)
+Cosmos Data: {999 17.0000034, 750 10.903547875767464, 500 8.743105651605196, 250 7.970692766004841, 0 4.7379618544860636}
+Errors: [2.2E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0 0.2815533980582524 0.052581714827096164 0.8348608702832137 0.043478260869565216 0.27071823204419887 0.024358697995257597]
+Total: 4.7379618544860636
+Mean: 0.2632
+HAH-error: null
+RMS-error: null
+History: (4.7379618544860636 9.34123049516761 12.854672005676269 12.854672005676269 12.854672005676269 12.854672005676269 16.0 16.0 16.0 6.968135140519641 9.330495861421758 9.330495861421758 9.330495861421758 7.9844816884188035 9.34123049516761 9.34123049516761 9.34123049516761 7.57974349657139 7.57974349657139 7.731723766072029 7.731723766072029 7.731723766072029 7.731723766072029 7.731723766072029 7.731723766072029 9.509092959059124 7.84956732706291 6.983578965257895 12.775245268210934 8.669640754246288 7.73542210785755 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 46
+--- Population Statistics ---
+Average total errors in population: 9.673283129799977
+Median total errors in population: 8.743105651605196
+Average program size in population (points): 45.315
+Number of unique programs in population:  828
+Max copy number of one program:  11
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
+Installing next generation...
+
+-----
+Processing generation: 34
+Computing errors...
+Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 34
+Current time: 1362365666356
+Best program: (((tag_exec_1271 (6.0 3.0 7.0 ((tag_exec_1271 ((tag_exec_1271 6.0 tag_exec_1271 exec_dup) float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add boolean_pop) 4.0) boolean_eq) 2.0 5.0 boolean_pop) 9.0 8.0 return_fromfloat)) boolean_fromfloat)
+Partial simplification: (((tag_exec_1271 (6.0 3.0 ((tag_exec_1271 (float_add) (tag_exec_1271) (6.0 tag_exec_1271 (10.0 (10.0 float_mult) 10.0 float_mult tag_float_4486 9.0 float_mult float_mult return_float_pop) float_add) 4.0)) 2.0 5.0) 9.0 8.0 return_fromfloat)))
+Cosmos Data: {999 17.0000034, 750 10.656481569900402, 500 8.716291004620729, 250 7.9132381606336555, 0 4.7379618544860636}
+Errors: [2.2E-6 0.6666666666666666 0.42857142857142855 0.25 0.1111111111111111 0 0.09090909090909091 0.16666666666666666 0.23076923076923078 0.2857142857142857 1.0 0 0.2815533980582524 0.052581714827096164 0.8348608702832137 0.043478260869565216 0.27071823204419887 0.024358697995257597]
+Total: 4.7379618544860636
+Mean: 0.2632
+HAH-error: null
+RMS-error: null
+History: (4.7379618544860636 4.7379618544860636 4.7379618544860636 6.418758098386703 6.418758098386703 6.418758098386703 5.686351570388277 6.640033999902885 9.273504052042924 6.970694466004841 5.721149562547044 8.767049976558557 8.767049976558557 8.767049976558557 8.767049976558557 8.767049976558557 8.767049976558557 7.86882338167887 7.86882338167887 7.86882338167887 9.45952201850383 9.45952201850383 6.690004864802001 6.690004864802001 9.481478619630899 9.481478619630899 9.481478619630899 7.84956732706291 6.983578965257895 12.775245268210934 8.669640754246288 7.73542210785755 14.13142241146165 8.26975109598217 9.269749395982167)
+Size: 46
+--- Population Statistics ---
+Average total errors in population: 9.52205961101829
+Median total errors in population: 8.716291004620729
+Average program size in population (points): 45.811
+Number of unique programs in population:  840
+Max copy number of one program:  10
+Min copy number of one program:  1
+Median copy number:  1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Producing offspring...
