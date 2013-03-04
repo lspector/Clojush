@@ -1,12 +1,10 @@
 ;; ultra_regression.clj
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
-;; Lee Spector, lspector@hampshire.edu, 2010
+;; Lee Spector, lspector@hampshire.edu, 2013
 
 (ns clojush.examples.ultra-regression
-  (:use [clojush.pushgp.pushgp]
-        [clojush.pushstate]
-        [clojush.interpreter]
-        [clojure.math.numeric-tower]))
+  (:use clojush.pushgp.pushgp)
+  (:require clojush.examples.simple-regression))
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of x^3 - 2x^2 - x (problem 5 from the 
@@ -14,35 +12,13 @@
 ;; input instruction that uses the auxiliary stack.
 ;; Uses only the ULTRA genetic operator.
 
-(define-registered 
-  in 
-  (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
-
 (def argmap
-  {:error-function (fn [program]
-                     (doall
-                       (for [input (range 10)]
-                         (let [state (run-push program 
-                                               (push-item input :auxiliary 
-                                                          (push-item input :integer 
-                                                                     (make-push-state))))
-                               top-int (top-item :integer state)]
-                           (if (number? top-int)
-                             (abs (- top-int 
-                                     (- (* input input input) 
-                                        (* 2 input input) input)))
-                             1000)))))
-   :atom-generators (list (fn [] (rand-int 10))
-                          'in
-                          'integer_div
-                          'integer_mult
-                          'integer_add
-                          'integer_sub)
-   :mutation-probability 0.0
-   :crossover-probability 0.0
-   :simplification-probability 0.0
-   :ultra-probability 1
-   :ultra-alternation-rate 0.01
-   :ultra-alignment-deviation 1
-   :ultra-mutation-rate 0.05
-   })
+  (merge clojush.examples.simple-regression/argmap
+         {:mutation-probability 0.0
+          :crossover-probability 0.0
+          :simplification-probability 0.0
+          :ultra-probability 1
+          :ultra-alternation-rate 0.01
+          :ultra-alignment-deviation 1
+          :ultra-mutation-rate 0.05
+          }))
