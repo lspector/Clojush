@@ -47,13 +47,16 @@
                 		(println "Undefined instruction:" instruction)
                 		state))))))
 
+(def saved-state-sequence (atom []))
+
 (defn eval-push 
   "Executes the contents of the exec stack, aborting prematurely if execution limits are 
    exceeded. The resulting push state will map :termination to :normal if termination was 
    normal, or :abnormal otherwise."
   ([state] (eval-push state false false))
   ([state print-steps] (eval-push state print-steps false))
-  ([state print-steps trace]
+  ([state print-steps trace] (eval-push state print-steps trace false))
+  ([state print-steps trace save-state-sequence]
     ;(when (empty? @global-atom-generators)
     ;  (println "global-atom-generators is empty. You should do something like: (reset! global-atom-generators '(exec_if boolean_not true false))"))
     (loop [iteration 1
@@ -74,6 +77,8 @@
               (printf "\nState after %s steps (last step: %s):\n" 
                       iteration "end_environment_from_empty_exec")
               (state-pretty-print s))
+            (when save-state-sequence
+              (swap! saved-state-sequence #(conj % s)))
             (recur (inc iteration) s time-limit))
           (let [exec-top (top-item :exec s)
                 s (pop-item :exec s)]
@@ -94,6 +99,8 @@
                 (printf "\nState after %s steps (last step: %s):\n"
                         iteration (if (seq? exec-top) "(...)" exec-top))
                 (state-pretty-print s))
+              (when save-state-sequence
+                (swap! saved-state-sequence #(conj % s)))
               (recur (inc iteration) s time-limit))))))))
 
 (defn run-push 
@@ -105,12 +112,16 @@
   ([code state print-steps]
     (run-push code state print-steps false))
   ([code state print-steps trace]
+    (run-push code state print-steps trace false))
+  ([code state print-steps trace save-state-sequence]
     (let [s (if top-level-push-code (push-item code :code state) state)]
       (let [s (push-item code :exec s)]
         (when print-steps
           (printf "\nState after 0 steps:\n")
           (state-pretty-print s))
-        (let [s (eval-push s print-steps trace)]
+        (when save-state-sequence
+          (reset! saved-state-sequence [s]))
+        (let [s (eval-push s print-steps trace save-state-sequence)]
           (if top-level-pop-code
             (pop-item :code s)
             s))))))
