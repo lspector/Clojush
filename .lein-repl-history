@@ -1,3 +1,0 @@
-(use 'clojush.examples.simple-regression)
-(pushgp)
-(pushgp argmap)

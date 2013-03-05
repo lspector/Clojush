@@ -1,6 +1,7 @@
 *~
 .DS_Store
 .lein-deps-sum
+.lein-repl-history
 /pom.xml
 /clojush*.jar
 classes/
