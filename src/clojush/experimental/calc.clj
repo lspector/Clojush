@@ -110,8 +110,9 @@
                                                  (run-push (second (closest-association the-tag push-state))
                                                            push-state))
                                                (rest buttons))))))]
-    (vec (cons (* 0.0000001 (reduce + (map second err-modcount-pairs)))
-               (map first err-modcount-pairs)))))
+    ;(vec (cons (* 0.0000001 (reduce + (map second err-modcount-pairs)))
+    ;           (map first err-modcount-pairs)))
+    (vec (map first err-modcount-pairs))))
 
 ;; a little test -- wire each key to just push the right digit
 ;(calc-errors '(tag_exec_2000 0.0 tag_exec_1600 1.0 tag_exec_1700 2.0
@@ -205,7 +206,7 @@
                           ;code_yankdup
                           environment_begin
                           environment_end
-                          ;environment_new
+                          environment_new
                           ;exec_do*count
                           ;exec_do*range
                           ;exec_do*times
@@ -218,16 +219,16 @@
                           ;exec_fromziprights
                           ;exec_fromziproot
                           exec_if
-                          ;;exec_k
+                          exec_k
                           exec_noop
-                          ;;exec_pop
+                          exec_pop
                           exec_rot
-                          ;;exec_s
+                          exec_s
                           ;exec_shove
                           ;exec_stackdepth
                           exec_swap
                           exec_when
-                          ;;exec_y
+                          exec_y
                           ;exec_yank
                           ;exec_yankdup
                           float_add
@@ -277,11 +278,11 @@
                           ;integer_swap
                           ;integer_yank
                           ;integer_yankdup
-                          ;return_boolean_pop
+                          return_boolean_pop
                           ;return_code_pop
                           return_exec_pop
                           return_float_pop
-                          ;return_fromboolean
+                          return_fromboolean
                           ;return_fromcode
                           return_fromexec
                           return_fromfloat
@@ -350,15 +351,16 @@
    ;:tournament-size 1
    :population-size 1000
    :max-generations 10001
-   :evalpush-limit 100
+   :evalpush-limit 1000
    :tag-limit 10000
    :max-points 1000
    :max-points-in-initial-program 25
    ;:parent-reversion-probability 0.9
-   :mutation-probability 0.0
-   :crossover-probability 0.0
-   :simplification-probability 0.0
-   :ultra-probability 1
+   :mutation-probability 0
+   :crossover-probability 0
+   :simplification-probability 0.1
+   :reproduction-simplifications 10
+   :ultra-probability 0.9
    :ultra-alternation-rate 0.01
    :ultra-alignment-deviation 10
    :ultra-mutation-rate 0.01
