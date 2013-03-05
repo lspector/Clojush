@@ -358,9 +358,9 @@
    ;:parent-reversion-probability 0.9
    :mutation-probability 0
    :crossover-probability 0
-   :simplification-probability 0.1
+   :simplification-probability 0
    :reproduction-simplifications 10
-   :ultra-probability 0.9
+   :ultra-probability 1
    :ultra-alternation-rate 0.01
    :ultra-alignment-deviation 10
    :ultra-mutation-rate 0.01
