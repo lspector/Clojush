@@ -347,6 +347,7 @@
                        )
    :use-single-thread false
    :use-lexicase-selection true
+   :use-historically-assessed-hardness true ;; just to print them!
    ;:decimation-ratio 0.01
    ;:tournament-size 1
    :population-size 1000
@@ -362,7 +363,7 @@
    :reproduction-simplifications 10
    :ultra-probability 1
    :ultra-alternation-rate 0.01
-   :ultra-alignment-deviation 10
+   :ultra-alignment-deviation 100
    :ultra-mutation-rate 0.01
    :deletion-mutation-probability 0
    :parentheses-addition-mutation-probability 0
