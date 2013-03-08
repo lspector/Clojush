@@ -9,4 +9,6 @@
                            [clojure-csv "2.0.0-alpha2"]
                            [org.clojure/data.json "0.1.3"]]
             :dev-dependencies [[lein-ccw "1.2.0"]]
+            ;; the following, or a variant, may be helpful on big machines
+            ;:jvm-opts ["-Xmx58g" "-Xms58g" "-XX:+UseParallelGC"]
             :main clojush.core)

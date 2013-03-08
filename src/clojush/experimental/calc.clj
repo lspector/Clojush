@@ -352,23 +352,23 @@
    ;:tournament-size 1
    :population-size 1000
    :max-generations 10001
-   :evalpush-limit 1000
+   :evalpush-limit 100
    :tag-limit 10000
-   :max-points 1000
-   :max-points-in-initial-program 25
+   :max-points 2000
+   :max-points-in-initial-program 1000
    ;:parent-reversion-probability 0.9
    :mutation-probability 0
    :crossover-probability 0
    :simplification-probability 0
    :reproduction-simplifications 10
-   :ultra-probability 1
+   :ultra-probability 0.99
    :ultra-alternation-rate 0.01
-   :ultra-alignment-deviation 100
-   :ultra-mutation-rate 0.01
+   :ultra-alignment-deviation 20
+   :ultra-mutation-rate 0.005
    :deletion-mutation-probability 0
    :parentheses-addition-mutation-probability 0
    :tagging-mutation-probability 0
-   :tag-branch-mutation-probability 0
+   :tag-branch-mutation-probability 0.01
    :tag-branch-mutation-type-instruction-pairs [[:boolean 'boolean_eq]
                                                 [:float 'float_eq]
                                                 [:float 'float_lt]
