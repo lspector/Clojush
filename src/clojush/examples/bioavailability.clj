@@ -147,9 +147,10 @@
    :population-size 500
    :max-generations 100
    :mutation-probability 0.09
+   :mutation-max-points 50
    :crossover-probability 0.81
    :tournament-size 10
-   :node-selection-method :uniform
+   :node-selection-method :unbiased
    :report-simplifications 0
    :final-report-simplifications 1000
    :use-rmse true
