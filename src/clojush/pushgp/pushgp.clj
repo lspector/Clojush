@@ -66,7 +66,9 @@
                        :ultra-probability 0.0
                        :ultra-alternation-rate 0.1
                        :ultra-alignment-deviation 1
-                       :ultra-mutation-rate 0.1)))
+                       :ultra-mutation-rate 0.1
+                       :print-errors true
+                       :print-history true)))
 
 (defn load-push-argmap
   [argmap]
@@ -135,18 +137,18 @@
   [pop-agents generation {:keys [error-function report-simplifications print-csv-logs print-json-logs
                                  csv-log-filename json-log-filename max-generations
                                  log-fitnesses-for-all-cases json-log-program-strings
+                                 print-errors print-history
                                  problem-specific-report error-threshold]}]
   (let [best (report (vec (doall (map deref pop-agents))) generation error-function 
                      report-simplifications print-csv-logs print-json-logs
                      csv-log-filename json-log-filename
                      log-fitnesses-for-all-cases json-log-program-strings
+                     print-errors print-history
                      problem-specific-report)]
     (cond (<= (:total-error best) error-threshold) best
           (>= generation max-generations) :failure
           :else :continue)))
           
-
-
 (defn produce-new-offspring
   [pop-agents child-agents rand-gens
    {:keys [decimation-ratio population-size decimation-tournament-size trivial-geography-radius
