@@ -37,4 +37,5 @@
     (cond 
       (= method :unbiased) (lrand-int (count-points tree))
       (= method :leaf-probability) (choose-node-index-with-leaf-probability tree)
-      (= method :size-tournament) (choose-node-index-by-tournament tree))))
+      (= method :size-tournament) (choose-node-index-by-tournament tree)
+      :else (throw (Exception. (str ":node-selection-method set to unrecognized value " method))))))

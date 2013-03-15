@@ -119,14 +119,17 @@
    individual of the generation."
   ([population generation error-function report-simplifications
     print-csv-logs print-json-logs csv-log-filename json-log-filename
-    log-fitnesses-for-all-cases json-log-program-strings]
+    log-fitnesses-for-all-cases json-log-program-strings print-errors
+    print-history]
     (report population generation error-function report-simplifications
             print-csv-logs print-json-logs csv-log-filename json-log-filename
             log-fitnesses-for-all-cases json-log-program-strings
+            print-errors print-history
             default-problem-specific-report))
   ([population generation error-function report-simplifications
     print-csv-logs print-json-logs csv-log-filename json-log-filename
-    log-fitnesses-for-all-cases json-log-program-strings problem-specific-report]
+    log-fitnesses-for-all-cases json-log-program-strings print-errors
+    print-history problem-specific-report]
     (printf "\n\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")(flush)
     ;(println (map :total-error population))(flush) ;***
     (printf "\n;; -*- Report at generation %s" generation)(flush)
@@ -140,13 +143,13 @@
       (flush)
       (printf "\nCosmos Data: %s" (let [quants (config/quantiles (count population))]
                                     (zipmap quants (map #(:total-error (nth (sort-by :total-error population) %)) quants))))
-      (printf "\nErrors: %s" (not-lazy (:errors best)))(flush)
+      (when print-errors (printf "\nErrors: %s" (not-lazy (:errors best))))(flush)
       (printf "\nTotal: %s" (:total-error best))(flush)
       (printf "\nMean: %.4f" (float (/ (:total-error best)
                                        (count (:errors best)))))(flush)
       (printf "\nHAH-error: %s" (:hah-error best))(flush)
       (printf "\nRMS-error: %s" (:rms-error best))(flush)
-      (printf "\nHistory: %s" (not-lazy (:history best)))(flush)
+      (when print-history (printf "\nHistory: %s" (not-lazy (:history best))))(flush)
       (printf "\nSize: %s" (count-points (:program best)))(flush)
       (print "\n--- Population Statistics ---\nAverage total errors in population: ")(flush)
       (print (*' 1.0 (/ (reduce +' (map :total-error sorted)) (count population))))(flush)
