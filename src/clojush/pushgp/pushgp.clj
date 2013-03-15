@@ -83,25 +83,26 @@
 
 (defn make-agents-and-rng [{:keys [initial-population use-single-thread population-size
                                    max-points-in-initial-program atom-generators random-seed]}]
-  {:pop-agents (if initial-population
-                 (->> (read-string (slurp (str "data/" initial-population)))
-                      (map #(if use-single-thread (atom %) (agent %)))
-                      (vec))
-                 (let [pa (doall (for [_ (range population-size)] 
-                                   (make-individual 
-                                    :program (random-code max-points-in-initial-program atom-generators)
-                                    :error-handler (fn [agnt except] (println except)))))
-                       f (str "data/" (System/currentTimeMillis) ".ser")]
-                   (io/make-parents f)
-                   (spit f (printable (map individual-string pa)))
-                   (vec (map #(if use-single-thread (atom %) (agent %)) pa))))
-   :child-agents (vec (doall (for [_ (range population-size)]
-                               ((if use-single-thread atom agent)
-                                (make-individual)
-                                :error-handler (fn [agnt except] (println except))))))
-   :rand-gens (vec (doall (for [k (range population-size)]
-                            (java.util.Random. (+ random-seed (inc k))))))
-   })
+  (let [agent-error-handler (fn [agnt except] (println except) (System/exit 0))]
+    {:pop-agents (if initial-population
+                   (->> (read-string (slurp (str "data/" initial-population)))
+                        (map #(if use-single-thread (atom %) (agent %)))
+                        (vec))
+                   (let [pa (doall (for [_ (range population-size)]
+                                     (make-individual
+                                       :program (random-code max-points-in-initial-program atom-generators)
+                                       :error-handler agent-error-handler)))
+                         f (str "data/" (System/currentTimeMillis) ".ser")]
+                     (io/make-parents f)
+                     (spit f (printable (map individual-string pa)))
+                     (vec (map #(if use-single-thread (atom %) (agent %)) pa))))
+     :child-agents (vec (doall (for [_ (range population-size)]
+                                 ((if use-single-thread atom agent)
+                                      (make-individual)
+                                      :error-handler agent-error-handler))))
+     :rand-gens (vec (doall (for [k (range population-size)]
+                              (java.util.Random. (+ random-seed (inc k))))))
+     }))
 
 (defn compute-errors [pop-agents rand-gens {:keys [use-single-thread error-function]}]
   (dorun (map #((if use-single-thread swap! send) % evaluate-individual error-function %2)
