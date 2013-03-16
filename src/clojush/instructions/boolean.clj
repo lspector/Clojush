@@ -4,7 +4,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; instructions for Booleans
 
-(define-registered 
+(define-registered
   boolean_and
   (fn [state]
     (if (not (empty? (rest (:boolean state))))
@@ -14,7 +14,7 @@
                  (pop-item :boolean (pop-item :boolean state)))
       state)))
 
-(define-registered 
+(define-registered
   boolean_or
   (fn [state]
     (if (not (empty? (rest (:boolean state))))
@@ -34,7 +34,37 @@
                  (pop-item :boolean state))
       state)))
 
-(define-registered 
+(define-registered
+  boolean_xor
+  (fn [state]
+    (if (not (empty? (rest (:boolean state))))
+      (push-item (not= (stack-ref :boolean 0 state)
+                       (stack-ref :boolean 1 state))
+                 :boolean
+                 (pop-item :boolean (pop-item :boolean state)))
+      state)))
+
+(define-registered
+  boolean_invert_first_then_and
+  (fn [state]
+    (if (not (empty? (rest (:boolean state))))
+      (push-item (and (not (stack-ref :boolean 0 state))
+                      (stack-ref :boolean 1 state))
+                 :boolean
+                 (pop-item :boolean (pop-item :boolean state)))
+      state)))
+
+(define-registered
+  boolean_invert_second_then_and
+  (fn [state]
+    (if (not (empty? (rest (:boolean state))))
+      (push-item (and (stack-ref :boolean 0 state)
+                      (not (stack-ref :boolean 1 state)))
+                 :boolean
+                 (pop-item :boolean (pop-item :boolean state)))
+      state)))
+
+(define-registered
   boolean_frominteger
   (fn [state]
     (if (not (empty? (:integer state)))
@@ -43,7 +73,7 @@
                  (pop-item :integer state))
       state)))
 
-(define-registered 
+(define-registered
   boolean_fromfloat
   (fn [state]
     (if (not (empty? (:float state)))
