@@ -361,18 +361,19 @@
    :crossover-probability 0
    :simplification-probability 0
    :reproduction-simplifications 10
-   :ultra-probability 0.99
-   :ultra-alternation-rate 0.01
+   :ultra-probability 1.0
+   :ultra-alternation-rate 0.001
    :ultra-alignment-deviation 20
-   :ultra-mutation-rate 0.005
+   :ultra-mutation-rate 0.001
    :deletion-mutation-probability 0
    :parentheses-addition-mutation-probability 0
    :tagging-mutation-probability 0
-   :tag-branch-mutation-probability 0.01
+   :tag-branch-mutation-probability 0.0
    :tag-branch-mutation-type-instruction-pairs [[:boolean 'boolean_eq]
                                                 [:float 'float_eq]
                                                 [:float 'float_lt]
                                                 [:float 'float_gt]]
    ;:pop-when-tagging false
    :report-simplifications 10
+   :print-history false
   })

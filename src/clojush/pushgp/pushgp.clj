@@ -68,7 +68,8 @@
                        :ultra-alignment-deviation 1
                        :ultra-mutation-rate 0.1
                        :print-errors true
-                       :print-history true)))
+                       :print-history true
+                       :save-initial-population false)))
 
 (defn load-push-argmap
   [argmap]
@@ -82,7 +83,8 @@
       (reset! @gatom (get @push-argmap (keyword (.substring (str gname) (count "global-"))))))))
 
 (defn make-agents-and-rng [{:keys [initial-population use-single-thread population-size
-                                   max-points-in-initial-program atom-generators random-seed]}]
+                                   max-points-in-initial-program atom-generators random-seed
+                                   save-initial-population]}]
   (let [agent-error-handler (fn [agnt except] (println except) (System/exit 0))]
     {:pop-agents (if initial-population
                    (->> (read-string (slurp (str "data/" initial-population)))
@@ -93,8 +95,9 @@
                                        :program (random-code max-points-in-initial-program atom-generators)
                                        :error-handler agent-error-handler)))
                          f (str "data/" (System/currentTimeMillis) ".ser")]
-                     (io/make-parents f)
-                     (spit f (printable (map individual-string pa)))
+                     (when save-initial-population
+                       (io/make-parents f)
+                       (spit f (printable (map individual-string pa))))
                      (vec (map #(if use-single-thread (atom %) (agent %)) pa))))
      :child-agents (vec (doall (for [_ (range population-size)]
                                  ((if use-single-thread atom agent)
