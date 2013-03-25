@@ -83,7 +83,7 @@
 
 (defn make-agents-and-rng [{:keys [initial-population use-single-thread population-size
                                    max-points-in-initial-program atom-generators random-seed]}]
-  (let [agent-error-handler (fn [agnt except] (println except) (System/exit 0))]
+  (let [agent-error-handler (fn [agnt except] (.printStackTrace except) (System/exit 0))]
     {:pop-agents (if initial-population
                    (->> (read-string (slurp (str "data/" initial-population)))
                         (map #(if use-single-thread (atom %) (agent %)))
