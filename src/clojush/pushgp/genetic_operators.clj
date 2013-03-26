@@ -333,8 +333,7 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
 (defn linearly-mutate
   [open-close-sequence mutation-rate atom-generators]
   (map #(if (< (lrand) mutation-rate)
-          (let [element (lrand-nth (concat atom-generators [:open :close ()]))]
-            (if (fn? element) (element) element))
+          (random-code 1 (concat atom-generators [:open :close ()]))
           %)
        open-close-sequence))
 
