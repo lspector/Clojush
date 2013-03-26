@@ -321,7 +321,7 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
             (> (count result) 10000)) ;; runaway growth
       result
       (if (< (lrand) alternation-rate)
-        (recur (max 0 (+ i (Math/round (* alignment-deviation (gaussian-noise-factor)))))
+        (recur (max 0 (+' i (Math/round (*' alignment-deviation (gaussian-noise-factor)))))
                (not use-s1)
                result)
         (recur (inc i)
