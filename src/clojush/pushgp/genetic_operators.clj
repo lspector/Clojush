@@ -342,16 +342,22 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
   (if (or (not (seq? p1))
           (not (seq? p2)))
     p1 ;; can't do if either program isn't a list
-    (remove-empties 
-      (open-close-sequence-to-list 
-        (balance
-          (linearly-mutate
-            (alternate (list-to-open-close-sequence p1)
-                       (list-to-open-close-sequence p2)
-                       alternation-rate 
-                       alignment-deviation)
-            mutation-rate 
-            atom-generators))))))
+    (let [p1 (if (>= (count p1) (count p2))
+               p1
+               (concat p1 (repeat (- (count p2) (count p1)) '())))
+          p2 (if (>= (count p2) (count p1))
+               p2
+               (concat p2 (repeat (- (count p1) (count p2)) '())))]
+      (remove-empties
+        (open-close-sequence-to-list
+          (balance
+            (linearly-mutate
+              (alternate (list-to-open-close-sequence p1)
+                         (list-to-open-close-sequence p2)
+                         alternation-rate
+                         alignment-deviation)
+              mutation-rate
+              atom-generators)))))))
 
 ;(let [p1 '(a (b c) (d ((e)) f))
 ;      p2 '((1 2 3) 4 ((5)) 6)]
