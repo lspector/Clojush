@@ -11,7 +11,7 @@ output_postfix = ".txt"
 title_string = "Test of cluster runs with odd problem"
 
 example_file = "clojush.examples.odd"
-command = "/home/thelmuth/bin/lein with-profiles production trampoline run " + example_file
+command = "/share/apps/bin/lein with-profiles production trampoline run " + example_file
 
 
 ##########################################################################
