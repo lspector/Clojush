@@ -5,10 +5,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; lexicase selection
 
+(defn retain-one-individual-per-error-vector
+  "Retains one random individual to represent each error vector."
+  [pop]
+  (map lrand-nth (vals (group-by #(:errors %) pop))))
+  
 (defn lexicase-selection
   "Returns an individual that does the best on a randomly selected set of fitness cases"
   [pop]
-  (loop [survivors pop
+  (loop [survivors (retain-one-individual-per-error-vector pop)
          cases (shuffle (range (count (:errors (first pop)))))]
     (if (or (empty? cases)
             (empty? (rest survivors)))
