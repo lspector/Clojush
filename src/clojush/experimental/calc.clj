@@ -378,7 +378,6 @@
                        )
    :use-single-thread false
    :use-lexicase-selection true
-   ;:use-idiolexicase-selection true
    :use-historically-assessed-hardness true ;; just to print them!
    ;:decimation-ratio 0.01
    ;:tournament-size 1

@@ -21,8 +21,7 @@
 (def maintain-ancestors false) ;; if true save all ancestors in each individual (costly)
 (def print-ancestors-of-solution false)
 
-;; The following globals require values because they are used in Push instructions but they
-;; may be reset by arguments to pushgp or other systems that use Push.
+;; The following globals may be reset by arguments to pushgp or other systems that use Push.
 (def global-atom-generators (atom ())) ;; the defalult for this will be set below
 (def global-max-points-in-program (atom 100))
 (def global-evalpush-limit (atom 150))

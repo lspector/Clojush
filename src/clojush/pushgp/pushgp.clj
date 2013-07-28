@@ -137,8 +137,9 @@
       (printf "\nDone performing parental reversion.") (flush))))
 
 ;; this is a wrapper for calculate-hah-solution-rates, which should itself be changed
-(defn calculate-hah-solution-rates-wrapper [pop-agents {:keys [use-historically-assessed-hardness use-lexicase-selection error-threshold population-size]}]
-  (calculate-hah-solution-rates use-historically-assessed-hardness use-lexicase-selection pop-agents error-threshold population-size))
+(defn calculate-hah-solution-rates-wrapper 
+  [pop-agents {:keys [use-historically-assessed-hardness error-threshold population-size]}]
+  (calculate-hah-solution-rates use-historically-assessed-hardness pop-agents error-threshold population-size))
 
 (defn report-and-check-for-success
   [pop-agents generation {:keys [error-function report-simplifications print-csv-logs print-json-logs

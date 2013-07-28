@@ -30,8 +30,7 @@
     nil))
 
 (defn calculate-hah-solution-rates
-  [use-historically-assessed-hardness use-lexicase-selection
-   pop-agents error-threshold population-size]
+  [use-historically-assessed-hardness pop-agents error-threshold population-size]
   (when use-historically-assessed-hardness
     (reset! solution-rates
             (let [error-seqs (map :errors (map deref pop-agents))

@@ -11,10 +11,11 @@
   (map lrand-nth (vals (group-by #(:errors %) pop))))
   
 (defn lexicase-selection
-  "Returns an individual that does the best on a randomly selected set of fitness cases"
+  "Returns an individual that does the best on the fitness cases when considered one at a
+time in random order."
   [pop]
   (loop [survivors (retain-one-individual-per-error-vector pop)
-         cases (shuffle (range (count (:errors (first pop)))))]
+         cases (lshuffle (range (count (:errors (first pop)))))]
     (if (or (empty? cases)
             (empty? (rest survivors)))
       (lrand-nth survivors)
@@ -28,7 +29,7 @@
 ;; parent selection
 
 (defn select
-  "Returns a selected parent, using lexicase or tournament selection."
+  "Returns a selected parent."
   [pop tournament-size radius location]
   (if @global-use-lexicase-selection
     (lexicase-selection pop)
