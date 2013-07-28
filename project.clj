@@ -1,8 +1,8 @@
-(defproject lspector/clojush "1.3.16"
+(defproject lspector/clojush "1.3.17"
             :description "The Push programming language and the PushGP genetic
                           programming system implemented in Clojure.
                           See http://hampshire.edu/lspector/push.html"
-            :dependencies [[org.clojure/clojure "1.3.0"]
+            :dependencies [[org.clojure/clojure "1.5.1"]
                            [org.clojars.etosch/cosmos "1.0.0"]
                            [org.clojure/math.numeric-tower "0.0.1"]
                            [local-file "0.1.0"]
