@@ -130,40 +130,41 @@
     print-csv-logs print-json-logs csv-log-filename json-log-filename
     log-fitnesses-for-all-cases json-log-program-strings print-errors
     print-history problem-specific-report]
-    (printf "\n\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")(flush)
-    ;(println (map :total-error population))(flush) ;***
-    (printf "\n;; -*- Report at generation %s" generation)(flush)
+    (printf "\n\n") 
+    (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
+    (println ";; -*- Report at generation" generation)
     (let [sorted (sort-by :total-error < population)
           best (first sorted)]
-      (printf "\nCurrent time: %s" (System/currentTimeMillis))
-      (printf "\nBest program: %s" (not-lazy (:program best)))(flush)
+      (println "Current time:" (System/currentTimeMillis))
+      (println "Best program:" (not-lazy (:program best)))
       (when (> report-simplifications 0)
-        (printf "\nPartial simplification: %s"
-                (not-lazy (:program (auto-simplify best error-function report-simplifications false 1000)))))
-      (flush)
-      (printf "\nCosmos Data: %s" (let [quants (config/quantiles (count population))]
-                                    (zipmap quants (map #(:total-error (nth (sort-by :total-error population) %)) quants))))
-      (when print-errors (printf "\nErrors: %s" (not-lazy (:errors best))))(flush)
-      (printf "\nTotal: %s" (:total-error best))(flush)
-      (printf "\nMean: %.4f" (float (/ (:total-error best)
-                                       (count (:errors best)))))(flush)
-      (printf "\nHAH-error: %s" (:hah-error best))(flush)
-      (printf "\nRMS-error: %s" (:rms-error best))(flush)
-      (when print-history (printf "\nHistory: %s" (not-lazy (:history best))))(flush)
-      (printf "\nSize: %s" (count-points (:program best)))(flush)
-      (print "\n--- Population Statistics ---\nAverage total errors in population: ")(flush)
-      (print (*' 1.0 (/ (reduce +' (map :total-error sorted)) (count population))))(flush)
-      (printf "\nMedian total errors in population: %s"
-              (:total-error (nth sorted (truncate (/ (count sorted) 2)))))(flush)
-      (printf "\nAverage program size in population (points): %s"
-              (*' 1.0 (/ (reduce +' (map count-points (map :program sorted)))
-                         (count population))))(flush)
+        (println "Partial simplification:"
+                 (not-lazy (:program (auto-simplify best error-function report-simplifications false 1000)))))
+      (println "Cosmos Data:" (let [quants (config/quantiles (count population))]
+                                (zipmap quants (map #(:total-error (nth (sort-by :total-error population) %)) quants))))
+      (when print-errors (println "Errors:" (not-lazy (:errors best))))
+      (println "Total:" (:total-error best))
+      (println "Mean:" (float (/ (:total-error best)
+                                 (count (:errors best)))))
+      (when @global-use-historically-assessed-hardness
+        (println "HAH-error:" (:hah-error best)))
+      (when @global-use-rmse (println "RMS-error:" (:rms-error best)))
+      (when print-history (println "History:" (not-lazy (:history best))))
+      (println "Size:" (count-points (:program best)))
+      (println "--- Population Statistics ---")
+      (println "Average total errors in population:"
+               (*' 1.0 (/ (reduce +' (map :total-error sorted)) (count population))))
+      (println "Median total errors in population:"
+               (:total-error (nth sorted (truncate (/ (count sorted) 2)))))
+      (println "Average program size in population (points):"
+               (*' 1.0 (/ (reduce +' (map count-points (map :program sorted)))
+                          (count population))))
       (let [frequency-map (frequencies (map :program population))]
-        (println "\nNumber of unique programs in population: " (count frequency-map))
-        (println "Max copy number of one program: " (apply max (vals frequency-map)))
-        (println "Min copy number of one program: " (apply min (vals frequency-map)))
-        (println "Median copy number: " (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
-      (printf "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n")
+        (println "Number of unique programs in population:" (count frequency-map))
+        (println "Max copy number of one program:" (apply max (vals frequency-map)))
+        (println "Min copy number of one program:" (apply min (vals frequency-map)))
+        (println "Median copy number:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
+      (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
       (flush)
       (when print-csv-logs (csv-print population generation csv-log-filename
                                       log-fitnesses-for-all-cases))
@@ -176,8 +177,8 @@
 (defn initial-report
   "Prints the initial report of a PushGP run."
   []
-  (printf "\nRegistered instructions: %s\n\n" @registered-instructions) (flush)
-  (printf "\nStarting PushGP run.\n\n") (flush)
+  (println "Registered instructions:" @registered-instructions)
+  (println "Starting PushGP run.")
   (printf "Clojush version = ")
   (try
     (let [version-str (apply str (butlast (re-find #"\".*\""

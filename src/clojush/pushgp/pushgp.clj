@@ -121,7 +121,7 @@
 (defn parental-reversion [pop-agents generation {:keys [parent-reversion-probability use-single-thread]}]
   (if (and (> generation 0) (> parent-reversion-probability 0))
     (let [err-fn (if @global-use-rmse :rms-error :total-error)]
-      (printf "\nPerforming parent reversion...") (flush)
+      (println "Performing parent reversion...")
       (dorun (map #((if use-single-thread swap! send) 
                     % 
                     (fn [i]  
@@ -134,7 +134,7 @@
                         (:parent i))))
                   pop-agents))
       (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
-      (printf "\nDone performing parental reversion.") (flush))))
+      (println "Done performing parent reversion."))))
 
 ;; this is a wrapper for calculate-hah-solution-rates, which should itself be changed
 (defn calculate-hah-solution-rates-wrapper 
@@ -191,14 +191,14 @@
        (reset-globals)
        (initial-report) ;; Print the inital report
        (print-params @push-argmap)
-       (printf "\nGenerating initial population...\n") (flush)
+       (println "Generating initial population...")
        (let [{:keys [pop-agents child-agents rand-gens]} (make-agents-and-rng @push-argmap)]
          ;; Main loop
          (loop [generation 0]
-           (printf "\n\n-----\nProcessing generation: %s\nComputing errors..." generation)
+           (println "Processing generation:" generation)
+           (print "Computing errors... ")
            (compute-errors pop-agents rand-gens @push-argmap)
-           (flush)
-           (printf "\nDone computing errors.") (flush)
+           (println "Done computing errors.")
            ;; possible parent reversion
            (parental-reversion pop-agents generation @push-argmap)
            ;; calculate solution rates if necessary for historically-assessed hardness
@@ -207,9 +207,9 @@
            ;; report and check for success
            (let [outcome (report-and-check-for-success pop-agents generation @push-argmap)]
              (cond (= outcome :failure) (do (printf "\nFAILURE\n") (flush))
-                   (= outcome :continue) (do (printf "\nProducing offspring...") (flush)
+                   (= outcome :continue) (do (println "Producing offspring...")
                                              (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
-                                             (printf "\nInstalling next generation...") (flush)
+                                             (println "Installing next generation...")
                                              (install-next-generation pop-agents child-agents @push-argmap)
                                              (recur (inc generation)))
                    :else (let [{:keys [error-function final-report-simplifications]} @push-argmap]
