@@ -114,8 +114,8 @@
   ;;   start with the initialized push state
   ;;   retrieve and execute all of the entry points from the pressed buttons
   ;;   determine error from float and boolean stacks
-  (let [correct 0
-        incorrect 1
+  (let [correct 0.0
+        incorrect 1.0
         first-run-result (run-push program (tag-before-entry-points (make-push-state)))
         initialized-push-state (push-item 
                                  0.0 
@@ -138,8 +138,8 @@
                                                  (if (not (number? top))
                                                    incorrect ;; no number
                                                    ;; else return error scaled to [0, 1]
-                                                   (/ (Math/abs (- top target))
-                                                      (+ (Math/abs top) (Math/abs target))))))))
+                                                   (float (/ (Math/abs (- top target))
+                                                             (+ (Math/abs top) (Math/abs target)))))))))
                                          (count (:tag push-state))]
                                         (recur (let [the-tag (get button-entrypoints (first buttons))]
                                                  (run-push (second (closest-association the-tag push-state))
@@ -377,11 +377,12 @@
                           )
                        )
    :use-single-thread false
-   :use-lexicase-selection true
+   ;:use-lexicase-selection true
+   :use-condensed-lexicase-selection true
    :use-historically-assessed-hardness true ;; just to print them!
    ;:decimation-ratio 0.01
    ;:tournament-size 1
-   :population-size 200
+   :population-size 2000;200 ;50
    :max-generations 10001
    :evalpush-limit 200
    :tag-limit 10000
