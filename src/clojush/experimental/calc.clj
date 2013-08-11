@@ -377,12 +377,12 @@
                           )
                        )
    :use-single-thread false
-   ;:use-lexicase-selection true
-   :use-condensed-lexicase-selection true
+   :use-lexicase-selection true
+   ;:use-elitegroup-lexicase-selection true
    :use-historically-assessed-hardness true ;; just to print them!
    ;:decimation-ratio 0.01
    ;:tournament-size 1
-   :population-size 2000;200 ;50
+   :population-size 200;200 ;50
    :max-generations 10001
    :evalpush-limit 200
    :tag-limit 10000
@@ -394,9 +394,9 @@
    :simplification-probability 0
    :reproduction-simplifications 10
    :ultra-probability 1.0
-   :ultra-alternation-rate 0.005
+   :ultra-alternation-rate 0.0025
    :ultra-alignment-deviation 20
-   :ultra-mutation-rate 0.005
+   :ultra-mutation-rate 0.0025
    :deletion-mutation-probability 0
    :parentheses-addition-mutation-probability 0
    :tagging-mutation-probability 0
