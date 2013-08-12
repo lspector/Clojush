@@ -88,7 +88,7 @@
 
 (defn add-parentheses-mutate 
   "Returns a version of the given individual with one pair of parentheses added
-somewhere. Not compatible with (currently 'experimental') tagged code macros."
+   somewhere. Not compatible with (currently 'experimental') tagged code macros."
   [ind max-points]
   (let [expression (:program ind) 
         new-program (let [expstr (str expression)
@@ -114,8 +114,8 @@ somewhere. Not compatible with (currently 'experimental') tagged code macros."
 
 (defn tagging-mutate 
   "Returns a version of the given individual with a piece of code replaced by a tag
-reference, and with an expression that tags the replaced code with the same tag added
-to the beginning of the individual's program."
+   reference, and with an expression that tags the replaced code with the same tag added
+   to the beginning of the individual's program."
   [ind max-points tag-limit]
   (let [old-program (:program ind)
         index-to-tag (select-node-index old-program)
@@ -136,12 +136,12 @@ to the beginning of the individual's program."
 
 (defn tag-branch-insertion-mutate 
   "Returns a version of the given individual with a tag-branch inserted at a random
-location. A tag-branch is a sequence of instructions that 1) produces a boolean
-value by performing a randomly chosen comparison of copies (not popped) of the top 
-two items of a randomly selected type, and 2) branches to one of two tags depending
-on the result. The type-instruction-pairs argument should be a sequence of pairs,
-in which the first element of each is a type and the second element is a Push instruction
-that performs a comparison of the type, as in [:integer 'integer_eq]."
+   location. A tag-branch is a sequence of instructions that 1) produces a boolean
+   value by performing a randomly chosen comparison of copies (not popped) of the top 
+   two items of a randomly selected type, and 2) branches to one of two tags depending
+   on the result. The type-instruction-pairs argument should be a sequence of pairs,
+   in which the first element of each is a type and the second element is a Push instruction
+   that performs a comparison of the type, as in [:integer 'integer_eq]."
   [ind max-points type-instruction-pairs tag-limit]
   (let [old-program (:program ind)
         tag-ref-instruction-1 (symbol (str "tagged_" (str (lrand-int tag-limit)))) 
@@ -205,51 +205,51 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
                  node))
     t))
 
-(defn list-to-open-close-sequence
+(defn list-to-open-close-vector
   [lst]
   (if (seq? lst)
-    (flatten (postwalklist #(if (seq? %) (list :open % :close) %) lst))
+    (vec (flatten (postwalklist #(if (seq? %) (list :open % :close) %) lst)))
     lst))
 
-; (list-to-open-close-sequence '(1 2 (a b (c) ((d)) e)))
+; (list-to-open-close-vector '(1 2 (a b (c) ((d)) e)))
 
-(defn open-close-sequence-to-list
-  [sequence]
-  (cond (not (seq? sequence)) sequence
-        (empty? sequence) ()
-        :else (let [s (str sequence)
+(defn open-close-vector-to-list
+  [v]
+  (cond (not (vector? v)) v
+        (empty? v) ()
+        :else (let [s (str v)
                     l (read-string (string/replace (string/replace s ":open" " ( ") ":close" " ) "))]
                 ;; there'll be an extra ( ) around l, which we keep if the number of read things is >1
                 (if (= (count l) 1) 
                   (first l)
-                  l))))
-    
-;(open-close-sequence-to-list '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close))
-;(open-close-sequence-to-list '(:open 1 :close :open 2 :close))
-;(open-close-sequence-to-list '(:open :open 1 :close :open 2 :close :close))
+                  (apply list l)))))
+
+;(open-close-vector-to-list [:open 1 2 :open 'a 'b :open 'c :close :open :open 'd :close :close 'e :close :close])
+;(open-close-vector-to-list [:open 1 :close :open 2 :close])
+;(open-close-vector-to-list [:open :open 1 :close :open 2 :close :close])
 
 (defn insert-somewhere 
   [thing lst]
   (let [after-how-many (lrand-int (inc (count lst)))]
-    (concat (take after-how-many lst) 
-            (list thing) 
-            (drop after-how-many lst))))
+    (vec (concat (take after-how-many lst)
+                 (list thing)
+                 (drop after-how-many lst)))))
 
 (defn delete-somewhere 
   [thing lst]
   (let [locations (->> lst
-                    (map vector (iterate inc 0))
-                    (filter #(= (second %) thing))
-                    (map first))
+                       (map vector (iterate inc 0))
+                       (filter #(= (second %) thing))
+                       (map first))
         location (lrand-nth locations)]
-    (concat (take location lst)
-            (drop (inc location) lst))))
+    (vec (concat (take location lst)
+                 (drop (inc location) lst)))))
 
-;(delete-somewhere :right '(0 :right 1 2 :right))
+;(delete-somewhere :right [0 :right 1 2 :right])
 
 (defn left-balance
   [s left right]
-  (loop [processed ()
+  (loop [processed []
          to-process s
          extra-lefts 0]
     (cond 
@@ -258,8 +258,8 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
       processed
       ;; see a left -- keep track of number unmatched
       (= (first to-process) left)
-      (recur (concat processed (list (first to-process)))
-             (rest to-process)
+      (recur (vec (concat processed (list (first to-process))))
+             (vec (rest to-process))
              (inc extra-lefts))
       ;; see a right -- may require fixes
       (= (first to-process) right)
@@ -267,40 +267,44 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
         ;; must fix
         (if (< (lrand) 0.5)
           ;; half the time delete a right (possibly this one) and continue
-          (recur () 
-                 (concat (delete-somewhere right (concat processed (list right))) 
-                         (rest to-process))
+          (recur []
+                 (vec (concat (delete-somewhere right (concat processed (list right))) 
+                              (rest to-process)))
                  0)
           ;; other half, add a left somewhere 
-          (recur () (concat (insert-somewhere left processed) to-process) 0))
+          (recur []
+                 (vec (concat (insert-somewhere left processed) to-process))
+                 0))
         ;; don't have to fix, keep going with adjusted extras
-        (recur (concat processed (list (first to-process)))
-               (rest to-process)
+        (recur (vec (concat processed (list (first to-process))))
+               (vec (rest to-process))
                (dec extra-lefts)))
       ;; anything else -- just keep going
       :else
-      (recur (concat processed (list (first to-process)))
-             (rest to-process)
+      (recur (vec (concat processed (list (first to-process))))
+             (vec (rest to-process))
              extra-lefts))))
 
 (defn balance
-  [open-close-sequence]
-  ;(println "balancing:" open-close-sequence)
-  (-> open-close-sequence
-    (left-balance :open :close)
-    (reverse)
-    (left-balance :close :open)
-    (reverse)))
+  [open-close-vector]
+  ;(println "balancing:" open-close-vector)
+  (-> open-close-vector
+      (left-balance :open :close)
+      (reverse)
+      (vec)
+      (left-balance :close :open)
+      (reverse)
+      (vec)))
 
-;(let [s '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close)]
+;(let [s [:open 1 2 :open 'a 'b :open 'c :close :open :open 'd :close :close 'e :close :close]]
 ;  (println s)
 ;  (println (balance s)))
 ;
-;(let [s '(:open 1 2 :open :open a b :open c :close :open :open d :close :close e :close :close)]
+;(let [s [:open 1 2 :open :open 'a 'b :open 'c :close :open :open 'd :close :close 'e :close :close]]
 ;  (println s)
 ;  (println (balance s)))
 ;
-;(let [s '(:open :open :close)]
+;(let [s [:open :open :close]]
 ;  (println s)
 ;  (println (balance s)))
 ;
@@ -316,7 +320,7 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
   [s1 s2 alternation-rate alignment-deviation]
   (loop [i 0
          use-s1 (lrand-nth [true false])
-         result ()]
+         result []]
     (if (or (>= i (count (if use-s1 s1 s2)))
             (> (count result) 10000)) ;; runaway growth
       result
@@ -326,16 +330,16 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
                result)
         (recur (inc i)
                use-s1
-               (concat result (list (nth (if use-s1 s1 s2) i))))))))
+               (conj result (nth (if use-s1 s1 s2) i)))))))
 
 ; (alternate '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16) '(a b c d e f g h i j k) 0.2 1)
 
 (defn linearly-mutate
-  [open-close-sequence mutation-rate atom-generators]
-  (map #(if (< (lrand) mutation-rate)
-          (random-code 1 (concat atom-generators [:open :close ()]))
-          %)
-       open-close-sequence))
+  [open-close-vector mutation-rate atom-generators]
+  (vec (map #(if (< (lrand) mutation-rate)
+               (random-code 1 (concat atom-generators [:open :close ()]))
+               %)
+            open-close-vector)))
 
 (defn ultra-operate-on-programs
   [p1 p2 alternation-rate alignment-deviation mutation-rate atom-generators]
@@ -349,11 +353,11 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
                p2
                (concat p2 (repeat (- (count p1) (count p2)) '())))]
       (remove-empties
-        (open-close-sequence-to-list
+        (open-close-vector-to-list
           (balance
             (linearly-mutate
-              (alternate (list-to-open-close-sequence p1)
-                         (list-to-open-close-sequence p2)
+              (alternate (list-to-open-close-vector p1)
+                         (list-to-open-close-vector p2)
                          alternation-rate
                          alignment-deviation)
               mutation-rate
@@ -367,7 +371,7 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
 
 (defn ultra
   "Returns the result of applying the ULTRA (Uniform Linear Transformation
-with Repair and Alternation) operation to parent1 and parent2."
+   with Repair and Alternation) operation to parent1 and parent2."
   [parent1 parent2 max-points alternation-rate alignment-deviation mutation-rate atom-generators]
   (let [new-program (ultra-operate-on-programs (:program parent1) 
                                                (:program parent2)
@@ -381,6 +385,3 @@ with Repair and Alternation) operation to parent1 and parent2."
                        :ancestors (if maintain-ancestors
                                     (cons (:program parent1) (:ancestors parent1))
                                     (:ancestors parent1))))))
-
-
-
