@@ -88,7 +88,7 @@
 
 (defn add-parentheses-mutate 
   "Returns a version of the given individual with one pair of parentheses added
-somewhere. Not compatible with (currently 'experimental') tagged code macros."
+   somewhere. Not compatible with (currently 'experimental') tagged code macros."
   [ind max-points]
   (let [expression (:program ind) 
         new-program (let [expstr (str expression)
@@ -114,8 +114,8 @@ somewhere. Not compatible with (currently 'experimental') tagged code macros."
 
 (defn tagging-mutate 
   "Returns a version of the given individual with a piece of code replaced by a tag
-reference, and with an expression that tags the replaced code with the same tag added
-to the beginning of the individual's program."
+   reference, and with an expression that tags the replaced code with the same tag added
+   to the beginning of the individual's program."
   [ind max-points tag-limit]
   (let [old-program (:program ind)
         index-to-tag (select-node-index old-program)
@@ -136,12 +136,12 @@ to the beginning of the individual's program."
 
 (defn tag-branch-insertion-mutate 
   "Returns a version of the given individual with a tag-branch inserted at a random
-location. A tag-branch is a sequence of instructions that 1) produces a boolean
-value by performing a randomly chosen comparison of copies (not popped) of the top 
-two items of a randomly selected type, and 2) branches to one of two tags depending
-on the result. The type-instruction-pairs argument should be a sequence of pairs,
-in which the first element of each is a type and the second element is a Push instruction
-that performs a comparison of the type, as in [:integer 'integer_eq]."
+   location. A tag-branch is a sequence of instructions that 1) produces a boolean
+   value by performing a randomly chosen comparison of copies (not popped) of the top 
+   two items of a randomly selected type, and 2) branches to one of two tags depending
+   on the result. The type-instruction-pairs argument should be a sequence of pairs,
+   in which the first element of each is a type and the second element is a Push instruction
+   that performs a comparison of the type, as in [:integer 'integer_eq]."
   [ind max-points type-instruction-pairs tag-limit]
   (let [old-program (:program ind)
         tag-ref-instruction-1 (symbol (str "tagged_" (str (lrand-int tag-limit)))) 
@@ -238,9 +238,9 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
 (defn delete-somewhere 
   [thing lst]
   (let [locations (->> lst
-                    (map vector (iterate inc 0))
-                    (filter #(= (second %) thing))
-                    (map first))
+                       (map vector (iterate inc 0))
+                       (filter #(= (second %) thing))
+                       (map first))
         location (lrand-nth locations)]
     (concat (take location lst)
             (drop (inc location) lst))))
@@ -287,10 +287,10 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
   [open-close-sequence]
   ;(println "balancing:" open-close-sequence)
   (-> open-close-sequence
-    (left-balance :open :close)
-    (reverse)
-    (left-balance :close :open)
-    (reverse)))
+      (left-balance :open :close)
+      (reverse)
+      (left-balance :close :open)
+      (reverse)))
 
 ;(let [s '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close)]
 ;  (println s)
@@ -314,19 +314,21 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
 
 (defn alternate
   [s1 s2 alternation-rate alignment-deviation]
-  (loop [i 0
-         use-s1 (lrand-nth [true false])
-         result ()]
-    (if (or (>= i (count (if use-s1 s1 s2)))
-            (> (count result) 10000)) ;; runaway growth
-      result
-      (if (< (lrand) alternation-rate)
-        (recur (max 0 (+' i (Math/round (*' alignment-deviation (gaussian-noise-factor)))))
-               (not use-s1)
-               result)
-        (recur (inc i)
-               use-s1
-               (concat result (list (nth (if use-s1 s1 s2) i))))))))
+  (let [s1 (vec s1)
+        s2 (vec s2)]
+    (loop [i 0
+           use-s1 (lrand-nth [true false])
+           result []]
+      (if (or (>= i (count (if use-s1 s1 s2)))
+              (> (count result) 10000)) ;; runaway growth
+        (apply list result)
+        (if (< (lrand) alternation-rate)
+          (recur (max 0 (+' i (Math/round (*' alignment-deviation (gaussian-noise-factor)))))
+                 (not use-s1)
+                 result)
+          (recur (inc i)
+                 use-s1
+                 (conj result (nth (if use-s1 s1 s2) i))))))))
 
 ; (alternate '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16) '(a b c d e f g h i j k) 0.2 1)
 
@@ -367,7 +369,7 @@ that performs a comparison of the type, as in [:integer 'integer_eq]."
 
 (defn ultra
   "Returns the result of applying the ULTRA (Uniform Linear Transformation
-with Repair and Alternation) operation to parent1 and parent2."
+   with Repair and Alternation) operation to parent1 and parent2."
   [parent1 parent2 max-points alternation-rate alignment-deviation mutation-rate atom-generators]
   (let [new-program (ultra-operate-on-programs (:program parent1) 
                                                (:program parent2)
@@ -381,6 +383,3 @@ with Repair and Alternation) operation to parent1 and parent2."
                        :ancestors (if maintain-ancestors
                                     (cons (:program parent1) (:ancestors parent1))
                                     (:ancestors parent1))))))
-
-
-
