@@ -46,6 +46,7 @@
                        :random-seed (System/nanoTime)
                        :use-historically-assessed-hardness false
                        :use-lexicase-selection false
+                       :use-elitegroup-lexicase-selection false
                        :use-rmse false
                        :print-csv-logs false
                        :print-json-logs false
@@ -204,6 +205,9 @@
            ;; calculate solution rates if necessary for historically-assessed hardness
            ;; change calculate-hah-solution-rates in the future, to destructure the argmap
            (calculate-hah-solution-rates-wrapper pop-agents @push-argmap)
+           ;; create global structure to support elitegroup lexicase selection
+           (when @global-use-elitegroup-lexicase-selection 
+             (build-elitegroups pop-agents))
            ;; report and check for success
            (let [outcome (report-and-check-for-success pop-agents generation @push-argmap)]
              (cond (= outcome :failure) (do (printf "\nFAILURE\n") (flush))
