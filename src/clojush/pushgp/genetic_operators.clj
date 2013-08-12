@@ -314,19 +314,21 @@
 
 (defn alternate
   [s1 s2 alternation-rate alignment-deviation]
-  (loop [i 0
-         use-s1 (lrand-nth [true false])
-         result ()]
-    (if (or (>= i (count (if use-s1 s1 s2)))
-            (> (count result) 10000)) ;; runaway growth
-      result
-      (if (< (lrand) alternation-rate)
-        (recur (max 0 (+' i (Math/round (*' alignment-deviation (gaussian-noise-factor)))))
-               (not use-s1)
-               result)
-        (recur (inc i)
-               use-s1
-               (concat result (list (nth (if use-s1 s1 s2) i))))))))
+  (let [s1 (vec s1)
+        s2 (vec s2)]
+    (loop [i 0
+           use-s1 (lrand-nth [true false])
+           result []]
+      (if (or (>= i (count (if use-s1 s1 s2)))
+              (> (count result) 10000)) ;; runaway growth
+        (apply list result)
+        (if (< (lrand) alternation-rate)
+          (recur (max 0 (+' i (Math/round (*' alignment-deviation (gaussian-noise-factor)))))
+                 (not use-s1)
+                 result)
+          (recur (inc i)
+                 use-s1
+                 (conj result (nth (if use-s1 s1 s2) i))))))))
 
 ; (alternate '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16) '(a b c d e f g h i j k) 0.2 1)
 
