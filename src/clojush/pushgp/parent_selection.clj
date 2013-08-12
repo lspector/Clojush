@@ -49,7 +49,7 @@ time in random order."
 (defn build-elitegroups
   "Builds a sequence that partitions the cases into sub-sequences, with cases 
 grouped when they produce the same set of elite individuals in the population. 
-In addition, if group A has produces population subset PS(A), and group B 
+In addition, if group A produces population subset PS(A), and group B 
 produces population subset PS(B), and PS(A) is a proper subset of PS(B), then 
 group B is discarded. "
   [pop-agents]
