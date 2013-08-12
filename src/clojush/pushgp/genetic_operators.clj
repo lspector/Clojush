@@ -205,35 +205,35 @@
                  node))
     t))
 
-(defn list-to-open-close-sequence
+(defn list-to-open-close-vector
   [lst]
   (if (seq? lst)
-    (flatten (postwalklist #(if (seq? %) (list :open % :close) %) lst))
+    (vec (flatten (postwalklist #(if (seq? %) (list :open % :close) %) lst)))
     lst))
 
-; (list-to-open-close-sequence '(1 2 (a b (c) ((d)) e)))
+; (list-to-open-close-vector '(1 2 (a b (c) ((d)) e)))
 
-(defn open-close-sequence-to-list
-  [sequence]
-  (cond (not (seq? sequence)) sequence
-        (empty? sequence) ()
-        :else (let [s (str sequence)
+(defn open-close-vector-to-list
+  [v]
+  (cond (not (vector? v)) v
+        (empty? v) ()
+        :else (let [s (str v)
                     l (read-string (string/replace (string/replace s ":open" " ( ") ":close" " ) "))]
                 ;; there'll be an extra ( ) around l, which we keep if the number of read things is >1
                 (if (= (count l) 1) 
                   (first l)
-                  l))))
-    
-;(open-close-sequence-to-list '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close))
-;(open-close-sequence-to-list '(:open 1 :close :open 2 :close))
-;(open-close-sequence-to-list '(:open :open 1 :close :open 2 :close :close))
+                  (apply list l)))))
+
+;(open-close-vector-to-list [:open 1 2 :open 'a 'b :open 'c :close :open :open 'd :close :close 'e :close :close])
+;(open-close-vector-to-list [:open 1 :close :open 2 :close])
+;(open-close-vector-to-list [:open :open 1 :close :open 2 :close :close])
 
 (defn insert-somewhere 
   [thing lst]
   (let [after-how-many (lrand-int (inc (count lst)))]
-    (concat (take after-how-many lst) 
-            (list thing) 
-            (drop after-how-many lst))))
+    (vec (concat (take after-how-many lst)
+                 (list thing)
+                 (drop after-how-many lst)))))
 
 (defn delete-somewhere 
   [thing lst]
@@ -242,14 +242,14 @@
                        (filter #(= (second %) thing))
                        (map first))
         location (lrand-nth locations)]
-    (concat (take location lst)
-            (drop (inc location) lst))))
+    (vec (concat (take location lst)
+                 (drop (inc location) lst)))))
 
-;(delete-somewhere :right '(0 :right 1 2 :right))
+;(delete-somewhere :right [0 :right 1 2 :right])
 
 (defn left-balance
   [s left right]
-  (loop [processed ()
+  (loop [processed []
          to-process s
          extra-lefts 0]
     (cond 
@@ -258,8 +258,8 @@
       processed
       ;; see a left -- keep track of number unmatched
       (= (first to-process) left)
-      (recur (concat processed (list (first to-process)))
-             (rest to-process)
+      (recur (vec (concat processed (list (first to-process))))
+             (vec (rest to-process))
              (inc extra-lefts))
       ;; see a right -- may require fixes
       (= (first to-process) right)
@@ -267,40 +267,44 @@
         ;; must fix
         (if (< (lrand) 0.5)
           ;; half the time delete a right (possibly this one) and continue
-          (recur () 
-                 (concat (delete-somewhere right (concat processed (list right))) 
-                         (rest to-process))
+          (recur []
+                 (vec (concat (delete-somewhere right (concat processed (list right))) 
+                              (rest to-process)))
                  0)
           ;; other half, add a left somewhere 
-          (recur () (concat (insert-somewhere left processed) to-process) 0))
+          (recur []
+                 (vec (concat (insert-somewhere left processed) to-process))
+                 0))
         ;; don't have to fix, keep going with adjusted extras
-        (recur (concat processed (list (first to-process)))
-               (rest to-process)
+        (recur (vec (concat processed (list (first to-process))))
+               (vec (rest to-process))
                (dec extra-lefts)))
       ;; anything else -- just keep going
       :else
-      (recur (concat processed (list (first to-process)))
-             (rest to-process)
+      (recur (vec (concat processed (list (first to-process))))
+             (vec (rest to-process))
              extra-lefts))))
 
 (defn balance
-  [open-close-sequence]
-  ;(println "balancing:" open-close-sequence)
-  (-> open-close-sequence
+  [open-close-vector]
+  ;(println "balancing:" open-close-vector)
+  (-> open-close-vector
       (left-balance :open :close)
       (reverse)
+      (vec)
       (left-balance :close :open)
-      (reverse)))
+      (reverse)
+      (vec)))
 
-;(let [s '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close)]
+;(let [s [:open 1 2 :open 'a 'b :open 'c :close :open :open 'd :close :close 'e :close :close]]
 ;  (println s)
 ;  (println (balance s)))
 ;
-;(let [s '(:open 1 2 :open :open a b :open c :close :open :open d :close :close e :close :close)]
+;(let [s [:open 1 2 :open :open 'a 'b :open 'c :close :open :open 'd :close :close 'e :close :close]]
 ;  (println s)
 ;  (println (balance s)))
 ;
-;(let [s '(:open :open :close)]
+;(let [s [:open :open :close]]
 ;  (println s)
 ;  (println (balance s)))
 ;
@@ -316,7 +320,7 @@
   [s1 s2 alternation-rate alignment-deviation]
   (loop [i 0
          use-s1 (lrand-nth [true false])
-         result ()]
+         result []]
     (if (or (>= i (count (if use-s1 s1 s2)))
             (> (count result) 10000)) ;; runaway growth
       result
@@ -326,16 +330,16 @@
                result)
         (recur (inc i)
                use-s1
-               (concat result (list (nth (if use-s1 s1 s2) i))))))))
+               (conj result (nth (if use-s1 s1 s2) i)))))))
 
 ; (alternate '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16) '(a b c d e f g h i j k) 0.2 1)
 
 (defn linearly-mutate
-  [open-close-sequence mutation-rate atom-generators]
-  (map #(if (< (lrand) mutation-rate)
-          (random-code 1 (concat atom-generators [:open :close ()]))
-          %)
-       open-close-sequence))
+  [open-close-vector mutation-rate atom-generators]
+  (vec (map #(if (< (lrand) mutation-rate)
+               (random-code 1 (concat atom-generators [:open :close ()]))
+               %)
+            open-close-vector)))
 
 (defn ultra-operate-on-programs
   [p1 p2 alternation-rate alignment-deviation mutation-rate atom-generators]
@@ -349,11 +353,11 @@
                p2
                (concat p2 (repeat (- (count p1) (count p2)) '())))]
       (remove-empties
-        (open-close-sequence-to-list
+        (open-close-vector-to-list
           (balance
             (linearly-mutate
-              (alternate (list-to-open-close-sequence p1)
-                         (list-to-open-close-sequence p2)
+              (alternate (list-to-open-close-vector p1)
+                         (list-to-open-close-vector p2)
                          alternation-rate
                          alignment-deviation)
               mutation-rate
