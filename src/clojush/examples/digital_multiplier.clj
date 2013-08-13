@@ -14,7 +14,7 @@
 ;; Each of these vectors has 2*n items, accessed by instructions in0 through
 ;; in(2*n) and out0 through out(2*n) respectively.
 
-(ns clojush.examples.multiple-output-multiplier
+(ns clojush.examples.digital-multiplier
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random]
         clojure.math.numeric-tower))
@@ -131,6 +131,7 @@
      :max-generations 500
      :max-points 400
      :max-points-in-initial-program 200
+     :evalpush-limit 400
      :mutation-probability 0.1
      :mutation-max-points 30
      :crossover-probability 0.8
