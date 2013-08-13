@@ -1,20 +1,20 @@
-;; multiple-output-multiplier.clj
+;; digital-multiplier.clj
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Tom Helmuth, thelmuth@cs.umass.edu
 ;;
-;; This is code for the multiple output multiplier problem, as defined in:
+;; This is code for the digital multiplier problem, as defined in:
 ;;    Walker, J.A.; Miller, J.F., "The Automatic Acquisition, Evolution and
 ;;    Reuse of Modules in Cartesian Genetic Programming," Evolutionary
 ;;    Computation, IEEE Transactions on , vol.12, no.4, pp.397,417, Aug. 2008
 ;;
-;; The n-bit multiple output multiplier takes 2 n-bit numbers and outputs their
+;; The n-bit digital multiplier takes 2 n-bit numbers and outputs their
 ;; product. So, this problem requires 2*n bits of input and 2*n bits of output.
 ;; The input is stored in a vector as the first item on the auxiliary stack, and
 ;; the output is stored in a vector as the second item on the auxiliary stack.
 ;; Each of these vectors has 2*n items, accessed by instructions in0 through
 ;; in(2*n) and out0 through out(2*n) respectively.
 
-(ns clojush.examples.multiple-output-multiplier
+(ns clojush.examples.digital-multiplier
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random]
         clojure.math.numeric-tower))
@@ -66,7 +66,7 @@
     (eval `(define-registered ~symb (out ~num)))))
       
 ;; Define atom generators for the problem
-(defn mom-atom-generators
+(defn dm-atom-generators
   [num-bits-n]
   (list
     (fn [] (lrand-nth (list 'boolean_and
@@ -81,7 +81,7 @@
     ))
 
 ;; Create test cases
-(defn mom-test-cases
+(defn dm-test-cases
   [num-bits-n]
   (for [num1 (range (expt 2 num-bits-n))
         num2 (range (expt 2 num-bits-n))]
@@ -92,7 +92,7 @@
 
 ;; Create error function; it is applied partially when defined, and takes
 ;; a program and returns its error vector.
-(defn mom-error-function
+(defn dm-error-function
   "Defines the error function of num-bits binary multiplier."
   [num-bits-n test-cases program]
   (doall
@@ -118,19 +118,20 @@
                       result-output))))))
 
 ;; Define argmap for pushgp
-(defn define-multiple-output-multiplier
+(defn define-digital-multiplier
   [num-bits-n]
   (define-ins (* 2 num-bits-n))
   (define-outs (* 2 num-bits-n))
   (def argmap
-    {:error-function (partial mom-error-function
+    {:error-function (partial dm-error-function
                               num-bits-n
-                              (mom-test-cases num-bits-n))
-     :atom-generators (mom-atom-generators num-bits-n)
+                              (dm-test-cases num-bits-n))
+     :atom-generators (dm-atom-generators num-bits-n)
      :population-size 1000
      :max-generations 500
      :max-points 400
      :max-points-in-initial-program 200
+     :evalpush-limit 400
      :mutation-probability 0.1
      :mutation-max-points 30
      :crossover-probability 0.8
@@ -139,4 +140,4 @@
   )
 
 ;; Create the argmap passing the number of bits for the problem
-(define-multiple-output-multiplier 2)
+(define-digital-multiplier 2)
