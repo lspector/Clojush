@@ -65,11 +65,12 @@ group B is discarded. "
         all-elitegroups (vals (group-by #(nth elites %) cases))
         pruned-elitegroups (filter (fn [eg]
                                      (let [e (set (nth elites (first eg)))]
-                                       (some (fn [eg2]
-                                               (let [e2 (set (nth elites (first eg2)))]
-                                                 (and (not= e e2)
-                                                      (set/subset? e2 e))))
-                                             all-elitegroups)))
+                                       (not-any?
+                                         (fn [eg2]
+                                           (let [e2 (set (nth elites (first eg2)))]
+                                             (and (not= e e2)
+                                                  (set/subset? e2 e))))
+                                         all-elitegroups)))
                                    all-elitegroups)]
     (reset! elitegroups pruned-elitegroups)
     (println (count @elitegroups) "elitegroups:" @elitegroups)))
