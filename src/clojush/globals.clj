@@ -36,6 +36,8 @@
 (def global-tag-limit (atom 10000))
 (def global-uniform-crossover-parameters (atom {:self 0.9 :other 0.2}))
 (def global-hybridization-parameters (atom {:self 0.9 :other 0.2}))
+(def global-timer (atom 0))
+(def global-timing-map (atom {:initialization 0 :reproduction 0 :report 0 :fitness 0 :other 0}))
 
 ;; Historically-assessed hardness (http://hampshire.edu/lspector/pubs/kleinspector-gptp08-preprint.pdf)
 ;; using the "Previous Generation / Difference" method. 
