@@ -9,68 +9,69 @@
 ;; pushgp
 
 (def push-argmap
-     (atom (sorted-map :error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
-                       :error-threshold 0
-                       :population-size 1000
-                       :max-points 50 
-                       :max-points-in-initial-program 50
-                       :atom-generators (concat @registered-instructions
-                                                (list 
-                                                 (fn [] (lrand-int 100))
-                                                 (fn [] (lrand))))
-                       :max-generations 1001
-                       :max-mutations nil
-                       :mutation-probability 0.4
-                       :mutation-max-points 20
-                       :crossover-probability 0.4
-                       :simplification-probability 0.1
-                       :tournament-size 7
-                       :report-simplifications 100
-                       :final-report-simplifications 1000
-                       :reproduction-simplifications 1
-                       :trivial-geography-radius 0
-                       :decimation-ratio 1
-                       :decimation-tournament-size 2
-                       :evalpush-limit 150
-                       :evalpush-time-limit 0
-                       :node-selection-method :unbiased
-                       :node-selection-leaf-probability 0.1
-                       :node-selection-tournament-size 2
-                       :pop-when-tagging true
-                       :gaussian-mutation-probability 0.0
-                       :gaussian-mutation-per-number-mutation-probability 0.5
-                       :gaussian-mutation-standard-deviation 0.1
-                       :reuse-errors true
-                       :problem-specific-report default-problem-specific-report
-                       :use-single-thread false
-                       :random-seed (System/nanoTime)
-                       :use-historically-assessed-hardness false
-                       :use-lexicase-selection false
-                       :use-elitegroup-lexicase-selection false
-                       :use-rmse false
-                       :print-csv-logs false
-                       :print-json-logs false
-                       :csv-log-filename "log.csv"
-                       :json-log-filename "log.json"
-                       :log-fitnesses-for-all-cases false
-                       :json-log-program-strings false 
-                       :boolean-gsxover-probability 0.0
-                       :boolean-gsxover-new-code-max-points 20
-                       :deletion-mutation-probability 0.0
-                       :parentheses-addition-mutation-probability 0.0
-                       :tagging-mutation-probability 0.0
-                       :tag-branch-mutation-probability 0.0
-                       :tag-branch-mutation-type-instruction-pairs []
-                       :parent-reversion-probability 0.0
-                       :tag-limit 10000
-                       :initial-population nil
-                       :ultra-probability 0.0
-                       :ultra-alternation-rate 0.1
-                       :ultra-alignment-deviation 1
-                       :ultra-mutation-rate 0.1
-                       :print-errors true
-                       :print-history true
-                       :save-initial-population false)))
+  (atom (sorted-map :error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
+                    :error-threshold 0
+                    :population-size 1000
+                    :max-points 50 
+                    :max-points-in-initial-program 50
+                    :atom-generators (concat @registered-instructions
+                                             (list 
+                                               (fn [] (lrand-int 100))
+                                               (fn [] (lrand))))
+                    :max-generations 1001
+                    :max-mutations nil
+                    :mutation-probability 0.4
+                    :mutation-max-points 20
+                    :crossover-probability 0.4
+                    :simplification-probability 0.1
+                    :tournament-size 7
+                    :report-simplifications 100
+                    :final-report-simplifications 1000
+                    :reproduction-simplifications 1
+                    :trivial-geography-radius 0
+                    :decimation-ratio 1
+                    :decimation-tournament-size 2
+                    :evalpush-limit 150
+                    :evalpush-time-limit 0
+                    :node-selection-method :unbiased
+                    :node-selection-leaf-probability 0.1
+                    :node-selection-tournament-size 2
+                    :pop-when-tagging true
+                    :gaussian-mutation-probability 0.0
+                    :gaussian-mutation-per-number-mutation-probability 0.5
+                    :gaussian-mutation-standard-deviation 0.1
+                    :reuse-errors true
+                    :problem-specific-report default-problem-specific-report
+                    :use-single-thread false
+                    :random-seed (System/nanoTime)
+                    :use-historically-assessed-hardness false
+                    :use-lexicase-selection false
+                    :use-elitegroup-lexicase-selection false
+                    :use-rmse false
+                    :print-csv-logs false
+                    :print-json-logs false
+                    :csv-log-filename "log.csv"
+                    :json-log-filename "log.json"
+                    :log-fitnesses-for-all-cases false
+                    :json-log-program-strings false 
+                    :boolean-gsxover-probability 0.0
+                    :boolean-gsxover-new-code-max-points 20
+                    :deletion-mutation-probability 0.0
+                    :parentheses-addition-mutation-probability 0.0
+                    :tagging-mutation-probability 0.0
+                    :tag-branch-mutation-probability 0.0
+                    :tag-branch-mutation-type-instruction-pairs []
+                    :parent-reversion-probability 0.0
+                    :tag-limit 10000
+                    :initial-population nil
+                    :ultra-probability 0.0
+                    :ultra-alternation-rate 0.1
+                    :ultra-alignment-deviation 1
+                    :ultra-mutation-rate 0.1
+                    :print-errors true
+                    :print-history true
+                    :print-timings false
+                    :save-initial-population false)))
 
 (defn load-push-argmap
   [argmap]
@@ -124,15 +125,15 @@
     (let [err-fn (if @global-use-rmse :rms-error :total-error)]
       (println "Performing parent reversion...")
       (dorun (map #((if use-single-thread swap! send) 
-                    % 
-                    (fn [i]  
-                      (if (or (< (err-fn i) (err-fn (:parent i)))
-                              (and (= (err-fn i) (err-fn (:parent i)))
-                                   (< (count-points (:program i))
-                                      (count-points (:program (:parent i)))))
-                              (> (lrand) parent-reversion-probability))
-                        (assoc i :parent nil)  ;; don't store whole ancestry
-                        (:parent i))))
+                        % 
+                        (fn [i]  
+                          (if (or (< (err-fn i) (err-fn (:parent i)))
+                                  (and (= (err-fn i) (err-fn (:parent i)))
+                                       (< (count-points (:program i))
+                                          (count-points (:program (:parent i)))))
+                                  (> (lrand) parent-reversion-probability))
+                            (assoc i :parent nil)  ;; don't store whole ancestry
+                            (:parent i))))
                   pop-agents))
       (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
       (println "Done performing parent reversion."))))
@@ -171,50 +172,65 @@
                         trivial-geography-radius))]
     (dotimes [i population-size]
       ((if use-single-thread swap! send)
-       (nth child-agents i) 
-       breed 
-       i (nth rand-gens i) pop @push-argmap)))
+           (nth child-agents i) 
+           breed 
+           i (nth rand-gens i) pop @push-argmap)))
   (when-not use-single-thread (apply await child-agents))) ;; SYNCHRONIZE
 
 (defn install-next-generation [pop-agents child-agents {:keys [population-size use-single-thread]}]
   (dotimes [i population-size]
     ((if use-single-thread swap! send)
-     (nth pop-agents i) (fn [av] (deref (nth child-agents i)))))
+         (nth pop-agents i) (fn [av] (deref (nth child-agents i)))))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
+
+(defn timer
+  "Used to track the time used by different parts of evolution."
+  [step]
+  (when @global-print-timings
+    (let [start-time @global-timer
+          current-time-for-step (get @global-timing-map step)]
+      (reset! global-timer (System/currentTimeMillis))
+      (swap! global-timing-map assoc step (+ current-time-for-step (- @global-timer start-time))))))
 
 (defn pushgp
   "The top-level routine of pushgp."
   ([] (pushgp '()))
   ([args]
-     (load-push-argmap args)
-     (binding [*thread-local-random-generator* (java.util.Random. (:random-seed @push-argmap))]
-       ;; set globals from parameters
-       (reset-globals)
-       (initial-report) ;; Print the inital report
-       (print-params @push-argmap)
-       (println "Generating initial population...")
-       (let [{:keys [pop-agents child-agents rand-gens]} (make-agents-and-rng @push-argmap)]
-         ;; Main loop
-         (loop [generation 0]
-           (println "Processing generation:" generation)
-           (print "Computing errors... ")
-           (compute-errors pop-agents rand-gens @push-argmap)
-           (println "Done computing errors.")
-           ;; possible parent reversion
-           (parental-reversion pop-agents generation @push-argmap)
-           ;; calculate solution rates if necessary for historically-assessed hardness
-           ;; change calculate-hah-solution-rates in the future, to destructure the argmap
-           (calculate-hah-solution-rates-wrapper pop-agents @push-argmap)
-           ;; create global structure to support elitegroup lexicase selection
-           (when @global-use-elitegroup-lexicase-selection 
-             (build-elitegroups pop-agents))
-           ;; report and check for success
-           (let [outcome (report-and-check-for-success pop-agents generation @push-argmap)]
-             (cond (= outcome :failure) (do (printf "\nFAILURE\n") (flush))
-                   (= outcome :continue) (do (println "Producing offspring...")
-                                             (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
-                                             (println "Installing next generation...")
-                                             (install-next-generation pop-agents child-agents @push-argmap)
-                                             (recur (inc generation)))
-                   :else (let [{:keys [error-function final-report-simplifications]} @push-argmap]
-                           (final-report generation outcome error-function final-report-simplifications)))))))))
+    (reset! global-timer (System/currentTimeMillis))
+    (load-push-argmap args)
+    (binding [*thread-local-random-generator* (java.util.Random. (:random-seed @push-argmap))]
+      ;; set globals from parameters
+      (reset-globals)
+      (initial-report) ;; Print the inital report
+      (print-params @push-argmap)
+      (timer :initialization)
+      (println "Generating initial population...")
+      (let [{:keys [pop-agents child-agents rand-gens]} (make-agents-and-rng @push-argmap)]
+        ;; Main loop
+        (loop [generation 0]
+          (println "Processing generation:" generation)
+          (timer :reproduction)
+          (print "Computing errors... ")
+          (compute-errors pop-agents rand-gens @push-argmap)
+          (println "Done computing errors.")
+          (timer :fitness)
+          ;; possible parent reversion
+          (parental-reversion pop-agents generation @push-argmap)
+          ;; calculate solution rates if necessary for historically-assessed hardness
+          ;; change calculate-hah-solution-rates in the future, to destructure the argmap
+          (calculate-hah-solution-rates-wrapper pop-agents @push-argmap)
+          ;; create global structure to support elitegroup lexicase selection
+          (when @global-use-elitegroup-lexicase-selection 
+            (build-elitegroups pop-agents))
+          (timer :other)
+          ;; report and check for success
+          (let [outcome (report-and-check-for-success pop-agents generation @push-argmap)]
+            (cond (= outcome :failure) (do (printf "\nFAILURE\n") (flush))
+                  (= outcome :continue) (do (timer :report)
+                                            (println "Producing offspring...")
+                                            (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
+                                            (println "Installing next generation...")
+                                            (install-next-generation pop-agents child-agents @push-argmap)
+                                            (recur (inc generation)))
+                  :else (let [{:keys [error-function final-report-simplifications]} @push-argmap]
+                          (final-report generation outcome error-function final-report-simplifications)))))))))
