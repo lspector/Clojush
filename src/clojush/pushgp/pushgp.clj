@@ -70,6 +70,7 @@
                     :ultra-mutation-rate 0.1
                     :print-errors true
                     :print-history true
+                    :print-timings false
                     :save-initial-population false)))
 
 (defn load-push-argmap
@@ -185,10 +186,11 @@
 (defn timer
   "Used to track the time used by different parts of evolution."
   [step]
-  (let [start-time @global-timer
-        current-time-for-step (get @global-timing-map step)]
-    (reset! global-timer (System/currentTimeMillis))
-    (swap! global-timing-map assoc step (+ current-time-for-step (- @global-timer start-time)))))
+  (when @global-print-timings
+    (let [start-time @global-timer
+          current-time-for-step (get @global-timing-map step)]
+      (reset! global-timer (System/currentTimeMillis))
+      (swap! global-timing-map assoc step (+ current-time-for-step (- @global-timer start-time))))))
 
 (defn pushgp
   "The top-level routine of pushgp."
