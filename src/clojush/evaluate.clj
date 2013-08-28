@@ -48,9 +48,9 @@
   [i error-function rand-gen]
   (binding [*thread-local-random-generator* rand-gen]
     (let [p (:program i)
-          e (if (and (seq? (:errors i)) @global-reuse-errors)
-              (:errors i)
-              (error-function p))
+          e (vec (if (and (seq? (:errors i)) @global-reuse-errors)
+                   (:errors i)
+                   (error-function p)))
           te (if (and (number? (:total-error i)) @global-reuse-errors)
                (:total-error i)
                (keep-number-reasonable (compute-total-error e)))
