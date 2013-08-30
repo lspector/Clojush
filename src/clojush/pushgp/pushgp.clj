@@ -90,7 +90,15 @@
   (let [agent-error-handler (fn [agnt except]
                               (.printStackTrace except System/out)
                               (.printStackTrace except)
-                              (System/exit 0))]
+                              (System/exit 0))
+        random-seeds (loop [seeds '()]
+                       (let [num-remaining (if initial-population
+                                             (- (count initial-population) (count seeds))
+                                             (- population-size (count seeds)))]
+                         (if (pos? num-remaining)
+                           (recur (distinct (concat seeds (repeatedly num-remaining
+                                                                      #(lrand-int Integer/MAX_VALUE)))))
+                           seeds)))]
     {:pop-agents (if initial-population
                    (->> (read-string (slurp (str "data/" initial-population)))
                         (map #(if use-single-thread (atom %) (agent %)))
@@ -108,8 +116,9 @@
                                  ((if use-single-thread atom agent)
                                       (make-individual)
                                       :error-handler agent-error-handler))))
-     :rand-gens (vec (doall (for [k (range population-size)]
-                              (java.util.Random. (+ random-seed (inc k))))))
+     :random-seeds random-seeds
+     :rand-gens (vec (doall (for [k (range population-size)]                      
+                              (java.util.Random. (nth random-seeds k)))))
      }))
 
 (defn compute-errors [pop-agents rand-gens {:keys [use-single-thread error-function]}]
@@ -205,7 +214,10 @@
       (print-params @push-argmap)
       (timer :initialization)
       (println "Generating initial population...")
-      (let [{:keys [pop-agents child-agents rand-gens]} (make-agents-and-rng @push-argmap)]
+      (let [{:keys [pop-agents child-agents rand-gens random-seeds]} (make-agents-and-rng @push-argmap)]
+        #_(print "Random seeds: ")
+        #_(doseq [seed random-seeds] (print " " seed))
+        #_(println)
         ;; Main loop
         (loop [generation 0]
           (println "Processing generation:" generation)

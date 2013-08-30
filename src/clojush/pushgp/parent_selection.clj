@@ -29,29 +29,9 @@ time in random order."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; elitegroup lexicase selection
 
-(defn build-elitegroups
-  "Builds a sequence that partitions the cases into sub-sequences, with cases 
-grouped when they produce the same set of elite individuals in the population."
-  [pop-agents]
-  (println "Building case elitegroups...")
-  (let [pop (retain-one-individual-per-error-vector (map deref pop-agents))
-        cases (range (count (:errors (first pop))))
-        elites (map (fn [c]
-                      (let [min-error-for-case 
-                            (apply min (map #(nth % c) (map :errors pop)))]
-                        (filter #(== (nth (:errors %) c) min-error-for-case)
-                                pop)))
-                    cases)]
-    (reset! elitegroups
-            (vals (group-by #(nth elites %) cases)))
-    (println (count @elitegroups) "elitegroups:" @elitegroups)))
-
 ;(defn build-elitegroups
 ;  "Builds a sequence that partitions the cases into sub-sequences, with cases 
-;grouped when they produce the same set of elite individuals in the population. 
-;In addition, if group A produces population subset PS(A), and group B 
-;produces population subset PS(B), and PS(A) is a proper subset of PS(B), then 
-;group B is discarded. "
+;grouped when they produce the same set of elite individuals in the population."
 ;  [pop-agents]
 ;  (println "Building case elitegroups...")
 ;  (let [pop (retain-one-individual-per-error-vector (map deref pop-agents))
@@ -61,19 +41,39 @@ grouped when they produce the same set of elite individuals in the population."
 ;                            (apply min (map #(nth % c) (map :errors pop)))]
 ;                        (filter #(== (nth (:errors %) c) min-error-for-case)
 ;                                pop)))
-;                    cases)
-;        all-elitegroups (vals (group-by #(nth elites %) cases))
-;        pruned-elitegroups (filter (fn [eg]
-;                                     (let [e (set (nth elites (first eg)))]
-;                                       (not-any?
-;                                         (fn [eg2]
-;                                           (let [e2 (set (nth elites (first eg2)))]
-;                                             (and (not= e e2)
-;                                                  (set/subset? e2 e))))
-;                                         all-elitegroups)))
-;                                   all-elitegroups)]
-;    (reset! elitegroups pruned-elitegroups)
+;                    cases)]
+;    (reset! elitegroups
+;            (vals (group-by #(nth elites %) cases)))
 ;    (println (count @elitegroups) "elitegroups:" @elitegroups)))
+
+(defn build-elitegroups
+  "Builds a sequence that partitions the cases into sub-sequences, with cases 
+grouped when they produce the same set of elite individuals in the population. 
+In addition, if group A produces population subset PS(A), and group B 
+produces population subset PS(B), and PS(A) is a proper subset of PS(B), then 
+group B is discarded. "
+  [pop-agents]
+  (println "Building case elitegroups...")
+  (let [pop (retain-one-individual-per-error-vector (map deref pop-agents))
+        cases (range (count (:errors (first pop))))
+        elites (map (fn [c]
+                      (let [min-error-for-case 
+                            (apply min (map #(nth % c) (map :errors pop)))]
+                        (filter #(== (nth (:errors %) c) min-error-for-case)
+                                pop)))
+                    cases)
+        all-elitegroups (vals (group-by #(nth elites %) cases))
+        pruned-elitegroups (filter (fn [eg]
+                                     (let [e (set (nth elites (first eg)))]
+                                       (not-any?
+                                         (fn [eg2]
+                                           (let [e2 (set (nth elites (first eg2)))]
+                                             (and (not= e e2)
+                                                  (set/subset? e2 e))))
+                                         all-elitegroups)))
+                                   all-elitegroups)]
+    (reset! elitegroups pruned-elitegroups)
+    (println (count @elitegroups) "elitegroups:" @elitegroups)))
 
 (defn elitegroup-lexicase-selection
   "Returns an individual produced by elitegroup lexicase selection."
