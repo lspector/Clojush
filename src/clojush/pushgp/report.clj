@@ -135,7 +135,6 @@
     (println ";; -*- Report at generation" generation)
     (let [sorted (sort-by :total-error < population)
           best (first sorted)]
-      (println "Current time:" (System/currentTimeMillis))
       (println "Best program:" (not-lazy (:program best)))
       (when (> report-simplifications 0)
         (println "Partial simplification:"
@@ -164,6 +163,20 @@
         (println "Max copy number of one program:" (apply max (vals frequency-map)))
         (println "Min copy number of one program:" (apply min (vals frequency-map)))
         (println "Median copy number:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
+      (println "--- Timings ---")
+      (println "Current time:" (System/currentTimeMillis) "miliseconds")
+      (when @global-print-timings
+        (let [total-time (apply + (vals @global-timing-map))
+              init (get @global-timing-map :initialization)
+              reproduction (get @global-timing-map :reproduction)
+              fitness (get @global-timing-map :fitness)
+              report-time (get @global-timing-map :report)
+              other (get @global-timing-map :other)]
+          (printf "Initialization:  %8.1f seconds, %4.1f%%\n" (/ init 1000.0) (* 100.0 (/ init total-time)))
+          (printf "Reproduction:    %8.1f seconds, %4.1f%%\n" (/ reproduction 1000.0) (* 100.0 (/ reproduction total-time)))
+          (printf "Fitness Testing: %8.1f seconds, %4.1f%%\n" (/ fitness 1000.0) (* 100.0 (/ fitness total-time)))
+          (printf "Report:          %8.1f seconds, %4.1f%%\n" (/ report-time 1000.0) (* 100.0 (/ report-time total-time)))
+          (printf "Other:           %8.1f seconds, %4.1f%%\n" (/ other 1000.0) (* 100.0 (/ other total-time)))))
       (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
       (flush)
       (when print-csv-logs (csv-print population generation csv-log-filename
