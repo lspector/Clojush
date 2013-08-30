@@ -155,6 +155,12 @@
                (*' 1.0 (/ (reduce +' (map :total-error sorted)) (count population))))
       (println "Median total errors in population:"
                (:total-error (nth sorted (truncate (/ (count sorted) 2)))))
+      (println "Error averages by case:"
+               (apply map (fn [& args] (*' 1.0 (/ (reduce +' args) (count args))))
+                      (map :errors population)))
+      (println "Error minima by case:"
+               (apply map (fn [& args] (apply min args))
+                      (map :errors population)))
       (println "Average program size in population (points):"
                (*' 1.0 (/ (reduce +' (map count-points (map :program sorted)))
                           (count population))))
