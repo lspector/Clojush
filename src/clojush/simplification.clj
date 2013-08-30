@@ -50,3 +50,15 @@
         (if (= new-errors errors)
           (recur (inc step) new-program new-errors new-total-errors)
           (recur (inc step) program errors total-errors))))))
+
+(defn auto-simplify-from-program
+  [p error-function steps print? progress-interval]
+  (let [errs (error-function p)]
+    (auto-simplify (make-individual :program p
+                                    :errors errs
+                                    :total-error (reduce + errs))
+                   error-function
+                   steps
+                   print?
+                   progress-interval)))
+                                  
