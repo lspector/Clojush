@@ -5,7 +5,65 @@
         [clojush.random]
         [clojush.util]
         [clojush.instructions.tag]
-        [clojure.math.numeric-tower]))
+        [clojure.math.numeric-tower]
+        ;[incanter.stats :as stats]
+        ))
+
+;;;;;;;;
+(defn compute-next-row
+  "computes the next row using the prev-row current-element and the other seq"
+  [prev-row current-element other-seq pred]
+  (reduce
+    (fn [row [diagonal above other-element]]
+      (let [update-val
+	     (if (pred other-element current-element)
+	       ;; if the elements are deemed equivalent according to the predicate
+	       ;; pred, then no change has taken place to the string, so we are
+	       ;; going to set it the same value as diagonal (which is the previous edit-distance)
+	       diagonal
+ 
+	       ;; in the case where the elements are not considered equivalent, then we are going
+	       ;; to figure out if its a substitution (then there is a change of 1 from the previous
+	       ;; edit distance) thus the value is diagonal + 1 or if its a deletion, then the value
+	       ;; is present in the columns, but not in the rows, the edit distance is the edit-distance
+	       ;; of last of row + 1 (since we will be using vectors, peek is more efficient)
+	       ;; or it could be a case of insertion, then the value is above+1, and we chose
+	       ;; the minimum of the three
+	       (inc (min diagonal above (peek row)))
+	       )]
+	(conj row update-val)))
+    ;; we need to initialize the reduce function with the value of a row, since we are
+    ;; constructing this row from the previous one, the row is a vector of 1 element which
+    ;; consists of 1 + the first element in the previous row (edit distance between the prefix so far
+    ;; and an empty string)
+    [(inc (first prev-row))]
+ 
+    ;; for the reduction to go over, we need to provide it with three values, the diagonal
+    ;; which is the same as prev-row because it starts from 0, the above, which is the next element
+    ;; from the list and finally the element from the other sequence itself.
+    (map vector prev-row (next prev-row) other-seq)))
+ 
+(defn levenshtein-distance
+  "Levenshtein Distance - http://en.wikipedia.org/wiki/Levenshtein_distance
+In information theory and computer science, the Levenshtein distance is a metric for measuring the amount of difference between two sequences. This is a functional implementation of the levenshtein edit
+distance with as little mutability as possible.
+ 
+Still maintains the O(n*m) guarantee.
+"
+  [a b & {p :predicate  :or {p =}}]
+  (peek
+    (reduce
+      ;; we use a simple reduction to convert the previous row into the next-row  using the
+      ;; compute-next-row which takes a current element, the previous-row computed so far
+      ;; and the predicate to compare for equality.
+      (fn [prev-row current-element]
+	(compute-next-row prev-row current-element b p))
+ 
+      ;; we need to initialize the prev-row with the edit distance between the various prefixes of
+      ;; b and the empty string.
+      (map #(identity %2) (cons nil b) (range)) 
+      a)))
+;;;;;;
 
 ;; Lee Spector, 20130101
 
@@ -30,6 +88,11 @@
 (define-registered 
   signal_error 
   (fn [state] (push-item :error :auxiliary state)))
+
+(def digit-entry-tests
+  (let [keys [:zero :one :two :three :four :five :six :seven :eight :nine]]
+    (vec (for [k (range 10)] 
+           [[(nth keys k)] (float k) false]))))
 
 (def digit-entry-pair-tests
   (let [keys [:zero :one :two :three :four :five :six :seven :eight :nine]]
@@ -85,6 +148,7 @@
   ;; answer doesn't matter if error is true
   ;; if no error, answer must be correct on float stack and true cannot be top boolean
   (concat
+    digit-entry-tests
     digit-entry-pair-tests
     single-digit-math-tests
     ;single-digit-incomplete-math-tests
@@ -93,7 +157,7 @@
     ;double-digit-float-entry-tests
     ))
 
-(println "Number of cases:" (count calc-tests))
+(println "Number of tests:" (count calc-tests))
 
 (defn tag-before-entry-points
   [push-state]
@@ -113,46 +177,64 @@
   ;; then, for each fitness case:
   ;;   start with the initialized push state
   ;;   retrieve and execute all of the entry points from the pressed buttons
-  ;;   determine error from float and boolean stacks
+  ;;   determine errors from float and boolean stacks
   (let [correct 0.0
-        incorrect 1.0
+        incorrect 1000000000.0
         first-run-result (run-push program (tag-before-entry-points (make-push-state)))
         initialized-push-state (push-item 
-                                 0.0 
-                                 :float 
-                                 (assoc (make-push-state) :tag (:tag first-run-result)))
-        err-modcount-pairs (doall (for [t calc-tests]
-                                    (loop [push-state initialized-push-state
-                                           buttons (first t)]
-                                      (if (empty? buttons)
-                                        [(if (nth t 2) 
-                                           ;; should signal error, via the auxiliary stack
-                                           (if (= :error (top-item :auxiliary push-state)) correct incorrect)
-                                           ;; shouldn't signal error
-                                           (if (= :error (top-item :auxiliary push-state))
-                                             incorrect ;; but did
-                                             (if (= (top-item :float push-state) (nth t 1))
-                                               correct ;; answer is correct
-                                               (let [top (top-item :float push-state)
-                                                     target (nth t 1)]
-                                                 (if (not (number? top))
-                                                   incorrect ;; no number
-                                                   ;; else return error scaled to [0, 1]
-                                                   (float (/ (Math/abs (- top target))
-                                                             (+ (Math/abs top) (Math/abs target)))))))))
-                                         (count (:tag push-state))]
-                                        (recur (let [the-tag (get button-entrypoints (first buttons))]
-                                                 (run-push (second (closest-association the-tag push-state))
-                                                           push-state))
-                                               (rest buttons))))))]
-    (vec (map first err-modcount-pairs))
+                                   0.0 
+                                   :float 
+                                   (assoc (make-push-state) :tag (:tag first-run-result)))
+        test-errors (doall (for [t calc-tests]
+                             (loop [push-state initialized-push-state
+                                    buttons (first t)]
+                               (if (empty? buttons)
+                                 (let [top (top-item :float push-state)
+                                       target (nth t 1)]
+                                   ;(println "TEST:" t)
+                                   ;(println "FINAL STATE:" push-state)
+                                   ;[;; numerical distance error
+                                   (if (not (number? top))
+                                     [incorrect incorrect]
+                                      ;; else return error scaled to [0, 1]
+;                                      (if (== top target)
+;                                        ;; correct
+;                                        [correct correct]
+;                                        ;incorrect ;; actually, try just error = 1 for all incorrect
+;                                        ;(Math/abs (- top target))
+;                                        [(Math/abs (- top target)) 
+;                                         (float (levenshtein-distance (str top) (str target)))]
+;                                        ;;(float (/ (Math/abs (- top target))
+;                                        ;;          (+ (Math/abs top) (Math/abs target))))
+;                                        )
+                                      (if (< (Math/abs (- top target)) 0.0001)
+                                        ;; correct
+                                        [correct correct]
+                                        ;incorrect ;; actually, try just error = 1 for all incorrect
+                                        ;(Math/abs (- top target))
+                                        [(Math/abs (- top target)) 
+                                         (float (levenshtein-distance (str top) (str target)))]
+                                        ;;(float (/ (Math/abs (- top target))
+                                        ;;          (+ (Math/abs top) (Math/abs target))))
+                                        )
+                                      )
+                                    ;;
+                                    ;; error signal error
+                                    #_(if (nth t 2)
+                                      (if (= :error (top-item :auxiliary push-state)) 
+                                        correct 
+                                        incorrect)
+                                      correct)
+                                    ;])
+                                    )
+                                 (recur (let [the-tag (get button-entrypoints (first buttons))]
+                                          (run-push (second (closest-association the-tag push-state))
+                                                    push-state))
+                                        (rest buttons))))))]
+    ;(vec (apply concat test-errors))
+    (let [all-errors (apply concat test-errors)]
+      (conj (vec all-errors) (count (filter #(not (zero? %)) all-errors))))
     ))
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -160,18 +242,13 @@
 (def argmap
   {:error-function calc-errors
     :atom-generators (concat
-                       '(signal_error)
-                       ;(list (fn [] (- (lrand-int 21) 10))
-                       ;      (fn [] (- (lrand 21) 10)))
+                       ;'(signal_error)
                        [0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0]
-                       ;(repeat 1 (tag-instruction-erc [:exec :float :boolean]))
-                       (repeat 1 (tag-instruction-erc [:exec]))
-                       ;(for [t (vals button-entrypoints)]
-                       ;  (fn [] (symbol (str "tag_exec_" (str t)))))
-                       ;[(fn []
-                       ;   (symbol (str "tag_exec_" (str (lrand-nth (vals button-entrypoints))))))]
-                       (repeat 1 (tagged-instruction-erc))
-                       ;(repeat 20 (return-tag-instruction-erc [:float :boolean :exec] 10000))
+                       [(tag-instruction-erc [:exec])]
+                       (for [t (vals button-entrypoints)]
+                         (fn [] (symbol (str "tag_exec_" (str t)))))
+                       [(tagged-instruction-erc)]
+                       (repeat 46 'code_noop)
                        '(boolean_and
                           boolean_dup
                           boolean_eq
@@ -204,14 +281,14 @@
                           ;code_eq
                           ;code_extract
                           ;code_flush
-                          ;code_fromboolean
+                          ;;code_fromboolean
                           ;code_fromfloat
                           ;code_frominteger
-                          ;code_fromzipchildren
-                          ;code_fromziplefts
-                          ;code_fromzipnode
-                          ;code_fromziprights
-                          ;code_fromziproot
+                          ;;code_fromzipchildren
+                          ;;code_fromziplefts
+                          ;;code_fromzipnode
+                          ;;code_fromziprights
+                          ;;code_fromziproot
                           ;code_if
                           ;code_insert
                           ;code_length
@@ -225,7 +302,7 @@
                           ;code_pop
                           ;code_position
                           ;code_quote
-                          ;code_rand
+                          ;;code_rand
                           ;code_rot
                           ;code_shove
                           ;code_size
@@ -241,8 +318,8 @@
                           ;exec_do*count
                           ;exec_do*range
                           ;exec_do*times
-                          ;exec_dup
-                          ;exec_eq
+                          exec_dup
+                          exec_eq
                           ;exec_flush
                           ;exec_fromzipchildren
                           ;exec_fromziplefts
@@ -250,20 +327,20 @@
                           ;exec_fromziprights
                           ;exec_fromziproot
                           exec_if
-                          ;exec_k
-                          ;exec_noop
+                          exec_k
+                          exec_noop
                           ;exec_pop
-                          ;exec_rot
-                          ;exec_s
+                          exec_rot
+                          exec_s
                           ;exec_shove
                           ;exec_stackdepth
-                          ;exec_swap
-                          ;exec_when
-                          ;exec_y
+                          exec_swap
+                          exec_when
+                          exec_y
                           ;exec_yank
                           ;exec_yankdup
                           float_add
-                          ;float_cos
+                          float_cos
                           float_div
                           float_dup
                           float_eq
@@ -272,19 +349,19 @@
                           ;float_frominteger
                           float_gt
                           float_lt
-                          ;float_max
-                          ;float_min
-                          ;;float_mod
+                          float_max
+                          float_min
+                          float_mod
                           float_mult
                           float_pop
                           ;float_rand
                           float_rot
                           ;float_shove
-                          ;float_sin
+                          float_sin
                           ;float_stackdepth
                           float_sub
                           float_swap
-                          ;float_tan
+                          float_tan
                           ;float_yank
                           ;float_yankdup
                           ;integer_add
@@ -332,7 +409,7 @@
                           ;string_length
                           ;string_parse_to_chars
                           ;string_pop
-                          ;string_rand
+                          ;;string_rand
                           ;string_reverse
                           ;string_rot
                           ;string_shove
@@ -379,24 +456,24 @@
    :use-single-thread false
    :use-lexicase-selection true
    ;:use-elitegroup-lexicase-selection true
-   :use-historically-assessed-hardness true ;; just to print them!
+   ;:use-historically-assessed-hardness true ;; just to print them!
    ;:decimation-ratio 0.01
    ;:tournament-size 1
-   :population-size 200;200 ;50
+   :population-size 1000 ;200 ;50
    :max-generations 10001
-   :evalpush-limit 200
+   :evalpush-limit 3000
    :tag-limit 10000
-   :max-points 2000
-   :max-points-in-initial-program 1000
-   ;:parent-reversion-probability 0.9
+   :max-points 3000
+   :max-points-in-initial-program 200 ;;100
+   :parent-reversion-probability 0.0
    :mutation-probability 0
    :crossover-probability 0
    :simplification-probability 0
    :reproduction-simplifications 10
    :ultra-probability 1.0
-   :ultra-alternation-rate 0.0025
-   :ultra-alignment-deviation 20
-   :ultra-mutation-rate 0.0025
+   :ultra-alternation-rate 0.005
+   :ultra-alignment-deviation 5
+   :ultra-mutation-rate 0.005
    :deletion-mutation-probability 0
    :parentheses-addition-mutation-probability 0
    :tagging-mutation-probability 0
@@ -405,7 +482,34 @@
                                                 [:float 'float_eq]
                                                 [:float 'float_lt]
                                                 [:float 'float_gt]]
-   ;:pop-when-tagging false
-   :report-simplifications 10
+   :pop-when-tagging true
+   :report-simplifications 0
    :print-history false
   })
+
+#_(calc-errors '((((tag_exec_1800 
+                   float_flush 
+                   code_swap tag_exec_600 7.0 
+                   (((exec_pop code_nth) 
+                      tag_exec_1700 float_flush code_swap exec_yank tag_exec_1400 
+                      (code_size code_fromfloat) (string_concat tag_exec_400 float_cos 
+                                                                code_fromfloat)) 
+                     (code_eq 
+                       code_fromfloat code_extract tag_exec_2300 (tag_exec_6725) code_yank 
+                       (tag_exec_1600 code_fromfloat) 
+                       (0.0 tag_exec_1300) return_fromfloat 
+                       return_fromstring tag_exec_1000 tag_exec_0) 
+                     ((0.0 tag_exec_1300) return_fromfloat return_fromstring tag_exec_1000) 
+                     (return_fromfloat) 
+                     boolean_fromfloat 
+                     (string_length 
+                       (8.0 code_do 
+                            boolean_pop (tag_exec_900) 
+                            return_fromfloat) (string_take tag_exec_900)) return_fromfloat) 
+                   (string_take (code_swap code_null)) (tag_exec_800)) 
+                  return_fromfloat 
+                  (return_fromstring float_tan float_sub tag_exec_400 tag_exec_1600 float_swap 8.0) 
+                  tag_exec_2100 tag_exec_600)) 
+                (float_mult) (code_list) 
+                ((code_size signal_error) float_eq tag_exec_1200 return_fromfloat return_fromfloat 
+                                          float_rot) code_flush))
