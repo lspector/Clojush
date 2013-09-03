@@ -11,21 +11,6 @@
   [pop]
   (map lrand-nth (vals (group-by #(:errors %) pop))))
   
-;(defn lexicase-selection
-;  "Returns an individual that does the best on the fitness cases when considered one at a
-;time in random order."
-;  [pop]
-;  (loop [survivors (retain-one-individual-per-error-vector pop)
-;         cases (lshuffle (range (count (:errors (first pop)))))]
-;    (if (or (empty? cases)
-;            (empty? (rest survivors)))
-;      (lrand-nth survivors)
-;      (let [min-err-for-case (apply min (map #(nth % (first cases))
-;                                             (map #(:errors %) survivors)))]
-;        (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
-;                       survivors)
-;              (rest cases))))))
-
 (defn lexicase-selection
   "Returns an individual that does the best on the fitness cases when considered one at a
 time in random order.  If radius is non-zero, selection is limited to parents within +/- r of location"
