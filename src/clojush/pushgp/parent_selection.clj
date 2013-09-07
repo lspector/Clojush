@@ -21,50 +21,19 @@ time in random order.  If radius is non-zero, selection is limited to parents wi
      subpop (if (zero? radius) 
                  pop
               (if (< lower upper)
-                        (subvec popvec lower (inc upper))
+                (subvec popvec lower (inc upper))
                 (into (subvec popvec lower (count pop)) 
                       (subvec popvec 0 (inc upper)))))]
-     ;(println (str lower " " upper ">>>"))
-     ;(println (clojure.string/join " " subpop))
-     (loop [survivors (retain-one-individual-per-error-vector subpop)
-            cases (lshuffle (range (count (:errors (first subpop)))))]
-               (if (or (empty? cases)
-               (empty? (rest survivors)))
-         (lrand-nth survivors)
-         (let [min-err-for-case (apply min (map #(nth % (first cases))
-                                                (map #(:errors %) survivors)))]
-           (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
-                          survivors)
-                  (rest cases)))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; test for lexicase selection with trivial geography
-;(let [p0 {:errors [3 3 3 3] :name "p0"}
-;      p1 {:errors [1 1 1 1] :name "p1"} 
-;      p2 {:errors [2 2 2 2] :name "p2"}
-;      p3 {:errors [3 3 3 3] :name "p3"}
-;      p4 {:errors [2 2 2 2] :name "p4"}
-;      pop [p0 p1 p2 p3 p4]]
-;  (println "testing geo-lexicase with radius 1, index 0")
-;  (println (if  (= (:name (lexicase-selection pop 1 0)) "p1") "pass" "fail"))
-;  (println "testing geo-lexicase with radius 1, index 1")
-;  (println (if  (= (:name (lexicase-selection pop 1 1)) "p1") "pass" "fail"))
-;  (println "testing geo-lexicase with radius 1, index 2")
-;  (println (if  (= (:name (lexicase-selection pop 1 2)) "p1") "pass" "fail"))
-;  (println "testing geo-lexicase with radius 1, index 3")
-;  (println (if  (or (= (:name (lexicase-selection pop 1 3)) "p2")
-;                    (= (:name (lexicase-selection pop 1 3)) "p4")) "pass" "fail"))
-;  (println "testing geo-lexicase with radius 1, index 4")
-;  (println (if  (= (:name (lexicase-selection pop 1 4)) "p4") "pass" "fail"))
-;  (println "testing geo-lexicase with radius 2, index 0")
-;  (println (if  (= (:name (lexicase-selection pop 2 0)) "p1") "pass" "fail"))
-;  (println "testing geo-lexicase with radius 2, index 1")
-;  (println (if  (= (:name (lexicase-selection pop 2 1)) "p1") "pass" "fail"))
-;  (println "testing geo-lexicase with radius 2, index 2")
-;  (println (if  (= (:name (lexicase-selection pop 2 2)) "p1") "pass" "fail"))
-;  (println "testing geo-lexicase with radius 2, index 3")
-;  (println (if  (= (:name (lexicase-selection pop 2 3)) "p1") "pass" "fail"))
-;  (println "testing geo-lexicase with radius 2, index 4"))
+    (loop [survivors (retain-one-individual-per-error-vector subpop)
+           cases (lshuffle (range (count (:errors (first subpop)))))]
+      (if (or (empty? cases)
+              (empty? (rest survivors)))
+        (lrand-nth survivors)
+        (let [min-err-for-case (apply min (map #(nth % (first cases))
+                                               (map #(:errors %) survivors)))]
+          (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
+                         survivors)
+                 (rest cases)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; elitegroup lexicase selection
