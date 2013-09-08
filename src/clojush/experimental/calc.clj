@@ -193,31 +193,14 @@ Still maintains the O(n*m) guarantee.
                                        target (nth t 1)]
                                    ;(println "TEST:" t)
                                    ;(println "FINAL STATE:" push-state)
-                                   ;[;; numerical distance error
                                    (if (not (number? top))
                                      [incorrect incorrect]
-                                      ;; else return error scaled to [0, 1]
-;                                      (if (== top target)
-;                                        ;; correct
-;                                        [correct correct]
-;                                        ;incorrect ;; actually, try just error = 1 for all incorrect
-;                                        ;(Math/abs (- top target))
-;                                        [(Math/abs (- top target)) 
-;                                         (float (levenshtein-distance (str top) (str target)))]
-;                                        ;;(float (/ (Math/abs (- top target))
-;                                        ;;          (+ (Math/abs top) (Math/abs target))))
-;                                        )
-                                      (if (< (Math/abs (- top target)) 0.0001)
+                                      (if (== top target)
                                         ;; correct
                                         [correct correct]
-                                        ;incorrect ;; actually, try just error = 1 for all incorrect
-                                        ;(Math/abs (- top target))
+                                        ;incorrect
                                         [(Math/abs (- top target)) 
-                                         (float (levenshtein-distance (str top) (str target)))]
-                                        ;;(float (/ (Math/abs (- top target))
-                                        ;;          (+ (Math/abs top) (Math/abs target))))
-                                        )
-                                      )
+                                         (float (levenshtein-distance (str top) (str target)))]))
                                     ;;
                                     ;; error signal error
                                     #_(if (nth t 2)
@@ -455,11 +438,12 @@ Still maintains the O(n*m) guarantee.
                        )
    :use-single-thread false
    :use-lexicase-selection true
+   :trivial-geography-radius 500
    ;:use-elitegroup-lexicase-selection true
    ;:use-historically-assessed-hardness true ;; just to print them!
    ;:decimation-ratio 0.01
    ;:tournament-size 1
-   :population-size 1000 ;200 ;50
+   :population-size 10000 ;200 ;50
    :max-generations 10001
    :evalpush-limit 3000
    :tag-limit 10000
@@ -486,30 +470,3 @@ Still maintains the O(n*m) guarantee.
    :report-simplifications 0
    :print-history false
   })
-
-#_(calc-errors '((((tag_exec_1800 
-                   float_flush 
-                   code_swap tag_exec_600 7.0 
-                   (((exec_pop code_nth) 
-                      tag_exec_1700 float_flush code_swap exec_yank tag_exec_1400 
-                      (code_size code_fromfloat) (string_concat tag_exec_400 float_cos 
-                                                                code_fromfloat)) 
-                     (code_eq 
-                       code_fromfloat code_extract tag_exec_2300 (tag_exec_6725) code_yank 
-                       (tag_exec_1600 code_fromfloat) 
-                       (0.0 tag_exec_1300) return_fromfloat 
-                       return_fromstring tag_exec_1000 tag_exec_0) 
-                     ((0.0 tag_exec_1300) return_fromfloat return_fromstring tag_exec_1000) 
-                     (return_fromfloat) 
-                     boolean_fromfloat 
-                     (string_length 
-                       (8.0 code_do 
-                            boolean_pop (tag_exec_900) 
-                            return_fromfloat) (string_take tag_exec_900)) return_fromfloat) 
-                   (string_take (code_swap code_null)) (tag_exec_800)) 
-                  return_fromfloat 
-                  (return_fromstring float_tan float_sub tag_exec_400 tag_exec_1600 float_swap 8.0) 
-                  tag_exec_2100 tag_exec_600)) 
-                (float_mult) (code_list) 
-                ((code_size signal_error) float_eq tag_exec_1200 return_fromfloat return_fromfloat 
-                                          float_rot) code_flush))
