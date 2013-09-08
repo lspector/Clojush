@@ -13,18 +13,27 @@
   
 (defn lexicase-selection
   "Returns an individual that does the best on the fitness cases when considered one at a
-time in random order."
-  [pop]
-  (loop [survivors (retain-one-individual-per-error-vector pop)
-         cases (lshuffle (range (count (:errors (first pop)))))]
-    (if (or (empty? cases)
-            (empty? (rest survivors)))
-      (lrand-nth survivors)
-      (let [min-err-for-case (apply min (map #(nth % (first cases))
-                                             (map #(:errors %) survivors)))]
-        (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
-                       survivors)
-               (rest cases))))))
+time in random order.  If radius is non-zero, selection is limited to parents within +/- r of location"
+  [pop radius location]
+  (let [lower (mod (- location radius) (count pop))
+     upper (mod (+ location radius) (count pop))
+     popvec (vec pop)
+     subpop (if (zero? radius) 
+                 pop
+              (if (< lower upper)
+                (subvec popvec lower (inc upper))
+                (into (subvec popvec lower (count pop)) 
+                      (subvec popvec 0 (inc upper)))))]
+    (loop [survivors (retain-one-individual-per-error-vector subpop)
+           cases (lshuffle (range (count (:errors (first subpop)))))]
+      (if (or (empty? cases)
+              (empty? (rest survivors)))
+        (lrand-nth survivors)
+        (let [min-err-for-case (apply min (map #(nth % (first cases))
+                                               (map #(:errors %) survivors)))]
+          (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
+                         survivors)
+                 (rest cases)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; elitegroup lexicase selection

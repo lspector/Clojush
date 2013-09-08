@@ -170,7 +170,7 @@
         (println "Min copy number of one program:" (apply min (vals frequency-map)))
         (println "Median copy number:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
       (println "--- Timings ---")
-      (println "Current time:" (System/currentTimeMillis) "miliseconds")
+      (println "Current time:" (System/currentTimeMillis) "milliseconds")
       (when @global-print-timings
         (let [total-time (apply + (vals @global-timing-map))
               init (get @global-timing-map :initialization)
@@ -178,6 +178,7 @@
               fitness (get @global-timing-map :fitness)
               report-time (get @global-timing-map :report)
               other (get @global-timing-map :other)]
+          (printf "Total Time:      %8.1f seconds\n" (/ total-time 1000.0))
           (printf "Initialization:  %8.1f seconds, %4.1f%%\n" (/ init 1000.0) (* 100.0 (/ init total-time)))
           (printf "Reproduction:    %8.1f seconds, %4.1f%%\n" (/ reproduction 1000.0) (* 100.0 (/ reproduction total-time)))
           (printf "Fitness Testing: %8.1f seconds, %4.1f%%\n" (/ fitness 1000.0) (* 100.0 (/ fitness total-time)))
