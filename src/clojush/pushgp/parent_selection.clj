@@ -104,7 +104,7 @@ group B is discarded. "
 (defn select
   "Returns a selected parent."
   [pop tournament-size radius location]
-  (cond @global-use-lexicase-selection (lexicase-selection pop)
+  (cond @global-use-lexicase-selection (lexicase-selection pop radius location)
         @global-use-elitegroup-lexicase-selection (elitegroup-lexicase-selection pop)
         :else ;; use tournament selection by default
         (let [tournament-set 
