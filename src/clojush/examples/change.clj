@@ -9,6 +9,7 @@
 (ns clojush.examples.change
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random]
+        clojush.instructions.tag
         clojure.math.numeric-tower))
 
 ; Make atom generators
