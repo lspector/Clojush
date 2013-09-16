@@ -7,6 +7,7 @@
         [clojush.pushstate]
         [clojush.util]
         [clojush.instructions.tag]
+        [clojush.simplification]
         ))
 
 
@@ -50,8 +51,37 @@
                        (push-item input :integer
                                   (make-push-state)))))
 
-
-
 (evaluate-individual (make-individual :program hand-coded-change-program)
                      (change-error-function 150)
                      (new java.util.Random))
+
+;;;;;;;
+
+
+(def evolved-change-program
+  '((((integer_lt 48 integer_mult) exec_k exec_stackdepth integer_fromboolean integer_mod integer_dup integer_dup exec_stackdepth in integer_add integer_add integer_add integer_add 25 integer_div integer_eq exec_rot) exec_pop integer_max in boolean_stackdepth exec_pop integer_stackdepth in boolean_dup 9 exec_yankdup integer_stackdepth -35 exec_stackdepth exec_do*range integer_div integer_yank integer_lt exec_pop exec_y integer_min exec_s integer_rot exec_y integer_min) exec_when integer_rot integer_lt)
+  )
+
+#_(48 integer_mult exec_stackdepth integer_fromboolean integer_mod
+    integer_dup integer_dup exec_stackdepth in integer_add integer_add
+    integer_add integer_add 25 integer_div integer_eq exec_rot exec_pop
+    integer_max in boolean_stackdepth exec_pop integer_stackdepth in boolean_dup
+    9 exec_yankdup integer_stackdepth -35
+    exec_stackdepth exec_do*range integer_div integer_yank integer_lt
+    integer_min exec_s integer_rot exec_y integer_min integer_rot integer_lt)
+
+
+(let [input 19
+      ]
+  (run-push evolved-change-program
+            (push-item input :auxiliary
+                       (push-item input :integer
+                                  (make-push-state)))))
+
+(evaluate-individual (make-individual :program evolved-change-program)
+                     (change-error-function 400)
+                     (new java.util.Random))
+
+(auto-simplify-from-program evolved-change-program
+                            (change-error-function 150)
+                            1000 true 100)
