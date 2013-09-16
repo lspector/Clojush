@@ -115,13 +115,11 @@
    :atom-generators change-atom-generators
    :max-points 500
    :max-points-in-initial-program 500
-   :evalpush-limit 1000
-   :population-size 1000
-   :max-generations 500
+   :evalpush-limit 800
+   :population-size 2000
+   :max-generations 1000
    :mutation-probability 0
-   :mutation-max-points 50
    :crossover-probability 0
-   :tournament-size 7
    :report-simplifications 0
    :final-report-simplifications 1000
    :use-lexicase-selection true
