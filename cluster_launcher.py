@@ -1,18 +1,20 @@
 import os, stat
 
+##########################################################################
 # Settings
 number_runs = 30
 
 clojush_directory = "/home/thelmuth/ExperimentalClojush/"
 output_directory = "../Results/thesis/change-exploratory-2/"
 
-title_string = "Change problem 2 (timed)"
-
 example_file = "clojush.examples.change"
+
+title_string = "Change problem 2 (timed)"
 
 description = """A second exploratory run to see how some initial settings do for the change problem.
 """
 
+##########################################################################
 # Uncomment the following if you want to print timings in the logs
 example_file += " :print-timings true"
 
@@ -34,6 +36,13 @@ if os.path.isdir(clojush_directory + output_directory):
 
 os.mkdir(clojush_directory + output_directory)
 
+# Make description file
+description_file_string = output_directory + "description.txt"
+description_f = open(description_file_string, "w")
+
+description_f.writelines(title_string + "\n\n" + description)
+description_f.close()
+
 # Make alf file
 alf_file_string = output_directory + "clojush_runs.alf"
 alf_f = open(alf_file_string, "w")
@@ -49,9 +58,9 @@ for run in range(0, number_runs):
     full_command = intro_command + command + outro_command
 
     alfcode += """    Task -title {%s - run %i} -cmds {
-        RemoteCmd {/bin/sh -c "%s"} -service {cluster}
+        RemoteCmd {/bin/sh -c "%s"} -service {%s}
     }
-""" % (title_string, run, full_command)
+""" % (title_string, run, full_command, service_tag)
 
 alfcode += "}\n"
 
