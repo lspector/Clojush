@@ -16,7 +16,7 @@ description = """This description will be stored in a file alongside the logs fr
 
 ##########################################################################
 # Uncomment the following if you want to print timings in the logs
-example_file += " :print-timings true"
+#example_file += " :print-timings true"
 
 ##########################################################################
 # Probably don't change these
