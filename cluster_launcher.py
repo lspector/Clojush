@@ -1,16 +1,16 @@
 import os, stat
 
 # Settings
-number_runs = 20
+number_runs = 30
 
 clojush_directory = "/home/thelmuth/ExperimentalClojush/"
-output_directory = "../Results/thesis/change-exploratory/"
+output_directory = "../Results/thesis/change-exploratory-2/"
 
-title_string = "Change problem (timed)"
+title_string = "Change problem 2 (timed)"
 
 example_file = "clojush.examples.change"
 
-description = """An exploratory run to see how some initial settings do for the change problem.
+description = """A second exploratory run to see how some initial settings do for the change problem.
 """
 
 # Uncomment the following if you want to print timings in the logs
