@@ -1,4 +1,4 @@
-;; change.clj
+;; change-minimal.clj
 ;; Tom Helmuth, thelmuth@cs.umass.edu
 ;;
 ;; This is code for the problem of determining the minimum number
@@ -6,13 +6,13 @@
 ;;
 ;; Input and output are given as single integers using the integer stack.
 
-(ns clojush.examples.change
+(ns clojush.examples.change-minimal
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random]
         clojush.instructions.tag
         clojure.math.numeric-tower))
 
-; Make atom generators
+; Make atom generators (use integers only)
 (define-registered 
   in 
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
@@ -21,52 +21,20 @@
   (list
     (fn [] (lrand-nth '(0 1 4 5 9 10 24 25)))
     (fn [] (- (lrand-int 101) 50))
-    (tag-instruction-erc [:exec :integer] 1000)
-    (tagged-instruction-erc 1000)
     'integer_add
-    'integer_eq
     'integer_swap
     'integer_yank
     'integer_dup
     'integer_yankdup
-    'integer_lt
     'integer_shove
     'integer_mult
     'integer_stackdepth
     'integer_div
-    'integer_gt
     'integer_max
-    'integer_fromboolean
     'integer_sub
     'integer_mod
     'integer_rot
     'integer_min
-    'exec_y
-    'exec_pop
-    'exec_eq
-    'exec_stackdepth
-    'exec_rot
-    'exec_when
-    'exec_do*times
-    'exec_do*count
-    'exec_s
-    'exec_do*range
-    'exec_if
-    'exec_k
-    'exec_yank
-    'exec_yankdup
-    'exec_swap
-    'exec_dup
-    'exec_shove
-    'boolean_swap
-    ;'boolean_eq
-    ;'boolean_rot
-    'boolean_and
-    'boolean_not
-    'boolean_or
-    'boolean_frominteger
-    'boolean_stackdepth
-    'boolean_dup
     'in))
 
 ; Create the error function
