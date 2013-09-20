@@ -2,21 +2,21 @@ import os, stat
 
 ##########################################################################
 # Settings
-number_runs = 30
+number_runs = 10
 
-clojush_directory = "/home/thelmuth/ExperimentalClojush/"
-output_directory = "../Results/thesis/change-exploratory-2/"
+clojush_directory = "/home/thelmuth/Clojush/"
+output_directory = "../Results/odd/"
 
-example_file = "clojush.examples.change"
+example_file = "clojush.examples.odd"
 
-title_string = "Change problem 2 (timed)"
+title_string = "Test of cluster runs with odd problem"
 
-description = """A second exploratory run to see how some initial settings do for the change problem.
+description = """This description will be stored in a file alongside the logs from the runs. This is just a test using the odd problem.
 """
 
 ##########################################################################
 # Uncomment the following if you want to print timings in the logs
-example_file += " :print-timings true"
+#example_file += " :print-timings true"
 
 ##########################################################################
 # Probably don't change these
