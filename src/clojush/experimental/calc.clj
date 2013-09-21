@@ -169,6 +169,15 @@ Still maintains the O(n*m) guarantee.
     (assoc push-state :tag (merge (sorted-map)
                                   (:tag push-state) 
                                   (zipmap tags (repeat ()))))))
+
+(defn remove-noops 
+  "Removes instances of code_noop from tree t."
+  [t]
+  (postwalklist 
+    (fn [node] (if (seq? node) 
+                 (remove #(= % 'code_noop) node)
+                 node))
+    t))
    
 (defn calc-errors
   [program]
@@ -180,7 +189,8 @@ Still maintains the O(n*m) guarantee.
   ;;   determine errors from float and boolean stacks
   (let [correct 0.0
         incorrect 1000000000.0
-        first-run-result (run-push program (tag-before-entry-points (make-push-state)))
+        first-run-result (run-push (remove-noops program)
+                                   (tag-before-entry-points (make-push-state)))
         initialized-push-state (push-item 
                                    0.0 
                                    :float 
