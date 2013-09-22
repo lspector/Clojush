@@ -71,7 +71,8 @@
                     :print-errors true
                     :print-history true
                     :print-timings false
-                    :save-initial-population false)))
+                    :save-initial-population false
+                    :use-bushy-code false)))
 
 (defn load-push-argmap
   [argmap]

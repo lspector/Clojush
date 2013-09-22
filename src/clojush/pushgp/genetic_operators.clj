@@ -334,10 +334,13 @@
 
 (defn linearly-mutate
   [open-close-sequence mutation-rate atom-generators]
-  (map #(if (< (lrand) mutation-rate)
-          (random-code 1 (concat atom-generators [:open :close ()]))
-          %)
-       open-close-sequence))
+  (let [parentheses (if @global-use-bushy-code
+                      (take (count atom-generators) (cycle [:open :close]))
+                      [:open :close])]
+    (map #(if (< (lrand) mutation-rate)
+            (random-code 1 (concat atom-generators parentheses [()]))
+            %)
+         open-close-sequence)))
 
 (defn ultra-operate-on-programs
   [p1 p2 alternation-rate alignment-deviation mutation-rate atom-generators]
