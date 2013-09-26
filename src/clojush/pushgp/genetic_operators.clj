@@ -336,10 +336,18 @@
   [open-close-sequence mutation-rate atom-generators]
   (let [parentheses (if @global-use-bushy-code
                       (take (count atom-generators) (cycle [:open :close]))
-                      [:open :close])]
-    (map #(if (< (lrand) mutation-rate)
-            (random-code 1 (concat atom-generators parentheses [()]))
-            %)
+                      [:open :close])
+        token-mutator (fn [token]
+                        (if (and (or (not @global-use-ultra-no-paren-mutation) ;if not using no-paren mutation
+                                     (not (some #{token} [:open :close]))) ;or if the token isn't :open or :close
+                                 (< (lrand) mutation-rate)) ;and if randomly below mutation rate
+                          (random-code 1 (concat atom-generators (if @global-use-ultra-no-paren-mutation ;random instruction, including parens if not no-paren mutation
+                                                                   []
+                                                                   parentheses)))
+                          ;; NOTE: The original ULTRA mutation (first 2 papers) allowed replacement with (), which would later be removed,
+                          ;; which is essentially deletion. This was removed later since it biases ULTRA toward smaller programs. This looked like:  ;(concat atom-generators parentheses [()]))
+                          token))] ;else, just return the token
+    (map token-mutator
          open-close-sequence)))
 
 (defn ultra-operate-on-programs
