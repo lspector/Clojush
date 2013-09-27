@@ -39,6 +39,8 @@
 (def global-print-timings (atom false))
 (def global-timer (atom 0))
 (def global-timing-map (atom {:initialization 0 :reproduction 0 :report 0 :fitness 0 :other 0}))
+(def global-use-bushy-code (atom false))
+(def global-use-ultra-no-paren-mutation (atom false)) ;When true, ULTRA will use no-paren mutation, which means that parentheses won't be added or deleted during mutation.
 
 ;; Historically-assessed hardness (http://hampshire.edu/lspector/pubs/kleinspector-gptp08-preprint.pdf)
 ;; using the "Previous Generation / Difference" method. 

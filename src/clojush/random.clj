@@ -1,4 +1,5 @@
-(ns clojush.random)
+(ns clojush.random
+  (:use [clojush.globals]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random code generator
@@ -39,7 +40,9 @@
   [number max-parts]
   (if (or (<= max-parts 1) (<= number 1))
     (list number)
-    (let [this-part (inc (lrand-int (dec number)))]
+    (let [this-part (if @global-use-bushy-code 
+                      (dec number)
+                      (inc (lrand-int (dec number))))]
       (cons this-part (decompose (-' number this-part)
                                  (dec max-parts))))))
 
