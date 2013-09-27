@@ -335,7 +335,8 @@
 (defn linearly-mutate
   [open-close-sequence mutation-rate atom-generators]
   (let [parentheses (if @global-use-bushy-code
-                      (take (count atom-generators) (cycle [:open :close]))
+                      (let [n (count atom-generators)]
+                        (concat (repeat n :open) (repeat n :close)))
                       [:open :close])
         token-mutator (fn [token]
                         (if (and (or (not @global-use-ultra-no-paren-mutation) ;if not using no-paren mutation
