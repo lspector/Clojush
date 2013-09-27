@@ -211,7 +211,7 @@
     (flatten (postwalklist #(if (seq? %) (list :open % :close) %) lst))
     lst))
 
-; (list-to-open-close-sequence '(1 2 (a b (c) ((d)) e)))
+;(list-to-open-close-sequence '(1 2 (a b (c) ((d)) e)))
 
 (defn open-close-sequence-to-list
   [sequence]
@@ -335,7 +335,8 @@
 (defn linearly-mutate
   [open-close-sequence mutation-rate atom-generators]
   (let [parentheses (if @global-use-bushy-code
-                      (take (count atom-generators) (cycle [:open :close]))
+                      (let [n (count atom-generators)]
+                        (concat (repeat n :open) (repeat n :close)))
                       [:open :close])]
     (map #(if (< (lrand) mutation-rate)
             (random-code 1 (concat atom-generators parentheses [()]))

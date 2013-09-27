@@ -448,26 +448,26 @@ Still maintains the O(n*m) guarantee.
                        )
    :use-single-thread false
    :use-lexicase-selection true
-   :trivial-geography-radius 500
+   ;:trivial-geography-radius 500
    ;:use-elitegroup-lexicase-selection true
    ;:use-historically-assessed-hardness true ;; just to print them!
    ;:decimation-ratio 0.01
    ;:tournament-size 1
-   :population-size 10000 ;200 ;50
+   :population-size 500 ;200 ;50
    :max-generations 10001
    :evalpush-limit 3000
    :tag-limit 10000
    :max-points 3000
-   :max-points-in-initial-program 200 ;;100
+   :max-points-in-initial-program 500 ;;100
    :parent-reversion-probability 0.0
    :mutation-probability 0
    :crossover-probability 0
    :simplification-probability 0
    :reproduction-simplifications 10
    :ultra-probability 1.0
-   :ultra-alternation-rate 0.005
+   :ultra-alternation-rate 0.001
    :ultra-alignment-deviation 5
-   :ultra-mutation-rate 0.005
+   :ultra-mutation-rate 0.01
    :deletion-mutation-probability 0
    :parentheses-addition-mutation-probability 0
    :tagging-mutation-probability 0
@@ -479,4 +479,5 @@ Still maintains the O(n*m) guarantee.
    :pop-when-tagging true
    :report-simplifications 0
    :print-history false
+   :use-bushy-code true
   })
