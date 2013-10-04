@@ -141,8 +141,7 @@
 
 ;; Define test cases
 (defn random-char-count-inputs
-  "Returns a list of n random inputs. Each will have size between 0
-   and 100 and will end with a (char 4) character."
+  "Returns a list of n random inputs. Each will have size between 0 and 100."
   [n]
   (let [chars (map char (range 32 127))
         max-len 100]
