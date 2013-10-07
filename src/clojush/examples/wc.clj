@@ -232,7 +232,9 @@
 (defn wc-line-count
   "Takes a wc input and returns the line count output"
   [input]
-  (inc (get (frequencies input) \newline 0)))
+  (if (empty? input)
+    0
+    (inc (get (frequencies input) \newline 0))))
 
 (defn wc-test-cases
   "Gives n IO test cases of the form [input output-char output-word output-line]."
@@ -247,35 +249,38 @@
 (defn wc-error-function
   "Returns the error function for the wc problem. Takes as
    input number of test cases to use."
-  [number-test-cases]
-  (fn [program]
-    (flatten
-      (doall
-        (for [[input out-char out-word out-line] (wc-test-cases number-test-cases)]
-          (let [final-state (run-push program
-                                      (->> (make-push-state)
-                                           (push-item nil :auxiliary)
-                                           (push-item nil :auxiliary)
-                                           (push-item nil :auxiliary)
-                                           (push-item input :auxiliary)
-                                           (push-item input :auxiliary)))
-                result-char (stack-ref :auxiliary 2 final-state)
-                result-word (stack-ref :auxiliary 3 final-state)
-                result-line (stack-ref :auxiliary 4 final-state)]
-            ; The error is the integer difference between the desired output
-            ; and the result output for each of char-count, word-count, and
-            ; line-count. Because of this, each test case results in 3
-            ; error values. If a value is missing, a penalty of 100000
-            ; is given.
-            (vector (if (number? result-char)
-                      (abs (- result-char out-char))
-                      100000)
-                    (if (number? result-word)
-                      (abs (- result-word out-word))
-                      100000)
-                    (if (number? result-line)
-                      (abs (- result-line out-line))
-                      100000))))))))
+  ([number-test-cases]
+    (wc-error-function number-test-cases
+                       (wc-test-cases number-test-cases)))
+  ([_ test-cases]
+    (fn [program]
+      (flatten
+        (doall
+          (for [[input out-char out-word out-line] test-cases]
+            (let [final-state (run-push program
+                                        (->> (make-push-state)
+                                             (push-item nil :auxiliary)
+                                             (push-item nil :auxiliary)
+                                             (push-item nil :auxiliary)
+                                             (push-item input :auxiliary)
+                                             (push-item input :auxiliary)))
+                  result-char (stack-ref :auxiliary 2 final-state)
+                  result-word (stack-ref :auxiliary 3 final-state)
+                  result-line (stack-ref :auxiliary 4 final-state)]
+              ; The error is the integer difference between the desired output
+              ; and the result output for each of char-count, word-count, and
+              ; line-count. Because of this, each test case results in 3
+              ; error values. If a value is missing, a penalty of 100000
+              ; is given.
+              (vector (if (number? result-char)
+                        (abs (- result-char out-char))
+                        100000)
+                      (if (number? result-word)
+                        (abs (- result-word out-word))
+                        100000)
+                      (if (number? result-line)
+                        (abs (- result-line out-line))
+                        100000)))))))))
 
 ; Define the argmap
 (def argmap
