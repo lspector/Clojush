@@ -57,6 +57,6 @@
           he (compute-hah-error e)
           rmse (compute-root-mean-square-error e)]
       (make-individual :program p :errors e :total-error te :hah-error he :rms-error rmse
-                       :history (if maintain-histories (cons te (:history i)) (:history i))
+                       :history (if @global-print-history (cons te (:history i)) (:history i))
                        :ancestors (:ancestors i)
                        :parent (:parent i)))))

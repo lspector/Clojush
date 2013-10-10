@@ -21,7 +21,7 @@
 (def max-random-string-length 10) ;; The maximum length of string created by the string_rand instruction
 (def max-points-in-random-expressions 50) ;; The maximum length of code created by the string_rand instruction
 
-(def maintain-histories true) ;; histories are lists of total-error values for ancestors
+;; These are used to save and print the ancestors of each individual
 (def maintain-ancestors false) ;; if true save all ancestors in each individual (costly)
 (def print-ancestors-of-solution false)
 
@@ -45,6 +45,10 @@
 (def global-timing-map (atom {:initialization 0 :reproduction 0 :report 0 :fitness 0 :other 0}))
 (def global-use-bushy-code (atom false))
 (def global-use-ultra-no-paren-mutation (atom false)) ;When true, ULTRA will use no-paren mutation, which means that parentheses won't be added or deleted during mutation.
+
+
+(def global-print-history (atom true)) ;; histories are lists of total-error values for ancestors
+(def global-print-cosmos-data (atom false)) ;; When true, prints COSMOS data
 
 ;; Historically-assessed hardness (http://hampshire.edu/lspector/pubs/kleinspector-gptp08-preprint.pdf)
 ;; using the "Previous Generation / Difference" method. 

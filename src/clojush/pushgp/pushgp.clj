@@ -71,6 +71,7 @@
                     :print-errors true
                     :print-history true
                     :print-timings false
+                    :print-cosmos-data false
                     :save-initial-population false
                     :use-bushy-code false
                     :use-ultra-no-paren-mutation false)))

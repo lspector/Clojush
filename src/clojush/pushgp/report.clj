@@ -139,8 +139,6 @@
       (when (> report-simplifications 0)
         (println "Partial simplification:"
                  (not-lazy (:program (auto-simplify best error-function report-simplifications false 1000)))))
-      (println "Cosmos Data:" (let [quants (config/quantiles (count population))]
-                                (zipmap quants (map #(:total-error (nth (sort-by :total-error population) %)) quants))))
       (when print-errors (println "Errors:" (not-lazy (:errors best))))
       (println "Total:" (:total-error best))
       (println "Mean:" (float (/ (:total-error best)
@@ -151,16 +149,19 @@
       (when print-history (println "History:" (not-lazy (:history best))))
       (println "Size:" (count-points (:program best)))
       (println "--- Population Statistics ---")
+      (when @global-print-cosmos-data
+        (println "Cosmos Data:" (let [quants (config/quantiles (count population))]
+                                  (zipmap quants (map #(:total-error (nth (sort-by :total-error population) %)) quants)))))
       (println "Average total errors in population:"
                (*' 1.0 (/ (reduce +' (map :total-error sorted)) (count population))))
       (println "Median total errors in population:"
                (:total-error (nth sorted (truncate (/ (count sorted) 2)))))
-      (println "Error averages by case:"
-               (apply map (fn [& args] (*' 1.0 (/ (reduce +' args) (count args))))
-                      (map :errors population)))
-      (println "Error minima by case:"
-               (apply map (fn [& args] (apply min args))
-                      (map :errors population)))
+      (when print-errors (println "Error averages by case:"
+                                  (apply map (fn [& args] (*' 1.0 (/ (reduce +' args) (count args))))
+                                         (map :errors population))))
+      (when print-errors (println "Error minima by case:"
+                                  (apply map (fn [& args] (apply min args))
+                                         (map :errors population))))
       (println "Average program size in population (points):"
                (*' 1.0 (/ (reduce +' (map count-points (map :program sorted)))
                           (count population))))
