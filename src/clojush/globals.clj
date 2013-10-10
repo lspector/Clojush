@@ -23,7 +23,7 @@
 
 ;; The following globals may be reset by arguments to pushgp or other systems that use Push.
 (def global-atom-generators (atom ())) ;; the defalult for this will be set below
-(def global-max-points-in-program (atom 100))
+(def global-max-points (atom 100))
 (def global-evalpush-limit (atom 150))
 (def global-evalpush-time-limit (atom 0)) ;; in nanoseconds, 0 => no time limit
 (def global-node-selection-method (atom :unbiased))

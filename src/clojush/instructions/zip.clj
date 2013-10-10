@@ -54,7 +54,7 @@
       (let [z (stack-ref :zip 0 state)
             c (stack-ref source 0 state)
             result (ignore-errors (inserter z c))]
-        (if (and result (<= (count-points (zip/root result)) @global-max-points-in-program))
+        (if (and result (<= (count-points (zip/root result)) @global-max-points))
           (push-item result :zip (pop-item :zip (pop-item source state)))
           state)))))
 

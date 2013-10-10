@@ -132,7 +132,7 @@
       state
       (let [new-zip-top (zip/replace (top-item :zip state)
 				     (modifier-fn (zip/node (top-item :zip state))))]
-	(if (> (count-points (zip/root new-zip-top)) @global-max-points-in-program)
+	(if (> (count-points (zip/root new-zip-top)) @global-max-points)
 	  state
 	  (push-item new-zip-top
 		     :zip (pop-item :zip state)))))))
@@ -250,7 +250,7 @@
 	    state)
 	  (let [top-zip (top-item :zip state)
 		zip-points (count-points (zip/root top-zip))
-		max-subtree-points (- @global-max-points-in-program zip-points)]
+		max-subtree-points (- @global-max-points zip-points)]
 	    (push-item (zip/replace top-zip
 				    (random-code max-subtree-points
 						 @global-atom-generators))
