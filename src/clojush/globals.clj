@@ -4,19 +4,23 @@
 ;; globals
 
 (def push-types '(:exec :integer :float :code :boolean :string :zip
-                        :tag :auxiliary :return :environment))
-(def max-number-magnitude 1000000000000)
-(def min-number-magnitude 1.0E-10)
-(def top-level-push-code true)
-(def top-level-pop-code true)
-(def min-random-integer -10)
-(def max-random-integer 10)
-(def min-random-float -1.0)
-(def max-random-float 1.0)
-(def min-random-string-length 1)
-(def max-random-string-length 10)
-(def max-string-length 100)
-(def max-points-in-random-expressions 50) ;; for code_rand
+                        :tag :auxiliary :return :environment)) ;; Stack types
+(def top-level-push-code true) ;; When true, run-push will push the program's code onto the code stack prior to running
+(def top-level-pop-code true) ;; When true, run-push will pop the code stack after running the program
+
+;; These definitions are used by instructions to keep computed values within limits
+;; or when using random instructions.
+(def max-number-magnitude 1000000000000) ;; Used by keep-number-reasonable as the maximum size of any integer or float
+(def min-number-magnitude 1.0E-10) ;; Used by keep-number-reasonable as the minimum magnitude of any float
+(def max-string-length 500) ;; Used by string instructions to ensure that strings don't get too large
+(def min-random-integer -10) ;; The minumum value created by the integer_rand instruction
+(def max-random-integer 10) ;; The maximum value created by the integer_rand instruction
+(def min-random-float -1.0) ;; The minumum value created by the float_rand instruction
+(def max-random-float 1.0) ;; The maximum value created by the float_rand instruction
+(def min-random-string-length 1) ;; The minimum length of string created by the string_rand instruction
+(def max-random-string-length 10) ;; The maximum length of string created by the string_rand instruction
+(def max-points-in-random-expressions 50) ;; The maximum length of code created by the string_rand instruction
+
 (def maintain-histories true) ;; histories are lists of total-error values for ancestors
 (def maintain-ancestors false) ;; if true save all ancestors in each individual (costly)
 (def print-ancestors-of-solution false)
