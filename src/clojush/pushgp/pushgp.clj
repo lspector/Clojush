@@ -11,6 +11,8 @@
 (def push-argmap
   (atom (sorted-map :error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
                     :error-threshold 0
+                    :top-level-push-code true
+                    :top-level-pop-code true
                     :population-size 1000
                     :max-points 50 
                     :max-points-in-initial-program 50
@@ -69,7 +71,8 @@
                     :ultra-alignment-deviation 1
                     :ultra-mutation-rate 0.1
                     :print-errors true
-                    :print-history true
+                    :print-history false
+                    :print-ancestors-of-solution false
                     :print-timings false
                     :print-cosmos-data false
                     :save-initial-population false
@@ -156,19 +159,10 @@
   (calculate-hah-solution-rates use-historically-assessed-hardness pop-agents error-threshold population-size))
 
 (defn report-and-check-for-success
-  [pop-agents generation {:keys [error-function report-simplifications print-csv-logs print-json-logs
-                                 csv-log-filename json-log-filename max-generations
-                                 log-fitnesses-for-all-cases json-log-program-strings
-                                 print-errors print-history
-                                 problem-specific-report error-threshold]}]
-  (let [best (report (vec (doall (map deref pop-agents))) generation error-function 
-                     report-simplifications print-csv-logs print-json-logs
-                     csv-log-filename json-log-filename
-                     log-fitnesses-for-all-cases json-log-program-strings
-                     print-errors print-history
-                     problem-specific-report)]
-    (cond (<= (:total-error best) error-threshold) best
-          (>= generation max-generations) :failure
+  [pop-agents generation argmap]
+  (let [best (report (vec (doall (map deref pop-agents))) generation argmap)]
+    (cond (<= (:total-error best) (get argmap :error-threshold)) best
+          (>= generation (get argmap :max-generations)) :failure
           :else :continue)))
           
 (defn produce-new-offspring
