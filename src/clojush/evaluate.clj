@@ -50,10 +50,10 @@
   ([i error-function rand-gen reuse-errors print-history]
     (binding [*thread-local-random-generator* rand-gen]
       (let [p (:program i)
-            e (if (and (seq? (:errors i)) reuse-errors)
+            e (if (and (not (nil? (:errors i))) reuse-errors)
                 (:errors i)
                 (error-function p))
-            te (if (and (number? (:total-error i)) reuse-errors)
+            te (if (and (not (nil? (:total-error i))) reuse-errors)
                  (:total-error i)
                  (keep-number-reasonable (compute-total-error e)))
             he (compute-hah-error e)
