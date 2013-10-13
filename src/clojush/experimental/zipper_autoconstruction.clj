@@ -300,7 +300,7 @@
     (if (nil? product)
       parent1
       (make-individual :program product :history (:history parent1)
-		       :ancestors (if maintain-ancestors
+		       :ancestors (if global-maintain-ancestors
 				    (if maintain-parents-only
 				      [(:program parent1) (:program parent2)]
 				      (cons (:program parent1) (:ancestors parent1)))
@@ -316,7 +316,7 @@
     (if (nil? product)
       parent1
       (make-individual :program product :history (:history parent1)
-		       :ancestors (if maintain-ancestors
+		       :ancestors (if global-maintain-ancestors
 				    (if maintain-parents-only
 				      [(:program parent1) (:program parent2)]
 				      (cons (:program parent1) (:ancestors parent1)))

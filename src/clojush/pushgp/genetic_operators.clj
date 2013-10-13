@@ -18,7 +18,7 @@
     (if (> (count-points new-program) max-points)
       ind
       (make-individual :program new-program :history (:history ind)
-                       :ancestors (if maintain-ancestors
+                       :ancestors (if global-maintain-ancestors
                                     (cons (:program ind) (:ancestors ind))
                                     (:ancestors ind))))))
 
@@ -34,7 +34,7 @@
     (if (> (count-points new-program) max-points)
       parent1
       (make-individual :program new-program :history (:history parent1)
-                       :ancestors (if maintain-ancestors
+                       :ancestors (if global-maintain-ancestors
                                     (cons (:program parent1) (:ancestors parent1))
                                     (:ancestors parent1))))))
 
@@ -50,7 +50,7 @@
     (if (> (count-points new-program) max-points)
       parent1
       (make-individual :program new-program :history (:history parent1)
-                       :ancestors (if maintain-ancestors
+                       :ancestors (if global-maintain-ancestors
                                     (cons (:program parent1) (:ancestors parent1))
                                     (:ancestors parent1))))))
 
@@ -82,7 +82,7 @@
                                    (remove-code-at-point prog point-index)))
                                (dec how-many))))]
     (make-individual :program new-program :history (:history ind)
-                     :ancestors (if maintain-ancestors
+                     :ancestors (if global-maintain-ancestors
                                   (cons (:program ind) (:ancestors ind))
                                   (:ancestors ind)))))
 
@@ -108,7 +108,7 @@
     (if (> (count-points new-program) max-points)
       ind
       (make-individual :program new-program :history (:history ind)
-                       :ancestors (if maintain-ancestors
+                       :ancestors (if global-maintain-ancestors
                                     (cons (:program ind) (:ancestors ind))
                                     (:ancestors ind))))))
 
@@ -130,7 +130,7 @@
     (if (> (count-points new-program) max-points)
       ind
       (make-individual :program new-program :history (:history ind)
-                       :ancestors (if maintain-ancestors
+                       :ancestors (if global-maintain-ancestors
                                     (cons (:program ind) (:ancestors ind))
                                     (:ancestors ind))))))
 
@@ -154,7 +154,7 @@
     (if (> (count-points new-program) max-points)
       ind
       (make-individual :program new-program :history (:history ind)
-                       :ancestors (if maintain-ancestors
+                       :ancestors (if global-maintain-ancestors
                                     (cons (:program ind) (:ancestors ind))
                                     (:ancestors ind))))))
 
@@ -189,7 +189,7 @@
   (make-individual 
     :program (perturb-code-with-gaussian-noise (:program ind) per-num-perturb-probability sd)
     :history (:history ind)
-    :ancestors (if maintain-ancestors
+    :ancestors (if global-maintain-ancestors
                  (cons (:program ind) (:ancestors ind))
                  (:ancestors ind))))
 
@@ -392,6 +392,6 @@
     (if (> (count-points new-program) max-points)
       parent1
       (make-individual :program new-program :history (:history parent1)
-                       :ancestors (if maintain-ancestors
+                       :ancestors (if global-maintain-ancestors
                                     (cons (:program parent1) (:ancestors parent1))
                                     (:ancestors parent1))))))

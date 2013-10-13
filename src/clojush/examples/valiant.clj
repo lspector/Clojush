@@ -71,11 +71,11 @@
 ;    (if (> (count-points new-program) max-points)
 ;      ;parent1
 ;      (make-individual :program (random-code 10 @global-atom-generators) :history (:history parent1)
-;                       :ancestors (if maintain-ancestors
+;                       :ancestors (if global-maintain-ancestors
 ;                                    (cons (:program parent1) (:ancestors parent1))
 ;                                    (:ancestors parent1)))
 ;      (make-individual :program new-program :history (:history parent1)
-;                       :ancestors (if maintain-ancestors
+;                       :ancestors (if global-maintain-ancestors
 ;                                    (cons (:program parent1) (:ancestors parent1))
 ;                                    (:ancestors parent1))))))
 ;(in-ns 'experimental.valiant)

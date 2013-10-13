@@ -29,7 +29,7 @@
     (if (>= step steps)
       (make-individual :program program :errors errors :total-error total-errors 
                        :history (:history ind) 
-                       :ancestors (if maintain-ancestors
+                       :ancestors (if global-maintain-ancestors
                                     (cons (:program ind) (:ancestors ind))
                                     (:ancestors ind)))
       (let [new-program (if (< (lrand-int 5) 4)

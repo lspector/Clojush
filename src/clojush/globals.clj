@@ -29,8 +29,8 @@
 ;;-------DONE THROUGH HERE
 
 ;; These are used to save and print the ancestors of each individual
-(def maintain-ancestors false) ;; if true save all ancestors in each individual (costly)
-(def print-ancestors-of-solution false)
+
+
 
 ;; The following globals may be reset by arguments to pushgp or other systems that use Push.
 (def global-atom-generators (atom ())) ;; the defalult for this will be set below
@@ -53,6 +53,7 @@
 (def global-use-bushy-code (atom false))
 (def global-use-ultra-no-paren-mutation (atom false)) ;When true, ULTRA will use no-paren mutation, which means that parentheses won't be added or deleted during mutation.
 
+;;;;;;;;;DONE THROUGH HERE
 
 (def global-print-history (atom false)) ;; histories are lists of total-error values for ancestors
 (def global-print-cosmos-data (atom false)) ;; When true, prints COSMOS data
@@ -72,3 +73,4 @@
 ;; Special defs not used by Push instructions, but still need to be globally def'ed, go here.
 (def global-top-level-push-code (atom true)) ;; When true, run-push will push the program's code onto the code stack prior to running
 (def global-top-level-pop-code (atom true)) ;; When true, run-push will pop the code stack after running the program
+(def global-maintain-ancestors (atom false)) ;; if true, save all ancestors in each individual (costly)

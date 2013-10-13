@@ -72,9 +72,10 @@
                     :ultra-mutation-rate 0.1
                     :print-errors true
                     :print-history false
-                    :print-ancestors-of-solution false
                     :print-timings false
                     :print-cosmos-data false
+                    :print-ancestors-of-solution false
+                    :maintain-ancestors false
                     :save-initial-population false
                     :use-bushy-code false
                     :use-ultra-no-paren-mutation false)))
@@ -241,5 +242,4 @@
                                             (println "Installing next generation...")
                                             (install-next-generation pop-agents child-agents @push-argmap)
                                             (recur (inc generation)))
-                  :else (let [{:keys [error-function final-report-simplifications]} @push-argmap]
-                          (final-report generation outcome error-function final-report-simplifications)))))))))
+                  :else (final-report generation outcome @push-argmap))))))))

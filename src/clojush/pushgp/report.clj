@@ -121,7 +121,8 @@
    {:keys [error-function report-simplifications print-csv-logs print-json-logs
            csv-log-filename json-log-filename max-generations
            log-fitnesses-for-all-cases json-log-program-strings
-           print-errors print-history problem-specific-report error-threshold]}]
+           print-errors print-history
+           problem-specific-report error-threshold]}]
   (printf "\n\n") 
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
   (println ";; -*- Report at generation" generation)
@@ -226,7 +227,8 @@
 
 (defn final-report
   "Prints the final report of a PushGP run if the run is successful."
-  [generation best error-function final-report-simplifications]
+  [generation best
+   {:keys [error-function final-report-simplifications print-ancestors-of-solution]}]
   (printf "\n\nSUCCESS at generation %s\nSuccessful program: %s\nErrors: %s\nTotal error: %s\nHistory: %s\nSize: %s\n\n"
           generation (not-lazy (:program best)) (not-lazy (:errors best)) (:total-error best) 
           (not-lazy (:history best)) (count-points (:program best)))
