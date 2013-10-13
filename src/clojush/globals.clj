@@ -25,14 +25,19 @@
 (def max-random-string-length 10) ;; The maximum length of string created by the string_rand instruction
 (def max-points-in-random-expressions 50) ;; The maximum length of code created by the string_rand instruction
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; The globals below may be reset by arguments to pushgp
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; These definitions are used by Push instructions and therefore must be global
+(def global-atom-generators (atom ())) ;; The instructions and literals that may be used in Push programs.
+(def global-max-points (atom 100)) ;; The maximum size of a Push program. Also, the maximum size of code that can appear on the exec or code stacks.
+
+
 
 ;;-------DONE THROUGH HERE
 
-
-
 ;; The following globals may be reset by arguments to pushgp or other systems that use Push.
-(def global-atom-generators (atom ())) ;; the defalult for this will be set below
-(def global-max-points (atom 100))
 (def global-evalpush-limit (atom 150))
 (def global-evalpush-time-limit (atom 0)) ;; in nanoseconds, 0 => no time limit
 (def global-node-selection-method (atom :unbiased))

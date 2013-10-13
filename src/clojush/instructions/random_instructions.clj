@@ -32,7 +32,7 @@
   code_rand
   (fn [state]
     (if (not (empty? (:integer state)))
-      (if (empty? @clojush.globals/global-atom-generators)
+      (if (empty? @global-atom-generators)
 	(binding [*out* *err*]
 	  (println "code_rand: global-atom-generators is empty.")
 	  state)
