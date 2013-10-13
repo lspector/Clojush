@@ -45,18 +45,20 @@
 (defn evaluate-individual
   "Returns the given individual with errors, total-errors, and hah-errors,
    computing them if necessary."
-  [i error-function rand-gen]
-  (binding [*thread-local-random-generator* rand-gen]
-    (let [p (:program i)
-          e (if (and (seq? (:errors i)) @global-reuse-errors)
-              (:errors i)
-              (error-function p))
-          te (if (and (number? (:total-error i)) @global-reuse-errors)
-               (:total-error i)
-               (keep-number-reasonable (compute-total-error e)))
-          he (compute-hah-error e)
-          rmse (compute-root-mean-square-error e)]
-      (make-individual :program p :errors e :total-error te :hah-error he :rms-error rmse
-                       :history (if @global-print-history (cons te (:history i)) (:history i))
-                       :ancestors (:ancestors i)
-                       :parent (:parent i)))))
+  ([i error-function rand-gen]
+    (evaluate-individual i error-function rand-gen true false))
+  ([i error-function rand-gen reuse-errors print-history]
+    (binding [*thread-local-random-generator* rand-gen]
+      (let [p (:program i)
+            e (if (and (seq? (:errors i)) reuse-errors)
+                (:errors i)
+                (error-function p))
+            te (if (and (number? (:total-error i)) reuse-errors)
+                 (:total-error i)
+                 (keep-number-reasonable (compute-total-error e)))
+            he (compute-hah-error e)
+            rmse (compute-root-mean-square-error e)]
+        (make-individual :program p :errors e :total-error te :hah-error he :rms-error rmse
+                         :history (if print-history (cons te (:history i)) (:history i))
+                         :ancestors (:ancestors i)
+                         :parent (:parent i))))))

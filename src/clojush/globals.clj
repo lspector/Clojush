@@ -28,8 +28,8 @@
 
 ;;-------DONE THROUGH HERE
 
-;; These are used to save and print the ancestors of each individual
 
+(def global-print-cosmos-data (atom false)) ;; When true, prints COSMOS data
 
 
 ;; The following globals may be reset by arguments to pushgp or other systems that use Push.
@@ -41,7 +41,6 @@
 (def global-node-selection-leaf-probability (atom 0.1))
 (def global-node-selection-tournament-size (atom 2))
 (def global-pop-when-tagging (atom true))
-(def global-reuse-errors (atom true))
 (def global-use-rmse (atom false))
 (def global-use-single-thread (atom false))
 (def global-tag-limit (atom 10000))
@@ -53,10 +52,6 @@
 (def global-use-bushy-code (atom false))
 (def global-use-ultra-no-paren-mutation (atom false)) ;When true, ULTRA will use no-paren mutation, which means that parentheses won't be added or deleted during mutation.
 
-;;;;;;;;;DONE THROUGH HERE
-
-(def global-print-history (atom false)) ;; histories are lists of total-error values for ancestors
-(def global-print-cosmos-data (atom false)) ;; When true, prints COSMOS data
 
 ;; Historically-assessed hardness (http://hampshire.edu/lspector/pubs/kleinspector-gptp08-preprint.pdf)
 ;; using the "Previous Generation / Difference" method. 
