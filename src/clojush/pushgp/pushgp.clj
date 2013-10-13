@@ -72,8 +72,8 @@
                     :ultra-mutation-rate 0.1
                     :print-errors true
                     :print-history false
-                    :print-timings false
-                    :print-cosmos-data false
+                    :print-timings false ; If true, report prints how long different parts of evolution have taken during the current run.
+                    :print-cosmos-data false ; If true, report prints COSMOS data each generation.
                     :print-ancestors-of-solution false
                     :maintain-ancestors false
                     :save-initial-population false

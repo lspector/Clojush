@@ -29,8 +29,6 @@
 ;;-------DONE THROUGH HERE
 
 
-(def global-print-cosmos-data (atom false)) ;; When true, prints COSMOS data
-
 
 ;; The following globals may be reset by arguments to pushgp or other systems that use Push.
 (def global-atom-generators (atom ())) ;; the defalult for this will be set below

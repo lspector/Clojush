@@ -121,7 +121,7 @@
    {:keys [error-function report-simplifications print-csv-logs print-json-logs
            csv-log-filename json-log-filename max-generations
            log-fitnesses-for-all-cases json-log-program-strings
-           print-errors print-history
+           print-errors print-history print-cosmos-data
            problem-specific-report error-threshold]}]
   (printf "\n\n") 
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
@@ -142,7 +142,7 @@
     (when print-history (println "History:" (not-lazy (:history best))))
     (println "Size:" (count-points (:program best)))
     (println "--- Population Statistics ---")
-    (when @global-print-cosmos-data
+    (when print-cosmos-data
       (println "Cosmos Data:" (let [quants (config/quantiles (count population))]
                                 (zipmap quants (map #(:total-error (nth (sort-by :total-error population) %)) quants)))))
     (println "Average total errors in population:"
