@@ -122,7 +122,7 @@
            csv-log-filename json-log-filename max-generations
            log-fitnesses-for-all-cases json-log-program-strings
            print-errors print-history print-cosmos-data
-           problem-specific-report error-threshold]}]
+           problem-specific-report error-threshold use-rmse]}]
   (printf "\n\n") 
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
   (println ";; -*- Report at generation" generation)
@@ -138,7 +138,7 @@
                                (count (:errors best)))))
     (when @global-use-historically-assessed-hardness
       (println "HAH-error:" (:hah-error best)))
-    (when @global-use-rmse (println "RMS-error:" (:rms-error best)))
+    (when use-rmse (println "RMS-error:" (:rms-error best)))
     (when print-history (println "History:" (not-lazy (:history best))))
     (println "Size:" (count-points (:program best)))
     (println "--- Population Statistics ---")

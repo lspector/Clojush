@@ -47,7 +47,7 @@
                     :use-single-thread false
                     :random-seed (System/nanoTime)
                     :use-historically-assessed-hardness false
-                    :use-lexicase-selection false
+                    :use-lexicase-selection false ; If true, uses Lexicase Parent Selection (see Spector paper in GECCO-UP 2012 workshop proceedings)
                     :use-elitegroup-lexicase-selection false
                     :use-rmse false
                     :print-csv-logs false
@@ -137,10 +137,15 @@
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE ;might this need a dorun?
 
 
-;; I feel like the printing shoudl be in the main loop, but i'm just cutting and pasting for now
-(defn parental-reversion [pop-agents generation {:keys [parent-reversion-probability use-single-thread]}]
+;; I feel like the printing should be in the main loop, but i'm just cutting and pasting for now
+(defn parental-reversion
+  [pop-agents generation {:keys [parent-reversion-probability use-single-thread use-rmse
+                                 use-historically-assessed-hardness]}]
   (if (and (> generation 0) (> parent-reversion-probability 0))
-    (let [err-fn (if @global-use-rmse :rms-error :total-error)]
+    (let [err-fn (cond
+                   use-historically-assessed-hardness :hah-error
+                   use-rmse :rms-error
+                   :else :total-error)]
       (println "Performing parent reversion...")
       (dorun (map #((if use-single-thread swap! send) 
                         % 
@@ -215,9 +220,9 @@
       (timer :initialization)
       (println "Generating initial population...")
       (let [{:keys [pop-agents child-agents rand-gens random-seeds]} (make-agents-and-rng @push-argmap)]
-        #_(print "Random seeds: ")
-        #_(doseq [seed random-seeds] (print " " seed))
-        #_(println)
+        ;(print "Random seeds: ")
+        ;(doseq [seed random-seeds] (print " " seed))
+        ;(println)
         ;; Main loop
         (loop [generation 0]
           (println "Processing generation:" generation)
@@ -232,7 +237,7 @@
           ;; change calculate-hah-solution-rates in the future, to destructure the argmap
           (calculate-hah-solution-rates-wrapper pop-agents @push-argmap)
           ;; create global structure to support elitegroup lexicase selection
-          (when @global-use-elitegroup-lexicase-selection 
+          (when (:use-elitegroup-lexicase-selection @push-argmap)
             (build-elitegroups pop-agents))
           (timer :other)
           ;; report and check for success

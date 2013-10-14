@@ -65,10 +65,7 @@
 (def global-use-historically-assessed-hardness (atom false))
 (def solution-rates (atom (repeat 0)))
 
-;; Lexicase Parent Selection (see Spector paper in GECCO-UP 2012 workshop proceedings)
-(def global-use-lexicase-selection (atom false)) 
 
 ;; Elitegroup lexicase selection (will only work if lexicase-selection is off)
 (def elitegroups (atom ()))
-(def global-use-elitegroup-lexicase-selection (atom false))
 
