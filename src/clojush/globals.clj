@@ -3,10 +3,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;   globals
 ;; The values def'ed here tend to remain constant over all runs. The atoms
-;; may change depending on the problem. The only values and atoms in this
-;; file should be those that are used by Push instructions; all others, with
-;; few exceptions, should be defined in push-argmap in pushgp.clj and should
-;; be passed to whatever functions use them as arguments.
+;; not starting with "global-" are used in a variety of places and therefore
+;; it is easiest to keep them global. The atoms starting with "global-"
+;; may change depending on arguments to pushgp.
+;;
+;; Most of the values and atoms in this file are those that are used by Push
+;; instructions; all others, with few exceptions, should be defined in push-argmap
+;; in pushgp.clj and should be passed to whatever functions use them as arguments.
 
 ;; push-types is the list of stacks used by the Push interpreter
 (def push-types '(:exec :integer :float :code :boolean :string :zip
@@ -25,6 +28,12 @@
 (def max-random-string-length 10) ;; The maximum length of string created by the string_rand instruction
 (def max-points-in-random-expressions 50) ;; The maximum length of code created by the string_rand instruction
 
+;; These atoms are used in different places and are therefore difficult to make fully functional
+(def timer-atom (atom 0)) ;; Used for timing of different parts of pushgp
+(def timing-map (atom {:initialization 0 :reproduction 0 :report 0 :fitness 0 :other 0}))  ;; Used for timing of different parts of pushgp
+(def solution-rates (atom (repeat 0))) ;; Is used in historically-assessed hardness
+(def elitegroups (atom ())) ;; Is used for elitegroup lexicase selection (will only work if lexicase-selection is off)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The globals below may be reset by arguments to pushgp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -42,20 +51,4 @@
 (def global-pop-when-tagging (atom true)) ;; When true, tagging instructions will pop the exec stack when tagging; otherwise, the exec stack is not popped
 
 ;; Special defs not used by Push instructions, but still need to be globally def'ed, go here.
-(def timer-atom (atom 0)) ;; Used for timing of different parts of pushgp
-(def timing-map (atom {:initialization 0 :reproduction 0 :report 0 :fitness 0 :other 0}))  ;; Used for timing of different parts of pushgp
-
-
-
-;;-------DONE THROUGH HERE
-
-;; The following globals may be reset by arguments to pushgp or other systems that use Push.
-(def global-use-bushy-code (atom false))
-
-;; solution-rates is used in HAH:
-;; Historically-assessed hardness (http://hampshire.edu/lspector/pubs/kleinspector-gptp08-preprint.pdf)
-;; using the "Previous Generation / Difference" method.
-(def solution-rates (atom (repeat 0)))
-
-;; elitegroups is used for elitegroup lexicase selection (will only work if lexicase-selection is off)
-(def elitegroups (atom ()))
+(def global-use-bushy-code (atom false)) ;; When true, random code and code changed by ULTRA mutation, will be "bushy", as in close to a binary tree
