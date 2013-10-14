@@ -161,6 +161,16 @@
       (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
       (println "Done performing parent reversion."))))
 
+(defn remove-parents
+  "Removes value from :parent for each individual in the population. This will
+   save memory."
+  [pop-agents {:keys [use-single-thread]}]
+  (dorun (map #((if use-single-thread swap! send)
+                    %
+                    (fn [i] (assoc i :parent nil)))
+              pop-agents))
+  (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
+
 ;; this is a wrapper for calculate-hah-solution-rates, which should itself be changed
 (defn calculate-hah-solution-rates-wrapper 
   [pop-agents {:keys [use-historically-assessed-hardness error-threshold population-size]}]
@@ -233,6 +243,8 @@
           (timer :fitness)
           ;; possible parent reversion
           (parental-reversion pop-agents generation @push-argmap)
+          ;; remove parents since they aren't used any more
+          (remove-parents pop-agents @push-argmap)
           ;; calculate solution rates if necessary for historically-assessed hardness
           ;; change calculate-hah-solution-rates in the future, to destructure the argmap
           (calculate-hah-solution-rates-wrapper pop-agents @push-argmap)
