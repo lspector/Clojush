@@ -15,19 +15,15 @@
 
 (defn compute-root-mean-square-error
   [errors]
-  (if @global-use-rmse
-    (math/sqrt (/ (apply +' (map #(* % %)
-                                 errors))
-                  (count errors)))
-    nil))
+  (math/sqrt (/ (apply +' (map #(* % %)
+                               errors))
+                (count errors))))
 
 (defn compute-hah-error
   [errors]
-  (if @global-use-historically-assessed-hardness
-    (reduce +' (doall (map (fn [rate e] (*' (- 1.01 rate) e))
-                           @solution-rates
-                           errors)))
-    nil))
+  (reduce +' (doall (map (fn [rate e] (*' (- 1.01 rate) e))
+                         @solution-rates
+                         errors))))
 
 (defn calculate-hah-solution-rates
   [use-historically-assessed-hardness pop-agents error-threshold population-size]
@@ -46,8 +42,13 @@
   "Returns the given individual with errors, total-errors, and hah-errors,
    computing them if necessary."
   ([i error-function rand-gen]
-    (evaluate-individual i error-function rand-gen true false))
-  ([i error-function rand-gen reuse-errors print-history]
+    (evaluate-individual i error-function rand-gen
+                         {:reuse-errors true
+                          :print-history false
+                          :use-rmse false
+                          :use-historically-assessed-hardness false}))
+  ([i error-function rand-gen {:keys [reuse-errors print-history use-rmse
+                                      use-historically-assessed-hardness]}]
     (binding [*thread-local-random-generator* rand-gen]
       (let [p (:program i)
             e (if (and (not (nil? (:errors i))) reuse-errors)
@@ -56,8 +57,12 @@
             te (if (and (not (nil? (:total-error i))) reuse-errors)
                  (:total-error i)
                  (keep-number-reasonable (compute-total-error e)))
-            he (compute-hah-error e)
-            rmse (compute-root-mean-square-error e)]
+            he (if use-historically-assessed-hardness
+                 (compute-hah-error e)
+                 nil)
+            rmse (if use-rmse
+                   (compute-root-mean-square-error e)
+                   nil)]
         (make-individual :program p :errors e :total-error te :hah-error he :rms-error rmse
                          :history (if print-history (cons te (:history i)) (:history i))
                          :ancestors (:ancestors i)

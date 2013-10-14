@@ -49,7 +49,6 @@
 ;;-------DONE THROUGH HERE
 
 ;; The following globals may be reset by arguments to pushgp or other systems that use Push.
-(def global-use-rmse (atom false))
 (def global-use-single-thread (atom false))
 (def global-uniform-crossover-parameters (atom {:self 0.9 :other 0.2}))
 (def global-hybridization-parameters (atom {:self 0.9 :other 0.2}))
@@ -61,11 +60,8 @@
 
 
 ;; Historically-assessed hardness (http://hampshire.edu/lspector/pubs/kleinspector-gptp08-preprint.pdf)
-;; using the "Previous Generation / Difference" method. 
-(def global-use-historically-assessed-hardness (atom false))
+;; using the "Previous Generation / Difference" method.
 (def solution-rates (atom (repeat 0)))
-
 
 ;; Elitegroup lexicase selection (will only work if lexicase-selection is off)
 (def elitegroups (atom ()))
-

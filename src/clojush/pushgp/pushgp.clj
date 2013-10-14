@@ -128,10 +128,10 @@
                               (java.util.Random. (nth random-seeds k)))))
      }))
 
-(defn compute-errors [pop-agents rand-gens {:keys [use-single-thread error-function
-                                                   reuse-errors print-history]}]
+(defn compute-errors [pop-agents rand-gens {:keys [use-single-thread error-function]
+                                            :as argmap}]
   (dorun (map #((if use-single-thread swap! send)
-                    % evaluate-individual error-function %2 reuse-errors print-history)
+                    % evaluate-individual error-function %2 argmap)
               pop-agents
               rand-gens))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE ;might this need a dorun?
