@@ -9,8 +9,8 @@
 ;; pushgp
 
 (def push-argmap
-  (atom (sorted-map :error-function (fn [p] '(0)) ;; pgm -> list of errors (1 per case)
-                    :error-threshold 0
+  (atom (sorted-map :error-function (fn [p] '(0)) ;; Function that takes a program and returns a list of errors
+                    :error-threshold 0 ;; Pushgp will stop and return the best program if its total error is <= the error-threshold
                     :top-level-push-code true
                     :top-level-pop-code true
                     :population-size 1000
@@ -178,10 +178,11 @@
   (calculate-hah-solution-rates use-historically-assessed-hardness pop-agents error-threshold population-size))
 
 (defn report-and-check-for-success
-  [pop-agents generation argmap]
+  [pop-agents generation {:keys [error-threshold max-generations]
+                          :as argmap}]
   (let [best (report (vec (doall (map deref pop-agents))) generation argmap)]
-    (cond (<= (:total-error best) (get argmap :error-threshold)) best
-          (>= generation (get argmap :max-generations)) :failure
+    (cond (<= (:total-error best) error-threshold) best
+          (>= generation max-generations) :failure
           :else :continue)))
           
 (defn produce-new-offspring

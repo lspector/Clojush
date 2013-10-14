@@ -118,12 +118,13 @@
   "Reports on the specified generation of a pushgp run. Returns the best
    individual of the generation."
   [population generation
-   {:keys [error-function report-simplifications print-csv-logs print-json-logs
-           csv-log-filename json-log-filename max-generations
+   {:keys [error-function report-simplifications
+           print-errors print-history print-cosmos-data print-timings
+           problem-specific-report use-rmse use-historically-assessed-hardness
+           ;; The following are for CSV or JSON logs
+           print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
-           print-errors print-history print-cosmos-data
-           problem-specific-report error-threshold use-rmse
-           use-historically-assessed-hardness print-timings]}]
+           ]}]
   (printf "\n\n") 
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
   (println ";; -*- Report at generation" generation)
