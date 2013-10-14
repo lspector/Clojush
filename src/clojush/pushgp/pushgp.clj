@@ -209,8 +209,8 @@
 
 (defn timer
   "Used to track the time used by different parts of evolution."
-  [step]
-  (when @global-print-timings
+  [{:keys [print-timings]} step]
+  (when print-timings
     (let [start-time @global-timer
           current-time-for-step (get @global-timing-map step)]
       (reset! global-timer (System/currentTimeMillis))
@@ -227,7 +227,7 @@
       (reset-globals)
       (initial-report) ;; Print the inital report
       (print-params @push-argmap)
-      (timer :initialization)
+      (timer @push-argmap :initialization)
       (println "Generating initial population...")
       (let [{:keys [pop-agents child-agents rand-gens random-seeds]} (make-agents-and-rng @push-argmap)]
         ;(print "Random seeds: ")
@@ -236,11 +236,11 @@
         ;; Main loop
         (loop [generation 0]
           (println "Processing generation:" generation)
-          (timer :reproduction)
+          (timer @push-argmap :reproduction)
           (print "Computing errors... ")
           (compute-errors pop-agents rand-gens @push-argmap)
           (println "Done computing errors.")
-          (timer :fitness)
+          (timer @push-argmap :fitness)
           ;; possible parent reversion
           (parental-reversion pop-agents generation @push-argmap)
           ;; remove parents since they aren't used any more
@@ -251,11 +251,11 @@
           ;; create global structure to support elitegroup lexicase selection
           (when (:use-elitegroup-lexicase-selection @push-argmap)
             (build-elitegroups pop-agents))
-          (timer :other)
+          (timer @push-argmap :other)
           ;; report and check for success
           (let [outcome (report-and-check-for-success pop-agents generation @push-argmap)]
             (cond (= outcome :failure) (do (printf "\nFAILURE\n") (flush))
-                  (= outcome :continue) (do (timer :report)
+                  (= outcome :continue) (do (timer @push-argmap :report)
                                             (println "Producing offspring...")
                                             (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
                                             (println "Installing next generation...")

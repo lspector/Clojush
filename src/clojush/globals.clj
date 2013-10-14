@@ -49,19 +49,15 @@
 ;;-------DONE THROUGH HERE
 
 ;; The following globals may be reset by arguments to pushgp or other systems that use Push.
-(def global-use-single-thread (atom false))
-(def global-uniform-crossover-parameters (atom {:self 0.9 :other 0.2}))
-(def global-hybridization-parameters (atom {:self 0.9 :other 0.2}))
-(def global-print-timings (atom false))
 (def global-timer (atom 0))
 (def global-timing-map (atom {:initialization 0 :reproduction 0 :report 0 :fitness 0 :other 0}))
 (def global-use-bushy-code (atom false))
 (def global-use-ultra-no-paren-mutation (atom false)) ;When true, ULTRA will use no-paren mutation, which means that parentheses won't be added or deleted during mutation.
 
-
+;; solution-rates is used in HAH:
 ;; Historically-assessed hardness (http://hampshire.edu/lspector/pubs/kleinspector-gptp08-preprint.pdf)
 ;; using the "Previous Generation / Difference" method.
 (def solution-rates (atom (repeat 0)))
 
-;; Elitegroup lexicase selection (will only work if lexicase-selection is off)
+;; elitegroups is used for elitegroup lexicase selection (will only work if lexicase-selection is off)
 (def elitegroups (atom ()))

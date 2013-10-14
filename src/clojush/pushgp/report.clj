@@ -123,7 +123,7 @@
            log-fitnesses-for-all-cases json-log-program-strings
            print-errors print-history print-cosmos-data
            problem-specific-report error-threshold use-rmse
-           use-historically-assessed-hardness]}]
+           use-historically-assessed-hardness print-timings]}]
   (printf "\n\n") 
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
   (println ";; -*- Report at generation" generation)
@@ -166,7 +166,7 @@
       (println "Median copy number:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
     (println "--- Timings ---")
     (println "Current time:" (System/currentTimeMillis) "milliseconds")
-    (when @global-print-timings
+    (when print-timings
       (let [total-time (apply + (vals @global-timing-map))
             init (get @global-timing-map :initialization)
             reproduction (get @global-timing-map :reproduction)
