@@ -78,7 +78,8 @@
                     :maintain-ancestors false  ; If true, save all ancestors in each individual (costly)
                     :save-initial-population false
                     :use-bushy-code false
-                    :use-ultra-no-paren-mutation false)))
+                    :use-ultra-no-paren-mutation false ; If true, ULTRA will use no-paren mutation, which means that parentheses won't be added or deleted during mutation.
+                    )))
 
 (defn load-push-argmap
   [argmap]
@@ -211,16 +212,16 @@
   "Used to track the time used by different parts of evolution."
   [{:keys [print-timings]} step]
   (when print-timings
-    (let [start-time @global-timer
-          current-time-for-step (get @global-timing-map step)]
-      (reset! global-timer (System/currentTimeMillis))
-      (swap! global-timing-map assoc step (+ current-time-for-step (- @global-timer start-time))))))
+    (let [start-time @timer-atom
+          current-time-for-step (get @timing-map step)]
+      (reset! timer-atom (System/currentTimeMillis))
+      (swap! timing-map assoc step (+ current-time-for-step (- @timer-atom start-time))))))
 
 (defn pushgp
   "The top-level routine of pushgp."
   ([] (pushgp '()))
   ([args]
-    (reset! global-timer (System/currentTimeMillis))
+    (reset! timer-atom (System/currentTimeMillis))
     (load-push-argmap args)
     (binding [*thread-local-random-generator* (java.util.Random. (:random-seed @push-argmap))]
       ;; set globals from parameters

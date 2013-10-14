@@ -42,17 +42,15 @@
 (def global-pop-when-tagging (atom true)) ;; When true, tagging instructions will pop the exec stack when tagging; otherwise, the exec stack is not popped
 
 ;; Special defs not used by Push instructions, but still need to be globally def'ed, go here.
-
+(def timer-atom (atom 0)) ;; Used for timing of different parts of pushgp
+(def timing-map (atom {:initialization 0 :reproduction 0 :report 0 :fitness 0 :other 0}))  ;; Used for timing of different parts of pushgp
 
 
 
 ;;-------DONE THROUGH HERE
 
 ;; The following globals may be reset by arguments to pushgp or other systems that use Push.
-(def global-timer (atom 0))
-(def global-timing-map (atom {:initialization 0 :reproduction 0 :report 0 :fitness 0 :other 0}))
 (def global-use-bushy-code (atom false))
-(def global-use-ultra-no-paren-mutation (atom false)) ;When true, ULTRA will use no-paren mutation, which means that parentheses won't be added or deleted during mutation.
 
 ;; solution-rates is used in HAH:
 ;; Historically-assessed hardness (http://hampshire.edu/lspector/pubs/kleinspector-gptp08-preprint.pdf)

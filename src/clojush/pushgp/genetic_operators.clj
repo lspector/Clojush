@@ -341,16 +341,16 @@
 ; (alternate '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16) '(a b c d e f g h i j k) 0.2 1)
 
 (defn linearly-mutate
-  [open-close-sequence mutation-rate atom-generators]
+  [open-close-sequence mutation-rate use-ultra-no-paren-mutation atom-generators]
   (let [parentheses (if @global-use-bushy-code
                       (let [n (count atom-generators)]
                         (concat (repeat n :open) (repeat n :close)))
                       [:open :close])
         token-mutator (fn [token]
-                        (if (and (or (not @global-use-ultra-no-paren-mutation) ;if not using no-paren mutation
+                        (if (and (or (not use-ultra-no-paren-mutation) ;if not using no-paren mutation
                                      (not (some #{token} [:open :close]))) ;or if the token isn't :open or :close
                                  (< (lrand) mutation-rate)) ;and if randomly below mutation rate
-                          (random-code 1 (concat atom-generators (if @global-use-ultra-no-paren-mutation ;random instruction, including parens if not no-paren mutation
+                          (random-code 1 (concat atom-generators (if use-ultra-no-paren-mutation ;random instruction, including parens if not no-paren mutation
                                                                    []
                                                                    parentheses)))
                           ;; NOTE: The original ULTRA mutation (first 2 papers) allowed replacement with (), which would later be removed,
@@ -360,7 +360,8 @@
          open-close-sequence)))
 
 (defn ultra-operate-on-programs
-  [p1 p2 alternation-rate alignment-deviation mutation-rate atom-generators]
+  [p1 p2 alternation-rate alignment-deviation mutation-rate
+   use-ultra-no-paren-mutation atom-generators]
   (if (or (not (seq? p1))
           (not (seq? p2)))
     p1 ;; can't do if either program isn't a list
@@ -379,24 +380,27 @@
                          alternation-rate
                          alignment-deviation)
               mutation-rate
+              use-ultra-no-paren-mutation
               atom-generators)))))))
 
 ;(let [p1 '(a (b c) (d ((e)) f))
 ;      p2 '((1 2 3) 4 ((5)) 6)]
 ;  (println p1)
 ;  (println p2)
-;  (println (ultra-operate-on-programs p1 p2 0.2 1 0.1 ['X])))
+;  (println (ultra-operate-on-programs p1 p2 0.2 1 0.1 false ['X])))
 
 (defn ultra
   "Returns the result of applying the ULTRA (Uniform Linear Transformation
    with Repair and Alternation) operation to parent1 and parent2."
   [parent1 parent2 {:keys [max-points ultra-alternation-rate ultra-alignment-deviation
-                           ultra-mutation-rate atom-generators maintain-ancestors]}]
+                           ultra-mutation-rate atom-generators maintain-ancestors
+                           use-ultra-no-paren-mutation]}]
   (let [new-program (ultra-operate-on-programs (:program parent1)
                                                (:program parent2)
                                                ultra-alternation-rate
                                                ultra-alignment-deviation
                                                ultra-mutation-rate
+                                               use-ultra-no-paren-mutation
                                                atom-generators)]
     (if (> (count-points new-program) max-points)
       parent1

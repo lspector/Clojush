@@ -167,12 +167,12 @@
     (println "--- Timings ---")
     (println "Current time:" (System/currentTimeMillis) "milliseconds")
     (when print-timings
-      (let [total-time (apply + (vals @global-timing-map))
-            init (get @global-timing-map :initialization)
-            reproduction (get @global-timing-map :reproduction)
-            fitness (get @global-timing-map :fitness)
-            report-time (get @global-timing-map :report)
-            other (get @global-timing-map :other)]
+      (let [total-time (apply + (vals @timing-map))
+            init (get @timing-map :initialization)
+            reproduction (get @timing-map :reproduction)
+            fitness (get @timing-map :fitness)
+            report-time (get @timing-map :report)
+            other (get @timing-map :other)]
         (printf "Total Time:      %8.1f seconds\n" (/ total-time 1000.0))
         (printf "Initialization:  %8.1f seconds, %4.1f%%\n" (/ init 1000.0) (* 100.0 (/ init total-time)))
         (printf "Reproduction:    %8.1f seconds, %4.1f%%\n" (/ reproduction 1000.0) (* 100.0 (/ reproduction total-time)))
