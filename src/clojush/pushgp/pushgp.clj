@@ -74,8 +74,8 @@
                     :print-history false
                     :print-timings false ; If true, report prints how long different parts of evolution have taken during the current run.
                     :print-cosmos-data false ; If true, report prints COSMOS data each generation.
-                    :print-ancestors-of-solution false
-                    :maintain-ancestors false
+                    :print-ancestors-of-solution false ; If true, final report prints the ancestors of the solution
+                    :maintain-ancestors false  ; If true, save all ancestors in each individual (costly)
                     :save-initial-population false
                     :use-bushy-code false
                     :use-ultra-no-paren-mutation false)))

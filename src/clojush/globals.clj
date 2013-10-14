@@ -32,21 +32,25 @@
 ;; These definitions are used by Push instructions and therefore must be global
 (def global-atom-generators (atom ())) ;; The instructions and literals that may be used in Push programs.
 (def global-max-points (atom 100)) ;; The maximum size of a Push program. Also, the maximum size of code that can appear on the exec or code stacks.
+(def global-tag-limit (atom 10000)) ;; The size of the tag space
+
+;; These definitions are used by run-push (and functions it calls), and must be global since run-push is called by the problem-specifc error functions
+(def global-top-level-push-code (atom true)) ;; When true, run-push will push the program's code onto the code stack prior to running
+(def global-top-level-pop-code (atom true)) ;; When true, run-push will pop the code stack after running the program
+(def global-evalpush-limit (atom 150)) ;; The number of Push instructions that can be evaluated before stopping evaluation
+(def global-evalpush-time-limit (atom 0)) ;; The time in nanoseconds that a program can evaluate before stopping, 0 => no time limit
+(def global-pop-when-tagging (atom true)) ;; When true, tagging instructions will pop the exec stack when tagging; otherwise, the exec stack is not popped
+
+;; Special defs not used by Push instructions, but still need to be globally def'ed, go here.
+
 
 
 
 ;;-------DONE THROUGH HERE
 
 ;; The following globals may be reset by arguments to pushgp or other systems that use Push.
-(def global-evalpush-limit (atom 150))
-(def global-evalpush-time-limit (atom 0)) ;; in nanoseconds, 0 => no time limit
-(def global-node-selection-method (atom :unbiased))
-(def global-node-selection-leaf-probability (atom 0.1))
-(def global-node-selection-tournament-size (atom 2))
-(def global-pop-when-tagging (atom true))
 (def global-use-rmse (atom false))
 (def global-use-single-thread (atom false))
-(def global-tag-limit (atom 10000))
 (def global-uniform-crossover-parameters (atom {:self 0.9 :other 0.2}))
 (def global-hybridization-parameters (atom {:self 0.9 :other 0.2}))
 (def global-print-timings (atom false))
@@ -68,7 +72,3 @@
 (def elitegroups (atom ()))
 (def global-use-elitegroup-lexicase-selection (atom false))
 
-;; Special defs not used by Push instructions, but still need to be globally def'ed, go here.
-(def global-top-level-push-code (atom true)) ;; When true, run-push will push the program's code onto the code stack prior to running
-(def global-top-level-pop-code (atom true)) ;; When true, run-push will pop the code stack after running the program
-(def global-maintain-ancestors (atom false)) ;; if true, save all ancestors in each individual (costly)
