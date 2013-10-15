@@ -114,7 +114,7 @@
                                     (cons (:program ind) (:ancestors ind))
                                     (:ancestors ind))))))
 
-(defn tagging-mutate 
+(defn tagging-mutate
   "Returns a version of the given individual with a piece of code replaced by a tag
    reference, and with an expression that tags the replaced code with the same tag added
    to the beginning of the individual's program."
@@ -167,17 +167,17 @@
 (defn gaussian-noise-factor
   "Returns gaussian noise of mean 0, std dev 1."
   []
-  (* (Math/sqrt (* -2.0 (Math/log (lrand))))
-     (Math/cos (* 2.0 Math/PI (lrand)))))
+  (*' (Math/sqrt (*' -2.0 (Math/log (lrand))))
+     (Math/cos (*' 2.0 Math/PI (lrand)))))
 
 (defn perturb-with-gaussian-noise 
   "Returns n perturbed with std dev sd."
   [sd n]
-  (+' n (* sd (gaussian-noise-factor))))
+  (+' n (*' sd (gaussian-noise-factor))))
 
 (defn perturb-code-with-gaussian-noise
   "Returns code with each float literal perturbed with std dev sd and perturbation probability
-   num-perturb-probability."
+   per-num-perturb-probability."
   [code per-num-perturb-probability sd]
   (postwalklist (fn [item]
                   (if (and (float? item)
@@ -187,7 +187,9 @@
                 code))
 
 (defn gaussian-mutate 
-  "Returns a gaussian-mutated version of the given individual."
+  "Returns the given individual where each float literal has a
+   gaussian-mutation-per-number-mutation-probability chance of being gaussian
+   mutated with a standard deviation of gaussian-mutation-standard-deviation."
   [ind {:keys [gaussian-mutation-per-number-mutation-probability
                gaussian-mutation-standard-deviation
                maintain-ancestors]}]

@@ -34,17 +34,17 @@
   
 (defn lexicase-selection
   "Returns an individual that does the best on the fitness cases when considered one at a
-time in random order.  If trivial-geography-radius is non-zero, selection is limited to parents within +/- r of location"
+   time in random order.  If trivial-geography-radius is non-zero, selection is limited to parents within +/- r of location"
   [pop location {:keys [trivial-geography-radius]}]
   (let [lower (mod (- location trivial-geography-radius) (count pop))
-     upper (mod (+ location trivial-geography-radius) (count pop))
-     popvec (vec pop)
-     subpop (if (zero? trivial-geography-radius) 
+        upper (mod (+ location trivial-geography-radius) (count pop))
+        popvec (vec pop)
+        subpop (if (zero? trivial-geography-radius) 
                  pop
-              (if (< lower upper)
-                (subvec popvec lower (inc upper))
-                (into (subvec popvec lower (count pop)) 
-                      (subvec popvec 0 (inc upper)))))]
+                 (if (< lower upper)
+                   (subvec popvec lower (inc upper))
+                   (into (subvec popvec lower (count pop)) 
+                         (subvec popvec 0 (inc upper)))))]
     (loop [survivors (retain-one-individual-per-error-vector subpop)
            cases (lshuffle (range (count (:errors (first subpop)))))]
       (if (or (empty? cases)

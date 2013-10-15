@@ -9,77 +9,116 @@
 ;; pushgp
 
 (def push-argmap
-  (atom (sorted-map :error-function (fn [p] '(0)) ;; Function that takes a program and returns a list of errors
-                    :error-threshold 0 ;; Pushgp will stop and return the best program if its total error is <= the error-threshold
-                    :top-level-push-code true
-                    :top-level-pop-code true
-                    :population-size 1000
-                    :max-points 50 
-                    :max-points-in-initial-program 50
-                    :atom-generators (concat @registered-instructions
-                                             (list 
-                                               (fn [] (lrand-int 100))
-                                               (fn [] (lrand))))
-                    :max-generations 1001
-                    :max-mutations nil
-                    :mutation-probability 0.4
-                    :mutation-max-points 20
-                    :crossover-probability 0.4
-                    :simplification-probability 0.1
-                    :tournament-size 7
-                    :report-simplifications 100
-                    :final-report-simplifications 1000
-                    :reproduction-simplifications 1
-                    :trivial-geography-radius 0
-                    :decimation-ratio 1
-                    :decimation-tournament-size 2
-                    :evalpush-limit 150
-                    :evalpush-time-limit 0
-                    :node-selection-method :unbiased
-                    :node-selection-leaf-probability 0.1
-                    :node-selection-tournament-size 2
-                    :pop-when-tagging true
-                    :gaussian-mutation-probability 0.0
-                    :gaussian-mutation-per-number-mutation-probability 0.5
-                    :gaussian-mutation-standard-deviation 0.1
-                    :reuse-errors true
-                    :problem-specific-report default-problem-specific-report
-                    :use-single-thread false
-                    :random-seed (System/nanoTime)
-                    :use-historically-assessed-hardness false
-                    :use-lexicase-selection false ; If true, uses Lexicase Parent Selection (see Spector paper in GECCO-UP 2012 workshop proceedings)
-                    :use-elitegroup-lexicase-selection false
-                    :use-rmse false
-                    :print-csv-logs false
-                    :print-json-logs false
-                    :csv-log-filename "log.csv"
-                    :json-log-filename "log.json"
-                    :log-fitnesses-for-all-cases false
-                    :json-log-program-strings false 
-                    :boolean-gsxover-probability 0.0
-                    :boolean-gsxover-new-code-max-points 20
-                    :deletion-mutation-probability 0.0
-                    :parentheses-addition-mutation-probability 0.0
-                    :tagging-mutation-probability 0.0
-                    :tag-branch-mutation-probability 0.0
-                    :tag-branch-mutation-type-instruction-pairs []
-                    :parent-reversion-probability 0.0
-                    :tag-limit 10000
-                    :initial-population nil
-                    :ultra-probability 0.0
-                    :ultra-alternation-rate 0.1
-                    :ultra-alignment-deviation 1
-                    :ultra-mutation-rate 0.1
-                    :print-errors true
-                    :print-history false
-                    :print-timings false ; If true, report prints how long different parts of evolution have taken during the current run.
-                    :print-cosmos-data false ; If true, report prints COSMOS data each generation.
-                    :print-ancestors-of-solution false ; If true, final report prints the ancestors of the solution
-                    :maintain-ancestors false  ; If true, save all ancestors in each individual (costly)
-                    :save-initial-population false
-                    :use-bushy-code false
-                    :use-ultra-no-paren-mutation false ; If true, ULTRA will use no-paren mutation, which means that parentheses won't be added or deleted during mutation.
-                    )))
+  (atom (sorted-map
+          ;;----------------------------------------
+          ;; Clojush system arguments
+          ;;----------------------------------------
+          :use-single-thread false ;; When true, Clojush will only use a single thread
+          :random-seed (System/nanoTime) ;; The seed for the random number generator
+          :initial-population nil ;; (MAY BE BROKEN) Can point to a file where an initial population is stored and can be read
+          :save-initial-population false ;; When true, saves the initial population
+          ;;
+          ;;----------------------------------------
+          ;; Standard GP arguments
+          ;;----------------------------------------
+          :error-function (fn [p] '(0)) ;; Function that takes a program and returns a list of errors
+          :error-threshold 0 ;; Pushgp will stop and return the best program if its total error is <= the error-threshold
+          :atom-generators (concat @registered-instructions ;; The instructions that pushgp will use in random code
+                                   (list 
+                                     (fn [] (lrand-int 100))
+                                     (fn [] (lrand))))
+          :population-size 1000
+          :max-generations 1001
+          :max-points 50 ;; Maximum size of push programs, as counted by points in the program
+          :max-points-in-initial-program 50 ;; Maximum size of initial programs in generation 0
+          :evalpush-limit 150 ;; The number of Push instructions that can be evaluated before stopping evaluation
+          :evalpush-time-limit 0 ;; The time in nanoseconds that a program can evaluate before stopping, 0 means no time limit
+          :reuse-errors true ;; When true, children produced through direct reproduction will not be re-evaluated but will have the error vector of their parent
+          ;;
+          ;;----------------------------------------
+          ;; Genetic operator probabilities (replication-probability is 1.0 minus the rest)
+          ;;----------------------------------------
+          :mutation-probability 0.4 ;; Subtree mutation, similar to that found in tree-GP
+          :crossover-probability 0.4 ;; Subtree crossover, similar to that found in tree-GP
+          :simplification-probability 0.1 ;; Auto-simplification of the program
+          :ultra-probability 0.0 ;; Uniform Linear Transformation with Repair and Alternation -- a uniform crossover and mutation operator
+          :gaussian-mutation-probability 0.0 ;; Gaussian mutation affects only the float literals in a program by adding Gaussian noise
+          :boolean-gsxover-probability 0.0 ;; Geometric Semantic Crossover -- creates random code that determines which of the two parents to use for each test cases
+          :deletion-mutation-probability 0.0 ;; A mutation operator that deletes random instructions
+          :parentheses-addition-mutation-probability 0.0 ;; Operator that randomly inserts a parentheses pair somewhere in the program
+          :tagging-mutation-probability 0.0 ;; Operator that chooses a piece of code, moves it to beginning of program and tags it, and puts a tagged call in its place
+          :tag-branch-mutation-probability 0.0 ;; Operator that inserts a tag-branch into the program. tag-branches compare two items on a stack and then jump to one of two tags depending on the comparison
+          ;;
+          ;;----------------------------------------
+          ;; Arguments related to genetic operators
+          ;;----------------------------------------
+          :mutation-max-points 20 ;; The maximum number of points that new code will introduce during mutation
+          :reproduction-simplifications 1 ;; The number of simplification steps that will happen during simplification reproduction
+          :ultra-alternation-rate 0.1 ;; When using ULTRA, how often ULTRA alternates between the parents
+          :ultra-alignment-deviation 1 ;; When using ULTRA, the standard deviation of how far alternation may jump between indices when switching between parents
+          :ultra-mutation-rate 0.1 ;; The probability of each token being mutated during ULTRA
+          :use-ultra-no-paren-mutation false ; If true, ULTRA will use no-paren mutation, which means that parentheses won't be added or deleted during mutation.
+          :gaussian-mutation-per-number-mutation-probability 0.5 ;; The probability that any given float literal will be affected by a pass of gaussian-mutate
+          :gaussian-mutation-standard-deviation 0.1 ;; The standard deviation of a gaussian-mutated float
+          :boolean-gsxover-new-code-max-points 20 ;; The maximum size of the random code fragment used in boolean-gsxover
+          :tag-branch-mutation-type-instruction-pairs [] ;; A list of types and comparators that can be used by tag-branch-insertion-mutation
+          ;;
+          ;;----------------------------------------
+          ;; Arguments related to node selection (used in mutate, crossover, and tagging-mutate)
+          ;;----------------------------------------
+          :node-selection-method :unbiased ;; The node selection method can be :unbiased, :leaf-probability, or :size-tournament
+          :node-selection-leaf-probability 0.1 ;; If the node-selection-method is :leaf-probability, this is the percent of selections that will happen in leaves of the tree
+          :node-selection-tournament-size 2 ;; If node-selection-method is :size-tournament, this is the size of the node selection tournaments
+          ;;
+          ;;----------------------------------------
+          ;; Arguments related to parent selection
+          ;;----------------------------------------
+          :tournament-size 7 ;; If using tournament selection, the size of the tournaments
+          :trivial-geography-radius 0 ;; If non-zero, this is used as the radius from which to select individuals for tournament or lexicase selection
+          :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population size that is retained before breeding. If 0 < decimation-ratio < 1, decimation tournaments will be used to reduce the population to size (* population-size decimation-ratio) before breeding. 
+          :decimation-tournament-size 2 ;; Size of the decimation tournaments
+          :use-historically-assessed-hardness false ;; When true, total error for tournament selection will depend on historically-assessed hardness
+          :use-rmse false ;; When true, total error for tournament selection will depend on the root mean square error of the error vector
+          :use-lexicase-selection false ;; If true, uses Lexicase Parent Selection (see Spector paper in GECCO-UP 2012 workshop proceedings)
+          :use-elitegroup-lexicase-selection false ;; If true, uses elitegroup lexicase selection, an experimental change to lexicase that thus far is often worse
+          ;;
+          ;;----------------------------------------
+          ;; Arguments related to the Push interpreter
+          ;;----------------------------------------
+          :pop-when-tagging true ;; When true, tagging instructions will pop the exec stack when tagging; otherwise, the exec stack is not popped
+          :tag-limit 10000 ;; The size of the tag space
+          :top-level-push-code true ;; When true, run-push will push the program's code onto the code stack prior to running
+          :top-level-pop-code true ;; When true, run-push will pop the code stack after running the program
+          ;;
+          ;;----------------------------------------
+          ;; Arguments related to generational and final reports
+          ;;----------------------------------------
+          :report-simplifications 100 ;; The number of simplification steps that will happen during report simplifications
+          :final-report-simplifications 1000 ;; The number of simplification steps that will happen during final report simplifications
+          :problem-specific-report default-problem-specific-report ;; A function can be called to provide a problem-specific report, which happens after the normal generational report is printed
+          :print-errors true ;; When true, prints the error vector of the best individual
+          :print-history false ;; When true, prints the history of the best individual's ancestors' total errors
+          :print-timings false ; If true, report prints how long different parts of evolution have taken during the current run.
+          :print-cosmos-data false ; If true, report prints COSMOS data each generation.
+          :print-ancestors-of-solution false ; If true, final report prints the ancestors of the solution
+          :maintain-ancestors false  ; If true, save all ancestors in each individual (costly)
+          ;;
+          ;;----------------------------------------
+          ;; Arguments related to printing JSON or CSV logs
+          ;;----------------------------------------
+          :print-csv-logs false ;; Prints a CSV log of the population each generation
+          :print-json-logs false ;; Prints a JSON log of the population each generation
+          :csv-log-filename "log.csv" ;; The file to print CSV log to
+          :json-log-filename "log.json" ;; The file to print JSON log to
+          :log-fitnesses-for-all-cases false ;; If true, the CSV and JSON logs will include the fitnesses of each individual on every test case
+          :json-log-program-strings false ;; If true, JSON logs will include program strings for each individual
+          ;;
+          ;;----------------------------------------
+          ;; Other arguments
+          ;;----------------------------------------
+          :parent-reversion-probability 0.0 ;; The probability of a child being reverted to its parent if the parent has better fitness or equal fitness and is smaller
+          :use-bushy-code false ;; When true, random code and code changed by ULTRA mutation, will be "bushy", as in close to a binary tree
+          )))
 
 (defn load-push-argmap
   [argmap]
@@ -245,7 +284,7 @@
           (timer @push-argmap :fitness)
           ;; possible parent reversion
           (parental-reversion pop-agents generation @push-argmap)
-          ;; remove parents since they aren't used any more
+          ;; stop tracking parents since they aren't used any more
           (remove-parents pop-agents @push-argmap)
           ;; calculate solution rates if necessary for historically-assessed hardness
           ;; change calculate-hah-solution-rates in the future, to destructure the argmap
