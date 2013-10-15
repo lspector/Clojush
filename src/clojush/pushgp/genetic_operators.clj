@@ -11,9 +11,10 @@
 
 (defn mutate 
   "Returns a mutated version of the given individual."
-  [ind mutation-max-points max-points atom-generators]
+  [ind {:keys [mutation-max-points max-points atom-generators maintain-ancestors]
+        :as argmap}]
   (let [new-program (insert-code-at-point (:program ind) 
-                                          (select-node-index (:program ind))
+                                          (select-node-index (:program ind) argmap)
                                           (random-code mutation-max-points atom-generators))]
     (if (> (count-points new-program) max-points)
       ind
@@ -25,12 +26,13 @@
 (defn crossover 
   "Returns a copy of parent1 with a random subprogram replaced with a random 
    subprogram of parent2."
-  [parent1 parent2 max-points]
+  [parent1 parent2 {:keys [max-points maintain-ancestors]
+                    :as argmap}]
   (let [new-program (insert-code-at-point 
                       (:program parent1) 
-                      (select-node-index (:program parent1))
+                      (select-node-index (:program parent1) argmap)
                       (code-at-point (:program parent2)
-                                     (select-node-index (:program parent2))))]
+                                     (select-node-index (:program parent2) argmap)))]
     (if (> (count-points new-program) max-points)
       parent1
       (make-individual :program new-program :history (:history parent1)
@@ -42,8 +44,8 @@
   "Returns a child produced from parent1 and parent2 using boolean geometric
    semantic crossover. The child will be of the form:
    (new-random-code exec_if parent1-code parent2-code)."
-  [parent1 parent2 new-code-max-points max-points atom-generators]
-  (let [new-program (list (random-code new-code-max-points atom-generators) 
+  [parent1 parent2 {:keys [boolean-gsxover-new-code-max-points max-points atom-generators maintain-ancestors]}]
+  (let [new-program (list (random-code boolean-gsxover-new-code-max-points atom-generators) 
                           'exec_if 
                           (:program parent1) 
                           (:program parent2))]
@@ -64,7 +66,7 @@
    p(2) = 0.42
    p(3) = 0.21
    p(4) = 0.05"
-  [ind]
+  [ind {:keys [maintain-ancestors]}]
   (let [new-program (loop [prog (:program ind)
                            how-many (let [prob (lrand)]
                                       (cond
@@ -89,7 +91,7 @@
 (defn add-parentheses-mutate 
   "Returns a version of the given individual with one pair of parentheses added
    somewhere. Not compatible with (currently 'experimental') tagged code macros."
-  [ind max-points]
+  [ind {:keys [max-points maintain-ancestors]}]
   (let [expression (:program ind) 
         new-program (let [expstr (str expression)
                           chars (count expstr)
@@ -112,13 +114,14 @@
                                     (cons (:program ind) (:ancestors ind))
                                     (:ancestors ind))))))
 
-(defn tagging-mutate 
+(defn tagging-mutate
   "Returns a version of the given individual with a piece of code replaced by a tag
    reference, and with an expression that tags the replaced code with the same tag added
    to the beginning of the individual's program."
-  [ind max-points tag-limit]
+  [ind tag-limit {:keys [max-points maintain-ancestors]
+                  :as argmap}]
   (let [old-program (:program ind)
-        index-to-tag (select-node-index old-program)
+        index-to-tag (select-node-index old-program argmap)
         tag (rand-int tag-limit)
         tagging-instruction (symbol (str "tag_exec_" (str tag)))
         tag-ref-instruction (symbol (str "tagged_" (str tag))) 
@@ -139,14 +142,14 @@
    location. A tag-branch is a sequence of instructions that 1) produces a boolean
    value by performing a randomly chosen comparison of copies (not popped) of the top 
    two items of a randomly selected type, and 2) branches to one of two tags depending
-   on the result. The type-instruction-pairs argument should be a sequence of pairs,
+   on the result. The tag-branch-mutation-type-instruction-pairs argument should be a sequence of pairs,
    in which the first element of each is a type and the second element is a Push instruction
    that performs a comparison of the type, as in [:integer 'integer_eq]."
-  [ind max-points type-instruction-pairs tag-limit]
+  [ind tag-limit {:keys [max-points tag-branch-mutation-type-instruction-pairs maintain-ancestors]}]
   (let [old-program (:program ind)
         tag-ref-instruction-1 (symbol (str "tagged_" (str (lrand-int tag-limit)))) 
         tag-ref-instruction-2 (symbol (str "tagged_" (str (lrand-int tag-limit))))
-        [type instruction] (lrand-nth type-instruction-pairs)
+        [type instruction] (lrand-nth tag-branch-mutation-type-instruction-pairs)
         yankdup-instruction (symbol (str (apply str (rest (str type))) "_yankdup"))
         tag-branch (list 1 yankdup-instruction 1 yankdup-instruction instruction 'exec_if
                          tag-ref-instruction-1 tag-ref-instruction-2)
@@ -164,17 +167,17 @@
 (defn gaussian-noise-factor
   "Returns gaussian noise of mean 0, std dev 1."
   []
-  (* (Math/sqrt (* -2.0 (Math/log (lrand))))
-     (Math/cos (* 2.0 Math/PI (lrand)))))
+  (*' (Math/sqrt (*' -2.0 (Math/log (lrand))))
+     (Math/cos (*' 2.0 Math/PI (lrand)))))
 
 (defn perturb-with-gaussian-noise 
   "Returns n perturbed with std dev sd."
   [sd n]
-  (+' n (* sd (gaussian-noise-factor))))
+  (+' n (*' sd (gaussian-noise-factor))))
 
 (defn perturb-code-with-gaussian-noise
   "Returns code with each float literal perturbed with std dev sd and perturbation probability
-   num-perturb-probability."
+   per-num-perturb-probability."
   [code per-num-perturb-probability sd]
   (postwalklist (fn [item]
                   (if (and (float? item)
@@ -184,10 +187,17 @@
                 code))
 
 (defn gaussian-mutate 
-  "Returns a gaussian-mutated version of the given individual."
-  [ind per-num-perturb-probability sd]
+  "Returns the given individual where each float literal has a
+   gaussian-mutation-per-number-mutation-probability chance of being gaussian
+   mutated with a standard deviation of gaussian-mutation-standard-deviation."
+  [ind {:keys [gaussian-mutation-per-number-mutation-probability
+               gaussian-mutation-standard-deviation
+               maintain-ancestors]}]
   (make-individual 
-    :program (perturb-code-with-gaussian-noise (:program ind) per-num-perturb-probability sd)
+    :program (perturb-code-with-gaussian-noise
+               (:program ind)
+               gaussian-mutation-per-number-mutation-probability
+               gaussian-mutation-standard-deviation)
     :history (:history ind)
     :ancestors (if maintain-ancestors
                  (cons (:program ind) (:ancestors ind))
@@ -333,16 +343,16 @@
 ; (alternate '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16) '(a b c d e f g h i j k) 0.2 1)
 
 (defn linearly-mutate
-  [open-close-sequence mutation-rate atom-generators]
+  [open-close-sequence mutation-rate use-ultra-no-paren-mutation atom-generators]
   (let [parentheses (if @global-use-bushy-code
                       (let [n (count atom-generators)]
                         (concat (repeat n :open) (repeat n :close)))
                       [:open :close])
         token-mutator (fn [token]
-                        (if (and (or (not @global-use-ultra-no-paren-mutation) ;if not using no-paren mutation
+                        (if (and (or (not use-ultra-no-paren-mutation) ;if not using no-paren mutation
                                      (not (some #{token} [:open :close]))) ;or if the token isn't :open or :close
                                  (< (lrand) mutation-rate)) ;and if randomly below mutation rate
-                          (random-code 1 (concat atom-generators (if @global-use-ultra-no-paren-mutation ;random instruction, including parens if not no-paren mutation
+                          (random-code 1 (concat atom-generators (if use-ultra-no-paren-mutation ;random instruction, including parens if not no-paren mutation
                                                                    []
                                                                    parentheses)))
                           ;; NOTE: The original ULTRA mutation (first 2 papers) allowed replacement with (), which would later be removed,
@@ -352,7 +362,8 @@
          open-close-sequence)))
 
 (defn ultra-operate-on-programs
-  [p1 p2 alternation-rate alignment-deviation mutation-rate atom-generators]
+  [p1 p2 alternation-rate alignment-deviation mutation-rate
+   use-ultra-no-paren-mutation atom-generators]
   (if (or (not (seq? p1))
           (not (seq? p2)))
     p1 ;; can't do if either program isn't a list
@@ -371,23 +382,27 @@
                          alternation-rate
                          alignment-deviation)
               mutation-rate
+              use-ultra-no-paren-mutation
               atom-generators)))))))
 
 ;(let [p1 '(a (b c) (d ((e)) f))
 ;      p2 '((1 2 3) 4 ((5)) 6)]
 ;  (println p1)
 ;  (println p2)
-;  (println (ultra-operate-on-programs p1 p2 0.2 1 0.1 ['X])))
+;  (println (ultra-operate-on-programs p1 p2 0.2 1 0.1 false ['X])))
 
 (defn ultra
   "Returns the result of applying the ULTRA (Uniform Linear Transformation
    with Repair and Alternation) operation to parent1 and parent2."
-  [parent1 parent2 max-points alternation-rate alignment-deviation mutation-rate atom-generators]
-  (let [new-program (ultra-operate-on-programs (:program parent1) 
+  [parent1 parent2 {:keys [max-points ultra-alternation-rate ultra-alignment-deviation
+                           ultra-mutation-rate atom-generators maintain-ancestors
+                           use-ultra-no-paren-mutation]}]
+  (let [new-program (ultra-operate-on-programs (:program parent1)
                                                (:program parent2)
-                                               alternation-rate 
-                                               alignment-deviation 
-                                               mutation-rate 
+                                               ultra-alternation-rate
+                                               ultra-alignment-deviation
+                                               ultra-mutation-rate
+                                               use-ultra-no-paren-mutation
                                                atom-generators)]
     (if (> (count-points new-program) max-points)
       parent1

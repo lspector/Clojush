@@ -117,81 +117,77 @@
 (defn report 
   "Reports on the specified generation of a pushgp run. Returns the best
    individual of the generation."
-  ([population generation error-function report-simplifications
-    print-csv-logs print-json-logs csv-log-filename json-log-filename
-    log-fitnesses-for-all-cases json-log-program-strings print-errors
-    print-history]
-    (report population generation error-function report-simplifications
-            print-csv-logs print-json-logs csv-log-filename json-log-filename
-            log-fitnesses-for-all-cases json-log-program-strings
-            print-errors print-history
-            default-problem-specific-report))
-  ([population generation error-function report-simplifications
-    print-csv-logs print-json-logs csv-log-filename json-log-filename
-    log-fitnesses-for-all-cases json-log-program-strings print-errors
-    print-history problem-specific-report]
-    (printf "\n\n") 
-    (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
-    (println ";; -*- Report at generation" generation)
-    (let [sorted (sort-by :total-error < population)
-          best (first sorted)]
-      (println "Best program:" (not-lazy (:program best)))
-      (when (> report-simplifications 0)
-        (println "Partial simplification:"
-                 (not-lazy (:program (auto-simplify best error-function report-simplifications false 1000)))))
+  [population generation
+   {:keys [error-function report-simplifications
+           print-errors print-history print-cosmos-data print-timings
+           problem-specific-report use-rmse use-historically-assessed-hardness
+           ;; The following are for CSV or JSON logs
+           print-csv-logs print-json-logs csv-log-filename json-log-filename
+           log-fitnesses-for-all-cases json-log-program-strings
+           ]}]
+  (printf "\n\n") 
+  (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
+  (println ";; -*- Report at generation" generation)
+  (let [sorted (sort-by :total-error < population)
+        best (first sorted)]
+    (println "Best program:" (not-lazy (:program best)))
+    (when (> report-simplifications 0)
+      (println "Partial simplification:"
+               (not-lazy (:program (auto-simplify best error-function report-simplifications false 1000)))))
+    (when print-errors (println "Errors:" (not-lazy (:errors best))))
+    (println "Total:" (:total-error best))
+    (println "Mean:" (float (/ (:total-error best)
+                               (count (:errors best)))))
+    (when use-historically-assessed-hardness
+      (println "HAH-error:" (:hah-error best)))
+    (when use-rmse (println "RMS-error:" (:rms-error best)))
+    (when print-history (println "History:" (not-lazy (:history best))))
+    (println "Size:" (count-points (:program best)))
+    (println "--- Population Statistics ---")
+    (when print-cosmos-data
       (println "Cosmos Data:" (let [quants (config/quantiles (count population))]
-                                (zipmap quants (map #(:total-error (nth (sort-by :total-error population) %)) quants))))
-      (when print-errors (println "Errors:" (not-lazy (:errors best))))
-      (println "Total:" (:total-error best))
-      (println "Mean:" (float (/ (:total-error best)
-                                 (count (:errors best)))))
-      (when @global-use-historically-assessed-hardness
-        (println "HAH-error:" (:hah-error best)))
-      (when @global-use-rmse (println "RMS-error:" (:rms-error best)))
-      (when print-history (println "History:" (not-lazy (:history best))))
-      (println "Size:" (count-points (:program best)))
-      (println "--- Population Statistics ---")
-      (println "Average total errors in population:"
-               (*' 1.0 (/ (reduce +' (map :total-error sorted)) (count population))))
-      (println "Median total errors in population:"
-               (:total-error (nth sorted (truncate (/ (count sorted) 2)))))
-      (println "Error averages by case:"
-               (apply map (fn [& args] (*' 1.0 (/ (reduce +' args) (count args))))
-                      (map :errors population)))
-      (println "Error minima by case:"
-               (apply map (fn [& args] (apply min args))
-                      (map :errors population)))
-      (println "Average program size in population (points):"
-               (*' 1.0 (/ (reduce +' (map count-points (map :program sorted)))
-                          (count population))))
-      (let [frequency-map (frequencies (map :program population))]
-        (println "Number of unique programs in population:" (count frequency-map))
-        (println "Max copy number of one program:" (apply max (vals frequency-map)))
-        (println "Min copy number of one program:" (apply min (vals frequency-map)))
-        (println "Median copy number:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
-      (println "--- Timings ---")
-      (println "Current time:" (System/currentTimeMillis) "milliseconds")
-      (when @global-print-timings
-        (let [total-time (apply + (vals @global-timing-map))
-              init (get @global-timing-map :initialization)
-              reproduction (get @global-timing-map :reproduction)
-              fitness (get @global-timing-map :fitness)
-              report-time (get @global-timing-map :report)
-              other (get @global-timing-map :other)]
-          (printf "Total Time:      %8.1f seconds\n" (/ total-time 1000.0))
-          (printf "Initialization:  %8.1f seconds, %4.1f%%\n" (/ init 1000.0) (* 100.0 (/ init total-time)))
-          (printf "Reproduction:    %8.1f seconds, %4.1f%%\n" (/ reproduction 1000.0) (* 100.0 (/ reproduction total-time)))
-          (printf "Fitness Testing: %8.1f seconds, %4.1f%%\n" (/ fitness 1000.0) (* 100.0 (/ fitness total-time)))
-          (printf "Report:          %8.1f seconds, %4.1f%%\n" (/ report-time 1000.0) (* 100.0 (/ report-time total-time)))
-          (printf "Other:           %8.1f seconds, %4.1f%%\n" (/ other 1000.0) (* 100.0 (/ other total-time)))))
-      (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
-      (flush)
-      (when print-csv-logs (csv-print population generation csv-log-filename
-                                      log-fitnesses-for-all-cases))
-      (when print-json-logs (json-print population generation json-log-filename
+                                (zipmap quants (map #(:total-error (nth (sort-by :total-error population) %)) quants)))))
+    (println "Average total errors in population:"
+             (*' 1.0 (/ (reduce +' (map :total-error sorted)) (count population))))
+    (println "Median total errors in population:"
+             (:total-error (nth sorted (truncate (/ (count sorted) 2)))))
+    (when print-errors (println "Error averages by case:"
+                                (apply map (fn [& args] (*' 1.0 (/ (reduce +' args) (count args))))
+                                       (map :errors population))))
+    (when print-errors (println "Error minima by case:"
+                                (apply map (fn [& args] (apply min args))
+                                       (map :errors population))))
+    (println "Average program size in population (points):"
+             (*' 1.0 (/ (reduce +' (map count-points (map :program sorted)))
+                        (count population))))
+    (let [frequency-map (frequencies (map :program population))]
+      (println "Number of unique programs in population:" (count frequency-map))
+      (println "Max copy number of one program:" (apply max (vals frequency-map)))
+      (println "Min copy number of one program:" (apply min (vals frequency-map)))
+      (println "Median copy number:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
+    (println "--- Timings ---")
+    (println "Current time:" (System/currentTimeMillis) "milliseconds")
+    (when print-timings
+      (let [total-time (apply + (vals @timing-map))
+            init (get @timing-map :initialization)
+            reproduction (get @timing-map :reproduction)
+            fitness (get @timing-map :fitness)
+            report-time (get @timing-map :report)
+            other (get @timing-map :other)]
+        (printf "Total Time:      %8.1f seconds\n" (/ total-time 1000.0))
+        (printf "Initialization:  %8.1f seconds, %4.1f%%\n" (/ init 1000.0) (* 100.0 (/ init total-time)))
+        (printf "Reproduction:    %8.1f seconds, %4.1f%%\n" (/ reproduction 1000.0) (* 100.0 (/ reproduction total-time)))
+        (printf "Fitness Testing: %8.1f seconds, %4.1f%%\n" (/ fitness 1000.0) (* 100.0 (/ fitness total-time)))
+        (printf "Report:          %8.1f seconds, %4.1f%%\n" (/ report-time 1000.0) (* 100.0 (/ report-time total-time)))
+        (printf "Other:           %8.1f seconds, %4.1f%%\n" (/ other 1000.0) (* 100.0 (/ other total-time)))))
+    (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
+    (flush)
+    (when print-csv-logs (csv-print population generation csv-log-filename
+                                    log-fitnesses-for-all-cases))
+    (when print-json-logs (json-print population generation json-log-filename
                                       log-fitnesses-for-all-cases json-log-program-strings))
-      (problem-specific-report best population generation error-function report-simplifications)
-      best)))
+    (problem-specific-report best population generation error-function report-simplifications)
+    best))
 
 
 (defn initial-report
@@ -233,7 +229,8 @@
 
 (defn final-report
   "Prints the final report of a PushGP run if the run is successful."
-  [generation best error-function final-report-simplifications]
+  [generation best
+   {:keys [error-function final-report-simplifications print-ancestors-of-solution]}]
   (printf "\n\nSUCCESS at generation %s\nSuccessful program: %s\nErrors: %s\nTotal error: %s\nHistory: %s\nSize: %s\n\n"
           generation (not-lazy (:program best)) (not-lazy (:errors best)) (:total-error best) 
           (not-lazy (:history best)) (count-points (:program best)))
