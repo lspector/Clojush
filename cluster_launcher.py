@@ -31,6 +31,8 @@ service_tag = "tom"
 # You don't need to change anything below here
 
 # Check to make sure directory doesn't exist; if not, create it
+if output_directory[-1] != "/":
+    output_directory += "/"
 if os.path.isdir(clojush_directory + output_directory):
     raise RuntimeError, "Output directory already exists"
 
