@@ -83,6 +83,7 @@ Still maintains the O(n*m) guarantee.
 (def button-entrypoints
   (zipmap buttons (iterate #(+ % 100) 0)))
 
+
 ; button-entrypoints
 
 (define-registered 
@@ -189,7 +190,7 @@ Still maintains the O(n*m) guarantee.
   ;;   determine errors from float and boolean stacks
   (let [correct 0.0
         incorrect 1000000000.0
-        first-run-result (run-push (remove-noops program)
+        first-run-result (run-push program ;(remove-noops program)
                                    (tag-before-entry-points (make-push-state)))
         initialized-push-state (push-item 
                                    0.0 
@@ -204,13 +205,19 @@ Still maintains the O(n*m) guarantee.
                                    ;(println "TEST:" t)
                                    ;(println "FINAL STATE:" push-state)
                                    (if (not (number? top))
-                                     [incorrect incorrect]
-                                      (if (== top target)
+                                     [incorrect 
+                                      ;incorrect
+                                      ]
+                                      (if ;(== top target)
+                                        (< (Math/abs (- top target)) 0.00001)
                                         ;; correct
-                                        [correct correct]
+                                        [correct 
+                                         ;correct
+                                         ]
                                         ;incorrect
                                         [(Math/abs (- top target)) 
-                                         (float (levenshtein-distance (str top) (str target)))]))
+                                         ;(float (levenshtein-distance (str top) (str target)))
+                                         ]))
                                     ;;
                                     ;; error signal error
                                     #_(if (nth t 2)
@@ -241,7 +248,7 @@ Still maintains the O(n*m) guarantee.
                        (for [t (vals button-entrypoints)]
                          (fn [] (symbol (str "tag_exec_" (str t)))))
                        [(tagged-instruction-erc)]
-                       (repeat 46 'code_noop)
+                       ;(repeat 46 'code_noop)
                        '(boolean_and
                           boolean_dup
                           boolean_eq
@@ -453,7 +460,7 @@ Still maintains the O(n*m) guarantee.
    ;:use-historically-assessed-hardness true ;; just to print them!
    ;:decimation-ratio 0.01
    ;:tournament-size 1
-   :population-size 500 ;200 ;50
+   :population-size 1000 ;200 ;50
    :max-generations 10001
    :evalpush-limit 3000
    :tag-limit 10000
@@ -465,9 +472,9 @@ Still maintains the O(n*m) guarantee.
    :simplification-probability 0
    :reproduction-simplifications 10
    :ultra-probability 1.0
-   :ultra-alternation-rate 0.001
+   :ultra-alternation-rate 0.005
    :ultra-alignment-deviation 5
-   :ultra-mutation-rate 0.01
+   :ultra-mutation-rate 0.005
    :deletion-mutation-probability 0
    :parentheses-addition-mutation-probability 0
    :tagging-mutation-probability 0
@@ -479,5 +486,6 @@ Still maintains the O(n*m) guarantee.
    :pop-when-tagging true
    :report-simplifications 0
    :print-history false
-   :use-bushy-code true
+   ;:use-bushy-code true
+   :use-ultra-no-paren-mutation true
   })
