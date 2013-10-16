@@ -114,7 +114,7 @@
   ([code state print-steps trace]
     (run-push code state print-steps trace false))
   ([code state print-steps trace save-state-sequence]
-    (let [s (if top-level-push-code (push-item code :code state) state)]
+    (let [s (if @global-top-level-push-code (push-item code :code state) state)]
       (let [s (push-item code :exec s)]
         (when print-steps
           (printf "\nState after 0 steps:\n")
@@ -122,6 +122,6 @@
         (when save-state-sequence
           (reset! saved-state-sequence [s]))
         (let [s (eval-push s print-steps trace save-state-sequence)]
-          (if top-level-pop-code
+          (if @global-top-level-pop-code
             (pop-item :code s)
             s))))))

@@ -4,6 +4,27 @@
   (:require [clojure.set :as set]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; tournament selection
+(defn tournament-selection
+  "Returns an individual that does the best out of a tournament."
+  [pop location {:keys [tournament-size trivial-geography-radius use-rmse
+                        use-historically-assessed-hardness]}]
+  (let [tournament-set 
+        (doall
+          (for [_ (range tournament-size)]
+            (nth pop
+                 (if (zero? trivial-geography-radius)
+                   (lrand-int (count pop))
+                   (mod (+ location (- (lrand-int (+ 1 (* trivial-geography-radius 2))) trivial-geography-radius))
+                        (count pop))))))
+        err-fn (cond
+                 use-historically-assessed-hardness :hah-error
+                 use-rmse :rms-error
+                 true :total-error)]
+    (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
+            tournament-set)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; lexicase selection
 
 (defn retain-one-individual-per-error-vector
@@ -13,17 +34,17 @@
   
 (defn lexicase-selection
   "Returns an individual that does the best on the fitness cases when considered one at a
-time in random order.  If radius is non-zero, selection is limited to parents within +/- r of location"
-  [pop radius location]
-  (let [lower (mod (- location radius) (count pop))
-     upper (mod (+ location radius) (count pop))
-     popvec (vec pop)
-     subpop (if (zero? radius) 
+   time in random order.  If trivial-geography-radius is non-zero, selection is limited to parents within +/- r of location"
+  [pop location {:keys [trivial-geography-radius]}]
+  (let [lower (mod (- location trivial-geography-radius) (count pop))
+        upper (mod (+ location trivial-geography-radius) (count pop))
+        popvec (vec pop)
+        subpop (if (zero? trivial-geography-radius) 
                  pop
-              (if (< lower upper)
-                (subvec popvec lower (inc upper))
-                (into (subvec popvec lower (count pop)) 
-                      (subvec popvec 0 (inc upper)))))]
+                 (if (< lower upper)
+                   (subvec popvec lower (inc upper))
+                   (into (subvec popvec lower (count pop)) 
+                         (subvec popvec 0 (inc upper)))))]
     (loop [survivors (retain-one-individual-per-error-vector subpop)
            cases (lshuffle (range (count (:errors (first subpop)))))]
       (if (or (empty? cases)
@@ -103,21 +124,9 @@ group B is discarded. "
 
 (defn select
   "Returns a selected parent."
-  [pop tournament-size radius location]
-  (cond @global-use-lexicase-selection (lexicase-selection pop radius location)
-        @global-use-elitegroup-lexicase-selection (elitegroup-lexicase-selection pop)
-        :else ;; use tournament selection by default
-        (let [tournament-set 
-              (doall
-                (for [_ (range tournament-size)]
-                  (nth pop
-                       (if (zero? radius)
-                         (lrand-int (count pop))
-                         (mod (+ location (- (lrand-int (+ 1 (* radius 2))) radius))
-                              (count pop))))))
-              err-fn (cond
-                       @global-use-historically-assessed-hardness :hah-error
-                       @global-use-rmse :rms-error
-                       true :total-error)]
-          (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
-                  tournament-set))))
+  [pop location {:keys [use-lexicase-selection use-elitegroup-lexicase-selection]
+                 :as argmap}]
+  (cond 
+    use-lexicase-selection (lexicase-selection pop location argmap)
+    use-elitegroup-lexicase-selection (elitegroup-lexicase-selection pop)
+    :else (tournament-selection pop location argmap))) ;; use tournament selection by default
