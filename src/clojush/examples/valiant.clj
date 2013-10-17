@@ -124,6 +124,7 @@
    :mutation-probability 0
    :crossover-probability 0
    :simplification-probability 0
+   :reproduction-probability 0
    :ultra-probability 1.0
    :ultra-alternation-rate 0.01
    :ultra-alignment-deviation 20

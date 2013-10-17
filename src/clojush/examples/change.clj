@@ -85,8 +85,10 @@
    :evalpush-limit 800
    :population-size 2000
    :max-generations 1000
+   :reproduction-probability 0
    :mutation-probability 0
    :crossover-probability 0
+   :simplification-probability 0
    :report-simplifications 0
    :final-report-simplifications 1000
    :use-lexicase-selection true

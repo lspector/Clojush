@@ -229,6 +229,7 @@
    :mutation-probability 0.3
    :crossover-probability 0.3
    :simplification-probability 0.3
+   :reproduction-probability 0.1
    :reproduction-simplifications 10
    :max-points 200
    :max-points-in-initial-program 200
