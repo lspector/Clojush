@@ -38,15 +38,16 @@
           ;;----------------------------------------
           ;; Genetic operator probabilities (replication-probability is 1.0 minus the rest)
           ;;----------------------------------------
-          :mutation-probability 0.4 ;; Subtree mutation, similar to that found in tree-GP
-          :crossover-probability 0.4 ;; Subtree crossover, similar to that found in tree-GP
-          :simplification-probability 0.1 ;; Auto-simplification of the program
-          :ultra-probability 0.0 ;; Uniform Linear Transformation with Repair and Alternation -- a uniform crossover and mutation operator
+          :reproduction-probability      0.1 ;; Direct reproduction, which makes a direct copy of the parent
+          :mutation-probability          0.4 ;; Subtree mutation, similar to that found in tree-GP
+          :crossover-probability         0.5 ;; Subtree crossover, similar to that found in tree-GP
+          :simplification-probability    0.0 ;; Auto-simplification of the program
+          :ultra-probability             0.0 ;; Uniform Linear Transformation with Repair and Alternation -- a uniform crossover and mutation operator
           :gaussian-mutation-probability 0.0 ;; Gaussian mutation affects only the float literals in a program by adding Gaussian noise
-          :boolean-gsxover-probability 0.0 ;; Geometric Semantic Crossover -- creates random code that determines which of the two parents to use for each test cases
+          :boolean-gsxover-probability   0.0 ;; Geometric Semantic Crossover -- creates random code that determines which of the two parents to use for each test cases
           :deletion-mutation-probability 0.0 ;; A mutation operator that deletes random instructions
           :parentheses-addition-mutation-probability 0.0 ;; Operator that randomly inserts a parentheses pair somewhere in the program
-          :tagging-mutation-probability 0.0 ;; Operator that chooses a piece of code, moves it to beginning of program and tags it, and puts a tagged call in its place
+          :tagging-mutation-probability  0.0 ;; Operator that chooses a piece of code, moves it to beginning of program and tags it, and puts a tagged call in its place
           :tag-branch-mutation-probability 0.0 ;; Operator that inserts a tag-branch into the program. tag-branches compare two items on a stack and then jump to one of two tags depending on the comparison
           ;;
           ;;----------------------------------------
@@ -126,15 +127,17 @@
     (assert (contains? @push-argmap argkey) (str "Argument key " argkey " is not a recognized argument to pushgp."))
     (swap! push-argmap assoc argkey argval)))
 
-(defn reset-globals []
+(defn reset-globals
+  []
   (doseq [[gname gatom] (filter (fn [[a _]] (.startsWith (name a) "global-")) (ns-publics 'clojush.globals))]
     (if (contains? @push-argmap (keyword (.substring (name gname) (count "global-"))))
       (reset! @gatom (get @push-argmap (keyword (.substring (str gname) (count "global-")))))
       (throw (Exception. (str "globals.clj definition " gname " has no matching argument in push-argmap. Only such definitions should use the prefix 'global-'."))))))
 
-(defn make-agents-and-rng [{:keys [initial-population use-single-thread population-size
-                                   max-points-in-initial-program atom-generators random-seed
-                                   save-initial-population]}]
+(defn make-agents-and-rng
+  [{:keys [initial-population use-single-thread population-size
+           max-points-in-initial-program atom-generators random-seed
+           save-initial-population]}]
   (let [agent-error-handler (fn [agnt except]
                               (.printStackTrace except System/out)
                               (.printStackTrace except)
@@ -169,8 +172,8 @@
                               (java.util.Random. (nth random-seeds k)))))
      }))
 
-(defn compute-errors [pop-agents rand-gens {:keys [use-single-thread error-function]
-                                            :as argmap}]
+(defn compute-errors
+  [pop-agents rand-gens {:keys [use-single-thread error-function] :as argmap}]
   (dorun (map #((if use-single-thread swap! send)
                     % evaluate-individual error-function %2 argmap)
               pop-agents
@@ -218,8 +221,7 @@
   (calculate-hah-solution-rates use-historically-assessed-hardness pop-agents error-threshold population-size))
 
 (defn report-and-check-for-success
-  [pop-agents generation {:keys [error-threshold max-generations]
-                          :as argmap}]
+  [pop-agents generation {:keys [error-threshold max-generations] :as argmap}]
   (let [best (report (vec (doall (map deref pop-agents))) generation argmap)]
     (cond (<= (:total-error best) error-threshold) best
           (>= generation max-generations) :failure
@@ -227,9 +229,8 @@
           
 (defn produce-new-offspring
   [pop-agents child-agents rand-gens
-   {:keys [decimation-ratio population-size decimation-tournament-size trivial-geography-radius
-           use-single-thread
-           ]}]
+   {:keys [decimation-ratio population-size decimation-tournament-size
+           trivial-geography-radius use-single-thread ]}]
   (let [pop (if (>= decimation-ratio 1)
               (vec (doall (map deref pop-agents)))
               (decimate (vec (doall (map deref pop-agents)))
@@ -243,12 +244,27 @@
            i (nth rand-gens i) pop @push-argmap)))
   (when-not use-single-thread (apply await child-agents))) ;; SYNCHRONIZE
 
-(defn install-next-generation [pop-agents child-agents {:keys [population-size use-single-thread]}]
+(defn install-next-generation
+  [pop-agents child-agents {:keys [population-size use-single-thread]}]
   (dotimes [i population-size]
     ((if use-single-thread swap! send)
          (nth pop-agents i) (fn [av] (deref (nth child-agents i)))))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
 
+(defn check-genetic-operator-probabilities-add-to-one
+  [argmap]
+  (let [prob-keywords (map keyword '(reproduction-probability mutation-probability crossover-probability simplification-probability
+                                                              ultra-probability gaussian-mutation-probability boolean-gsxover-probability
+                                                              deletion-mutation-probability parentheses-addition-mutation-probability
+                                                              tagging-mutation-probability tag-branch-mutation-probability))
+        prob-map (select-keys argmap prob-keywords)]
+    (assert (== 1.0
+                (apply + (vals prob-map)))
+            (str "Genetic operator probabilities do not sum to 1.0:\n"
+                 (clojure.string/replace (str prob-map \newline)
+                                         \,
+                                         \newline)))))
+  
 (defn timer
   "Used to track the time used by different parts of evolution."
   [{:keys [print-timings]} step]
@@ -269,6 +285,7 @@
       (reset-globals)
       (initial-report) ;; Print the inital report
       (print-params @push-argmap)
+      (check-genetic-operator-probabilities-add-to-one @push-argmap)
       (timer @push-argmap :initialization)
       (println "Generating initial population...")
       (let [{:keys [pop-agents child-agents rand-gens random-seeds]} (make-agents-and-rng @push-argmap)]
