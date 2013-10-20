@@ -132,6 +132,7 @@
      :max-points 400
      :max-points-in-initial-program 200
      :evalpush-limit 400
+     :reproduction-probability 0.05
      :mutation-probability 0.1
      :mutation-max-points 30
      :crossover-probability 0.8
