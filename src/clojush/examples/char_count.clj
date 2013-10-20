@@ -194,6 +194,7 @@
    :evalpush-limit 1000
    :population-size 500
    :max-generations 200
+   :reproduction-probability 0
    :mutation-probability 0
    :crossover-probability 0
    :report-simplifications 0
