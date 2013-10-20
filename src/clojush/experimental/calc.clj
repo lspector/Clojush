@@ -470,6 +470,7 @@ Still maintains the O(n*m) guarantee.
    :mutation-probability 0
    :crossover-probability 0
    :simplification-probability 0
+   :reproduction-probability 0
    :reproduction-simplifications 10
    :ultra-probability 1.0
    :ultra-alternation-rate 0.005

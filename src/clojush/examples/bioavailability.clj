@@ -149,6 +149,8 @@
    :mutation-probability 0.09
    :mutation-max-points 50
    :crossover-probability 0.81
+   :simplification-probability 0.0
+   :reproduction-probability 0.1
    :tournament-size 10
    :node-selection-method :unbiased
    :report-simplifications 0
