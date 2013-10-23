@@ -51,9 +51,9 @@
                                       use-historically-assessed-hardness]}]
     (binding [*thread-local-random-generator* rand-gen]
       (let [p (:program i)
-            e (if (and (not (nil? (:errors i))) reuse-errors)
-                (:errors i)
-                (error-function p))
+            e (vec (if (and (not (nil? (:errors i))) reuse-errors)
+                     (:errors i)
+                     (error-function p)))
             te (if (and (not (nil? (:total-error i))) reuse-errors)
                  (:total-error i)
                  (keep-number-reasonable (compute-total-error e)))
