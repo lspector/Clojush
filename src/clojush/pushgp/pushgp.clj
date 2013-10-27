@@ -156,8 +156,7 @@
                         (vec))
                    (let [pa (doall (for [_ (range population-size)]
                                      (make-individual
-                                       :program (random-code max-points-in-initial-program atom-generators)
-                                       :error-handler agent-error-handler)))
+                                       :program (random-code max-points-in-initial-program atom-generators))))
                          f (str "data/" (System/currentTimeMillis) ".ser")]
                      (when save-initial-population
                        (io/make-parents f)
