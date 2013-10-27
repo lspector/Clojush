@@ -86,79 +86,117 @@ Still maintains the O(n*m) guarantee.
 
 ; button-entrypoints
 
+(def digit-keys 
+  [:zero :one :two :three :four :five :six :seven :eight :nine])
+
+(def digit-key-map (into {} (map vector digit-keys (iterate inc 0))))
+
 (define-registered 
   signal_error 
   (fn [state] (push-item :error :auxiliary state)))
 
-(def digit-entry-tests
-  (let [keys [:zero :one :two :three :four :five :six :seven :eight :nine]]
-    (vec (for [k (range 10)] 
-           [[(nth keys k)] (float k) false]))))
+(defn digit-entry-tests [n]
+  (take n (lshuffle (for [k (range 10)] 
+                      [[(nth digit-keys k)] 
+                       (float k) 
+                       false]))))
 
-(def digit-entry-pair-tests
-  (let [keys [:zero :one :two :three :four :five :six :seven :eight :nine]]
-    (vec (for [k1 (range 10) k2 (range 10)] 
-           [[(nth keys k1) (nth keys k2)] (float (+ (* 10 k1) k2)) false]))))
+(defn digit-entry-pair-tests [n]
+  (take n (lshuffle (for [k1 (range 10) k2 (range 10)] 
+                      [[(nth digit-keys k1) (nth digit-keys k2)] 
+                       (float (+ (* 10 k1) k2)) 
+                       false]))))
 
-(def single-digit-math-tests
-  (vec (for [[arg1-key arg1-val] {:zero 0, :three 3, :seven 7}
-             [arg2-key arg2-val] {:two 2, :four 4, :nine 9}
-             [op-key op-fn] {:plus +, :minus -, :times *, :divided-by /}]
-         [[arg1-key op-key arg2-key :equals] (float (op-fn arg1-val arg2-val)) false])))
+(defn single-digit-math-tests [n]
+  (take n (lshuffle 
+            (for [[arg1-key arg1-val] digit-key-map
+                  [arg2-key arg2-val] digit-key-map
+                  [op-key op-fn] {:plus +, :minus -, :times *, :divided-by /}
+                  :when (not (and (= op-key :divided-by) (zero? arg2-val)))]
+              [[arg1-key op-key arg2-key :equals] 
+               (float (op-fn arg1-val arg2-val)) 
+               false]))))
 
-;single-digit-math-tests
+;(single-digit-math-tests 4)
 
-(def single-digit-incomplete-math-tests
-  (vec (apply concat
-              (for [[arg1-key arg1-val] {:zero 0, :three 3, :seven 7}
-                    [arg2-key arg2-val] {:two 2, :four 4, :nine 9}
+(defn single-digit-incomplete-math-tests [n]
+  (take n (lshuffle
+            (apply concat
+              (for [[arg1-key arg1-val] digit-key-map
+                    [arg2-key arg2-val] digit-key-map
                     [op-key op-fn] {:plus +, :minus -, :times *, :divided-by /}]
-                [[[arg1-key op-key arg2-key] (float arg2-val) false]
-                 [[arg1-key op-key] (float arg1-val) false]]))))
+                [[[arg1-key op-key arg2-key] ;; leave off the =
+                  (float arg2-val) 
+                  false]
+                 [[arg1-key op-key] ;; leave off the second arg and the =
+                  (float arg1-val) 
+                  false]])))))
   
-;single-digit-incomplete-math-tests
+;(single-digit-incomplete-math-tests 4)
     
-(def single-digit-chained-math-tests
-  (vec (for [[arg1-key arg1-val] {:zero 0, :three 3, :seven 7}
-             [arg2-key arg2-val] {:two 2, :four 4, :nine 9}
-             [op1-key op1-fn] {:plus +, :minus -, :times *, :divided-by /}
-             [arg3-key arg3-val] {:three 3, :five 5, :eight 8}
-             [op2-key op2-fn] {:plus +, :minus -, :times *, :divided-by /}]
-         [[arg1-key op1-key arg2-key op2-key arg3-key :equals] 
-          (float (op2-fn (op1-fn arg1-val arg2-val) arg3-val))
-          false])))
+(defn single-digit-chained-math-tests [n]
+  (take n (lshuffle
+            (for [[arg1-key arg1-val] digit-key-map
+                  [arg2-key arg2-val] digit-key-map
+                  [op1-key op1-fn] {:plus +, :minus -, :times *, :divided-by /}
+                  [arg3-key arg3-val] digit-key-map
+                  [op2-key op2-fn] {:plus +, :minus -, :times *, :divided-by /}
+                  :when (not (or (and (= op1-key :divided-by) (zero? arg2-val))
+                                 (and (= op2-key :divided-by) (zero? arg3-val))))]
+              (do #_(println arg1-key arg1-val arg2-key arg2-val op1-key 
+                       op1-fn arg3-key arg3-val op2-key op2-fn)
+              [[arg1-key op1-key arg2-key op2-key arg3-key :equals] 
+               (float (op2-fn (op1-fn arg1-val arg2-val) arg3-val))
+               false])))))
 
-;single-digit-chained-math-tests
+;(single-digit-chained-math-tests 4)
 
-(def division-by-zero-tests
-  (vec (for [[arg1-key arg1-val] {:zero 0, :three 3, :seven 7}
-             [arg2-key arg2-val] {:zero 0}]
-         [[arg1-key :divided-by arg2-key :equals] 0.0 true])))
+(defn division-by-zero-tests [n]
+  (take n (lshuffle 
+            (for [[arg1-key arg1-val] digit-key-map
+                  [arg2-key arg2-val] {:zero 0}]
+              [[arg1-key :divided-by arg2-key :equals] 
+               0.0 
+               true]))))
   
-;division-by-zero-tests
+;(division-by-zero-tests 4)
   
-(def double-digit-float-entry-tests
-  (vec (for [[arg1-key arg1-val] {:zero 0, :three 3, :seven 7}
-             [arg2-key arg2-val] {:two 2, :four 4, :nine 9}]
-         [[arg1-key :point arg2-key] (float (+ arg1-val (* 0.1 arg2-val))) false])))
+(defn double-digit-float-entry-tests [n]
+  (take n (lshuffle 
+            (for [[arg1-key arg1-val] digit-key-map
+                  [arg2-key arg2-val] digit-key-map]
+              [[arg1-key :point arg2-key] 
+               (float (+ arg1-val (* 0.1 arg2-val))) 
+               false]))))
 
-;(double-digit-float-entry-tests)
+;(double-digit-float-entry-tests 4)
 
-(def calc-tests
+(def calc-tests (atom []))
+
+(defn reset-calc-tests! []
   ;; [inputs answer error]
   ;; answer doesn't matter if error is true
   ;; if no error, answer must be correct on float stack and true cannot be top boolean
-  (concat
-    digit-entry-tests
-    digit-entry-pair-tests
-    single-digit-math-tests
-    ;single-digit-incomplete-math-tests
-    ;single-digit-chained-math-tests
-    ;division-by-zero-tests
-    ;double-digit-float-entry-tests
-    ))
+  (reset! calc-tests 
+          (vec (concat
+                 (digit-entry-tests 10)
+                 (digit-entry-pair-tests 10)
+                 (single-digit-math-tests 10)
+                 ;single-digit-incomplete-math-tests
+                 ;single-digit-chained-math-tests
+                 ;division-by-zero-tests
+                 ;double-digit-float-entry-tests
+                 ))))
 
-(println "Number of tests:" (count calc-tests))
+(defn calc-report-with-reset!
+  [best population generation error-function report-simplifications]
+  (println "Resetting cases.")
+  (reset-calc-tests!)
+  (println "New tests:" @calc-tests))
+  
+(reset-calc-tests!)
+(println "Number of tests:" (count @calc-tests))
+(println "Tests:" @calc-tests)
 
 (defn tag-before-entry-points
   [push-state]
@@ -196,7 +234,7 @@ Still maintains the O(n*m) guarantee.
                                    0.0 
                                    :float 
                                    (assoc (make-push-state) :tag (:tag first-run-result)))
-        test-errors (doall (for [t calc-tests]
+        test-errors (doall (for [t @calc-tests]
                              (loop [push-state initialized-push-state
                                     buttons (first t)]
                                (if (empty? buttons)
@@ -489,4 +527,5 @@ Still maintains the O(n*m) guarantee.
    :print-history false
    ;:use-bushy-code true
    :use-ultra-no-paren-mutation true
+   :problem-specific-report calc-report-with-reset!
   })
