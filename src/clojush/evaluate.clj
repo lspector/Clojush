@@ -56,7 +56,7 @@
                      (error-function p)))
             te (if (and (not (nil? (:total-error i))) reuse-errors)
                  (:total-error i)
-                 (keep-number-reasonable (compute-total-error e)))
+                 (compute-total-error e))
             he (if use-historically-assessed-hardness
                  (compute-hah-error e)
                  nil)

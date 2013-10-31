@@ -221,7 +221,7 @@
     (flatten (postwalklist #(if (seq? %) (list :open % :close) %) lst))
     lst))
 
-; (list-to-open-close-sequence '(1 2 (a b (c) ((d)) e)))
+;(list-to-open-close-sequence '(1 2 (a b (c) ((d)) e)))
 
 (defn open-close-sequence-to-list
   [sequence]
