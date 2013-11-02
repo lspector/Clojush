@@ -1,6 +1,7 @@
 (ns clojush.examples.tutorial
   (:use [clojush pushstate interpreter]
         [clojush.pushgp.pushgp]
+        [clojush.random]
         [clojure.math.numeric-tower]))
 
 (+ 1 2)
@@ -36,7 +37,7 @@
 ;                                        (* 2 input input)
 ;                                        input)))
 ;                             1000)))))
-;   :atom-generators (list (fn [] (rand-int 10))
+;   :atom-generators (list (fn [] (lrand-int 10))
 ;                          'in
 ;                          'integer_div
 ;                          'integer_mult
@@ -69,7 +70,7 @@
 ;                             (if (= top-bool (odd? input)) 0 1)
 ;                             1000)))))
 ;   :atom-generators (concat (registered-nonrandom)
-;                            (list (fn [] (rand-int 100))
+;                            (list (fn [] (lrand-int 100))
 ;                                  'in))
 ;   :mutation-probability 0
 ;   :crossover-probability 0

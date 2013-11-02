@@ -5,6 +5,7 @@
 (ns clojush.examples.simple-regression
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
+        [clojush.random]
         [clojush.interpreter]
         [clojure.math.numeric-tower]))
 
@@ -31,7 +32,7 @@
                                      (- (* input input input) 
                                         (* 2 input input) input)))
                              1000)))))
-   :atom-generators (list (fn [] (rand-int 10))
+   :atom-generators (list (fn [] (lrand-int 10))
                           'in
                           'integer_div
                           'integer_mult

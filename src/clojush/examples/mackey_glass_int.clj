@@ -14,6 +14,7 @@
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
+        [clojush.random]
         [local-file])
   (:require [clojure.math.numeric-tower :as math]
             [clojure.string :as s]))
@@ -76,7 +77,7 @@
 
 (def atom-generators
   (list 
-    (fn [] (rand-int 128))
+    (fn [] (lrand-int 128))
     'x1 'x2 'x4 'x8 'x16 'x32 'x64 'x128
     'integer_div
     'integer_mult

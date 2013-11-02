@@ -6,6 +6,7 @@
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
+        [clojush.random]
         [clojure.math.numeric-tower]
         [clojush.instructions.tag]))
 
@@ -43,7 +44,7 @@
    :atom-generators (concat 
                       '(integer_add integer_sub integer_mult integer_div)
                       (list 
-                        (fn [] (- (rand-int 21) 10))
+                        (fn [] (- (lrand-int 21) 10))
                         (tag-instruction-erc [:exec :integer] 1000) ;; added for tagged version
                         ;(untag-instruction-erc 1000) ;; added for tagged version
                         (tagged-instruction-erc 1000) ;; added for tagged version

@@ -5,6 +5,7 @@
 (ns clojush.examples.factorial
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
+        [clojush.random]
         [clojush.interpreter]
         [clojure.math.numeric-tower]))
 
@@ -40,7 +41,7 @@
    :atom-generators (concat (registered-for-type :integer)
                             (registered-for-type :exec)
                             (registered-for-type :boolean)
-                            (list (fn [] (rand-int 100))
+                            (list (fn [] (lrand-int 100))
                                   'in))
    :max-points 100
    :max-points-in-initial-program 100

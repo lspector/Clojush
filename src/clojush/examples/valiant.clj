@@ -1,6 +1,7 @@
 (ns clojush.examples.valiant
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
+        [clojush.random]
         [clojush.interpreter]
         [clojure.math.numeric-tower]))
 
@@ -13,7 +14,7 @@
 
 (def cases 
   (vec (repeatedly numcases
-                   (fn [] (let [vars (vec (repeatedly numvars #(< (rand) 0.5)))]
+                   (fn [] (let [vars (vec (repeatedly numvars #(< (lrand) 0.5)))]
                             [vars (even? (count (filter #(= % true) 
                                                         (map #(nth vars %)
                                                              input-indices))))])))))

@@ -6,6 +6,7 @@
         [clojure.data.json :only (json-str)])
   (:require [clojure.string :as string]
             [config :as config]
+            [clj-random.core :as random]
             [local-file]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -32,7 +33,9 @@
 
 (defn print-params [push-argmap]
   (doseq [[param val] push-argmap]
-    (println (name param) "=" val)))
+    (if (= param :random-seed)
+      (println (name param) "=" (random/seed-to-string val))
+      (println (name param) "=" val))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; log printing (csv and json)

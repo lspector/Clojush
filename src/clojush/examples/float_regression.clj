@@ -7,6 +7,7 @@
 
 (ns clojush.examples.float-regression
   (:use [clojush.pushgp.pushgp]
+        [clojush.random]
         [clojush.pushstate]
         [clojush.interpreter]))
 
@@ -38,7 +39,7 @@
                            (if (number? top-float)
                              (Math/abs (- top-float target))
                              1000)))))
-   :atom-generators (list (fn [] (rand 10))
+   :atom-generators (list (fn [] (lrand 10))
                           'in
                           'float_div
                           'float_mult
