@@ -1,6 +1,7 @@
 (ns clojush.examples.scaled-sextic
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
+        [clojush.random]
         [clojush.interpreter]
         [clojush.experimental.scaled-errors]
         [clojure.math.numeric-tower]))
@@ -44,7 +45,7 @@
                       '(float_div float_mult float_sub float_add
                                   float_rot float_swap float_dup float_pop)
                       (list 
-                        (fn [] (- (rand 20.0) 10))
+                        (fn [] (- (lrand 20.0) 10))
                         'in))
    :population-size 10000
    })

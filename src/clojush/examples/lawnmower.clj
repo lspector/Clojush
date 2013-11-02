@@ -7,6 +7,7 @@
         [clojush.pushstate]
         [clojush.interpreter]
         [clojush.globals]
+        [cloush.random]
         [clojush.instructions.common]
         [clojush.instructions.tag]))
 
@@ -210,7 +211,7 @@
 ;; standard 8x8 lawnmower problem
 #_(def argmap
   {:error-function (lawnmower-fitness 8 8 100)
-   :atom-generators (list 'left 'mow 'v8a 'frog (fn [] [(rand-int 8) (rand-int 8)]))
+   :atom-generators (list 'left 'mow 'v8a 'frog (fn [] [(lrand-int 8) (lrand-int 8)]))
    :mutation-probability 0.3
    :crossover-probability 0.3
    :simplification-probability 0.3
@@ -223,7 +224,7 @@
 ;; standard 8x8 lawnmower problem but with tags
 (def argmap
   {:error-function (lawnmower-fitness 8 8 100)
-   :atom-generators (list 'left 'mow 'v8a 'frog (fn [] [(rand-int 8) (rand-int 8)])
+   :atom-generators (list 'left 'mow 'v8a 'frog (fn [] [(lrand-int 8) (lrand-int 8)])
                           (tag-instruction-erc [:exec] 1000)
                           (tagged-instruction-erc 1000))
    :mutation-probability 0.3

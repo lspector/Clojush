@@ -3,7 +3,8 @@
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
 (ns clojush.examples.odd
-  (:use clojush.pushgp.pushgp
+  (:use [clojush.pushgp.pushgp]
+        [clojush.random]
         [clojush pushstate interpreter]))
 
 ;;;;;;;;;;;;
@@ -29,6 +30,6 @@
                              (if (= top-bool (odd? input)) 0 1)
                              1000)))))
    :atom-generators (concat (registered-nonrandom)
-                            (list (fn [] (rand-int 100))
+                            (list (fn [] (lrand-int 100))
                                   'in))
    })

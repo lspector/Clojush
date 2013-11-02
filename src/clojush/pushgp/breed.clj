@@ -3,7 +3,8 @@
         [clojush.random]
         [clojush.pushgp.parent-selection]
         [clojush.pushgp.genetic-operators]
-        [clojush.simplification]))
+        [clojush.simplification])
+  (:require [clj-random.core :as random]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; genetic operators
@@ -24,7 +25,7 @@
            error-function reproduction-simplifications maintain-ancestors
            ]
     :as argmap}]
-  (binding [*thread-local-random-generator* rand-gen]
+  (random/with-rng rand-gen
     (let [n (lrand)]
       (cond 
         ;; mutation
