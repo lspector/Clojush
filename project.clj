@@ -8,7 +8,7 @@
                            [local-file "0.1.0"]
                            [clojure-csv "2.0.0-alpha2"]
                            [org.clojure/data.json "0.1.3"]
-                           [clj-random "0.1.4"]
+                           [clj-random "0.1.5"]
                            ;[incanter/incanter-core "1.5.2"]
                            ]
             :dev-dependencies [[lein-ccw "1.2.0"]]

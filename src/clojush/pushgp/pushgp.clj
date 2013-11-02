@@ -143,7 +143,17 @@
                               (.printStackTrace except System/out)
                               (.printStackTrace except)
                               (System/exit 0))
-        random-seeds (repeatedly population-size #(random/lrand-bytes (:mersennetwister random/*seed-length*)))]
+        ;random-seeds (repeatedly population-size #(random/lrand-bytes (:mersennetwister random/*seed-length*)))];; doesn't ensure unique seeds
+        random-seeds (loop [seeds '()]
+                       (let [num-remaining (if initial-population
+                                             (- (count initial-population) (count seeds))
+                                             (- population-size (count seeds)))]
+                         (if (pos? num-remaining)
+                           (let [new-seeds (repeatedly num-remaining #(random/lrand-bytes (:mersennetwister random/*seed-length*)))]                             
+                             (recur (concat seeds (filter (fn [candidate]
+                                                            (not (some #(random/=byte-array % candidate)
+                                                                       seeds))) new-seeds)))); only add seeds that we do not already have
+                           seeds)))]
     {:pop-agents (if initial-population
                    (->> (read-string (slurp (str "data/" initial-population)))
                         (map #(if use-single-thread (atom %) (agent %)))
