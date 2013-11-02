@@ -8,6 +8,7 @@
 (ns clojush.examples.pagie-hogeweg
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
+        [clojush.random]
         [clojush.interpreter])
   (:require [clojure.math.numeric-tower :as math]))
 
@@ -59,7 +60,7 @@
 
 (def atom-generators
   (list 
-    (fn [] (- (rand 2) 1))
+    (fn [] (- (lrand 2) 1))
     'x 'y
     'float_div
     'float_mult

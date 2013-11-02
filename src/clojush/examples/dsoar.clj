@@ -11,6 +11,7 @@
 (ns clojush.examples.dsoar
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
+        [clojush.random]
         [clojush.interpreter]
         [clojure.math.numeric-tower]
         [clojush.instructions.common]
@@ -259,7 +260,7 @@
 #_(def argmap
   {:error-function (mopper-fitness 8 8 100)
    :atom-generators (list 'if-dirty 'if-obstacle 'left 'mop 'v8a 'frog
-                          (fn [] [(rand-int 8) (rand-int 8)]))
+                          (fn [] [(lrand-int 8) (lrand-int 8)]))
    :mutation-probability 0.3
    :crossover-probability 0.3
    :simplification-probability 0.3
@@ -273,7 +274,7 @@
 (def argmap
   {:error-function (mopper-fitness 8 8 100)
    :atom-generators (list 'if-dirty 'if-obstacle 'left 'mop 'v8a 'frog
-                          (fn [] [(rand-int 8) (rand-int 8)])
+                          (fn [] [(lrand-int 8) (lrand-int 8)])
                           (tag-instruction-erc [:exec] 1000)
                           (tagged-instruction-erc 1000))
    :mutation-probability 0.3
@@ -285,3 +286,5 @@
    :max-points-in-initial-program 200
    :evalpush-limit 1000
    })
+
+

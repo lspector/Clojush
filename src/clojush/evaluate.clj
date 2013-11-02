@@ -4,7 +4,8 @@
         [clojush.random]
         [clojush.globals]
         [clojush.individual])
-  (:require [clojure.math.numeric-tower :as math]))
+  (:require [clojure.math.numeric-tower :as math]
+            [clj-random.core :as random]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; evaluate individuals
@@ -49,7 +50,7 @@
                           :use-historically-assessed-hardness false}))
   ([i error-function rand-gen {:keys [reuse-errors print-history use-rmse
                                       use-historically-assessed-hardness]}]
-    (binding [*thread-local-random-generator* rand-gen]
+    (random/with-rng rand-gen
       (let [p (:program i)
             e (vec (if (and (not (nil? (:errors i))) reuse-errors)
                      (:errors i)

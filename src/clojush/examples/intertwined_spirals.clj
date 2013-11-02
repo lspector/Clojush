@@ -11,6 +11,7 @@
 
 (ns clojush.examples.intertwined-spirals
   (:use [clojush.pushgp.pushgp]
+        [clojush.random]
         [clojush.pushstate]
         [clojush.interpreter]
         [clojush.instructions.tag]))
@@ -84,19 +85,19 @@
         (list x y spiral predicted-spiral (if (= spiral predicted-spiral) 1 0))))))
 
 (def spiral-instructions 
-  {:basic (list (fn [] (rand))
+  {:basic (list (fn [] (lrand))
                 'x 'y
                 'float_add 'float_sub 'float_mult 'float_div
                 'float_sin 'float_cos
                 'iflte),
-   :exec  (list (fn [] (rand))
+   :exec  (list (fn [] (lrand))
                 'x 'y
                 'float_add 'float_sub 'float_mult 'float_div
                 'float_sin 'float_cos
                 'iflte 
                 'exec_y 'exec_s 'exec_k 'exec_rot
                 'exec_swap 'exec_dup 'exec_pop 'exec_eq),
-   :tag (list (fn [] (rand))
+   :tag (list (fn [] (lrand))
               'x 'y
               'float_add 'float_sub 'float_mult 'float_div
               'float_sin 'float_cos

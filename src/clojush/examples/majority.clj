@@ -5,6 +5,7 @@
 (ns clojush.examples.majority
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
+        [clojush.random]
         [clojush.interpreter]
         [clojure.math.numeric-tower]))
 
@@ -30,8 +31,8 @@ depth and number of nodes."
 (defn make-majority-instructions
   "Make the majority instructions for a given problem size."
   [problem-size]
-  (list (fn [] (inc (rand-int problem-size)))
-        (fn [] (- (inc (rand-int problem-size))))))
+  (list (fn [] (inc (lrand-int problem-size)))
+        (fn [] (- (inc (lrand-int problem-size))))))
 
 (defn majority-pushgp
   "Run Order with pushgp."

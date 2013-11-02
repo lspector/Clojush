@@ -90,9 +90,9 @@
                                'integer_dup
                                'integer_swap
                                'integer_stackdepth
-                               (fn [] (rand-int 10))
+                               (fn [] (lrand-int 10))
                                (fn [] (apply str (repeatedly (+ 1 (lrand-int 9))
-                                                             #(rand-nth (str "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                                             #(lrand-nth (str "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                                                              "abcdefghijklmnopqrstuvwxyz"
                                                                              "0123456789"))))))
         :population-size 500
