@@ -5,6 +5,7 @@
 (ns clojush.examples.gaussian-mutation-demo
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
+        [clojush.random]
         [clojush.interpreter]
         [clojure.math.numeric-tower]))
 
@@ -40,7 +41,7 @@
                       '(float_div float_mult float_sub float_add
                                   float_rot float_swap float_dup float_pop)
                       (list 
-                        (fn [] (* 1.0 (- (rand-int 21) 10)))
+                        (fn [] (* 1.0 (- (lrand-int 21) 10)))
                         'in))
    :mutation-probability 0.2
    :crossover-probability 0.2

@@ -5,6 +5,7 @@
 (ns clojush.examples.tg8
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
+        [clojush.random]
         [clojush.interpreter]
         [clojure.math.numeric-tower]))
 
@@ -42,7 +43,7 @@
    :atom-generators (concat 
                       '(integer_add integer_sub integer_mult integer_div)
                       (list 
-                        (fn [] (- (rand-int 21) 10))
+                        (fn [] (- (lrand-int 21) 10))
                         'in))
    :mutation-probability 0.3
    :crossover-probability 0.3

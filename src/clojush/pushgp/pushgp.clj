@@ -1,5 +1,6 @@
 (ns clojush.pushgp.pushgp
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [clj-random.core :as random])
   (:use [clojush globals util pushstate random individual evaluate]
         [clojush.instructions boolean code common numbers random-instructions string tag zip return]
         [clojush.pushgp breed parent-selection report]
@@ -14,7 +15,7 @@
           ;; Clojush system arguments
           ;;----------------------------------------
           :use-single-thread false ;; When true, Clojush will only use a single thread
-          :random-seed (System/nanoTime) ;; The seed for the random number generator
+          :random-seed (random/generate-mersennetwister-seed) ;; The seed for the random number generator
           :initial-population nil ;; (MAY BE BROKEN) Can point to a file where an initial population is stored and can be read
           :save-initial-population false ;; When true, saves the initial population
           ;;
@@ -142,13 +143,16 @@
                               (.printStackTrace except System/out)
                               (.printStackTrace except)
                               (System/exit 0))
+        ;random-seeds (repeatedly population-size #(random/lrand-bytes (:mersennetwister random/*seed-length*)))];; doesn't ensure unique seeds
         random-seeds (loop [seeds '()]
                        (let [num-remaining (if initial-population
                                              (- (count initial-population) (count seeds))
                                              (- population-size (count seeds)))]
                          (if (pos? num-remaining)
-                           (recur (distinct (concat seeds (repeatedly num-remaining
-                                                                      #(lrand-int Integer/MAX_VALUE)))))
+                           (let [new-seeds (repeatedly num-remaining #(random/lrand-bytes (:mersennetwister random/*seed-length*)))]                             
+                             (recur (concat seeds (filter (fn [candidate]
+                                                            (not (some #(random/=byte-array % candidate)
+                                                                       seeds))) new-seeds)))); only add seeds that we do not already have
                            seeds)))]
     {:pop-agents (if initial-population
                    (->> (read-string (slurp (str "data/" initial-population)))
@@ -168,7 +172,7 @@
                                       :error-handler agent-error-handler))))
      :random-seeds random-seeds
      :rand-gens (vec (doall (for [k (range population-size)]                      
-                              (java.util.Random. (nth random-seeds k)))))
+                              (random/make-mersennetwister-rng (nth random-seeds k)))))
      }))
 
 (defn compute-errors
@@ -279,7 +283,7 @@
   ([args]
     (reset! timer-atom (System/currentTimeMillis))
     (load-push-argmap args)
-    (binding [*thread-local-random-generator* (java.util.Random. (:random-seed @push-argmap))]
+    (random/with-rng (random/make-mersennetwister-rng (:random-seed @push-argmap))
       ;; set globals from parameters
       (reset-globals)
       (initial-report) ;; Print the inital report

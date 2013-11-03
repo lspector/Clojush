@@ -6,6 +6,7 @@
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
+        [cloush.random]
         [clojure.math.numeric-tower]))
 
 (defn generate-data 
@@ -17,7 +18,7 @@
   (doall
     (repeatedly rows
                 (fn []
-                  (let [inputs (repeatedly 5 #(- (* (rand) 100) 50))]
+                  (let [inputs (repeatedly 5 #(- (* (lrand) 100) 50))]
                     (println (concat inputs 
                                      (list (- 2.0 
                                               (* 2.1 
@@ -262,8 +263,8 @@
                              (expt (- top-float (nth row 5)) 2)
                              1000)))))
    :atom-generators (list 
-                      ;(fn [] (- (* (rand) 100) 50))
-                      (fn [] (- (rand) 0.5))
+                      ;(fn [] (- (* (lrand) 100) 50))
+                      (fn [] (- (lrand) 0.5))
                       'x0
                       ;'x1
                       ;'x2
