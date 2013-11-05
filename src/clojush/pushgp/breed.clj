@@ -26,69 +26,59 @@
            ]
     :as argmap}]
   (random/with-rng rand-gen
-    (let [n (lrand)]
-      (cond 
-        ;; mutation
-        (< n mutation-probability)
-        (let [parent (select population location argmap)]
-          (assoc (mutate parent argmap) :parent parent))
-        ;; crossover
-        (< n (+ mutation-probability crossover-probability))
-        (let [first-parent (select population location argmap)
-              second-parent (select population location argmap)]
-          (assoc (crossover first-parent second-parent argmap) :parent first-parent))
-        ;; simplification
-        (< n (+ mutation-probability crossover-probability simplification-probability))
-        (let [parent (select population location argmap)]
-          (assoc (auto-simplify parent error-function reproduction-simplifications false 1000 maintain-ancestors)
-                 :parent parent))
-        ;; gaussian mutation
-        (< n (+ mutation-probability crossover-probability simplification-probability 
-                gaussian-mutation-probability))
-        (let [parent (select population location argmap)]
-          (assoc (gaussian-mutate parent argmap) :parent parent))
-        ;; boolean gsxover
-        (< n (+ mutation-probability crossover-probability simplification-probability 
-                gaussian-mutation-probability boolean-gsxover-probability))
-        (let [first-parent (select population location argmap)
-              second-parent (select population location argmap)]
-          (assoc (boolean-gsxover first-parent second-parent argmap) :parent first-parent))
-        ;; deletion mutation
-        (< n (+ mutation-probability crossover-probability simplification-probability 
-                gaussian-mutation-probability boolean-gsxover-probability deletion-mutation-probability))
-        (let [parent (select population location argmap)]
-          (assoc (delete-mutate parent argmap) :parent parent))
-        ;; parentheses addition mutation
-        (< n (+ mutation-probability crossover-probability simplification-probability 
-                gaussian-mutation-probability boolean-gsxover-probability 
-                deletion-mutation-probability parentheses-addition-mutation-probability))
-        (let [parent (select population location argmap)]
-          (assoc (add-parentheses-mutate parent argmap) :parent parent))
-        ;; tagging mutation
-        (< n (+ mutation-probability crossover-probability simplification-probability 
-                gaussian-mutation-probability boolean-gsxover-probability 
-                deletion-mutation-probability parentheses-addition-mutation-probability
-                tagging-mutation-probability))
-        (let [parent (select population location argmap)]
-          (assoc (tagging-mutate parent @global-tag-limit argmap) :parent parent))
-        ;; tag branch mutation
-        (< n (+ mutation-probability crossover-probability simplification-probability 
-                gaussian-mutation-probability boolean-gsxover-probability 
-                deletion-mutation-probability parentheses-addition-mutation-probability
-                tagging-mutation-probability tag-branch-mutation-probability))        
-        (let [parent (select population location argmap)]
-          (assoc (tag-branch-insertion-mutate parent @global-tag-limit argmap) 
-                 :parent parent))
-        ;; ultra
-        (< n (+ mutation-probability crossover-probability simplification-probability 
-                gaussian-mutation-probability boolean-gsxover-probability 
-                deletion-mutation-probability parentheses-addition-mutation-probability
-                tagging-mutation-probability tag-branch-mutation-probability
-                ultra-probability))   
-        (let [first-parent (select population location argmap)
-              second-parent (select population location argmap)]
-          (assoc (ultra first-parent second-parent argmap) :parent first-parent))
-        ;; replication
-        true 
-        (let [parent (select population location argmap)]
-          (assoc parent :parent parent))))))
+    (let [n (lrand)
+          parent (select population location argmap)]
+      (assoc
+        (cond
+          ;; mutation
+          (< n mutation-probability)
+          (mutate parent argmap)
+          ;; crossover
+          (< n (+ mutation-probability crossover-probability))
+          (let [second-parent (select population location argmap)]
+            (crossover parent second-parent argmap))
+          ;; simplification
+          (< n (+ mutation-probability crossover-probability simplification-probability))
+          (auto-simplify parent error-function reproduction-simplifications false 1000 maintain-ancestors)
+          ;; gaussian mutation
+          (< n (+ mutation-probability crossover-probability simplification-probability 
+                  gaussian-mutation-probability))
+          (gaussian-mutate parent argmap)
+          ;; boolean gsxover
+          (< n (+ mutation-probability crossover-probability simplification-probability 
+                  gaussian-mutation-probability boolean-gsxover-probability))
+          (let [second-parent (select population location argmap)]
+            (boolean-gsxover parent second-parent argmap))
+          ;; deletion mutation
+          (< n (+ mutation-probability crossover-probability simplification-probability 
+                  gaussian-mutation-probability boolean-gsxover-probability deletion-mutation-probability))
+          (delete-mutate parent argmap)
+          ;; parentheses addition mutation
+          (< n (+ mutation-probability crossover-probability simplification-probability 
+                  gaussian-mutation-probability boolean-gsxover-probability
+                  deletion-mutation-probability parentheses-addition-mutation-probability))
+          (add-parentheses-mutate parent argmap)
+          ;; tagging mutation
+          (< n (+ mutation-probability crossover-probability simplification-probability 
+                  gaussian-mutation-probability boolean-gsxover-probability
+                  deletion-mutation-probability parentheses-addition-mutation-probability
+                  tagging-mutation-probability))
+          (tagging-mutate parent @global-tag-limit argmap)
+          ;; tag branch mutation
+          (< n (+ mutation-probability crossover-probability simplification-probability 
+                  gaussian-mutation-probability boolean-gsxover-probability
+                  deletion-mutation-probability parentheses-addition-mutation-probability
+                  tagging-mutation-probability tag-branch-mutation-probability))        
+          (tag-branch-insertion-mutate parent @global-tag-limit argmap)
+          ;; ultra
+          (< n (+ mutation-probability crossover-probability simplification-probability 
+                  gaussian-mutation-probability boolean-gsxover-probability
+                  deletion-mutation-probability parentheses-addition-mutation-probability
+                  tagging-mutation-probability tag-branch-mutation-probability
+                  ultra-probability))
+          (let [second-parent (select population location argmap)]
+            (ultra parent second-parent argmap))
+          ;; replication
+          true
+          parent)
+        :parent parent))))
