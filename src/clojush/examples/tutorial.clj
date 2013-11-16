@@ -1,17 +1,29 @@
-(ns clojush.examples.tutorial
-  (:use [clojush pushstate interpreter]
-        [clojush.pushgp.pushgp]
-        [clojush.random]
-        [clojure.math.numeric-tower]))
+;; Clojush tutorial code
 
-(+ 1 2)
+;; Evaluate this file and then uncomment and evaluate one form at a time.
+
+;; Declare a namespace for this file, with access to the clojush.ns namespace
+(ns clojush.examples.tutorial
+  (:use [clojush.ns]))
+
+;; Get access to all clojush namespaces (except for examples/* and experimental/*)
+
+(use-clojush)
+
+;; Adding numbers in clojure:
+
+;(+ 1 2)
+
+;; Adding numbers in push:
 
 ;(run-push '(1 2 integer_add) 
 ;          (make-push-state))
 
-;(run-push '(1 2 integer_add) 
-;          (make-push-state)
-;          true)
+;; Providing true as a third argument produces a trace of all stacks as it runs:
+
+(run-push '(1 2 integer_add) 
+          (make-push-state)
+          true)
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of x^3 - 2x^2 - x (problem 5 from the 
@@ -55,7 +67,7 @@
 ;(define-registered 
 ;  in 
 ;  (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
-
+;
 ;(def argmap
 ;  {:use-single-thread true
 ;   :error-function (fn [program]
@@ -81,5 +93,5 @@
 ;   :ultra-alignment-deviation 5
 ;   :ultra-mutation-rate 0.05
 ;   })
-
+;
 ;(pushgp argmap)
