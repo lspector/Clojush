@@ -21,9 +21,9 @@
 
 ;; Providing true as a third argument produces a trace of all stacks as it runs:
 
-(run-push '(1 2 integer_add) 
-          (make-push-state)
-          true)
+;(run-push '(1 2 integer_add) 
+;          (make-push-state)
+;          true)
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of x^3 - 2x^2 - x (problem 5 from the 
@@ -67,7 +67,7 @@
 ;(define-registered 
 ;  in 
 ;  (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
-;
+
 ;(def argmap
 ;  {:use-single-thread true
 ;   :error-function (fn [program]
@@ -93,5 +93,5 @@
 ;   :ultra-alignment-deviation 5
 ;   :ultra-mutation-rate 0.05
 ;   })
-;
+
 ;(pushgp argmap)
