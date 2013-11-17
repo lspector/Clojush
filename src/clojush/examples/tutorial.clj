@@ -3,8 +3,12 @@
 ;; Evaluate this file and then uncomment and evaluate one form at a time.
 
 ;; Declare a namespace for this file, with access to the clojush.ns namespace
+;; (which will allow us to easily use all of clojush) and clojure.math.numeric-tower
+;; (which provides access to an "abs" function that we use in an example below.
+
 (ns clojush.examples.tutorial
-  (:use [clojush.ns]))
+  (:use [clojush.ns]
+        [clojure.math.numeric-tower]))
 
 ;; Get access to all clojush namespaces (except for examples/* and experimental/*)
 
@@ -33,7 +37,7 @@
 ;(define-registered 
 ;  in 
 ;  (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
-
+;
 ;(def argmap
 ;  {:error-function (fn [program]
 ;                     (doall
