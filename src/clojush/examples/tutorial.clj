@@ -1,13 +1,29 @@
+;; Clojush tutorial code
+
+;; Evaluate this file and then uncomment and evaluate one form at a time.
+
+;; Declare a namespace for this file, with access to the clojush.ns namespace
+;; (which will allow us to easily use all of clojush) and clojure.math.numeric-tower
+;; (which provides access to an "abs" function that we use in an example below.
+
 (ns clojush.examples.tutorial
-  (:use [clojush pushstate interpreter]
-        [clojush.pushgp.pushgp]
-        [clojush.random]
+  (:use [clojush.ns]
         [clojure.math.numeric-tower]))
 
-(+ 1 2)
+;; Get access to all clojush namespaces (except for examples/* and experimental/*)
+
+(use-clojush)
+
+;; Adding numbers in clojure:
+
+;(+ 1 2)
+
+;; Adding numbers in push:
 
 ;(run-push '(1 2 integer_add) 
 ;          (make-push-state))
+
+;; Providing true as a third argument produces a trace of all stacks as it runs:
 
 ;(run-push '(1 2 integer_add) 
 ;          (make-push-state)
@@ -21,7 +37,7 @@
 ;(define-registered 
 ;  in 
 ;  (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
-
+;
 ;(def argmap
 ;  {:error-function (fn [program]
 ;                     (doall

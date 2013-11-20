@@ -170,20 +170,49 @@
 
 (def calc-tests (atom []))
 
+#_(defn reset-calc-tests! []
+   ;; [inputs answer error]
+   ;; answer doesn't matter if error is true
+   ;; if no error, answer must be correct on float stack and true cannot be top boolean
+   (reset! calc-tests 
+           (vec (concat
+                  (digit-entry-tests 10)
+                  (digit-entry-pair-tests 10)
+                  (single-digit-math-tests 10)
+                  ;single-digit-incomplete-math-tests
+                  ;single-digit-chained-math-tests
+                  ;division-by-zero-tests
+                  ;double-digit-float-entry-tests
+                  ))))
+
+(defn init-calc-tests! []
+   ;; [inputs answer error]
+   ;; answer doesn't matter if error is true
+   ;; if no error, answer must be correct on float stack and true cannot be top boolean
+   (reset! calc-tests 
+           (vec (concat
+                  (digit-entry-tests 10)
+                  (digit-entry-pair-tests 10)
+                  (single-digit-math-tests 10)
+                  ;single-digit-incomplete-math-tests
+                  ;single-digit-chained-math-tests
+                  ;division-by-zero-tests
+                  ;double-digit-float-entry-tests
+                  ))))
+
 (defn reset-calc-tests! []
   ;; [inputs answer error]
   ;; answer doesn't matter if error is true
   ;; if no error, answer must be correct on float stack and true cannot be top boolean
-  (reset! calc-tests 
-          (vec (concat
-                 (digit-entry-tests 10)
-                 (digit-entry-pair-tests 10)
-                 (single-digit-math-tests 10)
-                 ;single-digit-incomplete-math-tests
-                 ;single-digit-chained-math-tests
-                 ;division-by-zero-tests
-                 ;double-digit-float-entry-tests
-                 ))))
+  (swap! calc-tests
+         (fn [old-tests]
+           (apply concat
+                  (map (fn [test-list generator]
+                         (concat (rest test-list) (generator 1)))
+                       (partition 10 old-tests)
+                       [digit-entry-tests
+                        digit-entry-pair-tests
+                        single-digit-math-tests])))))
 
 (defn calc-report-with-reset!
   [best population generation error-function report-simplifications]
@@ -191,7 +220,7 @@
   (reset-calc-tests!)
   (println "New tests:" @calc-tests))
   
-(reset-calc-tests!)
+(init-calc-tests!)
 (println "Number of tests:" (count @calc-tests))
 (println "Tests:" @calc-tests)
 
@@ -509,7 +538,7 @@
    :reproduction-simplifications 10
    :ultra-probability 1.0
    :ultra-alternation-rate 0.005
-   :ultra-alignment-deviation 5
+   :ultra-alignment-deviation 50
    :ultra-mutation-rate 0.005
    :deletion-mutation-probability 0
    :parentheses-addition-mutation-probability 0

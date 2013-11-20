@@ -5,14 +5,8 @@
 (ns clojush.examples.factorial
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
-        [clojush.random]
         [clojush.interpreter]
         [clojure.math.numeric-tower]))
-
-;;;;;;;;;;;;
-;; Integer symbolic regression of factorial, using an input instruction and 
-;; lots of other instructions, a fairly large population (5000), and trivial
-;; geography. Hard but solvable.
 
 (define-registered 
   in 
@@ -29,7 +23,7 @@
 (def argmap
   {:error-function (fn [program]
                      (doall
-                       (for [input (range 1 6)]
+                       (for [input (range 1 11)]
                          (let [state (run-push program
                                                (push-item input :auxiliary
                                                           (push-item input :integer
@@ -38,13 +32,52 @@
                            (if (number? top-int)
                              (abs (- top-int (factorial input)))
                              1000000000))))) ;; big penalty, since errors can be big
-   :atom-generators (concat (registered-for-type :integer)
-                            (registered-for-type :exec)
-                            (registered-for-type :boolean)
-                            (list (fn [] (lrand-int 100))
-                                  'in))
-   :max-points 100
+   :atom-generators '(0
+                       1
+                       in
+                       boolean_and
+                       boolean_dup
+                       boolean_eq
+                       boolean_frominteger
+                       boolean_not
+                       boolean_or
+                       boolean_pop
+                       boolean_rot
+                       boolean_swap
+                       exec_dup
+                       exec_eq
+                       exec_if
+                       exec_k
+                       exec_noop
+                       exec_pop
+                       exec_rot
+                       exec_s
+                       exec_swap
+                       exec_when
+                       exec_y
+                       integer_add
+                       integer_div
+                       integer_dup
+                       integer_eq
+                       integer_fromboolean
+                       integer_gt
+                       integer_lt
+                       integer_mod
+                       integer_mult
+                       integer_pop
+                       integer_rot
+                       integer_sub
+                       integer_swap
+                       )
+   :population-size 1000
+   :max-generations 500
+   :max-points 500
    :max-points-in-initial-program 100
-   :population-size 5000
-   :trivial-geography-radius 10
+   :evalpush-limit 1000
+   :use-lexicase-selection true
+   :mutation-probability 0.45
+   :crossover-probability 0.45
+   :simplification-probability 0
+   :ultra-probability 0
+   :print-history false
    })
