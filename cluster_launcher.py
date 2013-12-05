@@ -42,7 +42,7 @@ os.mkdir(clojush_directory + output_directory)
 description_file_string = output_directory + "description.txt"
 description_f = open(description_file_string, "w")
 
-description_f.writelines(title_string + "\n\n" + description)
+description_f.writelines("COMMAND:\n" + command + "\n\nTRACTOR TITLE:\n" + title_string + "\n\nDESCRIPTION:\n" + description)
 description_f.close()
 
 # Make alf file

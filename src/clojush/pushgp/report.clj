@@ -131,7 +131,10 @@
   (printf "\n\n") 
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
   (println ";; -*- Report at generation" generation)
-  (let [sorted (sort-by :total-error < population)
+  (let [err-fn (cond
+                 use-rmse :rms-error
+                 true :total-error)
+        sorted (sort-by err-fn < population)
         best (first sorted)]
     (println "Best program:" (not-lazy (:program best)))
     (when (> report-simplifications 0)
