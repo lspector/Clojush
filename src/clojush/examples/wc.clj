@@ -7,7 +7,8 @@
 ;; and string_readline to read strings from the file and place them
 ;; on the string stack. The end of file happens when the file string
 ;; on the :auxiliary stack is empty, which can be checked with the
-;; file_EOF instruction. Output is an integer from the integer stack.
+;; file_EOF instruction. Output is an integer that comes from one
+;; of the three output instructions.
 ;;
 
 ;; NOTE: A word is defined by any characters separated by any number
@@ -23,7 +24,7 @@
         clojush.instructions.tag
         clojure.math.numeric-tower))
 
-; Hand-coded solution
+; Hand-coded solution for just character count
 #_(run-push '(exec_y (string_readchar file_EOF exec_when exec_pop) string_stackdepth output_charcount)
           (->> (make-push-state)
                (push-item nil :auxiliary)

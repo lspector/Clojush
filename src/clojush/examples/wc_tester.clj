@@ -8,7 +8,7 @@
 
 (reset! global-atom-generators wc-atom-generators)
 (reset! global-evalpush-limit 1000)
-(reset! global-max-points-in-program 100)
+(reset! global-max-points 100)
 
 ;;;;
 ;evolved solution
