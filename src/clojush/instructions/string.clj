@@ -76,7 +76,7 @@
   (fn [state]
     (if (empty? (:string state))
       state
-      (loop [word-list (reverse (split (trim (top-item :string state)) #"\s+"))
+      (loop [word-list (reverse (filter not-empty (split (trim (top-item :string state)) #"\s+")))
              loop-state (pop-item :string state)]
         (if (empty? word-list)
           loop-state

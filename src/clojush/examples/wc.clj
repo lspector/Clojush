@@ -22,7 +22,8 @@
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random]
         clojush.instructions.tag
-        clojure.math.numeric-tower))
+        clojure.math.numeric-tower
+        [clojure.string :only [split trim]]))
 
 ; Hand-coded solution for just character count
 #_(run-push '(exec_y (string_readchar file_EOF exec_when exec_pop) string_stackdepth output_charcount)
@@ -223,19 +224,13 @@
 (defn wc-word-count
   "Takes a wc input and returns the word count output"
   [input]
-  (count (filter (fn [[a b]]
-                   (and (contains? #{\space \tab \newline} a)
-                        (not (contains? #{\space \tab \newline} b))))
-                 (map vector
-                      (str " " input)
-                      (str input " ")))))
+  (count (filter not-empty (split (trim input) #"\s+"))))
     
 (defn wc-line-count
-  "Takes a wc input and returns the line count output"
+  "Takes a wc input and returns the line count output. Only lines ending
+   newlines count toward total."
   [input]
-  (if (empty? input)
-    0
-    (inc (get (frequencies input) \newline 0))))
+  (get (frequencies input) \newline 0))
 
 (defn wc-test-cases
   "Gives n IO test cases of the form [input output-char output-word output-line]."
