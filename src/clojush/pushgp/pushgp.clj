@@ -261,8 +261,9 @@
                                                               deletion-mutation-probability parentheses-addition-mutation-probability
                                                               tagging-mutation-probability tag-branch-mutation-probability))
         prob-map (select-keys argmap prob-keywords)]
-    (assert (== 1.0
-                (apply + (vals prob-map)))
+    (assert (< 0.99999
+               (apply + (vals prob-map))
+               1.00001)
             (str "Genetic operator probabilities do not sum to 1.0:\n"
                  (clojure.string/replace (str prob-map \newline)
                                          \,
