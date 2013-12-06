@@ -33,14 +33,15 @@
   (fn [state]
     (if (not (empty? (:integer state)))
       (if (empty? @global-atom-generators)
-	(binding [*out* *err*]
-	  (println "code_rand: global-atom-generators is empty.")
-	  state)
-	(push-item (random-code (math/abs (mod (stack-ref :integer 0 state)
-					       max-points-in-random-expressions))
-				@global-atom-generators)
-		   :code
-		   (pop-item :integer state)))
+        (binding [*out* *err*]
+	         (println "code_rand: global-atom-generators is empty.")
+	         state)
+        (push-item (random-code (max 1
+                                     (math/abs (mod (stack-ref :integer 0 state)
+                                                    max-points-in-random-expressions)))
+                                @global-atom-generators)
+                   :code
+                   (pop-item :integer state)))
       state)))
 
 (define-registered

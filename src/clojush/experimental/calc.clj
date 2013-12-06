@@ -5,7 +5,9 @@
         [clojush.random]
         [clojush.util]
         [clojush.instructions.tag]
-        [clojure.math.numeric-tower]
+        [clojure.math.numeric-tower]        
+        [clojush.globals]
+        [clojush.experimental.tagged-code-macros]
         ;[incanter.stats :as stats]
         ))
 
@@ -297,8 +299,15 @@
                                         (rest buttons))))))]
     ;(vec (apply concat test-errors))
     (let [all-errors (apply concat test-errors)]
-      (conj (vec all-errors) (count (filter #(not (zero? %)) all-errors))))
+      (conj
+        (conj (vec all-errors) 
+              (* 10000.0 (count (filter #(> % 0.0001) all-errors))))
+        ;; size case
+        (* 0.0001 (count-points program))
+        )
+      )
     ))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -309,9 +318,11 @@
                        ;'(signal_error)
                        [0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0]
                        [(tag-instruction-erc [:exec])]
-                       (for [t (vals button-entrypoints)]
-                         (fn [] (symbol (str "tag_exec_" (str t)))))
+                       ;(for [t (vals button-entrypoints)]
+                       ;  (fn [] (symbol (str "tag_exec_" (str t)))))
                        [(tagged-instruction-erc)]
+                       ;; allow code_append tag macros (taking 2 arguments and returning 1 result)
+                       [(tagged-code-macro-erc 'code_append @global-tag-limit 2 1)]
                        ;(repeat 46 'code_noop)
                        '(boolean_and
                           boolean_dup
@@ -525,7 +536,7 @@
    ;:decimation-ratio 0.01
    ;:tournament-size 1
    :population-size 1000 ;200 ;50
-   :max-generations 10001
+   :max-generations 100000
    :evalpush-limit 3000
    :tag-limit 10000
    :max-points 3000
@@ -538,7 +549,7 @@
    :reproduction-simplifications 10
    :ultra-probability 1.0
    :ultra-alternation-rate 0.005
-   :ultra-alignment-deviation 50
+   :ultra-alignment-deviation 5
    :ultra-mutation-rate 0.005
    :deletion-mutation-probability 0
    :parentheses-addition-mutation-probability 0
@@ -551,7 +562,8 @@
    :pop-when-tagging true
    :report-simplifications 0
    :print-history false
-   ;:use-bushy-code true
+   :use-bushy-code true
    :use-ultra-no-paren-mutation true
    :problem-specific-report calc-report-with-reset!
+   :reuse-errors false
   })
