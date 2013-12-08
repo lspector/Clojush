@@ -206,6 +206,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ULTRA (Uniform Linear Transformation with Repair and Alternation) operator
 
+(defn remove-empties 
+  "Removes empty sequences from tree t."
+  [t]
+  (postwalklist 
+    (fn [node] (if (seq? node) 
+                 (remove #(and (seq? %) (empty? %)) node)
+                 node))
+    t))
+
 (defn remove-ultra-padding 
   "Removes instances of 'ultra-padding from tree t."
   [t]
@@ -363,17 +372,19 @@
 
 (defn ultra-operate-on-programs
   [p1 p2 alternation-rate alignment-deviation mutation-rate
-   use-ultra-no-paren-mutation atom-generators]
+   use-ultra-no-paren-mutation ultra-pads-with-empties atom-generators]
   (if (or (not (seq? p1))
           (not (seq? p2)))
     p1 ;; can't do if either program isn't a list
     (let [p1 (if (>= (count p1) (count p2))
                p1
-               (concat p1 (repeat (- (count p2) (count p1)) 'ultra-padding)))
+               (concat p1 (repeat (- (count p2) (count p1)) 
+                                  (if ultra-pads-with-empties () 'ultra-padding))))
           p2 (if (>= (count p2) (count p1))
                p2
-               (concat p2 (repeat (- (count p1) (count p2)) 'ultra-padding)))]
-      (remove-ultra-padding
+               (concat p2 (repeat (- (count p1) (count p2)) 
+                                  (if ultra-pads-with-empties () 'ultra-padding))))]
+      ((if ultra-pads-with-empties remove-empties remove-ultra-padding)
         (open-close-sequence-to-list
           (balance
             (linearly-mutate
@@ -406,13 +417,14 @@
    with Repair and Alternation) operation to parent1 and parent2."
   [parent1 parent2 {:keys [max-points ultra-alternation-rate ultra-alignment-deviation
                            ultra-mutation-rate atom-generators maintain-ancestors
-                           use-ultra-no-paren-mutation]}]
+                           use-ultra-no-paren-mutation ultra-pads-with-empties]}]
   (let [new-program (ultra-operate-on-programs (:program parent1)
                                                (:program parent2)
                                                ultra-alternation-rate
                                                ultra-alignment-deviation
                                                ultra-mutation-rate
                                                use-ultra-no-paren-mutation
+                                               ultra-pads-with-empties
                                                atom-generators)]
     (if (> (count-points new-program) max-points)
       parent1

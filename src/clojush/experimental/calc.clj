@@ -548,7 +548,7 @@
    :reproduction-probability 0
    :reproduction-simplifications 10
    :ultra-probability 1.0
-   :ultra-alternation-rate 0.001
+   :ultra-alternation-rate 0.005
    :ultra-alignment-deviation 5
    :ultra-mutation-rate 0.005
    :deletion-mutation-probability 0
@@ -563,7 +563,8 @@
    :report-simplifications 0
    :print-history false
    :use-bushy-code true
-   :use-ultra-no-paren-mutation true
+   :use-ultra-no-paren-mutation false
+   :ultra-pads-with-empties false
    :problem-specific-report calc-report-with-reset!
    :reuse-errors false
   })
