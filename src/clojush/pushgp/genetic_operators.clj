@@ -206,12 +206,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ULTRA (Uniform Linear Transformation with Repair and Alternation) operator
 
-(defn remove-empties 
-  "Removes empty sequences from tree t."
+(defn remove-ultra-padding 
+  "Removes instances of 'ultra-padding from tree t."
   [t]
   (postwalklist 
     (fn [node] (if (seq? node) 
-                 (remove #(and (seq? %) (empty? %)) node)
+                 (remove #{'ultra-padding} node)
                  node))
     t))
 
@@ -369,11 +369,11 @@
     p1 ;; can't do if either program isn't a list
     (let [p1 (if (>= (count p1) (count p2))
                p1
-               (concat p1 (repeat (- (count p2) (count p1)) '())))
+               (concat p1 (repeat (- (count p2) (count p1)) 'ultra-padding)))
           p2 (if (>= (count p2) (count p1))
                p2
-               (concat p2 (repeat (- (count p1) (count p2)) '())))]
-      (remove-empties
+               (concat p2 (repeat (- (count p1) (count p2)) 'ultra-padding)))]
+      (remove-ultra-padding
         (open-close-sequence-to-list
           (balance
             (linearly-mutate
@@ -390,6 +390,16 @@
 ;  (println p1)
 ;  (println p2)
 ;  (println (ultra-operate-on-programs p1 p2 0.2 1 0.1 false ['X])))
+
+;(loop [i 0
+;       pgm-a (random-code-with-size 30 '(a))
+;       pgm-b (random-code-with-size 30 '(b))]
+;  (println "pgm-a:" pgm-a)
+;  (println "pgm-b:" pgm-b)
+;  (if (< i 100)
+;    (recur (inc i)
+;           (ultra-operate-on-programs pgm-a pgm-b 0.2 1 0.1 false '(a))
+;           (ultra-operate-on-programs pgm-b pgm-a 0.2 1 0.1 false '(b)))))
 
 (defn ultra
   "Returns the result of applying the ULTRA (Uniform Linear Transformation

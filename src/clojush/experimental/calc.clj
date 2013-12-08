@@ -299,12 +299,12 @@
                                         (rest buttons))))))]
     ;(vec (apply concat test-errors))
     (let [all-errors (apply concat test-errors)]
-      (conj
+      ;(conj
         (conj (vec all-errors) 
               (* 10000.0 (count (filter #(> % 0.0001) all-errors))))
         ;; size case
-        (* 0.0001 (count-points program))
-        )
+        ;(* 0.0001 (count-points program))
+        ;)
       )
     ))
 
@@ -322,7 +322,7 @@
                        ;  (fn [] (symbol (str "tag_exec_" (str t)))))
                        [(tagged-instruction-erc)]
                        ;; allow code_append tag macros (taking 2 arguments and returning 1 result)
-                       [(tagged-code-macro-erc 'code_append @global-tag-limit 2 1)]
+                       ;[(tagged-code-macro-erc 'code_append @global-tag-limit 2 1)]
                        ;(repeat 46 'code_noop)
                        '(boolean_and
                           boolean_dup
@@ -548,7 +548,7 @@
    :reproduction-probability 0
    :reproduction-simplifications 10
    :ultra-probability 1.0
-   :ultra-alternation-rate 0.005
+   :ultra-alternation-rate 0.001
    :ultra-alignment-deviation 5
    :ultra-mutation-rate 0.005
    :deletion-mutation-probability 0
