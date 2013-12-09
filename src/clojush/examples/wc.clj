@@ -199,22 +199,54 @@
     'boolean_dup))
 
 ;; Define test cases
-(defn random-wc-inputs
-  "Returns a list of n random inputs. Each will have size between 0 and 100."
-  [n]
-  (let [chars (map char (range 32 127))
-        max-len 100]
-    (repeatedly n
-                (fn []
-                  (apply str
-                         (repeatedly (lrand-int (inc max-len))
-                                     (fn []
-                                       (let [rand-cond (lrand)]
-                                         (cond
-                                           (< rand-cond 0.05) \tab
-                                           (< rand-cond 0.1) \newline
-                                           (< rand-cond 0.35) \space
-                                           :else (lrand-nth chars))))))))))
+(defn wc-input
+  "Makes a WC input of length len."
+  [len]
+  (apply str
+         (repeatedly len
+                     (fn []
+                       (let [rand-cond (lrand)]
+                         (cond
+                           (< rand-cond 0.05) \tab
+                           (< rand-cond 0.1) \newline
+                           (< rand-cond 0.35) \space
+                           :else (lrand-nth (map char (range 32 127)))))))))
+
+;; A list of data domains for the WC problem. Each domain is a vector containing
+;; a "set" of inputs and two integers representing how many cases from the set
+;; should be used as training and testing cases respectively. Each "set" of
+;; inputs is either a list or a function that, when called, will create a
+;; random element of the set.
+(def wc-data-domains
+  [['("", "A", " ", "\t", "\n", "5", "#", "A\n", " \n", "\t\n", "\n\n") 11 0] ;; "Special" inputs covering most base cases
+   [(fn [] (str (wc-input (lrand-int 100)) \newline)) 20 50] ;; Inputs ending in a newline
+   [(fn [] (wc-input (lrand-int 101))) 200 500] ;; Inputs that may or may not end in a newline
+   ])
+
+(defn test-and-train-data-from-domains
+  "Takes a list of domains and creates a set of train inputs and a set of test
+   inputs based on the domains. Returns [train test]. A program should not
+   be considered a solution unless it is perfect on both the train and test
+   cases."
+  [domains]
+  (apply mapv concat (map (fn [[input-set n-train n-test]]
+                            (if (fn? input-set)
+                              (vector (repeatedly n-train input-set)
+                                      (repeatedly n-test input-set))
+                              (vector (take n-train (shuffle input-set))
+                                      (take n-test (shuffle input-set)))))
+                          domains)))
+
+;;WC test data like this:
+;(test-and-train-data-from-domains wc-data-domains)
+
+;(defn random-wc-inputs
+;  "Returns a list of n random inputs. Each will have size between 0 and 100."
+;  [n]
+;  (let [chars (map char (range 32 127))
+;        max-len 100]
+;    (repeatedly n
+;                (partial wc-input (lrand-int (inc max-len))))))
 
 (defn wc-char-count
   "Takes a wc input and returns the char count output"
@@ -233,33 +265,33 @@
   (get (frequencies input) \newline 0))
 
 (defn wc-test-cases
-  "Gives n IO test cases of the form [input output-char output-word output-line]."
-  [n]
+  "Takes a sequence of inputs and gives IO test cases of the form
+   [input output-char output-word output-line]."
+  [inputs]
   (map #(vector %
                 (wc-char-count %)
                 (wc-word-count %)
                 (wc-line-count %))
-       (random-wc-inputs n)))
+       inputs))
 
 ;; Define error function. For now, each run uses different random inputs
 (defn wc-error-function
   "Returns the error function for the wc problem. Takes as
-   input number of test cases to use."
-  ([number-test-cases]
-    (wc-error-function number-test-cases
-                       (wc-test-cases number-test-cases)))
-  ([_ test-cases]
+   input WC data domains."
+  [data-domains]
+  (let [[train-cases test-cases] (map wc-test-cases
+                                      (test-and-train-data-from-domains wc-data-domains))]
     (fn [program]
       (flatten
         (doall
-          (for [[input out-char out-word out-line] test-cases]
+          (for [[input out-char out-word out-line] train-cases]
             (let [final-state (run-push program
                                         (->> (make-push-state)
-                                             (push-item nil :auxiliary)
-                                             (push-item nil :auxiliary)
-                                             (push-item nil :auxiliary)
-                                             (push-item input :auxiliary)
-                                             (push-item input :auxiliary)))
+                                          (push-item nil :auxiliary)
+                                          (push-item nil :auxiliary)
+                                          (push-item nil :auxiliary)
+                                          (push-item input :auxiliary)
+                                          (push-item input :auxiliary)))
                   result-char (stack-ref :auxiliary 2 final-state)
                   result-word (stack-ref :auxiliary 3 final-state)
                   result-line (stack-ref :auxiliary 4 final-state)]
@@ -280,7 +312,7 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (wc-error-function 50)
+  {:error-function (wc-error-function wc-data-domains)
    :atom-generators wc-atom-generators
    :max-points 200
    :max-points-in-initial-program 50
