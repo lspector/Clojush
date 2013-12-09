@@ -299,12 +299,12 @@
                                         (rest buttons))))))]
     ;(vec (apply concat test-errors))
     (let [all-errors (apply concat test-errors)]
-      (conj
+      ;(conj
         (conj (vec all-errors) 
               (* 10000.0 (count (filter #(> % 0.0001) all-errors))))
         ;; size case
-        (* 0.0001 (count-points program))
-        )
+        ;(* 0.0001 (count-points program))
+        ;)
       )
     ))
 
@@ -322,7 +322,7 @@
                        ;  (fn [] (symbol (str "tag_exec_" (str t)))))
                        [(tagged-instruction-erc)]
                        ;; allow code_append tag macros (taking 2 arguments and returning 1 result)
-                       [(tagged-code-macro-erc 'code_append @global-tag-limit 2 1)]
+                       ;[(tagged-code-macro-erc 'code_append @global-tag-limit 2 1)]
                        ;(repeat 46 'code_noop)
                        '(boolean_and
                           boolean_dup
@@ -563,7 +563,8 @@
    :report-simplifications 0
    :print-history false
    :use-bushy-code true
-   :use-ultra-no-paren-mutation true
+   :use-ultra-no-paren-mutation false
+   :ultra-pads-with-empties false
    :problem-specific-report calc-report-with-reset!
    :reuse-errors false
   })
