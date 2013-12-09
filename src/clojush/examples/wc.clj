@@ -332,6 +332,7 @@
         best-total-test-error (apply +' best-test-errors)]
     (printf ";; -*- WC problem report generation %s\n" generation)(flush)
     (println "Test total error for best:" best-total-test-error)
+    (println (format "Test mean error for best: %.5f" (double (/ best-total-test-error (count best-test-errors)))))
     (when (zero? (:total-error best))
       (println "Test errors for best:" best-test-errors))
     (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n")
