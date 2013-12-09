@@ -10,7 +10,7 @@
 ;; pushgp
 
 (def push-argmap
-  (atom sorted-map
+  (atom (sorted-map
           ;;----------------------------------------
           ;; Clojush system arguments
           ;;----------------------------------------
@@ -121,7 +121,7 @@
           ;;----------------------------------------
           :parent-reversion-probability 0.0 ;; The probability of a child being reverted to its parent if the parent has better fitness or equal fitness and is smaller
           :use-bushy-code false ;; When true, random code and code changed by ULTRA mutation, will be "bushy", as in close to a binary tree
-          ))
+          )))
 
 (defn load-push-argmap
   [argmap]

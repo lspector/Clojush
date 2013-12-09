@@ -281,34 +281,40 @@
   [data-domains]
   (let [[train-cases test-cases] (map wc-test-cases
                                       (test-and-train-data-from-domains wc-data-domains))]
-    (fn [program]
-      (flatten
-        (doall
-          (for [[input out-char out-word out-line] train-cases]
-            (let [final-state (run-push program
-                                        (->> (make-push-state)
-                                          (push-item nil :auxiliary)
-                                          (push-item nil :auxiliary)
-                                          (push-item nil :auxiliary)
-                                          (push-item input :auxiliary)
-                                          (push-item input :auxiliary)))
-                  result-char (stack-ref :auxiliary 2 final-state)
-                  result-word (stack-ref :auxiliary 3 final-state)
-                  result-line (stack-ref :auxiliary 4 final-state)]
-              ; The error is the integer difference between the desired output
-              ; and the result output for each of char-count, word-count, and
-              ; line-count. Because of this, each test case results in 3
-              ; error values. If a value is missing, a penalty of 100000
-              ; is given.
-              (vector (if (number? result-char)
-                        (abs (- result-char out-char))
-                        100000)
-                      (if (number? result-word)
-                        (abs (- result-word out-word))
-                        100000)
-                      (if (number? result-line)
-                        (abs (- result-line out-line))
-                        100000)))))))))
+    (fn the-actual-wc-error-function
+      ([program]
+        (the-actual-wc-error-function program :train))
+      ([program data-cases] ;; data-cases should be :train or :test
+        (flatten
+          (doall
+            (for [[input out-char out-word out-line] (case data-cases
+                                                       :train train-cases
+                                                       :test test-cases
+                                                       [])]
+              (let [final-state (run-push program
+                                          (->> (make-push-state)
+                                            (push-item nil :auxiliary)
+                                            (push-item nil :auxiliary)
+                                            (push-item nil :auxiliary)
+                                            (push-item input :auxiliary)
+                                            (push-item input :auxiliary)))
+                    result-char (stack-ref :auxiliary 2 final-state)
+                    result-word (stack-ref :auxiliary 3 final-state)
+                    result-line (stack-ref :auxiliary 4 final-state)]
+                ; The error is the integer difference between the desired output
+                ; and the result output for each of char-count, word-count, and
+                ; line-count. Because of this, each test case results in 3
+                ; error values. If a value is missing, a penalty of 100000
+                ; is given.
+                (vector (if (number? result-char)
+                          (abs (- result-char out-char))
+                          100000)
+                        (if (number? result-word)
+                          (abs (- result-word out-word))
+                          100000)
+                        (if (number? result-line)
+                          (abs (- result-line out-line))
+                          100000))))))))))
 
 ; Define the argmap
 (def argmap
