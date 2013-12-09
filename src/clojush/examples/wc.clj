@@ -20,7 +20,7 @@
 
 (ns clojush.examples.wc
   (:use clojush.pushgp.pushgp
-        [clojush pushstate interpreter random]
+        [clojush pushstate interpreter random util]
         clojush.instructions.tag
         clojure.math.numeric-tower
         [clojure.string :only [split trim]]))
@@ -219,12 +219,12 @@
 ;; random element of the set.
 (def wc-data-domains
   [['("", "A", " ", "\t", "\n", "5", "#", "A\n", " \n", "\t\n", "\n\n") 11 0] ;; "Special" inputs covering most base cases
-   [(fn [] (str (wc-input (lrand-int 100)) \newline)) 20 50] ;; Inputs ending in a newline
-   [(fn [] (wc-input (lrand-int 101))) 200 500] ;; Inputs that may or may not end in a newline
+   [(fn [] (str (wc-input (inc (lrand-int 99))) \newline)) 20 50] ;; Inputs ending in a newline
+   [(fn [] (wc-input (inc (lrand-int 100)))) 200 500] ;; Inputs that may or may not end in a newline
    ])
 
 (defn test-and-train-data-from-domains
-  "Takes a list of domains and creates a set of train inputs and a set of test
+  "Takes a list of domains and creates a set of (random) train inputs and a set of test
    inputs based on the domains. Returns [train test]. A program should not
    be considered a solution unless it is perfect on both the train and test
    cases."
@@ -281,6 +281,14 @@
   [data-domains]
   (let [[train-cases test-cases] (map wc-test-cases
                                       (test-and-train-data-from-domains wc-data-domains))]
+    (doseq [[i [string ch wo li]] (map vector (range) train-cases)]
+      (println (str "Train Case " i " | Chars: " ch " Words: " wo " Lines: " li))
+      (println string)
+      (println "--------------------"))
+    (doseq [[i [string ch wo li]] (map vector (range) test-cases)]
+      (println (str "Test Case " i " | Chars: " ch " Words: " wo " Lines: " li))
+      (println string)
+      (println "--------------------"))
     (fn the-actual-wc-error-function
       ([program]
         (the-actual-wc-error-function program :train))
@@ -316,15 +324,30 @@
                           (abs (- result-line out-line))
                           100000))))))))))
 
+(defn wc-report
+  "Customize generational report."
+  [best population generation error-function report-simplifications]
+  (let [best-program (not-lazy (:program best))
+        best-test-errors (error-function best-program :test)
+        best-total-test-error (apply +' best-test-errors)]
+    (printf ";; -*- WC problem report generation %s\n" generation)(flush)
+    (println "Test total error for best:" best-total-test-error)
+    (when (zero? (:total-error best))
+      (println "Test errors for best:" best-test-errors))
+    (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n")
+    )) ;; To do validation, could have this function return an altered best individual
+       ;; with total-error > 0 if it had error of zero on train but not on validation
+       ;; set. Would need a third category of data cases.
+
 ; Define the argmap
 (def argmap
   {:error-function (wc-error-function wc-data-domains)
    :atom-generators wc-atom-generators
-   :max-points 200
-   :max-points-in-initial-program 50
+   :max-points 250
+   :max-points-in-initial-program 150
    :evalpush-limit 1000
    :population-size 500
-   :max-generations 200
+   :max-generations 300
    :reproduction-probability 0
    :mutation-probability 0
    :crossover-probability 0
@@ -333,4 +356,5 @@
    :final-report-simplifications 1000
    :use-lexicase-selection true
    :use-ultra-no-paren-mutation true
+   :problem-specific-report wc-report
    })
