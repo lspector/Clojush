@@ -347,13 +347,16 @@
    :max-points 250
    :max-points-in-initial-program 150
    :evalpush-limit 1000
-   :population-size 500
+   :population-size 1000
    :max-generations 300
    :reproduction-probability 0
    :mutation-probability 0
    :crossover-probability 0
    :report-simplifications 0
    :ultra-probability 1.0
+   :ultra-alternation-rate 0.01
+   :ultra-alignment-deviation 10
+   :ultra-mutation-rate 0.01
    :final-report-simplifications 1000
    :use-lexicase-selection true
    :use-ultra-no-paren-mutation true
