@@ -114,7 +114,7 @@
   "Customize generational report."
   [best population generation error-function report-simplifications]
   (let [best-program (not-lazy (:program best))
-        best-test-errors (bioavailability-error-function :test best-program)] ;;not working
+        best-test-errors (bioavailability-error-function :test best-program)]
     (printf ";; -*- Bioavailability problem report generation %s" generation)(flush)
     (printf  "\nTest mean: %.4f"
             (float (/ (apply + best-test-errors)

@@ -192,8 +192,10 @@
                                     log-fitnesses-for-all-cases))
     (when print-json-logs (json-print population generation json-log-filename
                                       log-fitnesses-for-all-cases json-log-program-strings))
-    (problem-specific-report best population generation error-function report-simplifications)
-    best))
+    (let [psr-best (problem-specific-report best population generation error-function report-simplifications)]
+      (if (zero? (get psr-best :total-error 1))
+        psr-best
+        best))))
 
 
 (defn initial-report

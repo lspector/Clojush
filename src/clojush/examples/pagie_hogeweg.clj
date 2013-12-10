@@ -19,8 +19,8 @@
   (+ (/ (+ 1 (math/expt x -4)))
      (/ (+ 1 (math/expt y -4)))))
 
-(def data (doall (for [x (range -5 5.01 0.4) ; Range is exclusive on the end
-                       y (range -5 5.01 0.4)]
+(def data (doall (for [x (range -5.0 5.01 0.4) ; Range is exclusive on the end
+                       y (range -5.0 5.01 0.4)]
                    [x y (data-point-2D x y)])))
 
 (define-registered 
@@ -34,29 +34,33 @@
 (defn error-function
   [num-samples program]
   (doall
-    (for [row (take num-samples (shuffle data))]
+    (for [row (if (== (count data) num-samples)
+                data
+                (take num-samples (shuffle data)))]
       (let [state (run-push program 
                             (assoc (make-push-state)
                                    :auxiliary
                                    (butlast row)))
             top-float (top-item :float state)]
         (if (number? top-float)
-          (math/expt (- top-float (last row)) 2)
+          (math/abs (- top-float (last row)))
           1000)))))
 
 (defn hit-error-function
   "Error function based on Koza's hit criteria."
   [num-samples program]
   (doall
-    (for [row (take num-samples (shuffle data))]
+    (for [row (if (== (count data) num-samples)
+                data
+                (take num-samples (shuffle data)))]
       (let [state (run-push program 
                             (assoc (make-push-state)
                                    :auxiliary
                                    (butlast row)))
             top-float (top-item :float state)]
         (if (number? top-float)
-          (if (< (math/expt (- top-float (last row)) 2) 0.01) 0 1)
-          1000)))))
+          (if (< (math/abs (- top-float (last row))) 0.01) 0 1)
+          1)))))
 
 (def atom-generators
   (list 
@@ -77,7 +81,11 @@
         hit-total-error (apply + hit-errors)]
     #_(println "Best's errors on full data set:" errors)
     (println "Best's total error on full data set:" total-error)
-    (println "Best's total error (hits) on full data set:" hit-total-error)))
+    (println "Best's total error (hits) on full data set:" hit-total-error)
+    (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
+    (if (zero? hit-total-error)
+      (assoc best :total-error 0)
+      best)))
 
 (def argmap
   {:error-function (partial error-function (count data));; Use all samples
@@ -94,5 +102,6 @@
    :simplification-probability 0.0
    :tournament-size 7
    :reuse-errors true ;; If a sample set is used, then error reuse must be disabled
+   :print-errors false
    :problem-specific-report problem-specific-report
    })
