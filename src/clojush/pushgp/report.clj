@@ -1,8 +1,5 @@
 (ns clojush.pushgp.report
-  (:use [clojush.util]
-        [clojush.globals]
-        [clojush.pushstate]
-        [clojush.simplification]
+  (:use [clojush util globals pushstate simplification individual]
         [clojure.data.json :only (json-str)])
   (:require [clojure.string :as string]
             [config :as config]
@@ -135,7 +132,11 @@
                  use-rmse :rms-error
                  true :total-error)
         sorted (sort-by err-fn < population)
-        best (first sorted)]
+        err-fn-best (first sorted)
+        psr-best (problem-specific-report err-fn-best population generation error-function report-simplifications)
+        best (if (= (type best) clojush.individual.individual)
+               psr-best
+               err-fn-best)]
     (println "Best program:" (not-lazy (:program best)))
     (when (> report-simplifications 0)
       (println "Partial simplification:"
@@ -192,10 +193,7 @@
                                     log-fitnesses-for-all-cases))
     (when print-json-logs (json-print population generation json-log-filename
                                       log-fitnesses-for-all-cases json-log-program-strings))
-    (let [psr-best (problem-specific-report best population generation error-function report-simplifications)]
-      (if (zero? (get psr-best :total-error 1))
-        psr-best
-        best))))
+    best))
 
 
 (defn initial-report
