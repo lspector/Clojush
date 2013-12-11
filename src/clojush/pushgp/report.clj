@@ -114,18 +114,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; report printing functions
 
-(defn report 
+(defn report-and-check-for-success
   "Reports on the specified generation of a pushgp run. Returns the best
    individual of the generation."
   [population generation
    {:keys [error-function report-simplifications
+           error-threshold max-generations
            print-errors print-history print-cosmos-data print-timings
            problem-specific-report use-rmse use-historically-assessed-hardness
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
            ]}]
-  (printf "\n\n") 
+  (println)
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
   (println ";; -*- Report at generation" generation)
   (let [err-fn (cond
@@ -134,9 +135,10 @@
         sorted (sort-by err-fn < population)
         err-fn-best (first sorted)
         psr-best (problem-specific-report err-fn-best population generation error-function report-simplifications)
-        best (if (= (type best) clojush.individual.individual)
+        best (if (= (type psr-best) clojush.individual.individual)
                psr-best
                err-fn-best)]
+    (println "--- Best Program Statistics ---")
     (println "Best program:" (not-lazy (:program best)))
     (when (> report-simplifications 0)
       (println "Partial simplification:"
@@ -193,7 +195,10 @@
                                     log-fitnesses-for-all-cases))
     (when print-json-logs (json-print population generation json-log-filename
                                       log-fitnesses-for-all-cases json-log-program-strings))
-    best))
+    (cond (or (<= (:total-error best) error-threshold)
+              (:success best)) best
+          (>= generation max-generations) :failure
+          :else :continue)))
 
 
 (defn initial-report

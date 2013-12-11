@@ -80,11 +80,11 @@
         total-error (apply + errors)
         hit-total-error (apply + hit-errors)]
     #_(println "Best's errors on full data set:" errors)
+    (println "--- Pagie-Hogeweg Problem Specific Report ---")
     (println "Best's total error on full data set:" total-error)
     (println "Best's total error (hits) on full data set:" hit-total-error)
-    (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
     (if (zero? hit-total-error)
-      (assoc best :total-error 0)
+      (assoc best :success true)
       best)))
 
 (def argmap
