@@ -119,7 +119,6 @@
   [population {:keys [error-function report-simplifications print-errors
                       print-history use-rmse
                       ]}]
-  (println "--- Lexicse Best Program Statistics ---")
   (let [min-error-by-case (apply map
                                  (fn [& args] (apply min args))
                                  (map :errors population))
@@ -136,10 +135,11 @@
                                population)
         count-elites-by-case (map #(apply + %) (apply mapv vector pop-elite-by-case))
         ]
-    (println "Lexicase best program:" (not-lazy (:program lex-best)))
+    (println "--- Lexicse Best Program Statistics ---")
+    (println "Lexicase best program:" (pr-str (not-lazy (:program lex-best))))
     (when (> report-simplifications 0)
       (println "Lexicase best partial simplification:"
-               (not-lazy (:program (auto-simplify lex-best error-function report-simplifications false 1000)))))
+               (pr-str (not-lazy (:program (auto-simplify lex-best error-function report-simplifications false 1000))))))
     (when print-errors (println "Lexicase best errors:" (not-lazy (:errors lex-best))))
     (println "Lexicase best number of elite cases:" (apply + (map #(if (== %1 %2) 1 0)
                                                                   (:errors lex-best)
@@ -182,10 +182,10 @@
                psr-best
                err-fn-best)]
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
-    (println "Best program:" (not-lazy (:program best)))
+    (println "Best program:" (pr-str (not-lazy (:program best))))
     (when (> report-simplifications 0)
       (println "Partial simplification:"
-               (not-lazy (:program (auto-simplify best error-function report-simplifications false 1000)))))
+               (pr-str (not-lazy (:program (auto-simplify best error-function report-simplifications false 1000))))))
     (when print-errors (println "Errors:" (not-lazy (:errors best))))
     (println "Total:" (:total-error best))
     (println "Mean:" (float (/ (:total-error best)
@@ -286,9 +286,9 @@
   [generation best
    {:keys [error-function final-report-simplifications print-ancestors-of-solution]}]
   (printf "\n\nSUCCESS at generation %s\nSuccessful program: %s\nErrors: %s\nTotal error: %s\nHistory: %s\nSize: %s\n\n"
-          generation (not-lazy (:program best)) (not-lazy (:errors best)) (:total-error best) 
+          generation (pr-str (not-lazy (:program best))) (not-lazy (:errors best)) (:total-error best) 
           (not-lazy (:history best)) (count-points (:program best)))
   (when print-ancestors-of-solution
     (printf "\nAncestors of solution:\n")
-    (println (:ancestors best)))
+    (prn (:ancestors best)))
   (auto-simplify best error-function final-report-simplifications true 500))
