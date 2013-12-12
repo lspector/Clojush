@@ -114,6 +114,47 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; report printing functions
 
+(defn lexicase-report
+  "This extra report is printed whenever lexicase selection is used."
+  [population {:keys [error-function report-simplifications print-errors
+                      print-history use-rmse
+                      ]}]
+  (println "--- Lexicse Best Program Statistics ---")
+  (let [min-error-by-case (apply map
+                                 (fn [& args] (apply min args))
+                                 (map :errors population))
+        lex-best (apply max-key
+                        (fn [ind]
+                          (apply + (map #(if (== %1 %2) 1 0)
+                                        (:errors ind)
+                                        min-error-by-case)))
+                        population)
+        pop-elite-by-case (map (fn [ind]
+                                 (map #(if (== %1 %2) 1 0)
+                                      (:errors ind)
+                                      min-error-by-case))
+                               population)
+        count-elites-by-case (map #(apply + %) (apply mapv vector pop-elite-by-case))
+        ]
+    (println "Lexicase best program:" (not-lazy (:program lex-best)))
+    (when (> report-simplifications 0)
+      (println "Lexicase best partial simplification:"
+               (not-lazy (:program (auto-simplify lex-best error-function report-simplifications false 1000)))))
+    (when print-errors (println "Lexicase best errors:" (not-lazy (:errors lex-best))))
+    (println "Lexicase best number of elite cases:" (apply + (map #(if (== %1 %2) 1 0)
+                                                                  (:errors lex-best)
+                                                                  min-error-by-case)))
+    (println "Lexicase best total error:" (:total-error lex-best))
+    (println "Lexicase best mean error:" (float (/ (:total-error lex-best)
+                                                   (count (:errors lex-best)))))
+    (when use-rmse (println "Lexicase best RMS-error:" (:rms-error lex-best)))
+    (when print-history (println "Lexicase best history:" (not-lazy (:history lex-best))))
+    (println "Lexicase best size:" (count-points (:program lex-best)))
+    (println "--- Lexicase Population Statistics ---")
+    (println "Count of elite individuals by case:" count-elites-by-case)
+    (println (format "Population mean number of elite cases: %.2f" (float (/ (apply + count-elites-by-case) (count population)))))
+    ))
+
 (defn report-and-check-for-success
   "Reports on the specified generation of a pushgp run. Returns the best
    individual of the generation."
@@ -122,10 +163,12 @@
            error-threshold max-generations
            print-errors print-history print-cosmos-data print-timings
            problem-specific-report use-rmse use-historically-assessed-hardness
+           use-lexicase-selection
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
-           ]}]
+           ]
+    :as argmap}]
   (println)
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
   (println ";; -*- Report at generation" generation)
@@ -138,7 +181,7 @@
         best (if (= (type psr-best) clojush.individual.individual)
                psr-best
                err-fn-best)]
-    (println "--- Best Program Statistics ---")
+    (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
     (println "Best program:" (not-lazy (:program best)))
     (when (> report-simplifications 0)
       (println "Partial simplification:"
@@ -152,6 +195,7 @@
     (when use-rmse (println "RMS-error:" (:rms-error best)))
     (when print-history (println "History:" (not-lazy (:history best))))
     (println "Size:" (count-points (:program best)))
+    (when use-lexicase-selection (lexicase-report population argmap))
     (println "--- Population Statistics ---")
     (when print-cosmos-data
       (println "Cosmos Data:" (let [quants (config/quantiles (count population))]
@@ -199,7 +243,6 @@
               (:success best)) best
           (>= generation max-generations) :failure
           :else :continue)))
-
 
 (defn initial-report
   "Prints the initial report of a PushGP run."
