@@ -150,6 +150,7 @@
     (when use-rmse (println "Lexicase best RMS-error:" (:rms-error lex-best)))
     (when print-history (println "Lexicase best history:" (not-lazy (:history lex-best))))
     (println "Lexicase best size:" (count-points (:program lex-best)))
+    (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program lex-best)) (count-points (:program lex-best))))) ;Number of (open) parens / points
     (println "--- Lexicase Population Statistics ---")
     (println "Count of elite individuals by case:" count-elites-by-case)
     (println (format "Population mean number of elite cases: %.2f" (float (/ (apply + count-elites-by-case) (count population)))))
@@ -181,6 +182,7 @@
         best (if (= (type psr-best) clojush.individual.individual)
                psr-best
                err-fn-best)]
+    (when use-lexicase-selection (lexicase-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
     (println "Best program:" (pr-str (not-lazy (:program best))))
     (when (> report-simplifications 0)
@@ -195,7 +197,7 @@
     (when use-rmse (println "RMS-error:" (:rms-error best)))
     (when print-history (println "History:" (not-lazy (:history best))))
     (println "Size:" (count-points (:program best)))
-    (when use-lexicase-selection (lexicase-report population argmap))
+    (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program best)) (count-points (:program best))))) ;Number of (open) parens / points
     (println "--- Population Statistics ---")
     (when print-cosmos-data
       (println "Cosmos Data:" (let [quants (config/quantiles (count population))]
@@ -213,6 +215,8 @@
     (println "Average program size in population (points):"
              (*' 1.0 (/ (reduce +' (map count-points (map :program sorted)))
                         (count population))))
+    (printf "Average percent parens in population: %.3f\n" (/ (apply + (map #(double (/ (count-parens (:program %)) (count-points (:program %)))) sorted))
+                                                              (count population)))
     (let [frequency-map (frequencies (map :program population))]
       (println "Number of unique programs in population:" (count frequency-map))
       (println "Max copy number of one program:" (apply max (vals frequency-map)))

@@ -35,13 +35,20 @@
       (and (< n min-number-magnitude) (> n (- min-number-magnitude))) 0.0
       :else n)))
 
-(defn count-points 
+(defn count-points
   "Returns the number of points in tree, where each atom and each pair of parentheses 
    counts as a point."
   [tree]
   (if (seq? tree)
-    (+ 1 (apply + (map count-points tree)))
+    (inc (apply + (map count-points tree)))
     1))
+
+(defn count-parens
+  "Returns the number of paren pairs in tree"
+  [tree]
+  (if (seq? tree)
+    (inc (apply + (map count-parens tree)))
+    0))
 
 (defn code-at-point 
   "Returns a subtree of tree indexed by point-index in a depth first traversal."
