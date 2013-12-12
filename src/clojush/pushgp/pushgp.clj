@@ -103,8 +103,8 @@
           :print-history false ;; When true, prints the history of the best individual's ancestors' total errors
           :print-timings false ; If true, report prints how long different parts of evolution have taken during the current run.
           :print-cosmos-data false ; If true, report prints COSMOS data each generation.
-          :print-ancestors-of-solution false ; If true, final report prints the ancestors of the solution
           :maintain-ancestors false  ; If true, save all ancestors in each individual (costly)
+          :print-ancestors-of-solution false ; If true, final report prints the ancestors of the solution. Requires :maintain-ancestors to be true.
           ;;
           ;;----------------------------------------
           ;; Arguments related to printing JSON or CSV logs
@@ -223,13 +223,6 @@
 (defn calculate-hah-solution-rates-wrapper 
   [pop-agents {:keys [use-historically-assessed-hardness error-threshold population-size]}]
   (calculate-hah-solution-rates use-historically-assessed-hardness pop-agents error-threshold population-size))
-
-(defn report-and-check-for-success
-  [pop-agents generation {:keys [error-threshold max-generations] :as argmap}]
-  (let [best (report (vec (doall (map deref pop-agents))) generation argmap)]
-    (cond (<= (:total-error best) error-threshold) best
-          (>= generation max-generations) :failure
-          :else :continue)))
           
 (defn produce-new-offspring
   [pop-agents child-agents rand-gens
@@ -292,7 +285,8 @@
       (print-params @push-argmap)
       (check-genetic-operator-probabilities-add-to-one @push-argmap)
       (timer @push-argmap :initialization)
-      (println "Generating initial population...")
+      (println "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
+      (println "\nGenerating initial population...")
       (let [{:keys [pop-agents child-agents rand-gens random-seeds]} (make-agents-and-rng @push-argmap)]
         ;(print "Random seeds: ")
         ;(doseq [seed random-seeds] (print " " seed))
@@ -317,10 +311,11 @@
             (build-elitegroups pop-agents))
           (timer @push-argmap :other)
           ;; report and check for success
-          (let [outcome (report-and-check-for-success pop-agents generation @push-argmap)]
+          (let [outcome (report-and-check-for-success (vec (doall (map deref pop-agents)))
+                                                      generation @push-argmap)]
             (cond (= outcome :failure) (do (printf "\nFAILURE\n") (flush))
                   (= outcome :continue) (do (timer @push-argmap :report)
-                                            (println "Producing offspring...")
+                                            (println "\nProducing offspring...")
                                             (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
                                             (println "Installing next generation...")
                                             (install-next-generation pop-agents child-agents @push-argmap)

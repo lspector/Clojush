@@ -31,6 +31,4 @@
   (cons 'individual.
         (let [k '(:program :errors :total-error :hah-error :rms-error :history :ancestors :parent)]
           (interleave k  (map #(printable (get i %)) k)))))
-         
-       
-       
+
