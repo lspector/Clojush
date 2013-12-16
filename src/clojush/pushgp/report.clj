@@ -134,8 +134,18 @@
                                       min-error-by-case))
                                population)
         count-elites-by-case (map #(apply + %) (apply mapv vector pop-elite-by-case))
+        most-zero-cases-best (apply max-key
+                                    (fn [ind]
+                                      (apply + (map #(if (zero? %) 1 0)
+                                                    (:errors ind))))
+                                    population)
+        pop-zero-by-case (map (fn [ind]
+                                (map #(if (zero? %) 1 0)
+                                     (:errors ind)))
+                              population)
+        count-zero-by-case (map #(apply + %) (apply mapv vector pop-zero-by-case))
         ]
-    (println "--- Lexicse Best Program Statistics ---")
+    (println "--- Lexicse Program with Most Elite Cases Statistics ---")
     (println "Lexicase best program:" (pr-str (not-lazy (:program lex-best))))
     (when (> report-simplifications 0)
       (println "Lexicase best partial simplification:"
@@ -151,9 +161,27 @@
     (when print-history (println "Lexicase best history:" (not-lazy (:history lex-best))))
     (println "Lexicase best size:" (count-points (:program lex-best)))
     (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program lex-best)) (count-points (:program lex-best))))) ;Number of (open) parens / points
+    (println "--- Lexicse Program with Most Zero Cases Statistics ---")
+    (println "Zero cases best program:" (pr-str (not-lazy (:program most-zero-cases-best))))
+    (when (> report-simplifications 0)
+      (println "Zero cases best partial simplification:"
+               (pr-str (not-lazy (:program (auto-simplify most-zero-cases-best error-function report-simplifications false 1000))))))
+    (when print-errors (println "Zero cases best errors:" (not-lazy (:errors most-zero-cases-best))))
+    (println "Zero cases best number of elite cases:" (apply + (map #(if (== %1 %2) 1 0)
+                                                                  (:errors most-zero-cases-best)
+                                                                  min-error-by-case)))
+    (println "Zero cases best total error:" (:total-error most-zero-cases-best))
+    (println "Zero cases best mean error:" (float (/ (:total-error most-zero-cases-best)
+                                                   (count (:errors most-zero-cases-best)))))
+    (when use-rmse (println "Zero cases best RMS-error:" (:rms-error most-zero-cases-best)))
+    (when print-history (println "Zero cases best history:" (not-lazy (:history most-zero-cases-best))))
+    (println "Zero cases best size:" (count-points (:program most-zero-cases-best)))
+    (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program most-zero-cases-best)) (count-points (:program most-zero-cases-best))))) ;Number of (open) parens / points
     (println "--- Lexicase Population Statistics ---")
     (println "Count of elite individuals by case:" count-elites-by-case)
     (println (format "Population mean number of elite cases: %.2f" (float (/ (apply + count-elites-by-case) (count population)))))
+    (println "Count of perfect (error zero) individuals by case:" count-zero-by-case)
+    (println (format "Population mean number of perfect (error zero) cases: %.2f" (float (/ (apply + count-zero-by-case) (count population)))))
     ))
 
 (defn report-and-check-for-success
