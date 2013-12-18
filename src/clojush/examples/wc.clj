@@ -218,7 +218,18 @@
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
 (def wc-data-domains
-  [['("", "A", " ", "\t", "\n", "5", "#", "A\n", " \n", "\t\n", "\n\n") 11 0] ;; "Special" inputs covering most base cases
+  [[(list "", "A", " ", "\t", "\n", "5", "#", "A\n", " \n", "\t\n", "\n\n",
+          (apply str (repeat 100 \newline))
+          (apply str (repeat 100 \space))
+          (apply str (repeat 100 \tab))
+          (apply str (repeat 100 \A))
+          (apply str (take 100 (cycle (list \A \newline))))
+          (apply str (take 100 (cycle (list \B \newline \newline))))
+          (apply str (take 100 (cycle (list \C \D \newline))))
+          (apply str (take 100 (cycle (list \E \space))))
+          (apply str (take 100 (cycle (list \F \tab))))
+          (apply str (take 100 (cycle (list \x \newline \y \space))))
+          (apply str (take 100 (cycle (list \space \newline))))) 22 0] ;; "Special" inputs covering most base cases
    [(fn [] (str (wc-input (inc (lrand-int 99))) \newline)) 20 50] ;; Inputs ending in a newline
    [(fn [] (wc-input (inc (lrand-int 100)))) 200 500] ;; Inputs that may or may not end in a newline
    ])
@@ -233,8 +244,12 @@
                             (if (fn? input-set)
                               (vector (repeatedly n-train input-set)
                                       (repeatedly n-test input-set))
-                              (vector (take n-train (shuffle input-set))
-                                      (take n-test (shuffle input-set)))))
+                              (vector (if (>= n-train (count input-set))
+                                        input-set
+                                        (take n-train (shuffle input-set)))
+                                      (if (>= n-test (count input-set))
+                                        input-set
+                                        (take n-test (shuffle input-set))))))
                           domains)))
 
 ;;WC test data like this:
@@ -280,7 +295,7 @@
    input WC data domains."
   [data-domains]
   (let [[train-cases test-cases] (map wc-test-cases
-                                      (test-and-train-data-from-domains wc-data-domains))]
+                                      (test-and-train-data-from-domains data-domains))]
     (doseq [[i [string ch wo li]] (map vector (range) train-cases)]
       (println (str "Train Case " i " | Chars: " ch " Words: " wo " Lines: " li))
       (println string)
@@ -344,9 +359,9 @@
 (def argmap
   {:error-function (wc-error-function wc-data-domains)
    :atom-generators wc-atom-generators
-   :max-points 250
-   :max-points-in-initial-program 150
-   :evalpush-limit 1000
+   :max-points 1000
+   :max-points-in-initial-program 400
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :reproduction-probability 0
@@ -357,7 +372,7 @@
    :ultra-alternation-rate 0.01
    :ultra-alignment-deviation 10
    :ultra-mutation-rate 0.01
-   :final-report-simplifications 1000
+   :final-report-simplifications 5000
    :use-lexicase-selection true
    :use-ultra-no-paren-mutation true
    :problem-specific-report wc-report

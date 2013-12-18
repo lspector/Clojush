@@ -7,8 +7,8 @@
         clojure.math.numeric-tower))
 
 (reset! global-atom-generators wc-atom-generators)
-(reset! global-evalpush-limit 1000)
-(reset! global-max-points 100)
+(reset! global-evalpush-limit 2000)
+(reset! global-max-points 1000)
 
 ;;;;
 ;evolved solution
@@ -26,18 +26,33 @@
 
 (def log18 '((tag_string_305 string_readline string_readline output_charcount string_readline string_readline string_readline string_readline string_yank string_readline string_readline output_linecount exec_do*times exec_do*range boolean_stackdepth integer_sub output_linecount string_stackdepth boolean_swap output_linecount string_take output_wordcount string_concat) (output_charcount exec_dup string_concat string_concat exec_s exec_dup exec_dup string_concat string_concat integer_swap string_concat boolean_swap file_begin integer_sub integer_sub string_dup exec_rot integer_mod string_split string_length file_begin string_stackdepth exec_swap output_charcount output_wordcount)))
 
+(def sol27 '(((((exec_stackdepth exec_do*count string_readline exec_do*count string_concat exec_do*count string_stackdepth) exec_eq output_charcount exec_do*count string_stackdepth ("\t" exec_shove string_length (exec_yankdup string_rot string_dup) string_rot) string_pop output_charcount string_split string_whitespace exec_rot string_stackdepth)) string_dup (integer_yank) exec_s output_wordcount boolean_stackdepth (exec_s) "\n" ((string_contained) ((file_begin) (string_stackdepth string_flush) (((string_shove (exec_do*times integer_yankdup (integer_add exec_s ((exec_s integer_rot) string_rot (integer_min tag_string_246 exec_when exec_shove string_readline) string_readline) string_readline) string_readline string_readline string_readline)) string_readline) string_readline))) string_stackdepth) output_linecount))
+
 (defn test-evolved-program
-  [prog]
-  (let [test-cases (wc-test-cases 50)
-        result (evaluate-individual (make-individual :program prog)
-                     (wc-error-function 50 test-cases)
+  [prog data-domains]
+  (let [result (evaluate-individual (make-individual :program prog)
+                     (wc-error-function data-domains)
                      (new java.util.Random))
         errors (partition-all 3 (:errors result))]
     (map (fn [test-case error]
            (vector error test-case))
-         test-cases
+         (first (first data-domains))
          errors)))
-      
 
-(filter #(not= (first %) '(0 0 0))
-        (test-evolved-program log18))
+(def test-data-domains
+  [[(list (apply str (repeat 100 \newline))
+          (apply str (repeat 100 \space))
+          (apply str (repeat 100 \tab))
+          (apply str (repeat 100 \A))
+          (apply str (take 100 (cycle (list \A \newline))))
+          (apply str (take 100 (cycle (list \B \newline \newline))))
+          (apply str (take 100 (cycle (list \C \D \newline))))
+          (apply str (take 100 (cycle (list \E \space))))
+          (apply str (take 100 (cycle (list \F \tab))))
+          (apply str (take 100 (cycle (list \x \newline \y \space))))
+          (apply str (take 100 (cycle (list \space \newline))))) 20 0]])
+
+(test-evolved-program sol27 test-data-domains)
+
+#_(filter #(not= (first %) '(0 0 0))
+        (test-evolved-program sol27))
