@@ -26,7 +26,7 @@
                  (or (>= step steps)
                      (zero? (mod step progress-interval))))
         (printf "\nstep: %s\nprogram: %s\nerrors: %s\ntotal: %s\nsize: %s\n" 
-                step (not-lazy program) (not-lazy errors) total-errors (count-points program))
+                step (pr-str (not-lazy program)) (not-lazy errors) total-errors (count-points program))
         (flush))
       (if (>= step steps)
         (make-individual :program program :errors errors :total-error total-errors 
