@@ -345,12 +345,13 @@
   (let [best-program (not-lazy (:program best))
         best-test-errors (error-function best-program :test)
         best-total-test-error (apply +' best-test-errors)]
+    (println ";;******************************")
     (printf ";; -*- WC problem report generation %s\n" generation)(flush)
     (println "Test total error for best:" best-total-test-error)
     (println (format "Test mean error for best: %.5f" (double (/ best-total-test-error (count best-test-errors)))))
     (when (zero? (:total-error best))
       (println "Test errors for best:" best-test-errors))
-    (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n")
+    (println ";;******************************")
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
        ;; set. Would need a third category of data cases.
