@@ -88,7 +88,7 @@
   (fn [state]
     (if (empty? (:code state))
       state
-      (let [result (ignore-errors (zip/seq-zip (top-item :code state)))]
+      (let [result (ignore-errors (seq-zip (top-item :code state)))]
         (if result
           (push-item result :zip (pop-item :code state))
           state)))))
@@ -98,7 +98,7 @@
   (fn [state]
     (if (empty? (:exec state))
       state
-      (let [result (ignore-errors (zip/seq-zip (top-item :exec state)))]
+      (let [result (ignore-errors (seq-zip (top-item :exec state)))]
         (if result
           (push-item result :zip (pop-item :exec state))
           state)))))
