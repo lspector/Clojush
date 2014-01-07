@@ -8,6 +8,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utilities
 
+(defn seq-zip
+  "Returns a zipper for nested sequences, given a root sequence"
+  {:added "1.0"}
+  [root]
+  (zip/zipper seq?
+          seq
+          (fn [node children] (with-meta children (meta node)))
+          root))
+
 (defn ensure-list [thing] ;; really make-list-if-not-seq, but close enough for here
   (if (seq? thing)
     thing
@@ -54,7 +63,7 @@
   "Returns a subtree of tree indexed by point-index in a depth first traversal."
   [tree point-index]
   (let [index (mod (math/abs point-index) (count-points tree))
-        zipper (zip/seq-zip tree)]
+        zipper (seq-zip tree)]
     (loop [z zipper i index]
       (if (zero? i)
         (zip/node z)
@@ -65,7 +74,7 @@
    point-index (in a depth-first traversal) replaced by new-subtree."
   [tree point-index new-subtree]
   (let [index (mod (math/abs point-index) (count-points tree))
-        zipper (zip/seq-zip tree)]
+        zipper (seq-zip tree)]
     (loop [z zipper i index]
       (if (zero? i)
         (zip/root (zip/replace z new-subtree))
@@ -78,7 +87,7 @@
    from the behavior in other implementations of Push.)"
   [tree point-index]
   (let [index (mod (math/abs point-index) (count-points tree))
-        zipper (zip/seq-zip tree)]
+        zipper (seq-zip tree)]
     (if (zero? index)
       tree ;; can't remove entire tree
       (loop [z zipper i index]
@@ -98,7 +107,7 @@
    since you can't remove the outmost parens."
   [tree point-index]
   (let [index (mod (math/abs point-index) (count-points tree))
-        zipper (zip/seq-zip tree)]
+        zipper (seq-zip tree)]
     (if (zero? index)
       tree ;; can't remove entire tree's parens
       (let [z-found (loop [z zipper i index]
@@ -198,7 +207,7 @@ it will first be wrapped in a list."
         loc (inc (lrand-int (dec (count-points tree))))]
     (zip/root
       ((lrand-nth [zip/insert-left zip/insert-right])
-        (loop [z (zip/seq-zip tree) i 0]
+        (loop [z (seq-zip tree) i 0]
           (if (= i loc)
             z
             (recur (zip/next z) (inc i))))
