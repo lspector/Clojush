@@ -206,10 +206,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ULTRA (Uniform Linear Transformation with Repair and Alternation) operator
 
-(defn remove-empties 
+(defn remove-empties
   "Removes empty sequences from tree t."
   [t]
-  (postwalklist 
+  (prewalkseq 
     (fn [node] (if (seq? node) 
                  (remove #(and (seq? %) (empty? %)) node)
                  node))
@@ -218,7 +218,7 @@
 (defn remove-ultra-padding 
   "Removes instances of 'ultra-padding from tree t."
   [t]
-  (postwalklist 
+  (prewalkseq 
     (fn [node] (if (seq? node) 
                  (remove #{'ultra-padding} node)
                  node))
@@ -227,7 +227,7 @@
 (defn list-to-open-close-sequence
   [lst]
   (if (seq? lst)
-    (flatten (postwalklist #(if (seq? %) (list :open % :close) %) lst))
+    (flatten (prewalkseq #(if (seq? %) (concat '(:open) % '(:close)) %) lst))
     lst))
 
 ;(list-to-open-close-sequence '(1 2 (a b (c) ((d)) e)))

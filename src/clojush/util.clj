@@ -146,6 +146,14 @@
   [f form]
   (walklist (partial postwalklist f) f form))
 
+(defn prewalkseq
+  "Like prewalk but only for seqs and uses zippers."
+  [f s]
+  (loop [z (seq-zip s)] ;; note using modified version of seq-zip for now
+    (if (zip/end? z)
+      (zip/root z)
+      (recur (zip/next (zip/replace z (f (zip/node z))))))))
+
 (defn postwalklist-replace
   "Like postwalk-replace, but only for lists."
   [smap form]
