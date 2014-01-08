@@ -170,6 +170,8 @@
     (println "Zero cases best number of elite cases:" (apply + (map #(if (== %1 %2) 1 0)
                                                                   (:errors most-zero-cases-best)
                                                                   min-error-by-case)))
+    (println "Zero cases best number of zero cases:" (apply + (map #(if (< %1 min-number-magnitude) 1 0)
+                                                                   (:errors most-zero-cases-best))))
     (println "Zero cases best total error:" (:total-error most-zero-cases-best))
     (println "Zero cases best mean error:" (float (/ (:total-error most-zero-cases-best)
                                                    (count (:errors most-zero-cases-best)))))

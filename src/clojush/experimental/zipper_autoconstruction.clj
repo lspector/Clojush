@@ -219,7 +219,7 @@
       (if (or (not (seq? (zip/node (top-item :zip state))))
               (empty? (zip/node (top-item :zip state))))
         state
-        (let [top-zip (zip/seq-zip (zip/root (top-item :zip state)))
+        (let [top-zip (seq-zip (zip/root (top-item :zip state)))
               next-zip (loop [z top-zip
                               c (select-node-index (zip/node top-zip))]
                          (if (zero? c)
@@ -234,7 +234,7 @@
       (if (or (not (seq? (zip/node (top-item :zip state))))
               (empty? (zip/node (top-item :zip state))))
         state
-	(push-item (zip/seq-zip (zip/root (top-item :zip state)))
+	(push-item (seq-zip (zip/root (top-item :zip state)))
 		   :zip (pop-item :zip state))))))
 
 
