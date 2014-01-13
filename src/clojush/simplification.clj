@@ -37,9 +37,10 @@
         (let [new-program (if (< (lrand-int 5) 4)
                             ;; remove a small number of random things
                             (loop [p program how-many (inc (lrand-int 2))]
-                              (if (zero? how-many)
+                              (if (or (zero? how-many)
+                                      (<= (count-points p) 1))
                                 p
-                                (recur (remove-code-at-point p (lrand-int (count-points p)))
+                                (recur (remove-code-at-point p (inc (lrand-int (dec (count-points p)))))
                                        (dec how-many))))
                             ;; flatten something
                             (let [point-index (lrand-int (count-points program))
