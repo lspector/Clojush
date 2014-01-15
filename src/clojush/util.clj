@@ -80,11 +80,11 @@
         (zip/root (zip/replace z new-subtree))
         (recur (zip/next z) (dec i))))))
 
-(defn remove-code-at-point 
+(defn remove-code-at-point
   "Returns a copy of tree with the subtree formerly indexed by
-   point-index (in a depth-first traversal) removed. If removal would
-   result in an empty list then it is not performed. (NOTE: this is different
-   from the behavior in other implementations of Push.)"
+   point-index (in a depth-first traversal) removed. The old version would not
+   allow removals that result in empty lists, but the current version allows
+   this behavior."
   [tree point-index]
   (let [index (mod (math/abs point-index) (count-points tree))
         zipper (seq-zip tree)]
@@ -93,10 +93,10 @@
       (loop [z zipper i index]
         (if (zero? i)
           (zip/root (zip/remove z))
-          (if (and (= i 1) ;; can't remove only item from list
+          (if (and (= i 1) ;; zipper can't remove only item from list; instead, replace with empty list
                    (seq? (zip/node z))
                    (= 1 (count (zip/node z))))
-            (zip/root z) ;(zip/remove z))
+            (zip/root (zip/replace z '())) ;; used to just return (zip/root z)
             (recur (zip/next z) (dec i))))))))
 
 (defn remove-parens-at-point
