@@ -209,8 +209,8 @@
 (defn remove-empties
   "Removes empty sequences from tree t."
   [t]
-  (prewalkseq 
-    (fn [node] (if (seq? node) 
+  (prewalkseq
+    (fn [node] (if (seq? node)
                  (remove #(and (seq? %) (empty? %)) node)
                  node))
     t))
@@ -218,11 +218,13 @@
 (defn remove-ultra-padding 
   "Removes instances of 'ultra-padding from tree t."
   [t]
-  (prewalkseq 
-    (fn [node] (if (seq? node) 
-                 (remove #{'ultra-padding} node)
-                 node))
-    t))
+  (if (= t 'ultra-padding)
+    '()
+    (prewalkseq
+      (fn [node] (if (seq? node)
+                   (remove #{'ultra-padding} node)
+                   node))
+      t)))
 
 (defn list-to-open-close-sequence
   [lst]
