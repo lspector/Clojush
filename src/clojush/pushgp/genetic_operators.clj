@@ -334,14 +334,14 @@
 ;  (println (balance s)))
 
 (defn alternate
-  [s1 s2 alternation-rate alignment-deviation]
+  [s1 s2 alternation-rate alignment-deviation max-points]
   (let [s1 (vec s1)
         s2 (vec s2)]
     (loop [i 0
            use-s1 (lrand-nth [true false])
            result []]
       (if (or (>= i (count (if use-s1 s1 s2)))
-              (> (count result) 10000)) ;; runaway growth
+              (> (count result) (* 2 max-points))) ;; runaway growth
         (apply list result)
         (if (< (lrand) alternation-rate)
           (recur (max 0 (+' i (Math/round (*' alignment-deviation (gaussian-noise-factor)))))
@@ -374,7 +374,8 @@
 
 (defn ultra-operate-on-programs
   [p1 p2 alternation-rate alignment-deviation mutation-rate
-   use-ultra-no-paren-mutation ultra-pads-with-empties atom-generators]
+   use-ultra-no-paren-mutation ultra-pads-with-empties atom-generators
+   max-points]
   (if (or (not (seq? p1))
           (not (seq? p2)))
     p1 ;; can't do if either program isn't a list
@@ -393,7 +394,8 @@
               (alternate (list-to-open-close-sequence p1)
                          (list-to-open-close-sequence p2)
                          alternation-rate
-                         alignment-deviation)
+                         alignment-deviation
+                         max-points)
               mutation-rate
               use-ultra-no-paren-mutation
               atom-generators)))))))
@@ -427,7 +429,8 @@
                                                ultra-mutation-rate
                                                use-ultra-no-paren-mutation
                                                ultra-pads-with-empties
-                                               atom-generators)]
+                                               atom-generators
+                                               max-points)]
     (if (> (count-points new-program) max-points)
       parent1
       (make-individual :program new-program :history (:history parent1)
