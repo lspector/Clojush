@@ -50,9 +50,30 @@
           (apply str (take 100 (cycle (list \E \space))))
           (apply str (take 100 (cycle (list \F \tab))))
           (apply str (take 100 (cycle (list \x \newline \y \space))))
-          (apply str (take 100 (cycle (list \space \newline))))) 20 0]])
+          (apply str (take 100 (cycle (list \space \newline)))))
+    20 0]])
 
-(test-evolved-program sol27 test-data-domains)
+;(test-evolved-program sol27 test-data-domains)
 
 #_(filter #(not= (first %) '(0 0 0))
         (test-evolved-program sol27))
+
+;; From later testing
+
+(def missed-test-cases-3
+  [[(list "\t? ~` 0-\nGr2?\nk\nN <`' H; O]? P j  fh N\n\t\tDko 7 9 ,\"AS\n$\n\nf \tQZg Y5 px)}! \"jE( \n&z Xt\n\"0"
+          "kr6\tqe  !  rW  F QC VlM\tj D  o@c1  Wj\n\nq\n) \n9c\t2/ Y\tqT \t1oZ\nEk \n*6?|I<7 \\I ,8kx ^\nS^\n :h&Cn\n  s")
+    10 0]])
+
+(def sol3 '(((((((integer_dup ((((exec_stackdepth) integer_mod string_eq boolean_stackdepth output_charcount exec_do*times (exec_dup (string_readline string_concat)) exec_yankdup integer_dec exec_do*count integer_dec (exec_dup (string_readline string_concat)) exec_yankdup integer_dec exec_do*count integer_dec output_charcount) output_charcount boolean_swap) file_EOF integer_dec exec_when boolean_not integer_swap (output_charcount string_length string_rot boolean_dup exec_rot output_charcount string_length exec_if integer_max exec_rot file_begin integer_yank output_charcount file_begin string_take exec_yank boolean_and file_begin) exec_yankdup (file_begin) integer_inc) output_charcount exec_when string_readline exec_stackdepth boolean_frominteger string_readline string_readline output_charcount integer_min string_readline) string_readline exec_yankdup (string_readline) exec_yankdup string_readline) string_dup integer_dup)) integer_add output_charcount exec_do*count "\t" integer_dup (exec_pop output_charcount (string_whitespace integer_inc integer_max string_readline (integer_rot (integer_mult string_readline boolean_swap output_charcount string_readline boolean_or exec_swap (string_reverse string_readline integer_yank integer_dup string_reverse boolean_not) "\n" (output_charcount string_shove exec_do*times (string_contained ((string_eq) boolean_swap string_eq) boolean_swap exec_yank string_eq boolean_swap string_eq exec_k boolean_dup boolean_dup (string_pop exec_yankdup string_dup exec_yank) (output_charcount)) file_EOF string_take string_parse_to_chars ((string_pop file_begin exec_yank (exec_yank (string_pop file_begin exec_yank)) exec_if integer_yank exec_stackdepth (exec_s string_yankdup string_whitespace) (exec_yank) string_eq boolean_and (output_charcount output_wordcount string_stackdepth) string_whitespace exec_if (("\n") string_shove) (string_pop exec_yank) exec_dup string_whitespace) (string_eq exec_yank) file_begin string_whitespace exec_dup string_whitespace exec_if)) (("\n") string_shove (integer_min string_eq)) output_charcount) boolean_and integer_min exec_stackdepth) string_stackdepth) integer_yank exec_swap string_eq exec_do*range file_begin boolean_and ((integer_sub exec_do*count string_readline string_reverse) string_stackdepth) string_swap boolean_swap output_wordcount) exec_do*range output_wordcount output_linecount (((output_linecount exec_swap exec_s exec_do*times integer_add string_readline output_linecount (exec_shove string_take integer_max integer_yankdup integer_add string_stackdepth integer_dec output_linecount) exec_dup integer_yankdup (output_linecount string_rot integer_min exec_s exec_yank string_yank exec_s integer_dup string_rot string_yank) exec_s (string_split) (string_readchar string_split string_yank exec_pop exec_swap output_wordcount string_stackdepth string_split integer_mod string_split string_yank exec_pop tag_string_572 output_wordcount string_stackdepth string_split integer_min string_split string_yank exec_pop integer_yankdup boolean_and string_stackdepth integer_rot string_stackdepth) exec_dup) string_pop boolean_not boolean_not))))))
+
+(filter #(not= (first %) '(0 0 0)) (test-evolved-program sol3 missed-test-cases-3))
+
+(let [input (second (first (first missed-test-cases-3)))]
+  (run-push sol3
+            (->> (make-push-state)
+              (push-item nil :auxiliary)
+              (push-item nil :auxiliary)
+              (push-item nil :auxiliary)
+              (push-item input :auxiliary)
+              (push-item input :auxiliary))))

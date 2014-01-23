@@ -296,14 +296,15 @@
   [data-domains]
   (let [[train-cases test-cases] (map wc-test-cases
                                       (test-and-train-data-from-domains data-domains))]
-    (doseq [[i [string ch wo li]] (map vector (range) train-cases)]
-      (println (str "Train Case " i " | Chars: " ch " Words: " wo " Lines: " li))
-      (println string)
-      (println "--------------------"))
-    (doseq [[i [string ch wo li]] (map vector (range) test-cases)]
-      (println (str "Test Case " i " | Chars: " ch " Words: " wo " Lines: " li))
-      (println string)
-      (println "--------------------"))
+    (when true ;; Change to True to print test cases
+      (doseq [[i [string ch wo li]] (map vector (range) train-cases)]
+        (println (str "Train Case " i " | Chars: " ch " Words: " wo " Lines: " li))
+        (prn string)
+        (println "--------------------"))
+      (doseq [[i [string ch wo li]] (map vector (range) test-cases)]
+        (println (str "Test Case " i " | Chars: " ch " Words: " wo " Lines: " li))
+        (prn string)
+        (println "--------------------")))
     (fn the-actual-wc-error-function
       ([program]
         (the-actual-wc-error-function program :train))
