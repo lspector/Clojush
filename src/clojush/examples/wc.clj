@@ -355,7 +355,7 @@
     (println ";;******************************")
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
-       ;; set. Would need a third category of data cases.
+       ;; set. Would need a third category of data cases, or a defined split of training cases.
 
 ; Define the argmap
 (def argmap
