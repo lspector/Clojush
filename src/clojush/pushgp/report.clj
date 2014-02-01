@@ -212,6 +212,7 @@
         best (if (= (type psr-best) clojush.individual.individual)
                psr-best
                err-fn-best)]
+    (println "Error frequencies by case:" (doall (map frequencies (apply map vector (map :errors population)))))
     (when use-lexicase-selection (lexicase-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
     (println "Best program:" (pr-str (not-lazy (:program best))))
