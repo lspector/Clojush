@@ -25,15 +25,6 @@
         clojure.math.numeric-tower
         [clojure.string :only [split trim]]))
 
-; Hand-coded solution for just character count
-#_(run-push '(exec_y (string_readchar file_EOF exec_when exec_pop) string_stackdepth output_charcount)
-          (->> (make-push-state)
-               (push-item nil :auxiliary)
-               (push-item nil :auxiliary)
-               (push-item nil :auxiliary)
-               (push-item "hello\nworld" :auxiliary)
-               (push-item "hello\nworld" :auxiliary)))
-
 ; Define new instructions
 (define-registered
   string_readchar
@@ -118,7 +109,7 @@
         (stack-assoc top-int :auxiliary 4
                      (pop-item :integer state))))))
 
-; Make atom generators
+; Atom generators
 (def wc-atom-generators
   (list
     (fn [] (- (lrand-int 201) 100))
@@ -252,17 +243,10 @@
                                         (take n-test (shuffle input-set))))))
                           domains)))
 
-;;WC test data like this:
+;;Can make WC test data like this:
 ;(test-and-train-data-from-domains wc-data-domains)
 
-;(defn random-wc-inputs
-;  "Returns a list of n random inputs. Each will have size between 0 and 100."
-;  [n]
-;  (let [chars (map char (range 32 127))
-;        max-len 100]
-;    (repeatedly n
-;                (partial wc-input (lrand-int (inc max-len))))))
-
+; Helper functions for error function
 (defn wc-char-count
   "Takes a wc input and returns the char count output"
   [input]
@@ -296,7 +280,7 @@
   [data-domains]
   (let [[train-cases test-cases] (map wc-test-cases
                                       (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to True to print test cases
+    (when true ;; Change to false to not print test cases
       (doseq [[i [string ch wo li]] (map vector (range) train-cases)]
         (println (str "Train Case " i " | Chars: " ch " Words: " wo " Lines: " li))
         (prn string)
