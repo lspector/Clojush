@@ -1,7 +1,8 @@
 (ns clojush.util
   (:require [clojure.math.numeric-tower :as math]
             [clojure.zip :as zip]
-            [clojure.walk :as walk])
+            [clojure.walk :as walk]
+            [clojure.string :as string])
   (:use [clojush.globals]
         [clojush.random]))
 
@@ -202,6 +203,29 @@
   (if (seq? lst)
     (apply list lst)
     lst))
+
+(defn list-to-open-close-sequence
+  [lst]
+  (if (seq? lst)
+    (flatten (prewalkseq #(if (seq? %) (concat '(:open) % '(:close)) %) lst))
+    lst))
+
+;(list-to-open-close-sequence '(1 2 (a b (c) ((d)) e)))
+
+(defn open-close-sequence-to-list
+  [sequence]
+  (cond (not (seq? sequence)) sequence
+        (empty? sequence) ()
+        :else (let [s (str sequence)
+                    l (read-string (string/replace (string/replace s ":open" " ( ") ":close" " ) "))]
+                ;; there'll be an extra ( ) around l, which we keep if the number of read things is >1
+                (if (= (count l) 1)
+                  (first l)
+                  l))))
+
+;(open-close-sequence-to-list '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close))
+;(open-close-sequence-to-list '(:open 1 :close :open 2 :close))
+;(open-close-sequence-to-list '(:open :open 1 :close :open 2 :close :close))
 
 ;; backtrace abbreviation, to ease debugging
 (defn bt []
