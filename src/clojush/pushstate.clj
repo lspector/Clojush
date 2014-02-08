@@ -80,6 +80,14 @@
       :no-stack-item
       (nth stack position))))
 
+(defn stack-assoc
+  "Puts value at position on type stack in state. This is a utility, not for use
+   as an instruction in Push programs. NOT SAFE for invalid positions."
+  [value type position state]
+  (let [stack (type state)
+        new-stack (apply list (assoc (vec stack) position value))]
+    (assoc state type new-stack)))
+
 (defn pop-item
   "Returns a copy of the state with the specified stack popped. This is a utility,
    not for use as an instruction in Push programs."

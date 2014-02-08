@@ -188,7 +188,7 @@
 (define-registered integer_max (maxer :integer))
 (define-registered float_max (maxer :float))
 
-(define-registered 
+(define-registered
   float_sin
   (fn [state]
     (if (not (empty? (:float state)))
@@ -197,7 +197,7 @@
                  (pop-item :float state))
       state)))
 
-(define-registered 
+(define-registered
   float_cos
   (fn [state]
     (if (not (empty? (:float state)))
@@ -206,11 +206,29 @@
                  (pop-item :float state))
       state)))
 
-(define-registered 
+(define-registered
   float_tan
   (fn [state]
     (if (not (empty? (:float state)))
       (push-item (keep-number-reasonable (Math/tan (stack-ref :float 0 state)))
                  :float
                  (pop-item :float state))
+      state)))
+
+(define-registered
+  integer_inc
+  (fn [state]
+    (if (not (empty? (:integer state)))
+      (push-item (inc (stack-ref :integer 0 state))
+                 :integer
+                 (pop-item :integer state))
+      state)))
+
+(define-registered
+  integer_dec
+  (fn [state]
+    (if (not (empty? (:integer state)))
+      (push-item (dec (stack-ref :integer 0 state))
+                 :integer
+                 (pop-item :integer state))
       state)))

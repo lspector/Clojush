@@ -1,6 +1,7 @@
 (ns clojush.instructions.string
   (:use [clojush.pushstate]
-        [clojush.globals]))
+        [clojush.globals]
+        [clojure.string :only [split trim]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; instructions for strings
@@ -69,6 +70,18 @@
           loop-state
           (recur (rest char-list)
                  (push-item (str (first char-list)) :string loop-state)))))))
+
+(define-registered
+  string_split
+  (fn [state]
+    (if (empty? (:string state))
+      state
+      (loop [word-list (reverse (filter not-empty (split (trim (top-item :string state)) #"\s+")))
+             loop-state (pop-item :string state)]
+        (if (empty? word-list)
+          loop-state
+          (recur (rest word-list)
+                 (push-item (first word-list) :string loop-state)))))))
 
 (define-registered 
   string_contained ;;true if top string is a substring of second string; false otherwise
