@@ -21,7 +21,7 @@
   [number max-parts]
   (if (or (<= max-parts 1) (<= number 1))
     (list number)
-    (let [this-part (if @global-use-bushy-code 
+    (let [this-part (if @global-generate-bushy-random-code 
                       (dec number)
                       (inc (lrand-int (dec number))))]
       (cons this-part (decompose (-' number this-part)

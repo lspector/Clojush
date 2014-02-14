@@ -331,8 +331,8 @@
 ; (alternate '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16) '(a b c d e f g h i j k) 0.2 1)
 
 (defn linearly-mutate
-  [open-close-sequence mutation-rate use-ultra-no-paren-mutation atom-generators]
-  (let [parentheses (if @global-use-bushy-code
+  [open-close-sequence mutation-rate use-ultra-no-paren-mutation ultra-mutates-to-parentheses-frequently atom-generators]
+  (let [parentheses (if ultra-mutates-to-parentheses-frequently
                       (let [n (count atom-generators)]
                         (concat (repeat n :open) (repeat n :close)))
                       [:open :close])
@@ -351,8 +351,8 @@
 
 (defn ultra-operate-on-programs
   [p1 p2 alternation-rate alignment-deviation mutation-rate
-   use-ultra-no-paren-mutation ultra-pads-with-empties atom-generators
-   max-points]
+   use-ultra-no-paren-mutation ultra-pads-with-empties 
+   ultra-mutates-to-parentheses-frequently atom-generators max-points]
   (if (or (not (seq? p1))
           (not (seq? p2)))
     p1 ;; can't do if either program isn't a list
@@ -375,6 +375,7 @@
                          max-points)
               mutation-rate
               use-ultra-no-paren-mutation
+              ultra-mutates-to-parentheses-frequently
               atom-generators)))))))
 
 ;(let [p1 '(a (b c) (d ((e)) f))
@@ -398,7 +399,8 @@
    with Repair and Alternation) operation to parent1 and parent2."
   [parent1 parent2 {:keys [max-points ultra-alternation-rate ultra-alignment-deviation
                            ultra-mutation-rate atom-generators maintain-ancestors
-                           use-ultra-no-paren-mutation ultra-pads-with-empties]}]
+                           use-ultra-no-paren-mutation ultra-pads-with-empties
+                           ultra-mutates-to-parentheses-frequently]}]
   (let [new-program (ultra-operate-on-programs (:program parent1)
                                                (:program parent2)
                                                ultra-alternation-rate
@@ -406,6 +408,7 @@
                                                ultra-mutation-rate
                                                use-ultra-no-paren-mutation
                                                ultra-pads-with-empties
+                                               ultra-mutates-to-parentheses-frequently
                                                atom-generators
                                                max-points)]
     (if (> (count-points new-program) max-points)

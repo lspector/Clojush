@@ -558,7 +558,8 @@
    :pop-when-tagging true
    :report-simplifications 0
    :print-history false
-   :use-bushy-code true
+   :generate-bushy-random-code true
+   :ultra-mutates-to-parentheses-frequently true
    :use-ultra-no-paren-mutation false
    :ultra-pads-with-empties false
    :problem-specific-report calc-report-with-reset!

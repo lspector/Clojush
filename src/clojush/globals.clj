@@ -51,4 +51,4 @@
 (def global-pop-when-tagging (atom true)) ;; When true, tagging instructions will pop the exec stack when tagging; otherwise, the exec stack is not popped
 
 ;; Special defs not used by Push instructions, but still need to be globally def'ed, go here.
-(def global-use-bushy-code (atom false)) ;; When true, random code and code changed by ULTRA mutation, will be "bushy", as in close to a binary tree
+(def global-generate-bushy-random-code (atom false)) ;; When true, random code will be close to being a binary tree

@@ -61,6 +61,7 @@
           :ultra-mutation-rate 0.1 ;; The probability of each token being mutated during ULTRA
           :use-ultra-no-paren-mutation false ; If true, ULTRA will use no-paren mutation, which means that parentheses won't be added or deleted during mutation.
           :ultra-pads-with-empties false ;; If true then ULTRA pads the smaller parent with () and then removes them; if false then this is instead done using the symbol 'ultra-padding.
+          :ultra-mutates-to-parentheses-frequently false ;; If true then when ULTRA mutates the new token will be "(" 1/3 of the time, ")" 1/3 of the time, and something else 1/3 of the time. When false, parentheses are treated like all other possible tokens.
           :gaussian-mutation-per-number-mutation-probability 0.5 ;; The probability that any given float literal will be affected by a pass of gaussian-mutate
           :gaussian-mutation-standard-deviation 0.1 ;; The standard deviation of a gaussian-mutated float
           :boolean-gsxover-new-code-max-points 20 ;; The maximum size of the random code fragment used in boolean-gsxover
@@ -120,7 +121,7 @@
           ;; Other arguments
           ;;----------------------------------------
           :parent-reversion-probability 0.0 ;; The probability of a child being reverted to its parent if the parent has better fitness or equal fitness and is smaller
-          :use-bushy-code false ;; When true, random code and code changed by ULTRA mutation, will be "bushy", as in close to a binary tree
+          :generate-bushy-random-code false ;; When true, random code will be "bushy", as in close to a binary tree
           )))
 
 (defn load-push-argmap
