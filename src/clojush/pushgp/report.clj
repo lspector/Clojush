@@ -195,6 +195,7 @@
            print-errors print-history print-cosmos-data print-timings
            problem-specific-report use-rmse use-historically-assessed-hardness
            use-lexicase-selection
+           print-error-frequencies-by-case
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
@@ -212,7 +213,8 @@
         best (if (= (type psr-best) clojush.individual.individual)
                psr-best
                err-fn-best)]
-    (println "Error frequencies by case:" (doall (map frequencies (apply map vector (map :errors population)))))
+    (when print-error-frequencies-by-case
+      (println "Error frequencies by case:" (doall (map frequencies (apply map vector (map :errors population))))))
     (when use-lexicase-selection (lexicase-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
     (println "Best program:" (pr-str (not-lazy (:program best))))

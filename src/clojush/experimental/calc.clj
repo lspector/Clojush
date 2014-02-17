@@ -565,6 +565,7 @@
    :problem-specific-report calc-report-with-reset!
    :reuse-errors false
    :error-threshold -1
+   :print-error-frequencies-by-case true
   })
   
 ;; needed to validate

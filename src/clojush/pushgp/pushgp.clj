@@ -106,6 +106,7 @@
           :print-cosmos-data false ; If true, report prints COSMOS data each generation.
           :maintain-ancestors false  ; If true, save all ancestors in each individual (costly)
           :print-ancestors-of-solution false ; If true, final report prints the ancestors of the solution. Requires :maintain-ancestors to be true.
+          :print-error-frequencies-by-case false ; If true, print reports of error frequencies by case each generation
           ;;
           ;;----------------------------------------
           ;; Arguments related to printing JSON or CSV logs
