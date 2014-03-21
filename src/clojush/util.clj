@@ -100,33 +100,6 @@
             (zip/root (zip/replace z '())) ;; used to just return (zip/root z)
             (recur (zip/next z) (dec i))))))))
 
-(defn remove-parens-at-point
-  "Returns a copy of tree with the parens of the subtree formerly indexed by
-   point-index (in a depth-first traversal) removed. This
-   only works if that subtree is a sequence, otherwise this
-   just returns the tree. Also, can't remove from index 0,
-   since you can't remove the outmost parens."
-  [tree point-index]
-  (let [index (mod (math/abs point-index) (count-points tree))
-        zipper (seq-zip tree)]
-    (if (zero? index)
-      tree ;; can't remove entire tree's parens
-      (let [z-found (loop [z zipper i index]
-                      (if (zero? i)
-                        z
-                        (recur (zip/next z) (dec i))))]
-        (if (not (seq? (zip/node z-found))) ;can't un-paren non-seq things
-          (zip/root z-found)
-          (if (empty? (zip/children z-found)) ;seq is empty, just remove it
-            (zip/root (zip/remove z-found))
-            (let [children (zip/children z-found)]
-              (loop [ch (butlast children)
-                     z (zip/replace z-found (last children))]
-                (if (empty? ch)
-                  (zip/root z)
-                  (recur (rest ch)
-                         (zip/insert-left z (first ch))))))))))))
-
 (defn truncate
   "Returns a truncated integer version of n."
   [n]
