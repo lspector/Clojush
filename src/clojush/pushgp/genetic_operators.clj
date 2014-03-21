@@ -1,9 +1,5 @@
 (ns clojush.pushgp.genetic-operators
-  (:use [clojush.util]
-        [clojush.random]
-        [clojush.globals]
-        [clojush.individual]
-        [clojush.node-selection])
+  (:use [clojush util random globals individual node-selection simplification])
   (:require [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -76,12 +72,9 @@
                                         true 4))]
                       (if (zero? how-many)
                         prog
-                        (recur (let [point-index (lrand-int (count-points prog))
-                                     point (code-at-point prog point-index)]
-                                 (if (and (seq? point)
-                                          (< (lrand) 0.2))
-                                   (remove-parens-at-point prog point-index)
-                                   (remove-code-at-point prog point-index)))
+                        (recur (if (< (lrand) 0.1)
+                                 (remove-paren-pair prog)
+                                 (remove-code-at-point prog (lrand-int (count-points prog))))
                                (dec how-many))))]
     (make-individual :program new-program :history (:history ind)
                      :ancestors (if maintain-ancestors
