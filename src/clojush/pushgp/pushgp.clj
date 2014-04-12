@@ -1,7 +1,7 @@
 (ns clojush.pushgp.pushgp
   (:require [clojure.java.io :as io]
             [clj-random.core :as random])
-  (:use [clojush globals util pushstate random individual evaluate]
+  (:use [clojush globals util pushstate random individual evaluate simplification]
         [clojush.instructions boolean code common numbers random-instructions string tag zip return]
         [clojush.pushgp breed parent-selection report]
         [clojush.experimental.decimation]))
@@ -79,7 +79,7 @@
           ;;----------------------------------------
           :tournament-size 7 ;; If using tournament selection, the size of the tournaments
           :trivial-geography-radius 0 ;; If non-zero, this is used as the radius from which to select individuals for tournament or lexicase selection
-          :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population size that is retained before breeding. If 0 < decimation-ratio < 1, decimation tournaments will be used to reduce the population to size (* population-size decimation-ratio) before breeding. 
+          :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population size that is retained before breeding. If 0 < decimation-ratio < 1, decimation tournaments will be used to reduce the population to size (* population-size decimation-ratio) before breeding.
           :decimation-tournament-size 2 ;; Size of the decimation tournaments
           :use-historically-assessed-hardness false ;; When true, total error for tournament selection will depend on historically-assessed hardness
           :use-rmse false ;; When true, total error for tournament selection will depend on the root mean square error of the error vector
@@ -100,6 +100,7 @@
           :report-simplifications 100 ;; The number of simplification steps that will happen during report simplifications
           :final-report-simplifications 1000 ;; The number of simplification steps that will happen during final report simplifications
           :problem-specific-report default-problem-specific-report ;; A function can be called to provide a problem-specific report, which happens after the normal generational report is printed
+          :return-simplified-on-failure false ;; When true, will simplify the best indivual and return it, even if the error threshold has not been reached. This will make failures return the same as successes
           :print-errors true ;; When true, prints the error vector of the best individual
           :print-history false ;; When true, prints the history of the best individual's ancestors' total errors
           :print-timings false ; If true, report prints how long different parts of evolution have taken during the current run.
@@ -313,13 +314,16 @@
             (build-elitegroups pop-agents))
           (timer @push-argmap :other)
           ;; report and check for success
-          (let [outcome (report-and-check-for-success (vec (doall (map deref pop-agents)))
+          (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
                                                       generation @push-argmap)]
-            (cond (= outcome :failure) (do (printf "\nFAILURE\n") (flush))
+            (cond (= outcome :failure) (do (printf "\nFAILURE\n")
+                                           (if (:return-simplified-on-failure @push-argmap)
+                                             (auto-simplify best (:error-function @push-argmap) (:final-report-simplifications @push-argmap) true 500)
+                                             (flush)))
                   (= outcome :continue) (do (timer @push-argmap :report)
                                             (println "\nProducing offspring...")
                                             (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
                                             (println "Installing next generation...")
                                             (install-next-generation pop-agents child-agents @push-argmap)
                                             (recur (inc generation)))
-                  :else (final-report generation outcome @push-argmap))))))))
+                  :else  (final-report generation best @push-argmap))))))))

@@ -277,9 +277,9 @@
     (when print-json-logs (json-print population generation json-log-filename
                                       log-fitnesses-for-all-cases json-log-program-strings))
     (cond (or (<= (:total-error best) error-threshold)
-              (:success best)) best
-          (>= generation max-generations) :failure
-          :else :continue)))
+              (:success best)) [:success best]
+          (>= generation max-generations) [:failure best]
+          :else [:continue best])))
 
 (defn initial-report
   "Prints the initial report of a PushGP run."
