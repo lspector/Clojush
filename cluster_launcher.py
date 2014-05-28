@@ -71,6 +71,6 @@ alf_f.close()
 
 # Run tractor command
 source_string = "source /etc/sysconfig/pixar"
-pixar_string = "/opt/pixar/tractor-blade-1.6.3/python/bin/python2.6 /opt/pixar/tractor-blade-1.6.3/tractor-spool.py --engine=fly:8000"
+pixar_string = "/opt/pixar/tractor-blade-1.7.2/python/bin/python2.6 /opt/pixar/tractor-blade-1.7.2/tractor-spool.py --engine=fly:8000"
 
 os.system("%s;%s %s" % (source_string, pixar_string, alf_file_string))
