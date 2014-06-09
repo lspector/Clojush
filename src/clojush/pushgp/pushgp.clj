@@ -144,8 +144,9 @@
            max-points-in-initial-program atom-generators random-seed
            save-initial-population]}]
   (let [agent-error-handler (fn [agnt except]
-                              (.printStackTrace except System/out)
-                              (.printStackTrace except)
+                              ;(.printStackTrace except System/out)
+                              ;(.printStackTrace except)
+                              (clojure.repl/pst except 10000)
                               (System/exit 0))
         ;random-seeds (repeatedly population-size #(random/lrand-bytes (:mersennetwister random/*seed-length*)))];; doesn't ensure unique seeds
         random-seeds (loop [seeds '()]
