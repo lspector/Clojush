@@ -53,8 +53,8 @@
   "Executes the contents of the exec stack, aborting prematurely if execution limits are 
    exceeded. The resulting push state will map :termination to :normal if termination was 
    normal, or :abnormal otherwise."
-  ([state] (eval-push state false false))
-  ([state print-steps] (eval-push state print-steps false))
+  ([state] (eval-push state false false false))
+  ([state print-steps] (eval-push state print-steps false false))
   ([state print-steps trace] (eval-push state print-steps trace false))
   ([state print-steps trace save-state-sequence]
     ;(when (empty? @global-atom-generators)
@@ -108,9 +108,9 @@
    pushing/popping. The resulting push state will map :termination to :normal if termination was 
    normal, or :abnormal otherwise."
   ([code state]
-    (run-push code state false false))
+    (run-push code state false false false))
   ([code state print-steps]
-    (run-push code state print-steps false))
+    (run-push code state print-steps false false))
   ([code state print-steps trace]
     (run-push code state print-steps trace false))
   ([code state print-steps trace save-state-sequence]
