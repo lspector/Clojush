@@ -1,6 +1,7 @@
 (ns clojush.pushgp.pushgp
   (:require [clojure.java.io :as io]
-            [clj-random.core :as random])
+            [clj-random.core :as random]
+            [clojure.repl :as repl])
   (:use [clojush globals util pushstate random individual evaluate simplification]
         [clojush.instructions boolean code common numbers random-instructions string tag zip return]
         [clojush.pushgp breed parent-selection report]
@@ -146,7 +147,7 @@
   (let [agent-error-handler (fn [agnt except]
                               ;(.printStackTrace except System/out)
                               ;(.printStackTrace except)
-                              (clojure.repl/pst except 10000)
+                              (repl/pst except 10000)
                               (System/exit 0))
         ;random-seeds (repeatedly population-size #(random/lrand-bytes (:mersennetwister random/*seed-length*)))];; doesn't ensure unique seeds
         random-seeds (loop [seeds '()]
