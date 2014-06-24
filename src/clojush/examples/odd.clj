@@ -32,4 +32,11 @@
    :atom-generators (concat (registered-nonrandom)
                             (list (fn [] (lrand-int 100))
                                   'in))
+   :reproduction-probability 0
+   :mutation-probability 0
+   :crossover-probability 0
+   :ultra-probability 1.0
+   :ultra-alternation-rate 0.01
+   :ultra-alignment-deviation 10
+   :ultra-mutation-rate 0.01
    })

@@ -65,6 +65,7 @@
                    (compute-root-mean-square-error e)
                    nil)]
         (make-individual :program p :errors e :total-error te :hah-error he :rms-error rmse
+                         :genome (:genome i)
                          :history (if print-history (cons te (:history i)) (:history i))
                          :ancestors (:ancestors i)
                          :parent (:parent i))))))

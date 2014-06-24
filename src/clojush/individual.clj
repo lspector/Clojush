@@ -6,10 +6,11 @@
 ;; Populations are vectors of agents with individuals as their states (along with error and
 ;; history information).
 
-(defrecord individual [program errors total-error hah-error rms-error history ancestors parent])
+(defrecord individual [genome program errors total-error hah-error rms-error history ancestors parent])
 
-(defn make-individual [& {:keys [program errors total-error hah-error rms-error history ancestors parent]
-                          :or {program nil
+(defn make-individual [& {:keys [genome program errors total-error hah-error rms-error history ancestors parent]
+                          :or {genome nil
+                               program nil
                                errors nil
                                total-error nil ;; a non-number is used to indicate no value
                                hah-error nil
@@ -17,7 +18,7 @@
                                history nil
                                ancestors nil
                                parent nil}}]
-  (individual. program errors total-error hah-error rms-error history ancestors parent))
+  (individual. genome program errors total-error hah-error rms-error history ancestors parent))
 
 (defn printable [thing]
   (letfn [(unlazy [[head & tail]]
@@ -29,6 +30,6 @@
 
 (defn individual-string [i]
   (cons 'individual.
-        (let [k '(:program :errors :total-error :hah-error :rms-error :history :ancestors :parent)]
+        (let [k '(:genome :program :errors :total-error :hah-error :rms-error :history :ancestors :parent)]
           (interleave k  (map #(printable (get i %)) k)))))
 

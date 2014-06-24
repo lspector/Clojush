@@ -146,6 +146,7 @@
         count-zero-by-case (map #(apply + %) (apply mapv vector pop-zero-by-case))
         ]
     (println "--- Lexicse Program with Most Elite Cases Statistics ---")
+    (println "Lexicase best genome:" (pr-str (not-lazy (:genome lex-best))))
     (println "Lexicase best program:" (pr-str (not-lazy (:program lex-best))))
     (when (> report-simplifications 0)
       (println "Lexicase best partial simplification:"
@@ -162,6 +163,7 @@
     (println "Lexicase best size:" (count-points (:program lex-best)))
     (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program lex-best)) (count-points (:program lex-best))))) ;Number of (open) parens / points
     (println "--- Lexicse Program with Most Zero Cases Statistics ---")
+    (println "Zero cases best genome:" (pr-str (not-lazy (:genome most-zero-cases-best))))
     (println "Zero cases best program:" (pr-str (not-lazy (:program most-zero-cases-best))))
     (when (> report-simplifications 0)
       (println "Zero cases best partial simplification:"
@@ -217,6 +219,7 @@
       (println "Error frequencies by case:" (doall (map frequencies (apply map vector (map :errors population))))))
     (when use-lexicase-selection (lexicase-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
+    (println "Best genome:" (pr-str (not-lazy (:genome best))))
     (println "Best program:" (pr-str (not-lazy (:program best))))
     (when (> report-simplifications 0)
       (println "Partial simplification:"
