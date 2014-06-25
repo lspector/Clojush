@@ -5,7 +5,15 @@
   (:require [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; genetic operators
+;; reproduction
+
+(defn reproduction
+  "Returns parent"
+  [ind argmap]
+  ind)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform mutation
 
 (defn gaussian-noise-factor
   "Returns gaussian noise of mean 0, std dev 1."
@@ -66,6 +74,9 @@
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform close mutation
 
 (defn uniform-close-mutation
   "Uniformly mutates the :close's in the individual's instruction maps. Each

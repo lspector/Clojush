@@ -32,12 +32,10 @@
    :atom-generators (concat (registered-nonrandom)
                             (list (fn [] (lrand-int 100))
                                   'in))
-   :uniform-mutation-probability 0.9
-   :uniform-close-mutation-probability 0.1
    :uniform-mutation-rate 0.1
    :uniform-mutation-constant-tweak-rate 0.5
    :mutation-float-gaussian-standard-deviation 1.0
    :mutation-int-gaussian-standard-deviation 5
    :mutation-string-char-change-rate 0.1
-   :use-lexicase-selection true
+   ;:use-lexicase-selection true
    })

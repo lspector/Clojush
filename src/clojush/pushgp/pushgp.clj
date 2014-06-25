@@ -38,11 +38,13 @@
           :reuse-errors true ;; When true, children produced through direct reproduction will not be re-evaluated but will have the error vector of their parent
           ;;
           ;;----------------------------------------
-          ;; Genetic operator probabilities (replication-probability is 1.0 minus the rest)
+          ;; Genetic operator probabilities
           ;;----------------------------------------
-          :reproduction-probability           0.0 ;; Direct reproduction, which makes a direct copy of the parent
-          :uniform-mutation-probability       1.0 ;; Uniform mutation
-          :uniform-close-mutation-probability 0.0 ;; Mutates the :close's in the individual's instruction maps to adjust where parentheses are included
+          :genetic-operator-probabilities {:reproduction 0.0
+                                           :uniform-mutation 0.8
+                                           :uniform-close-mutation 0.2
+                                           [:uniform-mutation :uniform-close-mutation] 0.0
+                                           }
           ;;
           ;;----------------------------------------
           ;; Arguments related to genetic operators
@@ -325,10 +327,17 @@
 
 (defn check-genetic-operator-probabilities-add-to-one
   [argmap]
-  (let [prob-keywords (map keyword '(reproduction-probability
-                                      uniform-mutation-probability
-                                      uniform-close-mutation-probability))
-        prob-map (select-keys argmap prob-keywords)]
+  (let [;prob-keywords (map keyword '(reproduction-probability
+        ;                              uniform-mutation-probability
+        ;                              uniform-close-mutation-probability))
+        prob-map (:genetic-operator-probabilities argmap)]
+    (doseq [gen-op (keys prob-map)]
+      (if (sequential? gen-op)
+        (doseq [g gen-op]
+          (assert (contains? genetic-operators g)
+                  (str "Unrecognized genetic operator: " g " in " gen-op)))
+        (assert (contains? genetic-operators gen-op)
+                (str "Unrecognized genetic operator: " gen-op))))
     (assert (< 0.99999
                (apply + (vals prob-map))
                1.00001)
