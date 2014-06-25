@@ -40,21 +40,21 @@
           ;;----------------------------------------
           ;; Genetic operator probabilities (replication-probability is 1.0 minus the rest)
           ;;----------------------------------------
-          :reproduction-probability      0.1 ;; Direct reproduction, which makes a direct copy of the parent
-          :mutation-probability          0.4 ;; Subtree mutation, similar to that found in tree-GP
-          :crossover-probability         0.5 ;; Subtree crossover, similar to that found in tree-GP
-          :simplification-probability    0.0 ;; Auto-simplification of the program
-          :ultra-probability             0.0 ;; Uniform Linear Transformation with Repair and Alternation -- a uniform crossover and mutation operator
-          :gaussian-mutation-probability 0.0 ;; Gaussian mutation affects only the float literals in a program by adding Gaussian noise
-          :boolean-gsxover-probability   0.0 ;; Geometric Semantic Crossover -- creates random code that determines which of the two parents to use for each test cases
-          :deletion-mutation-probability 0.0 ;; A mutation operator that deletes random instructions
-          :parentheses-addition-mutation-probability 0.0 ;; Operator that randomly inserts a parentheses pair somewhere in the program
-          :tagging-mutation-probability  0.0 ;; Operator that chooses a piece of code, moves it to beginning of program and tags it, and puts a tagged call in its place
-          :tag-branch-mutation-probability 0.0 ;; Operator that inserts a tag-branch into the program. tag-branches compare two items on a stack and then jump to one of two tags depending on the comparison
+          :reproduction-probability           0.0 ;; Direct reproduction, which makes a direct copy of the parent
+          :uniform-mutation-probability       1.0 ;; Uniform mutation
+          :uniform-close-mutation-probability 0.0 ;; Mutates the :close's in the individual's instruction maps to adjust where parentheses are included
           ;;
           ;;----------------------------------------
           ;; Arguments related to genetic operators
           ;;----------------------------------------
+          :uniform-mutation-rate 0.1 ;; The probability of each token being mutated during uniform mutation
+          :uniform-mutation-constant-tweak-rate 0.5 ;; The probability of using a constant mutation instead of simply replacing the token with a random instruction during uniform mutation
+          :mutation-float-gaussian-standard-deviation 1.0 ;; The standard deviation used when tweaking float constants with Gaussian noise
+          :mutation-int-gaussian-standard-deviation 5 ;; The standard deviation used when tweaking integer constants with Gaussian noise
+          :mutation-string-char-change-rate 0.1 ;; The probability of each character being changed when doing string constant tweaking
+          :uniform-close-mutation-rate 0.1
+          :close-increment-rate 0.2
+          ;;;; Past here are old
           :mutation-max-points 20 ;; The maximum number of points that new code will introduce during mutation
           :reproduction-simplifications 1 ;; The number of simplification steps that will happen during simplification reproduction
           :ultra-alternation-rate 0.1 ;; When using ULTRA, how often ULTRA alternates between the parents
@@ -129,8 +129,9 @@
           ;;----------------------------------------
           ;; New for Plush
           ;;----------------------------------------
-          :epigenetic-markers [:close-parens] ;; A vector of the epigenetic markers that should be used in the individuals. Implemented options include: :close-parens
-          :close-parens-probabilities [0.772 0.206 0.021 0.001] ;; A vector of the probabilities for the number of parens ending at that position. See random-closes in clojush.random
+          :epigenetic-markers [:close] ;; A vector of the epigenetic markers that should be used in the individuals. Implemented options include: :close
+          :close-probabilities [0.772 0.206 0.021 0.001] ;; A vector of the probabilities for the number of parens ending at that position. See random-closes in clojush.random
+          :parent-selection :lexicase
           )))
 
 (defn load-push-argmap
@@ -149,7 +150,7 @@
 (defn make-agents-and-rng
   [{:keys [initial-population use-single-thread population-size
            max-points-in-initial-program atom-generators random-seed
-           save-initial-population epigenetic-markers close-parens-probabilities]}]
+           save-initial-population epigenetic-markers close-probabilities]}]
   (let [agent-error-handler (fn [agnt except]
                               ;(.printStackTrace except System/out)
                               ;(.printStackTrace except)
@@ -174,7 +175,7 @@
                                      (make-individual
                                        :genome (random-code max-points-in-initial-program
                                                             atom-generators epigenetic-markers
-                                                            close-parens-probabilities))))
+                                                            close-probabilities))))
                          f (str "data/" (System/currentTimeMillis) ".ser")]
                      (when save-initial-population
                        (io/make-parents f)
@@ -240,7 +241,7 @@
    parens will push :close and/or :close-open onto the paren-stack, and will
    also put an open paren after it in the program. For example, an instruction
    that requires 3 paren groupings will push :close, then :close-open, then :close-open.
-   When a positive number is encountered in the :close-parens key of the
+   When a positive number is encountered in the :close key of the
    instruction map, it is set to num-parens-here during the next recur. This
    indicates the number of parens to put here, if need is indicated on the
    paren-stack. If the top item of the paren-stack is :close, a close paren
@@ -250,15 +251,15 @@
    the paren-stack), parens are added until the paren-stack is empty."
   [{:keys [genome]}]
   (loop [prog [] ; The Push program incrementally being built
-         gn genome ; The linear Plush genome, where items will be popped off the front. Each item is a map containing at least the key :instruction, and unless the program is flat, also :close-parens
+         gn genome ; The linear Plush genome, where items will be popped off the front. Each item is a map containing at least the key :instruction, and unless the program is flat, also :close
          num-parens-here 0 ; The number of parens that still need to be added at this location.
-         paren-stack '()] ; Whenever an instruction requires parens grouping, it will push either :close or :close-open on this stack. This will indicate what to insert in the program the next time a paren is indicated by the :close-parens key in the instruction map.
+         paren-stack '()] ; Whenever an instruction requires parens grouping, it will push either :close or :close-open on this stack. This will indicate what to insert in the program the next time a paren is indicated by the :close key in the instruction map.
     (cond
       ; Check if need to add close parens here
       (< 0 num-parens-here) (recur (cond
                                      (= (first paren-stack) :close) (conj prog :close)
                                      (= (first paren-stack) :close-open) (conj (conj prog :close) :open)
-                                     :else prog) ; If paren-stack is empty, we won't put any parens in even though the :close-parens epigenetic marker indicated to do so
+                                     :else prog) ; If paren-stack is empty, we won't put any parens in even though the :close epigenetic marker indicated to do so
                                    gn
                                    (dec num-parens-here)
                                    (rest paren-stack))
@@ -281,7 +282,7 @@
                        (conj prog (:instruction (first gn)))
                        (conj (conj prog (:instruction (first gn))) :open))
                      (rest gn)
-                     (get (first gn) :close-parens 0) ; The number of close parens to put after this instruction; if :close-parens isn't in instruction map, default to zero
+                     (get (first gn) :close 0) ; The number of close parens to put after this instruction; if :close isn't in instruction map, default to zero
                      new-paren-stack)))))
 
 (defn translate-plush-to-push
@@ -324,10 +325,9 @@
 
 (defn check-genetic-operator-probabilities-add-to-one
   [argmap]
-  (let [prob-keywords (map keyword '(reproduction-probability mutation-probability crossover-probability simplification-probability
-                                                              ultra-probability gaussian-mutation-probability boolean-gsxover-probability
-                                                              deletion-mutation-probability parentheses-addition-mutation-probability
-                                                              tagging-mutation-probability tag-branch-mutation-probability))
+  (let [prob-keywords (map keyword '(reproduction-probability
+                                      uniform-mutation-probability
+                                      uniform-close-mutation-probability))
         prob-map (select-keys argmap prob-keywords)]
     (assert (< 0.99999
                (apply + (vals prob-map))

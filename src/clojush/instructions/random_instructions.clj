@@ -52,7 +52,6 @@
                    (+' min-random-string-length
                        (lrand-int (- max-random-string-length
                                      min-random-string-length)))
-                   #(rand-nth
-                      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")))
+                   (fn [] (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127)))))))
       :string
       state)))

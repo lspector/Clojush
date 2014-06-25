@@ -50,7 +50,7 @@
                                     (if (fn? element)
                                       (element)
                                       element))
-                     :close-parens (random-closes close-parens-probabilities)
+                     :close (random-closes close-parens-probabilities)
                    ))
                  markers))))
 
@@ -66,7 +66,7 @@
 (defn random-code 
   "Returns a random expression with size limited by max-points."
   [max-points atom-generators epigenetic-markers close-parens-probabilities]
-    (random-code-with-size (inc (lrand-int max-points))
-                           atom-generators
-                           epigenetic-markers
-                           close-parens-probabilities))
+  (random-code-with-size (inc (lrand-int max-points))
+                         atom-generators
+                         epigenetic-markers
+                         close-parens-probabilities))

@@ -1,56 +1,105 @@
 (ns clojush.pushgp.genetic-operators
-  (:use [clojush util random globals individual node-selection simplification])
+  (:use [clojush util random globals individual node-selection simplification interpreter]
+        clojush.instructions.tag
+        [clojure.math.numeric-tower])
   (:require [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; genetic operators
 
-(defn mutate 
-  "Returns a mutated version of the given individual."
-  [ind {:keys [mutation-max-points max-points atom-generators maintain-ancestors]
-        :as argmap}]
-  (let [new-program (insert-code-at-point (:program ind) 
-                                          (select-node-index (:program ind) argmap)
-                                          (random-code mutation-max-points atom-generators))]
-    (if (> (count-points new-program) max-points)
-      ind
-      (make-individual :program new-program :history (:history ind)
-                       :ancestors (if maintain-ancestors
-                                    (cons (:program ind) (:ancestors ind))
-                                    (:ancestors ind))))))
+(defn gaussian-noise-factor
+  "Returns gaussian noise of mean 0, std dev 1."
+  []
+  (*' (Math/sqrt (*' -2.0 (Math/log (lrand))))
+     (Math/cos (*' 2.0 Math/PI (lrand)))))
 
-(defn crossover 
-  "Returns a copy of parent1 with a random subprogram replaced with a random 
-   subprogram of parent2."
-  [parent1 parent2 {:keys [max-points maintain-ancestors]
-                    :as argmap}]
-  (let [new-program (insert-code-at-point 
-                      (:program parent1) 
-                      (select-node-index (:program parent1) argmap)
-                      (code-at-point (:program parent2)
-                                     (select-node-index (:program parent2) argmap)))]
-    (if (> (count-points new-program) max-points)
-      parent1
-      (make-individual :program new-program :history (:history parent1)
-                       :ancestors (if maintain-ancestors
-                                    (cons (:program parent1) (:ancestors parent1))
-                                    (:ancestors parent1))))))
+(defn perturb-with-gaussian-noise
+  "Returns n perturbed with std dev sd."
+  [sd n]
+  (+' n (*' sd (gaussian-noise-factor))))
 
-(defn boolean-gsxover 
-  "Returns a child produced from parent1 and parent2 using boolean geometric
-   semantic crossover. The child will be of the form:
-   (new-random-code exec_if parent1-code parent2-code)."
-  [parent1 parent2 {:keys [boolean-gsxover-new-code-max-points max-points atom-generators maintain-ancestors]}]
-  (let [new-program (list (random-code boolean-gsxover-new-code-max-points atom-generators) 
-                          'exec_if 
-                          (:program parent1) 
-                          (:program parent2))]
-    (if (> (count-points new-program) max-points)
-      parent1
-      (make-individual :program new-program :history (:history parent1)
-                       :ancestors (if maintain-ancestors
-                                    (cons (:program parent1) (:ancestors parent1))
-                                    (:ancestors parent1))))))
+(defn tag-gaussian-tweak
+  "For now just returns another random instruction. Should be changed to tweak
+   the tag with Gaussian noise."
+  [instr-map atom-generators epigenetic-markers close-parens-probabilities]
+  (first (random-code 1 atom-generators epigenetic-markers close-parens-probabilities)))
+  
+(defn uniform-mutation
+  "Uniformly mutates individual. For each token in program, there is
+   uniform-mutation-rate probability of being mutated. If a token is to be
+   mutated, it has a uniform-mutation-constant-tweak-rate probability of being
+   mutated using a constant mutator (which varies depending on the type of the
+   token), and otherwise is replaced with a random instruction."
+  [ind {:keys [uniform-mutation-rate uniform-mutation-constant-tweak-rate
+               mutation-float-gaussian-standard-deviation mutation-int-gaussian-standard-deviation
+               mutation-string-char-change-rate maintain-ancestors
+               atom-generators epigenetic-markers close-parens-probabilities]}]
+  (let [string-tweak (fn [st]
+                       (map (fn [c]
+                              (if (< (lrand) mutation-string-char-change-rate)
+                                (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127))))
+                                c))
+                            st))
+        instruction-mutator (fn [token]
+                              (first (random-code 1 atom-generators epigenetic-markers close-parens-probabilities)))
+        constant-mutator (fn [token]
+                           (let [const (:instruction token)]
+                             (if (tag-instruction? const)
+                               (tag-gaussian-tweak token atom-generators epigenetic-markers close-parens-probabilities)
+                               (assoc token
+                                      :instruction
+                                      (cond
+                                        (float? const) (perturb-with-gaussian-noise mutation-float-gaussian-standard-deviation const)
+                                        (integer? const) (round (perturb-with-gaussian-noise mutation-int-gaussian-standard-deviation const))
+                                        (string? const) (string-tweak const)
+                                        (or (= const true) (= const false)) (lrand-nth [true false])
+                                        :else (:instruction (first (random-code 1 atom-generators epigenetic-markers close-parens-probabilities))))))))               
+        token-mutator (fn [token]
+                        (if (< (lrand) uniform-mutation-rate)
+                          (if (< (lrand) uniform-mutation-constant-tweak-rate)
+                            (constant-mutator token)
+                            (instruction-mutator token))
+                          token))
+        new-genome (map token-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+(defn uniform-close-mutation
+  "Uniformly mutates the :close's in the individual's instruction maps. Each
+   :close will have a uniform-close-mutation-rate probability of being changed,
+   and those that are changed have a close-increment-rate chance of being
+   incremented, and are otherwise decremented."
+  [ind {:keys [uniform-close-mutation-rate close-increment-rate maintain-ancestors]}]
+  (let [close-mutator (fn [instr-map]
+                        (let [closes (get instr-map :close 0)]
+                          (assoc instr-map :close
+                                 (if (< (lrand) uniform-close-mutation-rate)
+                                   (if (< (lrand) close-increment-rate) ;Rate at which to increase closes instead of decrease
+                                     (inc closes)
+                                     (if (<= closes 0)
+                                       0
+                                       (dec closes)))
+                                   closes))))
+        new-genome (map close-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+  
+;;STARTED BUT NOT FINISHED
+
+(defn uniform-alternation
+  ""
+  []
+  ())
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; genetic operators (NOT UPDATE FOR PLUSH BELOW HERE)
 
 (defn delete-mutate
   "Returns the individual with between 1 and 4 points deleted. The points can be
@@ -81,32 +130,6 @@
                                   (cons (:program ind) (:ancestors ind))
                                   (:ancestors ind)))))
 
-(defn add-parentheses-mutate 
-  "Returns a version of the given individual with one pair of parentheses added
-   somewhere. Not compatible with (currently 'experimental') tagged code macros."
-  [ind {:keys [max-points maintain-ancestors]}]
-  (let [expression (:program ind) 
-        new-program (let [expstr (str expression)
-                          chars (count expstr)
-                          space-indices (filter #(= (nth expstr %) \space) (range chars))]
-                      (if (< (count space-indices) 2)
-                        expression ;; can't add parentheses if less than two spaces
-                        (let [i (lrand-nth space-indices)
-                              j (lrand-nth (remove #(= % i) space-indices))
-                              start (min i j)
-                              stop (max i j)]
-                          (read-string (str (subs expstr 0 start)
-                                            " ( "
-                                            (subs expstr (inc start) stop)
-                                            " ) "
-                                            (subs expstr (inc stop)))))))]
-    (if (> (count-points new-program) max-points)
-      ind
-      (make-individual :program new-program :history (:history ind)
-                       :ancestors (if maintain-ancestors
-                                    (cons (:program ind) (:ancestors ind))
-                                    (:ancestors ind))))))
-
 (defn tagging-mutate
   "Returns a version of the given individual with a piece of code replaced by a tag
    reference, and with an expression that tags the replaced code with the same tag added
@@ -129,284 +152,3 @@
                        :ancestors (if maintain-ancestors
                                     (cons (:program ind) (:ancestors ind))
                                     (:ancestors ind))))))
-
-(defn tag-branch-insertion-mutate 
-  "Returns a version of the given individual with a tag-branch inserted at a random
-   location. A tag-branch is a sequence of instructions that 1) produces a boolean
-   value by performing a randomly chosen comparison of copies (not popped) of the top 
-   two items of a randomly selected type, and 2) branches to one of two tags depending
-   on the result. The tag-branch-mutation-type-instruction-pairs argument should be a sequence of pairs,
-   in which the first element of each is a type and the second element is a Push instruction
-   that performs a comparison of the type, as in [:integer 'integer_eq]."
-  [ind tag-limit {:keys [max-points tag-branch-mutation-type-instruction-pairs maintain-ancestors]}]
-  (let [old-program (:program ind)
-        tag-ref-instruction-1 (symbol (str "tagged_" (str (lrand-int tag-limit)))) 
-        tag-ref-instruction-2 (symbol (str "tagged_" (str (lrand-int tag-limit))))
-        [type instruction] (lrand-nth tag-branch-mutation-type-instruction-pairs)
-        yankdup-instruction (symbol (str (apply str (rest (str type))) "_yankdup"))
-        tag-branch (list 1 yankdup-instruction 1 yankdup-instruction instruction 'exec_if
-                         tag-ref-instruction-1 tag-ref-instruction-2)
-        new-program (insert-randomly tag-branch old-program)]
-    (if (> (count-points new-program) max-points)
-      ind
-      (make-individual :program new-program :history (:history ind)
-                       :ancestors (if maintain-ancestors
-                                    (cons (:program ind) (:ancestors ind))
-                                    (:ancestors ind))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; some utilities are required for gaussian mutation
-
-(defn gaussian-noise-factor
-  "Returns gaussian noise of mean 0, std dev 1."
-  []
-  (*' (Math/sqrt (*' -2.0 (Math/log (lrand))))
-     (Math/cos (*' 2.0 Math/PI (lrand)))))
-
-(defn perturb-with-gaussian-noise 
-  "Returns n perturbed with std dev sd."
-  [sd n]
-  (+' n (*' sd (gaussian-noise-factor))))
-
-(defn perturb-code-with-gaussian-noise
-  "Returns code with each float literal perturbed with std dev sd and perturbation probability
-   per-num-perturb-probability."
-  [code per-num-perturb-probability sd]
-  (postwalklist (fn [item]
-                  (if (and (float? item)
-                           (< (lrand) per-num-perturb-probability))
-                    (perturb-with-gaussian-noise sd item)
-                    item))
-                code))
-
-(defn gaussian-mutate 
-  "Returns the given individual where each float literal has a
-   gaussian-mutation-per-number-mutation-probability chance of being gaussian
-   mutated with a standard deviation of gaussian-mutation-standard-deviation."
-  [ind {:keys [gaussian-mutation-per-number-mutation-probability
-               gaussian-mutation-standard-deviation
-               maintain-ancestors]}]
-  (make-individual 
-    :program (perturb-code-with-gaussian-noise
-               (:program ind)
-               gaussian-mutation-per-number-mutation-probability
-               gaussian-mutation-standard-deviation)
-    :history (:history ind)
-    :ancestors (if maintain-ancestors
-                 (cons (:program ind) (:ancestors ind))
-                 (:ancestors ind))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ULTRA (Uniform Linear Transformation with Repair and Alternation) operator
-
-(defn remove-empties
-  "Removes empty sequences from tree t."
-  [t]
-  (prewalkseq
-    (fn [node] (if (seq? node)
-                 (remove #(and (seq? %) (empty? %)) node)
-                 node))
-    t))
-
-(defn remove-ultra-padding 
-  "Removes instances of 'ultra-padding from tree t."
-  [t]
-  (if (= t 'ultra-padding)
-    '()
-    (prewalkseq
-      (fn [node] (if (seq? node)
-                   (remove #{'ultra-padding} node)
-                   node))
-      t)))
-
-(defn insert-somewhere 
-  [thing lst]
-  (let [after-how-many (lrand-int (inc (count lst)))]
-    (concat (take after-how-many lst) 
-            (list thing) 
-            (drop after-how-many lst))))
-
-(defn delete-somewhere 
-  [thing lst]
-  (let [locations (->> lst
-                       (map vector (iterate inc 0))
-                       (filter #(= (second %) thing))
-                       (map first))
-        location (lrand-nth locations)]
-    (concat (take location lst)
-            (drop (inc location) lst))))
-
-;(delete-somewhere :right '(0 :right 1 2 :right))
-
-(defn left-balance
-  [s left right]
-  (loop [processed ()
-         to-process s
-         extra-lefts 0]
-    (cond 
-      ;; done
-      (empty? to-process)
-      processed
-      ;; see a left -- keep track of number unmatched
-      (= (first to-process) left)
-      (recur (concat processed (list (first to-process)))
-             (rest to-process)
-             (inc extra-lefts))
-      ;; see a right -- may require fixes
-      (= (first to-process) right)
-      (if (zero? extra-lefts)
-        ;; must fix
-        (if (< (lrand) 0.5)
-          ;; half the time delete a right (possibly this one) and continue
-          (recur () 
-                 (concat (delete-somewhere right (concat processed (list right))) 
-                         (rest to-process))
-                 0)
-          ;; other half, add a left somewhere 
-          (recur () (concat (insert-somewhere left processed) to-process) 0))
-        ;; don't have to fix, keep going with adjusted extras
-        (recur (concat processed (list (first to-process)))
-               (rest to-process)
-               (dec extra-lefts)))
-      ;; anything else -- just keep going
-      :else
-      (recur (concat processed (list (first to-process)))
-             (rest to-process)
-             extra-lefts))))
-
-(defn balance
-  [open-close-sequence]
-  ;(println "balancing:" open-close-sequence)
-  (-> open-close-sequence
-      (left-balance :open :close)
-      (reverse)
-      (left-balance :close :open)
-      (reverse)))
-
-;(let [s '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close)]
-;  (println s)
-;  (println (balance s)))
-;
-;(let [s '(:open 1 2 :open :open a b :open c :close :open :open d :close :close e :close :close)]
-;  (println s)
-;  (println (balance s)))
-;
-;(let [s '(:open :open :close)]
-;  (println s)
-;  (println (balance s)))
-;
-;(let [s '(:close :close)]
-;  (println s)
-;  (println (balance s)))
-;
-;(let [s '(:close :open)]
-;  (println s)
-;  (println (balance s)))
-
-(defn alternate
-  [s1 s2 alternation-rate alignment-deviation max-points]
-  (let [s1 (vec s1)
-        s2 (vec s2)]
-    (loop [i 0
-           use-s1 (lrand-nth [true false])
-           result []]
-      (if (or (>= i (count (if use-s1 s1 s2)))
-              (> (count result) (* 2 max-points))) ;; runaway growth
-        (apply list result)
-        (if (< (lrand) alternation-rate)
-          (recur (max 0 (+' i (Math/round (*' alignment-deviation (gaussian-noise-factor)))))
-                 (not use-s1)
-                 result)
-          (recur (inc i)
-                 use-s1
-                 (conj result (nth (if use-s1 s1 s2) i))))))))
-
-; (alternate '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16) '(a b c d e f g h i j k) 0.2 1)
-
-(defn linearly-mutate
-  [open-close-sequence mutation-rate use-ultra-no-paren-mutation ultra-mutates-to-parentheses-frequently atom-generators]
-  (let [parentheses (if ultra-mutates-to-parentheses-frequently
-                      (let [n (count atom-generators)]
-                        (concat (repeat n :open) (repeat n :close)))
-                      [:open :close])
-        token-mutator (fn [token]
-                        (if (and (or (not use-ultra-no-paren-mutation) ;if not using no-paren mutation
-                                     (not (some #{token} [:open :close]))) ;or if the token isn't :open or :close
-                                 (< (lrand) mutation-rate)) ;and if randomly below mutation rate
-                          (random-code 1 (concat atom-generators (if use-ultra-no-paren-mutation ;random instruction, including parens if not no-paren mutation
-                                                                   []
-                                                                   parentheses)))
-                          ;; NOTE: The original ULTRA mutation (first 2 papers) allowed replacement with (), which would later be removed,
-                          ;; which is essentially deletion. This was removed later since it biases ULTRA toward smaller programs. This looked like:  ;(concat atom-generators parentheses [()]))
-                          token))] ;else, just return the token
-    (map token-mutator
-         open-close-sequence)))
-
-(defn ultra-operate-on-programs
-  [p1 p2 alternation-rate alignment-deviation mutation-rate
-   use-ultra-no-paren-mutation ultra-pads-with-empties 
-   ultra-mutates-to-parentheses-frequently atom-generators max-points]
-  (if (or (not (seq? p1))
-          (not (seq? p2)))
-    p1 ;; can't do if either program isn't a list
-    (let [p1 (if (>= (count p1) (count p2))
-               p1
-               (concat p1 (repeat (- (count p2) (count p1)) 
-                                  (if ultra-pads-with-empties () 'ultra-padding))))
-          p2 (if (>= (count p2) (count p1))
-               p2
-               (concat p2 (repeat (- (count p1) (count p2)) 
-                                  (if ultra-pads-with-empties () 'ultra-padding))))]
-      ((if ultra-pads-with-empties remove-empties remove-ultra-padding)
-        (open-close-sequence-to-list
-          (balance
-            (linearly-mutate
-              (alternate (list-to-open-close-sequence p1)
-                         (list-to-open-close-sequence p2)
-                         alternation-rate
-                         alignment-deviation
-                         max-points)
-              mutation-rate
-              use-ultra-no-paren-mutation
-              ultra-mutates-to-parentheses-frequently
-              atom-generators)))))))
-
-;(let [p1 '(a (b c) (d ((e)) f))
-;      p2 '((1 2 3) 4 ((5)) 6)]
-;  (println p1)
-;  (println p2)
-;  (println (ultra-operate-on-programs p1 p2 0.2 1 0.1 false ['X])))
-
-;(loop [i 0
-;       pgm-a (random-code-with-size 30 '(a))
-;       pgm-b (random-code-with-size 30 '(b))]
-;  (println "pgm-a:" pgm-a)
-;  (println "pgm-b:" pgm-b)
-;  (if (< i 100)
-;    (recur (inc i)
-;           (ultra-operate-on-programs pgm-a pgm-b 0.2 1 0.1 false '(a))
-;           (ultra-operate-on-programs pgm-b pgm-a 0.2 1 0.1 false '(b)))))
-
-(defn ultra
-  "Returns the result of applying the ULTRA (Uniform Linear Transformation
-   with Repair and Alternation) operation to parent1 and parent2."
-  [parent1 parent2 {:keys [max-points ultra-alternation-rate ultra-alignment-deviation
-                           ultra-mutation-rate atom-generators maintain-ancestors
-                           use-ultra-no-paren-mutation ultra-pads-with-empties
-                           ultra-mutates-to-parentheses-frequently]}]
-  (let [new-program (ultra-operate-on-programs (:program parent1)
-                                               (:program parent2)
-                                               ultra-alternation-rate
-                                               ultra-alignment-deviation
-                                               ultra-mutation-rate
-                                               use-ultra-no-paren-mutation
-                                               ultra-pads-with-empties
-                                               ultra-mutates-to-parentheses-frequently
-                                               atom-generators
-                                               max-points)]
-    (if (> (count-points new-program) max-points)
-      parent1
-      (make-individual :program new-program :history (:history parent1)
-                       :ancestors (if maintain-ancestors
-                                    (cons (:program parent1) (:ancestors parent1))
-                                    (:ancestors parent1))))))
