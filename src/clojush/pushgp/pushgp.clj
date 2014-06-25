@@ -41,14 +41,17 @@
           ;; Genetic operator probabilities
           ;;----------------------------------------
           :genetic-operator-probabilities {:reproduction 0.0
-                                           :uniform-mutation 0.8
-                                           :uniform-close-mutation 0.2
-                                           [:uniform-mutation :uniform-close-mutation] 0.0
+                                           :alternation 0.7
+                                           :uniform-mutation 0.1
+                                           :uniform-close-mutation 0.0
+                                           [:alternation :uniform-mutation] 0.2 ;Somewhat equivalent to normal Push's ULTRA operator
                                            }
           ;;
           ;;----------------------------------------
           ;; Arguments related to genetic operators
           ;;----------------------------------------
+          :alternation-rate 0.1 ;; When using alternation, how often alternates between the parents
+          :alignment-deviation 1 ;; When using alternation, the standard deviation of how far alternation may jump between indices when switching between parents
           :uniform-mutation-rate 0.1 ;; The probability of each token being mutated during uniform mutation
           :uniform-mutation-constant-tweak-rate 0.5 ;; The probability of using a constant mutation instead of simply replacing the token with a random instruction during uniform mutation
           :mutation-float-gaussian-standard-deviation 1.0 ;; The standard deviation used when tweaking float constants with Gaussian noise

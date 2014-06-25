@@ -19,7 +19,7 @@
   "Returns gaussian noise of mean 0, std dev 1."
   []
   (*' (Math/sqrt (*' -2.0 (Math/log (lrand))))
-     (Math/cos (*' 2.0 Math/PI (lrand)))))
+      (Math/cos (*' 2.0 Math/PI (lrand)))))
 
 (defn perturb-with-gaussian-noise
   "Returns n perturbed with std dev sd."
@@ -101,13 +101,46 @@
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
 
-  
-;;STARTED BUT NOT FINISHED
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; alternation
 
-(defn uniform-alternation
-  ""
-  []
-  ())
+(defn remove-alternation-padding
+  "Removes instances of 'alternation-padding from genome."
+  [genome]
+  (remove #{'alternation-padding} genome))
+
+(defn alternation
+  "Uniformly alternates between the two parents using a similar method to that
+   used in ULTRA."
+  [parent1 parent2 {:keys [alternation-rate alignment-deviation
+                           max-points maintain-ancestors] :as argmap}]
+  (let [g1 (:genome parent1)
+        g2 (:genome parent2)
+        s1 (vec (if (>= (count g1) (count g2))
+                  g1
+                  (concat g1 (repeat (- (count g2) (count g1)) 'alternation-padding))))
+        s2 (vec (if (>= (count g2) (count g1))
+                  g2
+                  (concat g2 (repeat (- (count g1) (count g2)) 'alternation-padding))))
+        new-genome (remove-alternation-padding
+                     (loop [i 0
+                            use-s1 (lrand-nth [true false])
+                            result-genome []]
+                       (if (or (>= i (count (if use-s1 s1 s2))) ;; finished current program
+                               (> (count result-genome) (* 2 max-points))) ;; runaway growth
+                         (apply list result-genome);; Return
+                         (if (< (lrand) alternation-rate)
+                           (recur (max 0 (+' i (Math/round (*' alignment-deviation (gaussian-noise-factor)))))
+                                  (not use-s1)
+                                  result-genome)
+                           (recur (inc i)
+                                  use-s1
+                                  (conj result-genome (nth (if use-s1 s1 s2) i)))))))]
+    (make-individual :genome new-genome
+                     :history (:history parent1)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome parent1) (:ancestors parent1))
+                                  (:ancestors parent1)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; genetic operators (NOT UPDATE FOR PLUSH BELOW HERE)
