@@ -27,7 +27,7 @@
                          errors))))
 
 (defn calculate-hah-solution-rates
-  [use-historically-assessed-hardness pop-agents error-threshold population-size]
+  [pop-agents {:keys [use-historically-assessed-hardness error-threshold population-size]}]
   (when use-historically-assessed-hardness
     (reset! solution-rates
             (let [error-seqs (map :errors (map deref pop-agents))
