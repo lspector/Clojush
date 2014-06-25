@@ -56,6 +56,7 @@
           :mutation-float-gaussian-standard-deviation 1.0 ;; The standard deviation used when tweaking float constants with Gaussian noise
           :mutation-int-gaussian-standard-deviation 1 ;; The standard deviation used when tweaking integer constants with Gaussian noise
           :mutation-string-char-change-rate 0.1 ;; The probability of each character being changed when doing string constant tweaking
+          :mutation-tag-gaussian-standard-deviation 100 ;; The standard deviation used when tweaking tag locations with Gaussian noise
           :uniform-close-mutation-rate 0.1 ;; The probability of each :close being incremented or decremented during uniform close mutation
           :close-increment-rate 0.2 ;; The probability of making an increment change to :close during uniform close mutation, as opposed to a decrement change
           ;;

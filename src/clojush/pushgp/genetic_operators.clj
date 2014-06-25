@@ -1,5 +1,5 @@
 (ns clojush.pushgp.genetic-operators
-  (:use [clojush util random individual]
+  (:use [clojush util random individual globals]
         clojush.instructions.tag
         [clojure.math.numeric-tower])
   (:require [clojure.string :as string]))
@@ -27,11 +27,16 @@
   (+' n (*' sd (gaussian-noise-factor))))
 
 (defn tag-gaussian-tweak
-  "For now just returns another random instruction. Should be changed to tweak
-   the tag with Gaussian noise."
-  [instr-map atom-generators epigenetic-markers close-parens-probabilities]
-  (first (random-code 1 atom-generators epigenetic-markers close-parens-probabilities)))
-  
+  "Tweaks the tag with Gaussian noise."
+  [instr-map mutation-tag-gaussian-standard-deviation]
+  (let [instr (:instruction instr-map)
+        tagparts (string/split (name instr) #"_")
+        tag-num (read-string (last tagparts))
+        new-tag-num (mod (round (perturb-with-gaussian-noise mutation-tag-gaussian-standard-deviation tag-num))
+                         @global-tag-limit)
+        new-instr (apply str (interpose  "_" (concat (butlast tagparts) (list (str new-tag-num)))))]
+    (assoc instr-map :instruction new-instr)))
+
 (defn uniform-mutation
   "Uniformly mutates individual. For each token in program, there is
    uniform-mutation-rate probability of being mutated. If a token is to be
@@ -40,6 +45,7 @@
    token), and otherwise is replaced with a random instruction."
   [ind {:keys [uniform-mutation-rate uniform-mutation-constant-tweak-rate
                mutation-float-gaussian-standard-deviation mutation-int-gaussian-standard-deviation
+               mutation-tag-gaussian-standard-deviation
                mutation-string-char-change-rate maintain-ancestors
                atom-generators epigenetic-markers close-parens-probabilities]}]
   (let [string-tweak (fn [st]
@@ -53,7 +59,7 @@
         constant-mutator (fn [token]
                            (let [const (:instruction token)]
                              (if (tag-instruction? const)
-                               (tag-gaussian-tweak token atom-generators epigenetic-markers close-parens-probabilities)
+                               (tag-gaussian-tweak token mutation-tag-gaussian-standard-deviation)
                                (assoc token
                                       :instruction
                                       (cond
