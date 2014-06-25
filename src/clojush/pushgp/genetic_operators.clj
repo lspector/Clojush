@@ -1,5 +1,5 @@
 (ns clojush.pushgp.genetic-operators
-  (:use [clojush util random globals individual node-selection simplification interpreter]
+  (:use [clojush util random individual]
         clojush.instructions.tag
         [clojure.math.numeric-tower])
   (:require [clojure.string :as string]))

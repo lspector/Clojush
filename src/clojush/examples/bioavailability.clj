@@ -134,7 +134,6 @@
 ;:crossover-probability 0.81
 ;;:replication-rate 0.1 ;implicit
 ;:tournament-size 10
-;:node-selection-method :uniform
 ;;:max-depth 17 ;tree GP param
 ;;:max-dept-of-mutation-code 6 ;tree GP param
 
@@ -152,7 +151,6 @@
    :simplification-probability 0.0
    :reproduction-probability 0.1
    :tournament-size 10
-   :node-selection-method :unbiased
    :report-simplifications 0
    :final-report-simplifications 1000
    :use-rmse true

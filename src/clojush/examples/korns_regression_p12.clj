@@ -293,7 +293,5 @@
    :tournament-size 1
    :decimation-ratio 0.1
    :decimation-tournament-size 2
-   :node-selection-method :size-tournament
-   :node-selection-tournament-size 3
    :max-generations 10000
    })
