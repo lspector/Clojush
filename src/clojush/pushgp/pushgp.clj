@@ -69,21 +69,12 @@
           ;;----------------------------------------
           ;; Arguments related to parent selection
           ;;----------------------------------------
-          :parent-selection-method :lexicase ;; The parent selection method. Options include :tournament, :lexicase
+          :parent-selection :lexicase ;; The parent selection method. Options include :tournament, :lexicase, :elitegroup-lexicase
           :tournament-size 7 ;; If using tournament selection, the size of the tournaments
           :total-error-method :sum ;; The method used to compute total error. Options include :sum (standard), :hah (historically-assessed hardness), :rmse (root mean squared error), and :ifs (implicit fitness sharing)
           :trivial-geography-radius 0 ;; If non-zero, this is used as the radius from which to select individuals for tournament or lexicase selection
           :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population size that is retained before breeding. If 0 < decimation-ratio < 1, decimation tournaments will be used to reduce the population to size (* population-size decimation-ratio) before breeding.
           :decimation-tournament-size 2 ;; Size of the decimation tournaments
-          ; old below here
-          :tournament-size 7 ;; If using tournament selection, the size of the tournaments
-          :trivial-geography-radius 0 ;; If non-zero, this is used as the radius from which to select individuals for tournament or lexicase selection
-          :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population size that is retained before breeding. If 0 < decimation-ratio < 1, decimation tournaments will be used to reduce the population to size (* population-size decimation-ratio) before breeding.
-          :decimation-tournament-size 2 ;; Size of the decimation tournaments
-          :use-historically-assessed-hardness false ;; When true, total error for tournament selection will depend on historically-assessed hardness
-          :use-rmse false ;; When true, total error for tournament selection will depend on the root mean square error of the error vector
-          :use-lexicase-selection false ;; If true, uses Lexicase Parent Selection (see Spector paper in GECCO-UP 2012 workshop proceedings)
-          :use-elitegroup-lexicase-selection false ;; If true, uses elitegroup lexicase selection, an experimental change to lexicase that thus far is often worse
           ;;
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
@@ -182,13 +173,12 @@
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
 
 (defn parental-reversion
-  [pop-agents generation {:keys [parent-reversion-probability use-single-thread use-rmse
-                                 use-historically-assessed-hardness]}]
+  [pop-agents generation {:keys [parent-reversion-probability use-single-thread
+                                 total-error-method]}]
   (if (and (> generation 0) (> parent-reversion-probability 0))
-    (let [err-fn (cond
-                   use-historically-assessed-hardness :hah-error
-                   use-rmse :rms-error
-                   :else :total-error)]
+    (let [err-fn (case total-error-method
+                   (:hah :rmse) :weighted-error
+                   :total-error)]
       (println "Performing parent reversion...")
       (dorun (map #((if use-single-thread swap! send) 
                         % 
@@ -360,8 +350,8 @@
           (remove-parents pop-agents @push-argmap)
           ;; calculate solution rates if necessary for historically-assessed hardness
           (calculate-hah-solution-rates pop-agents @push-argmap)
-          ;; create global structure to support elitegroup lexicase selection
-          (when (:use-elitegroup-lexicase-selection @push-argmap)
+          ;; create global structure to support elite group lexicase selection
+          (when (= (:parent-selection @push-argmap) :elitegroup-lexicase)
             (build-elitegroups pop-agents))
           (timer @push-argmap :other)
           ;; report and check for success

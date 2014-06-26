@@ -87,12 +87,10 @@
         part2-ind (if json-log-program-strings
                     (assoc part1-ind :program (str (not-lazy (:program individual))))
                     part1-ind)
-        part3-ind (if (:hah-error individual)
-                    (assoc part2-ind :hah-error (:hah-error individual))
+        part3-ind (if (:weighted-error individual)
+                    (assoc part2-ind :weighted-error (:weighted-error individual))
                     part2-ind)]
-    (if (:rms-error individual)
-      (assoc part3-ind :rms-error (:rms-error individual))
-      part3-ind)))
+    part3-ind))
 
 (defn json-print
   "Prints a json file of the population, with each individual's fitness and size.
@@ -117,7 +115,7 @@
 (defn lexicase-report
   "This extra report is printed whenever lexicase selection is used."
   [population {:keys [error-function report-simplifications print-errors
-                      print-history use-rmse
+                      print-history
                       ]}]
   (let [min-error-by-case (apply map
                                  (fn [& args] (apply min args))
@@ -158,7 +156,6 @@
     (println "Lexicase best total error:" (:total-error lex-best))
     (println "Lexicase best mean error:" (float (/ (:total-error lex-best)
                                                    (count (:errors lex-best)))))
-    (when use-rmse (println "Lexicase best RMS-error:" (:rms-error lex-best)))
     (when print-history (println "Lexicase best history:" (not-lazy (:history lex-best))))
     (println "Lexicase best size:" (count-points (:program lex-best)))
     (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program lex-best)) (count-points (:program lex-best))))) ;Number of (open) parens / points
@@ -177,7 +174,6 @@
     (println "Zero cases best total error:" (:total-error most-zero-cases-best))
     (println "Zero cases best mean error:" (float (/ (:total-error most-zero-cases-best)
                                                    (count (:errors most-zero-cases-best)))))
-    (when use-rmse (println "Zero cases best RMS-error:" (:rms-error most-zero-cases-best)))
     (when print-history (println "Zero cases best history:" (not-lazy (:history most-zero-cases-best))))
     (println "Zero cases best size:" (count-points (:program most-zero-cases-best)))
     (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program most-zero-cases-best)) (count-points (:program most-zero-cases-best))))) ;Number of (open) parens / points
@@ -195,8 +191,8 @@
    {:keys [error-function report-simplifications
            error-threshold max-generations
            print-errors print-history print-cosmos-data print-timings
-           problem-specific-report use-rmse use-historically-assessed-hardness
-           use-lexicase-selection
+           problem-specific-report total-error-method
+           parent-selection
            print-error-frequencies-by-case
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
@@ -206,9 +202,7 @@
   (println)
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
   (println ";; -*- Report at generation" generation)
-  (let [err-fn (cond
-                 use-rmse :rms-error
-                 true :total-error)
+  (let [err-fn (if (= total-error-method :rmse) :weighted-error :total-error)
         sorted (sort-by err-fn < population)
         err-fn-best (first sorted)
         psr-best (problem-specific-report err-fn-best population generation error-function report-simplifications)
@@ -217,7 +211,7 @@
                err-fn-best)]
     (when print-error-frequencies-by-case
       (println "Error frequencies by case:" (doall (map frequencies (apply map vector (map :errors population))))))
-    (when use-lexicase-selection (lexicase-report population argmap))
+    (when (some #{parent-selection} #{:lexicase :elitegroup-lexicase}) (lexicase-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
     (println "Best genome:" (pr-str (not-lazy (:genome best))))
     (println "Best program:" (pr-str (not-lazy (:program best))))
@@ -228,9 +222,10 @@
     (println "Total:" (:total-error best))
     (println "Mean:" (float (/ (:total-error best)
                                (count (:errors best)))))
-    (when use-historically-assessed-hardness
-      (println "HAH-error:" (:hah-error best)))
-    (when use-rmse (println "RMS-error:" (:rms-error best)))
+    (case total-error-method
+      :hah (println "HAH-error:" (:weighted-error best))
+      :rmse (println "RMS-error:" (:weighted-error best))
+      nil)
     (when print-history (println "History:" (not-lazy (:history best))))
     (println "Size:" (count-points (:program best)))
     (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program best)) (count-points (:program best))))) ;Number of (open) parens / points

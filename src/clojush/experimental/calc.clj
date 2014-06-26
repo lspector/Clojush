@@ -527,8 +527,8 @@
    :use-single-thread false
    :use-lexicase-selection true
    ;:trivial-geography-radius 500
-   ;:use-elitegroup-lexicase-selection true
-   ;:use-historically-assessed-hardness true ;; just to print them!
+   ;:parent-selection :elitegroup-lexicase
+   ;:total-error-method :hah ;; just to print them!
    ;:decimation-ratio 0.01
    ;:tournament-size 1
    :population-size 1000 ;200 ;50

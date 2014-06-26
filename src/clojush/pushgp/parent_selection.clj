@@ -7,8 +7,8 @@
 ;; tournament selection
 (defn tournament-selection
   "Returns an individual that does the best out of a tournament."
-  [pop location {:keys [tournament-size trivial-geography-radius use-rmse
-                        use-historically-assessed-hardness]}]
+  [pop location {:keys [tournament-size trivial-geography-radius
+                        total-error-method]}]
   (let [tournament-set 
         (doall
           (for [_ (range tournament-size)]
@@ -17,10 +17,11 @@
                    (lrand-int (count pop))
                    (mod (+ location (- (lrand-int (+ 1 (* trivial-geography-radius 2))) trivial-geography-radius))
                         (count pop))))))
-        err-fn (cond
-                 use-historically-assessed-hardness :hah-error
-                 use-rmse :rms-error
-                 true :total-error)]
+        err-fn (case total-error-method
+                 :sum :total-error
+                 (:hah :rmse) :weighted-error
+                 (throw (Exception. (str "Unrecognized argument for total-error-method: "
+                                         total-error-method))))]
     (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
             tournament-set)))
 
@@ -58,23 +59,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; elitegroup lexicase selection
-
-;(defn build-elitegroups
-;  "Builds a sequence that partitions the cases into sub-sequences, with cases 
-;grouped when they produce the same set of elite individuals in the population."
-;  [pop-agents]
-;  (println "Building case elitegroups...")
-;  (let [pop (retain-one-individual-per-error-vector (map deref pop-agents))
-;        cases (range (count (:errors (first pop))))
-;        elites (map (fn [c]
-;                      (let [min-error-for-case 
-;                            (apply min (map #(nth % c) (map :errors pop)))]
-;                        (filter #(== (nth (:errors %) c) min-error-for-case)
-;                                pop)))
-;                    cases)]
-;    (reset! elitegroups
-;            (vals (group-by #(nth elites %) cases)))
-;    (println (count @elitegroups) "elitegroups:" @elitegroups)))
 
 (defn build-elitegroups
   "Builds a sequence that partitions the cases into sub-sequences, with cases 
@@ -124,9 +108,11 @@ group B is discarded. "
 
 (defn select
   "Returns a selected parent."
-  [pop location {:keys [use-lexicase-selection use-elitegroup-lexicase-selection]
+  [pop location {:keys [parent-selection]
                  :as argmap}]
-  (cond 
-    use-lexicase-selection (lexicase-selection pop location argmap)
-    use-elitegroup-lexicase-selection (elitegroup-lexicase-selection pop)
-    :else (tournament-selection pop location argmap))) ;; use tournament selection by default
+  (case parent-selection
+    :tournament (tournament-selection pop location argmap)
+    :lexicase (lexicase-selection pop location argmap)
+    :elitegroup-lexicase (elitegroup-lexicase-selection pop)
+    (throw (Exception. (str "Unrecognized argument for parent-selection: "
+                            parent-selection)))))

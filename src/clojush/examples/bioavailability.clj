@@ -153,6 +153,6 @@
    :tournament-size 10
    :report-simplifications 0
    :final-report-simplifications 1000
-   :use-rmse true
+   :total-error-method :rmse
    :problem-specific-report bioavailability-report
    })
