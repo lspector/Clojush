@@ -31,7 +31,7 @@
         (number? thing) :float
         (or (= thing true) (= thing false)) :boolean
         (vector? thing) :intvec2D ;; just assume length is right
-        true false))
+        :else false))
 
 (in-ns 'clojush.examples.dsoar)
 
@@ -62,18 +62,18 @@
 (define-registered intvec2D_rot (rotter :intvec2D))
 
 (define-registered v8a
-                   (fn [state] 
-                     (if (and (not (empty? (rest (:intvec2D state))))
-                              (not (empty? (:auxiliary state))))
-                       (let [floorstate (stack-ref :auxiliary 0 state)
-                             topvec (stack-ref :intvec2D 0 state)
-                             nxtvec (stack-ref :intvec2D 1 state)]
-                         (->> (pop-item :intvec2D state)
-                              (pop-item :intvec2D)
-                              (push-item [(mod (+ (first topvec) (first nxtvec)) (:max-row floorstate))
-                                          (mod (+ (second topvec) (second nxtvec)) (:max-column floorstate))]
-                                         :intvec2D)))
-                       state)))
+  (fn [state] 
+    (if (and (not (empty? (rest (:intvec2D state))))
+             (not (empty? (:auxiliary state))))
+      (let [floorstate (stack-ref :auxiliary 0 state)
+            topvec (stack-ref :intvec2D 0 state)
+            nxtvec (stack-ref :intvec2D 1 state)]
+        (->> (pop-item :intvec2D state)
+          (pop-item :intvec2D)
+          (push-item [(mod (+ (first topvec) (first nxtvec)) (:max-row floorstate))
+                      (mod (+ (second topvec) (second nxtvec)) (:max-column floorstate))]
+                     :intvec2D)))
+      state)))
 
 (defstruct floor-state
   :grid :mopped :obstacles :row :column :orientation :turns :moves
@@ -177,62 +177,67 @@
       push-state)))
 
 (define-registered left
-                   (fn [state]
-                     (if-not (empty? (:auxiliary state))
-                       (let [floor-state (stack-ref :auxiliary 0 state)]
-                         (->> state
-                              (pop-item :auxiliary)
-                              (push-item (left-in floor-state) :auxiliary)))
-                       state)))
+  (fn [state]
+    (if-not (empty? (:auxiliary state))
+      (let [floor-state (stack-ref :auxiliary 0 state)]
+        (->> state
+          (pop-item :auxiliary)
+          (push-item (left-in floor-state) :auxiliary)))
+      state)))
 
 (define-registered mop
-                   (fn [state]
-                     (if-not (empty? (:auxiliary state))
-                       (let [floor-state (stack-ref :auxiliary 0 state)]
-                         (->> state
-                              (pop-item :auxiliary)
-                              (push-item (mop-in floor-state) :auxiliary)))
-                       state)))
+  (fn [state]
+    (if-not (empty? (:auxiliary state))
+      (let [floor-state (stack-ref :auxiliary 0 state)]
+        (->> state
+          (pop-item :auxiliary)
+          (push-item (mop-in floor-state) :auxiliary)))
+      state)))
 
 (define-registered frog 
-                   (fn [state]
-                     (if-not (empty? (:auxiliary state))
-                       (let [floorstate (stack-ref :auxiliary 0 state)]    
-                         (if (and (< (:turns floorstate) (:turns-limit floorstate))
-                                  (< (:moves floorstate) (:moves-limit floorstate))
-                                  (not (empty? (:intvec2D state))))
-                           (let [[shift-row shift-column] (first (:intvec2D state))
-                                 new-row (mod (+ (:row floorstate) shift-row) 
-                                              (:max-row floorstate))
-                                 new-column (mod (+ (:column floorstate) shift-column)
-                                                 (:max-column floorstate))]
-                             (if-not (obstacle? [new-row new-column] state)    
-                               (->> state
-                                    (pop-item :intvec2D)
-                                    (pop-item :auxiliary)
-                                    (push-item (assoc floorstate
-                                                      :moves (inc (:moves floorstate))
-                                                      :row new-row
-                                                      :column new-column
-                                                      :mowed (if (= 1 (nth (nth (:grid floorstate) new-row) new-column))
-                                                               (conj (:mowed floorstate) [new-row new-column])
-                                                               (:mowed floorstate)))
-                                               :auxiliary))
-                               state))
-                           state))
-                       state)))
+  (fn [state]
+    (if-not (empty? (:auxiliary state))
+      (let [floorstate (stack-ref :auxiliary 0 state)]    
+        (if (and (< (:turns floorstate) (:turns-limit floorstate))
+                 (< (:moves floorstate) (:moves-limit floorstate))
+                 (not (empty? (:intvec2D state))))
+          (let [[shift-row shift-column] (first (:intvec2D state))
+                new-row (mod (+ (:row floorstate) shift-row) 
+                             (:max-row floorstate))
+                new-column (mod (+ (:column floorstate) shift-column)
+                                (:max-column floorstate))]
+            (if-not (obstacle? [new-row new-column] state)    
+              (->> state
+                (pop-item :intvec2D)
+                (pop-item :auxiliary)
+                (push-item (assoc floorstate
+                                  :moves (inc (:moves floorstate))
+                                  :row new-row
+                                  :column new-column
+                                  :mowed (if (= 1 (nth (nth (:grid floorstate) new-row) new-column))
+                                           (conj (:mowed floorstate) [new-row new-column])
+                                           (:mowed floorstate)))
+                           :auxiliary))
+              state))
+          state))
+      state)))
 
 (define-registered if-obstacle
-                   (fn [state]
-                     (if-not (empty? (:auxiliary state))
-                       (if-obstacle-in state)
-                       state)))
+  (fn [state]
+    (if-not (empty? (:auxiliary state))
+      (if-obstacle-in state)
+      state)))
 
 (define-registered if-dirty
-                   (fn [state]
-                     (if-not (empty? (:auxiliary state))
-                       (if-dirty-in state)
-                       state)))
+  (fn [state]
+    (if-not (empty? (:auxiliary state))
+      (if-dirty-in state)
+      state)))
+
+; Set paren requirements for new instructions
+(swap! instr-paren-requirements assoc
+       'if-dirty 2
+       'if-obstacle 2)
 
 (defn mopper-fitness
   "Returns a fitness function for the dsoar problem with a floor of the
@@ -277,14 +282,17 @@
                           (fn [] [(lrand-int 8) (lrand-int 8)])
                           (tag-instruction-erc [:exec] 1000)
                           (tagged-instruction-erc 1000))
-   :mutation-probability 0.3
-   :crossover-probability 0.3
-   :simplification-probability 0.3
-   :reproduction-probability 0.1
-   :reproduction-simplifications 10
+   :genetic-operator-probabilities {:reproduction 0.1
+                                    :alternation 0.45
+                                    [:uniform-mutation :uniform-close-mutation] 0.45}
+   :parent-selection :tournament
+   ;;;;;; Old genetic operator probabilities; should add back in simplification when implemented
+   ;:mutation-probability 0.3
+   ;:crossover-probability 0.3
+   ;:simplification-probability 0.3
+   ;:reproduction-probability 0.1
+   ;:reproduction-simplifications 10
    :max-points 200
    :max-points-in-initial-program 200
    :evalpush-limit 1000
    })
-
-

@@ -4,9 +4,7 @@
 
 (ns clojush.examples.korns-regression-p12 
   (:use [clojush.pushgp.pushgp]
-        [clojush.pushstate]
-        [clojush.interpreter]
-        [cloush.random]
+        [clojush pushstate interpreter random]
         [clojure.math.numeric-tower]))
 
 (defn generate-data 
@@ -282,14 +280,13 @@
    :max-points-in-initial-program 30
    :evalpush-limit 50
    :population-size 500
-   :mutation-probability 0.20
-   :mutation-max-points 10
-   :crossover-probability 0.40
-   :simplification-probability 0.1
-   :reproduction-simplifications 10
-   :gaussian-mutation-probability 0.2
-   :gaussian-mutation-per-number-mutation-probability 0.5
-   :gaussian-mutation-standard-deviation 0.1
+   :epigenetic-markers []
+   :genetic-operator-probabilities {:alternation 0.6
+                                    :uniform-mutation 0.4}
+   :uniform-mutation-rate 0.1
+   :uniform-mutation-constant-tweak-rate 0.8
+   :mutation-float-gaussian-standard-deviation 0.1
+   :parent-selection :tournament
    :tournament-size 1
    :decimation-ratio 0.1
    :decimation-tournament-size 2

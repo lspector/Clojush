@@ -26,10 +26,10 @@
                           (s/split-lines f)))]
     (map #(map read-string %) lines)))
 
-(defn data-with-historical "Take the data and make a sequence:
-                            t-128 t-64 t-32 t-16 t-8 t-4 t-2 t-1
-                            where time points
-                            before the start of the series are set to 0."
+(defn data-with-historical
+  "Take the data and make a sequence:
+              t-128 t-64 t-32 t-16 t-8 t-4 t-2 t-1
+   where time points before the start of the series are set to 0."
   [data]
   (doall 
     (for [t (range (count data))]
@@ -39,28 +39,28 @@
 (def data (data-with-historical (read-data)))
 
 (define-registered x1 
-                   (fn [state] (push-item (stack-ref :auxiliary 7 state) :integer state)))
+  (fn [state] (push-item (stack-ref :auxiliary 7 state) :integer state)))
 
 (define-registered x2 
-                   (fn [state] (push-item (stack-ref :auxiliary 6 state) :integer state)))
+  (fn [state] (push-item (stack-ref :auxiliary 6 state) :integer state)))
 
 (define-registered x4 
-                   (fn [state] (push-item (stack-ref :auxiliary 5 state) :integer state)))
+  (fn [state] (push-item (stack-ref :auxiliary 5 state) :integer state)))
 
 (define-registered x8 
-                   (fn [state] (push-item (stack-ref :auxiliary 4 state) :integer state)))
+  (fn [state] (push-item (stack-ref :auxiliary 4 state) :integer state)))
 
 (define-registered x16 
-                   (fn [state] (push-item (stack-ref :auxiliary 3 state) :integer state)))
+  (fn [state] (push-item (stack-ref :auxiliary 3 state) :integer state)))
 
 (define-registered x32
-                   (fn [state] (push-item (stack-ref :auxiliary 2 state) :integer state)))
+  (fn [state] (push-item (stack-ref :auxiliary 2 state) :integer state)))
 
 (define-registered x64 
-                   (fn [state] (push-item (stack-ref :auxiliary 1 state) :integer state)))
+  (fn [state] (push-item (stack-ref :auxiliary 1 state) :integer state)))
 
 (define-registered x128
-                   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
+  (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
 (defn error-function
   [num-samples program]
@@ -102,11 +102,12 @@
    :max-points-in-initial-program 500
    :evalpush-limit 500
    :population-size 1000
-   :mutation-probability 0.10
-   :mutation-max-points 50
-   :crossover-probability 0.80
-   :simplification-probability 0
-   :reproduction-simplifications 10
+   :epigenetic-markers []
+   :genetic-operator-probabilities {:alternation 0.8
+                                    :uniform-mutation 0.1
+                                    :reproduction 0.1}
+   :alignment-deviation 10
+   :parent-selection :tournament
    :tournament-size 7
    :max-generations 1000
    :reuse-errors false ;; If a sample set is used, then error reuse must be disabled

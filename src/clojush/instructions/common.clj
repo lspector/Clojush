@@ -1,44 +1,47 @@
 (ns clojush.instructions.common
-  (:use [clojush.pushstate]))
+  (:use [clojush pushstate globals]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Lookup function to see how many paren groups a function requires
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lookup function to see how many paren groups a function requires
 
 (def instr-paren-requirements
-  {;; Require 3
-   'exec_rot 3
-   'exec_s 3
-   ;; Require 2
-   'exec_if 2
-   'exec_swap 2
-   'exec_k 2
-   ;; Require 1
-   'exec_when 1
-   'exec_pop 1
-   'exec_dup 1
-   'exec_shove 1
-   'exec_do*range 1
-   'exec_do*count 1
-   'exec_do*times 1
-   'exec_y 1
-   'return_fromexec 1
-   'environment_new 1
-   'zip_fromexec 1
-   'zip_replace_fromexec 1
-   'zip_insert_right_fromexec 1
-   'zip_insert_left_fromexec 1
-   'zip_insert_child_fromexec 1
-   'zip_append_child_fromexec 1
-   ;; Require 0, but included here in case change mind later
-   ;; (default for not-mentioned instructions is 0)
-   'exec_eq 0
-   'exec_yank 0
-   'exec_yankdup 0
-   })
+  (atom {;; Require 3
+         'exec_rot 3
+         'exec_s 3
+         ;; Require 2
+         'exec_if 2
+         'exec_swap 2
+         'exec_k 2
+         ;; Require 1
+         'exec_when 1
+         'exec_pop 1
+         'exec_dup 1
+         'exec_shove 1
+         'exec_do*range 1
+         'exec_do*count 1
+         'exec_do*times 1
+         'exec_y 1
+         'return_fromexec 1
+         'environment_new 1
+         'zip_fromexec 1
+         'zip_replace_fromexec 1
+         'zip_insert_right_fromexec 1
+         'zip_insert_left_fromexec 1
+         'zip_insert_child_fromexec 1
+         'zip_append_child_fromexec 1
+         ;; Require 0, but included here in case change mind later
+         ;; (default for not-mentioned instructions is 0)
+         'exec_eq 0
+         'exec_yank 0
+         'exec_yankdup 0
+         }))
 
 (defn lookup-instruction-paren-groups
   [ins]
-  (let [ins-req (get instr-paren-requirements ins)]
+  (let [ins-req (get @instr-paren-requirements ins)]
   (cond
     ins-req ins-req
     (and (symbol? ins)

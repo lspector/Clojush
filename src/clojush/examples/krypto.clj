@@ -52,5 +52,9 @@
                              (abs (- top-int objective))
                              1000)))))
    :atom-generators (list 'integer_div 'integer_mult 'integer_add 'integer_sub)
+   :epigenetic-markers []
+   :genetic-operator-probabilities {:alternation 0.5
+                                    :uniform-mutation 0.5}
+   :parent-selection :tournament
    :tournament-size 3
    })

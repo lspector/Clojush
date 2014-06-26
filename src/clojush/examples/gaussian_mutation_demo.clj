@@ -43,13 +43,13 @@
                       (list 
                         (fn [] (* 1.0 (- (lrand-int 21) 10)))
                         'in))
-   :mutation-probability 0.2
-   :crossover-probability 0.2
-   :simplification-probability 0.2
-   :reproduction-simplifications 10
-   :gaussian-mutation-probability 0.3
-   :gaussian-mutation-per-number-mutation-probability 1.0
-   :gaussian-mutation-standard-deviation 0.1
+   :epigenetic-markers []
+   :parent-selection :tournament
+   :genetic-operator-probabilities {:alternation 0.5
+                                    :uniform-mutation 0.5}
+   :uniform-mutation-rate 0.1
+   :uniform-mutation-constant-tweak-rate 0.8
+   :mutation-float-gaussian-standard-deviation 0.1
    :error-threshold 1.0
    :population-size 5000
    })

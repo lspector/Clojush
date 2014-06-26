@@ -4,8 +4,7 @@
 
 (ns clojush.examples.factorial
   (:use [clojush.pushgp.pushgp]
-        [clojush.pushstate]
-        [clojush.interpreter]
+        [clojush pushstate interpreter]
         [clojure.math.numeric-tower]))
 
 (define-registered 
@@ -74,10 +73,10 @@
    :max-points 500
    :max-points-in-initial-program 100
    :evalpush-limit 1000
-   :use-lexicase-selection true
-   :mutation-probability 0.45
-   :crossover-probability 0.45
-   :simplification-probability 0
-   :ultra-probability 0
+   :genetic-operator-probabilities {:uniform-close-mutation 0.1
+                                    :alternation 0.45
+                                    :uniform-mutation 0.45}
+   :alignment-deviation 10
+   :parent-selection :lexicase
    :print-history false
    })

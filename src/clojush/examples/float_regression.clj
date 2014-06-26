@@ -45,5 +45,9 @@
                           'float_mult
                           'float_add
                           'float_sub)
+   :epigenetic-markers []
+   :genetic-operator-probabilities {:alternation 0.8
+                                    :uniform-mutation 0.2}
+   :parent-selection :tournament
    :tournament-size 3
    })

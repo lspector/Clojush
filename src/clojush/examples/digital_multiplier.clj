@@ -132,11 +132,12 @@
      :max-points 400
      :max-points-in-initial-program 200
      :evalpush-limit 400
-     :reproduction-probability 0.05
-     :mutation-probability 0.1
-     :mutation-max-points 30
-     :crossover-probability 0.8
-     :simplification-probability 0.05
+     :epigenetic-markers []
+     :genetic-operator-probabilities {:reproduction 0.05
+                                      :alternation 0.80
+                                      :uniform-mutation 0.15}
+     :parent-selection :tournament
+     :tournament-size 7
      :report-simplifications 0})
   )
 

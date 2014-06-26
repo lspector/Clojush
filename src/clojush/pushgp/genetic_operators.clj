@@ -34,7 +34,7 @@
         tag-num (read-string (last tagparts))
         new-tag-num (mod (round (perturb-with-gaussian-noise mutation-tag-gaussian-standard-deviation tag-num))
                          @global-tag-limit)
-        new-instr (apply str (interpose  "_" (concat (butlast tagparts) (list (str new-tag-num)))))]
+        new-instr (symbol (apply str (interpose  "_" (concat (butlast tagparts) (list (str new-tag-num))))))]
     (assoc instr-map :instruction new-instr)))
 
 (defn uniform-mutation

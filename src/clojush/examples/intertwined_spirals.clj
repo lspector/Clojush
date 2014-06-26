@@ -11,10 +11,8 @@
 
 (ns clojush.examples.intertwined-spirals
   (:use [clojush.pushgp.pushgp]
-        [clojush.random]
-        [clojush.pushstate]
-        [clojush.interpreter]
-        [clojush.instructions.tag]))
+        [clojush random pushstate interpreter]
+        [clojush.instructions tag common]))
 
 ;;;;;;;;;;;;
 ;; Intertwined Spirals problem
@@ -41,28 +39,28 @@
                (inc k))))))
        
 (define-registered x
-                   (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
+  (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
 
 (define-registered y
-                   (fn [state] (push-item (stack-ref :auxiliary 1 state) :float state)))
+  (fn [state] (push-item (stack-ref :auxiliary 1 state) :float state)))
 
 (define-registered iflte
-                   (fn [state]
-                     (if (and (not (empty? (rest (:float state))))
-                              (not (empty? (rest (:exec state)))))
-                       (let [first-float (stack-ref :float 0 state)
-                             second-float (stack-ref :float 1 state)
-                             first-exec (stack-ref :exec 0 state)
-                             second-exec (stack-ref :exec 1 state)] 
-                         (->> (pop-item :float state)
-                              (pop-item :float)
-                              (pop-item :exec)
-                              (pop-item :exec)  
-                              (push-item (if (<= second-float first-float)
-                                           first-exec
-                                           second-exec)
-                                         :exec)))
-                       state)))
+  (fn [state]
+    (if (and (not (empty? (rest (:float state))))
+             (not (empty? (rest (:exec state)))))
+      (let [first-float (stack-ref :float 0 state)
+            second-float (stack-ref :float 1 state)
+            first-exec (stack-ref :exec 0 state)
+            second-exec (stack-ref :exec 1 state)] 
+        (->> (pop-item :float state)
+          (pop-item :float)
+          (pop-item :exec)
+          (pop-item :exec)  
+          (push-item (if (<= second-float first-float)
+                       first-exec
+                       second-exec)
+                     :exec)))
+      state)))
 
 (defn classify-spiral
   "Return the classification of based on the current solution for belonging to 1 of 2 spirals.
@@ -83,6 +81,10 @@
                                    (> top-float 0) 1
                                    :else           0)]
         (list x y spiral predicted-spiral (if (= spiral predicted-spiral) 1 0))))))
+
+; Set paren requirements for new instructions
+(swap! instr-paren-requirements assoc
+       'iflte 2)
 
 (def spiral-instructions 
   {:basic (list (fn [] (lrand))
@@ -109,7 +111,7 @@
 (defn spiral-error
   [program]
   (let [classification (classify-spiral program)]
-    (with-meta (map #(cond (= (nth % 3) -1)  1000         ; Did we get an invalid reponse?
+    (with-meta (map #(cond (= (nth % 3) -1)  1000 ; Did we get an invalid reponse?
                            (= (last %) 1)       0 ; Correct answer?
                            :else               17); Else wrong
                     classification)
@@ -120,4 +122,8 @@
    :population-size 1000,
    :error-function spiral-error,
    :atom-generators (:basic spiral-instructions)
+   :parent-selection :tournament
+   :genetic-operator-probabilities {:uniform-close-mutation 0.1
+                                    :alternation 0.45
+                                    :uniform-mutation 0.45}
    })

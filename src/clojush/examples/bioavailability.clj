@@ -29,9 +29,7 @@
 
 (ns clojush.examples.bioavailability
   (:use [clojush.pushgp.pushgp]
-        [clojush.pushstate]
-        [clojush.interpreter]
-        [clojush random util]
+        [clojush random util pushstate interpreter]
         [local-file]
         [clojure.math.numeric-tower])
   (:require [clojure.string :as string]
@@ -132,7 +130,7 @@
 ;:max-generations 100
 ;:mutation-probability 0.09
 ;:crossover-probability 0.81
-;;:replication-rate 0.1 ;implicit
+;;:replication-rate 0.1
 ;:tournament-size 10
 ;;:max-depth 17 ;tree GP param
 ;;:max-dept-of-mutation-code 6 ;tree GP param
@@ -145,14 +143,14 @@
    :evalpush-limit 500
    :population-size 500
    :max-generations 100
-   :mutation-probability 0.09
-   :mutation-max-points 50
-   :crossover-probability 0.81
-   :simplification-probability 0.0
-   :reproduction-probability 0.1
+   :epigenetic-markers []
+   :genetic-operator-probabilities {:reproduction 0.1
+                                    :alternation 0.81
+                                    :uniform-mutation 0.09}
+   :parent-selection :tournament
    :tournament-size 10
+   :total-error-method :rmse
    :report-simplifications 0
    :final-report-simplifications 1000
-   :total-error-method :rmse
    :problem-specific-report bioavailability-report
    })

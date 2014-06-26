@@ -42,9 +42,9 @@
         (tag-instruction? instruction) (handle-tag-instruction instruction state)
         (tagged-code-macro? instruction) (handle-tag-code-macro instruction state)
         (contains? @instruction-table instruction) ((instruction @instruction-table) state)
-        :else (do (println "Undefined instruction:" instruction)
+        :else (do (println "Undefined instruction:" (pr-str instruction))
                 (binding [*out* *err*]
-                		(println "Undefined instruction:" instruction)
+                		(println "Undefined instruction:" (pr-str instruction))
                 		state))))))
 
 (def saved-state-sequence (atom []))

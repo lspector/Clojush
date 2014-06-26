@@ -7,7 +7,7 @@
         [clojush.pushstate]
         [clojush.interpreter]
         [clojush.globals]
-        [cloush.random]
+        [clojush.random]
         [clojush.instructions.common]
         [clojush.instructions.tag]))
 
@@ -56,18 +56,18 @@
 ;; Define Koza's v8a "vector addition mod 8" function. This is a modified v8a
 ;;   that takes the modulo with respect to the lawn size.
 (define-registered v8a
-                   (fn [state] 
-                     (if (and (not (empty? (rest (:intvec2D state))))
-                              (not (empty? (:auxiliary state))))
-                       (let [lawnstate (stack-ref :auxiliary 0 state)
-                             topvec (stack-ref :intvec2D 0 state)
-                             nxtvec (stack-ref :intvec2D 1 state)]
-                         (->> (pop-item :intvec2D state)
-                              (pop-item :intvec2D)
-                              (push-item [(mod (+ (first topvec) (first nxtvec)) (:max-row lawnstate))
-                                          (mod (+ (second topvec) (second nxtvec)) (:max-column lawnstate))]
-                                         :intvec2D)))
-                       state)))
+  (fn [state] 
+    (if (and (not (empty? (rest (:intvec2D state))))
+             (not (empty? (:auxiliary state))))
+      (let [lawnstate (stack-ref :auxiliary 0 state)
+            topvec (stack-ref :intvec2D 0 state)
+            nxtvec (stack-ref :intvec2D 1 state)]
+        (->> (pop-item :intvec2D state)
+          (pop-item :intvec2D)
+          (push-item [(mod (+ (first topvec) (first nxtvec)) (:max-row lawnstate))
+                      (mod (+ (second topvec) (second nxtvec)) (:max-column lawnstate))]
+                     :intvec2D)))
+      state)))
 
 ; test
 #_(println (run-push '(1 2 integer_add [1 2] [3 4] v8a 
@@ -142,48 +142,48 @@
 ;; Define actual Push instructions for lawnmower functions.
 
 (define-registered left 
-                   (fn [state]
-                     (if-not (empty? (:auxiliary state))
-                       (let [lawnstate (stack-ref :auxiliary 0 state)]
-                         (->> state
-                              (pop-item :auxiliary)
-                              (push-item (left-in lawnstate) :auxiliary)))
-                       state)))
+  (fn [state]
+    (if-not (empty? (:auxiliary state))
+      (let [lawnstate (stack-ref :auxiliary 0 state)]
+        (->> state
+          (pop-item :auxiliary)
+          (push-item (left-in lawnstate) :auxiliary)))
+      state)))
 
 (define-registered mow 
-                   (fn [state]
-                     (if-not (empty? (:auxiliary state))
-                       (let [lawnstate (stack-ref :auxiliary 0 state)]
-                         (->> state
-                              (pop-item :auxiliary)
-                              (push-item (mow-in lawnstate) :auxiliary)))
-                       state)))
+  (fn [state]
+    (if-not (empty? (:auxiliary state))
+      (let [lawnstate (stack-ref :auxiliary 0 state)]
+        (->> state
+          (pop-item :auxiliary)
+          (push-item (mow-in lawnstate) :auxiliary)))
+      state)))
 
 (define-registered frog 
-                   (fn [state]
-                     (if-not (empty? (:auxiliary state))
-                       (let [lawnstate (stack-ref :auxiliary 0 state)]    
-                         (if (and (< (:turns lawnstate) (:turns-limit lawnstate))
-                                  (< (:moves lawnstate) (:moves-limit lawnstate))
-                                  (not (empty? (:intvec2D state))))
-                           (let [[shift-row shift-column] (first (:intvec2D state))
-                                 new-row (mod (+ (:row lawnstate) shift-row) 
-                                              (:max-row lawnstate))
-                                 new-column (mod (+ (:column lawnstate) shift-column)
-                                                 (:max-column lawnstate))
-                                 new-lawnstate (assoc lawnstate
-                                                      :moves (inc (:moves lawnstate))
-                                                      :row new-row
-                                                      :column new-column
-                                                      :mowed (if (= 1 (nth (nth (:grid lawnstate) new-row) new-column))
-                                                               (conj (:mowed lawnstate) [new-row new-column])
-                                                               (:mowed lawnstate)))]
-                             (->> state
-                                  (pop-item :intvec2D)
-                                  (pop-item :auxiliary)
-                                  (push-item new-lawnstate :auxiliary)))
-                           state))
-                       state)))
+  (fn [state]
+    (if-not (empty? (:auxiliary state))
+      (let [lawnstate (stack-ref :auxiliary 0 state)]    
+        (if (and (< (:turns lawnstate) (:turns-limit lawnstate))
+                 (< (:moves lawnstate) (:moves-limit lawnstate))
+                 (not (empty? (:intvec2D state))))
+          (let [[shift-row shift-column] (first (:intvec2D state))
+                new-row (mod (+ (:row lawnstate) shift-row) 
+                             (:max-row lawnstate))
+                new-column (mod (+ (:column lawnstate) shift-column)
+                                (:max-column lawnstate))
+                new-lawnstate (assoc lawnstate
+                                     :moves (inc (:moves lawnstate))
+                                     :row new-row
+                                     :column new-column
+                                     :mowed (if (= 1 (nth (nth (:grid lawnstate) new-row) new-column))
+                                              (conj (:mowed lawnstate) [new-row new-column])
+                                              (:mowed lawnstate)))]
+            (->> state
+              (pop-item :intvec2D)
+              (pop-item :auxiliary)
+              (push-item new-lawnstate :auxiliary)))
+          state))
+      state)))
 
 ;;;;;;;;;;;;
 ;; Define a high level fitness function so code for runs is cleaner.
@@ -227,11 +227,15 @@
    :atom-generators (list 'left 'mow 'v8a 'frog (fn [] [(lrand-int 8) (lrand-int 8)])
                           (tag-instruction-erc [:exec] 1000)
                           (tagged-instruction-erc 1000))
-   :mutation-probability 0.3
-   :crossover-probability 0.3
-   :simplification-probability 0.3
-   :reproduction-probability 0.1
-   :reproduction-simplifications 10
+   :genetic-operator-probabilities {:reproduction 0.1
+                                    :alternation 0.45
+                                    [:uniform-mutation :uniform-close-mutation] 0.45}
+   :parent-selection :tournament
+   ;:mutation-probability 0.3
+   ;:crossover-probability 0.3
+   ;:simplification-probability 0.3
+   ;:reproduction-probability 0.1
+   ;:reproduction-simplifications 10
    :max-points 200
    :max-points-in-initial-program 200
    :evalpush-limit 1000
