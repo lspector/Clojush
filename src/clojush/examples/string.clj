@@ -93,9 +93,12 @@
                                (fn [] (lrand-int 10))
                                (fn [] (apply str (repeatedly (+ 1 (lrand-int 9))
                                                              #(lrand-nth (str "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                                                             "abcdefghijklmnopqrstuvwxyz"
-                                                                             "0123456789"))))))
+                                                                              "abcdefghijklmnopqrstuvwxyz"
+                                                                              "0123456789"))))))
         :population-size 500
         :max-generations 200
-        :tournament-size 5
-  })
+        :epigenetic-markers []
+        :genetic-operator-probabilities {:alternation 0.5
+                                         :uniform-mutation 0.5}
+        :uniform-mutation-constant-tweak-rate 0.8
+        })

@@ -45,10 +45,16 @@
                       (list 
                         (fn [] (- (lrand-int 21) 10))
                         'in))
-   :mutation-probability 0.3
-   :crossover-probability 0.3
-   :simplification-probability 0.3
-   :reproduction-simplifications 10
+   :tag-limit 1000
+   :epigenetic-markers []
+   :parent-selection :tournament
+   :genetic-operator-probabilities {:alternation 0.5
+                                    :uniform-mutation 0.5
+                                    }
+   ;:mutation-probability 0.3
+   ;:crossover-probability 0.3
+   ;:simplification-probability 0.3
+   ;:reproduction-simplifications 10
    :max-points 100
    :max-points-in-initial-program 100
    :population-size 5000

@@ -7,9 +7,7 @@
 
 (ns clojush.examples.pagie-hogeweg
   (:use [clojush.pushgp.pushgp]
-        [clojush.pushstate]
-        [clojush.random]
-        [clojush.interpreter])
+        [clojush pushstate random interpreter])
   (:require [clojure.math.numeric-tower :as math]))
 
 (defn data-point-2D
@@ -96,10 +94,12 @@
    :evalpush-limit 500
    :population-size 1000
    :max-generations 1000
-   :mutation-probability 0.10
-   :mutation-max-points 50
-   :crossover-probability 0.80
-   :simplification-probability 0.0
+   :epigenetic-markers []
+   :parent-selection :tournament
+   :genetic-operator-probabilities {:alternation 0.5
+                                    :uniform-mutation 0.5}
+   :uniform-mutation-constant-tweak-rate 0.8
+   :mutation-float-gaussian-standard-deviation 0.01
    :tournament-size 7
    :reuse-errors true ;; If a sample set is used, then error reuse must be disabled
    :print-errors false

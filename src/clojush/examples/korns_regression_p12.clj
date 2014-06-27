@@ -283,7 +283,6 @@
    :epigenetic-markers []
    :genetic-operator-probabilities {:alternation 0.6
                                     :uniform-mutation 0.4}
-   :uniform-mutation-rate 0.1
    :uniform-mutation-constant-tweak-rate 0.8
    :mutation-float-gaussian-standard-deviation 0.1
    :parent-selection :tournament

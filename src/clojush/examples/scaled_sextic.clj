@@ -48,6 +48,12 @@
                         (fn [] (- (lrand 20.0) 10))
                         'in))
    :population-size 10000
+   :epigenetic-markers []
+   :parent-selection :tournament
+   :genetic-operator-probabilities {:alternation 0.5
+                                    :uniform-mutation 0.5}
+   :uniform-mutation-constant-tweak-rate 0.8
+   :mutation-float-gaussian-standard-deviation 0.1
    })
 
 ;;;; Here is an evolved solution:

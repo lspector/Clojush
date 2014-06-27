@@ -59,6 +59,9 @@
 ;                          'integer_mult
 ;                          'integer_add
 ;                          'integer_sub)
+;   :parent-selection :tournament
+;   :genetic-operator-probabilities {:alternation 0.5
+;                                     :uniform-mutation 0.5}
 ;   })
 
 ;(pushgp argmap)
@@ -88,14 +91,9 @@
 ;   :atom-generators (concat (registered-nonrandom)
 ;                            (list (fn [] (lrand-int 100))
 ;                                  'in))
-;   :mutation-probability 0
-;   :crossover-probability 0
-;   :simplification-probability 0
-;   :reproduction-probability 0
-;   :ultra-probability 1.0
-;   :ultra-alternation-rate 0.05
-;   :ultra-alignment-deviation 5
-;   :ultra-mutation-rate 0.05
+;   :parent-selection :tournament
+;   :genetic-operator-probabilities {:alternation 0.5
+;                                     :uniform-mutation 0.5}
 ;   })
 
 ;(pushgp argmap)

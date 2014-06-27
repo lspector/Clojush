@@ -89,4 +89,8 @@
                           ))
    :max-points 200
    :max-points-in-initial-program 200
+   :genetic-operator-probabilities {:uniform-close-mutation 0.1
+                                    :alternation 0.45
+                                    :uniform-mutation 0.45}
+   :parent-selection :tournament
    })

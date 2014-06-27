@@ -49,11 +49,11 @@
                mutation-string-char-change-rate maintain-ancestors
                atom-generators epigenetic-markers close-parens-probabilities]}]
   (let [string-tweak (fn [st]
-                       (map (fn [c]
-                              (if (< (lrand) mutation-string-char-change-rate)
-                                (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127))))
-                                c))
-                            st))
+                       (apply str (map (fn [c]
+                                         (if (< (lrand) mutation-string-char-change-rate)
+                                           (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127))))
+                                           c))
+                                       st)))
         instruction-mutator (fn [token]
                               (first (random-code 1 atom-generators epigenetic-markers close-parens-probabilities)))
         constant-mutator (fn [token]
@@ -89,23 +89,26 @@
    :close will have a uniform-close-mutation-rate probability of being changed,
    and those that are changed have a close-increment-rate chance of being
    incremented, and are otherwise decremented."
-  [ind {:keys [uniform-close-mutation-rate close-increment-rate maintain-ancestors]}]
-  (let [close-mutator (fn [instr-map]
-                        (let [closes (get instr-map :close 0)]
-                          (assoc instr-map :close
-                                 (if (< (lrand) uniform-close-mutation-rate)
-                                   (if (< (lrand) close-increment-rate) ;Rate at which to increase closes instead of decrease
-                                     (inc closes)
-                                     (if (<= closes 0)
-                                       0
-                                       (dec closes)))
-                                   closes))))
-        new-genome (map close-mutator (:genome ind))]
-    (make-individual :genome new-genome
-                     :history (:history ind)
-                     :ancestors (if maintain-ancestors
-                                  (cons (:genome ind) (:ancestors ind))
-                                  (:ancestors ind)))))
+  [ind {:keys [uniform-close-mutation-rate close-increment-rate
+               epigenetic-markers maintain-ancestors]}]
+  (if (not (some #{:close} epigenetic-markers))
+    ind
+    (let [close-mutator (fn [instr-map]
+                          (let [closes (get instr-map :close 0)]
+                            (assoc instr-map :close
+                                   (if (< (lrand) uniform-close-mutation-rate)
+                                     (if (< (lrand) close-increment-rate) ;Rate at which to increase closes instead of decrease
+                                       (inc closes)
+                                       (if (<= closes 0)
+                                         0
+                                         (dec closes)))
+                                     closes))))
+          new-genome (map close-mutator (:genome ind))]
+      (make-individual :genome new-genome
+                       :history (:history ind)
+                       :ancestors (if maintain-ancestors
+                                    (cons (:genome ind) (:ancestors ind))
+                                    (:ancestors ind))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; alternation

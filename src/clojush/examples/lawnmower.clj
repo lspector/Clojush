@@ -227,6 +227,7 @@
    :atom-generators (list 'left 'mow 'v8a 'frog (fn [] [(lrand-int 8) (lrand-int 8)])
                           (tag-instruction-erc [:exec] 1000)
                           (tagged-instruction-erc 1000))
+   :tag-limit 1000
    :genetic-operator-probabilities {:reproduction 0.1
                                     :alternation 0.45
                                     [:uniform-mutation :uniform-close-mutation] 0.45}

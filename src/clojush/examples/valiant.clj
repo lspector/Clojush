@@ -116,20 +116,11 @@
                             (apply concat 
                                    (repeat 25 
                                            '(boolean_and boolean_or boolean_not exec_if))))
-   ;:use-lexicase-selection true
-   :use-condensed-lexicase-selection true
    :max-points 1000
    :max-points-in-initial-program 100
    :population-size 100
    :evalpush-limit 2000
-   :mutation-probability 0
-   :crossover-probability 0
-   :simplification-probability 0
-   :reproduction-probability 0
-   :ultra-probability 1.0
-   :ultra-alternation-rate 0.01
-   :ultra-alignment-deviation 20
-   :ultra-mutation-rate 0.01
-
+   :genetic-operator-probabilities {[:alternation :uniform-mutation] 1.0} ;Somewhat equivalent to normal Push's ULTRA operator
+   :alignment-deviation 20
    ;:use-single-thread true
    })

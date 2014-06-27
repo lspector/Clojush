@@ -350,16 +350,16 @@
    :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
-   :reproduction-probability 0
-   :mutation-probability 0
-   :crossover-probability 0
-   :report-simplifications 0
-   :ultra-probability 1.0
-   :ultra-alternation-rate 0.01
-   :ultra-alignment-deviation 10
-   :ultra-mutation-rate 0.01
-   :final-report-simplifications 5000
-   :use-lexicase-selection true
-   :use-ultra-no-paren-mutation true
+   :parent-selection :lexicase
+   :genetic-operator-probabilities {:alternation 0.2
+                                    :uniform-mutation 0.2
+                                    :uniform-close-mutation 0.1
+                                    [:alternation :uniform-mutation] 0.5
+                                    }
+   :alternation-rate 0.01
+   :alignment-deviation 10
+   :uniform-mutation-rate 0.01
    :problem-specific-report wc-report
+   :report-simplifications 0
+   :final-report-simplifications 5000
    })

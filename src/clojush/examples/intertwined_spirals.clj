@@ -122,6 +122,7 @@
    :population-size 1000,
    :error-function spiral-error,
    :atom-generators (:basic spiral-instructions)
+   :tag-limit 100
    :parent-selection :tournament
    :genetic-operator-probabilities {:uniform-close-mutation 0.1
                                     :alternation 0.45

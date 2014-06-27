@@ -49,9 +49,9 @@
           ;;----------------------------------------
           ;; Arguments related to genetic operators
           ;;----------------------------------------
-          :alternation-rate 0.1 ;; When using alternation, how often alternates between the parents
-          :alignment-deviation 1 ;; When using alternation, the standard deviation of how far alternation may jump between indices when switching between parents
-          :uniform-mutation-rate 0.1 ;; The probability of each token being mutated during uniform mutation
+          :alternation-rate 0.01 ;; When using alternation, how often alternates between the parents
+          :alignment-deviation 10 ;; When using alternation, the standard deviation of how far alternation may jump between indices when switching between parents
+          :uniform-mutation-rate 0.01 ;; The probability of each token being mutated during uniform mutation
           :uniform-mutation-constant-tweak-rate 0.5 ;; The probability of using a constant mutation instead of simply replacing the token with a random instruction during uniform mutation
           :mutation-float-gaussian-standard-deviation 1.0 ;; The standard deviation used when tweaking float constants with Gaussian noise
           :mutation-int-gaussian-standard-deviation 1 ;; The standard deviation used when tweaking integer constants with Gaussian noise
@@ -154,7 +154,10 @@
                    (when save-initial-population
                      (io/make-parents f)
                      (spit f (printable (map individual-string pa))))
-                   (vec (map #(if use-single-thread (atom %) (agent %)) pa)))
+                   (vec (map #(if use-single-thread
+                                (atom %)
+                                (agent % :error-handler agent-error-handler))
+                             pa)))
      :child-agents (vec (doall (for [_ (range population-size)]
                                  ((if use-single-thread atom agent)
                                       (make-individual)

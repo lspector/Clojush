@@ -44,6 +44,7 @@
                       ;; allow code_wrap tag macros (taking 1 argument and returning 1 result)
                       (tagged-code-macro-erc 'code_wrap 1000 1 1)
                       )
+   :tag-limit 1000
    :population-size 100
    })
 

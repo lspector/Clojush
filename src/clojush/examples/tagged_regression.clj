@@ -44,5 +44,10 @@
                           (tag-instruction-erc [:integer :exec] 100)
                           (untag-instruction-erc 100)
                           (tagged-instruction-erc 100))
+   :tag-limit 100
+   :parent-selection :tournament
    :tournament-size 3
+   :genetic-operator-probabilities {:alternation 0.5
+                                    :uniform-mutation 0.4
+                                    :uniform-close-mutation 0.1}
    })

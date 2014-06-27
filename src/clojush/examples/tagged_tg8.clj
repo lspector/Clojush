@@ -49,10 +49,11 @@
                         ;(untag-instruction-erc 1000) ;; added for tagged version
                         (tagged-instruction-erc 1000) ;; added for tagged version
                         'in))
-   :mutation-probability 0.3
-   :crossover-probability 0.3
-   :simplification-probability 0.3
-   :reproduction-simplifications 10
+   :tag-limit 1000
+   :parent-selection :tournament
+   :genetic-operator-probabilities {:alternation 0.5
+                                    :uniform-mutation 0.4
+                                    :uniform-close-mutation 0.1}
    :max-points 100
    :max-points-in-initial-program 100
    :population-size 5000
