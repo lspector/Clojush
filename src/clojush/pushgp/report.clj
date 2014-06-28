@@ -184,6 +184,21 @@
     (println (format "Population mean number of perfect (error zero) cases: %.2f" (float (/ (apply + count-zero-by-case) (count population)))))
     ))
 
+(defn implicit-fitness-sharing-report
+  "This extra report is printed whenever implicit fitness sharing selection is used."
+  [population {:keys [print-errors]}]
+  (let [ifs-best (apply min-key :weighted-error population)]
+    (println "--- Program with Best Implicit Fitness Sharing Error Statistics ---")
+    (println "IFS best program:" (pr-str (not-lazy (:program ifs-best))))
+    (when print-errors (println "IFS best errors:" (not-lazy (:errors ifs-best))))
+    (println "IFS best total error:" (:total-error ifs-best))
+    (println "IFS best mean error:" (float (/ (:total-error ifs-best)
+                                              (count (:errors ifs-best)))))
+    (println "IFS best IFS error:" (:weighted-error ifs-best))
+    (println "IFS best size:" (count-points (:program ifs-best)))
+    (printf "IFS best percent parens: %.3f\n" (double (/ (count-parens (:program ifs-best)) (count-points (:program ifs-best))))) ;Number of (open) parens / points
+    ))
+
 (defn report-and-check-for-success
   "Reports on the specified generation of a pushgp run. Returns the best
    individual of the generation."
@@ -212,6 +227,7 @@
     (when print-error-frequencies-by-case
       (println "Error frequencies by case:" (doall (map frequencies (apply map vector (map :errors population))))))
     (when (some #{parent-selection} #{:lexicase :elitegroup-lexicase}) (lexicase-report population argmap))
+    (when (= total-error-method :ifs) (implicit-fitness-sharing-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
     (println "Best genome:" (pr-str (not-lazy (:genome best))))
     (println "Best program:" (pr-str (not-lazy (:program best))))
@@ -225,6 +241,7 @@
     (case total-error-method
       :hah (println "HAH-error:" (:weighted-error best))
       :rmse (println "RMS-error:" (:weighted-error best))
+      :ifs (println "IFS-error:" (:weighted-error best))
       nil)
     (when print-history (println "History:" (not-lazy (:history best))))
     (println "Size:" (count-points (:program best)))

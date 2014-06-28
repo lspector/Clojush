@@ -50,7 +50,7 @@
     (map (fn [err]
            (case normalization
              :divide-by-max-error (double (if (>= err max-error)
-                                            max-error
+                                            1.0
                                             (/ err max-error)))
              :e-over-e-plus-1 (double (/ err (inc err)))
              (throw (Exception. (str "Unrecognized argument for normalization: "
@@ -79,6 +79,7 @@
                  (compute-total-error e))
             we (case total-error-method
                  :sum nil
+                 :ifs nil
                  :hah (compute-hah-error e)
                  :rmse (compute-root-mean-square-error e)
                  nil)]

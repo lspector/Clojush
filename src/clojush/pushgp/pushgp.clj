@@ -182,7 +182,7 @@
                                  total-error-method]}]
   (if (and (> generation 0) (> parent-reversion-probability 0))
     (let [err-fn (case total-error-method
-                   (:hah :rmse) :weighted-error
+                   (:hah :rmse :ifs) :weighted-error
                    :total-error)]
       (println "Performing parent reversion...")
       (dorun (map #((if use-single-thread swap! send) 
@@ -360,18 +360,21 @@
           ;; create global structure to support elite group lexicase selection
           (when (= (:parent-selection @push-argmap) :elitegroup-lexicase)
             (build-elitegroups pop-agents))
+          ;; calculate implicit fitness sharing fitness for population
+          (when (= (:total-error-method @push-argmap) :ifs)
+            (calculate-implicit-fitness-sharing pop-agents @push-argmap))
           (timer @push-argmap :other)
           ;; report and check for success
           (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
-                                                      generation @push-argmap)]
+                                                             generation @push-argmap)]
             (cond (= outcome :failure) (do (printf "\nFAILURE\n")
-                                           (if (:return-simplified-on-failure @push-argmap)
-                                             (auto-simplify best (:error-function @push-argmap) (:final-report-simplifications @push-argmap) true 500)
-                                             (flush)))
+                                         (if (:return-simplified-on-failure @push-argmap)
+                                           (auto-simplify best (:error-function @push-argmap) (:final-report-simplifications @push-argmap) true 500)
+                                           (flush)))
                   (= outcome :continue) (do (timer @push-argmap :report)
-                                            (println "\nProducing offspring...")
-                                            (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
-                                            (println "Installing next generation...")
-                                            (install-next-generation pop-agents child-agents @push-argmap)
-                                            (recur (inc generation)))
+                                          (println "\nProducing offspring...")
+                                          (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
+                                          (println "Installing next generation...")
+                                          (install-next-generation pop-agents child-agents @push-argmap)
+                                          (recur (inc generation)))
                   :else  (final-report generation best @push-argmap))))))))

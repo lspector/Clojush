@@ -1,6 +1,5 @@
 (ns clojush.pushgp.parent-selection
-  (:use [clojush.random]
-        [clojush.globals])
+  (:use [clojush random globals util])
   (:require [clojure.set :as set]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -19,7 +18,7 @@
                         (count pop))))))
         err-fn (case total-error-method
                  :sum :total-error
-                 (:hah :rmse) :weighted-error
+                 (:hah :rmse :ifs) :weighted-error
                  (throw (Exception. (str "Unrecognized argument for total-error-method: "
                                          total-error-method))))]
     (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
@@ -62,10 +61,10 @@
 
 (defn build-elitegroups
   "Builds a sequence that partitions the cases into sub-sequences, with cases 
-grouped when they produce the same set of elite individuals in the population. 
-In addition, if group A produces population subset PS(A), and group B 
-produces population subset PS(B), and PS(A) is a proper subset of PS(B), then 
-group B is discarded. "
+   grouped when they produce the same set of elite individuals in the population. 
+   In addition, if group A produces population subset PS(A), and group B 
+   produces population subset PS(B), and PS(A) is a proper subset of PS(B), then 
+   group B is discarded. "
   [pop-agents]
   (println "Building case elitegroups...")
   (let [pop (retain-one-individual-per-error-vector (map deref pop-agents))
@@ -102,7 +101,54 @@ group B is discarded. "
         (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
                        survivors)
                (rest cases))))))
-       
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; implicit fitness sharing
+
+(defn assign-ifs-error-to-individual
+  "Takes an individual and calculates and assigns its IFS based on the summed
+   error across each test case."
+  [ind summed-reward-on-test-cases]
+  (let [ifs-reward (apply +' (map /
+                                  (map #(- 1.0 %) (:errors ind)) ; Should be dividing REWARD by summed (not ERRORS)
+                                  summed-reward-on-test-cases))
+        ifs-er (cond
+                 (< 1e20 ifs-reward) 0.0
+                 (zero? ifs-reward) 1e20
+                 (< 1e20 (/ 1.0 ifs-reward)) 1e20
+                 :else (/ 1.0 ifs-reward))]
+    ;(println "\n\n\n")
+    ;(println "IFS Fitness rewards:")
+    ; (doseq [[e s i] (map vector (:errors ind) summed-reward-on-test-cases (range))]
+    ; (println (format "T%2d | Error (e): %.4f | 1-e: %.5f | s: %8.4f | (1-e)/s: %.4f" i e (- 1.0 e) s (/ (- 1.0 e) s))))
+    ;(println (format "IFS Reward: %7.4f" ifs-reward))
+    ;(println (format "IFS Error: %7.4f" ifs-er))
+    (assoc ind :weighted-error ifs-er)))
+
+(defn calculate-implicit-fitness-sharing
+  "Calculates the summed fitness for each test case, and then uses it to
+   assign an implicit fitness sharing error to each individual. Assumes errors
+   are in range [0,1] with 0 being a solution."
+  [pop-agents {:keys [use-single-thread]}]
+  (println "Calculating implicit fitness sharing errors...")
+  (let [pop (map deref pop-agents)
+        summed-reward-on-test-cases (map (fn [list-of-errors]
+                                           (reduce +' (map #(- 1.0 %) list-of-errors)))
+                                         (apply map list (map :errors pop)))]
+    (println "\nImplicit fitness sharing reward per test case:")
+    (println summed-reward-on-test-cases)
+    (assert (every? (fn [error] (< -0.0000001 error 1.0000001))
+                    (flatten (map :errors pop)))
+            (str "All errors must be in range [0,1]. Please normalize them. Here are the offending errors:\n"
+                 (not-lazy (filter (fn [error] (not (< 0.0 error 1.0)))
+                                   (flatten (map :errors pop))))))
+    (dorun (map #((if use-single-thread swap! send)
+                   %
+                   assign-ifs-error-to-individual
+                   summed-reward-on-test-cases)
+                pop-agents))
+    (when-not use-single-thread (apply await pop-agents)))) ;; SYNCHRONIZE
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; parent selection
 
