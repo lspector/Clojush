@@ -362,4 +362,5 @@
    :problem-specific-report wc-report
    :report-simplifications 0
    :final-report-simplifications 5000
+   :max-error 100000
    })

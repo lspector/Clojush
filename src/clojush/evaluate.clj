@@ -42,6 +42,21 @@
                          @solution-rates
                          errors))))
 
+(defn normalize-errors
+  "Normalizes errors to [0,1] if normalize isn't :none."
+  [errors normalization max-error]
+  (if (= normalization :none)
+    errors
+    (map (fn [err]
+           (case normalization
+             :divide-by-max-error (double (if (>= err max-error)
+                                            max-error
+                                            (/ err max-error)))
+             :e-over-e-plus-1 (double (/ err (inc err)))
+             (throw (Exception. (str "Unrecognized argument for normalization: "
+                                     normalization)))))
+         errors)))
+
 (defn evaluate-individual
   "Returns the given individual with errors, total-errors, and weighted-errors,
    computing them if necessary."
@@ -49,14 +64,16 @@
     (evaluate-individual i error-function rand-gen
                          {:reuse-errors true
                           :print-history false
-                          :total-error-method :sum}))
+                          :total-error-method :sum
+                          :normalization :none
+                          :max-error 1000}))
   ([i error-function rand-gen
-    {:keys [reuse-errors print-history total-error-method]}]
+    {:keys [reuse-errors print-history total-error-method normalization max-error]}]
     (random/with-rng rand-gen
       (let [p (:program i)
             e (vec (if (and (not (nil? (:errors i))) reuse-errors)
                      (:errors i)
-                     (error-function p)))
+                     (normalize-errors (error-function p) normalization max-error)))
             te (if (and (not (nil? (:total-error i))) reuse-errors)
                  (:total-error i)
                  (compute-total-error e))

@@ -48,7 +48,10 @@
                    (case marker
                      :instruction (let [element (lrand-nth atom-generators)]
                                     (if (fn? element)
-                                      (element)
+                                      (let [fn-element (element)]
+                                        (if (fn? fn-element)
+                                          (fn-element)
+                                          fn-element))
                                       element))
                      :close (random-closes close-parens-probabilities)
                    ))
