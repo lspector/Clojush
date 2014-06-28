@@ -189,6 +189,7 @@
   [population {:keys [print-errors]}]
   (let [ifs-best (apply min-key :weighted-error population)]
     (println "--- Program with Best Implicit Fitness Sharing Error Statistics ---")
+    (println "IFS best genome:" (pr-str (not-lazy (:genome ifs-best))))
     (println "IFS best program:" (pr-str (not-lazy (:program ifs-best))))
     (when print-errors (println "IFS best errors:" (not-lazy (:errors ifs-best))))
     (println "IFS best total error:" (:total-error ifs-best))
