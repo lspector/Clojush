@@ -80,7 +80,7 @@
                                                 (count paren-stack)
                                                 paren-stack)
         ; Check if done
-        (empty? gn) (do (println "$$$$" (apply list prog)) (open-close-sequence-to-list (apply list prog)))
+        (empty? gn) (open-close-sequence-to-list (apply list prog))
         ; If here, ready for next instruction
         :else (let [number-paren-groups (lookup-instruction-paren-groups (:instruction (first gn)))
                     new-paren-stack (if (>= 0 number-paren-groups)
@@ -89,11 +89,7 @@
                                               '(:close)
                                               paren-stack))]
                 (if (= 'noop_delete_prev_paren_pair (:instruction (first gn)))
-                  (recur (let [asdasd (delete-prev-paren-pair prog)]
-                           (println "prog##" prog)
-                           (println "----- " asdasd)
-                           (println "gn:  " (rest gn))
-                           asdasd)
+                  (recur (delete-prev-paren-pair prog)
                          (rest gn)
                          (get (first gn) :close 0)
                          new-paren-stack)
