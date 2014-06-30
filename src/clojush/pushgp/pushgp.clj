@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clj-random.core :as random]
             [clojure.repl :as repl])
-  (:use [clojush globals util pushstate random individual evaluate simplification]
+  (:use [clojush globals util pushstate random individual evaluate simplification translate]
         [clojush.instructions boolean code common numbers random-instructions string tag zip return]
         [clojush.pushgp breed parent-selection report]
         [clojush.experimental.decimation]))
@@ -209,69 +209,6 @@
               pop-agents))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
 
-(defn translate-plush-genome-to-push-program
-  "Takes each Plush genome and translates it to the correct Push program with
-   balanced parens. The linear Plush genome is made up of a list of instruction
-   maps, each including an :instruction key as well as other epigenetic marker
-   keys. As the linear Plush genome is traversed, each instruction that requires
-   parens will push :close and/or :close-open onto the paren-stack, and will
-   also put an open paren after it in the program. For example, an instruction
-   that requires 3 paren groupings will push :close, then :close-open, then :close-open.
-   When a positive number is encountered in the :close key of the
-   instruction map, it is set to num-parens-here during the next recur. This
-   indicates the number of parens to put here, if need is indicated on the
-   paren-stack. If the top item of the paren-stack is :close, a close paren
-   will be inserted. If the top item is :close-open, a close paren followed by
-   an open paren will be inserted.
-   If the end of the program is reached but parens are still needed (as indicated by
-   the paren-stack), parens are added until the paren-stack is empty."
-  [{:keys [genome program]}]
-  (if program
-    program
-    (loop [prog [] ; The Push program incrementally being built
-           gn genome ; The linear Plush genome, where items will be popped off the front. Each item is a map containing at least the key :instruction, and unless the program is flat, also :close
-           num-parens-here 0 ; The number of parens that still need to be added at this location.
-           paren-stack '()] ; Whenever an instruction requires parens grouping, it will push either :close or :close-open on this stack. This will indicate what to insert in the program the next time a paren is indicated by the :close key in the instruction map.
-      (cond
-        ; Check if need to add close parens here
-        (< 0 num-parens-here) (recur (cond
-                                       (= (first paren-stack) :close) (conj prog :close)
-                                       (= (first paren-stack) :close-open) (conj (conj prog :close) :open)
-                                       :else prog) ; If paren-stack is empty, we won't put any parens in even though the :close epigenetic marker indicated to do so
-                                     gn
-                                     (dec num-parens-here)
-                                     (rest paren-stack))
-        ; Check if at end of program but still need to add parens
-        (and (empty? gn)
-             (not (empty? paren-stack))) (recur prog
-                                                gn
-                                                (count paren-stack)
-                                                paren-stack)
-        ; Check if done
-        (empty? gn) (open-close-sequence-to-list (apply list prog))
-        ; If here, ready for next instruction
-        :else (let [number-paren-groups (lookup-instruction-paren-groups (:instruction (first gn)))
-                    new-paren-stack (if (>= 0 number-paren-groups)
-                                      paren-stack
-                                      (concat (repeat (dec number-paren-groups) :close-open)
-                                              '(:close)
-                                              paren-stack))]
-                (recur (if (>= 0 number-paren-groups)
-                         (conj prog (:instruction (first gn)))
-                         (conj (conj prog (:instruction (first gn))) :open))
-                       (rest gn)
-                       (get (first gn) :close 0) ; The number of close parens to put after this instruction; if :close isn't in instruction map, default to zero
-                       new-paren-stack))))))
-
-(defn translate-plush-to-push
-  "Converts the population of Plush genomes into Push programs."
-  [pop-agents {:keys [use-single-thread]}]
-  (dorun (map #((if use-single-thread swap! send)
-                    %
-                    (fn [i] (assoc i :program (translate-plush-genome-to-push-program i))))
-              pop-agents))
-  (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
-
 (defn produce-new-offspring
   [pop-agents child-agents rand-gens
    {:keys [decimation-ratio population-size decimation-tournament-size
@@ -313,7 +250,7 @@
                  (clojure.string/replace (str prob-map \newline)
                                          \,
                                          \newline)))))
-  
+
 (defn timer
   "Used to track the time used by different parts of evolution."
   [{:keys [print-timings]} step]

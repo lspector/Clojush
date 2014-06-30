@@ -32,11 +32,13 @@
          'zip_insert_left_fromexec 1
          'zip_insert_child_fromexec 1
          'zip_append_child_fromexec 1
+         'noop_open_paren 1
          ;; Require 0, but included here in case change mind later
          ;; (default for not-mentioned instructions is 0)
          'exec_eq 0
          'exec_yank 0
          'exec_yankdup 0
+         'noop_delete_prev_paren-pair 0
          }))
 
 (defn lookup-instruction-paren-groups

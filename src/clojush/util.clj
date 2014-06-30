@@ -189,12 +189,16 @@
   [sequence]
   (cond (not (seq? sequence)) sequence
         (empty? sequence) ()
-        :else (let [s (str sequence)
-                    l (read-string (string/replace (string/replace s ":open" " ( ") ":close" " ) "))]
-                ;; there'll be an extra ( ) around l, which we keep if the number of read things is >1
-                (if (= (count l) 1)
-                  (first l)
-                  l))))
+        :else (let [opens (count (filter #(= :open %) sequence))
+                    closes (count (filter #(= :close %) sequence))]
+                (assert (= opens closes)
+                        (str "open-close sequence must have equal numbers of :open and :close; this one does not:\n" sequence))
+                (let [s (str sequence)
+                      l (read-string (string/replace (string/replace s ":open" " ( ") ":close" " ) "))]
+                  ;; there'll be an extra ( ) around l, which we keep if the number of read things is >1
+                  (if (= (count l) 1)
+                    (first l)
+                    l)))))
 
 ;(open-close-sequence-to-list '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close))
 ;(open-close-sequence-to-list '(:open 1 :close :open 2 :close))
