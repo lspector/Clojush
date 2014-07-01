@@ -7,7 +7,7 @@
         [clojush.pushstate]
         [clojush.interpreter]
         [clojush.globals]
-        [cloush.random]
+        [clojush.random]
         [clojush.instructions.common]
         [clojush.instructions.tag]))
 
@@ -24,12 +24,17 @@
 ;;;;;;;;;;;;
 ;; A few things must be done in other namespaces
 
-;; Redefine push-types to include :intvec2D and then redefine the push state structure.
+;; Redefine push-types to include :intvec2D.
 (in-ns 'clojush.globals)
 (def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :intvec2D))
 
+;; Redefine the push state structure.
 (in-ns 'clojush.pushstate)
 (define-push-state-record-type)
+(let [empty-state (map->PushState {})]
+  (defn make-push-state
+    "Returns an empty push state."
+    [] empty-state))
 
 ;; Redefine recognize-literal to support intvec2Ds of the form [row column]
 (in-ns 'clojush.interpreter)
