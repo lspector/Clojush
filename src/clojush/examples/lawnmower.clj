@@ -7,7 +7,7 @@
         [clojush.pushstate]
         [clojush.interpreter]
         [clojush.globals]
-        [cloush.random]
+        [clojush.random]
         [clojush.instructions.common]
         [clojush.instructions.tag]))
 
