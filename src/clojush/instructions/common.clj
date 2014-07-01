@@ -38,7 +38,7 @@
          'exec_eq 0
          'exec_yank 0
          'exec_yankdup 0
-         'noop_delete_prev_paren-pair 0
+         'noop_delete_prev_paren_pair 0
          }))
 
 (defn lookup-instruction-paren-groups

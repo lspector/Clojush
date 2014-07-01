@@ -18,12 +18,13 @@
           (fn [node children] (with-meta children (meta node)))
           root))
 
-(defn ensure-list [thing] ;; really make-list-if-not-seq, but close enough for here
+(defn ensure-list ;; really make-list-if-not-seq, but close enough for here
+  [thing]
   (if (seq? thing)
     thing
     (list thing)))
 
-(defn print-return 
+(defn print-return
   "Prints the provided thing and returns it."
   [thing]
   (println thing)
@@ -70,7 +71,7 @@
         (zip/node z)
         (recur (zip/next z) (dec i))))))
 
-(defn insert-code-at-point 
+(defn insert-code-at-point
   "Returns a copy of tree with the subtree formerly indexed by
    point-index (in a depth-first traversal) replaced by new-subtree."
   [tree point-index new-subtree]
@@ -139,7 +140,7 @@
   [this that lst]
   (postwalklist-replace {that this} lst))
 
-(defn contains-subtree 
+(defn contains-subtree
   "Returns true if tree contains subtree at any level. Inefficient but
    functional implementation."
   [tree subtree]
@@ -203,22 +204,4 @@
 ;(open-close-sequence-to-list '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close))
 ;(open-close-sequence-to-list '(:open 1 :close :open 2 :close))
 ;(open-close-sequence-to-list '(:open :open 1 :close :open 2 :close :close))
-
-;; backtrace abbreviation, to ease debugging
-(defn bt []
-  (.printStackTrace *e))
-
-(defn insert-randomly
-  "Returns lst with thing inserted in a random location. If lst is not a list then
-it will first be wrapped in a list."
-  [thing lst]
-  (let [tree (ensure-list lst)
-        loc (inc (lrand-int (dec (count-points tree))))]
-    (zip/root
-      ((lrand-nth [zip/insert-left zip/insert-right])
-        (loop [z (seq-zip tree) i 0]
-          (if (= i loc)
-            z
-            (recur (zip/next z) (inc i))))
-        thing))))
-                             
+             

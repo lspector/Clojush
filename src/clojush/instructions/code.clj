@@ -11,7 +11,7 @@
 (define-registered code_noop (fn [state] state))
 
 (define-registered noop_open_paren (fn [state] state))
-(define-registered noop_delete_prev_paren-pair (fn [state] state))
+(define-registered noop_delete_prev_paren_pair (fn [state] state))
 
 (define-registered 
   code_append
