@@ -101,13 +101,6 @@
             (zip/root (zip/replace z '())) ;; used to just return (zip/root z)
             (recur (zip/next z) (dec i))))))))
 
-(defn truncate
-  "Returns a truncated integer version of n."
-  [n]
-  (if (< n 0)
-    (math/round (math/ceil n))
-    (math/round (math/floor n))))
-
 (defn walklist
   "Like walk, but only for lists."
   [inner outer form]

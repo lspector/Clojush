@@ -62,7 +62,7 @@
         (->> (pop-item type state)
              (pop-item type)
              (push-item (if (= type :integer)
-                          (truncate (keep-number-reasonable (/ second first)))
+                          (int (keep-number-reasonable (/ second first)))
                           (keep-number-reasonable (/ second first)))
                         type)))
       state)))
@@ -82,7 +82,7 @@
         (->> (pop-item type state)
              (pop-item type)
              (push-item (if (= type :integer)
-                          (truncate (keep-number-reasonable (mod scnd frst)))
+                          (int (keep-number-reasonable (mod scnd frst)))
                           (keep-number-reasonable (mod scnd frst)))
                         type)))
       state)))
@@ -146,7 +146,7 @@
     (if (not (empty? (:float state)))
       (let [item (stack-ref :float 0 state)]
         (->> (pop-item :float state)
-             (push-item (truncate item) :integer)))
+             (push-item (int item) :integer)))
       state)))
 
 (define-registered 
