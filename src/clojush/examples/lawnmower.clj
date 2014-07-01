@@ -28,7 +28,7 @@
 (in-ns 'clojush.globals)
 (def push-types '(:exec :integer :float :code :boolean :auxiliary :tag :intvec2D))
 
-Redefine the push state structure.
+;; Redefine the push state structure.
 (in-ns 'clojush.pushstate)
 (define-push-state-record-type)
 (let [empty-state (map->PushState {})]
