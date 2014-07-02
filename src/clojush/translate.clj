@@ -56,7 +56,8 @@
    will be inserted. If the top item is :close-open, a close paren followed by
    an open paren will be inserted.
    If the end of the program is reached but parens are still needed (as indicated by
-   the paren-stack), parens are added until the paren-stack is empty."
+   the paren-stack), parens are added until the paren-stack is empty.
+   Instruction maps that have :silence set to true will be ignored entirely."
   [{:keys [genome program]}]
   (if program
     program
@@ -81,6 +82,11 @@
                                                 paren-stack)
         ; Check if done
         (empty? gn) (open-close-sequence-to-list (apply list prog))
+        ; Check for silenced instruction
+        (get (first gn) :silent false) (recur prog
+                                              (rest gn)
+                                              num-parens-here
+                                              paren-stack)
         ; If here, ready for next instruction
         :else (let [number-paren-groups (lookup-instruction-paren-groups (:instruction (first gn)))
                     new-paren-stack (if (>= 0 number-paren-groups)

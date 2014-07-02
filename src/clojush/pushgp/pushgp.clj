@@ -42,8 +42,9 @@
           :genetic-operator-probabilities {:reproduction 0.0
                                            :alternation 0.7
                                            :uniform-mutation 0.1
-                                           :uniform-close-mutation 0.0
                                            [:alternation :uniform-mutation] 0.2 ;Somewhat equivalent to normal Push's ULTRA operator
+                                           :uniform-close-mutation 0.0
+                                           :uniform-silent-mutation 0.0
                                            }
           ;;
           ;;----------------------------------------
@@ -59,12 +60,14 @@
           :uniform-mutation-tag-gaussian-standard-deviation 100 ;; The standard deviation used when tweaking tag locations with Gaussian noise
           :uniform-close-mutation-rate 0.1 ;; The probability of each :close being incremented or decremented during uniform close mutation
           :close-increment-rate 0.2 ;; The probability of making an increment change to :close during uniform close mutation, as opposed to a decrement change
+          :uniform-silent-mutation-rate 0.1 ;; The probability of each :silent being switched during uniform silent mutation
           ;;
           ;;----------------------------------------
           ;; Epignenetics
           ;;----------------------------------------
-          :epigenetic-markers [:close] ;; A vector of the epigenetic markers that should be used in the individuals. Implemented options include: :close
+          :epigenetic-markers [:close] ;; A vector of the epigenetic markers that should be used in the individuals. Implemented options include: :close, :silent
           :close-probabilities [0.772 0.206 0.021 0.001] ;; A vector of the probabilities for the number of parens ending at that position. See random-closes in clojush.random          
+          :silent-instruction-probability 0.2
           ;;
           ;;----------------------------------------
           ;; Arguments related to parent selection
@@ -133,7 +136,8 @@
 (defn make-agents-and-rng
   [{:keys [use-single-thread population-size
            max-points-in-initial-program atom-generators random-seed
-           save-initial-population epigenetic-markers close-probabilities]}]
+           save-initial-population]
+    :as argmap}]
   (let [agent-error-handler (fn [agnt except]
                               ;(.printStackTrace except System/out)
                               ;(.printStackTrace except)
@@ -150,8 +154,7 @@
     {:pop-agents (let [pa (doall (for [_ (range population-size)]
                                    (make-individual
                                      :genome (random-code max-points-in-initial-program
-                                                          atom-generators epigenetic-markers
-                                                          close-probabilities))))
+                                                          atom-generators argmap))))
                        f (str "data/" (System/currentTimeMillis) ".ser")]
                    (when save-initial-population
                      (io/make-parents f)

@@ -50,7 +50,8 @@
                uniform-mutation-int-gaussian-standard-deviation
                uniform-mutation-tag-gaussian-standard-deviation
                uniform-mutation-string-char-change-rate maintain-ancestors
-               atom-generators epigenetic-markers close-parens-probabilities]}]
+               atom-generators]
+        :as argmap}]
   (let [string-tweak (fn [st]
                        (apply str (map (fn [c]
                                          (if (< (lrand) uniform-mutation-string-char-change-rate)
@@ -58,7 +59,7 @@
                                            c))
                                        st)))
         instruction-mutator (fn [token]
-                              (first (random-code 1 atom-generators epigenetic-markers close-parens-probabilities)))
+                              (first (random-code 1 atom-generators argmap)))
         constant-mutator (fn [token]
                            (let [const (:instruction token)]
                              (if (tag-instruction? const)
@@ -70,7 +71,7 @@
                                         (integer? const) (round (perturb-with-gaussian-noise uniform-mutation-int-gaussian-standard-deviation const))
                                         (string? const) (string-tweak const)
                                         (or (= const true) (= const false)) (lrand-nth [true false])
-                                        :else (:instruction (first (random-code 1 atom-generators epigenetic-markers close-parens-probabilities))))))))               
+                                        :else (:instruction (first (random-code 1 atom-generators argmap))))))))               
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
                           (if (< (lrand) uniform-mutation-constant-tweak-rate)
@@ -107,6 +108,29 @@
                                          (dec closes)))
                                      closes))))
           new-genome (map close-mutator (:genome ind))]
+      (make-individual :genome new-genome
+                       :history (:history ind)
+                       :ancestors (if maintain-ancestors
+                                    (cons (:genome ind) (:ancestors ind))
+                                    (:ancestors ind))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform silent mutation
+
+(defn uniform-silent-mutation
+  "Uniformly mutates the :silent's in the individual's instruction maps. Each
+   :silent will have a uniform-silent-mutation-rate probability of being switched."
+  [ind {:keys [uniform-silent-mutation-rate
+               epigenetic-markers maintain-ancestors]}]
+  (if (not (some #{:silent} epigenetic-markers))
+    ind
+    (let [silent-mutator (fn [instr-map]
+                           (let [silent (get instr-map :silent false)]
+                             (assoc instr-map :silent
+                                    (if (< (lrand) uniform-silent-mutation-rate)
+                                      (not silent)
+                                      silent))))
+          new-genome (map silent-mutator (:genome ind))]
       (make-individual :genome new-genome
                        :history (:history ind)
                        :ancestors (if maintain-ancestors

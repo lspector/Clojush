@@ -39,7 +39,8 @@
         (push-item (random-code (max 1
                                      (math/abs (mod (stack-ref :integer 0 state)
                                                     max-points-in-random-expressions)))
-                                @global-atom-generators)
+                                @global-atom-generators
+                                {:epigenetic-markers []})
                    :code
                    (pop-item :integer state)))
       state)))
