@@ -31,5 +31,6 @@
                              1000)))))
    :atom-generators (concat (registered-nonrandom)
                             (list (fn [] (lrand-int 100))
-                                  'in))
+                                  'in
+                                  'code_rand))
    })

@@ -286,7 +286,7 @@
         ;; Main loop
         (loop [generation 0]
           (println "Processing generation:" generation)
-          (translate-plush-to-push pop-agents @push-argmap)
+          (population-translate-plush-to-push pop-agents @push-argmap)
           (timer @push-argmap :reproduction)
           (print "Computing errors... ")
           (compute-errors pop-agents rand-gens @push-argmap)

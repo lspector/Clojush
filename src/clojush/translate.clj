@@ -108,7 +108,7 @@
                          (get (first gn) :close 0) ; The number of close parens to put after this instruction; if :close isn't in instruction map, default to zero
                          new-paren-stack)))))))
 
-(defn translate-plush-to-push
+(defn population-translate-plush-to-push
   "Converts the population of Plush genomes into Push programs."
   [pop-agents {:keys [use-single-thread]}]
   (dorun (map #((if use-single-thread swap! send)
