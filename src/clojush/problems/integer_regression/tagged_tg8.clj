@@ -2,7 +2,7 @@
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
-(ns clojush.examples.tagged-tg8
+(ns clojush.problems.integer-regression.tagged-tg8
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]

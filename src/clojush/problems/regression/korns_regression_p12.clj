@@ -2,7 +2,7 @@
 ;; a symbolic regression problem based on Michael Korns's draft chapter from GPTP11
 ;; Lee Spector, lspector@hampshire.edu, 2011
 
-(ns clojush.examples.korns-regression-p12 
+(ns clojush.problems.regression.korns-regression-p12 
   (:use [clojush.pushgp.pushgp]
         [clojush pushstate interpreter random]
         [clojure.math.numeric-tower]))
@@ -284,7 +284,7 @@
    :genetic-operator-probabilities {:alternation 0.6
                                     :uniform-mutation 0.4}
    :uniform-mutation-constant-tweak-rate 0.8
-   :mutation-float-gaussian-standard-deviation 0.1
+   :uniform-mutation-float-gaussian-standard-deviation 0.1
    :parent-selection :tournament
    :tournament-size 1
    :decimation-ratio 0.1

@@ -1,4 +1,4 @@
-(ns clojush.examples.scaled-sextic
+(ns clojush.problems.demos.scaled-sextic
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.random]
@@ -53,7 +53,7 @@
    :genetic-operator-probabilities {:alternation 0.5
                                     :uniform-mutation 0.5}
    :uniform-mutation-constant-tweak-rate 0.8
-   :mutation-float-gaussian-standard-deviation 0.1
+   :uniform-mutation-float-gaussian-standard-deviation 0.1
    })
 
 ;;;; Here is an evolved solution:

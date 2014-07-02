@@ -1,4 +1,4 @@
-(ns clojush.examples.valiant
+(ns clojush.problems.boolean.valiant
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.random]

@@ -6,7 +6,7 @@
 ;; (which will allow us to easily use all of clojush) and clojure.math.numeric-tower
 ;; (which provides access to an "abs" function that we use in an example below.
 
-(ns clojush.examples.tutorial
+(ns clojush.problems.demos.tutorial
   (:use [clojush.ns]
         [clojure.math.numeric-tower]))
 

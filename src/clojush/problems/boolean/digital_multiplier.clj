@@ -14,7 +14,7 @@
 ;; Each of these vectors has 2*n items, accessed by instructions in0 through
 ;; in(2*n) and out0 through out(2*n) respectively.
 
-(ns clojush.examples.digital-multiplier
+(ns clojush.problems.boolean.digital-multiplier
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random]
         clojure.math.numeric-tower))

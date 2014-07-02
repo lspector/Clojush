@@ -5,7 +5,7 @@
 ;; Differs from simple_regression by using floats and also by precomputing
 ;; the fitness cases.
 
-(ns clojush.examples.float-regression
+(ns clojush.problems.demos.float-regression
   (:use [clojush.pushgp.pushgp]
         [clojush.random]
         [clojush.pushstate]

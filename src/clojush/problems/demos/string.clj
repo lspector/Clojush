@@ -1,4 +1,4 @@
-(ns clojush.examples.string
+(ns clojush.problems.demos.string
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]

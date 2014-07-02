@@ -6,7 +6,7 @@
 ;;
 ;; Input and output are given as single integers using the integer stack.
 
-(ns clojush.examples.change
+(ns clojush.problems.integer-regression.change
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random]
         clojush.instructions.tag

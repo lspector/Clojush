@@ -1,4 +1,4 @@
-(ns clojush.experimental.calc
+(ns clojush.problems.software.calc
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]

@@ -2,7 +2,7 @@
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Lee Spector, lspector@hampshire.edu, 2011
 
-(ns clojush.examples.codesize20
+(ns clojush.problems.synthetic.codesize20
   (:require [clojure.math.numeric-tower :as math])
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]

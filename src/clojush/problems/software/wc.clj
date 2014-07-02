@@ -18,7 +18,7 @@
 ;; NOTE: auxiliary stack has, from top: working_file, full_file,
 ;; char_count_out, word_count_out, line_count_out
 
-(ns clojush.examples.wc
+(ns clojush.problems.software.wc
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util]
         clojush.instructions.tag

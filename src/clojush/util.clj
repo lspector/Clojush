@@ -101,6 +101,17 @@
             (zip/root (zip/replace z '())) ;; used to just return (zip/root z)
             (recur (zip/next z) (dec i))))))))
 
+; Note: Well, I think I figured out why truncate was there. When I tried running
+; the change problem, it threw an exception trying to cast into an int a number
+; that was too big. Maybe there's a different principled way to use casting, but 
+; 'm just going to add truncate back for now!
+(defn truncate
+  "Returns a truncated integer version of n."
+  [n]
+  (if (< n 0)
+    (math/round (math/ceil n))
+    (math/round (math/floor n))))
+
 (defn walklist
   "Like walk, but only for lists."
   [inner outer form]

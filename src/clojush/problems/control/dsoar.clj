@@ -8,7 +8,7 @@
 
 ;; This version was written by Brian Martin in 2010-2011.
 
-(ns clojush.examples.dsoar
+(ns clojush.problems.control.dsoar
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.random]

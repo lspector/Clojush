@@ -2,7 +2,7 @@
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Kyle Harrington, kyleh@cs.brandeis.edu, 2011.
 
-(ns clojush.examples.order
+(ns clojush.problems.synthetic.order
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.random]

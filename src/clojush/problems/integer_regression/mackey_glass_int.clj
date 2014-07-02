@@ -10,7 +10,7 @@
 ;;
 ;; Kyle Harrington, kyleh@cs.brandeis.edu, 2011
 
-(ns clojush.examples.mackey-glass-int
+(ns clojush.problems.integer-regression.mackey-glass-int
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]
@@ -20,7 +20,7 @@
             [clojure.string :as s]))
 
 (defn read-data []
-  (let [f (slurp (file* "src/clojush/problems/regression/data/mg_int_128.dat"))
+  (let [f (slurp (file* "src/clojush/problems/integer_regression/data/mg_int_128.dat"))
         lines (doall (map #(filter (partial not= "")
                                    (s/split % #" "))
                           (s/split-lines f)))]

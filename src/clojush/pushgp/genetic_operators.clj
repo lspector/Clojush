@@ -24,15 +24,17 @@
 (defn perturb-with-gaussian-noise
   "Returns n perturbed with std dev sd."
   [sd n]
+  (println "SD: " sd)
+  (println "n: " n)
   (+' n (*' sd (gaussian-noise-factor))))
 
 (defn tag-gaussian-tweak
   "Tweaks the tag with Gaussian noise."
-  [instr-map mutation-tag-gaussian-standard-deviation]
+  [instr-map uniform-mutation-tag-gaussian-standard-deviation]
   (let [instr (:instruction instr-map)
         tagparts (string/split (name instr) #"_")
         tag-num (read-string (last tagparts))
-        new-tag-num (mod (round (perturb-with-gaussian-noise mutation-tag-gaussian-standard-deviation tag-num))
+        new-tag-num (mod (round (perturb-with-gaussian-noise uniform-mutation-tag-gaussian-standard-deviation tag-num))
                          @global-tag-limit)
         new-instr (symbol (apply str (interpose  "_" (concat (butlast tagparts) (list (str new-tag-num))))))]
     (assoc instr-map :instruction new-instr)))
@@ -44,13 +46,14 @@
    mutated using a constant mutator (which varies depending on the type of the
    token), and otherwise is replaced with a random instruction."
   [ind {:keys [uniform-mutation-rate uniform-mutation-constant-tweak-rate
-               mutation-float-gaussian-standard-deviation mutation-int-gaussian-standard-deviation
-               mutation-tag-gaussian-standard-deviation
-               mutation-string-char-change-rate maintain-ancestors
+               uniform-mutation-float-gaussian-standard-deviation
+               uniform-mutation-int-gaussian-standard-deviation
+               uniform-mutation-tag-gaussian-standard-deviation
+               uniform-mutation-string-char-change-rate maintain-ancestors
                atom-generators epigenetic-markers close-parens-probabilities]}]
   (let [string-tweak (fn [st]
                        (apply str (map (fn [c]
-                                         (if (< (lrand) mutation-string-char-change-rate)
+                                         (if (< (lrand) uniform-mutation-string-char-change-rate)
                                            (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127))))
                                            c))
                                        st)))
@@ -59,12 +62,12 @@
         constant-mutator (fn [token]
                            (let [const (:instruction token)]
                              (if (tag-instruction? const)
-                               (tag-gaussian-tweak token mutation-tag-gaussian-standard-deviation)
+                               (tag-gaussian-tweak token uniform-mutation-tag-gaussian-standard-deviation)
                                (assoc token
                                       :instruction
                                       (cond
-                                        (float? const) (perturb-with-gaussian-noise mutation-float-gaussian-standard-deviation const)
-                                        (integer? const) (round (perturb-with-gaussian-noise mutation-int-gaussian-standard-deviation const))
+                                        (float? const) (perturb-with-gaussian-noise uniform-mutation-float-gaussian-standard-deviation const)
+                                        (integer? const) (round (perturb-with-gaussian-noise uniform-mutation-int-gaussian-standard-deviation const))
                                         (string? const) (string-tweak const)
                                         (or (= const true) (= const false)) (lrand-nth [true false])
                                         :else (:instruction (first (random-code 1 atom-generators epigenetic-markers close-parens-probabilities))))))))               

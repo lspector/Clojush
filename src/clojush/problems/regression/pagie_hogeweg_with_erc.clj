@@ -5,7 +5,7 @@
 ;;
 ;; Kyle Harrington, kyleh@cs.brandeis.edu, 2011
 
-(ns clojush.examples.pagie-hogeweg
+(ns clojush.problems.regression.pagie-hogeweg-with-erc
   (:use [clojush.pushgp.pushgp]
         [clojush pushstate random interpreter])
   (:require [clojure.math.numeric-tower :as math]))
@@ -99,7 +99,7 @@
    :genetic-operator-probabilities {:alternation 0.5
                                     :uniform-mutation 0.5}
    :uniform-mutation-constant-tweak-rate 0.8
-   :mutation-float-gaussian-standard-deviation 0.01
+   :uniform-mutation-float-gaussian-standard-deviation 0.01
    :tournament-size 7
    :reuse-errors true ;; If a sample set is used, then error reuse must be disabled
    :print-errors false

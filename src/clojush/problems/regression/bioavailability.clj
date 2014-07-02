@@ -27,7 +27,7 @@
 ;;
 ;; Tom Helmuth, thelmuth@cs.umass.edu, 2012
 
-(ns clojush.examples.bioavailability
+(ns clojush.problems.regression.bioavailability
   (:use [clojush.pushgp.pushgp]
         [clojush random util pushstate interpreter]
         [local-file]

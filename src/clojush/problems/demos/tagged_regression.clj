@@ -2,7 +2,7 @@
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
-(ns clojush.examples.tagged-regression
+(ns clojush.problems.demos.tagged-regression
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.random]

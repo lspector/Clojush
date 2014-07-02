@@ -53,10 +53,10 @@
           :alignment-deviation 10 ;; When using alternation, the standard deviation of how far alternation may jump between indices when switching between parents
           :uniform-mutation-rate 0.01 ;; The probability of each token being mutated during uniform mutation
           :uniform-mutation-constant-tweak-rate 0.5 ;; The probability of using a constant mutation instead of simply replacing the token with a random instruction during uniform mutation
-          :mutation-float-gaussian-standard-deviation 1.0 ;; The standard deviation used when tweaking float constants with Gaussian noise
-          :mutation-int-gaussian-standard-deviation 1 ;; The standard deviation used when tweaking integer constants with Gaussian noise
-          :mutation-string-char-change-rate 0.1 ;; The probability of each character being changed when doing string constant tweaking
-          :mutation-tag-gaussian-standard-deviation 100 ;; The standard deviation used when tweaking tag locations with Gaussian noise
+          :uniform-mutation-float-gaussian-standard-deviation 1.0 ;; The standard deviation used when tweaking float constants with Gaussian noise
+          :uniform-mutation-int-gaussian-standard-deviation 1 ;; The standard deviation used when tweaking integer constants with Gaussian noise
+          :uniform-mutation-string-char-change-rate 0.1 ;; The probability of each character being changed when doing string constant tweaking
+          :uniform-mutation-tag-gaussian-standard-deviation 100 ;; The standard deviation used when tweaking tag locations with Gaussian noise
           :uniform-close-mutation-rate 0.1 ;; The probability of each :close being incremented or decremented during uniform close mutation
           :close-increment-rate 0.2 ;; The probability of making an increment change to :close during uniform close mutation, as opposed to a decrement change
           ;;

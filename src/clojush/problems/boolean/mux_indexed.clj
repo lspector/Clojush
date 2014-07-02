@@ -5,7 +5,7 @@
 ;; This is code for multiplexer problems of various sizes, using integers
 ;; to index address and data bits (which are Boolean values).
 
-(ns clojush.examples.mux-indexed
+(ns clojush.problems.boolean.mux-indexed
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]

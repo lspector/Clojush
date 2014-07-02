@@ -4,7 +4,7 @@
 ;;
 ;; This is code for the 6-bit multiplexer problem.
 
-(ns clojush.examples.mux-6
+(ns clojush.problems.boolean.mux-6
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.interpreter]

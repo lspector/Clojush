@@ -3,7 +3,7 @@
 ; The Pagie-Hogeweg problem without a float ERC; instead, just
 ; uses the constant 1.0 as an atom generator.
 
-(ns clojush.examples.pagie-hogeweg-no-erc
+(ns clojush.problems.regression.pagie-hogeweg
   (:use clojush.pushgp.pushgp)
   (:require clojush.examples.pagie-hogeweg))
 

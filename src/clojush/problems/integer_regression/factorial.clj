@@ -2,7 +2,7 @@
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
-(ns clojush.examples.factorial
+(ns clojush.problems.integer-regression.factorial
   (:use [clojush.pushgp.pushgp]
         [clojush pushstate interpreter]
         [clojure.math.numeric-tower]))

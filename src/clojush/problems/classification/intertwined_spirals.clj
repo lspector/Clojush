@@ -9,7 +9,7 @@
 ;; intertwined-spirals-demo.
 ;; For Kyle's full version see https://github.com/kephale/Clojush
 
-(ns clojush.examples.intertwined-spirals
+(ns clojush.problems.classification.intertwined-spirals
   (:use [clojush.pushgp.pushgp]
         [clojush random pushstate interpreter]
         [clojush.instructions tag common]))
