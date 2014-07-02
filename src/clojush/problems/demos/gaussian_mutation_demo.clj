@@ -16,7 +16,8 @@
 ;; while the ephemeral random constant generator can only produce constants
 ;; like 1.0 and 2.0. While it would be possible to produce 1.23 through
 ;; arithmetic manipulation of integral values, it is probably easier to 
-;; produce it through gaussian mutations.
+;; produce it through gaussian mutations, which can happen through uniform
+;; mutation.
 
 (define-registered in 
                    (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))

@@ -1,9 +1,6 @@
 (ns clojush.pushgp.breed
-  (:use [clojush.globals]
-        [clojush.random]
-        [clojush.pushgp.parent-selection]
-        [clojush.pushgp.genetic-operators]
-        [clojush.simplification])
+  (:use [clojush globals random simplification]
+        [clojush.pushgp parent-selection genetic-operators])
   (:require [clj-random.core :as random]))
 
 ; A map of genetic operator keywords to maps containing the genetic operator

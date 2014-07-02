@@ -48,7 +48,7 @@
 
 (defn read-data []
   "Reads data from data/bioavailability.txt into a sequence of sequences."
-  (let [f (slurp* "src/clojush/examples/data/bioavailability.txt")
+  (let [f (slurp* "src/clojush/problems/regression/data/bioavailability.txt")
         lines (csv/parse-csv f :delimiter \tab)]
     (map #(map (fn [x] (float (read-string x)))
                %)
