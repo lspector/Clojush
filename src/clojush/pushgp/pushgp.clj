@@ -45,6 +45,7 @@
                                            [:alternation :uniform-mutation] 0.2 ;Somewhat equivalent to normal Push's ULTRA operator
                                            :uniform-close-mutation 0.0
                                            :uniform-silent-mutation 0.0
+                                           [:make-next-operator-revertable :uniform-silent-mutation] 0.0 ;Equivalent to a hill-climbing version of uniform-silent-mutation
                                            }
           ;;
           ;;----------------------------------------
