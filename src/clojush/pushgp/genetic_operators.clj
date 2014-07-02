@@ -24,8 +24,6 @@
 (defn perturb-with-gaussian-noise
   "Returns n perturbed with std dev sd."
   [sd n]
-  (println "SD: " sd)
-  (println "n: " n)
   (+' n (*' sd (gaussian-noise-factor))))
 
 (defn tag-gaussian-tweak

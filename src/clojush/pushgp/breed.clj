@@ -1,5 +1,5 @@
 (ns clojush.pushgp.breed
-  (:use [clojush globals random simplification]
+  (:use [clojush globals random simplification individual]
         [clojush.pushgp parent-selection genetic-operators])
   (:require [clj-random.core :as random]))
 
@@ -12,6 +12,24 @@
    :uniform-close-mutation {:fn uniform-close-mutation :parents 1}
    :uniform-silent-mutation {:fn uniform-silent-mutation :parents 1}
    })
+
+(defn revert-too-big-child
+  "Determines what individual should replace a child program that exceeds the
+   size limit. Options are:
+     :parent -- one of the parents (default)
+     :empty  -- an empty program
+     :random -- a random program
+   In future, may implement :delete, which deletes some of the instructions
+   in a parent."
+  [parent {:keys [replace-child-that-exceeds-size-limit-with atom-generators
+                  max-points-in-initial-program]
+           :as argmap}]
+  (case replace-child-that-exceeds-size-limit-with
+    :parent parent
+    :empty (make-individual :genome '())
+    :random (make-individual :genome (random-code max-points-in-initial-program atom-generators argmap))
+    ))
+
 
 (defn perform-genetic-operator-list
   "Recursively applies the genetic operators in operator-list, using
@@ -40,7 +58,7 @@
                 (perform-genetic-operator-list operator first-parent population location argmap)
                 (perform-genetic-operator-list (vector operator) first-parent population location argmap))]
     (if (> (count (:genome child)) max-points) ; Check if too big
-      first-parent
+      (revert-too-big-child first-parent argmap)
       (assoc child :parent first-parent))))
 
 (defn breed

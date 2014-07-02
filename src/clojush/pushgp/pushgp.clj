@@ -61,6 +61,7 @@
           :uniform-close-mutation-rate 0.1 ;; The probability of each :close being incremented or decremented during uniform close mutation
           :close-increment-rate 0.2 ;; The probability of making an increment change to :close during uniform close mutation, as opposed to a decrement change
           :uniform-silent-mutation-rate 0.1 ;; The probability of each :silent being switched during uniform silent mutation
+          :replace-child-that-exceeds-size-limit-with :parent ;; When a child is produced that exceeds the size limit of max-points, this is used to determine what program to return. Options include :parent, :empty, :random
           ;;
           ;;----------------------------------------
           ;; Epignenetics
