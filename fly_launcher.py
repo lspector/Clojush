@@ -7,7 +7,7 @@ number_runs = 10
 clojush_directory = "/home/thelmuth/Clojush/"
 output_directory = "../Results/odd/"
 
-example_file = "clojush.examples.odd"
+example_file = "clojush.problems.demos.odd"
 
 title_string = "Test of cluster runs with odd problem"
 

@@ -537,7 +537,6 @@
    :tag-limit 10000
    :max-points 3000
    :max-points-in-initial-program 500 ;;100
-   :parent-reversion-probability 0.0
    :mutation-probability 0.0
    :crossover-probability 0.0
    :simplification-probability 0

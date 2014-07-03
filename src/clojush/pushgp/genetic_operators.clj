@@ -113,19 +113,19 @@
                                     (:ancestors ind))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; uniform silent mutation
+;; uniform silence mutation
 
-(defn uniform-silent-mutation
+(defn uniform-silence-mutation
   "Uniformly mutates the :silent's in the individual's instruction maps. Each
-   :silent will have a uniform-silent-mutation-rate probability of being switched."
-  [ind {:keys [uniform-silent-mutation-rate
+   :silent will have a uniform-silence-mutation-rate probability of being switched."
+  [ind {:keys [uniform-silence-mutation-rate
                epigenetic-markers maintain-ancestors]}]
   (if (not (some #{:silent} epigenetic-markers))
     ind
     (let [silent-mutator (fn [instr-map]
                            (let [silent (get instr-map :silent false)]
                              (assoc instr-map :silent
-                                    (if (< (lrand) uniform-silent-mutation-rate)
+                                    (if (< (lrand) uniform-silence-mutation-rate)
                                       (not silent)
                                       silent))))
           new-genome (map silent-mutator (:genome ind))]

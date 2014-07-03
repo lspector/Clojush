@@ -10,7 +10,7 @@
    :alternation {:fn alternation :parents 2}
    :uniform-mutation {:fn uniform-mutation :parents 1}
    :uniform-close-mutation {:fn uniform-close-mutation :parents 1}
-   :uniform-silent-mutation {:fn uniform-silent-mutation :parents 1}
+   :uniform-silence-mutation {:fn uniform-silence-mutation :parents 1}
    :make-next-operator-revertable {:fn nil :parents 0}
    })
 
@@ -34,15 +34,16 @@
 (defn revert-to-parent-if-worse
   "Evaluates child and parent, returning the child if it is at least as good as
    the parent on every test case."
-  [child parent rand-gen {:keys [error-function] :as argmap}]
+  [child parent rand-gen {:keys [error-function parent-reversion-probability] :as argmap}]
   (let [evaluated-child (evaluate-individual (assoc child :program (translate-plush-genome-to-push-program child))
                                              error-function rand-gen argmap)
         child-errors (:errors evaluated-child)
         evaluated-parent (evaluate-individual (assoc parent :program (translate-plush-genome-to-push-program parent))
                                               error-function rand-gen argmap)
         parent-errors (:errors evaluated-parent)]
-    (if (reduce #(and %1 %2)
-                (map <= child-errors parent-errors))
+    (if (or (>= (lrand) parent-reversion-probability)
+            (reduce #(and %1 %2)
+                    (map <= child-errors parent-errors)))
       evaluated-child
       evaluated-parent)))
 

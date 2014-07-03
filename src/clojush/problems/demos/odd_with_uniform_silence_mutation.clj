@@ -2,7 +2,7 @@
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
-(ns clojush.problems.demos.odd-with-uniform-silent-mutation
+(ns clojush.problems.demos.odd-with-uniform-silence-mutation
   (:use [clojush.pushgp.pushgp]
         [clojush.random]
         [clojush pushstate interpreter]))
@@ -37,8 +37,8 @@
                                     :uniform-mutation 0.1
                                     [:alternation :uniform-mutation] 0.2 ;Somewhat equivalent to normal Push's ULTRA operator
                                     :uniform-close-mutation 0.1
-                                    :uniform-silent-mutation 0.1
+                                    :uniform-silence-mutation 0.1
                                     }
    :silent-instruction-probability 0.2
-   :uniform-silent-mutation-rate 0.1
+   :uniform-silence-mutation-rate 0.1
    })

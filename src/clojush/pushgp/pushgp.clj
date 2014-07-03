@@ -44,8 +44,8 @@
                                            :uniform-mutation 0.1
                                            [:alternation :uniform-mutation] 0.2 ;Somewhat equivalent to normal Push's ULTRA operator
                                            :uniform-close-mutation 0.0
-                                           :uniform-silent-mutation 0.0
-                                           [:make-next-operator-revertable :uniform-silent-mutation] 0.0 ;Equivalent to a hill-climbing version of uniform-silent-mutation
+                                           :uniform-silence-mutation 0.0
+                                           [:make-next-operator-revertable :uniform-silence-mutation] 0.0 ;Equivalent to a hill-climbing version of uniform-silence-mutation
                                            }
           ;;
           ;;----------------------------------------
@@ -61,8 +61,9 @@
           :uniform-mutation-tag-gaussian-standard-deviation 100 ;; The standard deviation used when tweaking tag locations with Gaussian noise
           :uniform-close-mutation-rate 0.1 ;; The probability of each :close being incremented or decremented during uniform close mutation
           :close-increment-rate 0.2 ;; The probability of making an increment change to :close during uniform close mutation, as opposed to a decrement change
-          :uniform-silent-mutation-rate 0.1 ;; The probability of each :silent being switched during uniform silent mutation
+          :uniform-silence-mutation-rate 0.1 ;; The probability of each :silent being switched during uniform silent mutation
           :replace-child-that-exceeds-size-limit-with :parent ;; When a child is produced that exceeds the size limit of max-points, this is used to determine what program to return. Options include :parent, :empty, :random
+          :parent-reversion-probability 1.0 ;; The probability of a child being reverted to its parent by a genetic operator that has been made revertable, if the child is not as good as the parent on at least one test case
           ;;
           ;;----------------------------------------
           ;; Epignenetics
@@ -115,11 +116,6 @@
           :json-log-filename "log.json" ;; The file to print JSON log to
           :log-fitnesses-for-all-cases false ;; If true, the CSV and JSON logs will include the fitnesses of each individual on every test case
           :json-log-program-strings false ;; If true, JSON logs will include program strings for each individual
-          ;;
-          ;;----------------------------------------
-          ;; Other arguments
-          ;;----------------------------------------
-          :parent-reversion-probability 0.0 ;; The probability of a child being reverted to its parent if the parent has better fitness or equal fitness and is smaller
           )))
 
 (defn load-push-argmap
@@ -181,28 +177,6 @@
               pop-agents
               rand-gens))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
-
-(defn parental-reversion
-  [pop-agents generation {:keys [parent-reversion-probability use-single-thread
-                                 total-error-method]}]
-  (if (and (> generation 0) (> parent-reversion-probability 0))
-    (let [err-fn (case total-error-method
-                   (:hah :rmse :ifs) :weighted-error
-                   :total-error)]
-      (println "Performing parent reversion...")
-      (dorun (map #((if use-single-thread swap! send) 
-                        % 
-                        (fn [i]  
-                          (if (or (< (err-fn i) (err-fn (:parent i)))
-                                  (and (= (err-fn i) (err-fn (:parent i)))
-                                       (< (count-points (:program i))
-                                          (count-points (:program (:parent i)))))
-                                  (> (lrand) parent-reversion-probability))
-                            (assoc i :parent nil)  ;; don't store whole ancestry
-                            (:parent i))))
-                  pop-agents))
-      (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
-      (println "Done performing parent reversion."))))
 
 (defn remove-parents
   "Removes value from :parent for each individual in the population. This will
@@ -293,8 +267,6 @@
           (compute-errors pop-agents rand-gens @push-argmap)
           (println "Done computing errors.")
           (timer @push-argmap :fitness)
-          ;; possible parent reversion
-          (parental-reversion pop-agents generation @push-argmap)
           ;; stop tracking parents since they aren't used any more
           (remove-parents pop-agents @push-argmap)
           ;; calculate solution rates if necessary for historically-assessed hardness
