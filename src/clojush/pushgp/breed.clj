@@ -35,14 +35,16 @@
   "Evaluates child and parent, returning the child if it is at least as good as
    the parent on every test case."
   [child parent rand-gen {:keys [error-function] :as argmap}]
-  (let [child-errors (:errors (evaluate-individual (assoc child :program (translate-plush-genome-to-push-program child))
-                                                   error-function rand-gen argmap))
-        parent-errors (:errors (evaluate-individual (assoc parent :program (translate-plush-genome-to-push-program parent))
-                                                    error-function rand-gen argmap))]
+  (let [evaluated-child (evaluate-individual (assoc child :program (translate-plush-genome-to-push-program child))
+                                             error-function rand-gen argmap)
+        child-errors (:errors evaluated-child)
+        evaluated-parent (evaluate-individual (assoc parent :program (translate-plush-genome-to-push-program parent))
+                                              error-function rand-gen argmap)
+        parent-errors (:errors evaluated-parent)]
     (if (reduce #(and %1 %2)
                 (map <= child-errors parent-errors))
-      child
-      parent)))
+      evaluated-child
+      evaluated-parent)))
 
 (defn perform-genetic-operator-list
   "Recursively applies the genetic operators in operator-list, using

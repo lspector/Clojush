@@ -271,6 +271,7 @@
       (println "Max copy number of one program:" (apply max (vals frequency-map)))
       (println "Min copy number of one program:" (apply min (vals frequency-map)))
       (println "Median copy number:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
+    (println "Number of evaluations used so far:" @evaluations-count)
     (println "--- Timings ---")
     (println "Current time:" (System/currentTimeMillis) "milliseconds")
     (when print-timings

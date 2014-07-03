@@ -1,9 +1,5 @@
 (ns clojush.evaluate
-  (:use [clojush.util]
-        [clojush.pushstate]
-        [clojush.random]
-        [clojush.globals]
-        [clojush.individual])
+  (:use [clojush util pushstate random globals individual])
   (:require [clojure.math.numeric-tower :as math]
             [clj-random.core :as random]))
 
@@ -73,7 +69,10 @@
       (let [p (:program i)
             e (vec (if (and (not (nil? (:errors i))) reuse-errors)
                      (:errors i)
-                     (normalize-errors (error-function p) normalization max-error)))
+                     (do
+                       (swap! evaluations-count inc)
+                       (normalize-errors (error-function p) normalization max-error)
+                       )))
             te (if (and (not (nil? (:total-error i))) reuse-errors)
                  (:total-error i)
                  (compute-total-error e))

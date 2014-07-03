@@ -29,7 +29,8 @@
 (def max-points-in-random-expressions 50) ;; The maximum length of code created by the code_rand instruction
 
 ;; These atoms are used in different places and are therefore difficult to make fully functional
-(def timer-atom (atom 0)) ;; Used for timing of different parts of pushgp
+(def evaluations-count (atom 0)) ;; Used to count the number of times GP evaluates an individual
+(def timer-atom (atom 0)) ;; Used for timing of different parts of PushGP
 (def timing-map (atom {:initialization 0 :reproduction 0 :report 0 :fitness 0 :other 0}))  ;; Used for timing of different parts of pushgp
 (def solution-rates (atom (repeat 0))) ;; Used in historically-assessed hardness
 (def elitegroups (atom ())) ;; Used for elitegroup lexicase selection (will only work if lexicase-selection is off)
