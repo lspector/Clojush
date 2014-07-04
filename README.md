@@ -1,4 +1,5 @@
-README.txt
+Clojush
+=======
 
 Lee Spector (lspector@hampshire.edu), started 20100227
 See version history at https://github.com/lspector/Clojush/commits/master
@@ -9,11 +10,13 @@ Push programming language and the PushGP genetic programming system in the
 Clojure programming language. Among other features this implementation
 takes advantage of Clojure's facilities for multi-core concurrency. 
 
-AVAILABILITY
+Availability
+------------
 
 https://github.com/lspector/Clojush/
 
-REQUIREMENTS
+Requirements
+------------
 
 To use this code you must have a Clojure programming environment; see 
 http://clojure.org/. The current version of Clojush requires Clojure 1.3.
@@ -21,20 +24,21 @@ http://clojure.org/. The current version of Clojush requires Clojure 1.3.
 Clojure is available for most OS platforms. A good starting point for
 obtaining and using Clojure is http://dev.clojure.org/display/doc/Getting+Started.
 
-QUICKSTART
+Quickstart
+----------
 
 Using Leiningen (from https://github.com/technomancy/leiningen) you can 
 run an example from the OS command line (in the Clojush directory) with 
 a call like:
 
-    lein run clojush.examples.simple-regression
+    lein run clojush.problems.demos.simple-regression
 
 If you would like to change a parameter, you may do so at the command line. 
 For example, to change the default population size from 1000 to 50, call:
 
-    lein run clojush.examples.simple-regression :population-size 50
+    lein run clojush.problems.demos.simple-regression :population-size 50
 
-Additional parameters may also be specified. 
+Additional parameters may also be specified. All valid parameters with their descriptions can be found in src/clojush/pushgp/pushgp.clj.
 
 The above calls will load everything and run PushGP on a simple symbolic 
 regression problem (symbolic regression of y=x^3-2x^2-x). Although the 
@@ -54,7 +58,7 @@ namespace.
 
 To run the examples in an IDE (Integrated Development Environment) for 
 Clojure such as Clooj or Eclipse/Counterclockwise, load one of the
-files in src/clojush/examples into the IDE's REPL, type "(pushgp argmap)"
+files in src/clojush/problems into the IDE's REPL, type "(pushgp argmap)"
 into the REPL's input area, and hit the enter key.
 
 For large-scale runs you may want to provide additional arguments to 
@@ -64,7 +68,11 @@ reliance on garbage  collection. For example, you might want to provide
 arguments such  as -Xmx2000m and -XX:+UseParallelGC. Details will depend
 on the method that you use to launch your code.
 
-DESCRIPTION
+An additional tutorial is available in src/clojush/problems/demos/tutorial.clj.
+
+
+Description
+-----------
 
 Clojush is a version of the Push programming language for evolutionary 
 computation, and the PushGP genetic programming system, implemented in 
@@ -105,7 +113,10 @@ simplification. Clojush can serve as the foundation for other evolutionary
 algorithms, but only the core Push interpreter and a version of PushGP
 are provided here.
 
-USAGE
+Starting with version 2.0.0, the genomes of evolving individuals in Clojush are based on Plush (linear Push) genomes, which are translated into normal Push programs before execution. Plush genomes are composed of instruction maps, each of whic contains an instruction and potentially other metadata describing whether that instruction should be silenced, whether closing parentheses should follow it, etc.
+
+Usage
+-----
 
 Example calls to PushGP are provided in other accompanying files.
 
@@ -137,8 +148,8 @@ normal, or :abnormal otherwise (which generally means that execution was
 aborted because the evaluation limit was reached.
 
 Random code can be generated with random-code, which takes a size limit and a 
-list of "atom generators." Size is calculated in "points" -- each atom and
-each pair of parentheses counts as a single point. Each atom-generator should
+list of "atom generators." Size is simply the length of the linear Plush genome.
+Each atom-generator should
 be a constant, or the name of a Push instruction (in which case it will be
 used literally), or a Clojure function that will be called with no arguments
 to produce a constant or a Push instruction. This is how "ephemeral random
@@ -159,7 +170,8 @@ the resulting interpreter state:
                   (list (fn [] (rand-int 100)) ;;  random integers from 0-99
                         (fn [] (rand)))))]     ;; random floats from 0.0-1.0
   (printf "\n\nCode: %s\n\n" (apply list c))
-  (run-push c s))
+  (run-push (translate-plush-genome-to-push-program {:genome c})
+            s))
 
 If you look at the resulting interpreter state you will see an "auxiliary" 
 stack that is not mentioned in any of the Push publications. This exists 
@@ -203,11 +215,19 @@ play with. The registered-for-type function can make it simpler to include
 or exclude groups of instructions. This is demonstrated in some of the 
 examples.
 
-Other pushgp arguments to note include those that control genetic 
-operators (mutation, crossover, and simplification). The specified operator
-probabilities should sum to 1.0 or less -- any difference between the sum and
-1.0 will be the probability for "straight" (unmodified) reproduction. The use
-of simplification is also novel here. Push programs can be automatically 
+As of Clojush 2.0.0, genetic operator arguments are provided as a map to the :genetic-operator-probabilities argument. Here, each key may be a single operator or an "operator pipeline" vector, which allows the application of multiple operators sequentially, using one operators output as the input to the next operator. An example argument could be:
+
+    {:reproduction 0.1
+     :alternation 0.2
+     :uniform-mutation 0.2
+     [:alternation :uniform-mutation] 0.2
+     :uniform-close-mutation 0.1
+     :uniform-silence-mutation 0.1
+     [:make-next-operator-revertable :uniform-silence-mutation] 0.1}
+
+Here, two different pipelines would be used. In the second pipeline, the meta-operator :make-next-operator-revertable makes the :uniform-silence-mutation operator revertable, which means that the child will be compared to the parent, and the parent kept if it is better than the child.
+
+The use of simplification is also novel here. Push programs can be automatically 
 simplified -- to some extent -- in a very straightforward way: because 
 there are almost no syntax constraints you can remove anything (one or more 
 atoms or sub-lists, or a pair of parentheses) and still have a valid
@@ -215,22 +235,15 @@ program. So the automatic simplification procedure just iteratively removes
 something, checks to see what that does to the error, and keeps the simpler
 program if the error is the same (or lower!).
 
-Automatic simplification is used in this implementation of PushGP in three 
-places: 
-
-1. There is a genetic operator that adds the simplified program to the next
-generation's population. The use of the simplification genetic operator will
-tend to keep programs smaller, but whether this has benificial or detrimental
-effects on search performance is a subject for future research.
-
-2. A specified number of simplification iterations is performed on the best 
+Automatic simplification is used in this implementation of PushGP in two places: 
+1. A specified number of simplification iterations is performed on the best 
 program in each generation. This is produced only for the sake of the report, 
 and the result is not added to the population. It is possible that the 
 simplified program that is displayed will actually be better than the best 
 program in the population. Note also that the other data in the report 
 concerning the "best" program refers to the unsimplified program.
 
-3. Simplification is also performed on solutions at the ends of runs. 
+2. Simplification is also performed on solutions at the ends of runs. 
 
 Note that the automatic simplification procedure will not always find all
 possible simplifications even if you run it for a large number of iterations,
@@ -238,9 +251,10 @@ but in practice it does often seem to eliminate a lot of useless code (and to
 make it easier to perform further simplification by hand).
 
 If you've read this far then the best way to go further is probably to read
-and run the examples.
+and run the example problem files in src/clojush/problems/demos/.
 
-IMPLEMENTATION NOTES
+Implementation Notes
+--------------------
 
 A Push interpreter state is represented here as a Clojure map that maps type 
 names (keywords) to stacks (lists, with the top items listed first).
@@ -291,18 +305,18 @@ Push3 stuff not (yet) implemented:
   spec have not been implemented here. The approach here is quite different,
   so this may never be implemented
 
-TO DO (SOMETIME, MAYBE)
+To Do (sometime, maybe)
+-----------------------
 
 - Implement remaining instructions in the Push3 specification.
-- Add more examples.
 - Add support for seeding the random number generator.
-- Add improved genetic operators, e.g. fair mutation/crossover.
-- Improve the automatic simplification algorithm.
+- Improve the automatic simplification algorithm and make it work on Plush genomes.
 - Possibly rename the auxiliary stack the "input" stack if no other
   uses are developed for it.
 - Write a "sufficient-args" fn/macro to clean up Push instruction definitions.
 
-ACKNOWLEDGEMENTS
+Acknowledgements
+----------------
 
 This material is based upon work supported by the National Science Foundation 
 under Grant No. 1017817. Any opinions, findings, and conclusions or 

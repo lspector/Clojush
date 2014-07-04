@@ -42,7 +42,8 @@
                    found-first-close))))
 
 (defn translate-plush-genome-to-push-program
-  "Takes each Plush genome and translates it to the correct Push program with
+  "Takes as input an individual (or map) containing a Plush genome (:genome)
+   and translates it to the correct Push program with
    balanced parens. The linear Plush genome is made up of a list of instruction
    maps, each including an :instruction key as well as other epigenetic marker
    keys. As the linear Plush genome is traversed, each instruction that requires

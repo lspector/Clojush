@@ -38,8 +38,7 @@
                      {:genome (random-code (max 1
                                                 (math/abs (mod (stack-ref :integer 0 state)
                                                                max-points-in-random-expressions)))
-                                           @global-atom-generators
-                                           {:epigenetic-markers []})})
+                                           @global-atom-generators)})
                    :code
                    (pop-item :integer state)))
       state)))

@@ -41,25 +41,31 @@
 (defn random-plush-instruction-map
   "Returns a random instruction map given the atom-generators and the required
    epigenetic-markers."
-  [atom-generators {:keys [epigenetic-markers close-parens-probabilities
-                           silent-instruction-probability]}]
-  (let [markers (conj epigenetic-markers :instruction)]
-    (zipmap markers
-            (map (fn [marker]
-                   (case marker
-                     :instruction (let [element (lrand-nth atom-generators)]
-                                    (if (fn? element)
-                                      (let [fn-element (element)]
-                                        (if (fn? fn-element)
-                                          (fn-element)
-                                          fn-element))
-                                      element))
-                     :close (random-closes close-parens-probabilities)
-                     :silent (if (< (lrand) silent-instruction-probability)
-                               true
-                               false)
-                     ))
-                 markers))))
+  ([atom-generators]
+    (random-plush-instruction-map atom-generators {}))
+  ([atom-generators {:keys [epigenetic-markers
+                            close-parens-probabilities
+                            silent-instruction-probability]
+                     :or {epigenetic-markers []
+                          close-parens-probabilities [0.772 0.206 0.021 0.001]
+                          silent-instruction-probability 0}}]
+    (let [markers (conj epigenetic-markers :instruction)]
+      (zipmap markers
+              (map (fn [marker]
+                     (case marker
+                       :instruction (let [element (lrand-nth atom-generators)]
+                                      (if (fn? element)
+                                        (let [fn-element (element)]
+                                          (if (fn? fn-element)
+                                            (fn-element)
+                                            fn-element))
+                                        element))
+                       :close (random-closes close-parens-probabilities)
+                       :silent (if (< (lrand) silent-instruction-probability)
+                                 true
+                                 false)
+                       ))
+                   markers)))))
 
 (defn random-code-with-size
   "Returns a random Plush expression containing the given number of points."
@@ -71,7 +77,9 @@
 
 (defn random-code
   "Returns a random expression with size limited by max-points."
-  [max-points atom-generators argmap]
-  (random-code-with-size (inc (lrand-int max-points))
-                         atom-generators
-                         argmap))
+  ([max-points atom-generators]
+    (random-code max-points atom-generators {}))
+  ([max-points atom-generators argmap]
+    (random-code-with-size (inc (lrand-int max-points))
+                           atom-generators
+                           argmap)))
