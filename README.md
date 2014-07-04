@@ -127,14 +127,14 @@ function (a.k.a. fitness function) that you pass to the pushgp function.
 Here is a simple example of a call to run-push, adding 1 and 2 and returning 
 the top of the integer stack in the resulting interpreter state:
 
-(top-item :integer (run-push '(1 2 integer_add) (make-push-state)))
+    (top-item :integer (run-push '(1 2 integer_add) (make-push-state)))
 
 If you want to see every step of execution you can pass an optional third
 argument of true to run-push. This will cause a representation of the
 interpreter state to be printed at the start of execution and after
 each step. Here is the same example as above but with each step printed:
 
-(top-item :integer (run-push '(1 2 integer_add) (make-push-state) true))
+    (top-item :integer (run-push '(1 2 integer_add) (make-push-state) true))
 
 See the "parameters" section of the code for some parameters that will affect 
 execution, e.g. whether code is pushed onto and/or popped off of the code
@@ -163,6 +163,7 @@ since it may be a large and/or looping program, and since the default
 evaluation limit is pretty low) and it returns the internal representation of
 the resulting interpreter state:
 
+```clojure
 (let [s (make-push-state)
       c (random-code 
           100                                  ;; size limit of 100 points
@@ -172,6 +173,7 @@ the resulting interpreter state:
   (printf "\n\nCode: %s\n\n" (apply list c))
   (run-push (translate-plush-genome-to-push-program {:genome c})
             s))
+```
 
 If you look at the resulting interpreter state you will see an "auxiliary" 
 stack that is not mentioned in any of the Push publications. This exists 
@@ -242,7 +244,6 @@ and the result is not added to the population. It is possible that the
 simplified program that is displayed will actually be better than the best 
 program in the population. Note also that the other data in the report 
 concerning the "best" program refers to the unsimplified program.
-
 2. Simplification is also performed on solutions at the ends of runs. 
 
 Note that the automatic simplification procedure will not always find all
