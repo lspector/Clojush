@@ -165,14 +165,13 @@ the resulting interpreter state:
 
 ```clojure
 (let [s (make-push-state)
-      c (random-code 
+      c (random-push-code 
           100                                  ;; size limit of 100 points
           (concat @registered-instructions     ;; all registered instrs 
                   (list (fn [] (rand-int 100)) ;; random integers from 0-99
                         (fn [] (rand)))))]     ;; random floats from 0.0-1.0
   (printf "\n\nCode: %s\n\n" (apply list c))
-  (run-push (translate-plush-genome-to-push-program {:genome c})
-            s))
+  (run-push c s))
 ```
 
 If you look at the resulting interpreter state you will see an "auxiliary" 

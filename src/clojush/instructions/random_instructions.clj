@@ -34,11 +34,10 @@
         (binding [*out* *err*]
 	         (println "code_rand: global-atom-generators is empty.")
 	         state)
-        (push-item (translate-plush-genome-to-push-program
-                     {:genome (random-plush-genome (max 1
-                                                        (math/abs (mod (stack-ref :integer 0 state)
-                                                                       max-points-in-random-expressions)))
-                                           @global-atom-generators)})
+        (push-item (random-push-code (max 1
+                                          (math/abs (mod (stack-ref :integer 0 state)
+                                                         max-points-in-random-expressions)))
+                                     @global-atom-generators)
                    :code
                    (pop-item :integer state)))
       state)))

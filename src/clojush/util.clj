@@ -1,10 +1,9 @@
 (ns clojush.util
+  (:use clojush.globals)
   (:require [clojure.math.numeric-tower :as math]
             [clojure.zip :as zip]
             [clojure.walk :as walk]
-            [clojure.string :as string])
-  (:use [clojush.globals]
-        [clojush.random]))
+            [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utilities

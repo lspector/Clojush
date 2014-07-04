@@ -1,3 +1,8 @@
+
+;============== NOTE NOTE NOTE =================
+; This file has note been updated for Clojush 2.0, and will likely not work
+;============== NOTE NOTE NOTE =================
+
 (ns clojush.problems.boolean.valiant
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]

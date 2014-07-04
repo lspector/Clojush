@@ -1,3 +1,9 @@
+
+;============== NOTE NOTE NOTE =================
+; This file has note been updated for Clojush 2.0, and will not work
+; for example, genetic operators haven't been updated
+;============== NOTE NOTE NOTE =================
+
 (ns clojush.problems.software.calc
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]

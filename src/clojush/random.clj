@@ -1,6 +1,6 @@
 (ns clojush.random
-  (:require [clj-random.core :as random])
-  (:use [clojush.globals]))
+  (:use [clojush globals translate])
+  (:require [clj-random.core :as random]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random functions
@@ -16,7 +16,7 @@
 (def lshuffle random/lshuffle)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; random code generator
+;; random plush genome generator
 
 (defn random-closes
   "Returns a random number of closes based on close-parens-probabilities, which
@@ -68,7 +68,7 @@
                    markers)))))
 
 (defn random-plush-genome-with-size
-  "Returns a random Plush expression containing the given number of points."
+  "Returns a random Plush genome containing the given number of points."
   [points atom-generators argmap]
   (repeatedly points
               (partial random-plush-instruction-map
@@ -76,10 +76,21 @@
                        argmap)))
 
 (defn random-plush-genome
-  "Returns a random expression with size limited by max-points."
+  "Returns a random Plush genome with size limited by max-points."
   ([max-points atom-generators]
     (random-plush-genome max-points atom-generators {}))
   ([max-points atom-generators argmap]
     (random-plush-genome-with-size (inc (lrand-int max-points))
                            atom-generators
                            argmap)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; random Push code generator
+
+(defn random-push-code
+  "Returns a random Push expression with size limited by max-points."
+  ([max-points atom-generators]
+    (random-push-code max-points atom-generators {}))
+  ([max-points atom-generators argmap]
+    (translate-plush-genome-to-push-program
+      {:genome (random-plush-genome max-points atom-generators argmap)})))
