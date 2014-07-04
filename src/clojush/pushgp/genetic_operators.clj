@@ -57,7 +57,7 @@
                                            c))
                                        st)))
         instruction-mutator (fn [token]
-                              (first (random-code 1 atom-generators argmap)))
+                              (first (random-plush-genome 1 atom-generators argmap)))
         constant-mutator (fn [token]
                            (let [const (:instruction token)]
                              (if (tag-instruction? const)
@@ -69,7 +69,7 @@
                                         (integer? const) (round (perturb-with-gaussian-noise uniform-mutation-int-gaussian-standard-deviation const))
                                         (string? const) (string-tweak const)
                                         (or (= const true) (= const false)) (lrand-nth [true false])
-                                        :else (:instruction (first (random-code 1 atom-generators argmap))))))))               
+                                        :else (:instruction (first (random-plush-genome 1 atom-generators argmap))))))))               
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
                           (if (< (lrand) uniform-mutation-constant-tweak-rate)

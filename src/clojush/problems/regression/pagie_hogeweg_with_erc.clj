@@ -70,8 +70,6 @@
     'float_sub
     ))
 
-#_(println (apply + (error-function 50 (random-code 50 atom-generators))))
-
 (defn problem-specific-report [best population generation sampled-error-function report-simplifications] 
   (let [errors (error-function (count data) (:program best))
         hit-errors (hit-error-function (count data) (:program best))

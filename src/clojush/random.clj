@@ -67,7 +67,7 @@
                        ))
                    markers)))))
 
-(defn random-code-with-size
+(defn random-plush-genome-with-size
   "Returns a random Plush expression containing the given number of points."
   [points atom-generators argmap]
   (repeatedly points
@@ -75,11 +75,11 @@
                        atom-generators
                        argmap)))
 
-(defn random-code
+(defn random-plush-genome
   "Returns a random expression with size limited by max-points."
   ([max-points atom-generators]
-    (random-code max-points atom-generators {}))
+    (random-plush-genome max-points atom-generators {}))
   ([max-points atom-generators argmap]
-    (random-code-with-size (inc (lrand-int max-points))
+    (random-plush-genome-with-size (inc (lrand-int max-points))
                            atom-generators
                            argmap)))

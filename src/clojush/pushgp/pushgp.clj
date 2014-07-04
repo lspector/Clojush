@@ -151,7 +151,7 @@
                            seeds)))]
     {:pop-agents (let [pa (doall (for [_ (range population-size)]
                                    (make-individual
-                                     :genome (random-code max-points-in-initial-program
+                                     :genome (random-plush-genome max-points-in-initial-program
                                                           atom-generators argmap))))
                        f (str "data/" (System/currentTimeMillis) ".ser")]
                    (when save-initial-population
