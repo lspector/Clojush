@@ -19,7 +19,7 @@ Requirements
 ------------
 
 To use this code you must have a Clojure programming environment; see 
-http://clojure.org/. The current version of Clojush requires Clojure 1.3.
+http://clojure.org/. The current version of Clojush requires Clojure 1.5.1.
 
 Clojure is available for most OS platforms. [A good starting point for
 obtaining and using Clojure](http://dev.clojure.org/display/doc/Getting+Started).
