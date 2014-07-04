@@ -2,7 +2,7 @@ Clojush
 =======
 
 Lee Spector (lspector@hampshire.edu), started 20100227
-See version history at https://github.com/lspector/Clojush/commits/master
+[See version history](https://github.com/lspector/Clojush/commits/master).
 Older version history is in old-version-history.txt.
 
 This is the README file accompanying Clojush, an implementation of the 
@@ -21,13 +21,13 @@ Requirements
 To use this code you must have a Clojure programming environment; see 
 http://clojure.org/. The current version of Clojush requires Clojure 1.3.
 
-Clojure is available for most OS platforms. A good starting point for
-obtaining and using Clojure is http://dev.clojure.org/display/doc/Getting+Started.
+Clojure is available for most OS platforms. [A good starting point for
+obtaining and using Clojure](http://dev.clojure.org/display/doc/Getting+Started).
 
 Quickstart
 ----------
 
-Using Leiningen (from https://github.com/technomancy/leiningen) you can 
+Using [Leiningen](https://github.com/technomancy/leiningen) you can 
 run an example from the OS command line (in the Clojush directory) with 
 a call like:
 
@@ -65,7 +65,7 @@ For large-scale runs you may want to provide additional arguments to
 Java in order to allow  access to more memory and/or to take maximal 
 advantage of Clojure's concurrency support in the context of Clojush's 
 reliance on garbage  collection. For example, you might want to provide
-arguments such  as -Xmx2000m and -XX:+UseParallelGC. Details will depend
+arguments such  as `-Xmx2000m and -XX:+UseParallelGC`. Details will depend
 on the method that you use to launch your code.
 
 An additional tutorial is available in src/clojush/problems/demos/tutorial.clj.
@@ -168,7 +168,7 @@ the resulting interpreter state:
       c (random-code 
           100                                  ;; size limit of 100 points
           (concat @registered-instructions     ;; all registered instrs 
-                  (list (fn [] (rand-int 100)) ;;  random integers from 0-99
+                  (list (fn [] (rand-int 100)) ;; random integers from 0-99
                         (fn [] (rand)))))]     ;; random floats from 0.0-1.0
   (printf "\n\nCode: %s\n\n" (apply list c))
   (run-push (translate-plush-genome-to-push-program {:genome c})
@@ -219,13 +219,15 @@ examples.
 
 As of Clojush 2.0.0, genetic operator arguments are provided as a map to the :genetic-operator-probabilities argument. Here, each key may be a single operator or an "operator pipeline" vector, which allows the application of multiple operators sequentially, using one operators output as the input to the next operator. An example argument could be:
 
-    {:reproduction 0.1
-     :alternation 0.2
-     :uniform-mutation 0.2
-     [:alternation :uniform-mutation] 0.2
-     :uniform-close-mutation 0.1
-     :uniform-silence-mutation 0.1
-     [:make-next-operator-revertable :uniform-silence-mutation] 0.1}
+```clojure
+{:reproduction 0.1
+ :alternation 0.2
+ :uniform-mutation 0.2
+ [:alternation :uniform-mutation] 0.2
+ :uniform-close-mutation 0.1
+ :uniform-silence-mutation 0.1
+ [:make-next-operator-revertable :uniform-silence-mutation] 0.1}
+```
 
 Here, two different pipelines would be used. In the second pipeline, the meta-operator :make-next-operator-revertable makes the :uniform-silence-mutation operator revertable, which means that the child will be compared to the parent, and the parent kept if it is better than the child.
 
@@ -271,7 +273,7 @@ For example there's a function called popper that takes a type and returns
 a function -- that function takes a state and pops the right stack in the 
 state. This allows us to define integer_pop with a simple form:
 
-(define-registered integer_pop (popper :integer))
+    (define-registered integer_pop (popper :integer))
 
 In many versions of Push RUNPUSH takes initialization code or initial stack 
 contents, along with a variety of other parameters. The implementation of
