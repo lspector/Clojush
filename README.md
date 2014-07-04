@@ -239,7 +239,8 @@ program. So the automatic simplification procedure just iteratively removes
 something, checks to see what that does to the error, and keeps the simpler
 program if the error is the same (or lower!).
 
-Automatic simplification is used in this implementation of PushGP in two places: 
+Automatic simplification is used in this implementation of PushGP in two places:
+
 1. A specified number of simplification iterations is performed on the best 
 program in each generation. This is produced only for the sake of the report, 
 and the result is not added to the population. It is possible that the 
