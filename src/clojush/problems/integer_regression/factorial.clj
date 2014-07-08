@@ -73,9 +73,13 @@
    :max-points 500
    :max-points-in-initial-program 100
    :evalpush-limit 1000
-   :genetic-operator-probabilities {:uniform-close-mutation 0.1
-                                    :alternation 0.45
-                                    :uniform-mutation 0.45}
+   :genetic-operator-probabilities {[:alternation :uniform-mutation] 0.5
+                                    [:alternation :uniform-mutation :uniform-close-mutation] 0.5}
+   ;   :genetic-operator-probabilities {:uniform-close-mutation 0.1
+   ;                                    :alternation 0.45
+   ;                                    :uniform-mutation 0.45}
+   :alternation-rate 0.05
+   :uniform-mutation-rate 0.05
    :alignment-deviation 10
    :parent-selection :lexicase
    :print-history false
