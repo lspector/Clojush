@@ -245,6 +245,7 @@
       :ifs (println "IFS-error:" (:weighted-error best))
       nil)
     (when print-history (println "History:" (not-lazy (:history best))))
+    (println "Genome size:" (count (:genome best)))
     (println "Size:" (count-points (:program best)))
     (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program best)) (count-points (:program best))))) ;Number of (open) parens / points
     (println "--- Population Statistics ---")
@@ -261,6 +262,9 @@
     (when print-errors (println "Error minima by case:"
                                 (apply map (fn [& args] (apply min args))
                                        (map :errors population))))
+    (println "Average genome size in population (length):"
+             (*' 1.0 (/ (reduce +' (map count (map :genome sorted)))
+                        (count population))))
     (println "Average program size in population (points):"
              (*' 1.0 (/ (reduce +' (map count-points (map :program sorted)))
                         (count population))))
