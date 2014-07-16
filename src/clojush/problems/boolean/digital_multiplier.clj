@@ -133,11 +133,12 @@
      :max-points-in-initial-program 200
      :evalpush-limit 400
      :epigenetic-markers []
-     :genetic-operator-probabilities {:reproduction 0.05
-                                      :alternation 0.80
-                                      :uniform-mutation 0.15}
-     :parent-selection :tournament
-     :tournament-size 7
+     :genetic-operator-probabilities {[:alternation :uniform-mutation] 1}
+     :alternation-rate 0.01
+     :alignment-deviation 10
+     :uniform-mutation-rate 0.01
+     :uniform-mutation-constant-tweak-rate 0
+     :parent-selection :lexicase
      :report-simplifications 0})
   )
 
