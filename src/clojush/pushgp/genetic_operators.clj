@@ -164,7 +164,7 @@
                             result-genome []]
                        (if (or (>= i (count (if use-s1 s1 s2))) ;; finished current program
                                (> (count result-genome) (* 2 max-points))) ;; runaway growth
-                         (apply list result-genome);; Return
+                         (seq result-genome);; Return, converting back into a sequence
                          (if (< (lrand) alternation-rate)
                            (recur (max 0 (+' i (Math/round (*' alignment-deviation (gaussian-noise-factor)))))
                                   (not use-s1)
