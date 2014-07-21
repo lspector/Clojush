@@ -57,7 +57,9 @@
                                            c))
                                        st)))
         instruction-mutator (fn [token]
-                              (first (random-plush-genome 1 atom-generators argmap)))
+                              (assoc token
+                                     :instruction
+                                     (:instruction (first (random-plush-genome 1 atom-generators argmap)))))
         constant-mutator (fn [token]
                            (let [const (:instruction token)]
                              (if (tag-instruction? const)
