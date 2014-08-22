@@ -1,6 +1,5 @@
 (ns clojush.interpreter
-  (:use [clojush.pushstate]
-        [clojush.globals]
+  (:use [clojush pushstate globals util]
         [clojush.instructions.tag]
         [clojush.experimental.tagged-code-macros]))
 
@@ -112,7 +111,7 @@
     (run-push code state print-steps trace false))
   ([code state print-steps trace save-state-sequence]
     (let [s (if @global-top-level-push-code (push-item code :code state) state)]
-      (let [s (push-item code :exec s)]
+      (let [s (push-item (not-lazy code) :exec s)]
         (when print-steps
           (printf "\nState after 0 steps:\n")
           (state-pretty-print s))
