@@ -140,24 +140,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; alternation
 
-(defn remove-alternation-padding
-  "Removes instances of 'alternation-padding from genome."
-  [genome]
-  (remove #{'alternation-padding} genome))
-
 (defn alternation
   "Uniformly alternates between the two parents using a similar method to that
    used in ULTRA."
   [parent1 parent2 {:keys [alternation-rate alignment-deviation
                            max-points maintain-ancestors] :as argmap}]
-  (let [g1 (:genome parent1)
-        g2 (:genome parent2)
-        s1 g1 #_(vec (if (>= (count g1) (count g2))
-                      g1
-                      (concat g1 (repeat (- (count g2) (count g1)) 'alternation-padding))))
-        s2 g2 #_(vec (if (>= (count g2) (count g1))
-                      g2
-                      (concat g2 (repeat (- (count g1) (count g2)) 'alternation-padding))))
+  (let [s1 (:genome parent1)
+        s2 (:genome parent2)
         new-genome (remove-alternation-padding
                      (loop [i 0
                             use-s1 (lrand-nth [true false])
