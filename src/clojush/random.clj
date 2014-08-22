@@ -71,9 +71,9 @@
   "Returns a random Plush genome containing the given number of points."
   [points atom-generators argmap]
   (repeatedly points
-              (partial random-plush-instruction-map
-                       atom-generators
-                       argmap)))
+              #(random-plush-instruction-map
+                 atom-generators
+                 argmap)))
 
 (defn random-plush-genome
   "Returns a random Plush genome with size limited by max-points."

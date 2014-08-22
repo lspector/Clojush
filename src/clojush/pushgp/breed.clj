@@ -8,6 +8,8 @@
 (def genetic-operators
   {:reproduction {:fn reproduction :parents 1}
    :alternation {:fn alternation :parents 2}
+   :two-point-crossover {:fn two-point-crossover :parents 2}
+   :uniform-crossover {:fn uniform-crossover :parents 2}
    :uniform-mutation {:fn uniform-mutation :parents 1}
    :uniform-close-mutation {:fn uniform-close-mutation :parents 1}
    :uniform-silence-mutation {:fn uniform-silence-mutation :parents 1}

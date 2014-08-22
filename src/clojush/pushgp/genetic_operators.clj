@@ -165,3 +165,55 @@
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; two-point crossover
+(defn two-point-crossover
+  "Crossover of two parents. Each parent will have two points randomly selected, and
+   the code between the two points in the first parent will be replaced by the
+   code between the two points in the second parent."
+  [parent1 parent2 {:keys [maintain-ancestors] :as argmap}]
+  (let [genome1 (:genome parent1)
+        genome2 (:genome parent2)
+        p1-points (sort (repeatedly 2 #(lrand-int (inc (count genome1)))))
+        p2-points (sort (repeatedly 2 #(lrand-int (inc (count genome2)))))
+        new-genome (concat (take (first p1-points) genome1)
+                           (drop (first p2-points) (take (second p2-points) genome2))
+                           (drop (second p1-points) genome1))]
+    (make-individual :genome new-genome
+                     :history (:history parent1)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome parent1) (:ancestors parent1))
+                                  (:ancestors parent1)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; traditional uniform crossover from GAs
+
+(defn remove-uniform-padding
+  "Removes instances of 'uniform-padding from genome."
+  [genome]
+  (remove #{'uniform-padding} genome))
+
+(defn uniform-crossover
+  "Uniform crossover of two parents. At each index in the child, an instruction
+   will be taken from one of the two parents at random."
+  [parent1 parent2 {:keys [maintain-ancestors] :as argmap}]
+  (if (> (count (:genome parent1)) (count (:genome parent2)))
+    (recur parent2 parent1 argmap)
+    (let [short-genome (:genome parent1)
+          long-genome (:genome parent2)
+          short-genome-lengthened (concat short-genome
+                                          (repeat (- (count long-genome) (count short-genome))
+                                                  'uniform-padding))
+          new-genome (remove-uniform-padding
+                       (map (fn [x1 x2]
+                              (if (< (lrand) 0.5)
+                                x1
+                                x2))
+                            short-genome-lengthened
+                            long-genome))]
+      (make-individual :genome new-genome
+                       :history (:history parent1)
+                       :ancestors (if maintain-ancestors
+                                    (cons (:genome parent1) (:ancestors parent1))
+                                    (:ancestors parent1))))))
