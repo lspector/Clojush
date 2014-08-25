@@ -236,29 +236,36 @@
       ([program data-cases] ;; data-cases should be :train or :test
         (the-actual-wc-error-function program data-cases false))
       ([program data-cases print-outputs]
-        (flatten
-          (doall
-            (for [[[in-float in-int] out-float] (case data-cases
-                                                             :train train-cases
-                                                             :test test-cases
-                                                             [])]
-              (let [final-state (run-push program
-                                          (->> (make-push-state)
-                                            (push-item in-int :auxiliary)
-                                            (push-item in-float :auxiliary)
-                                            (push-item "" :auxiliary)))
-                    printed-result (stack-ref :auxiliary 0 final-state)]
-                (when print-outputs
-                  (println (format "Correct output: %-19s | Program output: %-19s" (str out-float) printed-result)))
-                ; Each test case results in two error values:
-                ;   1. Numeric difference between correct output and the printed
-                ;      output read into a float; if such a conversion fails, the
-                ;      error is a penalty of 1000.
-                ;   2. Levenstein distance between printed output and correct output as strings
-                (vector ((if (= :lexicase @global-parent-selection) #(round (* 1.0E4 %)) identity) ; If we're using lexicase, multiply by 10^4 and round
-                          (try (min 1000.0 (abs (- out-float (Double/parseDouble printed-result))))
-                            (catch Exception e 1000.0)))
-                        (levenshtein-distance printed-result (str out-float))))))))))))
+        (let [behavior (atom '())
+              errors (flatten
+                       (doall
+                         (for [[[in-float in-int] out-float] (case data-cases
+                                                                          :train train-cases
+                                                                          :test test-cases
+                                                                          [])]
+                           (let [final-state (run-push program
+                                                       (->> (make-push-state)
+                                                         (push-item in-int :auxiliary)
+                                                         (push-item in-float :auxiliary)
+                                                         (push-item "" :auxiliary)))
+                                 printed-result (stack-ref :auxiliary 0 final-state)]
+                             (when print-outputs
+                               (println (format "Correct output: %-19s | Program output: %-19s" (str out-float) printed-result)))
+                             ; Record the behavior
+                             (when @global-print-behavioral-diversity
+                               (swap! behavior conj printed-result))
+                             ; Each test case results in two error values:
+                             ;   1. Numeric difference between correct output and the printed
+                             ;      output read into a float; if such a conversion fails, the
+                             ;      error is a penalty of 1000.
+                             ;   2. Levenstein distance between printed output and correct output as strings
+                             (vector ((if (= :lexicase @global-parent-selection) #(round (* 1.0E4 %)) identity) ; If we're using lexicase, multiply by 10^4 and round
+                                       (try (min 1000.0 (abs (- out-float (Double/parseDouble printed-result))))
+                                         (catch Exception e 1000.0)))
+                                     (levenshtein-distance printed-result (str out-float)))))))]
+          (when @global-print-behavioral-diversity
+            (swap! population-behaviors conj @behavior))
+          errors))))))
 
 (defn num-io-report
   "Custom generational report."
@@ -300,6 +307,7 @@
    :alignment-deviation 5
    :uniform-mutation-rate 0.01
    :problem-specific-report num-io-report
+   :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 1000
