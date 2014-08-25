@@ -278,7 +278,10 @@
     (println "Test total error for best:" best-total-test-error)
     (println (format "Test mean error for best: %.5f" (double (/ best-total-test-error (count best-test-errors)))))
     (when (<= (:total-error best) 1.0E-4)
-      (println "Test errors for best:" best-test-errors))
+      (doseq [[i [num-error lev-dist]] (map vector
+                                            (range)
+                                            (partition 2 best-test-errors))]
+        (println (format "Test Case  %3d | Numeric Error: %19.14f | Levenshtein Distance: %d" i (float num-error) lev-dist))))
     (println ";;------------------------------")
     (println "Outputs of best individual on training cases:")
     (error-function best-program :train true)
