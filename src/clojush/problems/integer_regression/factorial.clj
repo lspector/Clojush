@@ -4,7 +4,7 @@
 
 (ns clojush.problems.integer-regression.factorial
   (:use [clojush.pushgp.pushgp]
-        [clojush pushstate interpreter]
+        [clojush pushstate interpreter globals]
         [clojure.math.numeric-tower]))
 
 (define-registered 
@@ -21,16 +21,22 @@
 
 (def argmap
   {:error-function (fn [program]
-                     (doall
-                       (for [input (range 1 11)]
-                         (let [state (run-push program
-                                               (push-item input :auxiliary
-                                                          (push-item input :integer
-                                                                     (make-push-state))))
-                               top-int (top-item :integer state)]
-                           (if (number? top-int)
-                             (abs (- top-int (factorial input)))
-                             1000000000))))) ;; big penalty, since errors can be big
+                     (let [behavior (atom '())
+                           errors (doall
+                                    (for [input (range 1 11)]
+                                      (let [state (run-push program
+                                                            (push-item input :auxiliary
+                                                                       (push-item input :integer
+                                                                                  (make-push-state))))
+                                            top-int (top-item :integer state)]
+                                        (when @global-print-behavioral-diversity
+                                          (swap! behavior conj top-int))
+                                        (if (number? top-int)
+                                          (abs (- top-int (factorial input)))
+                                          1000000000))))] ;; big penalty, since errors can be big
+                       (when @global-print-behavioral-diversity
+                         (swap! population-behaviors conj @behavior))
+                       errors))
    :atom-generators '(0
                        1
                        in

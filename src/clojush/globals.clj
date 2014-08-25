@@ -34,6 +34,7 @@
 (def timing-map (atom {:initialization 0 :reproduction 0 :report 0 :fitness 0 :other 0}))  ;; Used for timing of different parts of pushgp
 (def solution-rates (atom (repeat 0))) ;; Used in historically-assessed hardness
 (def elitegroups (atom ())) ;; Used for elitegroup lexicase selection (will only work if lexicase-selection is off)
+(def population-behaviors (atom ())) ;; Used to store the behaviors of the population for use in tracking behavioral diversity
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The globals below may be reset by arguments to pushgp
@@ -50,3 +51,6 @@
 (def global-evalpush-limit (atom 150)) ;; The number of Push instructions that can be evaluated before stopping evaluation
 (def global-evalpush-time-limit (atom 0)) ;; The time in nanoseconds that a program can evaluate before stopping, 0 means no time limit
 (def global-pop-when-tagging (atom true)) ;; When true, tagging instructions will pop the exec stack when tagging; otherwise, the exec stack is not popped
+
+;; These definitions are used by some problem-specific error functions, and must therefore be global
+(def global-print-behavioral-diversity (atom false)) ;; When true, reports will print the behavioral diversity of the population
