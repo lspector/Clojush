@@ -34,6 +34,7 @@
 (def timing-map (atom {:initialization 0 :reproduction 0 :report 0 :fitness 0 :other 0}))  ;; Used for timing of different parts of pushgp
 (def solution-rates (atom (repeat 0))) ;; Used in historically-assessed hardness
 (def elitegroups (atom ())) ;; Used for elitegroup lexicase selection (will only work if lexicase-selection is off)
+(def population-behaviors (atom ())) ;; Used to store the behaviors of the population for use in tracking behavioral diversity
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The globals below may be reset by arguments to pushgp
@@ -52,4 +53,5 @@
 (def global-pop-when-tagging (atom true)) ;; When true, tagging instructions will pop the exec stack when tagging; otherwise, the exec stack is not popped
 
 ;; These definitions are used by some problem-specific error functions, and must therefore be global
-(def global-parent-selection (atom :lexicse))
+(def global-parent-selection (atom :lexicse)) ;; The type of parent selection used
+(def global-print-behavioral-diversity (atom false)) ;; When true, reports will print the behavioral diversity of the population

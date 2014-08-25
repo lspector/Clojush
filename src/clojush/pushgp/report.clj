@@ -34,6 +34,16 @@
       (println (name param) "=" (random/seed-to-string val))
       (println (name param) "=" val))))
 
+(defn behavioral-diversity
+  "Returns the behavioral diversity of the population, as described by David
+   Jackson in 'Promoting phenotypic diversity in genetic programming'. It is
+   the percent of distinct behavior vectors in the population. Since finite
+   algebras has binary test cases, error vectors are equivalent to behavior
+   vectors."
+  []
+  (float (/ (count (distinct @population-behaviors))
+            (count @population-behaviors))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; log printing (csv and json)
 
@@ -205,7 +215,7 @@
    individual of the generation."
   [population generation
    {:keys [error-function report-simplifications
-           error-threshold max-generations
+           error-threshold max-generations population-size
            print-errors print-history print-cosmos-data print-timings
            problem-specific-report total-error-method
            parent-selection
@@ -275,6 +285,11 @@
       (println "Max copy number of one program:" (apply max (vals frequency-map)))
       (println "Min copy number of one program:" (apply min (vals frequency-map)))
       (println "Median copy number:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
+    (when @global-print-behavioral-diversity
+      (swap! population-behaviors #(take-last population-size %))
+      (println "Behavioral diversity:" (behavioral-diversity))
+      ;(println "Number of behaviors:" (count @population-behaviors))
+      (reset! population-behaviors ()))
     (println "Number of evaluations used so far:" @evaluations-count)
     (println "--- Timings ---")
     (println "Current time:" (System/currentTimeMillis) "milliseconds")
