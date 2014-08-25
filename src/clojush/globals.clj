@@ -50,3 +50,6 @@
 (def global-evalpush-limit (atom 150)) ;; The number of Push instructions that can be evaluated before stopping evaluation
 (def global-evalpush-time-limit (atom 0)) ;; The time in nanoseconds that a program can evaluate before stopping, 0 means no time limit
 (def global-pop-when-tagging (atom true)) ;; When true, tagging instructions will pop the exec stack when tagging; otherwise, the exec stack is not popped
+
+;; These definitions are used by some problem-specific error functions, and must therefore be global
+(def global-parent-selection (atom :lexicse))
