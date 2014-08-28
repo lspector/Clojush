@@ -22,6 +22,7 @@
          'exec_do*times 1
          'exec_y 1
          'return_fromexec 1
+         'print_exec 1
          'environment_new 1
          'zip_fromexec 1
          'zip_replace_fromexec 1
