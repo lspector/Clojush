@@ -19,15 +19,12 @@
 ;; produce it through gaussian mutations, which can happen through uniform
 ;; mutation.
 
-(define-registered in 
-                   (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
-
 (def argmap
   {:error-function (fn [program]
                      (doall
                        (for [input (range -1.0 1.0 0.1)]
                          (let [state (run-push program 
-                                               (push-item input :auxiliary 
+                                               (push-item input :input 
                                                           (push-item input :float
                                                                      (make-push-state))))
                                top-float (top-item :float state)
@@ -43,7 +40,7 @@
                                   float_rot float_swap float_dup float_pop)
                       (list 
                         (fn [] (* 1.0 (- (lrand-int 21) 10)))
-                        'in))
+                        'in1))
    :epigenetic-markers []
    :parent-selection :tournament
    :genetic-operator-probabilities {:alternation 0.5

@@ -13,10 +13,6 @@
         clojure.math.numeric-tower))
 
 ; Make atom generators
-(define-registered
-  in
-  (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
-
 (def change-atom-generators
   (list
     (fn [] (lrand-nth '(0 1 4 5 9 10 24 25)))
@@ -34,7 +30,7 @@
     'integer_mod
     'integer_rot
     'integer_min
-    'in))
+    'in1))
 
 ; Create the error function
 (defn make-change
@@ -65,7 +61,7 @@
       (for [[input output] (change-test-cases number-test-cases)]
         (let [final-state (run-push program
                                     (push-item input
-                                               :auxiliary
+                                               :input
                                                (push-item input
                                                           :integer
                                                           (make-push-state))))

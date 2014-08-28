@@ -11,22 +11,18 @@
 
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of the y=5x^6-2x^5-5x^3+3x^2+5. This uses
-;; the core integer arithmetic instructions and an input instruction that uses the auxiliary stack.
+;; the core integer arithmetic instructions and an input instruction that uses the input stack.
 ;; This example also demonstrates  the use of fitness penalties for abnormally terminating programs.
 ;; This is example 8 from the "trivial geography" chapter, 
 ;; http://hampshire.edu/lspector/pubs/trivial-geography-toappear.pdf
 ;; (Hence the name tg8.)
-
-
-(define-registered in 
-                   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
 (def argmap
   {:error-function (fn [program]
                      (doall
                        (for [input (range 10)]
                          (let [state (run-push program 
-                                               (push-item input :auxiliary 
+                                               (push-item input :input 
                                                           (push-item input :integer
                                                                      (make-push-state))))
                                top-int (top-item :integer state)
@@ -44,7 +40,7 @@
                       '(integer_add integer_sub integer_mult integer_div)
                       (list 
                         (fn [] (- (lrand-int 21) 10))
-                        'in))
+                        'in1))
    :tag-limit 1000
    :epigenetic-markers []
    :parent-selection :tournament

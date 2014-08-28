@@ -37,7 +37,7 @@
 
 (defn in-symbols
   [num-bits]
-  (map #(vector % (symbol (str "in" %))) (range num-bits)))
+  (map #(vector % (symbol (str "in_dm" %))) (range num-bits)))
 
 (defn define-ins
   [num-bits]
@@ -58,7 +58,7 @@
 
 (defn out-symbols
   [num-bits]
-  (map #(vector % (symbol (str "out" %))) (range num-bits)))
+  (map #(vector % (symbol (str "out_dm" %))) (range num-bits)))
 
 (defn define-outs
   [num-bits]

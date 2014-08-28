@@ -8,6 +8,27 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utilities
 
+(def literals
+  (atom
+    {:integer integer?
+     :float float?
+     :string string?
+     :boolean (fn [thing] (or (= thing true) (= thing false)))
+     }))
+
+(defn recognize-literal
+  "If thing is a literal, return its type -- otherwise return false."
+  [thing]
+  (loop [m (seq @literals)]
+    (if-let [[type pred] (first m)]
+      (if (pred thing) type
+        (recur (rest m))))))
+
+;; Add new literals by just assoc'ing on the new predicate. e.g.:
+;; (swap! literals :symbol symbol?)
+
+(def debug-recent-instructions ())
+
 (defn seq-zip
   "Returns a zipper for nested sequences, given a root sequence"
   {:added "1.0"}
