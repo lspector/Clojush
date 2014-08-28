@@ -1,5 +1,6 @@
 (ns clojush.pushstate
-  (:use [clojush.globals]))
+  (:use [clojush.globals]
+        [clojure.set]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; states, stacks, and instructions
