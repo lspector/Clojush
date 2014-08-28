@@ -13,7 +13,8 @@
 
 ;; push-types is the list of stacks used by the Push interpreter
 (def push-types '(:exec :integer :float :code :boolean :string :zip
-                        :tag :auxiliary :return :environment)) ;; Stack types
+                        :input :output :auxiliary
+                        :tag :return :environment)) ;; Stack types
 
 ;; These definitions are used by instructions to keep computed values within limits
 ;; or when using random instructions.

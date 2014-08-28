@@ -4,9 +4,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lookup function to see how many paren groups a function requires
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Lookup function to see how many paren groups a function requires
-
 (def instr-paren-requirements
   (atom {;; Require 3
          'exec_rot 3
@@ -51,7 +48,7 @@
     :else 0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; instructions for all types (except auxiliary and tag)
+;; instructions for all types (except non-data stacks such as auxiliary, tag, input, and output)
 
 (defn popper 
   "Returns a function that takes a state and pops the appropriate stack of the state."
