@@ -32,19 +32,15 @@
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of x^3 - 2x^2 - x (problem 5 from the 
 ;; trivial geography chapter) with minimal integer instructions and an 
-;; input instruction that uses the auxiliary stack.
+;; input instruction that uses the default input stack
 
-;(define-registered 
-;  in 
-;  (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
-;
 ;(def argmap
 ;  {:error-function (fn [program]
 ;                     (doall
 ;                       (for [input (range 10)]
 ;                         (let [state (->> (make-push-state)
 ;                                       (push-item input :integer)
-;                                       (push-item input :auxiliary)
+;                                       (push-item input :input)
 ;                                       (run-push program))
 ;                               top-int (top-item :integer state)]
 ;                           (if (number? top-int)
@@ -54,7 +50,7 @@
 ;                                        input)))
 ;                             1000)))))
 ;   :atom-generators (list (fn [] (lrand-int 10))
-;                          'in
+;                          'in1
 ;                          'integer_div
 ;                          'integer_mult
 ;                          'integer_add
@@ -71,17 +67,13 @@
 ;; whether or not the input is an odd number. There are many ways to compute this
 ;; and PushGP sometimes finds unusual methods.
 
-;(define-registered 
-;  in 
-;  (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
-
 ;(def argmap
 ;  {:use-single-thread true
 ;   :error-function (fn [program]
 ;                     (doall
 ;                       (for [input (range 10)]
 ;                         (let [state (run-push program
-;                                               (push-item input :auxiliary
+;                                               (push-item input :input
 ;                                                          (push-item input :integer
 ;                                                                     (make-push-state))))
 ;                               top-bool (top-item :boolean state)]
@@ -90,7 +82,7 @@
 ;                             1000)))))
 ;   :atom-generators (concat (registered-nonrandom)
 ;                            (list (fn [] (lrand-int 100))
-;                                  'in))
+;                                  'in1))
 ;   :parent-selection :tournament
 ;   :genetic-operator-probabilities {:alternation 0.5
 ;                                     :uniform-mutation 0.5}

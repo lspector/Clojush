@@ -45,10 +45,6 @@
         (string-char-counts-difference (.substring s1 1 (count s1)) remove-from-s2)))))
       
 
-(define-registered 
-  in 
-  (fn [state] (push-item (stack-ref :auxiliary 0 state) :string state)))
-
 ; This is a solution to the string GP problem
 #_(println (run-push '(string_dup string_length 2 integer_sub string_take string_dup string_concat)
                      (push-item "abcde" :string (make-push-state))))
@@ -68,7 +64,7 @@
                                            "GallopTrotCanter"
                                            "Quinona")]
                               (let [final-state (run-push program 
-                                                          (push-item input :auxiliary 
+                                                          (push-item input :input 
                                                                      (push-item input :string 
                                                                                 (make-push-state))))
                                     top-string (top-item :string final-state)
@@ -78,7 +74,7 @@
                                   1000
                                   (+ (string-difference top-string desired-output)
                                      (string-char-counts-difference top-string desired-output)))))))
-        :atom-generators (list 'in
+        :atom-generators (list 'in1
                                'string_length
                                'string_take
                                'string_concat

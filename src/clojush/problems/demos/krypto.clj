@@ -12,9 +12,6 @@
 ;; See http://en.wikipedia.org/wiki/Krypto_(game)
 ;; Might produce solutions that rely on truncation in integer division.
 
-(define-registered in 
-                   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
-
 (def deck (shuffle (vec (concat ;; deck with right number of each card
                                 (take 3 (repeat 1))
                                 (take 3 (repeat 2))

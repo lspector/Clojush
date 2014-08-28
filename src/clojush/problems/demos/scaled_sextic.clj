@@ -17,10 +17,6 @@
 ;; the call to pushgp to see how the scaling information can be extracted to post-process the 
 ;; outputs of an evolved solution to get the actual outputs.
 
-(define-registered 
-  in 
-  (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
-
 (defn sextic-scaled-error-function
   ([program]
     (sextic-scaled-error-function program false))
@@ -28,7 +24,7 @@
     (let [inputs (range -1.0 1.0 0.1)
           outputs (doall (map #(top-item :float 
                                          (run-push program
-                                                   (push-item % :auxiliary
+                                                   (push-item % :input
                                                               (push-item % :float
                                                                          (make-push-state)))))
                               inputs))
@@ -46,7 +42,7 @@
                                   float_rot float_swap float_dup float_pop)
                       (list 
                         (fn [] (- (lrand 20.0) 10))
-                        'in))
+                        'in1))
    :population-size 10000
    :epigenetic-markers []
    :parent-selection :tournament
