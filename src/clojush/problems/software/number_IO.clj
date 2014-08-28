@@ -72,41 +72,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Define new instructions
-(define-registered
-  in1
-  (fn [state] (push-item (stack-ref :auxiliary 1 state) :float state)))
-  
-(define-registered
-  in2
-  (fn [state] (push-item (stack-ref :auxiliary 2 state) :integer state)))
-
-(define-registered
-  print_integer
-  (fn [state]
-    (if (empty? (:integer state))
-      state
-      (let [top-int (top-item :integer state)]
-        (if (< max-string-length (count (str (stack-ref :auxiliary 0 state) top-int)))
-          state
-          (stack-assoc (str (stack-ref :auxiliary 0 state) top-int)
-                       :auxiliary
-                       0
-                       (pop-item :integer state)))))))
-
-(define-registered
-  print_float
-  (fn [state]
-    (if (empty? (:float state))
-      state
-      (let [top-float (top-item :float state)]
-        (if (< max-string-length (count (str (stack-ref :auxiliary 0 state) top-float)))
-          state
-          (stack-assoc (str (stack-ref :auxiliary 0 state) top-float)
-                       :auxiliary
-                       0
-                       (pop-item :float state)))))))
-
 ; Atom generators
 (def num-io-atom-generators
   (list
@@ -119,7 +84,7 @@
     'in2
     'print_float
     'print_integer
-    ;;; end problem-specific instructions
+    ;;; end IO instructions
     'float_rot
     'float_yank
     'float_sin
@@ -245,10 +210,10 @@
                                                                           [])]
                            (let [final-state (run-push program
                                                        (->> (make-push-state)
-                                                         (push-item in-int :auxiliary)
-                                                         (push-item in-float :auxiliary)
-                                                         (push-item "" :auxiliary)))
-                                 printed-result (stack-ref :auxiliary 0 final-state)]
+                                                         (push-item in-int :input)
+                                                         (push-item in-float :input)
+                                                         (push-item "" :output)))
+                                 printed-result (stack-ref :output 0 final-state)]
                              (when print-outputs
                                (println (format "Correct output: %-19s | Program output: %-19s" (str out-float) printed-result)))
                              ; Record the behavior
