@@ -19,75 +19,17 @@
 
 ; Atom generators
 (def num-io-atom-generators
-  (list
-    (fn [] (- (lrand-int 201) 100))
-    (fn [] (- (* (lrand) 200) 100.0))
-    (tag-instruction-erc [:float :integer] 1000)
-    (tagged-instruction-erc 1000)
-    ;;; end ERCs
-    'in1
-    'in2
-    'print_float
-    'print_integer
-    ;;; end IO instructions
-    'float_rot
-    'float_yank
-    'float_sin
-    'float_frominteger
-    'float_cos
-    'float_stackdepth
-    'float_swap
-    'float_div
-    'float_shove
-    'float_sub
-    'float_yankdup
-    'float_add
-    'float_tan
-    'float_mult
-    'float_max
-    'float_pop
-    'float_eq
-    'float_min
-    'float_dup
-    'float_mod
-    ;;; end float instructions
-    'integer_add
-    'integer_swap
-    'integer_yank
-    'integer_dup
-    'integer_yankdup
-    'integer_shove
-    'integer_mult
-    'integer_div
-    'integer_max
-    'integer_sub
-    'integer_mod
-    'integer_rot
-    'integer_min
-    'integer_inc
-    'integer_dec
-    'integer_fromfloat
-    'integer_stackdepth
-    ;;; end integer instructions
-;    'exec_y
-;    'exec_pop
-;    'exec_eq
-;    'exec_stackdepth
-;    'exec_rot
-;    'exec_when
-;    'exec_do*times
-;    'exec_do*count
-;    'exec_s
-;    'exec_do*range
-;    'exec_if
-;    'exec_k
-;    'exec_yank
-;    'exec_yankdup
-;    'exec_swap
-;    'exec_dup
-;    'exec_shove
-    ;;; end exec instructions
-    ))
+  (concat (list
+            (fn [] (- (lrand-int 201) 100))
+            (fn [] (- (* (lrand) 200) 100.0))
+            (tag-instruction-erc [:float :integer] 1000)
+            (tagged-instruction-erc 1000)
+            ;;; end ERCs
+            'in1
+            'in2
+            ;;; end input instructions
+            )
+          (registered-for-stacks [:float :integer :print])))
 
 ;; A list of data domains for the number IO problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
