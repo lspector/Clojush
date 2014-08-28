@@ -1,31 +1,10 @@
 (ns clojush.interpreter
   (:use [clojush pushstate globals util]
-        [clojush.instructions.tag]
+        [clojush.instructions tag input-output]
         [clojush.experimental.tagged-code-macros]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; push interpreter
-
-(def literals
-  (atom
-    {:integer integer?
-     :float float?
-     :string string?
-     :boolean (fn [thing] (or (= thing true) (= thing false)))
-     }))
-
-(defn recognize-literal
-  "If thing is a literal, return its type -- otherwise return false."
-  [thing]
-  (loop [m (seq @literals)]
-    (if-let [[type pred] (first m)]
-      (if (pred thing) type
-        (recur (rest m))))))
-
-;; Add new literals by just assoc'ing on the new predicate. e.g.:
-;; (swap! literals :symbol symbol?)
-
-(def debug-recent-instructions ())
 
 (defn execute-instruction
   "Executes a single Push instruction."
@@ -38,6 +17,7 @@
     (let [literal-type (recognize-literal instruction)]
       (cond
         literal-type (push-item instruction literal-type state)
+        (and (symbol? instruction) (re-seq #"in\d+" (name instruction))) (handle-input-instruction instruction state)
         (tag-instruction? instruction) (handle-tag-instruction instruction state)
         (tagged-code-macro? instruction) (handle-tag-code-macro instruction state)
         (contains? @instruction-table instruction) ((instruction @instruction-table) state)
