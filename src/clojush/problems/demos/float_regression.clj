@@ -16,10 +16,6 @@
 ;; trivial geography chapter) with minimal float instructions and an 
 ;; input instruction that uses the auxiliary stack.
 
-(define-registered 
-  in 
-  (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
-
 (def fitness-cases
   (for [input (map float (range 10))]
     [input
@@ -32,7 +28,7 @@
                      (doall
                        (for [[input target] fitness-cases]
                          (let [state (run-push program 
-                                               (push-item input :auxiliary 
+                                               (push-item input :input 
                                                           (push-item input :float 
                                                                      (make-push-state))))
                                top-float (top-item :float state)]
@@ -40,7 +36,7 @@
                              (Math/abs (- top-float target))
                              1000)))))
    :atom-generators (list (fn [] (lrand 10))
-                          'in
+                          'in1
                           'float_div
                           'float_mult
                           'float_add

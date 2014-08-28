@@ -36,7 +36,7 @@
   (let [n (Integer/parseInt (second (first (re-seq #"in(\d+)" (name instr)))))]
     (if (or (> n (count (:input state)))
             (< n 1))
-      (throw (Exception. (str "Undefined instruction: " (pr-str instr))))
+      (throw (Exception. (str "Undefined instruction: " (pr-str instr) "\nNOTE: Likely not same number of items on input stack as input instructions.")))
       (let [item (stack-ref :input (dec n) state)
             literal-type (recognize-literal item)]
         (push-item item literal-type state)))))

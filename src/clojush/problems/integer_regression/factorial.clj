@@ -7,10 +7,6 @@
         [clojush pushstate interpreter globals]
         [clojure.math.numeric-tower]))
 
-(define-registered 
-  in 
-  (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
-
 (defn factorial 
   "Returns the factorial of n. Just used to set up fitness cases here, so
    efficiency isn't a concern."
@@ -25,7 +21,7 @@
                            errors (doall
                                     (for [input (range 1 11)]
                                       (let [state (run-push program
-                                                            (push-item input :auxiliary
+                                                            (push-item input :input
                                                                        (push-item input :integer
                                                                                   (make-push-state))))
                                             top-int (top-item :integer state)]
@@ -39,7 +35,7 @@
                        errors))
    :atom-generators '(0
                        1
-                       in
+                       in1
                        boolean_and
                        boolean_dup
                        boolean_eq

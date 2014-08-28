@@ -11,19 +11,16 @@
 
 ;;;;;;;;;;;;
 ;; Floating point symbolic regression of the "sextic polynomial" y=x^6-2x^4+x^2. This uses
-;; the core float arithmetic instructions and an input instruction that uses the auxiliary stack.
+;; the core float arithmetic instructions and an input instruction that uses the input stack.
 ;; This example also demonstrates  the use of fitness penalties for abnormally terminating programs.
 ;; It also uses squared errors in the error function and a non-zero error threshold.
-
-(define-registered in 
-                   (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
 
 (def argmap
   {:error-function (fn [program]
                      (doall
                        (for [input (range -1.0 1.0 0.1)]
                          (let [state (run-push program 
-                                               (push-item input :auxiliary 
+                                               (push-item input :input 
                                                           (push-item input :float
                                                                      (make-push-state))))
                                top-float (top-item :float state)
@@ -42,7 +39,7 @@
                                   float_rot float_swap float_dup float_pop)
                       (list 
                         (fn [] (* 1.0 (- (lrand-int 21) 10)))
-                        'in))
+                        'in1))
    :population-size 10000
    :epigenetic-markers []
    :parent-selection :tournament
