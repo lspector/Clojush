@@ -1,16 +1,13 @@
-;; number_IO.clj
+;; median.clj
 ;; Tom Helmuth, thelmuth@cs.umass.edu
 ;;
-;; Problem Source: iJava (http://ijava.cs.umass.edu/)
+;; Problem Source: Program Repair Benchmark Paper (add citation later)
 ;;
-;; This problem file defines the following problem:
-;; There are two inputs, a float and an int. The program must read them in,
-;; find their sum as a float, and print the result as a float.
+;; Program must inputs 3 integers, and return their median.
 ;;
-;; NOTE: input stack: in1 (float), in2 (int)
-;;       output stack: printed output
+;; input stack has the 3 integers
 
-(ns clojush.problems.software.number-IO
+(ns clojush.problems.software.median
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
