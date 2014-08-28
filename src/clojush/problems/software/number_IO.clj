@@ -81,12 +81,12 @@
       (doseq [[i [[in-float in-int] out]] (map vector (range) train-cases)]
         (println (format "Train Case %3d | Float %18.14f | Int %4d | Out %19.14f" i in-float in-int out)))
       (doseq [[i [[in-float in-int] out]] (map vector (range) test-cases)]
-        (println (format "Test Case  %3d | Float %18.14f | Int %4d | Out %19.14f" i in-float in-int out)))
-    (fn the-actual-wc-error-function
+        (println (format "Test Case  %3d | Float %18.14f | Int %4d | Out %19.14f" i in-float in-int out))))
+    (fn the-actual-num-io-error-function
       ([program]
-        (the-actual-wc-error-function program :train))
+        (the-actual-num-io-error-function program :train))
       ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-wc-error-function program data-cases false))
+        (the-actual-num-io-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
               errors (flatten
@@ -117,7 +117,7 @@
                                      (levenshtein-distance printed-result (str out-float)))))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
-          errors))))))
+          errors)))))
 
 (defn num-io-report
   "Custom generational report."

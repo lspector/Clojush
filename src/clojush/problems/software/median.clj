@@ -15,26 +15,29 @@
         ))
 
 ; Atom generators
-(def num-io-atom-generators
+(def median-atom-generators
   (concat (list
             (fn [] (- (lrand-int 201) 100))
-            (fn [] (- (* (lrand) 200) 100.0))
-            (tag-instruction-erc [:float :integer] 1000)
+            (tag-instruction-erc [:exec :integer :boolean] 1000)
             (tagged-instruction-erc 1000)
             ;;; end ERCs
             'in1
             'in2
+            'in3
             ;;; end input instructions
             )
-          (registered-for-stacks [:float :integer])))
+          (registered-for-stacks [:integer :boolean :exec :print])))
 
-;; A list of data domains for the number IO problem. Each domain is a vector containing
+;; A list of data domains for the median problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
 ;; should be used as training and testing cases respectively. Each "set" of
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
-(def num-io-data-domains
-  [[(fn [] (vector (- (* (lrand) 200) 100.0) (- (lrand-int 201) 100))) 25 1000] ;; Each input is a float and an int, both from range [-100,100]
+(def median-data-domains
+  [[(fn [] (repeatedly 3 #(- (lrand-int 201) 100))) 60 500] ;; Each input includes 3 integers in range [-100,100]
+   [(fn [] (repeat 3 (- (lrand-int 201) 100))) 10 100] ;; Edge cases where all are the same
+   [(fn [] (shuffle (conj (repeat 2 (- (lrand-int 201) 100))
+                          (- (lrand-int 201) 100)))) 30 300] ;; Edge cases where two of three are the same
    ])
 
 (defn test-and-train-data-from-domains
@@ -55,85 +58,80 @@
                                         (take n-test (shuffle input-set))))))
                           domains)))
 
-;;Can make number-IO test data like this:
-;(test-and-train-data-from-domains num-io-data-domains)
+;;Can make median test data like this:
+;(test-and-train-data-from-domains median-data-domains)
 
 ; Helper function for error function
-(defn num-io-test-cases
+(defn median-test-cases
   "Takes a sequence of inputs and gives IO test cases of the form
-   [[float-input int-input] output]."
+   [[input1 input2 input3] output]."
   [inputs]
   (map #(vector %
-                (apply + %))
+                (second (sort %)))
        inputs))
 
 ; Define error function. For now, each run uses different random inputs
-(defn num-io-error-function
-  "Returns the error function for the number IO problem. Takes as
-   input number IO data domains."
+(defn median-error-function
+  "Returns the error function for the median problem. Takes as
+   input median data domains."
   [data-domains]
-  (let [[train-cases test-cases] (map num-io-test-cases
+  (let [[train-cases test-cases] (map median-test-cases
                                       (test-and-train-data-from-domains data-domains))]
     (when true ;; Change to false to not print test cases
-      (doseq [[i [[in-float in-int] out]] (map vector (range) train-cases)]
-        (println (format "Train Case %3d | Float %18.14f | Int %4d | Out %19.14f" i in-float in-int out)))
-      (doseq [[i [[in-float in-int] out]] (map vector (range) test-cases)]
-        (println (format "Test Case  %3d | Float %18.14f | Int %4d | Out %19.14f" i in-float in-int out)))
-    (fn the-actual-wc-error-function
+      (doseq [[i [[input1 input2 input3] out]] (map vector (range) train-cases)]
+        (println (format "Train Case %3d | In1 %4d | In2 %4d | In3 %4d | Out %4d" i input1 input2 input3 out)))
+      (doseq [[i [[input1 input2 input3] out]] (map vector (range) test-cases)]
+        (println (format "Test Case %3d | In1 %4d | In2 %4d | In3 %4d | Out %4d" i input1 input2 input3 out))))
+    (fn the-actual-median-error-function
       ([program]
-        (the-actual-wc-error-function program :train))
+        (the-actual-median-error-function program :train))
       ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-wc-error-function program data-cases false))
+        (the-actual-median-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
-              errors (flatten
-                       (doall
-                         (for [[[in-float in-int] out-float] (case data-cases
-                                                                          :train train-cases
-                                                                          :test test-cases
-                                                                          [])]
-                           (let [final-state (run-push program
-                                                       (->> (make-push-state)
-                                                         (push-item in-int :input)
-                                                         (push-item in-float :input)
-                                                         (push-item "" :output)))
-                                 printed-result (stack-ref :output 0 final-state)]
-                             (when print-outputs
-                               (println (format "Correct output: %-19s | Program output: %-19s" (str out-float) printed-result)))
-                             ; Record the behavior
-                             (when @global-print-behavioral-diversity
-                               (swap! behavior conj printed-result))
-                             ; Each test case results in two error values:
-                             ;   1. Numeric difference between correct output and the printed
-                             ;      output read into a float; if such a conversion fails, the
-                             ;      error is a penalty of 1000.
-                             ;   2. Levenstein distance between printed output and correct output as strings
-                             (vector ((if (= :lexicase @global-parent-selection) #(round (* 1.0E4 %)) identity) ; If we're using lexicase, multiply by 10^4 and round
-                                       (try (min 1000.0 (abs (- out-float (Double/parseDouble printed-result))))
-                                         (catch Exception e 1000.0)))
-                                     (levenshtein-distance printed-result (str out-float)))))))]
+              errors (doall
+                       (for [[[input1 input2 input3] out-int] (case data-cases
+                                                                           :train train-cases
+                                                                           :test test-cases
+                                                                           [])]
+                         (let [final-state (run-push program
+                                                     (->> (make-push-state)
+                                                       (push-item input3 :input)
+                                                       (push-item input2 :input)
+                                                       (push-item input1 :input)
+                                                       (push-item "" :output)))
+                               printed-result (stack-ref :output 0 final-state)]
+                           (when print-outputs
+                             (println (format "Correct output: %-19s | Program output: %-19s" (str out-int) printed-result)))
+                           ; Record the behavior
+                           (when @global-print-behavioral-diversity
+                             (swap! behavior conj printed-result))
+                           ; Each test case is either right or wrong
+                           (if (= printed-result (str out-int))
+                             0
+                             1))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
-          errors))))))
+          errors)))))
 
-(defn num-io-report
+(defn median-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
   (let [best-program (not-lazy (:program best))
         best-test-errors (error-function best-program :test)
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
-    (printf ";; -*- Number IO problem report - generation %s\n" generation)(flush)
+    (printf ";; -*- Median problem report - generation %s\n" generation)(flush)
     (println "Test total error for best:" best-total-test-error)
     (println (format "Test mean error for best: %.5f" (double (/ best-total-test-error (count best-test-errors)))))
-    (when (<= (:total-error best) 1.0E-4)
-      (doseq [[i [num-error lev-dist]] (map vector
-                                            (range)
-                                            (partition 2 best-test-errors))]
-        (println (format "Test Case  %3d | Numeric Error: %19.14f | Levenshtein Distance: %d" i (float num-error) lev-dist))))
+    (when (zero? (:total-error best))
+      (doseq [[i error] (map vector
+                             (range)
+                             best-test-errors)]
+        (println (format "Test Case  %3d | Error: %d" i error))))
     (println ";;------------------------------")
-    (println "Outputs of best individual on training cases:")
-    (error-function best-program :train true)
+    ;(println "Outputs of best individual on training cases:")
+    ;(error-function best-program :train true)
     (println ";;******************************")
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
@@ -142,26 +140,26 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (num-io-error-function num-io-data-domains)
-   :atom-generators num-io-atom-generators
+  {:error-function (median-error-function median-data-domains)
+   :atom-generators median-atom-generators
    :max-points 200
    :max-points-in-initial-program 100
    :evalpush-limit 200
    :population-size 1000
    :max-generations 200
    :parent-selection :lexicase
-   :epigenetic-markers []
-   :genetic-operator-probabilities {:alternation 0.3
+   :epigenetic-markers [:close]
+   :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
+                                    :uniform-close-mutation 0.1
                                     [:alternation :uniform-mutation] 0.5
                                     }
    :alternation-rate 0.01
    :alignment-deviation 5
    :uniform-mutation-rate 0.01
-   :problem-specific-report num-io-report
+   :problem-specific-report median-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 1000
-   :error-threshold 1.0E-4
    })
