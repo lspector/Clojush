@@ -109,7 +109,7 @@
   "Takes an individual and calculates and assigns its IFS based on the summed
    error across each test case."
   [ind summed-reward-on-test-cases]
-  (let [ifs-reward (apply +' (map /
+  (let [ifs-reward (apply +' (map #(if (zero? %2) 1.0 (/ %1 %2))
                                   (map #(- 1.0 %) (:errors ind)) ; Should be dividing REWARD by summed (not ERRORS)
                                   summed-reward-on-test-cases))
         ifs-er (cond
@@ -130,12 +130,12 @@
    assign an implicit fitness sharing error to each individual. Assumes errors
    are in range [0,1] with 0 being a solution."
   [pop-agents {:keys [use-single-thread]}]
-  (println "Calculating implicit fitness sharing errors...")
+  (println "\nCalculating implicit fitness sharing errors...")
   (let [pop (map deref pop-agents)
         summed-reward-on-test-cases (map (fn [list-of-errors]
                                            (reduce +' (map #(- 1.0 %) list-of-errors)))
                                          (apply map list (map :errors pop)))]
-    (println "\nImplicit fitness sharing reward per test case:")
+    (println "Implicit fitness sharing reward per test case (lower means population performs worse):")
     (println summed-reward-on-test-cases)
     (assert (every? (fn [error] (< -0.0000001 error 1.0000001))
                     (flatten (map :errors pop)))
