@@ -34,10 +34,13 @@
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
 (def median-data-domains
-  [[(fn [] (repeatedly 3 #(- (lrand-int 201) 100))) 60 500] ;; Each input includes 3 integers in range [-100,100]
-   [(fn [] (repeat 3 (- (lrand-int 201) 100))) 10 100] ;; Edge cases where all are the same
+  [[(list [2 6 8] [2 8 6] [6 2 8] [6 8 2] [8 2 6] [8 6 2] ; Permutations of [2 6 8]
+          [-5 0 5] [-5 5 0] [0 -5 5] [0 5 -5] [5 -5 0] [5 0 -5] ; Permutations of [-5 0 5]
+          [23 0 0] [0 23 0] [0 0 23] [-31 0 0] [0 -31 0] [0 0 -31]) 18 0] ; Two zeroes
+   [(fn [] (repeatedly 3 #(- (lrand-int 201) 100))) 52 500] ;; Each input includes 3 integers in range [-100,100]
    [(fn [] (shuffle (conj (repeat 2 (- (lrand-int 201) 100))
-                          (- (lrand-int 201) 100)))) 30 300] ;; Edge cases where two of three are the same
+                          (- (lrand-int 201) 100)))) 20 300] ;; Edge cases where two of three are the same
+   [(fn [] (repeat 3 (- (lrand-int 201) 100))) 10 100] ;; Edge cases where all are the same
    ])
 
 (defn test-and-train-data-from-domains
