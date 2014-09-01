@@ -28,8 +28,8 @@
                                    (list 
                                      (fn [] (lrand-int 100))
                                      (fn [] (lrand))))
-          :population-size 1000
-          :max-generations 1001
+          :population-size 1000 ;; Number of individuals in the population
+          :max-generations 1001 ;; The maximum number of generations to run GP
           :max-points 50 ;; Maximum size of push programs, as counted by points in the program
           :max-points-in-initial-program 50 ;; Maximum size of initial programs in generation 0
           :evalpush-limit 150 ;; The number of Push instructions that can be evaluated before stopping evaluation
@@ -39,6 +39,13 @@
           ;;----------------------------------------
           ;; Genetic operator probabilities
           ;;----------------------------------------
+          ;; The map supplied to :genetic-operator-probabilities should contain genetic operators
+          ;; that sum to 1.0. All available genetic operators are defined in clojush.pushgp.breed.
+          ;; Along with single operators, pipelines (vectors) containing multiple operators are
+          ;; also allowed, where each operator is applied to the child of the previous operator, along
+          ;; with newly selecting individuals where necessary. If an operator is preceeded by
+          ;; :make-next-operator-revertable, it will only keep the child if it is at least as good as
+          ;; its (first) parent on every test case.
           :genetic-operator-probabilities {:reproduction 0.0
                                            :alternation 0.7
                                            :uniform-mutation 0.1
@@ -70,7 +77,7 @@
           ;;----------------------------------------
           :epigenetic-markers [:close] ;; A vector of the epigenetic markers that should be used in the individuals. Implemented options include: :close, :silent
           :close-probabilities [0.772 0.206 0.021 0.001] ;; A vector of the probabilities for the number of parens ending at that position. See random-closes in clojush.random          
-          :silent-instruction-probability 0.2
+          :silent-instruction-probability 0.2 ;; If :silent is used as an epigenetic-marker, this is the probability of random instructions having :silent be true
           ;;
           ;;----------------------------------------
           ;; Arguments related to parent selection
