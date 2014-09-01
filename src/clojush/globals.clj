@@ -13,7 +13,8 @@
 
 ;; push-types is the list of stacks used by the Push interpreter
 (def push-types '(:exec :integer :float :code :boolean :string :zip
-                        :tag :auxiliary :return :environment)) ;; Stack types
+                        :input :output :auxiliary
+                        :tag :return :environment)) ;; Stack types
 
 ;; These definitions are used by instructions to keep computed values within limits
 ;; or when using random instructions.
@@ -26,13 +27,15 @@
 (def max-random-float 1.0) ;; The maximum value created by the float_rand instruction
 (def min-random-string-length 1) ;; The minimum length of string created by the string_rand instruction
 (def max-random-string-length 10) ;; The maximum length of string created by the string_rand instruction
-(def max-points-in-random-expressions 50) ;; The maximum length of code created by the string_rand instruction
+(def max-points-in-random-expressions 50) ;; The maximum length of code created by the code_rand instruction
 
 ;; These atoms are used in different places and are therefore difficult to make fully functional
-(def timer-atom (atom 0)) ;; Used for timing of different parts of pushgp
+(def evaluations-count (atom 0)) ;; Used to count the number of times GP evaluates an individual
+(def timer-atom (atom 0)) ;; Used for timing of different parts of PushGP
 (def timing-map (atom {:initialization 0 :reproduction 0 :report 0 :fitness 0 :other 0}))  ;; Used for timing of different parts of pushgp
-(def solution-rates (atom (repeat 0))) ;; Is used in historically-assessed hardness
-(def elitegroups (atom ())) ;; Is used for elitegroup lexicase selection (will only work if lexicase-selection is off)
+(def solution-rates (atom (repeat 0))) ;; Used in historically-assessed hardness
+(def elitegroups (atom ())) ;; Used for elitegroup lexicase selection (will only work if lexicase-selection is off)
+(def population-behaviors (atom ())) ;; Used to store the behaviors of the population for use in tracking behavioral diversity
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The globals below may be reset by arguments to pushgp
@@ -50,5 +53,5 @@
 (def global-evalpush-time-limit (atom 0)) ;; The time in nanoseconds that a program can evaluate before stopping, 0 means no time limit
 (def global-pop-when-tagging (atom true)) ;; When true, tagging instructions will pop the exec stack when tagging; otherwise, the exec stack is not popped
 
-;; Special defs not used by Push instructions, but still need to be globally def'ed, go here.
-(def global-generate-bushy-random-code (atom false)) ;; When true, random code will be close to being a binary tree
+;; These definitions are used by some problem-specific error functions, and must therefore be global
+(def global-print-behavioral-diversity (atom false)) ;; When true, reports will print the behavioral diversity of the population

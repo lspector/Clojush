@@ -1,32 +1,10 @@
 (ns clojush.interpreter
-  (:use [clojush.pushstate]
-        [clojush.globals]
-        [clojush.instructions.tag]
+  (:use [clojush pushstate globals util]
+        [clojush.instructions tag input-output]
         [clojush.experimental.tagged-code-macros]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; push interpreter
-
-(def literals
-  (atom
-    {:integer integer?
-     :float float?
-     :string string?
-     :boolean (fn [thing] (or (= thing true) (= thing false)))
-     }))
-
-(defn recognize-literal
-  "If thing is a literal, return its type -- otherwise return false."
-  [thing]
-  (loop [m (seq @literals)]
-    (if-let [[type pred] (first m)]
-      (if (pred thing) type
-        (recur (rest m))))))
-
-;; Add new literals by just assoc'ing on the new predicate. e.g.:
-;; (swap! literals :symbol symbol?)
-
-(def debug-recent-instructions ())
 
 (defn execute-instruction
   "Executes a single Push instruction."
@@ -39,13 +17,11 @@
     (let [literal-type (recognize-literal instruction)]
       (cond
         literal-type (push-item instruction literal-type state)
+        (and (symbol? instruction) (re-seq #"in\d+" (name instruction))) (handle-input-instruction instruction state)
         (tag-instruction? instruction) (handle-tag-instruction instruction state)
         (tagged-code-macro? instruction) (handle-tag-code-macro instruction state)
         (contains? @instruction-table instruction) ((instruction @instruction-table) state)
-        :else (do (println "Undefined instruction:" instruction)
-                (binding [*out* *err*]
-                		(println "Undefined instruction:" instruction)
-                		state))))))
+        :else (throw (Exception. (str "Undefined instruction: " (pr-str instruction))))))))
 
 (def saved-state-sequence (atom []))
 
@@ -115,7 +91,7 @@
     (run-push code state print-steps trace false))
   ([code state print-steps trace save-state-sequence]
     (let [s (if @global-top-level-push-code (push-item code :code state) state)]
-      (let [s (push-item code :exec s)]
+      (let [s (push-item (not-lazy code) :exec s)]
         (when print-steps
           (printf "\nState after 0 steps:\n")
           (state-pretty-print s))

@@ -2,8 +2,8 @@
   (:require [clojure.java.io :as io]
             [clj-random.core :as random]
             [clojure.repl :as repl])
-  (:use [clojush globals util pushstate random individual evaluate simplification]
-        [clojush.instructions boolean code common numbers random-instructions string tag zip return]
+  (:use [clojush globals util pushstate random individual evaluate simplification translate]
+        [clojush.instructions boolean code common numbers random-instructions string tag zip return input-output]
         [clojush.pushgp breed parent-selection report]
         [clojush.experimental.decimation]))
 
@@ -17,7 +17,6 @@
           ;;----------------------------------------
           :use-single-thread false ;; When true, Clojush will only use a single thread
           :random-seed (random/generate-mersennetwister-seed) ;; The seed for the random number generator
-          :initial-population nil ;; (MAY BE BROKEN) Can point to a file where an initial population is stored and can be read
           :save-initial-population false ;; When true, saves the initial population
           ;;
           ;;----------------------------------------
@@ -38,54 +37,52 @@
           :reuse-errors true ;; When true, children produced through direct reproduction will not be re-evaluated but will have the error vector of their parent
           ;;
           ;;----------------------------------------
-          ;; Genetic operator probabilities (replication-probability is 1.0 minus the rest)
+          ;; Genetic operator probabilities
           ;;----------------------------------------
-          :reproduction-probability      0.1 ;; Direct reproduction, which makes a direct copy of the parent
-          :mutation-probability          0.4 ;; Subtree mutation, similar to that found in tree-GP
-          :crossover-probability         0.5 ;; Subtree crossover, similar to that found in tree-GP
-          :simplification-probability    0.0 ;; Auto-simplification of the program
-          :ultra-probability             0.0 ;; Uniform Linear Transformation with Repair and Alternation -- a uniform crossover and mutation operator
-          :gaussian-mutation-probability 0.0 ;; Gaussian mutation affects only the float literals in a program by adding Gaussian noise
-          :boolean-gsxover-probability   0.0 ;; Geometric Semantic Crossover -- creates random code that determines which of the two parents to use for each test cases
-          :deletion-mutation-probability 0.0 ;; A mutation operator that deletes random instructions
-          :parentheses-addition-mutation-probability 0.0 ;; Operator that randomly inserts a parentheses pair somewhere in the program
-          :tagging-mutation-probability  0.0 ;; Operator that chooses a piece of code, moves it to beginning of program and tags it, and puts a tagged call in its place
-          :tag-branch-mutation-probability 0.0 ;; Operator that inserts a tag-branch into the program. tag-branches compare two items on a stack and then jump to one of two tags depending on the comparison
+          :genetic-operator-probabilities {:reproduction 0.0
+                                           :alternation 0.7
+                                           :uniform-mutation 0.1
+                                           [:alternation :uniform-mutation] 0.2 ;Somewhat equivalent to normal Push's ULTRA operator
+                                           :uniform-close-mutation 0.0
+                                           :uniform-silence-mutation 0.0
+                                           [:make-next-operator-revertable :uniform-silence-mutation] 0.0 ;Equivalent to a hill-climbing version of uniform-silence-mutation
+                                           }
           ;;
           ;;----------------------------------------
           ;; Arguments related to genetic operators
           ;;----------------------------------------
-          :mutation-max-points 20 ;; The maximum number of points that new code will introduce during mutation
-          :reproduction-simplifications 1 ;; The number of simplification steps that will happen during simplification reproduction
-          :ultra-alternation-rate 0.1 ;; When using ULTRA, how often ULTRA alternates between the parents
-          :ultra-alignment-deviation 1 ;; When using ULTRA, the standard deviation of how far alternation may jump between indices when switching between parents
-          :ultra-mutation-rate 0.1 ;; The probability of each token being mutated during ULTRA
-          :use-ultra-no-paren-mutation false ; If true, ULTRA will use no-paren mutation, which means that parentheses won't be added or deleted during mutation.
-          :ultra-pads-with-empties false ;; If true then ULTRA pads the smaller parent with () and then removes them; if false then this is instead done using the symbol 'ultra-padding.
-          :ultra-mutates-to-parentheses-frequently false ;; If true then when ULTRA mutates the new token will be "(" 1/3 of the time, ")" 1/3 of the time, and something else 1/3 of the time. When false, parentheses are treated like all other possible tokens.
-          :gaussian-mutation-per-number-mutation-probability 0.5 ;; The probability that any given float literal will be affected by a pass of gaussian-mutate
-          :gaussian-mutation-standard-deviation 0.1 ;; The standard deviation of a gaussian-mutated float
-          :boolean-gsxover-new-code-max-points 20 ;; The maximum size of the random code fragment used in boolean-gsxover
-          :tag-branch-mutation-type-instruction-pairs [] ;; A list of types and comparators that can be used by tag-branch-insertion-mutation
+          :alternation-rate 0.01 ;; When using alternation, how often alternates between the parents
+          :alignment-deviation 10 ;; When using alternation, the standard deviation of how far alternation may jump between indices when switching between parents
+          :uniform-mutation-rate 0.01 ;; The probability of each token being mutated during uniform mutation
+          :uniform-mutation-constant-tweak-rate 0.5 ;; The probability of using a constant mutation instead of simply replacing the token with a random instruction during uniform mutation
+          :uniform-mutation-float-gaussian-standard-deviation 1.0 ;; The standard deviation used when tweaking float constants with Gaussian noise
+          :uniform-mutation-int-gaussian-standard-deviation 1 ;; The standard deviation used when tweaking integer constants with Gaussian noise
+          :uniform-mutation-string-char-change-rate 0.1 ;; The probability of each character being changed when doing string constant tweaking
+          :uniform-mutation-tag-gaussian-standard-deviation 100 ;; The standard deviation used when tweaking tag locations with Gaussian noise
+          :uniform-close-mutation-rate 0.1 ;; The probability of each :close being incremented or decremented during uniform close mutation
+          :close-increment-rate 0.2 ;; The probability of making an increment change to :close during uniform close mutation, as opposed to a decrement change
+          :uniform-silence-mutation-rate 0.1 ;; The probability of each :silent being switched during uniform silent mutation
+          :replace-child-that-exceeds-size-limit-with :parent ;; When a child is produced that exceeds the size limit of max-points, this is used to determine what program to return. Options include :parent, :empty, :random
+          :parent-reversion-probability 1.0 ;; The probability of a child being reverted to its parent by a genetic operator that has been made revertable, if the child is not as good as the parent on at least one test case
           ;;
           ;;----------------------------------------
-          ;; Arguments related to node selection (used in mutate, crossover, and tagging-mutate)
+          ;; Epignenetics
           ;;----------------------------------------
-          :node-selection-method :unbiased ;; The node selection method can be :unbiased, :leaf-probability, or :size-tournament
-          :node-selection-leaf-probability 0.1 ;; If the node-selection-method is :leaf-probability, this is the percent of selections that will happen in leaves of the tree
-          :node-selection-tournament-size 2 ;; If node-selection-method is :size-tournament, this is the size of the node selection tournaments
+          :epigenetic-markers [:close] ;; A vector of the epigenetic markers that should be used in the individuals. Implemented options include: :close, :silent
+          :close-probabilities [0.772 0.206 0.021 0.001] ;; A vector of the probabilities for the number of parens ending at that position. See random-closes in clojush.random          
+          :silent-instruction-probability 0.2
           ;;
           ;;----------------------------------------
           ;; Arguments related to parent selection
           ;;----------------------------------------
+          :parent-selection :lexicase ;; The parent selection method. Options include :tournament, :lexicase, :elitegroup-lexicase
           :tournament-size 7 ;; If using tournament selection, the size of the tournaments
+          :total-error-method :sum ;; The method used to compute total error. Options include :sum (standard), :hah (historically-assessed hardness), :rmse (root mean squared error), and :ifs (implicit fitness sharing)
+          :normalization :none ;; The method used to normalize the errors to the range [0,1], with 0 being best. Options include :none (no normalization), :divide-by-max-error (divides by value of argument :max-error), :e-over-e-plus-1 (e/(e+1) = 1 - 1/(e+1))
+          :max-error 1000 ;; If :normalization is set to :max-error, will use this number for normalization
           :trivial-geography-radius 0 ;; If non-zero, this is used as the radius from which to select individuals for tournament or lexicase selection
           :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population size that is retained before breeding. If 0 < decimation-ratio < 1, decimation tournaments will be used to reduce the population to size (* population-size decimation-ratio) before breeding.
           :decimation-tournament-size 2 ;; Size of the decimation tournaments
-          :use-historically-assessed-hardness false ;; When true, total error for tournament selection will depend on historically-assessed hardness
-          :use-rmse false ;; When true, total error for tournament selection will depend on the root mean square error of the error vector
-          :use-lexicase-selection false ;; If true, uses Lexicase Parent Selection (see Spector paper in GECCO-UP 2012 workshop proceedings)
-          :use-elitegroup-lexicase-selection false ;; If true, uses elitegroup lexicase selection, an experimental change to lexicase that thus far is often worse
           ;;
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
@@ -105,10 +102,11 @@
           :print-errors true ;; When true, prints the error vector of the best individual
           :print-history false ;; When true, prints the history of the best individual's ancestors' total errors
           :print-timings false ; If true, report prints how long different parts of evolution have taken during the current run.
+          :print-error-frequencies-by-case false ; If true, print reports of error frequencies by case each generation
           :print-cosmos-data false ; If true, report prints COSMOS data each generation.
           :maintain-ancestors false  ; If true, save all ancestors in each individual (costly)
           :print-ancestors-of-solution false ; If true, final report prints the ancestors of the solution. Requires :maintain-ancestors to be true.
-          :print-error-frequencies-by-case false ; If true, print reports of error frequencies by case each generation
+          :print-behavioral-diversity false ; If true, prints the behavioral diversity of the population each generation. Note: The error function for the problem must support behavioral diversity. For an example, see wc.clj
           ;;
           ;;----------------------------------------
           ;; Arguments related to printing JSON or CSV logs
@@ -119,12 +117,6 @@
           :json-log-filename "log.json" ;; The file to print JSON log to
           :log-fitnesses-for-all-cases false ;; If true, the CSV and JSON logs will include the fitnesses of each individual on every test case
           :json-log-program-strings false ;; If true, JSON logs will include program strings for each individual
-          ;;
-          ;;----------------------------------------
-          ;; Other arguments
-          ;;----------------------------------------
-          :parent-reversion-probability 0.0 ;; The probability of a child being reverted to its parent if the parent has better fitness or equal fitness and is smaller
-          :generate-bushy-random-code false ;; When true, random code will be "bushy", as in close to a binary tree
           )))
 
 (defn load-push-argmap
@@ -141,37 +133,35 @@
       (throw (Exception. (str "globals.clj definition " gname " has no matching argument in push-argmap. Only such definitions should use the prefix 'global-'."))))))
 
 (defn make-agents-and-rng
-  [{:keys [initial-population use-single-thread population-size
+  [{:keys [use-single-thread population-size
            max-points-in-initial-program atom-generators random-seed
-           save-initial-population]}]
+           save-initial-population]
+    :as argmap}]
   (let [agent-error-handler (fn [agnt except]
                               ;(.printStackTrace except System/out)
                               ;(.printStackTrace except)
                               (repl/pst except 10000)
                               (System/exit 0))
-        ;random-seeds (repeatedly population-size #(random/lrand-bytes (:mersennetwister random/*seed-length*)))];; doesn't ensure unique seeds
         random-seeds (loop [seeds '()]
-                       (let [num-remaining (if initial-population
-                                             (- (count initial-population) (count seeds))
-                                             (- population-size (count seeds)))]
+                       (let [num-remaining (- population-size (count seeds))]
                          (if (pos? num-remaining)
                            (let [new-seeds (repeatedly num-remaining #(random/lrand-bytes (:mersennetwister random/*seed-length*)))]                             
                              (recur (concat seeds (filter (fn [candidate]
                                                             (not (some #(random/=byte-array % candidate)
                                                                        seeds))) new-seeds)))); only add seeds that we do not already have
                            seeds)))]
-    {:pop-agents (if initial-population
-                   (->> (read-string (slurp (str "data/" initial-population)))
-                        (map #(if use-single-thread (atom %) (agent %)))
-                        (vec))
-                   (let [pa (doall (for [_ (range population-size)]
-                                     (make-individual
-                                       :program (random-code max-points-in-initial-program atom-generators))))
-                         f (str "data/" (System/currentTimeMillis) ".ser")]
-                     (when save-initial-population
-                       (io/make-parents f)
-                       (spit f (printable (map individual-string pa))))
-                     (vec (map #(if use-single-thread (atom %) (agent %)) pa))))
+    {:pop-agents (let [pa (doall (for [_ (range population-size)]
+                                   (make-individual
+                                     :genome (random-plush-genome max-points-in-initial-program
+                                                          atom-generators argmap))))
+                       f (str "data/" (System/currentTimeMillis) ".ser")]
+                   (when save-initial-population
+                     (io/make-parents f)
+                     (spit f (printable (map individual-string pa))))
+                   (vec (map #(if use-single-thread
+                                (atom %)
+                                (agent % :error-handler agent-error-handler))
+                             pa)))
      :child-agents (vec (doall (for [_ (range population-size)]
                                  ((if use-single-thread atom agent)
                                       (make-individual)
@@ -187,32 +177,7 @@
                     % evaluate-individual error-function %2 argmap)
               pop-agents
               rand-gens))
-  (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE ;might this need a dorun?
-
-
-;; I feel like the printing should be in the main loop, but i'm just cutting and pasting for now
-(defn parental-reversion
-  [pop-agents generation {:keys [parent-reversion-probability use-single-thread use-rmse
-                                 use-historically-assessed-hardness]}]
-  (if (and (> generation 0) (> parent-reversion-probability 0))
-    (let [err-fn (cond
-                   use-historically-assessed-hardness :hah-error
-                   use-rmse :rms-error
-                   :else :total-error)]
-      (println "Performing parent reversion...")
-      (dorun (map #((if use-single-thread swap! send) 
-                        % 
-                        (fn [i]  
-                          (if (or (< (err-fn i) (err-fn (:parent i)))
-                                  (and (= (err-fn i) (err-fn (:parent i)))
-                                       (< (count-points (:program i))
-                                          (count-points (:program (:parent i)))))
-                                  (> (lrand) parent-reversion-probability))
-                            (assoc i :parent nil)  ;; don't store whole ancestry
-                            (:parent i))))
-                  pop-agents))
-      (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
-      (println "Done performing parent reversion."))))
+  (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
 
 (defn remove-parents
   "Removes value from :parent for each individual in the population. This will
@@ -224,11 +189,6 @@
               pop-agents))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
 
-;; this is a wrapper for calculate-hah-solution-rates, which should itself be changed
-(defn calculate-hah-solution-rates-wrapper 
-  [pop-agents {:keys [use-historically-assessed-hardness error-threshold population-size]}]
-  (calculate-hah-solution-rates use-historically-assessed-hardness pop-agents error-threshold population-size))
-          
 (defn produce-new-offspring
   [pop-agents child-agents rand-gens
    {:keys [decimation-ratio population-size decimation-tournament-size
@@ -255,11 +215,14 @@
 
 (defn check-genetic-operator-probabilities-add-to-one
   [argmap]
-  (let [prob-keywords (map keyword '(reproduction-probability mutation-probability crossover-probability simplification-probability
-                                                              ultra-probability gaussian-mutation-probability boolean-gsxover-probability
-                                                              deletion-mutation-probability parentheses-addition-mutation-probability
-                                                              tagging-mutation-probability tag-branch-mutation-probability))
-        prob-map (select-keys argmap prob-keywords)]
+  (let [prob-map (:genetic-operator-probabilities argmap)]
+    (doseq [gen-op (keys prob-map)]
+      (if (sequential? gen-op)
+        (doseq [g gen-op]
+          (assert (contains? genetic-operators g)
+                  (str "Unrecognized genetic operator: " g " in " gen-op)))
+        (assert (contains? genetic-operators gen-op)
+                (str "Unrecognized genetic operator: " gen-op))))
     (assert (< 0.99999
                (apply + (vals prob-map))
                1.00001)
@@ -267,7 +230,7 @@
                  (clojure.string/replace (str prob-map \newline)
                                          \,
                                          \newline)))))
-  
+
 (defn timer
   "Used to track the time used by different parts of evolution."
   [{:keys [print-timings]} step]
@@ -299,33 +262,34 @@
         ;; Main loop
         (loop [generation 0]
           (println "Processing generation:" generation)
+          (population-translate-plush-to-push pop-agents @push-argmap)
           (timer @push-argmap :reproduction)
           (print "Computing errors... ")
           (compute-errors pop-agents rand-gens @push-argmap)
           (println "Done computing errors.")
           (timer @push-argmap :fitness)
-          ;; possible parent reversion
-          (parental-reversion pop-agents generation @push-argmap)
           ;; stop tracking parents since they aren't used any more
           (remove-parents pop-agents @push-argmap)
           ;; calculate solution rates if necessary for historically-assessed hardness
-          ;; change calculate-hah-solution-rates in the future, to destructure the argmap
-          (calculate-hah-solution-rates-wrapper pop-agents @push-argmap)
-          ;; create global structure to support elitegroup lexicase selection
-          (when (:use-elitegroup-lexicase-selection @push-argmap)
+          (calculate-hah-solution-rates pop-agents @push-argmap)
+          ;; create global structure to support elite group lexicase selection
+          (when (= (:parent-selection @push-argmap) :elitegroup-lexicase)
             (build-elitegroups pop-agents))
+          ;; calculate implicit fitness sharing fitness for population
+          (when (= (:total-error-method @push-argmap) :ifs)
+            (calculate-implicit-fitness-sharing pop-agents @push-argmap))
           (timer @push-argmap :other)
           ;; report and check for success
           (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
-                                                      generation @push-argmap)]
+                                                             generation @push-argmap)]
             (cond (= outcome :failure) (do (printf "\nFAILURE\n")
-                                           (if (:return-simplified-on-failure @push-argmap)
-                                             (auto-simplify best (:error-function @push-argmap) (:final-report-simplifications @push-argmap) true 500)
-                                             (flush)))
+                                         (if (:return-simplified-on-failure @push-argmap)
+                                           (auto-simplify best (:error-function @push-argmap) (:final-report-simplifications @push-argmap) true 500)
+                                           (flush)))
                   (= outcome :continue) (do (timer @push-argmap :report)
-                                            (println "\nProducing offspring...")
-                                            (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
-                                            (println "Installing next generation...")
-                                            (install-next-generation pop-agents child-agents @push-argmap)
-                                            (recur (inc generation)))
+                                          (println "\nProducing offspring...")
+                                          (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
+                                          (println "Installing next generation...")
+                                          (install-next-generation pop-agents child-agents @push-argmap)
+                                          (recur (inc generation)))
                   :else  (final-report generation best @push-argmap))))))))

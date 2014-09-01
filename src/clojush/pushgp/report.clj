@@ -34,6 +34,16 @@
       (println (name param) "=" (random/seed-to-string val))
       (println (name param) "=" val))))
 
+(defn behavioral-diversity
+  "Returns the behavioral diversity of the population, as described by David
+   Jackson in 'Promoting phenotypic diversity in genetic programming'. It is
+   the percent of distinct behavior vectors in the population. Since finite
+   algebras has binary test cases, error vectors are equivalent to behavior
+   vectors."
+  []
+  (float (/ (count (distinct @population-behaviors))
+            (count @population-behaviors))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; log printing (csv and json)
 
@@ -87,12 +97,10 @@
         part2-ind (if json-log-program-strings
                     (assoc part1-ind :program (str (not-lazy (:program individual))))
                     part1-ind)
-        part3-ind (if (:hah-error individual)
-                    (assoc part2-ind :hah-error (:hah-error individual))
+        part3-ind (if (:weighted-error individual)
+                    (assoc part2-ind :weighted-error (:weighted-error individual))
                     part2-ind)]
-    (if (:rms-error individual)
-      (assoc part3-ind :rms-error (:rms-error individual))
-      part3-ind)))
+    part3-ind))
 
 (defn json-print
   "Prints a json file of the population, with each individual's fitness and size.
@@ -117,7 +125,7 @@
 (defn lexicase-report
   "This extra report is printed whenever lexicase selection is used."
   [population {:keys [error-function report-simplifications print-errors
-                      print-history use-rmse
+                      print-history
                       ]}]
   (let [min-error-by-case (apply map
                                  (fn [& args] (apply min args))
@@ -146,6 +154,7 @@
         count-zero-by-case (map #(apply + %) (apply mapv vector pop-zero-by-case))
         ]
     (println "--- Lexicse Program with Most Elite Cases Statistics ---")
+    (println "Lexicase best genome:" (pr-str (not-lazy (:genome lex-best))))
     (println "Lexicase best program:" (pr-str (not-lazy (:program lex-best))))
     (when (> report-simplifications 0)
       (println "Lexicase best partial simplification:"
@@ -157,11 +166,11 @@
     (println "Lexicase best total error:" (:total-error lex-best))
     (println "Lexicase best mean error:" (float (/ (:total-error lex-best)
                                                    (count (:errors lex-best)))))
-    (when use-rmse (println "Lexicase best RMS-error:" (:rms-error lex-best)))
     (when print-history (println "Lexicase best history:" (not-lazy (:history lex-best))))
     (println "Lexicase best size:" (count-points (:program lex-best)))
     (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program lex-best)) (count-points (:program lex-best))))) ;Number of (open) parens / points
     (println "--- Lexicse Program with Most Zero Cases Statistics ---")
+    (println "Zero cases best genome:" (pr-str (not-lazy (:genome most-zero-cases-best))))
     (println "Zero cases best program:" (pr-str (not-lazy (:program most-zero-cases-best))))
     (when (> report-simplifications 0)
       (println "Zero cases best partial simplification:"
@@ -175,7 +184,6 @@
     (println "Zero cases best total error:" (:total-error most-zero-cases-best))
     (println "Zero cases best mean error:" (float (/ (:total-error most-zero-cases-best)
                                                    (count (:errors most-zero-cases-best)))))
-    (when use-rmse (println "Zero cases best RMS-error:" (:rms-error most-zero-cases-best)))
     (when print-history (println "Zero cases best history:" (not-lazy (:history most-zero-cases-best))))
     (println "Zero cases best size:" (count-points (:program most-zero-cases-best)))
     (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program most-zero-cases-best)) (count-points (:program most-zero-cases-best))))) ;Number of (open) parens / points
@@ -186,15 +194,31 @@
     (println (format "Population mean number of perfect (error zero) cases: %.2f" (float (/ (apply + count-zero-by-case) (count population)))))
     ))
 
+(defn implicit-fitness-sharing-report
+  "This extra report is printed whenever implicit fitness sharing selection is used."
+  [population {:keys [print-errors]}]
+  (let [ifs-best (apply min-key :weighted-error population)]
+    (println "--- Program with Best Implicit Fitness Sharing Error Statistics ---")
+    (println "IFS best genome:" (pr-str (not-lazy (:genome ifs-best))))
+    (println "IFS best program:" (pr-str (not-lazy (:program ifs-best))))
+    (when print-errors (println "IFS best errors:" (not-lazy (:errors ifs-best))))
+    (println "IFS best total error:" (:total-error ifs-best))
+    (println "IFS best mean error:" (float (/ (:total-error ifs-best)
+                                              (count (:errors ifs-best)))))
+    (println "IFS best IFS error:" (:weighted-error ifs-best))
+    (println "IFS best size:" (count-points (:program ifs-best)))
+    (printf "IFS best percent parens: %.3f\n" (double (/ (count-parens (:program ifs-best)) (count-points (:program ifs-best))))) ;Number of (open) parens / points
+    ))
+
 (defn report-and-check-for-success
   "Reports on the specified generation of a pushgp run. Returns the best
    individual of the generation."
   [population generation
    {:keys [error-function report-simplifications
-           error-threshold max-generations
+           error-threshold max-generations population-size
            print-errors print-history print-cosmos-data print-timings
-           problem-specific-report use-rmse use-historically-assessed-hardness
-           use-lexicase-selection
+           problem-specific-report total-error-method
+           parent-selection
            print-error-frequencies-by-case
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
@@ -204,9 +228,7 @@
   (println)
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
   (println ";; -*- Report at generation" generation)
-  (let [err-fn (cond
-                 use-rmse :rms-error
-                 true :total-error)
+  (let [err-fn (if (= total-error-method :rmse) :weighted-error :total-error)
         sorted (sort-by err-fn < population)
         err-fn-best (first sorted)
         psr-best (problem-specific-report err-fn-best population generation error-function report-simplifications)
@@ -215,8 +237,10 @@
                err-fn-best)]
     (when print-error-frequencies-by-case
       (println "Error frequencies by case:" (doall (map frequencies (apply map vector (map :errors population))))))
-    (when use-lexicase-selection (lexicase-report population argmap))
+    (when (some #{parent-selection} #{:lexicase :elitegroup-lexicase}) (lexicase-report population argmap))
+    (when (= total-error-method :ifs) (implicit-fitness-sharing-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
+    (println "Best genome:" (pr-str (not-lazy (:genome best))))
     (println "Best program:" (pr-str (not-lazy (:program best))))
     (when (> report-simplifications 0)
       (println "Partial simplification:"
@@ -225,10 +249,13 @@
     (println "Total:" (:total-error best))
     (println "Mean:" (float (/ (:total-error best)
                                (count (:errors best)))))
-    (when use-historically-assessed-hardness
-      (println "HAH-error:" (:hah-error best)))
-    (when use-rmse (println "RMS-error:" (:rms-error best)))
+    (case total-error-method
+      :hah (println "HAH-error:" (:weighted-error best))
+      :rmse (println "RMS-error:" (:weighted-error best))
+      :ifs (println "IFS-error:" (:weighted-error best))
+      nil)
     (when print-history (println "History:" (not-lazy (:history best))))
+    (println "Genome size:" (count (:genome best)))
     (println "Size:" (count-points (:program best)))
     (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program best)) (count-points (:program best))))) ;Number of (open) parens / points
     (println "--- Population Statistics ---")
@@ -245,6 +272,9 @@
     (when print-errors (println "Error minima by case:"
                                 (apply map (fn [& args] (apply min args))
                                        (map :errors population))))
+    (println "Average genome size in population (length):"
+             (*' 1.0 (/ (reduce +' (map count (map :genome sorted)))
+                        (count population))))
     (println "Average program size in population (points):"
              (*' 1.0 (/ (reduce +' (map count-points (map :program sorted)))
                         (count population))))
@@ -255,6 +285,12 @@
       (println "Max copy number of one program:" (apply max (vals frequency-map)))
       (println "Min copy number of one program:" (apply min (vals frequency-map)))
       (println "Median copy number:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
+    (when @global-print-behavioral-diversity
+      (swap! population-behaviors #(take-last population-size %))
+      (println "Behavioral diversity:" (behavioral-diversity))
+      ;(println "Number of behaviors:" (count @population-behaviors))
+      (reset! population-behaviors ()))
+    (println "Number of evaluations used so far:" @evaluations-count)
     (println "--- Timings ---")
     (println "Current time:" (System/currentTimeMillis) "milliseconds")
     (when print-timings

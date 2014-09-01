@@ -1,13 +1,33 @@
 (ns clojush.util
+  (:use clojush.globals)
   (:require [clojure.math.numeric-tower :as math]
             [clojure.zip :as zip]
             [clojure.walk :as walk]
-            [clojure.string :as string])
-  (:use [clojush.globals]
-        [clojush.random]))
+            [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utilities
+
+(def literals
+  (atom
+    {:integer integer?
+     :float float?
+     :string string?
+     :boolean (fn [thing] (or (= thing true) (= thing false)))
+     }))
+
+(defn recognize-literal
+  "If thing is a literal, return its type -- otherwise return false."
+  [thing]
+  (loop [m (seq @literals)]
+    (if-let [[type pred] (first m)]
+      (if (pred thing) type
+        (recur (rest m))))))
+
+;; Add new literals by just assoc'ing on the new predicate. e.g.:
+;; (swap! literals :symbol symbol?)
+
+(def debug-recent-instructions ())
 
 (defn seq-zip
   "Returns a zipper for nested sequences, given a root sequence"
@@ -18,12 +38,13 @@
           (fn [node children] (with-meta children (meta node)))
           root))
 
-(defn ensure-list [thing] ;; really make-list-if-not-seq, but close enough for here
+(defn ensure-list ;; really make-list-if-not-seq, but close enough for here
+  [thing]
   (if (seq? thing)
     thing
     (list thing)))
 
-(defn print-return 
+(defn print-return
   "Prints the provided thing and returns it."
   [thing]
   (println thing)
@@ -70,7 +91,7 @@
         (zip/node z)
         (recur (zip/next z) (dec i))))))
 
-(defn insert-code-at-point 
+(defn insert-code-at-point
   "Returns a copy of tree with the subtree formerly indexed by
    point-index (in a depth-first traversal) replaced by new-subtree."
   [tree point-index new-subtree]
@@ -100,6 +121,10 @@
             (zip/root (zip/replace z '())) ;; used to just return (zip/root z)
             (recur (zip/next z) (dec i))))))))
 
+; Note: Well, I think I figured out why truncate was there. When I tried running
+; the change problem, it threw an exception trying to cast into an int a number
+; that was too big. Maybe there's a different principled way to use casting, but 
+; 'm just going to add truncate back for now!
 (defn truncate
   "Returns a truncated integer version of n."
   [n]
@@ -139,7 +164,7 @@
   [this that lst]
   (postwalklist-replace {that this} lst))
 
-(defn contains-subtree 
+(defn contains-subtree
   "Returns true if tree contains subtree at any level. Inefficient but
    functional implementation."
   [tree subtree]
@@ -189,32 +214,18 @@
   [sequence]
   (cond (not (seq? sequence)) sequence
         (empty? sequence) ()
-        :else (let [s (str sequence)
-                    l (read-string (string/replace (string/replace s ":open" " ( ") ":close" " ) "))]
-                ;; there'll be an extra ( ) around l, which we keep if the number of read things is >1
-                (if (= (count l) 1)
-                  (first l)
-                  l))))
+        :else (let [opens (count (filter #(= :open %) sequence))
+                    closes (count (filter #(= :close %) sequence))]
+                (assert (= opens closes)
+                        (str "open-close sequence must have equal numbers of :open and :close; this one does not:\n" sequence))
+                (let [s (str sequence)
+                      l (read-string (string/replace (string/replace s ":open" " ( ") ":close" " ) "))]
+                  ;; there'll be an extra ( ) around l, which we keep if the number of read things is >1
+                  (if (= (count l) 1)
+                    (first l)
+                    l)))))
 
 ;(open-close-sequence-to-list '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close))
 ;(open-close-sequence-to-list '(:open 1 :close :open 2 :close))
 ;(open-close-sequence-to-list '(:open :open 1 :close :open 2 :close :close))
-
-;; backtrace abbreviation, to ease debugging
-(defn bt []
-  (.printStackTrace *e))
-
-(defn insert-randomly
-  "Returns lst with thing inserted in a random location. If lst is not a list then
-it will first be wrapped in a list."
-  [thing lst]
-  (let [tree (ensure-list lst)
-        loc (inc (lrand-int (dec (count-points tree))))]
-    (zip/root
-      ((lrand-nth [zip/insert-left zip/insert-right])
-        (loop [z (seq-zip tree) i 0]
-          (if (= i loc)
-            z
-            (recur (zip/next z) (inc i))))
-        thing))))
-                             
+             

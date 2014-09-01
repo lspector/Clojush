@@ -7,6 +7,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; code and exec instructions
 
+(define-registered exec_noop (fn [state] state))
+(define-registered code_noop (fn [state] state))
+
+(define-registered noop_open_paren (fn [state] state))
+(define-registered noop_delete_prev_paren_pair (fn [state] state))
+
 (define-registered 
   code_append
   (fn [state]
@@ -291,9 +297,6 @@
                  :boolean
                  (pop-item :code (pop-item :code state)))
       state)))
-
-(define-registered exec_noop (fn [state] state))
-(define-registered code_noop (fn [state] state))
 
 (define-registered 
   code_nth
