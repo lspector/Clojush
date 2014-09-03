@@ -367,5 +367,5 @@
     (prn (:ancestors best)))
   (let [simplified-best (auto-simplify best error-function final-report-simplifications true 500)]
     (println "\n;;******************************")
-    (println ";; Problem-Specific Report of Simplified Solution"
+    (println ";; Problem-Specific Report of Simplified Solution")
     (problem-specific-report simplified-best [] generation error-function report-simplifications)))
