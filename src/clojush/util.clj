@@ -12,6 +12,7 @@
   (atom
     {:integer integer?
      :float float?
+     :char char?
      :string string?
      :boolean (fn [thing] (or (= thing true) (= thing false)))
      }))
