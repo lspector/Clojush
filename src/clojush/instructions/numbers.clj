@@ -158,6 +158,24 @@
              (push-item (*' 1.0 item) :float)))
       state)))
 
+(define-registered
+  integer_fromchar
+  (fn [state]
+    (if (not (empty? (:char state)))
+      (let [item (stack-ref :char 0 state)]
+        (->> (pop-item :char state)
+             (push-item (int item) :integer)))
+      state)))
+
+(define-registered
+  float_fromchar
+  (fn [state]
+    (if (not (empty? (:char state)))
+      (let [item (stack-ref :char 0 state)]
+        (->> (pop-item :char state)
+             (push-item (float (int item)) :float)))
+      state)))
+
 (defn minner
   "Returns a function that pushes the minimum of the top two items."
   [type]
