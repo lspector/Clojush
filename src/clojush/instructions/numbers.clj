@@ -90,39 +90,29 @@
 (define-registered integer_mod (modder :integer))
 (define-registered float_mod (modder :float))
 
-(defn lessthaner
-  "Returns a function that pushes the result of < of the top two items onto the 
-   boolean stack."
-  [type]
+(defn comparer
+  "Returns a function that pushes the result of comparator of the top two items
+   on the 'type' stack onto the boolean stack."
+  [type comparator]
   (fn [state]
     (if (not (empty? (rest (type state))))
       (let [first (stack-ref type 0 state)
             second (stack-ref type 1 state)]
         (->> (pop-item type state)
              (pop-item type)
-             (push-item (< second first) :boolean)))
+             (push-item (comparator second first) :boolean)))
       state)))
 
-(define-registered integer_lt (lessthaner :integer))
-(define-registered float_lt (lessthaner :float))
+(define-registered integer_lt (comparer :integer <))
+(define-registered integer_lte (comparer :integer <=))
+(define-registered integer_gt (comparer :integer >))
+(define-registered integer_gte (comparer :integer >=))
+(define-registered float_lt (comparer :float <))
+(define-registered float_lte (comparer :float <=))
+(define-registered float_gt (comparer :float >))
+(define-registered float_gte (comparer :float >=))
 
-(defn greaterthaner
-  "Returns a function that pushes the result of > of the top two items onto the 
-   boolean stack."
-  [type]
-  (fn [state]
-    (if (not (empty? (rest (type state))))
-      (let [first (stack-ref type 0 state)
-            second (stack-ref type 1 state)]
-        (->> (pop-item type state)
-             (pop-item type)
-             (push-item (> second first) :boolean)))
-      state)))
-
-(define-registered integer_gt (greaterthaner :integer))
-(define-registered float_gt (greaterthaner :float))
-
-(define-registered 
+(define-registered
   integer_fromboolean
   (fn [state]
     (if (not (empty? (:boolean state)))
@@ -131,7 +121,7 @@
              (push-item (if item 1 0) :integer)))
       state)))
 
-(define-registered 
+(define-registered
   float_fromboolean
   (fn [state]
     (if (not (empty? (:boolean state)))
@@ -140,7 +130,7 @@
              (push-item (if item 1.0 0.0) :float)))
       state)))
 
-(define-registered 
+(define-registered
   integer_fromfloat
   (fn [state]
     (if (not (empty? (:float state)))
@@ -149,13 +139,33 @@
              (push-item (truncate item) :integer)))
       state)))
 
-(define-registered 
+(define-registered
   float_frominteger
   (fn [state]
     (if (not (empty? (:integer state)))
       (let [item (stack-ref :integer 0 state)]
         (->> (pop-item :integer state)
              (push-item (*' 1.0 item) :float)))
+      state)))
+
+(define-registered
+  integer_fromstring
+  (fn [state]
+    (if (not (empty? (:string state)))
+      (try (pop-item :string
+                     (push-item (Integer/parseInt (top-item :string state))
+                                :integer state))
+        (catch Exception e state))
+      state)))
+
+(define-registered
+  float_fromstring
+  (fn [state]
+    (if (not (empty? (:string state)))
+      (try (pop-item :string
+                     (push-item (Float/parseFloat (top-item :string state))
+                                :float state))
+        (catch Exception e state))
       state)))
 
 (define-registered

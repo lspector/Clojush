@@ -1,11 +1,48 @@
 (ns clojush.instructions.string
   (:use [clojush pushstate globals]
-        [clojure.string :only [split trim]]))
+        [clojure.string :only [split trim]])
+  (:require [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; instructions for strings
 
-(define-registered 
+(define-registered
+  string_frominteger
+  (fn [state]
+    (if (not (empty? (:integer state)))
+      (let [item (stack-ref :integer 0 state)]
+        (->> (pop-item :integer state)
+             (push-item (str item) :string)))
+      state)))
+
+(define-registered
+  string_fromfloat
+  (fn [state]
+    (if (not (empty? (:float state)))
+      (let [item (stack-ref :float 0 state)]
+        (->> (pop-item :float state)
+             (push-item (str item) :string)))
+      state)))
+
+(define-registered
+  string_fromboolean
+  (fn [state]
+    (if (not (empty? (:boolean state)))
+      (let [item (stack-ref :boolean 0 state)]
+        (->> (pop-item :boolean state)
+             (push-item (str item) :string)))
+      state)))
+
+(define-registered
+  string_fromchar
+  (fn [state]
+    (if (not (empty? (:char state)))
+      (let [item (stack-ref :char 0 state)]
+        (->> (pop-item :char state)
+             (push-item (str item) :string)))
+      state)))
+
+(define-registered
   string_concat
   (fn [state]
     (if (not (empty? (rest (:string state))))
@@ -18,7 +55,20 @@
         state)
       state)))
 
-(define-registered 
+(define-registered
+  string_conjchar ; Conj char onto string
+  (fn [state]
+    (if (and (not (empty? (:string state)))
+             (not (empty? (:char state))))
+      (let [result (str (stack-ref :string 0 state) (stack-ref :char 0 state))]
+        (if (>= max-string-length (count result))
+          (push-item result
+                     :string
+                     (pop-item :char (pop-item :string state)))
+          state))
+      state)))
+
+(define-registered
   string_take
   (fn [state]
     (if (and (not (empty? (:string state)))
@@ -29,23 +79,77 @@
                  (pop-item :string (pop-item :integer state)))
       state)))
 
-(define-registered 
+(define-registered
+  string_substring
+  (fn [state]
+    (if (and (not (empty? (:string state)))
+             (not (empty? (rest (:integer state)))))
+      (let [st (stack-ref :string 0 state)
+            first-index (min (count st) (max 0 (stack-ref :integer 1 state)))
+            second-index (min (count st) (max first-index (stack-ref :integer 0 state)))]
+        (push-item (apply str (subs st first-index second-index))
+                   :string
+                   (pop-item :string (pop-item :integer (pop-item :integer state)))))
+      state)))
+
+(define-registered
+  string_first
+  (fn [state]
+    (if (and (not (empty? (:string state)))
+             (first (first (:string state))))
+      (push-item (first (stack-ref :string 0 state))
+                 :char
+                 (pop-item :string state))
+      state)))
+
+(define-registered
+  string_last
+  (fn [state]
+    (if (and (not (empty? (:string state)))
+             (last (first (:string state))))
+      (push-item (last (stack-ref :string 0 state))
+                 :char
+                 (pop-item :string state))
+      state)))
+
+(define-registered
+  string_nth
+  (fn [state]
+    (if (and (not (empty? (:string state)))
+             (not (empty? (:integer state)))
+             (not (empty? (first (:string state)))))
+      (let [st (stack-ref :string 0 state)
+            index (mod (stack-ref :integer 0 state) (count st))]
+        (push-item (nth st index)
+                   :char
+                   (pop-item :string state)))
+      state)))
+
+(define-registered
+  string_rest
+  (fn [state]
+    (if (not (empty? (:string state)))
+      (push-item (apply str (rest (stack-ref :string 0 state)))
+                 :string
+                 (pop-item :string state))
+      state)))
+
+(define-registered
+  string_butlast
+  (fn [state]
+    (if (not (empty? (:string state)))
+      (push-item (apply str (butlast (stack-ref :string 0 state)))
+                 :string
+                 (pop-item :string state))
+      state)))
+
+(define-registered
   string_length
   (fn [state]
     (if (not (empty? (:string state)))
       (push-item (count (stack-ref :string 0 state))
                  :integer
                  (pop-item :string state))
-      state)))
-
-(define-registered
-  string_atoi
-  (fn [state]
-    (if (not (empty? (:string state)))
-      (try (pop-item :string
-                     (push-item (Integer/parseInt (top-item :string state))
-                                :integer state))
-           (catch Exception e state))
       state)))
 
 (define-registered
@@ -82,16 +186,125 @@
           (recur (rest word-list)
                  (push-item (first word-list) :string loop-state)))))))
 
-(define-registered 
-  string_contained ;;true if top string is a substring of second string; false otherwise
+(define-registered
+  string_contains ;;true if top string is a substring of second string; false otherwise
   (fn [state]
     (if (empty? (rest (:string state)))
       state
       (let [sub (top-item :string state)
             full (stack-ref :string 1 state)
-            result-boolean         (if (<= 0 (.indexOf full sub))
-                                     true
-                                     false)]
+            result-boolean (if (<= 0 (.indexOf full sub))
+                             true
+                             false)]
         (push-item result-boolean
                    :boolean
                    (pop-item :string (pop-item :string state)))))))
+
+(define-registered
+  string_containschar ; true if the top char is in the top string
+  (fn [state]
+    (if (or (empty? (:string state))
+            (empty? (:char state)))
+      state
+      (let [sub (str (top-item :char state))
+            full (stack-ref :string 0 state)
+            result (<= 0 (.indexOf full sub))]
+        (push-item result
+                   :boolean
+                   (pop-item :char (pop-item :string state)))))))
+
+(define-registered
+  string_indexofchar ; puts on the integer stack the index of the top char in the top string
+  (fn [state]
+    (if (or (empty? (:string state))
+            (empty? (:char state)))
+      state
+      (let [sub (str (top-item :char state))
+            full (stack-ref :string 0 state)
+            index (.indexOf full sub)]
+        (push-item index
+                   :integer
+                   (pop-item :char (pop-item :string state)))))))
+
+(define-registered
+  string_occurencesofchar ; the number of times the top char is in the top string
+  (fn [state]
+    (if (or (empty? (:string state))
+            (empty? (:char state)))
+      state
+      (let [ch (stack-ref :char 0 state)
+            st (stack-ref :string 0 state)
+            occ (count (filter #{ch} st))]
+        (push-item occ
+                   :integer
+                   (pop-item :char (pop-item :string state)))))))
+
+(define-registered
+  string_replace ; In third string on stack, replaces all occurences of second string with first string
+  (fn [state]
+    (if (<= 3 (count (:string state)))
+      (let [result (string/replace (stack-ref :string 2 state)
+                                   (stack-ref :string 1 state)
+                                   (stack-ref :string 0 state))]
+        (if (>= max-string-length (count result))
+          (push-item result
+                     :string
+                     (pop-item :string (pop-item :string (pop-item :string state))))
+          state))
+      state)))
+
+(define-registered
+  string_replacefirst ; In third string on stack, replaces first occurence of second string with first string
+  (fn [state]
+    (if (<= 3 (count (:string state)))
+      (let [result (string/replace-first (stack-ref :string 2 state)
+                                         (stack-ref :string 1 state)
+                                         (stack-ref :string 0 state))]
+        (if (>= max-string-length (count result))
+          (push-item result
+                     :string
+                     (pop-item :string (pop-item :string (pop-item :string state))))
+          state))
+      state)))
+
+(define-registered
+  string_replacechar ; In top string on stack, replaces all occurences of second char with first char
+  (fn [state]
+    (if (and (not (empty? (:string state)))
+             (<= 2 (count (:char state))))
+      (let [result (string/replace (stack-ref :string 0 state)
+                                   (stack-ref :char 1 state)
+                                   (stack-ref :char 0 state))]
+        (if (>= max-string-length (count result))
+          (push-item result
+                     :string
+                     (pop-item :char (pop-item :char (pop-item :string state))))
+          state))
+      state)))
+
+(define-registered
+  string_replacefirstchar ; In top string on stack, replaces first occurence of second char with first char
+  (fn [state]
+    (if (and (not (empty? (:string state)))
+             (<= 2 (count (:char state))))
+      (let [result (string/replace-first (stack-ref :string 0 state)
+                                   (stack-ref :char 1 state)
+                                   (stack-ref :char 0 state))]
+        (if (>= max-string-length (count result))
+          (push-item result
+                     :string
+                     (pop-item :char (pop-item :char (pop-item :string state))))
+          state))
+      state)))
+
+(define-registered
+  string_removechar ; In top string on stack, remove all occurences of char
+  (fn [state]
+    (if (and (not (empty? (:string state)))
+             (not (empty? (:char state))))
+      (let [result (apply str (remove #{(stack-ref :char 0 state)}
+                                      (stack-ref :string 0 state)))]
+        (push-item result
+                   :string
+                   (pop-item :char (pop-item :string state))))
+      state)))

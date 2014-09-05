@@ -53,3 +53,10 @@
                    (fn [] (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127)))))))
       :string
       state)))
+
+(define-registered
+  char_rand
+  (fn [state]
+    (push-item (lrand-nth (concat [\newline \tab] (map char (range 32 127))))
+               :char
+               state)))
