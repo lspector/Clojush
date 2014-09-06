@@ -20,6 +20,8 @@
          'exec_do*range 1
          'exec_do*count 1
          'exec_do*times 1
+         'exec_while 1
+         'exec_do*while 1
          'exec_y 1
          'return_fromexec 1
          'print_exec 1
@@ -51,7 +53,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; instructions for all types (except non-data stacks such as auxiliary, tag, input, and output)
 
-(defn popper 
+(defn popper
   "Returns a function that takes a state and pops the appropriate stack of the state."
   [type]
   (fn [state] (pop-item type state)))
@@ -65,7 +67,7 @@
 (define-registered string_pop (popper :string))
 (define-registered char_pop (popper :char))
 
-(defn duper 
+(defn duper
   "Returns a function that takes a state and duplicates the top item of the appropriate 
    stack of the state."
   [type]
@@ -83,7 +85,7 @@
 (define-registered string_dup (duper :string))
 (define-registered char_dup (duper :char))
 
-(defn swapper 
+(defn swapper
   "Returns a function that takes a state and swaps the top 2 items of the appropriate 
    stack of the state."
   [type]
@@ -106,7 +108,7 @@
 (define-registered string_swap (swapper :string))
 (define-registered char_swap (swapper :char))
 
-(defn rotter 
+(defn rotter
   "Returns a function that takes a state and rotates the top 3 items of the appropriate 
    stack of the state."
   [type]
@@ -147,8 +149,7 @@
 (define-registered string_flush (flusher :string))
 (define-registered char_flush (flusher :char))
 
-
-(defn eqer 
+(defn eqer
   "Returns a function that compares the top two items of the appropriate stack of 
    the given state."
   [type]
@@ -272,3 +273,20 @@
 (define-registered zip_shove (shover :zip))
 (define-registered string_shove (shover :string))
 (define-registered char_shove (shover :char))
+
+(defn emptyer
+  "Returns a function that takes a state and tells whether that stack is empty."
+  [type]
+  (fn [state]
+    (push-item (empty? (type state))
+               :boolean
+               state)))
+
+(define-registered exec_empty (emptyer :exec))
+(define-registered integer_empty (emptyer :integer))
+(define-registered float_empty (emptyer :float))
+(define-registered code_empty (emptyer :code))
+(define-registered boolean_empty (emptyer :boolean))
+(define-registered zip_empty (emptyer :zip))
+(define-registered string_empty (emptyer :string))
+(define-registered char_empty (emptyer :char))
