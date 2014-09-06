@@ -114,23 +114,30 @@
         (the-actual-checksum-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
-              errors (doall
-                       (for [[input correct-output] (case data-cases
-                                                                 :train train-cases
-                                                                 :test test-cases
-                                                                 [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input :input)
-                                                       (push-item "" :output)))
-                               printed-result (stack-ref :output 0 final-state)]
-                           (when print-outputs
-                             (println (format "Correct output: %-19s | Program output: %-19s" correct-output printed-result)))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj printed-result))
-                           ; Error is Levenshtein distance
-                           (levenshtein-distance correct-output printed-result))))]
+              errors (flatten
+                       (doall
+                         (for [[input correct-output] (case data-cases
+                                                                   :train train-cases
+                                                                   :test test-cases
+                                                                   [])]
+                           (let [final-state (run-push program
+                                                       (->> (make-push-state)
+                                                         (push-item input :input)
+                                                         (push-item "" :output)))
+                                 printed-result (stack-ref :output 0 final-state)]
+                             (when print-outputs
+                               (println (format "Correct output: %-19s | Program output: %-19s" correct-output printed-result)))
+                             ; Record the behavior
+                             (when @global-print-behavioral-diversity
+                               (swap! behavior conj printed-result))
+                             ; Error is Levenshtein distance and, if correct format, distance from correct character
+                             (vector
+                               (levenshtein-distance correct-output printed-result)
+                               (if (and (= (count correct-output) (count printed-result))
+                                        (= "Check sum is " (subs printed-result 0 (count "Check sum is "))))
+                                 (abs (- (int (last correct-output)) (int (last printed-result)))) ;distance from correct last character
+                                 1000) ;penalty for wrong format
+                               )))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
