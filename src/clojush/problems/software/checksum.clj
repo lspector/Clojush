@@ -192,46 +192,53 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
-(reset! global-evalpush-limit 1500)
-
-(reset! global-max-points 800)
-
-(defn test-program-on-training
-  [program]
-  ((checksum-error-function checksum-data-domains) program))
-
-(defn run-prog
-  [program print-steps]
-  (let [input "dl2HKsdJ2 jad2E\"d2n\nad3!"
-        final-state (run-push program
-                              (->> (make-push-state)
-                                (push-item input :input)
-                                (push-item "" :output))
-                              print-steps)
-        printed-result (stack-ref :output 0 final-state)]
-    (doseq [[nm stack] (sort-by #(name (first %)) final-state)]
-      (println (format "%-12s | %s" nm (pr-str stack))))))
-
-;(char (+ (mod (apply + (map int "qwerty")) 64)
-;         (int \space)))
-
-(char (+ (int \space) (mod (apply + (map int "")) 64)))
-
-(def tom-program
-  '(
-     "Check sum is " print_string
-     in1 char_allfromstring
-     100 exec_do*times
-     (integer_fromchar integer_add 5.2 4.5 float_add float_add)
-     64 integer_swap 64 integer_mod
-     \space integer_fromchar integer_add
-     char_frominteger
-     print_char
-     ))
+;(reset! global-evalpush-limit 1500)
+;
+;(reset! global-max-points 800)
+;
+;(defn test-program-on-training
+;  [program]
+;  ((checksum-error-function checksum-data-domains) program))
+;
+;(defn run-prog
+;  [program print-steps]
+;  (let [input "dl2HKsdJ2 jad2E\"d2n\nad3!"
+;        final-state (run-push program
+;                              (->> (make-push-state)
+;                                (push-item input :input)
+;                                (push-item "" :output))
+;                              print-steps)
+;        printed-result (stack-ref :output 0 final-state)]
+;    (doseq [[nm stack] (sort-by #(name (first %)) final-state)]
+;      (println (format "%-12s | %s" nm (pr-str stack))))))
+;
+;(def tom-program
+;  '(
+;     "Check sum is " print_string
+;     in1 char_allfromstring
+;     100 exec_do*times
+;     (integer_fromchar integer_add)
+;     64 integer_swap 64 integer_mod
+;     \space integer_fromchar integer_add
+;     char_frominteger
+;     print_char
+;     ))
+;
+;(def while-program
+;  '(
+;     "Check sum is " print_string
+;     in1 char_allfromstring
+;     exec_do*while
+;     (integer_fromchar integer_add char_empty boolean_not)
+;     64 integer_swap 64 integer_mod
+;     \space integer_fromchar integer_add
+;     char_frominteger
+;     print_char
+;     ))
 
 
 ;(test-program-on-training tom-program)
 
 ;(run-prog tom-program false)
 
-
+;(test-program-on-training while-program)
