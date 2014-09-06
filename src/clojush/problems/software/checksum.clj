@@ -102,7 +102,7 @@
   [data-domains]
   (let [[train-cases test-cases] (map checksum-test-cases
                                       (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
+    (when false ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
@@ -189,3 +189,49 @@
    :final-report-simplifications 5000
    ;:max-error 1
    })
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+(reset! global-evalpush-limit 1500)
+
+(reset! global-max-points 800)
+
+(defn test-program-on-training
+  [program]
+  ((checksum-error-function checksum-data-domains) program))
+
+(defn run-prog
+  [program print-steps]
+  (let [input "dl2HKsdJ2 jad2E\"d2n\nad3!"
+        final-state (run-push program
+                              (->> (make-push-state)
+                                (push-item input :input)
+                                (push-item "" :output))
+                              print-steps)
+        printed-result (stack-ref :output 0 final-state)]
+    (doseq [[nm stack] (sort-by #(name (first %)) final-state)]
+      (println (format "%-12s | %s" nm (pr-str stack))))))
+
+;(char (+ (mod (apply + (map int "qwerty")) 64)
+;         (int \space)))
+
+(char (+ (int \space) (mod (apply + (map int "")) 64)))
+
+(def tom-program
+  '(
+     "Check sum is " print_string
+     in1 char_allfromstring
+     100 exec_do*times
+     (integer_fromchar integer_add 5.2 4.5 float_add float_add)
+     64 integer_swap 64 integer_mod
+     \space integer_fromchar integer_add
+     char_frominteger
+     print_char
+     ))
+
+
+;(test-program-on-training tom-program)
+
+;(run-prog tom-program false)
+
+
