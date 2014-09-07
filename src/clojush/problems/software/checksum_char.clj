@@ -1,4 +1,4 @@
-;; checksum.clj
+;; checksum_char.clj
 ;; Tom Helmuth, thelmuth@cs.umass.edu
 ;;
 ;; Problem Source: Program Repair Benchmark Paper (add citation later)
@@ -6,12 +6,13 @@
 ;; Given a string (max length 50), compute the integer values of the characters
 ;; in the string, sum them, take the sum modulo 64, add the value of the \space 
 ;; character, and then convert that integer back into its corresponding character
-;; (the checksum). Program must print "Check sum is X", where X is replaced by
-;; the correct checksum.
+;; (the checksum).
+;;
+;; This differs from checksum in that it doesn't require the answer to be printed.
 ;;
 ;; input stack has the input string
 
-(ns clojush.problems.software.checksum
+(ns clojush.problems.software.checksum-char
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -21,7 +22,6 @@
 ; Atom generators
 (def checksum-atom-generators
   (concat (list
-            "Check sum is "
             \space
             64
             ;;; end constants
@@ -34,7 +34,7 @@
             'in1
             ;;; end input instructions
             )
-          (registered-for-stacks [:integer :boolean :string :char :exec :print])))
+          (registered-for-stacks [:integer :boolean :string :char :exec])))
 
 
 ;; Define test cases
@@ -90,9 +90,8 @@
    [input output]."
   [inputs]
   (map #(vector %
-                (format "Check sum is %c"
-                        (char (+ (mod (apply + (map int %)) 64)
-                                 (int \space)))))
+                (char (+ (mod (apply + (map int %)) 64)
+                         (int \space))))
        inputs))
 
 ; Define error function. For now, each run uses different random inputs
@@ -114,29 +113,25 @@
         (the-actual-checksum-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
-              errors (flatten
-                       (doall
-                         (for [[input correct-output] (case data-cases
-                                                                   :train train-cases
-                                                                   :test test-cases
-                                                                   [])]
-                           (let [final-state (run-push program
-                                                       (->> (make-push-state)
-                                                         (push-item input :input)
-                                                         (push-item "" :output)))
-                                 printed-result (stack-ref :output 0 final-state)]
-                             (when print-outputs
-                               (println (format "Correct output: %-19s | Program output: %-19s" correct-output printed-result)))
-                             ; Record the behavior
-                             (when @global-print-behavioral-diversity
-                               (swap! behavior conj printed-result))
-                             ; Error is Levenshtein distance and, if correct format, distance from correct character
-                             (vector
-                               (levenshtein-distance correct-output printed-result)
-                               (if (not (empty? printed-result))
-                                 (abs (- (int (last correct-output)) (int (last printed-result)))) ;distance from correct last character
-                                 1000) ;penalty for wrong format
-                               )))))]
+              errors (doall
+                       (for [[input correct-output] (case data-cases
+                                                      :train train-cases
+                                                      :test test-cases
+                                                      [])]
+                         (let [final-state (run-push program
+                                                     (->> (make-push-state)
+                                                       (push-item input :input)))
+                               char-result (top-item :char final-state)]
+                           (when print-outputs
+                             (println (format "Correct output: %c | Program output: %c" correct-output char-result)))
+                           ; Record the behavior
+                           (when @global-print-behavioral-diversity
+                             (swap! behavior conj char-result))
+                           ; Error is distance from correct character
+                           (if (char? char-result)
+                             (abs (- (int correct-output) (int char-result))) ;distance from correct last character
+                             1000) ;penalty for no character on stack
+                           )))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
@@ -189,56 +184,3 @@
    :final-report-simplifications 5000
    ;:max-error 1
    })
-
-;;;;;;;;;;;;;;;;;;;;;;;;
-
-;(reset! global-evalpush-limit 1500)
-;
-;(reset! global-max-points 800)
-;
-;(defn test-program-on-training
-;  [program]
-;  ((checksum-error-function checksum-data-domains) program))
-;
-;(defn run-prog
-;  [program print-steps]
-;  (let [input "dl2HKsdJ2 jad2E\"d2n\nad3!"
-;        final-state (run-push program
-;                              (->> (make-push-state)
-;                                (push-item input :input)
-;                                (push-item "" :output))
-;                              print-steps)
-;        printed-result (stack-ref :output 0 final-state)]
-;    (doseq [[nm stack] (sort-by #(name (first %)) final-state)]
-;      (println (format "%-12s | %s" nm (pr-str stack))))))
-;
-;(def tom-program
-;  '(
-;     "Check sum is " print_string
-;     in1 char_allfromstring
-;     100 exec_do*times
-;     (integer_fromchar integer_add)
-;     64 integer_swap 64 integer_mod
-;     \space integer_fromchar integer_add
-;     char_frominteger
-;     print_char
-;     ))
-;
-;(def while-program
-;  '(
-;     "Check sum is " print_string
-;     in1 char_allfromstring
-;     exec_do*while
-;     (integer_fromchar integer_add char_empty boolean_not)
-;     64 integer_swap 64 integer_mod
-;     \space integer_fromchar integer_add
-;     char_frominteger
-;     print_char
-;     ))
-
-
-;(test-program-on-training tom-program)
-
-;(run-prog tom-program false)
-
-;(test-program-on-training while-program)
