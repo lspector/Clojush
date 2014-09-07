@@ -20,18 +20,20 @@
   (concat (list
             (fn [] (lrand-nth (list true false))) ;Boolean
             ;;; end ERCs
-            (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
+            (tag-instruction-erc [:integer :boolean :string :exec] 1000)
             (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
+            'in2
+            'in3
             ;;; end input instructions
             )
-          (registered-for-stacks [:integer :boolean :string :char :exec :print])))
+          (registered-for-stacks [:integer :boolean :string :exec])))
 
 
 ;; Define test cases
 (defn csl-input
-  "Makes a Compare String Lengths input of length len."
+  "Makes a Compare String Lengths input string of length len."
   [len]
   (apply str
          (repeatedly len
@@ -44,14 +46,10 @@
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
 (def csl-data-domains
-  [[(list "", "A", "\t", "\n", "B\n", "\n\n",
-          (apply str (repeat 50 \newline))
-          (apply str (repeat 50 \space))
-          (apply str (repeat 50 \s))
-          (apply str (take 50 (cycle (list \C \D \newline))))
-          (apply str (take 50 (cycle (list \x \newline \y \space))))
-          (apply str (take 50 (cycle (list \space \newline))))) 12 0] ;; "Special" inputs covering some base cases
-   [(fn [] (csl-input (inc (lrand-int 50)))) 88 1000]
+  [[(list ["" "" ""] ["" "a" "bc"] ["q" "" "to"]) 3 0] ;; Some small cases with empty strings
+   [(fn [] (repeat 3 (csl-input (lrand-int 50)))) 5 100] ;; Edge cases where all are the same
+   [(fn [] (sort-by count (repeatedly 3 #(csl-input (lrand-int 50))))) 20 200] ;; Cases forced to be in order
+   [(fn [] (repeatedly 3 #(csl-input (lrand-int 50)))) 72 700] ;; Cases in random order
    ])
 
 
@@ -82,9 +80,7 @@
    [input output]."
   [inputs]
   (map #(vector %
-                (format "Check sum is %c"
-                        (char (+ (mod (apply + (map int %)) 64)
-                                 (int \space)))))
+                (apply < (map count %)))
        inputs))
 
 ; Define error function. For now, each run uses different random inputs
@@ -94,7 +90,7 @@
   [data-domains]
   (let [[train-cases test-cases] (map csl-test-cases
                                       (test-and-train-data-from-domains data-domains))]
-    (when false ;; Change to false to not print test cases
+    (when true ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
@@ -106,29 +102,26 @@
         (the-actual-csl-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
-              errors (flatten
-                       (doall
-                         (for [[input correct-output] (case data-cases
-                                                                   :train train-cases
-                                                                   :test test-cases
-                                                                   [])]
-                           (let [final-state (run-push program
-                                                       (->> (make-push-state)
-                                                         (push-item input :input)
-                                                         (push-item "" :output)))
-                                 printed-result (stack-ref :output 0 final-state)]
-                             (when print-outputs
-                               (println (format "Correct output: %-19s | Program output: %-19s" correct-output printed-result)))
-                             ; Record the behavior
-                             (when @global-print-behavioral-diversity
-                               (swap! behavior conj printed-result))
-                             ; Error is Levenshtein distance and, if correct format, distance from correct character
-                             (vector
-                               (levenshtein-distance correct-output printed-result)
-                               (if (not (empty? printed-result))
-                                 (abs (- (int (last correct-output)) (int (last printed-result)))) ;distance from correct last character
-                                 1000) ;penalty for wrong format
-                               )))))]
+              errors (doall
+                       (for [[[input1 input2 input3] correct-output] (case data-cases
+                                                                                  :train train-cases
+                                                                                  :test test-cases
+                                                                                  [])]
+                         (let [final-state (run-push program
+                                                     (->> (make-push-state)
+                                                       (push-item input3 :input)
+                                                       (push-item input2 :input)
+                                                       (push-item input1 :input)))
+                               result (top-item :boolean final-state)]
+                           (when print-outputs
+                             (println (format "Correct output: %5b | Program output: %5b" correct-output result)))
+                           ; Record the behavior
+                           (when @global-print-behavioral-diversity
+                             (swap! behavior conj result))
+                           ; Error is boolean error
+                           (if (= result correct-output)
+                             0
+                             1))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
@@ -161,11 +154,11 @@
 (def argmap
   {:error-function (csl-error-function csl-data-domains)
    :atom-generators csl-atom-generators
-   :max-points 800
-   :max-points-in-initial-program 400
-   :evalpush-limit 1500
+   :max-points 200
+   :max-points-in-initial-program 100
+   :evalpush-limit 200
    :population-size 1000
-   :max-generations 300
+   :max-generations 200
    :parent-selection :lexicase
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
@@ -173,7 +166,7 @@
                                     [:alternation :uniform-mutation] 0.5
                                     }
    :alternation-rate 0.01
-   :alignment-deviation 10
+   :alignment-deviation 5
    :uniform-mutation-rate 0.01
    :problem-specific-report csl-report
    :print-behavioral-diversity true
