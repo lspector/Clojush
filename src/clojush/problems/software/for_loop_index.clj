@@ -1,26 +1,28 @@
-;; compare_string_lengths.clj
+;; for_loop_index.clj
 ;; Tom Helmuth, thelmuth@cs.umass.edu
 ;;
 ;; Problem Source: iJava (http://ijava.cs.umass.edu/)
 ;;
-;; Given three strings in1, in2, and in3, return true if
-;; lenth(in1) < length(in2) < length(in3), and false otherwise.
+;; Given 3 integer inputs (start, finish, stepSize), print the integers
+;; represented by the Java for loop:
+;;      for(i = start; i < finish; i += stepSize) System.out.println(i);
 ;;
-;; input stack has 3 input strings
+;; Note that start < finish for all test cases, so will always require printing something.
+;;
+;; input stack has 3 input integers: in1 = start, in2 = finish, in3 = step-size
 
-(ns clojush.problems.software.compare-string-lengths
+(ns clojush.problems.software.for-loop-index
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
-        [clojure.math numeric-tower combinatorics]
+        [clojure.math numeric-tower]
         ))
 
 ; Atom generators
-(def csl-atom-generators
+(def loop-atom-generators
   (concat (list
-            (fn [] (lrand-nth (list true false))) ;Boolean
             ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :string :exec] 1000)
+            (tag-instruction-erc [:integer :boolean :exec] 1000)
             (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
@@ -28,31 +30,31 @@
             'in3
             ;;; end input instructions
             )
-          (registered-for-stacks [:integer :boolean :string :exec])))
+          (registered-for-stacks [:integer :boolean :exec :print])))
 
 
 ;; Define test cases
-(defn csl-input
-  "Makes a Compare String Lengths input string of length len."
-  [len]
-  (apply str
-         (repeatedly len
-                     #(lrand-nth (concat [\newline \tab]
-                                         (map char (range 32 127)))))))
+(defn loop-input
+  "Makes a For Loop Index input vector = [start, finish, step-size] with start < finish."
+  [& {:keys [neg-pos] :or {neg-pos false}}]
+  (if (not neg-pos)
+    (let [step-size (inc (lrand-int 10))
+          start (- (lrand-int 1000) 500)
+          finish (+ start 1 (lrand-int (* 20 step-size)))]
+      [start finish step-size])
+    (let [step-size (inc (lrand-int 10))
+          start (dec (- (lrand-int (* 10 step-size))))
+          finish (lrand-int (* 10 step-size))]
+      [start finish step-size])))
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
 ;; should be used as training and testing cases respectively. Each "set" of
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
-(def csl-data-domains
-  [[(list ["" "" ""]) 1 0] ;; All empty strings
-   [(permutations ["" "a" "bc"]) 6 0] ;; Permutations of three small strings
-   [(apply concat (repeatedly 2 #(permutations ["" "" (csl-input (inc (lrand-int 49)))]))) 6 0] ;; Cases with 2 empties and a non-empty
-   [(apply concat (repeatedly 3 #(permutations (conj (repeat 2 (csl-input (inc (lrand-int 49)))) (csl-input (inc (lrand-int 49))))))) 9 0] ;; Cases with 2 strings repeated
-   [(fn [] (repeat 3 (csl-input (lrand-int 50)))) 3 100] ;; Cases where all are the same
-   [(fn [] (sort-by count (repeatedly 3 #(csl-input (lrand-int 50))))) 25 200] ;; Cases forced to be in order (as long as two aren't same size randomly, will be true)
-   [(fn [] (repeatedly 3 #(csl-input (lrand-int 50)))) 50 700] ;; Cases in random order
+(def loop-data-domains
+  [[(fn [] (loop-input :neg-pos true)) 10 100] ;; Cases where start < 0 and finish > 0
+   [(fn [] (loop-input)) 90 900] ;; Random cases
    ])
 
 
@@ -74,35 +76,35 @@
                                         (take n-test (shuffle input-set))))))
                           domains)))
 
-;;Can make Compare String Lengths test data like this:
-;(test-and-train-data-from-domains csl-data-domains)
+;;Can make For Loop Index test data like this:
+;(test-and-train-data-from-domains loop-data-domains)
 
 ; Helper function for error function
-(defn csl-test-cases
+(defn loop-test-cases
   "Takes a sequence of inputs and gives IO test cases of the form
    [input output]."
   [inputs]
   (map #(vector %
-                (apply < (map count %)))
+                (apply str (interpose \newline (apply range %))))
        inputs))
 
 ; Define error function. For now, each run uses different random inputs
-(defn csl-error-function
-  "Returns the error function for the csl problem. Takes as
-   input Compare String Lengths data domains."
+(defn loop-error-function
+  "Returns the error function for the For Loop Index problem. Takes as
+   input For Loop Index data domains."
   [data-domains]
-  (let [[train-cases test-cases] (map csl-test-cases
+  (let [[train-cases test-cases] (map loop-test-cases
                                       (test-and-train-data-from-domains data-domains))]
     (when true ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
         (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-csl-error-function
+    (fn the-actual-loop-error-function
       ([program]
-        (the-actual-csl-error-function program :train))
+        (the-actual-loop-error-function program :train))
       ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-csl-error-function program data-cases false))
+        (the-actual-loop-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
               errors (doall
@@ -114,29 +116,28 @@
                                                      (->> (make-push-state)
                                                        (push-item input3 :input)
                                                        (push-item input2 :input)
-                                                       (push-item input1 :input)))
-                               result (top-item :boolean final-state)]
+                                                       (push-item input1 :input)
+                                                       (push-item "" :output)))
+                               result (stack-ref :output 0 final-state)]
                            (when print-outputs
-                             (println (format "Correct output: %5b | Program output: %5b" correct-output result)))
+                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
                            ; Record the behavior
                            (when @global-print-behavioral-diversity
                              (swap! behavior conj result))
-                           ; Error is boolean error
-                           (if (= result correct-output)
-                             0
-                             1))))]
+                           ; Error is Levenshtein distance of printed strings
+                           (levenshtein-distance correct-output result))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
 
-(defn csl-report
+(defn loop-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
   (let [best-program (not-lazy (:program best))
         best-test-errors (error-function best-program :test)
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
-    (printf ";; -*- Compare String Lengths problem report - generation %s\n" generation)(flush)
+    (printf ";; -*- For Loop Index problem report - generation %s\n" generation)(flush)
     (println "Test total error for best:" best-total-test-error)
     (println (format "Test mean error for best: %.5f" (double (/ best-total-test-error (count best-test-errors)))))
     (when (zero? (:total-error best))
@@ -155,10 +156,10 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (csl-error-function csl-data-domains)
-   :atom-generators csl-atom-generators
-   :max-points 400
-   :max-points-in-initial-program 200
+  {:error-function (loop-error-function loop-data-domains)
+   :atom-generators loop-atom-generators
+   :max-points 300
+   :max-points-in-initial-program 150
    :evalpush-limit 600
    :population-size 1000
    :max-generations 300
@@ -171,7 +172,7 @@
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
-   :problem-specific-report csl-report
+   :problem-specific-report loop-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
