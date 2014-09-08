@@ -53,7 +53,7 @@
   [state]
   (doseq [t push-types]
     (printf "%s = " t)
-    (println (t state))
+    (prn (t state))
     (flush)))
 
 (defn push-item

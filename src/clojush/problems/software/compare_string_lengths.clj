@@ -12,7 +12,7 @@
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
-        clojure.math.numeric-tower
+        [clojure.math numeric-tower combinatorics]
         ))
 
 ; Atom generators
@@ -46,10 +46,13 @@
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
 (def csl-data-domains
-  [[(list ["" "" ""] ["" "a" "bc"] ["q" "" "to"]) 3 0] ;; Some small cases with empty strings
-   [(fn [] (repeat 3 (csl-input (lrand-int 50)))) 5 100] ;; Edge cases where all are the same
-   [(fn [] (sort-by count (repeatedly 3 #(csl-input (lrand-int 50))))) 20 200] ;; Cases forced to be in order
-   [(fn [] (repeatedly 3 #(csl-input (lrand-int 50)))) 72 700] ;; Cases in random order
+  [[(list ["" "" ""]) 1 0] ;; All empty strings
+   [(permutations ["" "a" "bc"]) 3 0] ;; Permutations of three small strings
+   [(apply concat (repeatedly 3 #(permutations ["" "" (csl-input (inc (lrand-int 49)))]))) 9 0] ;; Cases with 2 empties and a non-empty
+   [(apply concat (repeatedly 3 #(permutations (conj (repeat 2 (csl-input (inc (lrand-int 49)))) (csl-input (inc (lrand-int 49))))))) 9 0] ;; Cases with 2 strings repeated
+   [(fn [] (repeat 3 (csl-input (lrand-int 50)))) 3 100] ;; Cases where all are the same
+   [(fn [] (sort-by count (repeatedly 3 #(csl-input (lrand-int 50))))) 25 200] ;; Cases forced to be in order (as long as two aren't same size randomly, will be true)
+   [(fn [] (repeatedly 3 #(csl-input (lrand-int 50)))) 50 700] ;; Cases in random order
    ])
 
 
@@ -154,11 +157,11 @@
 (def argmap
   {:error-function (csl-error-function csl-data-domains)
    :atom-generators csl-atom-generators
-   :max-points 200
-   :max-points-in-initial-program 100
-   :evalpush-limit 200
+   :max-points 400
+   :max-points-in-initial-program 200
+   :evalpush-limit 600
    :population-size 1000
-   :max-generations 200
+   :max-generations 300
    :parent-selection :lexicase
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
@@ -166,7 +169,7 @@
                                     [:alternation :uniform-mutation] 0.5
                                     }
    :alternation-rate 0.01
-   :alignment-deviation 5
+   :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report csl-report
    :print-behavioral-diversity true
