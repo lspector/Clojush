@@ -29,4 +29,5 @@
                             (list (fn [] (lrand-int 100))
                                   'in1
                                   'code_rand))
+   :meta-error-categories [:size]
    })

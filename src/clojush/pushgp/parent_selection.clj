@@ -156,9 +156,11 @@
   "Returns a selected parent."
   [pop location {:keys [parent-selection]
                  :as argmap}]
-  (case parent-selection
-    :tournament (tournament-selection pop location argmap)
-    :lexicase (lexicase-selection pop location argmap)
-    :elitegroup-lexicase (elitegroup-lexicase-selection pop)
-    (throw (Exception. (str "Unrecognized argument for parent-selection: "
-                            parent-selection)))))
+  (let [pop-with-meta-errors (map (fn [ind] (update-in ind [:errors] concat (:meta-errors ind)))
+                                  pop)]
+    (case parent-selection
+      :tournament (tournament-selection pop-with-meta-errors location argmap)
+      :lexicase (lexicase-selection pop-with-meta-errors location argmap)
+      :elitegroup-lexicase (elitegroup-lexicase-selection pop-with-meta-errors)
+      (throw (Exception. (str "Unrecognized argument for parent-selection: "
+                              parent-selection))))))
