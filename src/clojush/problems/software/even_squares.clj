@@ -141,9 +141,9 @@
 (def argmap
   {:error-function (even-squares-error-function even-squares-data-domains)
    :atom-generators even-squares-atom-generators
-   :max-points 300
-   :max-points-in-initial-program 150
-   :evalpush-limit 600
+   :max-points 400
+   :max-points-in-initial-program 200
+   :evalpush-limit 1000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
