@@ -286,7 +286,7 @@
       (println "Min copy number of one program:" (apply min (vals frequency-map)))
       (println "Median copy number:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
     (when @global-print-behavioral-diversity
-      (swap! population-behaviors #(take-last population-size %))
+      (swap! population-behaviors #(take-last population-size %)) ; Only use behaviors during evaluation, not those during simplification
       (println "Behavioral diversity:" (behavioral-diversity))
       ;(println "Number of behaviors:" (count @population-behaviors))
       (reset! population-behaviors ()))
