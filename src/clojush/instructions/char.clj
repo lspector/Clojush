@@ -42,8 +42,7 @@
     (if (not (empty? (:char state)))
       (let [item (stack-ref :char 0 state)]
         (->> (pop-item :char state)
-             (push-item (or (<= (int \A) (int item) (int \Z))
-                            (<= (int \a) (int item) (int \z)))
+             (push-item (Character/isLetter item)
                         :boolean)))
       state)))
 
@@ -53,7 +52,7 @@
     (if (not (empty? (:char state)))
       (let [item (stack-ref :char 0 state)]
         (->> (pop-item :char state)
-             (push-item (<= (int \0) (int item) (int \9))
+             (push-item (Character/isDigit item)
                         :boolean)))
       state)))
 
