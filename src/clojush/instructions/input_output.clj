@@ -11,10 +11,14 @@
   (fn [state]
     (if (empty? (type state))
       state
-      (let [top-thing (top-item type state)]
-        (if (< max-string-length (count (str (stack-ref :output 0 state) top-thing)))
+      (let [top-thing (top-item type state)
+            top-thing-string (if (or (string? top-thing)
+                                     (char? top-thing))
+                               top-thing
+                               (pr-str top-thing))]
+        (if (< max-string-length (count (str (stack-ref :output 0 state) top-thing-string)))
           state
-          (stack-assoc (str (stack-ref :output 0 state) top-thing)
+          (stack-assoc (str (stack-ref :output 0 state) top-thing-string)
                        :output
                        0
                        (pop-item type state)))))))

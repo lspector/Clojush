@@ -1,6 +1,5 @@
 (ns clojush.instructions.char
   (:use [clojush pushstate globals]
-        ;[clojure.string :only [split trim]]
         ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
