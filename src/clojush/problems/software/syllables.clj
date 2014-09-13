@@ -13,8 +13,8 @@
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
-        clojure.math.numeric-tower
-        ))
+        clojure.math.numeric-tower)
+    (:require [clojure.string :as string]))
 
 ;; Define test cases
 (defn syllables-input
@@ -106,7 +106,7 @@
   (let [[train-cases test-cases] (map #(sort-by (comp count first) %)
                                       (map syllables-test-cases
                                            (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
+    (when false ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
@@ -137,11 +137,14 @@
                              ; Error is Levenshtein distance and, if ends in an integer, distance from correct integer
                              (vector
                                (levenshtein-distance correct-output printed-result)
-                               (if-let [num-result (re-find #"-?\d+$" printed-result)]
-                                 (abs (- (Integer/parseInt (re-find #"-?\d+$" correct-output))
-                                         (Integer/parseInt num-result))) ;distance from correct integer
-                                 1000)
-                             )))))]
+                               (let [num-result (try (read-string (last (string/split printed-result #"\s+")))
+                                                  (catch Exception e nil))]
+                                 (if (integer? num-result)
+                                   (abs (- (try (read-string (last (string/split correct-output #"\s+")))
+                                             (catch Exception e nil))
+                                           num-result)) ;distance from correct integer
+                                   1000)
+                                 ))))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
