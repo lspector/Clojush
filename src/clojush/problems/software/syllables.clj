@@ -4,7 +4,7 @@
 ;; Problem Source: Program Repair Benchmark Paper (add citation later)
 ;;
 ;; Given a string (max length 20, containing symbols, spaces, digits, and
-;; lowercase letters), count the number of occurances of vowels (a,e,i,o,u,y)
+;; lowercase letters), count the number of occurrences of vowels (a,e,i,o,u,y)
 ;; in the string and print that number as X in "The number of syllables is X"
 ;;
 ;; input stack has the input string
