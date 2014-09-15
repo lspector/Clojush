@@ -198,11 +198,11 @@
 (def argmap
   {:error-function (grade-error-function grade-data-domains)
    :atom-generators grade-atom-generators
-   :max-points 200
-   :max-points-in-initial-program 100
-   :evalpush-limit 200
+   :max-points 400
+   :max-points-in-initial-program 200
+   :evalpush-limit 800
    :population-size 1000
-   :max-generations 200
+   :max-generations 300
    :parent-selection :lexicase
    :epigenetic-markers [:close]
    :genetic-operator-probabilities {:alternation 0.2
@@ -211,7 +211,7 @@
                                     [:alternation :uniform-mutation] 0.5
                                     }
    :alternation-rate 0.01
-   :alignment-deviation 5
+   :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report grade-report
    :print-behavioral-diversity true
