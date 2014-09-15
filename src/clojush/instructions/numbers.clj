@@ -260,3 +260,21 @@
                  :integer
                  (pop-item :integer state))
       state)))
+
+(define-registered
+  float_inc
+  (fn [state]
+    (if (not (empty? (:float state)))
+      (push-item (inc (stack-ref :float 0 state))
+                 :float
+                 (pop-item :float state))
+      state)))
+
+(define-registered
+  float_dec
+  (fn [state]
+    (if (not (empty? (:float state)))
+      (push-item (dec (stack-ref :float 0 state))
+                 :float
+                 (pop-item :float state))
+      state)))
