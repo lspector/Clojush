@@ -12,7 +12,7 @@
 ;; in pushgp.clj and should be passed to whatever functions use them as arguments.
 
 ;; push-types is the list of stacks used by the Push interpreter
-(def push-types '(:exec :integer :float :code :boolean :string :zip
+(def push-types '(:exec :integer :float :code :boolean :char :string :zip
                         :input :output :auxiliary
                         :tag :return :environment)) ;; Stack types
 

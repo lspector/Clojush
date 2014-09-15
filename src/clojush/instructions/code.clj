@@ -186,6 +186,26 @@
                  (pop-item :integer (pop-item :exec state)))
       state)))
 
+(define-registered
+  exec_while
+  (fn [state]
+    (if (empty? (:exec state))
+      state
+      (if (empty? (:boolean state))
+        (pop-item :exec state)
+        (if (not (stack-ref :boolean 0 state))
+          (pop-item :exec (pop-item :boolean state))
+          (let [block (stack-ref :exec 0 state)]
+            (pop-item :boolean (push-item block :exec (push-item 'exec_while :exec state)))))))))
+
+(define-registered
+  exec_do*while
+  (fn [state]
+    (if (empty? (:exec state))
+      state
+      (let [block (stack-ref :exec 0 state)]
+        (push-item block :exec (push-item 'exec_while :exec state))))))
+
 (define-registered 
   code_map
   (fn [state]

@@ -11,10 +11,14 @@
   (fn [state]
     (if (empty? (type state))
       state
-      (let [top-thing (top-item type state)]
-        (if (< max-string-length (count (str (stack-ref :output 0 state) top-thing)))
+      (let [top-thing (top-item type state)
+            top-thing-string (if (or (string? top-thing)
+                                     (char? top-thing))
+                               top-thing
+                               (pr-str top-thing))]
+        (if (< max-string-length (count (str (stack-ref :output 0 state) top-thing-string)))
           state
-          (stack-assoc (str (stack-ref :output 0 state) top-thing)
+          (stack-assoc (str (stack-ref :output 0 state) top-thing-string)
                        :output
                        0
                        (pop-item type state)))))))
@@ -25,8 +29,18 @@
 (define-registered print_code (printer :code))
 (define-registered print_boolean (printer :boolean))
 (define-registered print_string (printer :string))
+(define-registered print_char (printer :char))
 ;(define-registered print_zip (printer :zip)) ; I don't think we want this
 
+(define-registered
+  print_newline
+  (fn [state]
+    (if (< max-string-length (count (str (stack-ref :output 0 state) \newline)))
+      state
+      (stack-assoc (str (stack-ref :output 0 state) \newline)
+                   :output
+                   0
+                   state))))
 
 (defn handle-input-instruction
   "Allows Push to handle inN instructions, e.g. in2, using things from the input

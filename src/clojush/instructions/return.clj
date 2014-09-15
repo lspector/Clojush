@@ -19,7 +19,7 @@
 ;(define-registered return_fromzip (returner :zip)) ;; won't work, reconsider
 (define-registered return_fromstring (returner :string))
 
-(define-registered 
+(define-registered
   return_fromcode
   (fn [state]
     (if (empty? (:code state))
