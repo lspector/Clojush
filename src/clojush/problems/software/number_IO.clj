@@ -40,24 +40,6 @@
   [[(fn [] (vector (- (* (lrand) 200) 100.0) (- (lrand-int 201) 100))) 25 1000] ;; Each input is a float and an int, both from range [-100,100]
    ])
 
-(defn test-and-train-data-from-domains
-  "Takes a list of domains and creates a set of (random) train inputs and a set of test
-   inputs based on the domains. Returns [train test]. A program should not
-   be considered a solution unless it is perfect on both the train and test
-   cases."
-  [domains]
-  (apply mapv concat (map (fn [[input-set n-train n-test]]
-                            (if (fn? input-set)
-                              (vector (repeatedly n-train input-set)
-                                      (repeatedly n-test input-set))
-                              (vector (if (>= n-train (count input-set))
-                                        input-set
-                                        (take n-train (shuffle input-set)))
-                                      (if (>= n-test (count input-set))
-                                        input-set
-                                        (take n-test (shuffle input-set))))))
-                          domains)))
-
 ;;Can make number-IO test data like this:
 ;(test-and-train-data-from-domains num-io-data-domains)
 
@@ -78,10 +60,10 @@
   (let [[train-cases test-cases] (map num-io-test-cases
                                       (test-and-train-data-from-domains data-domains))]
     (when true ;; Change to false to not print test cases
-      (doseq [[i [[in-float in-int] out]] (map vector (range) train-cases)]
-        (println (format "Train Case %3d | Float %18.14f | Int %4d | Out %19.14f" i in-float in-int out)))
-      (doseq [[i [[in-float in-int] out]] (map vector (range) test-cases)]
-        (println (format "Test Case  %3d | Float %18.14f | Int %4d | Out %19.14f" i in-float in-int out))))
+      (doseq [[i case] (map vector (range) train-cases)]
+        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+      (doseq [[i case] (map vector (range) test-cases)]
+        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
     (fn the-actual-num-io-error-function
       ([program]
         (the-actual-num-io-error-function program :train))

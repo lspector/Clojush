@@ -39,25 +39,6 @@
    [(fn [] (+ 20 (lrand-int 9980))) 87 1000] ;; Random cases
    ])
 
-
-(defn test-and-train-data-from-domains
-  "Takes a list of domains and creates a set of (random) train inputs and a set of test
-   inputs based on the domains. Returns [train test]. A program should not
-   be considered a solution unless it is perfect on both the train and test
-   cases."
-  [domains]
-  (apply mapv concat (map (fn [[input-set n-train n-test]]
-                            (if (fn? input-set)
-                              (vector (repeatedly n-train input-set)
-                                      (repeatedly n-test input-set))
-                              (vector (if (>= n-train (count input-set))
-                                        input-set
-                                        (take n-train (shuffle input-set)))
-                                      (if (>= n-test (count input-set))
-                                        input-set
-                                        (take n-test (shuffle input-set))))))
-                          domains)))
-
 ;;Can make Even Squares test data like this:
 ;(test-and-train-data-from-domains even-squares-data-domains)
 

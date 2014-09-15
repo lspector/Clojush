@@ -31,6 +31,10 @@
             )
           (registered-for-stacks [:integer :boolean :string :char :exec :print])))
 
+(defn my-rand-long
+  "replaces rand-int when need longs"
+  [end]
+  (long (* (lrand) end)))
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
@@ -44,27 +48,8 @@
             start (expt 10 (dec digs))
             end (expt 10 digs)]
         ((if (< (lrand) 0.5) - +)
-          (+ (lrand-int (- end start)) start)))) 85 1000] ;; Random cases such that each number of digits between 1 and 10 will be represented evenly, as will negatives and positives
+          (+ (my-rand-long (- end start)) start)))) 85 1000] ;; Random cases such that each number of digits between 1 and 10 will be represented evenly, as will negatives and positives
    ])
-
-
-(defn test-and-train-data-from-domains
-  "Takes a list of domains and creates a set of (random) train inputs and a set of test
-   inputs based on the domains. Returns [train test]. A program should not
-   be considered a solution unless it is perfect on both the train and test
-   cases."
-  [domains]
-  (apply mapv concat (map (fn [[input-set n-train n-test]]
-                            (if (fn? input-set)
-                              (vector (repeatedly n-train input-set)
-                                      (repeatedly n-test input-set))
-                              (vector (if (>= n-train (count input-set))
-                                        input-set
-                                        (take n-train (shuffle input-set)))
-                                      (if (>= n-test (count input-set))
-                                        input-set
-                                        (take n-test (shuffle input-set))))))
-                          domains)))
 
 ;;Can make Digits test data like this:
 ;(test-and-train-data-from-domains digits-data-domains)

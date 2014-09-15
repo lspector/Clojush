@@ -62,25 +62,6 @@
    [(fn [] (checksum-input (inc (lrand-int 50)))) 88 1000]
    ])
 
-
-(defn test-and-train-data-from-domains
-  "Takes a list of domains and creates a set of (random) train inputs and a set of test
-   inputs based on the domains. Returns [train test]. A program should not
-   be considered a solution unless it is perfect on both the train and test
-   cases."
-  [domains]
-  (apply mapv concat (map (fn [[input-set n-train n-test]]
-                            (if (fn? input-set)
-                              (vector (repeatedly n-train input-set)
-                                      (repeatedly n-test input-set))
-                              (vector (if (>= n-train (count input-set))
-                                        input-set
-                                        (take n-train (shuffle input-set)))
-                                      (if (>= n-test (count input-set))
-                                        input-set
-                                        (take n-test (shuffle input-set))))))
-                          domains)))
-
 ;;Can make checksum test data like this:
 ;(test-and-train-data-from-domains checksum-data-domains)
 
@@ -99,9 +80,10 @@
   "Returns the error function for the checksum problem. Takes as
    input checksum data domains."
   [data-domains]
-  (let [[train-cases test-cases] (map checksum-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
-    (when false ;; Change to false to not print test cases
+  (let [[train-cases test-cases] (map #(sort-by (comp count first) %)
+                                      (map checksum-test-cases
+                                           (test-and-train-data-from-domains data-domains)))]
+    (when true ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
