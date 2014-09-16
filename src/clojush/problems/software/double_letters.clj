@@ -1,7 +1,7 @@
 ;; double_letters.clj
 ;; Tom Helmuth, thelmuth@cs.umass.edu
 ;;
-;; Problem Source: Program Repair Benchmark Paper (add citation later)
+;; Problem Source: iJava (http://ijava.cs.umass.edu/)
 ;;
 ;; Given a string, print the string, doubling every letter character, and
 ;; trippling every exclamation point. All other non-alphabetic and non-exclamation

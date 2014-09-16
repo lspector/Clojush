@@ -1,7 +1,7 @@
 ;; replace_space_with_newline.clj
 ;; Tom Helmuth, thelmuth@cs.umass.edu
 ;;
-;; Problem Source: Program Repair Benchmark Paper (add citation later)
+;; Problem Source: iJava (http://ijava.cs.umass.edu/)
 ;;
 ;; Given a string input, print the string, replacing spaces with newlines.
 ;; The input string will not have tabs or newlines, but may have multiple spaces

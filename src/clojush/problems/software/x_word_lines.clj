@@ -1,7 +1,7 @@
 ;; n_word_lines.clj
 ;; Tom Helmuth, thelmuth@cs.umass.edu
 ;;
-;; Problem Source: Program Repair Benchmark Paper (add citation later)
+;; Problem Source: iJava (http://ijava.cs.umass.edu/)
 ;;
 ;; Given an integer 1 <= X <= 10 and a string of at most 100 characters that likely
 ;; contains spaces and newlines, print the string with exactly X words per line.
