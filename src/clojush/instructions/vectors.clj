@@ -194,79 +194,107 @@
 (define-registered vector_boolean_nth (nther :vector_boolean :boolean))
 (define-registered vector_string_nth (nther :vector_string :string))
 
+(defn rester
+  "Returns a function that takes a state and takes the rest of the top item
+   on the type stack."
+  [type]
+  (fn [state]
+    (if (not (empty? (type state)))
+      (push-item (vec (rest (top-item type state)))
+                 type
+                 (pop-item type state))
+      state)))
+
+(define-registered vector_integer_rest (rester :vector_integer))
+(define-registered vector_float_rest (rester :vector_float))
+(define-registered vector_boolean_rest (rester :vector_boolean))
+(define-registered vector_string_rest (rester :vector_string))
+
+(defn butlaster
+  "Returns a function that takes a state and takes the butlast of the top item
+   on the type stack."
+  [type]
+  (fn [state]
+    (if (not (empty? (type state)))
+      (push-item (vec (butlast (top-item type state)))
+                 type
+                 (pop-item type state))
+      state)))
+
+(define-registered vector_integer_butlast (butlaster :vector_integer))
+(define-registered vector_float_butlast (butlaster :vector_float))
+(define-registered vector_boolean_butlast (butlaster :vector_boolean))
+(define-registered vector_string_butlast (butlaster :vector_string))
+
+(defn lengther
+  "Returns a function that takes a state and takes the length of the top item
+   on the type stack."
+  [type]
+  (fn [state]
+    (if (not (empty? (type state)))
+      (push-item (count (top-item type state))
+                 :integer
+                 (pop-item type state))
+      state)))
+
+(define-registered vector_integer_length (lengther :vector_integer))
+(define-registered vector_float_length (lengther :vector_float))
+(define-registered vector_boolean_length (lengther :vector_boolean))
+(define-registered vector_string_length (lengther :vector_string))
+
+(defn reverser
+  "Returns a function that takes a state and takes the reverse of the top item
+   on the type stack."
+  [type]
+  (fn [state]
+    (if (not (empty? (type state)))
+      (push-item (vec (reverse (top-item type state)))
+                 type
+                 (pop-item type state))
+      state)))
+
+(define-registered vector_integer_reverse (reverser :vector_integer))
+(define-registered vector_float_reverse (reverser :vector_float))
+(define-registered vector_boolean_reverse (reverser :vector_boolean))
+(define-registered vector_string_reverse (reverser :vector_string))
+
+(defn pushaller
+  "Returns a function that takes a state and pushes every item from the first
+   vector onto the appropriate stack."
+  [type lit-type]
+  (fn [state]
+    (if (empty? (type state))
+      state
+      (loop [lit-list (reverse (top-item type state))
+             loop-state (pop-item type state)]
+        (if (empty? lit-list)
+          loop-state
+          (recur (rest lit-list)
+                 (push-item (first lit-list) lit-type loop-state)))))))
+
+(define-registered vector_integer_pushall (pushaller :vector_integer :integer))
+(define-registered vector_float_pushall (pushaller :vector_float :float))
+(define-registered vector_boolean_pushall (pushaller :vector_boolean :boolean))
+(define-registered vector_string_pushall (pushaller :vector_string :string))
+
+(defn emptyvectorer
+  "Returns a function that takes a state and pushes a boolean of whether the top
+   vector is empty."
+  [type]
+  (fn [state]
+    (if (not (empty? (type state)))
+      (push-item (empty? (top-item type state))
+                 :boolean
+                 (pop-item type state))
+      state)))
+
+(define-registered vector_integer_emptyvector (emptyvectorer :vector_integer))
+(define-registered vector_float_emptyvector (emptyvectorer :vector_float))
+(define-registered vector_boolean_emptyvector (emptyvectorer :vector_boolean))
+(define-registered vector_string_emptyvector (emptyvectorer :vector_string))
 
 
-;
-;(define-registered
-;  string_rest
-;  (fn [state]
-;    (if (not (empty? (:string state)))
-;      (push-item (apply str (rest (stack-ref :string 0 state)))
-;                 :string
-;                 (pop-item :string state))
-;      state)))
-;
-;(define-registered
-;  string_butlast
-;  (fn [state]
-;    (if (not (empty? (:string state)))
-;      (push-item (apply str (butlast (stack-ref :string 0 state)))
-;                 :string
-;                 (pop-item :string state))
-;      state)))
-;
-;(define-registered
-;  string_length
-;  (fn [state]
-;    (if (not (empty? (:string state)))
-;      (push-item (count (stack-ref :string 0 state))
-;                 :integer
-;                 (pop-item :string state))
-;      state)))
-;
-;(define-registered
-;  string_reverse
-;  (fn [state]
-;    (if (empty? (:string state))
-;      state
-;      (let [top-string (top-item :string state)]
-;        (push-item (apply str (reverse top-string))
-;                   :string
-;                   (pop-item :string state))))))
-;
-;(define-registered
-;  string_parse_to_chars ;;call this pushall??
-;  (fn [state]
-;    (if (empty? (:string state))
-;      state
-;      (loop [char-list (reverse (top-item :string state))
-;             loop-state (pop-item :string state)]
-;        (if (empty? char-list)
-;          loop-state
-;          (recur (rest char-list)
-;                 (push-item (str (first char-list)) :string loop-state)))))))
-;
-;(define-registered
-;  string_split
-;  (fn [state]
-;    (if (empty? (:string state))
-;      state
-;      (loop [word-list (reverse (filter not-empty (split (trim (top-item :string state)) #"\s+")))
-;             loop-state (pop-item :string state)]
-;        (if (empty? word-list)
-;          loop-state
-;          (recur (rest word-list)
-;                 (push-item (first word-list) :string loop-state)))))))
-;
-;(define-registered
-;  string_emptystring ;;true if top string is empty
-;  (fn [state]
-;    (if (empty? (:string state))
-;      state
-;      (let [result-boolean (empty? (top-item :string state))]
-;        (push-item result-boolean
-;                   :boolean
-;                   (pop-item :string state))))))
+
 ;
 ;(define-registered
 ;  string_contains ;;true if top string is a substring of second string; false otherwise
