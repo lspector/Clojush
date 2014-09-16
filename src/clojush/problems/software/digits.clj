@@ -21,7 +21,7 @@
   (concat (list
             \newline
             ;;; end constants
-            (fn [] (- (lrand-int 11) 10))
+            (fn [] (- (lrand-int 21) 10))
             ;;; end ERCs
             (tag-instruction-erc [:integer :boolean :string :char :exec] 1000)
             (tagged-instruction-erc 1000)
