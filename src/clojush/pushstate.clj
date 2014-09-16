@@ -401,6 +401,13 @@
     zip_yank [:zip :integer]
     zip_yankdup [:zip :integer]
     })
+
+; The following finds instructions that haven't yet been added to instruction-types
+(defn print-instructions-without-types
+  []
+  (doseq [ins (sort-by name (clojure.set/difference (set @registered-instructions)
+                                                    (set (keys instruction-types))))]
+    (println ins)))
   
 (defn registered-for-stacks
   "Takes a list of stacks and returns all instructions that have all

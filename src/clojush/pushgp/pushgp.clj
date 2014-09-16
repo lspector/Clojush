@@ -3,7 +3,7 @@
             [clj-random.core :as random]
             [clojure.repl :as repl])
   (:use [clojush globals util pushstate random individual evaluate simplification translate]
-        [clojush.instructions boolean code common numbers random-instructions string char tag zip return input-output]
+        [clojush.instructions boolean code common numbers random-instructions string char vectors tag zip return input-output]
         [clojush.pushgp breed parent-selection report]
         [clojush.experimental.decimation]))
 
