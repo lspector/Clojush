@@ -13,6 +13,9 @@
 ;;    4 e a
 ;;
 ;; input stack has the 2 input strings
+;;
+;; NOTE: I could add a second error value per case. For example, comparing the
+;; number of newlines to the correct number of newlines. Or something similar.
 
 (ns clojush.problems.software.string-differences
   (:use clojush.pushgp.pushgp
@@ -155,7 +158,7 @@
                            (when @global-print-behavioral-diversity
                              (swap! behavior conj result))
                            ; Error is Levenshtein distance of printed strings
-                           (levenshtein-distance correct-output result))))]
+                           (levenshtein-distance correct-output result))))] ;;NOTE: SEE NOTE IN INTRO
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
