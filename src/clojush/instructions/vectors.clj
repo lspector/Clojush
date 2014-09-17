@@ -293,119 +293,109 @@
 (define-registered vector_boolean_emptyvector (emptyvectorer :vector_boolean))
 (define-registered vector_string_emptyvector (emptyvectorer :vector_string))
 
+(defn containser
+  "Returns a function that takes a state and tells whether the top lit-type item
+   is in the top type vector."
+  [type lit-type]
+  (fn [state]
+    (if (or (empty? (type state))
+            (empty? (lit-type state)))
+      state
+      (let [item (top-item lit-type state)
+            vect (top-item type state)
+            result (<= 0 (.indexOf vect item))]
+        (push-item result
+                   :boolean
+                   (pop-item lit-type (pop-item type state)))))))
+
+(define-registered vector_integer_contains (containser :vector_integer :integer))
+(define-registered vector_float_contains (containser :vector_float :float))
+(define-registered vector_boolean_contains (containser :vector_boolean :boolean))
+(define-registered vector_string_contains (containser :vector_string :string))
+
+(defn indexofer
+  "Returns a function that takes a state and finds the index of the top lit-type
+   item in the top type vector."
+  [type lit-type]
+  (fn [state]
+    (if (or (empty? (type state))
+            (empty? (lit-type state)))
+      state
+      (let [item (top-item lit-type state)
+            vect (top-item type state)
+            result (.indexOf vect item)]
+        (push-item result
+                   :integer
+                   (pop-item lit-type (pop-item type state)))))))
+
+(define-registered vector_integer_indexof (indexofer :vector_integer :integer))
+(define-registered vector_float_indexof (indexofer :vector_float :float))
+(define-registered vector_boolean_indexof (indexofer :vector_boolean :boolean))
+(define-registered vector_string_indexof (indexofer :vector_string :string))
+
+(defn occurrencesofer
+  "Returns a function that takes a state and counts the occurrences of the top lit-type
+   item in the top type vector."
+  [type lit-type]
+  (fn [state]
+    (if (or (empty? (type state))
+            (empty? (lit-type state)))
+      state
+      (let [item (top-item lit-type state)
+            vect (top-item type state)
+            result (count (filter #(= % item) vect))]
+        (push-item result
+                   :integer
+                   (pop-item lit-type (pop-item type state)))))))
+
+(define-registered vector_integer_occurrencesof (occurrencesofer :vector_integer :integer))
+(define-registered vector_float_occurrencesof (occurrencesofer :vector_float :float))
+(define-registered vector_boolean_occurrencesof (occurrencesofer :vector_boolean :boolean))
+(define-registered vector_string_occurrencesof (occurrencesofer :vector_string :string))
+
+(defn replaceer
+  "Returns a function that takes a state and replaces all occurrences of the second lit-type item
+   with the first lit-type item in the top type vector."
+  [type lit-type]
+  (fn [state]
+    (if (or (empty? (type state))
+            (empty? (rest (lit-type state))))
+      state
+      (let [result (replace {(stack-ref lit-type 1 state) (stack-ref lit-type 0 state)}
+                            (top-item type state))]
+        (push-item result
+                   type
+                   (pop-item lit-type (pop-item lit-type (pop-item type state))))))))
+
+(define-registered vector_integer_replace (replaceer :vector_integer :integer))
+(define-registered vector_float_replace (replaceer :vector_float :float))
+(define-registered vector_boolean_replace (replaceer :vector_boolean :boolean))
+(define-registered vector_string_replace (replaceer :vector_string :string))
+
+(defn replacefirster
+  "Returns a function that takes a state and replaces the first occurrence of the second lit-type item
+   with the first lit-type item in the top type vector."
+  [type lit-type]
+  (fn [state]
+    (if (or (empty? (type state))
+            (empty? (rest (lit-type state))))
+      state
+      (let [index (.indexOf (top-item type state) (stack-ref lit-type 1 state))
+            result (if (< index 0)
+                     (top-item type state)
+                     (assoc (top-item type state) index (stack-ref lit-type 0 state)))]
+        (push-item result
+                   type
+                   (pop-item lit-type (pop-item lit-type (pop-item type state))))))))
+
+(define-registered vector_integer_replacefirst (replacefirster :vector_integer :integer))
+(define-registered vector_float_replacefirst (replacefirster :vector_float :float))
+(define-registered vector_boolean_replacefirst (replacefirster :vector_boolean :boolean))
+(define-registered vector_string_replacefirst (replacefirster :vector_string :string))
 
 
-;
-;(define-registered
-;  string_contains ;;true if top string is a substring of second string; false otherwise
-;  (fn [state]
-;    (if (empty? (rest (:string state)))
-;      state
-;      (let [sub (top-item :string state)
-;            full (stack-ref :string 1 state)
-;            result-boolean (if (<= 0 (.indexOf full sub))
-;                             true
-;                             false)]
-;        (push-item result-boolean
-;                   :boolean
-;                   (pop-item :string (pop-item :string state)))))))
-;
-;(define-registered
-;  string_containschar ; true if the top char is in the top string
-;  (fn [state]
-;    (if (or (empty? (:string state))
-;            (empty? (:char state)))
-;      state
-;      (let [sub (str (top-item :char state))
-;            full (stack-ref :string 0 state)
-;            result (<= 0 (.indexOf full sub))]
-;        (push-item result
-;                   :boolean
-;                   (pop-item :char (pop-item :string state)))))))
-;
-;(define-registered
-;  string_indexofchar ; puts on the integer stack the index of the top char in the top string
-;  (fn [state]
-;    (if (or (empty? (:string state))
-;            (empty? (:char state)))
-;      state
-;      (let [sub (str (top-item :char state))
-;            full (stack-ref :string 0 state)
-;            index (.indexOf full sub)]
-;        (push-item index
-;                   :integer
-;                   (pop-item :char (pop-item :string state)))))))
-;
-;(define-registered
-;  string_occurencesofchar ; the number of times the top char is in the top string
-;  (fn [state]
-;    (if (or (empty? (:string state))
-;            (empty? (:char state)))
-;      state
-;      (let [ch (stack-ref :char 0 state)
-;            st (stack-ref :string 0 state)
-;            occ (count (filter #{ch} st))]
-;        (push-item occ
-;                   :integer
-;                   (pop-item :char (pop-item :string state)))))))
-;
-;(define-registered
-;  string_replace ; In third string on stack, replaces all occurences of second string with first string
-;  (fn [state]
-;    (if (<= 3 (count (:string state)))
-;      (let [result (string/replace (stack-ref :string 2 state)
-;                                   (stack-ref :string 1 state)
-;                                   (stack-ref :string 0 state))]
-;        (if (>= max-string-length (count result))
-;          (push-item result
-;                     :string
-;                     (pop-item :string (pop-item :string (pop-item :string state))))
-;          state))
-;      state)))
-;
-;(define-registered
-;  string_replacefirst ; In third string on stack, replaces first occurence of second string with first string
-;  (fn [state]
-;    (if (<= 3 (count (:string state)))
-;      (let [result (string/replace-first (stack-ref :string 2 state)
-;                                         (stack-ref :string 1 state)
-;                                         (stack-ref :string 0 state))]
-;        (if (>= max-string-length (count result))
-;          (push-item result
-;                     :string
-;                     (pop-item :string (pop-item :string (pop-item :string state))))
-;          state))
-;      state)))
-;
-;(define-registered
-;  string_replacechar ; In top string on stack, replaces all occurences of second char with first char
-;  (fn [state]
-;    (if (and (not (empty? (:string state)))
-;             (<= 2 (count (:char state))))
-;      (let [result (string/replace (stack-ref :string 0 state)
-;                                   (stack-ref :char 1 state)
-;                                   (stack-ref :char 0 state))]
-;        (if (>= max-string-length (count result))
-;          (push-item result
-;                     :string
-;                     (pop-item :char (pop-item :char (pop-item :string state))))
-;          state))
-;      state)))
-;
-;(define-registered
-;  string_replacefirstchar ; In top string on stack, replaces first occurence of second char with first char
-;  (fn [state]
-;    (if (and (not (empty? (:string state)))
-;             (<= 2 (count (:char state))))
-;      (let [result (string/replace-first (stack-ref :string 0 state)
-;                                   (stack-ref :char 1 state)
-;                                   (stack-ref :char 0 state))]
-;        (if (>= max-string-length (count result))
-;          (push-item result
-;                     :string
-;                     (pop-item :char (pop-item :char (pop-item :string state))))
-;          state))
-;      state)))
+
+
 ;
 ;(define-registered
 ;  string_removechar ; In top string on stack, remove all occurences of char

@@ -237,7 +237,7 @@
                    (pop-item :char (pop-item :string state)))))))
 
 (define-registered
-  string_occurencesofchar ; the number of times the top char is in the top string
+  string_occurrencesofchar ; the number of times the top char is in the top string
   (fn [state]
     (if (or (empty? (:string state))
             (empty? (:char state)))
