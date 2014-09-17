@@ -393,18 +393,21 @@
 (define-registered vector_boolean_replacefirst (replacefirster :vector_boolean :boolean))
 (define-registered vector_string_replacefirst (replacefirster :vector_string :string))
 
+(defn removeer
+  "Returns a function that takes a state and removes all occurrences of the first lit-type item
+   in the top type vector."
+  [type lit-type]
+  (fn [state]
+    (if (or (empty? (type state))
+            (empty? (lit-type state)))
+      state
+      (let [result (vec (remove #(= % (top-item lit-type state))
+                                (top-item type state)))]
+        (push-item result
+                   type
+                   (pop-item lit-type (pop-item type state)))))))
 
-
-
-;
-;(define-registered
-;  string_removechar ; In top string on stack, remove all occurences of char
-;  (fn [state]
-;    (if (and (not (empty? (:string state)))
-;             (not (empty? (:char state))))
-;      (let [result (apply str (remove #{(stack-ref :char 0 state)}
-;                                      (stack-ref :string 0 state)))]
-;        (push-item result
-;                   :string
-;                   (pop-item :char (pop-item :string state))))
-;      state)))
+(define-registered vector_integer_remove (removeer :vector_integer :integer))
+(define-registered vector_float_remove (removeer :vector_float :float))
+(define-registered vector_boolean_remove (removeer :vector_boolean :boolean))
+(define-registered vector_string_remove (removeer :vector_string :string))
