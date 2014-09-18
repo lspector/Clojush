@@ -15,7 +15,8 @@
 ;; input stack has the 2 input strings
 ;;
 ;; NOTE: I could add a second error value per case. For example, comparing the
-;; number of newlines to the correct number of newlines. Or something similar.
+;; number of newlines to the correct number of newlines. Or that the format
+;; of each line is correct (number, space, char, space, char). Or something similar.
 
 (ns clojush.problems.software.string-differences
   (:use clojush.pushgp.pushgp
