@@ -49,8 +49,8 @@
 (def global-tag-limit (atom 10000)) ;; The size of the tag space
 
 ;; These definitions are used by run-push (and functions it calls), and must be global since run-push is called by the problem-specifc error functions
-(def global-top-level-push-code (atom true)) ;; When true, run-push will push the program's code onto the code stack prior to running
-(def global-top-level-pop-code (atom true)) ;; When true, run-push will pop the code stack after running the program
+(def global-top-level-push-code (atom false)) ;; When true, run-push will push the program's code onto the code stack prior to running
+(def global-top-level-pop-code (atom false)) ;; When true, run-push will pop the code stack after running the program
 (def global-evalpush-limit (atom 150)) ;; The number of Push instructions that can be evaluated before stopping evaluation
 (def global-evalpush-time-limit (atom 0)) ;; The time in nanoseconds that a program can evaluate before stopping, 0 means no time limit
 (def global-pop-when-tagging (atom true)) ;; When true, tagging instructions will pop the exec stack when tagging; otherwise, the exec stack is not popped
