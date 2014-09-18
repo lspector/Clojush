@@ -3,7 +3,7 @@
             [clj-random.core :as random]
             [clojure.repl :as repl])
   (:use [clojush globals util pushstate random individual evaluate simplification translate]
-        [clojush.instructions boolean code common numbers random-instructions string char tag zip return input-output]
+        [clojush.instructions boolean code common numbers random-instructions string char vectors tag zip return input-output]
         [clojush.pushgp breed parent-selection report]
         [clojush.experimental.decimation]))
 
@@ -69,7 +69,7 @@
           :uniform-close-mutation-rate 0.1 ;; The probability of each :close being incremented or decremented during uniform close mutation
           :close-increment-rate 0.2 ;; The probability of making an increment change to :close during uniform close mutation, as opposed to a decrement change
           :uniform-silence-mutation-rate 0.1 ;; The probability of each :silent being switched during uniform silent mutation
-          :replace-child-that-exceeds-size-limit-with :parent ;; When a child is produced that exceeds the size limit of max-points, this is used to determine what program to return. Options include :parent, :empty, :random
+          :replace-child-that-exceeds-size-limit-with :random ;; When a child is produced that exceeds the size limit of max-points, this is used to determine what program to return. Options include :parent, :empty, :random
           :parent-reversion-probability 1.0 ;; The probability of a child being reverted to its parent by a genetic operator that has been made revertable, if the child is not as good as the parent on at least one test case
           ;;
           ;;----------------------------------------

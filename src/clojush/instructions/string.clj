@@ -87,7 +87,7 @@
       (let [st (stack-ref :string 0 state)
             first-index (min (count st) (max 0 (stack-ref :integer 1 state)))
             second-index (min (count st) (max first-index (stack-ref :integer 0 state)))]
-        (push-item (apply str (subs st first-index second-index))
+        (push-item (subs st first-index second-index)
                    :string
                    (pop-item :string (pop-item :integer (pop-item :integer state)))))
       state)))
@@ -122,7 +122,7 @@
             index (mod (stack-ref :integer 0 state) (count st))]
         (push-item (nth st index)
                    :char
-                   (pop-item :string state)))
+                   (pop-item :integer (pop-item :string state))))
       state)))
 
 (define-registered
@@ -187,6 +187,16 @@
                  (push-item (first word-list) :string loop-state)))))))
 
 (define-registered
+  string_emptystring ;;true if top string is empty
+  (fn [state]
+    (if (empty? (:string state))
+      state
+      (let [result-boolean (empty? (top-item :string state))]
+        (push-item result-boolean
+                   :boolean
+                   (pop-item :string state))))))
+
+(define-registered
   string_contains ;;true if top string is a substring of second string; false otherwise
   (fn [state]
     (if (empty? (rest (:string state)))
@@ -227,7 +237,7 @@
                    (pop-item :char (pop-item :string state)))))))
 
 (define-registered
-  string_occurencesofchar ; the number of times the top char is in the top string
+  string_occurrencesofchar ; the number of times the top char is in the top string
   (fn [state]
     (if (or (empty? (:string state))
             (empty? (:char state)))

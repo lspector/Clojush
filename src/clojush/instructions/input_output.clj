@@ -53,4 +53,6 @@
       (throw (Exception. (str "Undefined instruction: " (pr-str instr) "\nNOTE: Likely not same number of items on input stack as input instructions.")))
       (let [item (stack-ref :input (dec n) state)
             literal-type (recognize-literal item)]
-        (push-item item literal-type state)))))
+        (if (and (vector? item) (= [] item))
+          (push-item [] :vector_integer (push-item [] :vector_float (push-item [] :vector_string (push-item [] :vector_boolean state))))
+          (push-item item literal-type state))))))
