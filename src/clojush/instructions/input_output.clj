@@ -30,6 +30,10 @@
 (define-registered print_boolean (printer :boolean))
 (define-registered print_string (printer :string))
 (define-registered print_char (printer :char))
+(define-registered print_vector_integer (printer :vector_integer))
+(define-registered print_vector_float (printer :vector_float))
+(define-registered print_vector_boolean (printer :vector_boolean))
+(define-registered print_vector_string (printer :vector_string))
 ;(define-registered print_zip (printer :zip)) ; I don't think we want this
 
 (define-registered

@@ -92,7 +92,6 @@
     (if (and (not (empty? (vec-type state)))
              (not (empty? (lit-type state))))
       (let [result (conj (vec (top-item vec-type state)) (top-item lit-type state))]
-        (println result)
         (if (>= max-vector-length (count result))
           (push-item result
                      vec-type
