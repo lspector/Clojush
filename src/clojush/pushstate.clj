@@ -528,22 +528,6 @@
     zip_yank [:zip :integer]
     zip_yankdup [:zip :integer]
     })
-
-; The following finds instructions that haven't yet been added to instruction-types
-(defn print-instructions-without-types
-  []
-  (println "===============================")
-  (println "The following are in @registered-instructions but not in instruction-types (and should be added)")
-  (println "===============================")
-  (doseq [ins (sort-by name (clojure.set/difference (set @registered-instructions)
-                                                    (set (keys instruction-types))))]
-    (println ins))
-  (println "===============================")
-  (println "The following are in instruction-types but not in @registered-instructions")
-  (println "===============================")
-  (doseq [ins (sort-by name (clojure.set/difference (set (keys instruction-types))
-                                                    (set @registered-instructions)))]
-    (println ins)))
   
 (defn registered-for-stacks
   "Takes a list of stacks and returns all instructions that have all
@@ -567,3 +551,22 @@
                  (and (:stack-types (meta instr-fn))
                       (clojure.set/subset? (set (:stack-types (meta instr-fn))) (set types-list))))
                @instruction-table)))
+
+; The following finds instructions that haven't yet been added to instruction-types
+(defn print-instructions-without-types
+  []
+  (let [ins-registered-for-stacks (set (registered-for-stacks-meta [:integer :boolean :float :char :string :print :random
+                                                                    :parentheses :exec :code :vector_integer :vector_string
+                                                                    :vector_boolean :vector_float :zip :environment]))]
+    (println "===============================")
+    (println "The following are in @registered-instructions but not in registed-for-stacks-meta (and should be added)")
+    (println "===============================")
+    (doseq [ins (sort-by name (clojure.set/difference (set @registered-instructions)
+                                                      ins-registered-for-stacks))]
+      (println ins))
+    (println "===============================")
+    (println "The following are in registered-for-stacks-meta but not in @registered-instructions")
+    (println "===============================")
+    (doseq [ins (sort-by name (clojure.set/difference ins-registered-for-stacks
+                                                      (set @registered-instructions)))]
+      (println ins))))
