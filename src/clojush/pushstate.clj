@@ -163,7 +163,7 @@
     char_rand [:char :random]
     char_rot [:char]
     char_shove [:char :integer]
-    char_stackdepth [:char]
+    char_stackdepth [:char :integer]
     char_swap [:char]
     char_yank [:char :integer]
     char_yankdup [:char :integer]

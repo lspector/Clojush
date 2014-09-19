@@ -58,14 +58,14 @@
   [type]
   (fn [state] (pop-item type state)))
 
-(define-registered exec_pop (popper :exec))
-(define-registered integer_pop (popper :integer))
-(define-registered float_pop (popper :float))
-(define-registered code_pop (popper :code))
-(define-registered boolean_pop (popper :boolean))
-(define-registered zip_pop (popper :zip))
-(define-registered string_pop (popper :string))
-(define-registered char_pop (popper :char))
+(define-registered exec_pop (with-meta (popper :exec) {:stack-types [:exec]}))
+(define-registered integer_pop (with-meta (popper :integer) {:stack-types [:integer]}))
+(define-registered float_pop (with-meta (popper :float) {:stack-types [:float]}))
+(define-registered code_pop (with-meta (popper :code) {:stack-types [:code]}))
+(define-registered boolean_pop (with-meta (popper :boolean) {:stack-types [:boolean]}))
+(define-registered zip_pop (with-meta (popper :zip) {:stack-types [:zip]}))
+(define-registered string_pop (with-meta (popper :string) {:stack-types [:string]}))
+(define-registered char_pop (with-meta (popper :char) {:stack-types [:char]}))
 
 (defn duper
   "Returns a function that takes a state and duplicates the top item of the appropriate 
@@ -76,14 +76,14 @@
       state
       (push-item (top-item type state) type state))))
 
-(define-registered exec_dup (duper :exec))
-(define-registered integer_dup (duper :integer))
-(define-registered float_dup (duper :float))
-(define-registered code_dup (duper :code))
-(define-registered boolean_dup (duper :boolean))
-(define-registered zip_dup (duper :zip))
-(define-registered string_dup (duper :string))
-(define-registered char_dup (duper :char))
+(define-registered exec_dup (with-meta (duper :exec) {:stack-types [:exec]}))
+(define-registered integer_dup (with-meta (duper :integer) {:stack-types [:integer]}))
+(define-registered float_dup (with-meta (duper :float) {:stack-types [:float]}))
+(define-registered code_dup (with-meta (duper :code) {:stack-types [:code]}))
+(define-registered boolean_dup (with-meta (duper :boolean) {:stack-types [:boolean]}))
+(define-registered zip_dup (with-meta (duper :zip) {:stack-types [:zip]}))
+(define-registered string_dup (with-meta (duper :string) {:stack-types [:string]}))
+(define-registered char_dup (with-meta (duper :char) {:stack-types [:char]}))
 
 (defn swapper
   "Returns a function that takes a state and swaps the top 2 items of the appropriate 
@@ -99,14 +99,14 @@
              (push-item second-item type)))
       state)))
 
-(define-registered exec_swap (swapper :exec))
-(define-registered integer_swap (swapper :integer))
-(define-registered float_swap (swapper :float))
-(define-registered code_swap (swapper :code))
-(define-registered boolean_swap (swapper :boolean))
-(define-registered zip_swap (swapper :zip))
-(define-registered string_swap (swapper :string))
-(define-registered char_swap (swapper :char))
+(define-registered exec_swap (with-meta (swapper :exec) {:stack-types [:exec]}))
+(define-registered integer_swap (with-meta (swapper :integer) {:stack-types [:integer]}))
+(define-registered float_swap (with-meta (swapper :float) {:stack-types [:float]}))
+(define-registered code_swap (with-meta (swapper :code) {:stack-types [:code]}))
+(define-registered boolean_swap (with-meta (swapper :boolean) {:stack-types [:boolean]}))
+(define-registered zip_swap (with-meta (swapper :zip) {:stack-types [:zip]}))
+(define-registered string_swap (with-meta (swapper :string) {:stack-types [:string]}))
+(define-registered char_swap (with-meta (swapper :char) {:stack-types [:char]}))
 
 (defn rotter
   "Returns a function that takes a state and rotates the top 3 items of the appropriate 
@@ -125,14 +125,14 @@
              (push-item third type)))
       state)))
 
-(define-registered exec_rot (rotter :exec))
-(define-registered integer_rot (rotter :integer))
-(define-registered float_rot (rotter :float))
-(define-registered code_rot (rotter :code))
-(define-registered boolean_rot (rotter :boolean))
-(define-registered zip_rot (rotter :zip))
-(define-registered string_rot (rotter :string))
-(define-registered char_rot (rotter :char))
+(define-registered exec_rot (with-meta (rotter :exec) {:stack-types [:exec]}))
+(define-registered integer_rot (with-meta (rotter :integer) {:stack-types [:integer]}))
+(define-registered float_rot (with-meta (rotter :float) {:stack-types [:float]}))
+(define-registered code_rot (with-meta (rotter :code) {:stack-types [:code]}))
+(define-registered boolean_rot (with-meta (rotter :boolean) {:stack-types [:boolean]}))
+(define-registered zip_rot (with-meta (rotter :zip) {:stack-types [:zip]}))
+(define-registered string_rot (with-meta (rotter :string) {:stack-types [:string]}))
+(define-registered char_rot (with-meta (rotter :char) {:stack-types [:char]}))
 
 (defn flusher
   "Returns a function that empties the stack of the given state."
@@ -140,14 +140,14 @@
   (fn [state]
     (assoc state type '())))
 
-(define-registered exec_flush (flusher :exec))
-(define-registered integer_flush (flusher :integer))
-(define-registered float_flush (flusher :float))
-(define-registered code_flush (flusher :code))
-(define-registered boolean_flush (flusher :boolean))
-(define-registered zip_flush (flusher :zip))
-(define-registered string_flush (flusher :string))
-(define-registered char_flush (flusher :char))
+(define-registered exec_flush (with-meta (flusher :exec) {:stack-types [:exec]}))
+(define-registered integer_flush (with-meta (flusher :integer) {:stack-types [:integer]}))
+(define-registered float_flush (with-meta (flusher :float) {:stack-types [:float]}))
+(define-registered code_flush (with-meta (flusher :code) {:stack-types [:code]}))
+(define-registered boolean_flush (with-meta (flusher :boolean) {:stack-types [:boolean]}))
+(define-registered zip_flush (with-meta (flusher :zip) {:stack-types [:zip]}))
+(define-registered string_flush (with-meta (flusher :string) {:stack-types [:string]}))
+(define-registered char_flush (with-meta (flusher :char) {:stack-types [:char]}))
 
 (defn eqer
   "Returns a function that compares the top two items of the appropriate stack of 
@@ -162,14 +162,14 @@
              (push-item (= first second) :boolean)))
       state)))
 
-(define-registered exec_eq (eqer :exec))
-(define-registered integer_eq (eqer :integer))
-(define-registered float_eq (eqer :float))
-(define-registered code_eq (eqer :code))
-(define-registered boolean_eq (eqer :boolean))
-(define-registered zip_eq (eqer :zip))
-(define-registered string_eq (eqer :string))
-(define-registered char_eq (eqer :char))
+(define-registered exec_eq (with-meta (eqer :exec) {:stack-types [:exec :boolean]}))
+(define-registered integer_eq (with-meta (eqer :integer) {:stack-types [:integer :boolean]}))
+(define-registered float_eq (with-meta (eqer :float) {:stack-types [:float :boolean]}))
+(define-registered code_eq (with-meta (eqer :code) {:stack-types [:code :boolean]}))
+(define-registered boolean_eq (with-meta (eqer :boolean) {:stack-types [:boolean]}))
+(define-registered zip_eq (with-meta (eqer :zip) {:stack-types [:zip :boolean]}))
+(define-registered string_eq (with-meta (eqer :string) {:stack-types [:string :boolean]}))
+(define-registered char_eq (with-meta (eqer :char) {:stack-types [:char :boolean]}))
 
 (defn stackdepther
   "Returns a function that pushes the depth of the appropriate stack of the 
@@ -178,14 +178,14 @@
   (fn [state]
     (push-item (count (type state)) :integer state)))
 
-(define-registered exec_stackdepth (stackdepther :exec))
-(define-registered integer_stackdepth (stackdepther :integer))
-(define-registered float_stackdepth (stackdepther :float))
-(define-registered code_stackdepth (stackdepther :code))
-(define-registered boolean_stackdepth (stackdepther :boolean))
-(define-registered zip_stackdepth (stackdepther :zip))
-(define-registered string_stackdepth (stackdepther :string))
-(define-registered char_stackdepth (stackdepther :char))
+(define-registered exec_stackdepth (with-meta (stackdepther :exec) {:stack-types [:exec :integer]}))
+(define-registered integer_stackdepth (with-meta (stackdepther :integer) {:stack-types [:integer]}))
+(define-registered float_stackdepth (with-meta (stackdepther :float) {:stack-types [:float :integer]}))
+(define-registered code_stackdepth (with-meta (stackdepther :code) {:stack-types [:code :integer]}))
+(define-registered boolean_stackdepth (with-meta (stackdepther :boolean) {:stack-types [:boolean :integer]}))
+(define-registered zip_stackdepth (with-meta (stackdepther :zip) {:stack-types [:zip :integer]}))
+(define-registered string_stackdepth (with-meta (stackdepther :string) {:stack-types [:string :integer]}))
+(define-registered char_stackdepth (with-meta (stackdepther :char) {:stack-types [:char :integer]}))
 
 (defn yanker
   "Returns a function that yanks an item from deep in the specified stack,
@@ -209,14 +209,14 @@
         (push-item item type with-item-pulled))
       state)))
 
-(define-registered exec_yank (yanker :exec))
-(define-registered integer_yank (yanker :integer))
-(define-registered float_yank (yanker :float))
-(define-registered code_yank (yanker :code))
-(define-registered boolean_yank (yanker :boolean))
-(define-registered zip_yank (yanker :zip))
-(define-registered string_yank (yanker :string))
-(define-registered char_yank (yanker :char))
+(define-registered exec_yank (with-meta (yanker :exec) {:stack-types [:exec :integer]}))
+(define-registered integer_yank (with-meta (yanker :integer) {:stack-types [:integer]}))
+(define-registered float_yank (with-meta (yanker :float) {:stack-types [:float :integer]}))
+(define-registered code_yank (with-meta (yanker :code) {:stack-types [:code :integer]}))
+(define-registered boolean_yank (with-meta (yanker :boolean) {:stack-types [:boolean :integer]}))
+(define-registered zip_yank (with-meta (yanker :zip) {:stack-types [:zip :integer]}))
+(define-registered string_yank (with-meta (yanker :string) {:stack-types [:string :integer]}))
+(define-registered char_yank (with-meta (yanker :char) {:stack-types [:char :integer]}))
 
 (defn yankduper
   "Returns a function that yanks a copy of an item from deep in the specified stack,
@@ -235,14 +235,14 @@
         (push-item item type with-index-popped))
       state)))
 
-(define-registered exec_yankdup (yankduper :exec))
-(define-registered integer_yankdup (yankduper :integer))
-(define-registered float_yankdup (yankduper :float))
-(define-registered code_yankdup (yankduper :code))
-(define-registered boolean_yankdup (yankduper :boolean))
-(define-registered zip_yankdup (yankduper :zip))
-(define-registered string_yankdup (yankduper :string))
-(define-registered char_yankdup (yankduper :char))
+(define-registered exec_yankdup (with-meta (yankduper :exec) {:stack-types [:exec :integer]}))
+(define-registered integer_yankdup (with-meta (yankduper :integer) {:stack-types [:integer]}))
+(define-registered float_yankdup (with-meta (yankduper :float) {:stack-types [:float :integer]}))
+(define-registered code_yankdup (with-meta (yankduper :code) {:stack-types [:code :integer]}))
+(define-registered boolean_yankdup (with-meta (yankduper :boolean) {:stack-types [:boolean :integer]}))
+(define-registered zip_yankdup (with-meta (yankduper :zip) {:stack-types [:zip :integer]}))
+(define-registered string_yankdup (with-meta (yankduper :string) {:stack-types [:string :integer]}))
+(define-registered char_yankdup (with-meta (yankduper :char) {:stack-types [:char :integer]}))
 
 (defn shover
   "Returns a function that shoves an item deep in the specified stack, using the top
@@ -265,14 +265,14 @@
                                                (drop actual-index stk)))))
       state)))
 
-(define-registered exec_shove (shover :exec))
-(define-registered integer_shove (shover :integer))
-(define-registered float_shove (shover :float))
-(define-registered code_shove (shover :code))
-(define-registered boolean_shove (shover :boolean))
-(define-registered zip_shove (shover :zip))
-(define-registered string_shove (shover :string))
-(define-registered char_shove (shover :char))
+(define-registered exec_shove (with-meta (shover :exec) {:stack-types [:exec :integer]}))
+(define-registered integer_shove (with-meta (shover :integer) {:stack-types [:integer]}))
+(define-registered float_shove (with-meta (shover :float) {:stack-types [:float :integer]}))
+(define-registered code_shove (with-meta (shover :code) {:stack-types [:code :integer]}))
+(define-registered boolean_shove (with-meta (shover :boolean) {:stack-types [:boolean :integer]}))
+(define-registered zip_shove (with-meta (shover :zip) {:stack-types [:zip :integer]}))
+(define-registered string_shove (with-meta (shover :string) {:stack-types [:string :integer]}))
+(define-registered char_shove (with-meta (shover :char) {:stack-types [:char :integer]}))
 
 (defn emptyer
   "Returns a function that takes a state and tells whether that stack is empty."
@@ -282,11 +282,11 @@
                :boolean
                state)))
 
-(define-registered exec_empty (emptyer :exec))
-(define-registered integer_empty (emptyer :integer))
-(define-registered float_empty (emptyer :float))
-(define-registered code_empty (emptyer :code))
-(define-registered boolean_empty (emptyer :boolean))
-(define-registered zip_empty (emptyer :zip))
-(define-registered string_empty (emptyer :string))
-(define-registered char_empty (emptyer :char))
+(define-registered exec_empty (with-meta (emptyer :exec) {:stack-types [:exec :boolean]}))
+(define-registered integer_empty (with-meta (emptyer :integer) {:stack-types [:integer :boolean]}))
+(define-registered float_empty (with-meta (emptyer :float) {:stack-types [:float :boolean]}))
+(define-registered code_empty (with-meta (emptyer :code) {:stack-types [:code :boolean]}))
+(define-registered boolean_empty (with-meta (emptyer :boolean) {:stack-types [:boolean]}))
+(define-registered zip_empty (with-meta (emptyer :zip) {:stack-types [:zip :boolean]}))
+(define-registered string_empty (with-meta (emptyer :string) {:stack-types [:string :boolean]}))
+(define-registered char_empty (with-meta (emptyer :char) {:stack-types [:char :boolean]}))
