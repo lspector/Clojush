@@ -555,3 +555,15 @@
        (filter (fn [[instr req-types]]
                  (clojure.set/subset? (set req-types) (set types-list)))
                instruction-types)))
+
+(defn registered-for-stacks-meta
+  "Takes a list of stacks and returns all instructions that have all
+   of their stack requirements fulfilled. This won't include random instructions
+   unless :random is in the types list. This won't include parenthesis-altering
+   instructions unless :parentheses is in the types list."
+  [types-list]
+  (map first
+       (filter (fn [[instr instr-fn]]
+                 (and (:stack-types (meta instr-fn))
+                      (clojure.set/subset? (set (:stack-types (meta instr-fn))) (set types-list))))
+               @instruction-table)))
