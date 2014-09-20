@@ -1,66 +1,64 @@
 (ns clojush.instructions.vectors
   (:use [clojush pushstate globals]
         clojush.instructions.common))
-;      [clojure.string :only [split trim]])
-;(:require [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; stack instructions for vectors
 
-(define-registered vector_integer_pop (popper :vector_integer))
-(define-registered vector_float_pop (popper :vector_float))
-(define-registered vector_boolean_pop (popper :vector_boolean))
-(define-registered vector_string_pop (popper :vector_string))
+(define-registered vector_integer_pop (with-meta (popper :vector_integer) {:stack-types [:vector_integer]}))
+(define-registered vector_float_pop (with-meta (popper :vector_float) {:stack-types [:vector_float]}))
+(define-registered vector_boolean_pop (with-meta (popper :vector_boolean) {:stack-types [:vector_boolean]}))
+(define-registered vector_string_pop (with-meta (popper :vector_string) {:stack-types [:vector_string]}))
 
-(define-registered vector_integer_dup (duper :vector_integer))
-(define-registered vector_float_dup (duper :vector_float))
-(define-registered vector_boolean_dup (duper :vector_boolean))
-(define-registered vector_string_dup (duper :vector_string))
+(define-registered vector_integer_dup (with-meta (duper :vector_integer) {:stack-types [:vector_integer]}))
+(define-registered vector_float_dup (with-meta (duper :vector_float) {:stack-types [:vector_float]}))
+(define-registered vector_boolean_dup (with-meta (duper :vector_boolean) {:stack-types [:vector_boolean]}))
+(define-registered vector_string_dup (with-meta (duper :vector_string) {:stack-types [:vector_string]}))
 
-(define-registered vector_integer_swap (swapper :vector_integer))
-(define-registered vector_float_swap (swapper :vector_float))
-(define-registered vector_boolean_swap (swapper :vector_boolean))
-(define-registered vector_string_swap (swapper :vector_string))
+(define-registered vector_integer_swap (with-meta (swapper :vector_integer) {:stack-types [:vector_integer]}))
+(define-registered vector_float_swap (with-meta (swapper :vector_float) {:stack-types [:vector_float]}))
+(define-registered vector_boolean_swap (with-meta (swapper :vector_boolean) {:stack-types [:vector_boolean]}))
+(define-registered vector_string_swap (with-meta (swapper :vector_string) {:stack-types [:vector_string]}))
 
-(define-registered vector_integer_rot (rotter :vector_integer))
-(define-registered vector_float_rot (rotter :vector_float))
-(define-registered vector_boolean_rot (rotter :vector_boolean))
-(define-registered vector_string_rot (rotter :vector_string))
+(define-registered vector_integer_rot (with-meta (rotter :vector_integer) {:stack-types [:vector_integer]}))
+(define-registered vector_float_rot (with-meta (rotter :vector_float) {:stack-types [:vector_float]}))
+(define-registered vector_boolean_rot (with-meta (rotter :vector_boolean) {:stack-types [:vector_boolean]}))
+(define-registered vector_string_rot (with-meta (rotter :vector_string) {:stack-types [:vector_string]}))
 
-(define-registered vector_integer_flush (flusher :vector_integer))
-(define-registered vector_float_flush (flusher :vector_float))
-(define-registered vector_boolean_flush (flusher :vector_boolean))
-(define-registered vector_string_flush (flusher :vector_string))
+(define-registered vector_integer_flush (with-meta (flusher :vector_integer) {:stack-types [:vector_integer]}))
+(define-registered vector_float_flush (with-meta (flusher :vector_float) {:stack-types [:vector_float]}))
+(define-registered vector_boolean_flush (with-meta (flusher :vector_boolean) {:stack-types [:vector_boolean]}))
+(define-registered vector_string_flush (with-meta (flusher :vector_string) {:stack-types [:vector_string]}))
 
-(define-registered vector_integer_eq (eqer :vector_integer))
-(define-registered vector_float_eq (eqer :vector_float))
-(define-registered vector_boolean_eq (eqer :vector_boolean))
-(define-registered vector_string_eq (eqer :vector_string))
+(define-registered vector_integer_eq (with-meta (eqer :vector_integer) {:stack-types [:vector_integer :boolean]}))
+(define-registered vector_float_eq (with-meta (eqer :vector_float) {:stack-types [:vector_float :boolean]}))
+(define-registered vector_boolean_eq (with-meta (eqer :vector_boolean) {:stack-types [:vector_boolean :boolean]}))
+(define-registered vector_string_eq (with-meta (eqer :vector_string) {:stack-types [:vector_string :boolean]}))
 
-(define-registered vector_integer_stackdepth (stackdepther :vector_integer))
-(define-registered vector_float_stackdepth (stackdepther :vector_float))
-(define-registered vector_boolean_stackdepth (stackdepther :vector_boolean))
-(define-registered vector_string_stackdepth (stackdepther :vector_string))
+(define-registered vector_integer_stackdepth (with-meta (stackdepther :vector_integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_stackdepth (with-meta (stackdepther :vector_float) {:stack-types [:vector_float :integer]}))
+(define-registered vector_boolean_stackdepth (with-meta (stackdepther :vector_boolean) {:stack-types [:vector_boolean :integer]}))
+(define-registered vector_string_stackdepth (with-meta (stackdepther :vector_string) {:stack-types [:vector_string :integer]}))
 
-(define-registered vector_integer_yank (yanker :vector_integer))
-(define-registered vector_float_yank (yanker :vector_float))
-(define-registered vector_boolean_yank (yanker :vector_boolean))
-(define-registered vector_string_yank (yanker :vector_string))
+(define-registered vector_integer_yank (with-meta (yanker :vector_integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_yank (with-meta (yanker :vector_float) {:stack-types [:vector_float :integer]}))
+(define-registered vector_boolean_yank (with-meta (yanker :vector_boolean) {:stack-types [:vector_boolean :integer]}))
+(define-registered vector_string_yank (with-meta (yanker :vector_string) {:stack-types [:vector_string :integer]}))
 
-(define-registered vector_integer_yankdup (yankduper :vector_integer))
-(define-registered vector_float_yankdup (yankduper :vector_float))
-(define-registered vector_boolean_yankdup (yankduper :vector_boolean))
-(define-registered vector_string_yankdup (yankduper :vector_string))
+(define-registered vector_integer_yankdup (with-meta (yankduper :vector_integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_yankdup (with-meta (yankduper :vector_float) {:stack-types [:vector_float :integer]}))
+(define-registered vector_boolean_yankdup (with-meta (yankduper :vector_boolean) {:stack-types [:vector_boolean :integer]}))
+(define-registered vector_string_yankdup (with-meta (yankduper :vector_string) {:stack-types [:vector_string :integer]}))
 
-(define-registered vector_integer_shove (shover :vector_integer))
-(define-registered vector_float_shove (shover :vector_float))
-(define-registered vector_boolean_shove (shover :vector_boolean))
-(define-registered vector_string_shove (shover :vector_string))
+(define-registered vector_integer_shove (with-meta (shover :vector_integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_shove (with-meta (shover :vector_float) {:stack-types [:vector_float :integer]}))
+(define-registered vector_boolean_shove (with-meta (shover :vector_boolean) {:stack-types [:vector_boolean :integer]}))
+(define-registered vector_string_shove (with-meta (shover :vector_string) {:stack-types [:vector_string :integer]}))
 
-(define-registered vector_integer_empty (emptyer :vector_integer))
-(define-registered vector_float_empty (emptyer :vector_float))
-(define-registered vector_boolean_empty (emptyer :vector_boolean))
-(define-registered vector_string_empty (emptyer :vector_string))
+(define-registered vector_integer_empty (with-meta (emptyer :vector_integer) {:stack-types [:vector_integer :boolean]}))
+(define-registered vector_float_empty (with-meta (emptyer :vector_float) {:stack-types [:vector_float :boolean]}))
+(define-registered vector_boolean_empty (with-meta (emptyer :vector_boolean) {:stack-types [:vector_boolean :boolean]}))
+(define-registered vector_string_empty (with-meta (emptyer :vector_string) {:stack-types [:vector_string :boolean]}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; common instructions for vectors
@@ -80,10 +78,10 @@
           state))
       state)))
 
-(define-registered vector_integer_concat (concater :vector_integer))
-(define-registered vector_float_concat (concater :vector_float))
-(define-registered vector_boolean_concat (concater :vector_boolean))
-(define-registered vector_string_concat (concater :vector_string))
+(define-registered vector_integer_concat (with-meta (concater :vector_integer) {:stack-types [:vector_integer]}))
+(define-registered vector_float_concat (with-meta (concater :vector_float) {:stack-types [:vector_float]}))
+(define-registered vector_boolean_concat (with-meta (concater :vector_boolean) {:stack-types [:vector_boolean]}))
+(define-registered vector_string_concat (with-meta (concater :vector_string) {:stack-types [:vector_string]}))
 
 (defn conjer
   "Returns a function that takes a state and conj's an item onto the type stack."
@@ -99,10 +97,10 @@
           state))
       state)))
 
-(define-registered vector_integer_conj (conjer :vector_integer :integer))
-(define-registered vector_float_conj (conjer :vector_float :float))
-(define-registered vector_boolean_conj (conjer :vector_boolean :boolean))
-(define-registered vector_string_conj (conjer :vector_string :string))
+(define-registered vector_integer_conj (with-meta (conjer :vector_integer :integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_conj (with-meta (conjer :vector_float :float) {:stack-types [:vector_float :float]}))
+(define-registered vector_boolean_conj (with-meta (conjer :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean]}))
+(define-registered vector_string_conj (with-meta (conjer :vector_string :string) {:stack-types [:vector_string :string]}))
 
 (defn taker
   "Returns a function that takes a state and takes the first N items from the type
@@ -117,10 +115,10 @@
                  (pop-item type (pop-item :integer state)))
       state)))
 
-(define-registered vector_integer_take (taker :vector_integer))
-(define-registered vector_float_take (taker :vector_float))
-(define-registered vector_boolean_take (taker :vector_boolean))
-(define-registered vector_string_take (taker :vector_string))
+(define-registered vector_integer_take (with-meta (taker :vector_integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_take (with-meta (taker :vector_float) {:stack-types [:vector_float :integer]}))
+(define-registered vector_boolean_take (with-meta (taker :vector_boolean) {:stack-types [:vector_boolean :integer]}))
+(define-registered vector_string_take (with-meta (taker :vector_string) {:stack-types [:vector_string :integer]}))
 
 (defn subvecer
   "Returns a function that takes a state and takes the subvec of the top item
@@ -137,10 +135,10 @@
                    (pop-item type (pop-item :integer (pop-item :integer state)))))
       state)))
 
-(define-registered vector_integer_subvec (subvecer :vector_integer))
-(define-registered vector_float_subvec (subvecer :vector_float))
-(define-registered vector_boolean_subvec (subvecer :vector_boolean))
-(define-registered vector_string_subvec (subvecer :vector_string))
+(define-registered vector_integer_subvec (with-meta (subvecer :vector_integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_subvec (with-meta (subvecer :vector_float) {:stack-types [:vector_float :integer]}))
+(define-registered vector_boolean_subvec (with-meta (subvecer :vector_boolean) {:stack-types [:vector_boolean :integer]}))
+(define-registered vector_string_subvec (with-meta (subvecer :vector_string) {:stack-types [:vector_string :integer]}))
 
 (defn firster
   "Returns a function that takes a state and gets the first item from the type stack."
@@ -153,10 +151,10 @@
                  (pop-item type state))
       state)))
 
-(define-registered vector_integer_first (firster :vector_integer :integer))
-(define-registered vector_float_first (firster :vector_float :float))
-(define-registered vector_boolean_first (firster :vector_boolean :boolean))
-(define-registered vector_string_first (firster :vector_string :string))
+(define-registered vector_integer_first (with-meta (firster :vector_integer :integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_first (with-meta (firster :vector_float :float) {:stack-types [:vector_float :float]}))
+(define-registered vector_boolean_first (with-meta (firster :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean]}))
+(define-registered vector_string_first (with-meta (firster :vector_string :string) {:stack-types [:vector_string :string]}))
 
 (defn laster
   "Returns a function that takes a state and gets the last item from the type stack."
@@ -169,10 +167,10 @@
                  (pop-item type state))
       state)))
 
-(define-registered vector_integer_last (laster :vector_integer :integer))
-(define-registered vector_float_last (laster :vector_float :float))
-(define-registered vector_boolean_last (laster :vector_boolean :boolean))
-(define-registered vector_string_last (laster :vector_string :string))
+(define-registered vector_integer_last (with-meta (laster :vector_integer :integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_last (with-meta (laster :vector_float :float) {:stack-types [:vector_float :float]}))
+(define-registered vector_boolean_last (with-meta (laster :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean]}))
+(define-registered vector_string_last (with-meta (laster :vector_string :string) {:stack-types [:vector_string :string]}))
 
 (defn nther
   "Returns a function that takes a state and gets the nth item from the type stack."
@@ -188,10 +186,10 @@
                    (pop-item :integer (pop-item type state))))
       state)))
 
-(define-registered vector_integer_nth (nther :vector_integer :integer))
-(define-registered vector_float_nth (nther :vector_float :float))
-(define-registered vector_boolean_nth (nther :vector_boolean :boolean))
-(define-registered vector_string_nth (nther :vector_string :string))
+(define-registered vector_integer_nth (with-meta (nther :vector_integer :integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_nth (with-meta (nther :vector_float :float) {:stack-types [:vector_float :float :integer]}))
+(define-registered vector_boolean_nth (with-meta (nther :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean :integer]}))
+(define-registered vector_string_nth (with-meta (nther :vector_string :string) {:stack-types [:vector_string :string :integer]}))
 
 (defn rester
   "Returns a function that takes a state and takes the rest of the top item
@@ -204,10 +202,10 @@
                  (pop-item type state))
       state)))
 
-(define-registered vector_integer_rest (rester :vector_integer))
-(define-registered vector_float_rest (rester :vector_float))
-(define-registered vector_boolean_rest (rester :vector_boolean))
-(define-registered vector_string_rest (rester :vector_string))
+(define-registered vector_integer_rest (with-meta (rester :vector_integer) {:stack-types [:vector_integer]}))
+(define-registered vector_float_rest (with-meta (rester :vector_float) {:stack-types [:vector_float]}))
+(define-registered vector_boolean_rest (with-meta (rester :vector_boolean) {:stack-types [:vector_boolean]}))
+(define-registered vector_string_rest (with-meta (rester :vector_string) {:stack-types [:vector_string]}))
 
 (defn butlaster
   "Returns a function that takes a state and takes the butlast of the top item
@@ -220,10 +218,10 @@
                  (pop-item type state))
       state)))
 
-(define-registered vector_integer_butlast (butlaster :vector_integer))
-(define-registered vector_float_butlast (butlaster :vector_float))
-(define-registered vector_boolean_butlast (butlaster :vector_boolean))
-(define-registered vector_string_butlast (butlaster :vector_string))
+(define-registered vector_integer_butlast (with-meta (butlaster :vector_integer) {:stack-types [:vector_integer]}))
+(define-registered vector_float_butlast (with-meta (butlaster :vector_float) {:stack-types [:vector_float]}))
+(define-registered vector_boolean_butlast (with-meta (butlaster :vector_boolean) {:stack-types [:vector_boolean]}))
+(define-registered vector_string_butlast (with-meta (butlaster :vector_string) {:stack-types [:vector_string]}))
 
 (defn lengther
   "Returns a function that takes a state and takes the length of the top item
@@ -236,10 +234,10 @@
                  (pop-item type state))
       state)))
 
-(define-registered vector_integer_length (lengther :vector_integer))
-(define-registered vector_float_length (lengther :vector_float))
-(define-registered vector_boolean_length (lengther :vector_boolean))
-(define-registered vector_string_length (lengther :vector_string))
+(define-registered vector_integer_length (with-meta (lengther :vector_integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_length (with-meta (lengther :vector_float) {:stack-types [:vector_float :integer]}))
+(define-registered vector_boolean_length (with-meta (lengther :vector_boolean) {:stack-types [:vector_boolean :integer]}))
+(define-registered vector_string_length (with-meta (lengther :vector_string) {:stack-types [:vector_string :integer]}))
 
 (defn reverser
   "Returns a function that takes a state and takes the reverse of the top item
@@ -252,10 +250,10 @@
                  (pop-item type state))
       state)))
 
-(define-registered vector_integer_reverse (reverser :vector_integer))
-(define-registered vector_float_reverse (reverser :vector_float))
-(define-registered vector_boolean_reverse (reverser :vector_boolean))
-(define-registered vector_string_reverse (reverser :vector_string))
+(define-registered vector_integer_reverse (with-meta (reverser :vector_integer) {:stack-types [:vector_integer]}))
+(define-registered vector_float_reverse (with-meta (reverser :vector_float) {:stack-types [:vector_float]}))
+(define-registered vector_boolean_reverse (with-meta (reverser :vector_boolean) {:stack-types [:vector_boolean]}))
+(define-registered vector_string_reverse (with-meta (reverser :vector_string) {:stack-types [:vector_string]}))
 
 (defn pushaller
   "Returns a function that takes a state and pushes every item from the first
@@ -271,10 +269,10 @@
           (recur (rest lit-list)
                  (push-item (first lit-list) lit-type loop-state)))))))
 
-(define-registered vector_integer_pushall (pushaller :vector_integer :integer))
-(define-registered vector_float_pushall (pushaller :vector_float :float))
-(define-registered vector_boolean_pushall (pushaller :vector_boolean :boolean))
-(define-registered vector_string_pushall (pushaller :vector_string :string))
+(define-registered vector_integer_pushall (with-meta (pushaller :vector_integer :integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_pushall (with-meta (pushaller :vector_float :float) {:stack-types [:vector_float :float]}))
+(define-registered vector_boolean_pushall (with-meta (pushaller :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean]}))
+(define-registered vector_string_pushall (with-meta (pushaller :vector_string :string) {:stack-types [:vector_string :string]}))
 
 (defn emptyvectorer
   "Returns a function that takes a state and pushes a boolean of whether the top
@@ -287,10 +285,10 @@
                  (pop-item type state))
       state)))
 
-(define-registered vector_integer_emptyvector (emptyvectorer :vector_integer))
-(define-registered vector_float_emptyvector (emptyvectorer :vector_float))
-(define-registered vector_boolean_emptyvector (emptyvectorer :vector_boolean))
-(define-registered vector_string_emptyvector (emptyvectorer :vector_string))
+(define-registered vector_integer_emptyvector (with-meta (emptyvectorer :vector_integer) {:stack-types [:vector_integer :boolean]}))
+(define-registered vector_float_emptyvector (with-meta (emptyvectorer :vector_float) {:stack-types [:vector_float :boolean]}))
+(define-registered vector_boolean_emptyvector (with-meta (emptyvectorer :vector_boolean) {:stack-types [:vector_boolean :boolean]}))
+(define-registered vector_string_emptyvector (with-meta (emptyvectorer :vector_string) {:stack-types [:vector_string :boolean]}))
 
 (defn containser
   "Returns a function that takes a state and tells whether the top lit-type item
@@ -307,10 +305,10 @@
                    :boolean
                    (pop-item lit-type (pop-item type state)))))))
 
-(define-registered vector_integer_contains (containser :vector_integer :integer))
-(define-registered vector_float_contains (containser :vector_float :float))
-(define-registered vector_boolean_contains (containser :vector_boolean :boolean))
-(define-registered vector_string_contains (containser :vector_string :string))
+(define-registered vector_integer_contains (with-meta (containser :vector_integer :integer) {:stack-types [:vector_integer :integer :boolean]}))
+(define-registered vector_float_contains (with-meta (containser :vector_float :float) {:stack-types [:vector_float :float :boolean]}))
+(define-registered vector_boolean_contains (with-meta (containser :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean]}))
+(define-registered vector_string_contains (with-meta (containser :vector_string :string) {:stack-types [:vector_string :string :boolean]}))
 
 (defn indexofer
   "Returns a function that takes a state and finds the index of the top lit-type
@@ -327,10 +325,10 @@
                    :integer
                    (pop-item lit-type (pop-item type state)))))))
 
-(define-registered vector_integer_indexof (indexofer :vector_integer :integer))
-(define-registered vector_float_indexof (indexofer :vector_float :float))
-(define-registered vector_boolean_indexof (indexofer :vector_boolean :boolean))
-(define-registered vector_string_indexof (indexofer :vector_string :string))
+(define-registered vector_integer_indexof (with-meta (indexofer :vector_integer :integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_indexof (with-meta (indexofer :vector_float :float) {:stack-types [:vector_float :float :integer]}))
+(define-registered vector_boolean_indexof (with-meta (indexofer :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean :integer]}))
+(define-registered vector_string_indexof (with-meta (indexofer :vector_string :string) {:stack-types [:vector_string :string :integer]}))
 
 (defn occurrencesofer
   "Returns a function that takes a state and counts the occurrences of the top lit-type
@@ -347,10 +345,10 @@
                    :integer
                    (pop-item lit-type (pop-item type state)))))))
 
-(define-registered vector_integer_occurrencesof (occurrencesofer :vector_integer :integer))
-(define-registered vector_float_occurrencesof (occurrencesofer :vector_float :float))
-(define-registered vector_boolean_occurrencesof (occurrencesofer :vector_boolean :boolean))
-(define-registered vector_string_occurrencesof (occurrencesofer :vector_string :string))
+(define-registered vector_integer_occurrencesof (with-meta (occurrencesofer :vector_integer :integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_occurrencesof (with-meta (occurrencesofer :vector_float :float) {:stack-types [:vector_float :float :integer]}))
+(define-registered vector_boolean_occurrencesof (with-meta (occurrencesofer :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean :integer]}))
+(define-registered vector_string_occurrencesof (with-meta (occurrencesofer :vector_string :string) {:stack-types [:vector_string :string :integer]}))
 
 (defn replaceer
   "Returns a function that takes a state and replaces all occurrences of the second lit-type item
@@ -366,10 +364,10 @@
                    type
                    (pop-item lit-type (pop-item lit-type (pop-item type state))))))))
 
-(define-registered vector_integer_replace (replaceer :vector_integer :integer))
-(define-registered vector_float_replace (replaceer :vector_float :float))
-(define-registered vector_boolean_replace (replaceer :vector_boolean :boolean))
-(define-registered vector_string_replace (replaceer :vector_string :string))
+(define-registered vector_integer_replace (with-meta (replaceer :vector_integer :integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_replace (with-meta (replaceer :vector_float :float) {:stack-types [:vector_float :float]}))
+(define-registered vector_boolean_replace (with-meta (replaceer :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean]}))
+(define-registered vector_string_replace (with-meta (replaceer :vector_string :string) {:stack-types [:vector_string :string]}))
 
 (defn replacefirster
   "Returns a function that takes a state and replaces the first occurrence of the second lit-type item
@@ -387,10 +385,10 @@
                    type
                    (pop-item lit-type (pop-item lit-type (pop-item type state))))))))
 
-(define-registered vector_integer_replacefirst (replacefirster :vector_integer :integer))
-(define-registered vector_float_replacefirst (replacefirster :vector_float :float))
-(define-registered vector_boolean_replacefirst (replacefirster :vector_boolean :boolean))
-(define-registered vector_string_replacefirst (replacefirster :vector_string :string))
+(define-registered vector_integer_replacefirst (with-meta (replacefirster :vector_integer :integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_replacefirst (with-meta (replacefirster :vector_float :float) {:stack-types [:vector_float :float]}))
+(define-registered vector_boolean_replacefirst (with-meta (replacefirster :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean]}))
+(define-registered vector_string_replacefirst (with-meta (replacefirster :vector_string :string) {:stack-types [:vector_string :string]}))
 
 (defn removeer
   "Returns a function that takes a state and removes all occurrences of the first lit-type item
@@ -406,7 +404,7 @@
                    type
                    (pop-item lit-type (pop-item type state)))))))
 
-(define-registered vector_integer_remove (removeer :vector_integer :integer))
-(define-registered vector_float_remove (removeer :vector_float :float))
-(define-registered vector_boolean_remove (removeer :vector_boolean :boolean))
-(define-registered vector_string_remove (removeer :vector_string :string))
+(define-registered vector_integer_remove (with-meta (removeer :vector_integer :integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_remove (with-meta (removeer :vector_float :float) {:stack-types [:vector_float :float]}))
+(define-registered vector_boolean_remove (with-meta (removeer :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean]}))
+(define-registered vector_string_remove (with-meta (removeer :vector_string :string) {:stack-types [:vector_string :string]}))
