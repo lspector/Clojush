@@ -101,8 +101,8 @@
       state)))
 
 (define-registered
-  ^{:stack-types [:string :char]}
   string_first
+  ^{:stack-types [:string :char]}
   (fn [state]
     (if (and (not (empty? (:string state)))
              (first (first (:string state))))

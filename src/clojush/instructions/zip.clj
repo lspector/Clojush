@@ -24,14 +24,14 @@
           state
           (push-item result :zip (pop-item :zip state)))))))
 
-(define-registered zip_next (zip-mover zip/next))
-(define-registered zip_prev (zip-mover zip/prev))
-(define-registered zip_down (zip-mover zip/down))
-(define-registered zip_up (zip-mover zip/up))
-(define-registered zip_left (zip-mover zip/left))
-(define-registered zip_leftmost (zip-mover zip/leftmost))
-(define-registered zip_right (zip-mover zip/right))
-(define-registered zip_rightmost (zip-mover zip/rightmost))
+(define-registered zip_next (with-meta (zip-mover zip/next) {:stack-types [:zip]}))
+(define-registered zip_prev (with-meta (zip-mover zip/prev) {:stack-types [:zip]}))
+(define-registered zip_down (with-meta (zip-mover zip/down) {:stack-types [:zip]}))
+(define-registered zip_up (with-meta (zip-mover zip/up) {:stack-types [:zip]}))
+(define-registered zip_left (with-meta (zip-mover zip/left) {:stack-types [:zip]}))
+(define-registered zip_leftmost (with-meta (zip-mover zip/leftmost) {:stack-types [:zip]}))
+(define-registered zip_right (with-meta (zip-mover zip/right) {:stack-types [:zip]}))
+(define-registered zip_rightmost (with-meta (zip-mover zip/rightmost) {:stack-types [:zip]}))
 
 (defn zip-tester
   [test-fn]
@@ -43,8 +43,8 @@
           state
           (push-item result :boolean (pop-item :zip state)))))))
 
-(define-registered zip_end? (zip-tester zip/end?))
-(define-registered zip_branch? (zip-tester zip/branch?))
+(define-registered zip_end? (with-meta (zip-tester zip/end?) {:stack-types [:zip :boolean]}))
+(define-registered zip_branch? (with-meta (zip-tester zip/branch?) {:stack-types [:zip :boolean]}))
 
 (defn zip-inserter
   [source inserter]
@@ -58,23 +58,24 @@
           (push-item result :zip (pop-item :zip (pop-item source state)))
           state)))))
 
-(define-registered zip_replace_fromcode (zip-inserter :code zip/replace))
-(define-registered zip_replace_fromexec (zip-inserter :exec zip/replace))
+(define-registered zip_replace_fromcode (with-meta (zip-inserter :code zip/replace) {:stack-types [:zip :code]}))
+(define-registered zip_replace_fromexec (with-meta (zip-inserter :exec zip/replace) {:stack-types [:zip :exec]}))
 
-(define-registered zip_insert_right_fromcode (zip-inserter :code zip/insert-right))
-(define-registered zip_insert_right_fromexec (zip-inserter :exec zip/insert-right))
+(define-registered zip_insert_right_fromcode (with-meta (zip-inserter :code zip/insert-right) {:stack-types [:zip :code]}))
+(define-registered zip_insert_right_fromexec (with-meta (zip-inserter :exec zip/insert-right) {:stack-types [:zip :exec]}))
 
-(define-registered zip_insert_left_fromcode (zip-inserter :code zip/insert-left))
-(define-registered zip_insert_left_fromexec (zip-inserter :exec zip/insert-left))
+(define-registered zip_insert_left_fromcode (with-meta (zip-inserter :code zip/insert-left) {:stack-types [:zip :code]}))
+(define-registered zip_insert_left_fromexec (with-meta (zip-inserter :exec zip/insert-left) {:stack-types [:zip :exec]}))
 
-(define-registered zip_insert_child_fromcode (zip-inserter :code zip/insert-child))
-(define-registered zip_insert_child_fromexec (zip-inserter :exec zip/insert-child))
+(define-registered zip_insert_child_fromcode (with-meta (zip-inserter :code zip/insert-child) {:stack-types [:zip :code]}))
+(define-registered zip_insert_child_fromexec (with-meta (zip-inserter :exec zip/insert-child) {:stack-types [:zip :exec]}))
 
-(define-registered zip_append_child_fromcode (zip-inserter :code zip/append-child))
-(define-registered zip_append_child_fromexec (zip-inserter :exec zip/append-child))
+(define-registered zip_append_child_fromcode (with-meta (zip-inserter :code zip/append-child) {:stack-types [:zip :code]}))
+(define-registered zip_append_child_fromexec (with-meta (zip-inserter :exec zip/append-child) {:stack-types [:zip :exec]}))
 
 (define-registered 
   zip_remove
+  ^{:stack-types [:zip]}
   (fn [state]
     (if (empty? (:zip state))
       state
@@ -85,6 +86,7 @@
 
 (define-registered 
   zip_fromcode
+  ^{:stack-types [:zip :code]}
   (fn [state]
     (if (empty? (:code state))
       state
@@ -95,6 +97,7 @@
 
 (define-registered 
   zip_fromexec
+  ^{:stack-types [:zip :exec]}
   (fn [state]
     (if (empty? (:exec state))
       state
@@ -114,17 +117,21 @@
           (push-item result destination (pop-item :zip state))
           state)))))
 
-(define-registered code_fromzipnode (zip-extractor :code zip/node))
-(define-registered exec_fromzipnode (zip-extractor :exec zip/node))
+(define-registered code_fromzipnode (with-meta (zip-extractor :code zip/node) {:stack-types [:zip :code]}))
+(define-registered exec_fromzipnode (with-meta (zip-extractor :exec zip/node) {:stack-types [:zip :exec]}))
 
-(define-registered code_fromziproot (zip-extractor :code zip/root))
-(define-registered exec_fromziproot (zip-extractor :exec zip/root))
+(define-registered code_fromziproot (with-meta (zip-extractor :code zip/root) {:stack-types [:zip :code]}))
+(define-registered exec_fromziproot (with-meta (zip-extractor :exec zip/root) {:stack-types [:zip :exec]}))
 
-(define-registered code_fromzipchildren (zip-extractor :code zip/children))
-(define-registered exec_fromzipchildren (zip-extractor :exec zip/children))
+(define-registered code_fromzipchildren (with-meta (zip-extractor :code zip/children) {:stack-types [:zip :code]}))
+(define-registered exec_fromzipchildren (with-meta (zip-extractor :exec zip/children) {:stack-types [:zip :exec]}))
 
-(define-registered code_fromziplefts (zip-extractor :code zip/lefts))
-(define-registered exec_fromziplefts (zip-extractor :exec zip/lefts))
+(define-registered code_fromziplefts (with-meta (zip-extractor :code zip/lefts) {:stack-types [:zip :code]}))
+(define-registered exec_fromziplefts (with-meta (zip-extractor :exec zip/lefts) {:stack-types [:zip :exec]}))
 
-(define-registered code_fromziprights (zip-extractor :code zip/rights))
-(define-registered exec_fromziprights (zip-extractor :exec zip/rights))
+(define-registered code_fromziprights (with-meta (zip-extractor :code zip/rights) {:stack-types [:zip :code]}))
+(define-registered exec_fromziprights (with-meta (zip-extractor :exec zip/rights) {:stack-types [:zip :exec]}))
+
+(define-registered 
+  un-meta-instruction
+  (fn [state] state))

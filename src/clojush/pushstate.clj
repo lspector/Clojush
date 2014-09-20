@@ -570,3 +570,17 @@
     (doseq [ins (sort-by name (clojure.set/difference ins-registered-for-stacks
                                                       (set @registered-instructions)))]
       (println ins))))
+
+(defn print-instructions-with-diff-meta
+  []
+  (let [ins-registered-for-stacks (sort-by name (registered-for-stacks-meta [:integer :boolean :float :char :string :print :random
+                                                                             :parentheses :exec :code :vector_integer :vector_string
+                                                                             :vector_boolean :vector_float :zip :environment]))]
+    (doseq [x (filter #(not (= (sort (second %)) (sort (nth % 2))))
+                      (map (fn [ins]
+                            (vector ins
+                                    (:stack-types (meta (get @instruction-table ins)))
+                                    (get instruction-types ins)
+                                    ))
+                          ins-registered-for-stacks))]
+      (println x))))
