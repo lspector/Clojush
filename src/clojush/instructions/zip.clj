@@ -59,19 +59,19 @@
           state)))))
 
 (define-registered zip_replace_fromcode (with-meta (zip-inserter :code zip/replace) {:stack-types [:zip :code]}))
-(define-registered zip_replace_fromexec (with-meta (zip-inserter :exec zip/replace) {:stack-types [:zip :exec]}))
+(define-registered zip_replace_fromexec (with-meta (zip-inserter :exec zip/replace) {:stack-types [:zip :exec] :parentheses 1}))
 
 (define-registered zip_insert_right_fromcode (with-meta (zip-inserter :code zip/insert-right) {:stack-types [:zip :code]}))
-(define-registered zip_insert_right_fromexec (with-meta (zip-inserter :exec zip/insert-right) {:stack-types [:zip :exec]}))
+(define-registered zip_insert_right_fromexec (with-meta (zip-inserter :exec zip/insert-right) {:stack-types [:zip :exec] :parentheses 1}))
 
 (define-registered zip_insert_left_fromcode (with-meta (zip-inserter :code zip/insert-left) {:stack-types [:zip :code]}))
-(define-registered zip_insert_left_fromexec (with-meta (zip-inserter :exec zip/insert-left) {:stack-types [:zip :exec]}))
+(define-registered zip_insert_left_fromexec (with-meta (zip-inserter :exec zip/insert-left) {:stack-types [:zip :exec] :parentheses 1}))
 
 (define-registered zip_insert_child_fromcode (with-meta (zip-inserter :code zip/insert-child) {:stack-types [:zip :code]}))
-(define-registered zip_insert_child_fromexec (with-meta (zip-inserter :exec zip/insert-child) {:stack-types [:zip :exec]}))
+(define-registered zip_insert_child_fromexec (with-meta (zip-inserter :exec zip/insert-child) {:stack-types [:zip :exec] :parentheses 1}))
 
 (define-registered zip_append_child_fromcode (with-meta (zip-inserter :code zip/append-child) {:stack-types [:zip :code]}))
-(define-registered zip_append_child_fromexec (with-meta (zip-inserter :exec zip/append-child) {:stack-types [:zip :exec]}))
+(define-registered zip_append_child_fromexec (with-meta (zip-inserter :exec zip/append-child) {:stack-types [:zip :exec] :parentheses 1}))
 
 (define-registered 
   zip_remove
@@ -97,7 +97,8 @@
 
 (define-registered 
   zip_fromexec
-  ^{:stack-types [:zip :exec]}
+  ^{:stack-types [:zip :exec]
+    :parentheses 1}
   (fn [state]
     (if (empty? (:exec state))
       state

@@ -23,7 +23,7 @@
                        0
                        (pop-item type state)))))))
 
-(define-registered print_exec (with-meta (printer :exec) {:stack-types [:print :exec]}))
+(define-registered print_exec (with-meta (printer :exec) {:stack-types [:print :exec] :parentheses 1}))
 (define-registered print_integer (with-meta (printer :integer) {:stack-types [:print :integer]}))
 (define-registered print_float (with-meta (printer :float) {:stack-types [:print :float]}))
 (define-registered print_code (with-meta (printer :code) {:stack-types [:print :code]}))

@@ -10,8 +10,8 @@
 (define-registered exec_noop ^{:stack-types [:exec]} (fn [state] state))
 (define-registered code_noop ^{:stack-types [:code]} (fn [state] state))
 
-(define-registered noop_open_paren ^{:stack-types [:parentheses]} (fn [state] state))
-(define-registered noop_delete_prev_paren_pair ^{:stack-types [:parentheses]} (fn [state] state))
+(define-registered noop_open_paren ^{:stack-types [:parentheses] :parentheses 1} (fn [state] state))
+(define-registered noop_delete_prev_paren_pair ^{:stack-types [:parentheses] :parentheses 0} (fn [state] state))
 
 (define-registered 
   code_append
@@ -121,7 +121,8 @@
 
 (define-registered 
   exec_do*range
-  ^{:stack-types [:exec :integer]}
+  ^{:stack-types [:exec :integer]
+    :parentheses 1}
   (fn [state] ; Differs from code.do*range only in the source of the code and the recursive call.
     (if (not (or (empty? (:exec state))
                  (empty? (rest (:integer state)))))
@@ -160,7 +161,8 @@
 
 (define-registered
   exec_do*count
-  ^{:stack-types [:exec :integer]}
+  ^{:stack-types [:exec :integer]
+    :parentheses 1}
   ;; differs from code.do*count only in the source of the code and the recursive call    
   (fn [state] 
     (if (not (or (empty? (:integer state))
@@ -187,7 +189,8 @@
 
 (define-registered
   exec_do*times
-  ^{:stack-types [:exec :integer]}
+  ^{:stack-types [:exec :integer]
+    :parentheses 1}
   ;; differs from code.do*times only in the source of the code and the recursive call
   (fn [state]
     (if (not (or (empty? (:integer state))
@@ -201,7 +204,8 @@
 
 (define-registered
   exec_while
-  ^{:stack-types [:exec :boolean]}
+  ^{:stack-types [:exec :boolean]
+    :parentheses 1}
   (fn [state]
     (if (empty? (:exec state))
       state
@@ -214,7 +218,8 @@
 
 (define-registered
   exec_do*while
-  ^{:stack-types [:exec :boolean]}
+  ^{:stack-types [:exec :boolean]
+    :parentheses 1}
   (fn [state]
     (if (empty? (:exec state))
       state
@@ -270,7 +275,8 @@
 
 (define-registered 
   exec_if
-  ^{:stack-types [:exec :boolean]}
+  ^{:stack-types [:exec :boolean]
+    :parentheses 2}
   ;; differs from code.if in the source of the code and in the order of the if/then parts
   (fn [state]
     (if (not (or (empty? (:boolean state))
@@ -284,7 +290,8 @@
 
 (define-registered 
   exec_when
-  ^{:stack-types [:exec :boolean]}
+  ^{:stack-types [:exec :boolean]
+    :parentheses 1}
   (fn [state]
     (if (not (or (empty? (:boolean state))
                  (empty? (:exec state))))
@@ -477,7 +484,8 @@
 
 (define-registered 
   exec_k
-  ^{:stack-types [:exec]}
+  ^{:stack-types [:exec]
+    :parentheses 2}
   (fn [state]
     (if (not (empty? (rest (:exec state))))
       (push-item (first (:exec state))
@@ -487,7 +495,8 @@
 
 (define-registered 
   exec_s
-  ^{:stack-types [:exec]}
+  ^{:stack-types [:exec]
+    :parentheses 3}
   (fn [state]
     (if (not (empty? (rest (rest (:exec state)))))
       (let [stk (:exec state)
@@ -509,7 +518,8 @@
 
 (define-registered 
   exec_y
-  ^{:stack-types [:exec]}
+  ^{:stack-types [:exec]
+    :parentheses 1}
   (fn [state]
     (if (not (empty? (:exec state)))
       (let [new-item (list 'exec_y (first (:exec state)))]
@@ -524,7 +534,9 @@
 
 (define-registered
   environment_new
-  ^{:stack-types [:environment]}
+  ^{:stack-types [:environment]
+    :parentheses 1}
+  ;; Creates new environment using the top item on the exec stack
   (fn [state]
     (if (empty? (:exec state))
       state
@@ -539,6 +551,7 @@
 (define-registered
   environment_begin
   ^{:stack-types [:environment]}
+  ;; Creates new environment using the entire exec stack
   (fn [state]
     (assoc (push-item (assoc state :exec '())
                       :environment state)
@@ -547,6 +560,7 @@
 (define-registered
   environment_end
   ^{:stack-types [:environment]}
+  ;; Ends current environment
   (fn [state]
     (if (empty? (:environment state))
       state

@@ -2,53 +2,16 @@
   (:use [clojush pushstate globals]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Lookup function to see how many paren groups a function requires
-
-(def instr-paren-requirements
-  (atom {;; Require 3
-         'exec_rot 3
-         'exec_s 3
-         ;; Require 2
-         'exec_if 2
-         'exec_swap 2
-         'exec_k 2
-         ;; Require 1
-         'exec_when 1
-         'exec_pop 1
-         'exec_dup 1
-         'exec_shove 1
-         'exec_do*range 1
-         'exec_do*count 1
-         'exec_do*times 1
-         'exec_while 1
-         'exec_do*while 1
-         'exec_y 1
-         'return_fromexec 1
-         'print_exec 1
-         'environment_new 1
-         'zip_fromexec 1
-         'zip_replace_fromexec 1
-         'zip_insert_right_fromexec 1
-         'zip_insert_left_fromexec 1
-         'zip_insert_child_fromexec 1
-         'zip_append_child_fromexec 1
-         'noop_open_paren 1
-         ;; Require 0, but included here in case change mind later
-         ;; (default for not-mentioned instructions is 0)
-         'exec_eq 0
-         'exec_yank 0
-         'exec_yankdup 0
-         'noop_delete_prev_paren_pair 0
-         }))
+;; Lookup function to see how many paren groups a function requires. Uses metadata.
 
 (defn lookup-instruction-paren-groups
   [ins]
-  (let [ins-req (get @instr-paren-requirements ins)]
-  (cond
-    ins-req ins-req
-    (and (symbol? ins)
-         (.startsWith (name ins) "tag_exec")) 1
-    :else 0)))
+  (let [ins-req (:parentheses (meta (get @instruction-table ins)))]
+    (cond
+      ins-req ins-req
+      (and (symbol? ins)
+           (.startsWith (name ins) "tag_exec")) 1
+      :else 0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; instructions for all types (except non-data stacks such as auxiliary, tag, input, and output)
@@ -58,7 +21,7 @@
   [type]
   (fn [state] (pop-item type state)))
 
-(define-registered exec_pop (with-meta (popper :exec) {:stack-types [:exec]}))
+(define-registered exec_pop (with-meta (popper :exec) {:stack-types [:exec] :parentheses 1}))
 (define-registered integer_pop (with-meta (popper :integer) {:stack-types [:integer]}))
 (define-registered float_pop (with-meta (popper :float) {:stack-types [:float]}))
 (define-registered code_pop (with-meta (popper :code) {:stack-types [:code]}))
@@ -76,7 +39,7 @@
       state
       (push-item (top-item type state) type state))))
 
-(define-registered exec_dup (with-meta (duper :exec) {:stack-types [:exec]}))
+(define-registered exec_dup (with-meta (duper :exec) {:stack-types [:exec] :parentheses 1}))
 (define-registered integer_dup (with-meta (duper :integer) {:stack-types [:integer]}))
 (define-registered float_dup (with-meta (duper :float) {:stack-types [:float]}))
 (define-registered code_dup (with-meta (duper :code) {:stack-types [:code]}))
@@ -99,7 +62,7 @@
              (push-item second-item type)))
       state)))
 
-(define-registered exec_swap (with-meta (swapper :exec) {:stack-types [:exec]}))
+(define-registered exec_swap (with-meta (swapper :exec) {:stack-types [:exec] :parentheses 2}))
 (define-registered integer_swap (with-meta (swapper :integer) {:stack-types [:integer]}))
 (define-registered float_swap (with-meta (swapper :float) {:stack-types [:float]}))
 (define-registered code_swap (with-meta (swapper :code) {:stack-types [:code]}))
@@ -125,7 +88,7 @@
              (push-item third type)))
       state)))
 
-(define-registered exec_rot (with-meta (rotter :exec) {:stack-types [:exec]}))
+(define-registered exec_rot (with-meta (rotter :exec) {:stack-types [:exec] :parentheses 3}))
 (define-registered integer_rot (with-meta (rotter :integer) {:stack-types [:integer]}))
 (define-registered float_rot (with-meta (rotter :float) {:stack-types [:float]}))
 (define-registered code_rot (with-meta (rotter :code) {:stack-types [:code]}))
@@ -162,7 +125,7 @@
              (push-item (= first second) :boolean)))
       state)))
 
-(define-registered exec_eq (with-meta (eqer :exec) {:stack-types [:exec :boolean]}))
+(define-registered exec_eq (with-meta (eqer :exec) {:stack-types [:exec :boolean] :parentheses 0}))
 (define-registered integer_eq (with-meta (eqer :integer) {:stack-types [:integer :boolean]}))
 (define-registered float_eq (with-meta (eqer :float) {:stack-types [:float :boolean]}))
 (define-registered code_eq (with-meta (eqer :code) {:stack-types [:code :boolean]}))
@@ -209,7 +172,7 @@
         (push-item item type with-item-pulled))
       state)))
 
-(define-registered exec_yank (with-meta (yanker :exec) {:stack-types [:exec :integer]}))
+(define-registered exec_yank (with-meta (yanker :exec) {:stack-types [:exec :integer] :parentheses 0}))
 (define-registered integer_yank (with-meta (yanker :integer) {:stack-types [:integer]}))
 (define-registered float_yank (with-meta (yanker :float) {:stack-types [:float :integer]}))
 (define-registered code_yank (with-meta (yanker :code) {:stack-types [:code :integer]}))
@@ -235,7 +198,7 @@
         (push-item item type with-index-popped))
       state)))
 
-(define-registered exec_yankdup (with-meta (yankduper :exec) {:stack-types [:exec :integer]}))
+(define-registered exec_yankdup (with-meta (yankduper :exec) {:stack-types [:exec :integer] :parentheses 0}))
 (define-registered integer_yankdup (with-meta (yankduper :integer) {:stack-types [:integer]}))
 (define-registered float_yankdup (with-meta (yankduper :float) {:stack-types [:float :integer]}))
 (define-registered code_yankdup (with-meta (yankduper :code) {:stack-types [:code :integer]}))
@@ -265,7 +228,7 @@
                                                (drop actual-index stk)))))
       state)))
 
-(define-registered exec_shove (with-meta (shover :exec) {:stack-types [:exec :integer]}))
+(define-registered exec_shove (with-meta (shover :exec) {:stack-types [:exec :integer] :parentheses 1}))
 (define-registered integer_shove (with-meta (shover :integer) {:stack-types [:integer]}))
 (define-registered float_shove (with-meta (shover :float) {:stack-types [:float :integer]}))
 (define-registered code_shove (with-meta (shover :code) {:stack-types [:code :integer]}))

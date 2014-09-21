@@ -12,7 +12,7 @@
       (let [item (top-item type state)]
         (push-item item :return (pop-item type state))))))
 
-(define-registered return_fromexec (with-meta (returner :exec) {:stack-types [:environment :exec]}))
+(define-registered return_fromexec (with-meta (returner :exec) {:stack-types [:environment :exec] :parentheses 1}))
 (define-registered return_frominteger (with-meta (returner :integer) {:stack-types [:environment :integer]}))
 (define-registered return_fromfloat (with-meta (returner :float) {:stack-types [:environment :float]}))
 (define-registered return_fromboolean (with-meta (returner :boolean) {:stack-types [:environment :boolean]}))
