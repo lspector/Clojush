@@ -8,6 +8,7 @@
 
 (define-registered
   string_frominteger
+  ^{:stack-types [:string :integer]}
   (fn [state]
     (if (not (empty? (:integer state)))
       (let [item (stack-ref :integer 0 state)]
@@ -17,6 +18,7 @@
 
 (define-registered
   string_fromfloat
+  ^{:stack-types [:string :float]}
   (fn [state]
     (if (not (empty? (:float state)))
       (let [item (stack-ref :float 0 state)]
@@ -26,6 +28,7 @@
 
 (define-registered
   string_fromboolean
+  ^{:stack-types [:string :boolean]}
   (fn [state]
     (if (not (empty? (:boolean state)))
       (let [item (stack-ref :boolean 0 state)]
@@ -35,6 +38,7 @@
 
 (define-registered
   string_fromchar
+  ^{:stack-types [:string :char]}
   (fn [state]
     (if (not (empty? (:char state)))
       (let [item (stack-ref :char 0 state)]
@@ -44,6 +48,7 @@
 
 (define-registered
   string_concat
+  ^{:stack-types [:string]}
   (fn [state]
     (if (not (empty? (rest (:string state))))
       (if (>= max-string-length (+ (count (stack-ref :string 1 state))
@@ -57,6 +62,7 @@
 
 (define-registered
   string_conjchar ; Conj char onto string
+  ^{:stack-types [:string :char]}
   (fn [state]
     (if (and (not (empty? (:string state)))
              (not (empty? (:char state))))
@@ -70,6 +76,7 @@
 
 (define-registered
   string_take
+  ^{:stack-types [:string :integer]}
   (fn [state]
     (if (and (not (empty? (:string state)))
              (not (empty? (:integer state))))
@@ -81,6 +88,7 @@
 
 (define-registered
   string_substring
+  ^{:stack-types [:string :integer]}
   (fn [state]
     (if (and (not (empty? (:string state)))
              (not (empty? (rest (:integer state)))))
@@ -94,6 +102,7 @@
 
 (define-registered
   string_first
+  ^{:stack-types [:string :char]}
   (fn [state]
     (if (and (not (empty? (:string state)))
              (first (first (:string state))))
@@ -104,6 +113,7 @@
 
 (define-registered
   string_last
+  ^{:stack-types [:string :char]}
   (fn [state]
     (if (and (not (empty? (:string state)))
              (last (first (:string state))))
@@ -114,6 +124,7 @@
 
 (define-registered
   string_nth
+  ^{:stack-types [:string :char :integer]}
   (fn [state]
     (if (and (not (empty? (:string state)))
              (not (empty? (:integer state)))
@@ -127,6 +138,7 @@
 
 (define-registered
   string_rest
+  ^{:stack-types [:string]}
   (fn [state]
     (if (not (empty? (:string state)))
       (push-item (apply str (rest (stack-ref :string 0 state)))
@@ -136,6 +148,7 @@
 
 (define-registered
   string_butlast
+  ^{:stack-types [:string]}
   (fn [state]
     (if (not (empty? (:string state)))
       (push-item (apply str (butlast (stack-ref :string 0 state)))
@@ -145,6 +158,7 @@
 
 (define-registered
   string_length
+  ^{:stack-types [:string :integer]}
   (fn [state]
     (if (not (empty? (:string state)))
       (push-item (count (stack-ref :string 0 state))
@@ -154,6 +168,7 @@
 
 (define-registered
   string_reverse
+  ^{:stack-types [:string]}
   (fn [state]
     (if (empty? (:string state))
       state
@@ -164,6 +179,7 @@
 
 (define-registered
   string_parse_to_chars
+  ^{:stack-types [:string]}
   (fn [state]
     (if (empty? (:string state))
       state
@@ -176,6 +192,7 @@
 
 (define-registered
   string_split
+  ^{:stack-types [:string]}
   (fn [state]
     (if (empty? (:string state))
       state
@@ -188,6 +205,7 @@
 
 (define-registered
   string_emptystring ;;true if top string is empty
+  ^{:stack-types [:string :boolean]}
   (fn [state]
     (if (empty? (:string state))
       state
@@ -198,6 +216,7 @@
 
 (define-registered
   string_contains ;;true if top string is a substring of second string; false otherwise
+  ^{:stack-types [:string :boolean]}
   (fn [state]
     (if (empty? (rest (:string state)))
       state
@@ -212,6 +231,7 @@
 
 (define-registered
   string_containschar ; true if the top char is in the top string
+  ^{:stack-types [:string :boolean :char]}
   (fn [state]
     (if (or (empty? (:string state))
             (empty? (:char state)))
@@ -225,6 +245,7 @@
 
 (define-registered
   string_indexofchar ; puts on the integer stack the index of the top char in the top string
+  ^{:stack-types [:string :integer :char]}
   (fn [state]
     (if (or (empty? (:string state))
             (empty? (:char state)))
@@ -238,6 +259,7 @@
 
 (define-registered
   string_occurrencesofchar ; the number of times the top char is in the top string
+  ^{:stack-types [:string :integer :char]}
   (fn [state]
     (if (or (empty? (:string state))
             (empty? (:char state)))
@@ -251,6 +273,7 @@
 
 (define-registered
   string_replace ; In third string on stack, replaces all occurences of second string with first string
+  ^{:stack-types [:string]}
   (fn [state]
     (if (<= 3 (count (:string state)))
       (let [result (string/replace (stack-ref :string 2 state)
@@ -265,6 +288,7 @@
 
 (define-registered
   string_replacefirst ; In third string on stack, replaces first occurence of second string with first string
+  ^{:stack-types [:string]}
   (fn [state]
     (if (<= 3 (count (:string state)))
       (let [result (string/replace-first (stack-ref :string 2 state)
@@ -279,6 +303,7 @@
 
 (define-registered
   string_replacechar ; In top string on stack, replaces all occurences of second char with first char
+  ^{:stack-types [:string :char]}
   (fn [state]
     (if (and (not (empty? (:string state)))
              (<= 2 (count (:char state))))
@@ -294,6 +319,7 @@
 
 (define-registered
   string_replacefirstchar ; In top string on stack, replaces first occurence of second char with first char
+  ^{:stack-types [:string :char]}
   (fn [state]
     (if (and (not (empty? (:string state)))
              (<= 2 (count (:char state))))
@@ -309,6 +335,7 @@
 
 (define-registered
   string_removechar ; In top string on stack, remove all occurences of char
+  ^{:stack-types [:string :char]}
   (fn [state]
     (if (and (not (empty? (:string state)))
              (not (empty? (:char state))))

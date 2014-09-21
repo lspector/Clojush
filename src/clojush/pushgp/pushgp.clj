@@ -96,8 +96,8 @@
           ;;----------------------------------------
           :pop-when-tagging true ;; When true, tagging instructions will pop the exec stack when tagging; otherwise, the exec stack is not popped
           :tag-limit 10000 ;; The size of the tag space
-          :top-level-push-code true ;; When true, run-push will push the program's code onto the code stack prior to running
-          :top-level-pop-code true ;; When true, run-push will pop the code stack after running the program
+          :top-level-push-code false ;; When true, run-push will push the program's code onto the code stack prior to running
+          :top-level-pop-code false ;; When true, run-push will pop the code stack after running the program
           ;;
           ;;----------------------------------------
           ;; Arguments related to generational and final reports
