@@ -131,7 +131,3 @@
 
 (define-registered code_fromziprights (with-meta (zip-extractor :code zip/rights) {:stack-types [:zip :code]}))
 (define-registered exec_fromziprights (with-meta (zip-extractor :exec zip/rights) {:stack-types [:zip :exec]}))
-
-(define-registered 
-  un-meta-instruction
-  (fn [state] state))
