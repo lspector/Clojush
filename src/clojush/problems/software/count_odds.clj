@@ -65,15 +65,13 @@
 ;;Can make Count Odds test data like this:
 ;(test-and-train-data-from-domains count-odds-data-domains)
 
-;;TMH DONE TO HERE
-
 ; Helper function for error function
 (defn count-odds-test-cases
   "Takes a sequence of inputs and gives IO test cases of the form
    [input output]."
   [inputs]
   (map #(vector %
-                (= (first %) (vec (reverse (second %)))))
+                (count (filter odd? %)))
        inputs))
 
 ; Define error function. For now, each run uses different random inputs
@@ -83,7 +81,7 @@
   [data-domains]
   (let [[train-cases test-cases] (map count-odds-test-cases
                                       (test-and-train-data-from-domains data-domains))]
-    (when false ;; Change to false to not print test cases
+    (when true ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
@@ -96,24 +94,24 @@
       ([program data-cases print-outputs]
         (let [behavior (atom '())
               errors (doall
-                       (for [[[input1 input2] correct-output] (case data-cases
-                                                                           :train train-cases
-                                                                           :test test-cases
-                                                                           [])]
+                       (for [[input1 correct-output] (case data-cases
+                                                                  :train train-cases
+                                                                  :test test-cases
+                                                                  [])]
                          (let [final-state (run-push program
                                                      (->> (make-push-state)
-                                                       (push-item input2 :input)
                                                        (push-item input1 :input)))
-                               result (top-item :boolean final-state)]
+                               result (top-item :integer final-state)]
                            (when print-outputs
-                             (println (format "Correct output: %5b | Program output: %5b" correct-output result)))
+                             (println (format "Correct output: %2d | Program output: %s" correct-output (str result))))
                            ; Record the behavior
                            (when @global-print-behavioral-diversity
                              (swap! behavior conj result))
-                           ; Error is boolean error
-                           (if (= result correct-output)
-                             0
-                             1))))]
+                           ; Error is integer error
+                           (if (number? result)
+                             (abs (- result correct-output)) ; distance from correct integer
+                             1000) ; penalty for no return value
+                           )))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
@@ -146,9 +144,9 @@
 (def argmap
   {:error-function (count-odds-error-function count-odds-data-domains)
    :atom-generators count-odds-atom-generators
-   :max-points 300
-   :max-points-in-initial-program 150
-   :evalpush-limit 600
+   :max-points 500
+   :max-points-in-initial-program 250
+   :evalpush-limit 1500
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
