@@ -40,16 +40,13 @@
 ;; should be used as training and testing cases respectively. Each "set" of
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
-(def range-13-198-shuffled (shuffle (range 13 198)))
-
 (def wallis-pi-data-domains
   [[(concat (range 1 13) '(198 199 200)) 15 0] ; Small and large cases
-   [(take 135 range-13-198-shuffled) 135 0] ; Random cases [13,197] for training; the remainder will be used for testing
-   [(drop 135 range-13-198-shuffled) 0 50] ; Random cases [13,197] for testing (those not used for training)
+   [(shuffle (range 13 198)) 135 50] ; Random cases [13,197]
    ])
 
 ;;Can make Wallis Pi test data like this:
-;(test-and-train-data-from-domains wallis-pi-data-domains)
+(map sort (test-and-train-data-from-domains wallis-pi-data-domains))
 
 ; Helper function for error function
 (defn wallis-pi-approximation
@@ -78,7 +75,7 @@
   [data-domains]
   (let [[train-cases test-cases] (map sort (map wallis-pi-test-cases
                                                 (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
+    (when false ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]

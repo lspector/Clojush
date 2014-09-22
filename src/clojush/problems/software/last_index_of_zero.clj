@@ -18,8 +18,8 @@
 ; Atom generators
 (def last-index-of-zero-atom-generators
   (concat (list
-            ^{:generator-label "Random numbers in the range [0, 50)"}
-            (fn [] (lrand-int 50))
+            ^{:generator-label "Random numbers in the range [-50,50]"}
+            (fn [] (- (lrand-int 101) 50))
             ;;; end ERCs
             (tag-instruction-erc [:integer :boolean :vector_integer :exec] 1000)
             (tagged-instruction-erc 1000)
@@ -35,8 +35,8 @@
   (shuffle
    (concat
     [0] ; To ensure at least one zero
-    (repeat (lrand-int max-extra-zeros) 0)
-    (repeatedly (lrand-int max-additional-values) #(- (lrand-int 100) 50)))))
+    (repeat (lrand-int (inc max-extra-zeros)) 0)
+    (repeatedly (lrand-int (inc max-additional-values)) #(- (lrand-int 101) 50)))))
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
@@ -58,11 +58,11 @@
    ^{:domain-label "permutations of a 4 item vector with one zero"}
    [(map vec (permutations [0 5 -8 9])) 20 4]
    ^{:domain-label "permutations of a 4 item vector with two zeros"}
-   [(map vec (permutations [0 0 -8 9])) 20 4]
+   [(map vec (permutations [0 0 -8 9])) 10 2]
    ^{:domain-label "permutations of a 4 item vector with three zeros"}
-   [(map vec (permutations [0 0 0 9])) 20 4]
+   [(map vec (permutations [0 0 0 9])) 4 0]
    ^{:domain-label "random cases"}
-   [(fn [] (random-sequence-with-at-least-one-zero 5 20)) 100 100]
+   [(fn [] (random-sequence-with-at-least-one-zero 5 44)) 78 974]
    ])
 
 ;;Can make Last Index of Zero test data like this:
@@ -96,10 +96,10 @@
       ([program data-cases print-outputs]
         (let [behavior (atom '())
               errors (doall
-                      (for [[[input] correct-output] (case data-cases
-                                                       :train train-cases
-                                                       :test test-cases
-                                                       [])]
+                      (for [[input correct-output] (case data-cases
+                                                     :train train-cases
+                                                     :test test-cases
+                                                     [])]
                         (let [final-state (run-push program
                                                     (->> (make-push-state)
                                                          (push-item input :input)))
