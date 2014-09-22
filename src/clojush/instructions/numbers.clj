@@ -17,8 +17,8 @@
              (push-item (keep-number-reasonable (+' first second)) type)))
       state)))
 
-(define-registered integer_add (adder :integer))
-(define-registered float_add (adder :float))
+(define-registered integer_add (with-meta (adder :integer) {:stack-types [:integer]}))
+(define-registered float_add (with-meta (adder :float) {:stack-types [:float]}))
 
 (defn subtracter
   "Returns a function that pushes the difference of the top two items."
@@ -32,8 +32,8 @@
              (push-item (keep-number-reasonable (- second first)) type)))
       state)))
 
-(define-registered integer_sub (subtracter :integer))
-(define-registered float_sub (subtracter :float))
+(define-registered integer_sub (with-meta (subtracter :integer) {:stack-types [:integer]}))
+(define-registered float_sub (with-meta (subtracter :float) {:stack-types [:float]}))
 
 (defn multiplier
   "Returns a function that pushes the product of the top two items."
@@ -47,8 +47,8 @@
              (push-item (keep-number-reasonable (*' second first)) type)))
       state)))
 
-(define-registered integer_mult (multiplier :integer))
-(define-registered float_mult (multiplier :float))
+(define-registered integer_mult (with-meta (multiplier :integer) {:stack-types [:integer]}))
+(define-registered float_mult (with-meta (multiplier :float) {:stack-types [:float]}))
 
 (defn divider
   "Returns a function that pushes the quotient of the top two items. Does
@@ -67,8 +67,8 @@
                         type)))
       state)))
 
-(define-registered integer_div (divider :integer))
-(define-registered float_div (divider :float))
+(define-registered integer_div (with-meta (divider :integer) {:stack-types [:integer]}))
+(define-registered float_div (with-meta (divider :float) {:stack-types [:float]}))
 
 (defn modder
   "Returns a function that pushes the modulus of the top two items. Does
@@ -87,8 +87,8 @@
                         type)))
       state)))
 
-(define-registered integer_mod (modder :integer))
-(define-registered float_mod (modder :float))
+(define-registered integer_mod (with-meta (modder :integer) {:stack-types [:integer]}))
+(define-registered float_mod (with-meta (modder :float) {:stack-types [:float]}))
 
 (defn comparer
   "Returns a function that pushes the result of comparator of the top two items
@@ -103,17 +103,18 @@
              (push-item (comparator second first) :boolean)))
       state)))
 
-(define-registered integer_lt (comparer :integer <))
-(define-registered integer_lte (comparer :integer <=))
-(define-registered integer_gt (comparer :integer >))
-(define-registered integer_gte (comparer :integer >=))
-(define-registered float_lt (comparer :float <))
-(define-registered float_lte (comparer :float <=))
-(define-registered float_gt (comparer :float >))
-(define-registered float_gte (comparer :float >=))
+(define-registered integer_lt (with-meta (comparer :integer <) {:stack-types [:integer :boolean]}))
+(define-registered integer_lte (with-meta (comparer :integer <=) {:stack-types [:integer :boolean]}))
+(define-registered integer_gt (with-meta (comparer :integer >) {:stack-types [:integer :boolean]}))
+(define-registered integer_gte (with-meta (comparer :integer >=) {:stack-types [:integer :boolean]}))
+(define-registered float_lt (with-meta (comparer :float <) {:stack-types [:float :boolean]}))
+(define-registered float_lte (with-meta (comparer :float <=) {:stack-types [:float :boolean]}))
+(define-registered float_gt (with-meta (comparer :float >) {:stack-types [:float :boolean]}))
+(define-registered float_gte (with-meta (comparer :float >=) {:stack-types [:float :boolean]}))
 
 (define-registered
   integer_fromboolean
+  ^{:stack-types [:integer :boolean]}
   (fn [state]
     (if (not (empty? (:boolean state)))
       (let [item (stack-ref :boolean 0 state)]
@@ -123,6 +124,7 @@
 
 (define-registered
   float_fromboolean
+  ^{:stack-types [:float :boolean]}
   (fn [state]
     (if (not (empty? (:boolean state)))
       (let [item (stack-ref :boolean 0 state)]
@@ -132,6 +134,7 @@
 
 (define-registered
   integer_fromfloat
+  ^{:stack-types [:integer :float]}
   (fn [state]
     (if (not (empty? (:float state)))
       (let [item (stack-ref :float 0 state)]
@@ -141,6 +144,7 @@
 
 (define-registered
   float_frominteger
+  ^{:stack-types [:integer :float]}
   (fn [state]
     (if (not (empty? (:integer state)))
       (let [item (stack-ref :integer 0 state)]
@@ -150,6 +154,7 @@
 
 (define-registered
   integer_fromstring
+  ^{:stack-types [:integer :string]}
   (fn [state]
     (if (not (empty? (:string state)))
       (try (pop-item :string
@@ -160,6 +165,7 @@
 
 (define-registered
   float_fromstring
+  ^{:stack-types [:float :string]}
   (fn [state]
     (if (not (empty? (:string state)))
       (try (pop-item :string
@@ -170,6 +176,7 @@
 
 (define-registered
   integer_fromchar
+  ^{:stack-types [:integer :char]}
   (fn [state]
     (if (not (empty? (:char state)))
       (let [item (stack-ref :char 0 state)]
@@ -179,6 +186,7 @@
 
 (define-registered
   float_fromchar
+  ^{:stack-types [:float :char]}
   (fn [state]
     (if (not (empty? (:char state)))
       (let [item (stack-ref :char 0 state)]
@@ -198,8 +206,8 @@
              (push-item (min second first) type)))
       state)))
 
-(define-registered integer_min (minner :integer))
-(define-registered float_min (minner :float))
+(define-registered integer_min (with-meta (minner :integer) {:stack-types [:integer]}))
+(define-registered float_min (with-meta (minner :float) {:stack-types [:float]}))
 
 (defn maxer
   "Returns a function that pushes the maximum of the top two items."
@@ -213,11 +221,12 @@
              (push-item (max second first) type)))
       state)))
 
-(define-registered integer_max (maxer :integer))
-(define-registered float_max (maxer :float))
+(define-registered integer_max (with-meta (maxer :integer) {:stack-types [:integer]}))
+(define-registered float_max (with-meta (maxer :float) {:stack-types [:float]}))
 
 (define-registered
   float_sin
+  ^{:stack-types [:float]}
   (fn [state]
     (if (not (empty? (:float state)))
       (push-item (keep-number-reasonable (Math/sin (stack-ref :float 0 state)))
@@ -227,6 +236,7 @@
 
 (define-registered
   float_cos
+  ^{:stack-types [:float]}
   (fn [state]
     (if (not (empty? (:float state)))
       (push-item (keep-number-reasonable (Math/cos (stack-ref :float 0 state)))
@@ -236,6 +246,7 @@
 
 (define-registered
   float_tan
+  ^{:stack-types [:float]}
   (fn [state]
     (if (not (empty? (:float state)))
       (push-item (keep-number-reasonable (Math/tan (stack-ref :float 0 state)))
@@ -245,6 +256,7 @@
 
 (define-registered
   integer_inc
+  ^{:stack-types [:integer]}
   (fn [state]
     (if (not (empty? (:integer state)))
       (push-item (inc (stack-ref :integer 0 state))
@@ -254,9 +266,30 @@
 
 (define-registered
   integer_dec
+  ^{:stack-types [:integer]}
   (fn [state]
     (if (not (empty? (:integer state)))
       (push-item (dec (stack-ref :integer 0 state))
                  :integer
                  (pop-item :integer state))
+      state)))
+
+(define-registered
+  float_inc
+  ^{:stack-types [:float]}
+  (fn [state]
+    (if (not (empty? (:float state)))
+      (push-item (inc (stack-ref :float 0 state))
+                 :float
+                 (pop-item :float state))
+      state)))
+
+(define-registered
+  float_dec
+  ^{:stack-types [:float]}
+  (fn [state]
+    (if (not (empty? (:float state)))
+      (push-item (dec (stack-ref :float 0 state))
+                 :float
+                 (pop-item :float state))
       state)))

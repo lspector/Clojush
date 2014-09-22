@@ -5,7 +5,8 @@
 (ns clojush.problems.demos.odd
   (:use [clojush.pushgp.pushgp]
         [clojush.random]
-        [clojush pushstate interpreter]))
+        [clojush pushstate interpreter]
+        clojush.instructions.common))
 
 ;;;;;;;;;;;;
 ;; The "odd" problem: take a positive integer input and push a Boolean indicating

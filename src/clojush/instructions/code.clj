@@ -7,14 +7,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; code and exec instructions
 
-(define-registered exec_noop (fn [state] state))
-(define-registered code_noop (fn [state] state))
+(define-registered exec_noop ^{:stack-types [:exec]} (fn [state] state))
+(define-registered code_noop ^{:stack-types [:code]} (fn [state] state))
 
-(define-registered noop_open_paren (fn [state] state))
-(define-registered noop_delete_prev_paren_pair (fn [state] state))
+(define-registered noop_open_paren ^{:stack-types [:parentheses] :parentheses 1} (fn [state] state))
+(define-registered noop_delete_prev_paren_pair ^{:stack-types [:parentheses] :parentheses 0} (fn [state] state))
 
 (define-registered 
   code_append
+  ^{:stack-types [:code]}
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (let [new-item (concat (ensure-list (stack-ref :code 0 state))
@@ -28,6 +29,7 @@
 
 (define-registered 
   code_atom
+  ^{:stack-types [:code :boolean]}
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (not (seq? (stack-ref :code 0 state)))
@@ -37,6 +39,7 @@
 
 (define-registered 
   code_car
+  ^{:stack-types [:code]}
   (fn [state]
     (if (and (not (empty? (:code state)))
              (> (count (ensure-list (stack-ref :code 0 state))) 0))
@@ -47,6 +50,7 @@
 
 (define-registered 
   code_cdr
+  ^{:stack-types [:code]}
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (rest (ensure-list (stack-ref :code 0 state)))
@@ -56,6 +60,7 @@
 
 (define-registered 
   code_cons
+  ^{:stack-types [:code]}
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (let [new-item (cons (stack-ref :code 1 state)
@@ -69,6 +74,7 @@
 
 (define-registered 
   code_do
+  ^{:stack-types [:code :exec]}
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (stack-ref :code 0 state) 
@@ -78,6 +84,7 @@
 
 (define-registered 
   code_do*
+  ^{:stack-types [:code :exec]}
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (stack-ref :code 0 state)
@@ -87,6 +94,7 @@
 
 (define-registered 
   code_do*range
+  ^{:stack-types [:code :exec :integer]}
   (fn [state]
     (if (not (or (empty? (:code state))
                  (empty? (rest (:integer state)))))
@@ -112,7 +120,9 @@
       state)))
 
 (define-registered 
-  exec_do*range 
+  exec_do*range
+  ^{:stack-types [:exec :integer]
+    :parentheses 1}
   (fn [state] ; Differs from code.do*range only in the source of the code and the recursive call.
     (if (not (or (empty? (:exec state))
                  (empty? (rest (:integer state)))))
@@ -138,6 +148,7 @@
 
 (define-registered 
   code_do*count
+  ^{:stack-types [:code :exec :integer]}
   (fn [state]
     (if (not (or (empty? (:integer state))
                  (< (first (:integer state)) 1)
@@ -148,8 +159,10 @@
                  (pop-item :integer (pop-item :code state)))
       state)))
 
-(define-registered 
+(define-registered
   exec_do*count
+  ^{:stack-types [:exec :integer]
+    :parentheses 1}
   ;; differs from code.do*count only in the source of the code and the recursive call    
   (fn [state] 
     (if (not (or (empty? (:integer state))
@@ -160,8 +173,9 @@
                  (pop-item :integer (pop-item :exec state)))
       state)))
 
-(define-registered 
+(define-registered
   code_do*times
+  ^{:stack-types [:code :exec :integer]}
   (fn [state]
     (if (not (or (empty? (:integer state))
                  (< (first (:integer state)) 1)
@@ -173,8 +187,10 @@
                  (pop-item :integer (pop-item :code state)))
       state)))
 
-(define-registered 
+(define-registered
   exec_do*times
+  ^{:stack-types [:exec :integer]
+    :parentheses 1}
   ;; differs from code.do*times only in the source of the code and the recursive call
   (fn [state]
     (if (not (or (empty? (:integer state))
@@ -188,6 +204,8 @@
 
 (define-registered
   exec_while
+  ^{:stack-types [:exec :boolean]
+    :parentheses 1}
   (fn [state]
     (if (empty? (:exec state))
       state
@@ -200,6 +218,8 @@
 
 (define-registered
   exec_do*while
+  ^{:stack-types [:exec :boolean]
+    :parentheses 1}
   (fn [state]
     (if (empty? (:exec state))
       state
@@ -208,6 +228,7 @@
 
 (define-registered 
   code_map
+  ^{:stack-types [:code :exec]}
   (fn [state]
     (if (not (or (empty? (:code state))
                  (empty? (:exec state))))
@@ -234,13 +255,14 @@
                  (pop-item type state))
       state)))
 
-(define-registered code_fromboolean (codemaker :boolean))
-(define-registered code_fromfloat (codemaker :float))
-(define-registered code_frominteger (codemaker :integer))
-(define-registered code_quote (codemaker :exec))
+(define-registered code_fromboolean (with-meta (codemaker :boolean) {:stack-types [:code :boolean]}))
+(define-registered code_fromfloat (with-meta (codemaker :float) {:stack-types [:code :float]}))
+(define-registered code_frominteger (with-meta (codemaker :integer) {:stack-types [:code :integer]}))
+(define-registered code_quote (with-meta (codemaker :exec) {:stack-types [:code :exec]}))
 
 (define-registered 
   code_if
+  ^{:stack-types [:code :exec :boolean]}
   (fn [state]
     (if (not (or (empty? (:boolean state))
                  (empty? (rest (:code state)))))
@@ -253,6 +275,8 @@
 
 (define-registered 
   exec_if
+  ^{:stack-types [:exec :boolean]
+    :parentheses 2}
   ;; differs from code.if in the source of the code and in the order of the if/then parts
   (fn [state]
     (if (not (or (empty? (:boolean state))
@@ -266,6 +290,8 @@
 
 (define-registered 
   exec_when
+  ^{:stack-types [:exec :boolean]
+    :parentheses 1}
   (fn [state]
     (if (not (or (empty? (:boolean state))
                  (empty? (:exec state))))
@@ -276,6 +302,7 @@
 
 (define-registered 
   code_length
+  ^{:stack-types [:code :integer]}
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (count (ensure-list (first (:code state))))
@@ -285,6 +312,7 @@
 
 (define-registered 
   code_list
+  ^{:stack-types [:code]}
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (let [new-item (list (first (rest (:code state)))
@@ -298,6 +326,7 @@
 
 (define-registered 
   code_wrap
+  ^{:stack-types [:code]}
   (fn [state]
     (if (not (empty? (:code state)))
       (let [new-item (list (first (:code state)))]
@@ -310,6 +339,7 @@
 
 (define-registered 
   code_member
+  ^{:stack-types [:code :boolean]}
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (push-item (not (not (some #{(first (rest (:code state)))} 
@@ -320,6 +350,7 @@
 
 (define-registered 
   code_nth
+  ^{:stack-types [:code :integer]}
   (fn [state]
     (if (not (or (empty? (:integer state))
                  (empty? (:code state))
@@ -333,6 +364,7 @@
 
 (define-registered 
   code_nthcdr
+  ^{:stack-types [:code :integer]}
   (fn [state]
     (if (not (or (empty? (:integer state))
                  (empty? (:code state))
@@ -346,6 +378,7 @@
 
 (define-registered 
   code_null
+  ^{:stack-types [:code :boolean]}
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (let [item (first (:code state))]
@@ -356,6 +389,7 @@
 
 (define-registered 
   code_size
+  ^{:stack-types [:code :integer]}
   (fn [state]
     (if (not (empty? (:code state)))
       (push-item (count-points (first (:code state)))
@@ -365,6 +399,7 @@
 
 (define-registered 
   code_extract
+  ^{:stack-types [:code :integer]}
   (fn [state]
     (if (not (or (empty? (:code state))
                  (empty? (:integer state))))
@@ -376,6 +411,7 @@
 
 (define-registered 
   code_insert
+  ^{:stack-types [:code :integer]}
   (fn [state]
     (if (not (or (empty? (rest (:code state)))
                  (empty? (:integer state))))
@@ -391,6 +427,7 @@
 
 (define-registered 
   code_subst
+  ^{:stack-types [:code]}
   (fn [state]
     (if (not (empty? (rest (rest (:code state)))))
       (let [new-item (subst (stack-ref :code 2 state)
@@ -405,6 +442,7 @@
 
 (define-registered 
   code_contains
+  ^{:stack-types [:code :boolean]}
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (push-item (contains-subtree (stack-ref :code 1 state)
@@ -415,6 +453,7 @@
 
 (define-registered 
   code_container
+  ^{:stack-types [:code]}
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (push-item (containing-subtree (stack-ref :code 0 state)
@@ -433,6 +472,7 @@
 
 (define-registered 
   code_position
+  ^{:stack-types [:code :integer]}
   (fn [state]
     (if (not (empty? (rest (:code state))))
       (push-item (or (first (positions #{(stack-ref :code 1 state)}
@@ -444,6 +484,8 @@
 
 (define-registered 
   exec_k
+  ^{:stack-types [:exec]
+    :parentheses 2}
   (fn [state]
     (if (not (empty? (rest (:exec state))))
       (push-item (first (:exec state))
@@ -453,6 +495,8 @@
 
 (define-registered 
   exec_s
+  ^{:stack-types [:exec]
+    :parentheses 3}
   (fn [state]
     (if (not (empty? (rest (rest (:exec state)))))
       (let [stk (:exec state)
@@ -474,6 +518,8 @@
 
 (define-registered 
   exec_y
+  ^{:stack-types [:exec]
+    :parentheses 1}
   (fn [state]
     (if (not (empty? (:exec state)))
       (let [new-item (list 'exec_y (first (:exec state)))]
@@ -488,6 +534,9 @@
 
 (define-registered
   environment_new
+  ^{:stack-types [:environment]
+    :parentheses 1}
+  ;; Creates new environment using the top item on the exec stack
   (fn [state]
     (if (empty? (:exec state))
       state
@@ -501,6 +550,8 @@
 
 (define-registered
   environment_begin
+  ^{:stack-types [:environment]}
+  ;; Creates new environment using the entire exec stack
   (fn [state]
     (assoc (push-item (assoc state :exec '())
                       :environment state)
@@ -508,6 +559,8 @@
 
 (define-registered
   environment_end
+  ^{:stack-types [:environment]}
+  ;; Ends current environment
   (fn [state]
     (if (empty? (:environment state))
       state

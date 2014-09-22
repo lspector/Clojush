@@ -15,6 +15,10 @@
      :char char?
      :string string?
      :boolean (fn [thing] (or (= thing true) (= thing false)))
+     :vector_integer (fn [thing] (and (vector? thing) (integer? (first thing))))
+     :vector_float (fn [thing] (and (vector? thing) (float? (first thing))))
+     :vector_string (fn [thing] (and (vector? thing) (string? (first thing))))
+     :vector_boolean (fn [thing] (and (vector? thing) (or (= (first thing) true) (= (first thing) false))))
      }))
 
 (defn recognize-literal
@@ -23,7 +27,8 @@
   (loop [m (seq @literals)]
     (if-let [[type pred] (first m)]
       (if (pred thing) type
-        (recur (rest m))))))
+        (recur (rest m)))
+      nil)))
 
 ;; Add new literals by just assoc'ing on the new predicate. e.g.:
 ;; (swap! literals :symbol symbol?)

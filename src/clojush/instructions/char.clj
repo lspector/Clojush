@@ -7,6 +7,7 @@
 
 (define-registered
   char_allfromstring
+  ^{:stack-types [:char :string]}
   (fn [state]
     (if (empty? (:string state))
       state
@@ -19,6 +20,7 @@
 
 (define-registered
   char_frominteger
+  ^{:stack-types [:char :integer]}
   (fn [state]
     (if (not (empty? (:integer state)))
       (let [item (stack-ref :integer 0 state)]
@@ -28,6 +30,7 @@
 
 (define-registered
   char_fromfloat
+  ^{:stack-types [:char :float]}
   (fn [state]
     (if (not (empty? (:float state)))
       (let [item (stack-ref :float 0 state)]
@@ -37,6 +40,7 @@
 
 (define-registered
   char_isletter
+  ^{:stack-types [:char :boolean]}
   (fn [state]
     (if (not (empty? (:char state)))
       (let [item (stack-ref :char 0 state)]
@@ -48,6 +52,7 @@
 
 (define-registered
   char_isdigit
+  ^{:stack-types [:char :boolean]}
   (fn [state]
     (if (not (empty? (:char state)))
       (let [item (stack-ref :char 0 state)]
@@ -58,6 +63,7 @@
 
 (define-registered
   char_iswhitespace
+  ^{:stack-types [:char :boolean]}
   (fn [state]
     (if (not (empty? (:char state)))
       (let [item (stack-ref :char 0 state)]

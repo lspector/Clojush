@@ -7,11 +7,13 @@
 
 (define-registered
   boolean_rand
+  ^{:stack-types [:boolean :random]}
   (fn [state]
     (push-item (lrand-nth [true false]) :boolean state)))
 
 (define-registered
   integer_rand
+  ^{:stack-types [:integer :random]}
   (fn [state]
     (push-item (+' (lrand-int (+ 1 (- max-random-integer min-random-integer)))
                    min-random-integer)
@@ -20,6 +22,7 @@
 
 (define-registered
   float_rand
+  ^{:stack-types [:float :random]}
   (fn [state]
     (push-item (+' (lrand (- max-random-float min-random-float))
                    min-random-float)
@@ -28,6 +31,7 @@
 
 (define-registered
   code_rand
+  ^{:stack-types [:code :integer :random]}
   (fn [state]
     (if (not (empty? (:integer state)))
       (if (empty? @global-atom-generators)
@@ -44,6 +48,7 @@
 
 (define-registered
   string_rand
+  ^{:stack-types [:string :random]}
   (fn [state]
     (push-item
       (apply str (repeatedly
@@ -56,6 +61,7 @@
 
 (define-registered
   char_rand
+  ^{:stack-types [:char :random]}
   (fn [state]
     (push-item (lrand-nth (concat [\newline \tab] (map char (range 32 127))))
                :char
