@@ -56,11 +56,11 @@
    ^{:domain-label "vectors of all zeros"}
    [(map #(vec (repeat (inc %) 0)) (range 50)) 30 20]
    ^{:domain-label "permutations of a 4 item vector with one zero"}
-   [(vec (permutations [0 5 -8 9])) 20 4]
+   [(map vec (permutations [0 5 -8 9])) 20 4]
    ^{:domain-label "permutations of a 4 item vector with two zeros"}
-   [(vec (permutations [0 0 -8 9])) 20 4]
+   [(map vec (permutations [0 0 -8 9])) 20 4]
    ^{:domain-label "permutations of a 4 item vector with three zeros"}
-   [(vec (permutations [0 0 0 9])) 20 4]
+   [(map vec (permutations [0 0 0 9])) 20 4]
    ^{:domain-label "random cases"}
    [(fn [] (random-sequence-with-at-least-one-zero 5 20)) 100 100]
    ])
