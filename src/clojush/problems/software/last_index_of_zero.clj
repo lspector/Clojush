@@ -31,12 +31,12 @@
 
 ;; Define test cases
 (defn random-sequence-with-at-least-one-zero
-  [max-extra-zeros num-additional-values]
+  [max-extra-zeros max-additional-values]
   (shuffle
    (concat
     [0] ; To ensure at least one zero
     (repeat (lrand-int max-extra-zeros) 0)
-    (repeatedly num-additional-values #(- (lrand-int 100) 50)))))
+    (repeatedly (lrand-int max-additional-values) #(- (lrand-int 100) 50)))))
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
@@ -54,13 +54,13 @@
           [-7 0]
           [0 -8]) 8 0]
    ^{:domain-label "vectors of all zeros"}
-   [(map #(repeat (inc %) 0) (range 50)) 30 20]
+   [(map #(vec (repeat (inc %) 0)) (range 50)) 30 20]
    ^{:domain-label "permutations of a 4 item vector with one zero"}
-   [(permutations [0 5 -8 9]) 20 4]
+   [(vec (permutations [0 5 -8 9])) 20 4]
    ^{:domain-label "permutations of a 4 item vector with two zeros"}
-   [(permutations [0 0 -8 9]) 20 4]
+   [(vec (permutations [0 0 -8 9])) 20 4]
    ^{:domain-label "permutations of a 4 item vector with three zeros"}
-   [(permutations [0 0 0 9]) 20 4]
+   [(vec (permutations [0 0 0 9])) 20 4]
    ^{:domain-label "random cases"}
    [(fn [] (random-sequence-with-at-least-one-zero 5 20)) 100 100]
    ])
