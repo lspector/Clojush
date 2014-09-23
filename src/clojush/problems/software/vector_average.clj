@@ -151,4 +151,5 @@
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
+   :error-threshold 1.0E-3
    })
