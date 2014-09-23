@@ -68,6 +68,11 @@
                  (wallis-pi-approximation in)))
        inputs))
 
+(defn round-to-n-decimal-places
+  [f n]
+  (let [factor (expt 10 n)]
+    (double (/ (round (* f factor)) factor))))
+
 ; Define error function. For now, each run uses different random inputs
 (defn wallis-pi-error-function
   "Returns the error function for the Wallis Pi problem. Takes as
@@ -75,7 +80,7 @@
   [data-domains]
   (let [[train-cases test-cases] (map sort (map wallis-pi-test-cases
                                                 (test-and-train-data-from-domains data-domains)))]
-    (when false ;; Change to false to not print test cases
+    (when true ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
@@ -101,10 +106,12 @@
                            ; Record the behavior
                            (when @global-print-behavioral-diversity
                              (swap! behavior conj result))
-                           ; Error is Levenshtein distance of printed strings
-                           (if (number? result)
-                             (abs (- result correct-output)) ;distance from correct integer
-                             1000000.0) ;penalty for no return value
+                           ; Error is float error rounded to 4 decimal places
+                           (round-to-n-decimal-places
+                             (if (number? result)
+                               (abs (- result correct-output)) ;distance from correct integer
+                               1000000.0) ;penalty for no return value
+                             5)
                            )))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))

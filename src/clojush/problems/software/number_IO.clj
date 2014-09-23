@@ -52,6 +52,11 @@
                 (apply + %))
        inputs))
 
+(defn round-to-n-decimal-places
+  [f n]
+  (let [factor (expt 10 n)]
+    (double (/ (round (* f factor)) factor))))
+
 ; Define error function. For now, each run uses different random inputs
 (defn num-io-error-function
   "Returns the error function for the number IO problem. Takes as
@@ -90,12 +95,13 @@
                                (swap! behavior conj printed-result))
                              ; Each test case results in two error values:
                              ;   1. Numeric difference between correct output and the printed
-                             ;      output read into a float; if such a conversion fails, the
-                             ;      error is a penalty of 1000.
+                             ;      output read into a float, rounded to 4 decimal places;
+                             ;      if such a conversion fails, the error is a penalty of 1000.
                              ;   2. Levenstein distance between printed output and correct output as strings
-                             (vector ((if (= :lexicase @global-parent-selection) #(round (* 1.0E4 %)) identity) ; If we're using lexicase, multiply by 10^4 and round
+                             (vector (round-to-n-decimal-places
                                        (try (min 1000.0 (abs (- out-float (Double/parseDouble printed-result))))
-                                         (catch Exception e 1000.0)))
+                                         (catch Exception e 1000.0))
+                                       4)
                                      (levenshtein-distance printed-result (str out-float)))))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))

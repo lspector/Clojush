@@ -56,5 +56,5 @@
 (def global-pop-when-tagging (atom true)) ;; When true, tagging instructions will pop the exec stack when tagging; otherwise, the exec stack is not popped
 
 ;; These definitions are used by some problem-specific error functions, and must therefore be global
-(def global-parent-selection (atom :lexicse)) ;; The type of parent selection used
+(def global-parent-selection (atom :lexicase)) ;; The type of parent selection used
 (def global-print-behavioral-diversity (atom false)) ;; When true, reports will print the behavioral diversity of the population

@@ -63,6 +63,11 @@
                    (count %)))
        inputs))
 
+(defn round-to-n-decimal-places
+  [f n]
+  (let [factor (expt 10 n)]
+    (double (/ (round (* f factor)) factor))))
+
 ; Define error function. For now, each run uses different random inputs
 (defn vector-average-error-function
   "Returns the error function for the vector-average problem. Takes as
@@ -92,14 +97,16 @@
                                                        (push-item input1 :input)))
                                result (top-item :float final-state)]
                            (when print-outputs
-                              (println (format "Correct output: %19.14f | Program output: %19.14f" correct-output result)))
+                             (println (format "Correct output: %19.14f | Program output: %19.14f" correct-output result)))
                            ; Record the behavior
                            (when @global-print-behavioral-diversity
                              (swap! behavior conj result))
-                           ; Error is integer error
-                           (if (number? result)
-                             (abs (- result correct-output)) ; distance from correct integer
-                             1000000) ; penalty for no return value
+                           ; Error is float error rounded to 4 decimal places
+                           (round-to-n-decimal-places
+                             (if (number? result)
+                              (abs (- result correct-output)) ; distance from correct integer
+                              1000000.0)
+                             4) ; penalty for no return value
                            )))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
