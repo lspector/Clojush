@@ -350,6 +350,32 @@
 (define-registered vector_boolean_occurrencesof (with-meta (occurrencesofer :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean :integer]}))
 (define-registered vector_string_occurrencesof (with-meta (occurrencesofer :vector_string :string) {:stack-types [:vector_string :string :integer]}))
 
+(defn seter
+  "Returns a function that takes a state and replaces, in the top type vector,
+   item at index (from integer stack) with the first lit-type item."
+  [type lit-type]
+  (fn [state]
+    (if (or (empty? (type state))
+            (empty? (lit-type state))
+            (empty? (:integer state))
+            (and (= lit-type :integer) (empty? (rest (:integer state)))))
+      state
+      (let [item (if (= lit-type :integer)
+                   (stack-ref :integer 1 state)
+                   (top-item lit-type state))
+            index (mod (top-item :integer state) (count (top-item type state)))
+            result (assoc (top-item type state)
+                          index
+                          item)]
+        (push-item result
+                   type
+                   (pop-item lit-type (pop-item :integer (pop-item type state))))))))
+
+(define-registered vector_integer_set (with-meta (seter :vector_integer :integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_set (with-meta (seter :vector_float :float) {:stack-types [:vector_float :float :integer]}))
+(define-registered vector_boolean_set (with-meta (seter :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean :integer]}))
+(define-registered vector_string_set (with-meta (seter :vector_string :string) {:stack-types [:vector_string :string :integer]}))
+
 (defn replaceer
   "Returns a function that takes a state and replaces all occurrences of the second lit-type item
    with the first lit-type item in the top type vector."
