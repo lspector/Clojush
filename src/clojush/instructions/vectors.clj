@@ -360,13 +360,18 @@
             (empty? (:integer state))
             (and (= lit-type :integer) (empty? (rest (:integer state)))))
       state
-      (let [item (if (= lit-type :integer)
+      (let [vect (top-item type state)
+            item (if (= lit-type :integer)
                    (stack-ref :integer 1 state)
                    (top-item lit-type state))
-            index (mod (top-item :integer state) (count (top-item type state)))
-            result (assoc (top-item type state)
-                          index
-                          item)]
+            index (if (empty? vect)
+                    0
+                    (mod (top-item :integer state) (count vect)))
+            result (if (empty? vect)
+                     vect
+                     (assoc vect
+                            index
+                            item))]
         (push-item result
                    type
                    (pop-item lit-type (pop-item :integer (pop-item type state))))))))
