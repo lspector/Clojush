@@ -22,6 +22,9 @@
 (def super-anagrams-atom-generators
   (concat (list
             ;;; end constants
+            (fn [] (lrand-nth (list true false))) ;Boolean ERC
+            (fn [] (- (lrand-int 2001) 1000)) ;Integer ERC [-1000,1000]
+            (fn [] (lrand-nth (concat [\newline \tab] (map char (range 32 127))))) ;Visible character ERC
             ;;; end ERCs
             (tag-instruction-erc [:string :char :integer :boolean :exec] 1000)
             (tagged-instruction-erc 1000)
@@ -36,21 +39,21 @@
 ;; Define test cases
 (defn super-anagrams-input
   "Makes a pair of Super Anagrams inputs."
-  [min-length]
-  (let [len (+ min-length (lrand-int (- 11 min-length)))
+  []
+  (let [len (inc (lrand-int 20))
         input1 (apply str
                       (repeatedly len
                                   (fn []
-                                    (lrand-nth (map char (range 33 127))))))
+                                    (lrand-nth (map char (range 97 123))))))
         change-char-sometimes-fn (fn [c]
-                                   "Each char has 40% chance of being replaced"
-                                   (if (< (lrand) 0.4)
-                                     (lrand-nth (map char (range 33 127)))
+                                   "Each char has 10% chance of being replaced"
+                                   (if (< (lrand) 0.1)
+                                     (lrand-nth (map char (range 97 123)))
                                      c))
-        num-chars-to-drop-last (lrand-nth (list 0 0 0 1 1 (lrand-int (inc (count input1)))))
-        input2 (apply str (drop-last num-chars-to-drop-last
-                                     (map change-char-sometimes-fn input1)))]
-    (if (< (lrand) 0.5) ;;Choose random order since len(input1) >= len(input2)
+        num-chars-to-drop (lrand-int len)
+        input2 (apply str (drop num-chars-to-drop
+                                (shuffle (map change-char-sometimes-fn input1))))]
+    (if (< (lrand) 0.2) ;;Choose random order (biased towad input2 first) since len(input1) >= len(input2)
       [input1 input2]
       [input2 input1])))
 
@@ -61,35 +64,36 @@
 ;; random element of the set.
 (def super-anagrams-data-domains
   [[(list ["" ""]
-          ["" "hi"]
-          ["hereworld" ""]
+          ["" "h"]
+          ["i" ""]
           ["a" "a"]
           ["b" "c"]
           ["n" "nn"]
           ["abcde" "c"]
           ["c" "abcde"]
+          ["r" "mnbvccxz"]
           ["abc" "aabc"]
           ["aabc" "abcde"]
           ["abcde" "edcba"]
           ["mo" "moo"]
           ["moo" "mo"]
+          ["tree" "though"]
           ["rip" "zipper"]
           ["flipper" "rip"]
           ["hi" "zipper"]
           ["dealer" "dollars"]
           ["loud" "louder"]
+          ["ccccccccc" "ccccc"]
           ["clinteastwood" "oldwestaction"]
           ["clinteastwood" "ldwestaction"]
           ["verificationcomplete" "verificationcomplete"]
           ["hahahahahahahahahaha" "hhhhhhhhhhaaaaaaaaaa"]
           ["hahahahahahahahahaha" "aahhhh"]
-          
-          [(apply str (repeat 10 \s)) (apply str (repeat 10 \~))]
-          [(apply str (take 10 (cycle (list \> \_ \= \])))) (apply str (take 10 (cycle (list \q \_))))]
-          [(apply str (take 10 (cycle (list \( \))))) (apply str (take 10 (cycle (list \p \p \)))))]
-          [(apply str (take 10 (cycle (list \H \a)))) (apply str (take 10 (cycle (list \H \i))))]) 30 0] ; Edge case inputs
-   [#(super-anagrams-input 2) 170 0] ; Random inputs. Length 1 strings are covered by hand-coded cases
-   [#(super-anagrams-input 1) 0 2000]
+          ["" "qwqeqrqtqyquqiqoqpqs"]
+          ["wxyz" "qazwsxedcrfvtgbyhnuj"]
+          ["dddeeefffgggg" "gggffggfefeededdd"]
+          ["gggffggfefeededdd" "dddeeefffgggg"]) 30 0] ; hand-written cases
+   [super-anagrams-input 170 2000] ; Random inputs designed to be close to anagrams
    ])
 
 ;;Can make test data like this:
@@ -102,13 +106,13 @@
   [inputs]
   (map (fn [[in1 in2]]
          (vector [in1 in2]
-                 (apply str
-                        (interpose \newline
-                                   (map #(apply str (interpose \space (rest %)))
-                                       (filter first (map #(vector (not= %1 %2) %3 %1 %2)
-                                                          in1
-                                                          in2
-                                                          (range))))))))
+                 (loop [i1 in1
+                        i2 in2]
+                   (cond
+                     (empty? i1) true
+                     (> 0 (.indexOf i2 (str (first i1)))) false
+                     :else (recur (rest i1)
+                                  (string/replace-first i2 (first i1) \space))))))
        inputs))
 
 ; Define error function. For now, each run uses different random inputs
@@ -116,8 +120,9 @@
   "Returns the error function for the Super Anagrams problem. Takes as
    input Super Anagrams data domains."
   [data-domains]
-  (let [[train-cases test-cases] (map super-anagrams-test-cases
-                                          (test-and-train-data-from-domains data-domains))]
+  (let [[train-cases test-cases] (map #(sort-by second %)
+                                      (map super-anagrams-test-cases
+                                          (test-and-train-data-from-domains data-domains)))]
     (when true ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
@@ -140,14 +145,16 @@
                                                        (push-item input2 :input)
                                                        (push-item input1 :input)
                                                        (push-item "" :output)))
-                               result (stack-ref :output 0 final-state)]
+                               result (top-item :boolean final-state)]
                            (when print-outputs
-                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                             (println (format "Correct output: %5b | Program output: %5b" correct-output result)))
                            ; Record the behavior
                            (when @global-print-behavioral-diversity
                              (swap! behavior conj result))
-                           ; Error is Levenshtein distance of printed strings
-                           (levenshtein-distance correct-output result))))] ;;NOTE: SEE NOTE IN INTRO
+                           ; Error is boolean error
+                           (if (= result correct-output)
+                             0
+                             1))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
@@ -180,9 +187,9 @@
 (def argmap
   {:error-function (super-anagrams-error-function super-anagrams-data-domains)
    :atom-generators super-anagrams-atom-generators
-   :max-points 1000
-   :max-points-in-initial-program 500
-   :evalpush-limit 2000
+   :max-points 800
+   :max-points-in-initial-program 400
+   :evalpush-limit 1600
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase

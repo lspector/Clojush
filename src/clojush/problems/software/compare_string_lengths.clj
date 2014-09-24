@@ -18,7 +18,7 @@
 ; Atom generators
 (def csl-atom-generators
   (concat (list
-            (fn [] (lrand-nth (list true false))) ;Boolean
+            (fn [] (lrand-nth (list true false))) ;Boolean ERC
             ;;; end ERCs
             (tag-instruction-erc [:integer :boolean :string :exec] 1000)
             (tagged-instruction-erc 1000)
