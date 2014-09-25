@@ -81,7 +81,7 @@
   [data-domains]
   (let [[train-cases test-cases] (map vectors-summed-test-cases
                                       (test-and-train-data-from-domains data-domains))]
-    (when false ;; Change to false to not print test cases
+    (when true ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
@@ -168,3 +168,47 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    })
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;(reset! global-evalpush-limit 1500)
+;
+;(reset! global-max-points 500)
+;
+;(defn test-program-on-training
+;  [program]
+;  ((vectors-summed-error-function vectors-summed-data-domains) program :train true))
+;
+;(defn run-prog
+;  [program print-steps]
+;  (let [input "dl2HKsdJ2 jad2E\"d2n\nad3!"
+;        final-state (run-push program
+;                              (->> (make-push-state)
+;                                (push-item input :input)
+;                                (push-item "" :output))
+;                              print-steps)
+;        printed-result (stack-ref :output 0 final-state)]
+;    (doseq [[nm stack] (sort-by #(name (first %)) final-state)]
+;      (println (format "%-12s | %s" nm (pr-str stack))))))
+;
+;(def tom-program
+;  '(
+;     in1 in1 vector_integer_length
+;     exec_do*count
+;     (
+;       integer_dup integer_dup
+;       in1 vector_integer_nth
+;       integer_swap
+;       in2 vector_integer_nth
+;       integer_add
+;       integer_swap vector_integer_set
+;       )
+;     ))
+
+
+
+;(test-program-on-training tom-program)
+
+;(run-prog tom-program false)
+
+;(test-program-on-training while-program)
