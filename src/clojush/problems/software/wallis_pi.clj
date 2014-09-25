@@ -127,11 +127,11 @@
     (printf ";; -*- Wallis Pi problem report - generation %s\n" generation)(flush)
     (println "Test total error for best:" best-total-test-error)
     (println (format "Test mean error for best: %.5f" (double (/ best-total-test-error (count best-test-errors)))))
-    (when (zero? (:total-error best))
+    (when (<= (:total-error best) 0.001)
       (doseq [[i error] (map vector
                              (range)
                              best-test-errors)]
-        (println (format "Test Case  %3d | Error: %d" i error))))
+        (println (format "Test Case  %3d | Error: %s" i (str error)))))
     (println ";;------------------------------")
     (println "Outputs of best individual on training cases:")
     (error-function best-program :train true)

@@ -125,7 +125,7 @@
       (doseq [[i error] (map vector
                              (range)
                              best-test-errors)]
-        (println (format "Test Case  %3d | Error: %d" i error))))
+        (println (format "Test Case  %3d | Error: %s" i (str error)))))
     (println ";;------------------------------")
     (println "Outputs of best individual on training cases:")
     (error-function best-program :train true)
