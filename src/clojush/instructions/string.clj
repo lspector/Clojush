@@ -345,3 +345,25 @@
                    :string
                    (pop-item :char (pop-item :string state))))
       state)))
+
+(define-registered
+  exec_string_iterate ; Returns a function that iterates over a string using the code on the exec stack.
+  ^{:stack-types [:string :char :exec] :parentheses 1}
+  (fn [state]
+    (if (or (empty? (:string state))
+            (empty? (:exec state)))
+      state
+      (let [s (top-item :string state)]
+      (cond
+        (empty? s) (->> state
+                        (pop-item :string)
+                        (pop-item :exec))
+        (empty? (rest s)) (->> state ;If the rest of the string is empty, we're done iterating.
+                            (pop-item :string)
+                            (push-item (first s) :char))
+        :else (->> state
+                (pop-item :string)
+                (push-item 'exec_string_iterate :exec)
+                (push-item (apply str (rest s)) :exec)
+                (push-item (top-item :exec state) :exec)
+                (push-item (first s) :char)))))))
