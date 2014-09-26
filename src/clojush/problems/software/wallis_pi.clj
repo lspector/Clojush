@@ -106,7 +106,7 @@
                            ; Record the behavior
                            (when @global-print-behavioral-diversity
                              (swap! behavior conj result))
-                           ; Error is float error rounded to 4 decimal places
+                           ; Error is float error rounded to 5 decimal places
                            (round-to-n-decimal-places
                              (if (number? result)
                                (abs (- result correct-output)) ;distance from correct integer
