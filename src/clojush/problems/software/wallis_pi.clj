@@ -68,11 +68,6 @@
                  (wallis-pi-approximation in)))
        inputs))
 
-(defn round-to-n-decimal-places
-  [f n]
-  (let [factor (expt 10 n)]
-    (double (/ (round (* f factor)) factor))))
-
 ; Define error function. For now, each run uses different random inputs
 (defn wallis-pi-error-function
   "Returns the error function for the Wallis Pi problem. Takes as

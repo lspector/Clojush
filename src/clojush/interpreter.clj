@@ -45,9 +45,10 @@
               (and (empty? (:exec s)) (empty? (:environment s)))
               (and (not (zero? time-limit))
                    (> (System/nanoTime) time-limit)))
-        (assoc s :termination (if (and (empty? (:exec s)) (empty? (:environment s)))
-                                :normal
-                                :abnormal))
+        (assoc (assoc s :termination (if (and (empty? (:exec s)) (empty? (:environment s)))
+                                       :normal
+                                       :abnormal))
+               :eval-push-iterations iteration)
         (if (empty? (:exec s))
           (let [s (end-environment s)]
             (when print-steps

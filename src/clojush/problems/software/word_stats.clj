@@ -177,15 +177,10 @@
                    (vector (str (apply str (for [n (range 1 (inc (apply max word-lengths)))]
                                              (format "words of length %d: %d\n" n (count (filter #(= % n) word-lengths)))))
                                 (format "number of sentences: %d\n" num-sentences)
-                                (format "average sentence length: %s" (pr-str (float (/ (count words) num-sentences)))))
+                                (format "average sentence length: %s" (pr-str (round-to-n-decimal-places (* 1.0 (/ (count words) num-sentences)) 10))))
                            num-sentences
                            (float (/ (count words) num-sentences))))))
        inputs))
-
-(defn round-to-n-decimal-places
-  [f n]
-  (let [factor (expt 10 n)]
-    (double (/ (round (* f factor)) factor))))
 
 ; Define error function. For now, each run uses different random inputs
 (defn word-stats-error-function
@@ -195,7 +190,7 @@
   (let [[train-cases test-cases] (map #(sort-by (comp count first) %)
                                       (map word-stats-test-cases
                                            (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
+    (when false ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
@@ -230,12 +225,14 @@
                              ;  3. If contains a line of the form "average sentence length: (-?\d+.\d+)", then float distance from correct output, rounded to 4 places; otherwise penalty
                              (vector
                                (levenshtein-distance correct-output result)
-                               (if-let [num-str (second (re-find #"number of sentences: (-?\d+)" result))]
-                                 (abs (- (Integer/parseInt num-str) sentences))
-                                 1000) ;Penalty
-                               (if-let [num-str (second (re-find #"average sentence length: (-?\d+.\d+)" result))]
-                                 (round-to-n-decimal-places (abs (- (Float/parseFloat num-str) words-per-sentence)) 4)
-                                 1000.0) ;Penalty
+                               (if-let [result-n (try (Integer/parseInt (second (re-find #"number of sentences: (-?\d+)" result)))
+                                                   (catch Exception e nil))]
+                                 (abs (- result-n sentences))
+                                 10000) ;Penalty
+                               (if-let [result-f (try (Float/parseFloat (second (re-find #"average sentence length: (-?\d+\.\d+)" result)))
+                                                   (catch Exception e nil))]
+                                 (round-to-n-decimal-places (abs (- result-f words-per-sentence)) 4)
+                                 10000.0) ;Penalty
                                )))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
@@ -271,7 +268,7 @@
    :atom-generators word-stats-atom-generators
    :max-points 1000
    :max-points-in-initial-program 500
-   :evalpush-limit 2000
+   :evalpush-limit 6000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -290,3 +287,90 @@
    :error-threshold 0.02
    ;:max-error 1
    })
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;(reset! global-evalpush-limit 5000)
+;
+;(reset! global-max-points 1000)
+;
+;(defn test-program-on-training
+;  [program print-outputs]
+;  ((word-stats-error-function word-stats-data-domains) program :train print-outputs))
+;
+;(defn run-prog
+;  [program print-steps]
+;  (let [input (apply str (repeat 100 \.))
+;        final-state (run-push program
+;                              (->> (make-push-state)
+;                                (push-item input :input)
+;                                (push-item input :input)
+;                                (push-item "" :output))
+;                              print-steps)
+;        printed-result (stack-ref :output 0 final-state)]
+;    (doseq [[nm stack] (sort-by #(name (first %)) final-state)]
+;      (println (format "%-15s | %s" nm (pr-str stack))))))
+;
+;(def tom-program
+;  '(
+;     []
+;     exec_do*while ;for each line in the file
+;     (
+;       file_readline string_split
+;       exec_do*while ;for each string in this line
+;       (
+;         string_length
+;         integer_dup
+;         vector_integer_dup vector_integer_length
+;         integer_gte
+;         exec_while ;make sure vector_integer is long enough
+;         (
+;           0 vector_integer_conj
+;           integer_dup
+;           vector_integer_dup vector_integer_length
+;           integer_gte
+;           )
+;         ;Inc that integer's index in vector
+;         integer_dup vector_integer_dup
+;         vector_integer_nth
+;         integer_inc integer_swap
+;         vector_integer_set
+;         string_empty boolean_not
+;         )
+;       file_EOF boolean_not
+;       )
+;     ; Have vector of word size counts at this point
+;     1 vector_integer_dup vector_integer_length integer_dec
+;     exec_do*range
+;     (
+;       "words of length " print_string
+;       integer_dup print_integer
+;       ": " print_string
+;       vector_integer_dup vector_integer_nth print_integer
+;       print_newline
+;       )
+;     "number of sentences: " print_string
+;     file_begin
+;     exec_do*while
+;     ( ;get all lines in one string
+;       file_readline string_concat
+;       file_EOF boolean_not
+;       )
+;     ; count \., \!, and \?
+;     string_dup string_dup string_dup
+;     \. string_occurrencesofchar
+;     \! string_occurrencesofchar
+;     \? string_occurrencesofchar
+;     integer_add integer_add integer_dup
+;     print_integer print_newline
+;     "average sentence length: " print_string
+;     string_split string_stackdepth
+;     float_frominteger float_frominteger float_div print_float
+;     ))
+
+
+;(test-program-on-training tom-program false)
+
+;(run-prog tom-program false)
+
+;(test-program-on-training while-program)

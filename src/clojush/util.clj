@@ -72,6 +72,12 @@
       (and (< n min-number-magnitude) (> n (- min-number-magnitude))) 0.0
       :else n)))
 
+(defn round-to-n-decimal-places
+  "Rounds float f to n decimal places."
+  [f n]
+  (let [factor (math/expt 10 n)]
+    (double (/ (math/round (* f factor)) factor))))
+
 (defn count-points
   "Returns the number of points in tree, where each atom and each pair of parentheses 
    counts as a point."

@@ -52,11 +52,6 @@
                 (apply + %))
        inputs))
 
-(defn round-to-n-decimal-places
-  [f n]
-  (let [factor (expt 10 n)]
-    (double (/ (round (* f factor)) factor))))
-
 ; Define error function. For now, each run uses different random inputs
 (defn num-io-error-function
   "Returns the error function for the number IO problem. Takes as

@@ -12,10 +12,11 @@
     (if (empty? (type state))
       state
       (let [top-thing (top-item type state)
-            top-thing-string (if (or (string? top-thing)
-                                     (char? top-thing))
-                               top-thing
-                               (pr-str top-thing))]
+            top-thing-string (cond
+                               (or (string? top-thing)
+                                   (char? top-thing)) top-thing
+                               (float? top-thing) (pr-str (round-to-n-decimal-places top-thing 10))
+                               :else (pr-str top-thing))]
         (if (< max-string-length (count (str (stack-ref :output 0 state) top-thing-string)))
           state
           (stack-assoc (str (stack-ref :output 0 state) top-thing-string)
