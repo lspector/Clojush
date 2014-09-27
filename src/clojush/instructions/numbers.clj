@@ -158,7 +158,7 @@
   (fn [state]
     (if (not (empty? (:string state)))
       (try (pop-item :string
-                     (push-item (Integer/parseInt (top-item :string state))
+                     (push-item (keep-number-reasonable (Long/parseLong (top-item :string state)))
                                 :integer state))
         (catch Exception e state))
       state)))
@@ -169,7 +169,7 @@
   (fn [state]
     (if (not (empty? (:string state)))
       (try (pop-item :string
-                     (push-item (Float/parseFloat (top-item :string state))
+                     (push-item (keep-number-reasonable (Float/parseFloat (top-item :string state)))
                                 :float state))
         (catch Exception e state))
       state)))
@@ -259,7 +259,7 @@
   ^{:stack-types [:integer]}
   (fn [state]
     (if (not (empty? (:integer state)))
-      (push-item (inc (stack-ref :integer 0 state))
+      (push-item (keep-number-reasonable (inc (stack-ref :integer 0 state)))
                  :integer
                  (pop-item :integer state))
       state)))
@@ -269,7 +269,7 @@
   ^{:stack-types [:integer]}
   (fn [state]
     (if (not (empty? (:integer state)))
-      (push-item (dec (stack-ref :integer 0 state))
+      (push-item (keep-number-reasonable (dec (stack-ref :integer 0 state)))
                  :integer
                  (pop-item :integer state))
       state)))
@@ -279,7 +279,7 @@
   ^{:stack-types [:float]}
   (fn [state]
     (if (not (empty? (:float state)))
-      (push-item (inc (stack-ref :float 0 state))
+      (push-item (keep-number-reasonable (inc (stack-ref :float 0 state)))
                  :float
                  (pop-item :float state))
       state)))
@@ -289,7 +289,7 @@
   ^{:stack-types [:float]}
   (fn [state]
     (if (not (empty? (:float state)))
-      (push-item (dec (stack-ref :float 0 state))
+      (push-item (keep-number-reasonable (dec (stack-ref :float 0 state)))
                  :float
                  (pop-item :float state))
       state)))
