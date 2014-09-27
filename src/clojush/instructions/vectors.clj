@@ -443,7 +443,7 @@
 (defn iterateer
   "Returns a function that takes a state and iterates over the type vector using
    the code on the exec stack. If the vector isn't empty, expands to:
-      ((first vector) (top-item :exec state) (rest vector) exec_vector_iterate (top-item :exec state) rest_of_program)"
+      ((first vector) (top-item :exec state) (rest vector) exec_do*vector_type (top-item :exec state) rest_of_program)"
   [type lit-type instr]
   (fn [state]
     (if (or (empty? (type state))
@@ -464,7 +464,7 @@
                 (push-item (top-item :exec state) :exec)
                 (push-item (first vect) lit-type)))))))
 
-(define-registered exec_vector_integer_iterate (with-meta (iterateer :vector_integer :integer 'exec_vector_integer_iterate) {:stack-types [:vector_integer :integer :exec] :parentheses 1}))
-(define-registered exec_vector_float_iterate (with-meta (iterateer :vector_float :float 'exec_vector_float_iterate) {:stack-types [:vector_float :float :exec] :parentheses 1}))
-(define-registered exec_vector_boolean_iterate (with-meta (iterateer :vector_boolean :boolean 'exec_vector_boolean_iterate) {:stack-types [:vector_boolean :boolean :exec] :parentheses 1}))
-(define-registered exec_vector_string_iterate (with-meta (iterateer :vector_string :string 'exec_vector_string_iterate) {:stack-types [:vector_string :string :exec] :parentheses 1}))
+(define-registered exec_do*vector_integer (with-meta (iterateer :vector_integer :integer 'exec_do*vector_integer) {:stack-types [:vector_integer :integer :exec] :parentheses 1}))
+(define-registered exec_do*vector_float (with-meta (iterateer :vector_float :float 'exec_do*vector_float) {:stack-types [:vector_float :float :exec] :parentheses 1}))
+(define-registered exec_do*vector_boolean (with-meta (iterateer :vector_boolean :boolean 'exec_do*vector_boolean) {:stack-types [:vector_boolean :boolean :exec] :parentheses 1}))
+(define-registered exec_do*vector_string (with-meta (iterateer :vector_string :string 'exec_do*vector_string) {:stack-types [:vector_string :string :exec] :parentheses 1}))
