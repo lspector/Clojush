@@ -190,7 +190,7 @@
   (let [[train-cases test-cases] (map #(sort-by (comp count first) %)
                                       (map word-stats-test-cases
                                            (test-and-train-data-from-domains data-domains)))]
-    (when false ;; Change to false to not print test cases
+    (when true ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
