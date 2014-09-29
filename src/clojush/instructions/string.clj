@@ -346,6 +346,26 @@
                    (pop-item :char (pop-item :string state))))
       state)))
 
+  (define-registered
+  string_setchar ; Returns a function that sets char at index in string
+  ^{:stack-types [:string :char :integer]}
+  (fn [state]
+    (if (or (empty? (:string state))
+            (empty? (:char state))
+            (empty? (:integer state)))
+      state
+      (let [s (top-item :string state)
+            item (top-item :char state)
+            index (if (empty? s)
+                    0
+                    (mod (top-item :integer state) (count s)))
+            result (if (empty? s)
+                     s
+                     (apply str (assoc (vec s) index item)))]
+        (push-item result
+                   :string
+                   (pop-item :char (pop-item :integer (pop-item :string state))))))))
+
 (define-registered
   exec_string_iterate ; Returns a function that iterates over a string using the code on the exec stack.
   ^{:stack-types [:string :char :exec] :parentheses 1}
