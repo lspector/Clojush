@@ -253,10 +253,10 @@
                                       (repeatedly n-test input-set))
                               (let [shuffled-inputs (shuffle input-set)
                                     train-inputs (if (= n-train (count input-set))
-                                                   input-set
+                                                   input-set ; NOTE: input-set is not shuffled if it is the same size as n-train
                                                    (take n-train shuffled-inputs))
                                     test-inputs (if (= n-test (count input-set))
-                                                   input-set
+                                                   input-set ; NOTE: input-set is not shuffled if it is the same size as n-test
                                                    (drop n-train shuffled-inputs))]
                                 (assert (= (+ n-train n-test) (count input-set)) "Sizes of train and test sets don't add up to the size of the input set.")
                                 (vector train-inputs test-inputs))))
