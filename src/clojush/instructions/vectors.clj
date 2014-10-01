@@ -350,6 +350,37 @@
 (define-registered vector_boolean_occurrencesof (with-meta (occurrencesofer :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean :integer]}))
 (define-registered vector_string_occurrencesof (with-meta (occurrencesofer :vector_string :string) {:stack-types [:vector_string :string :integer]}))
 
+(defn seter
+  "Returns a function that takes a state and replaces, in the top type vector,
+   item at index (from integer stack) with the first lit-type item."
+  [type lit-type]
+  (fn [state]
+    (if (or (empty? (type state))
+            (empty? (lit-type state))
+            (empty? (:integer state))
+            (and (= lit-type :integer) (empty? (rest (:integer state)))))
+      state
+      (let [vect (top-item type state)
+            item (if (= lit-type :integer)
+                   (stack-ref :integer 1 state)
+                   (top-item lit-type state))
+            index (if (empty? vect)
+                    0
+                    (mod (top-item :integer state) (count vect)))
+            result (if (empty? vect)
+                     vect
+                     (assoc vect
+                            index
+                            item))]
+        (push-item result
+                   type
+                   (pop-item lit-type (pop-item :integer (pop-item type state))))))))
+
+(define-registered vector_integer_set (with-meta (seter :vector_integer :integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_set (with-meta (seter :vector_float :float) {:stack-types [:vector_float :float :integer]}))
+(define-registered vector_boolean_set (with-meta (seter :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean :integer]}))
+(define-registered vector_string_set (with-meta (seter :vector_string :string) {:stack-types [:vector_string :string :integer]}))
+
 (defn replaceer
   "Returns a function that takes a state and replaces all occurrences of the second lit-type item
    with the first lit-type item in the top type vector."
@@ -408,3 +439,32 @@
 (define-registered vector_float_remove (with-meta (removeer :vector_float :float) {:stack-types [:vector_float :float]}))
 (define-registered vector_boolean_remove (with-meta (removeer :vector_boolean :boolean) {:stack-types [:vector_boolean :boolean]}))
 (define-registered vector_string_remove (with-meta (removeer :vector_string :string) {:stack-types [:vector_string :string]}))
+
+(defn iterateer
+  "Returns a function that takes a state and iterates over the type vector using
+   the code on the exec stack. If the vector isn't empty, expands to:
+      ((first vector) (top-item :exec state) (rest vector) exec_do*vector_type (top-item :exec state) rest_of_program)"
+  [type lit-type instr]
+  (fn [state]
+    (if (or (empty? (type state))
+            (empty? (:exec state)))
+      state
+      (let [vect (top-item type state)]
+      (cond
+        (empty? vect) (->> state
+                           (pop-item type)
+                           (pop-item :exec))
+        (empty? (rest vect)) (->> state ;If the rest of the vector is empty, we're done iterating.
+                               (pop-item type)
+                               (push-item (first vect) lit-type))
+        :else (->> state
+                (pop-item type)
+                (push-item instr :exec)
+                (push-item (vec (rest vect)) :exec)
+                (push-item (top-item :exec state) :exec)
+                (push-item (first vect) lit-type)))))))
+
+(define-registered exec_do*vector_integer (with-meta (iterateer :vector_integer :integer 'exec_do*vector_integer) {:stack-types [:vector_integer :integer :exec] :parentheses 1}))
+(define-registered exec_do*vector_float (with-meta (iterateer :vector_float :float 'exec_do*vector_float) {:stack-types [:vector_float :float :exec] :parentheses 1}))
+(define-registered exec_do*vector_boolean (with-meta (iterateer :vector_boolean :boolean 'exec_do*vector_boolean) {:stack-types [:vector_boolean :boolean :exec] :parentheses 1}))
+(define-registered exec_do*vector_string (with-meta (iterateer :vector_string :string 'exec_do*vector_string) {:stack-types [:vector_string :string :exec] :parentheses 1}))
