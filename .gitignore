@@ -3,6 +3,7 @@
 .lein-deps-sum
 .lein-repl-history
 /pom.xml
+/pom.xml.asc
 /clojush*.jar
 classes/
 target/
