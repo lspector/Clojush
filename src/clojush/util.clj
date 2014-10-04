@@ -294,7 +294,7 @@
     ;; which is the same as prev-row because it starts from 0, the above, which is the next element
     ;; from the list and finally the element from the other sequence itself.
     (map vector prev-row (next prev-row) other-seq)))
-   
+
 (defn levenshtein-distance
   "Levenshtein Distance - http://en.wikipedia.org/wiki/Levenshtein_distance
      In information theory and computer science, the Levenshtein distance is a
@@ -317,4 +317,3 @@
               ;; b and the empty string.
               (range (inc (count b)))
               a))))
-             
