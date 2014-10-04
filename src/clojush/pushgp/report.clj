@@ -44,6 +44,14 @@
   (float (/ (count (distinct @population-behaviors))
             (count @population-behaviors))))
 
+(defn sample-population-edit-distance
+  [pop samples]
+  (let [instr-programs (map #(map :instruction %)
+                            (map :genome pop))]
+    (repeatedly samples
+                #(levenshtein-distance (random/lrand-nth instr-programs)
+                                       (random/lrand-nth instr-programs)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; log printing (csv and json)
 
@@ -218,7 +226,7 @@
            error-threshold max-generations population-size
            print-errors print-history print-cosmos-data print-timings
            problem-specific-report total-error-method
-           parent-selection
+           parent-selection print-homology-data
            print-error-frequencies-by-case
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
@@ -234,7 +242,41 @@
         psr-best (problem-specific-report err-fn-best population generation error-function report-simplifications)
         best (if (= (type psr-best) clojush.individual.individual)
                psr-best
-               err-fn-best)]
+               err-fn-best)
+        average (fn [nums]
+                  (if (zero? (count nums))
+                    "Cannot find average of zero numbers."
+                    (float (/ (apply +' nums) (count nums)))))
+        standard-deviation (fn [nums]
+                             (if (<= (count nums) 1)
+                               (str "Cannot find standard deviation of " (count nums) "numbers. Must have at least 2.")
+                               (let [mean (average nums)]
+                                 (Math/sqrt (/ (apply +' (map #(* (- % mean) (- % mean))
+                                                              nums))
+                                               (dec (count nums)))))))
+        median (fn [nums]
+                 (if (zero? (count nums))
+                   "Cannot find median of zero numbers."
+                   (let [sorted (sort nums)]
+                     (if (odd? (count nums))
+                       (nth sorted
+                            (truncate (/ (count nums) 2)))
+                       (/ (+' (nth sorted
+                                   (/ (count nums) 2))
+                              (nth sorted
+                                   (dec (/ (count nums) 2))))
+                          2.0)))))
+        quartiles (fn [nums]
+                    (if (zero? (count nums))
+                      "Cannot find quartiles of zero numbers."
+                      (let [sorted (sort nums)]
+                        (vector (nth sorted
+                                     (truncate (/ (count nums) 4)))
+                                (nth sorted
+                                     (truncate (/ (count nums) 2)))
+                                (nth sorted
+                                     (truncate (/ (* 3 (count nums)) 4)))))))
+        ]
     (when print-error-frequencies-by-case
       (println "Error frequencies by case:" (doall (map frequencies (apply map vector (map :errors population))))))
     (when (some #{parent-selection} #{:lexicase :elitegroup-lexicase}) (lexicase-report population argmap))
@@ -291,6 +333,25 @@
       ;(println "Number of behaviors:" (count @population-behaviors))
       (reset! population-behaviors ()))
     (println "Number of evaluations used so far:" @evaluations-count)
+    (when print-homology-data
+      (let [num-samples 1000
+            sample-1 (sample-population-edit-distance population num-samples)
+            sample-2 (sample-population-edit-distance population num-samples)
+            [first-quart-1 median-1 third-quart-1] (quartiles sample-1)
+            [first-quart-2 median-2 third-quart-2] (quartiles sample-2)]
+        (println "--- Population Homology Statistics (all stats reference the sampled population edit distance of programs) ---")
+        (println "Number of homology samples in each sample:" num-samples)
+        (println "Average            (sample 1):" (average sample-1))
+        (println "Average            (sample 2):" (average sample-2))
+        (println "Standard deviation (sample 1):" (standard-deviation sample-1))
+        (println "Standard deviation (sample 2):" (standard-deviation sample-2))
+        (println "First quartile (sample 1):" first-quart-1)
+        (println "Median         (sample 1):" median-1)
+        (println "Third quartile (sample 1):" third-quart-1)
+        (println "First quartile (sample 2):" first-quart-2)
+        (println "Median         (sample 2):" median-2)
+        (println "Third quartile (sample 2):" third-quart-2)
+        ))
     (println "--- Timings ---")
     (println "Current time:" (System/currentTimeMillis) "milliseconds")
     (when print-timings
