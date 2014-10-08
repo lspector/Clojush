@@ -158,7 +158,7 @@
           (apply str (take 100 (cycle (list \. \tab))))
           (apply str (take 100 (cycle (list \? \newline \y \space))))
           (apply str (take 100 (cycle (list \5 \!))))) 36 0] ;; "Special" inputs covering most base cases
-   [(fn [] (word-stats-input (inc (lrand-int 100)))) 164 2000] ;; Random inputs
+   [(fn [] (word-stats-input (inc (lrand-int 100)))) 64 1000] ;; Random inputs
    ])
 
 ;;Can make Word Stats test data like this:
@@ -266,8 +266,8 @@
 (def argmap
   {:error-function (word-stats-error-function word-stats-data-domains)
    :atom-generators word-stats-atom-generators
-   :max-points 1000
-   :max-points-in-initial-program 500
+   :max-points 800
+   :max-points-in-initial-program 400
    :evalpush-limit 6000
    :population-size 1000
    :max-generations 300
@@ -282,6 +282,7 @@
    :uniform-mutation-rate 0.01
    :problem-specific-report word-stats-report
    :print-behavioral-diversity true
+   :print-homology-data true
    :report-simplifications 0
    :final-report-simplifications 5000
    :error-threshold 0.02
