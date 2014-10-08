@@ -45,12 +45,17 @@
             (count @population-behaviors))))
 
 (defn sample-population-edit-distance
+  "Returns a sample of Levenshtein distances between programs in the population,
+   where each is divided by the length of the longer program."
   [pop samples]
   (let [instr-programs (map #(map :instruction %)
                             (map :genome pop))]
     (repeatedly samples
-                #(levenshtein-distance (random/lrand-nth instr-programs)
-                                       (random/lrand-nth instr-programs)))))
+                #(let [prog1 (random/lrand-nth instr-programs)
+                       prog2 (random/lrand-nth instr-programs)
+                       longer-length (max (count prog1) (count prog2))]
+                   (float (/ (levenshtein-distance prog1 prog2)
+                             longer-length))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; log printing (csv and json)
