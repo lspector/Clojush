@@ -54,8 +54,10 @@
                 #(let [prog1 (random/lrand-nth instr-programs)
                        prog2 (random/lrand-nth instr-programs)
                        longer-length (max (count prog1) (count prog2))]
-                   (float (/ (levenshtein-distance prog1 prog2)
-                             longer-length))))))
+                   (if (zero? longer-length)
+                     0
+                     (float (/ (levenshtein-distance prog1 prog2)
+                               longer-length)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; log printing (csv and json)
