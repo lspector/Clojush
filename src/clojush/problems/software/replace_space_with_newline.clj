@@ -116,7 +116,7 @@
                                  int-result (stack-ref :integer 0 final-state)]
                              (when print-outputs
                                (println (format "\n| Correct output: %s\n| Program output: %s" (pr-str correct-output) (pr-str printed-result)))
-                               (println (format "| Correct integer: %2d | Program integer: %d" correct-int int-result)))
+                               (println (format "| Correct integer: %2d | Program integer: %s" correct-int (str int-result))))
                              ; Record the behavior
                              (when @global-print-behavioral-diversity
                                (swap! behavior conj [printed-result int-result]))
