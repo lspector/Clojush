@@ -110,7 +110,7 @@
                            ; Error is Levenshtein distance of vectors
                            (if (vector? result)
                              (levenshtein-distance correct-output result)
-                             1000000) ; penalty for no return value
+                             5000) ; penalty for no return value
                            )))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
@@ -162,4 +162,5 @@
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
+   :max-error 5000
    })

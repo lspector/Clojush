@@ -143,7 +143,7 @@
                            ; Record the behavior
                            (when @global-print-behavioral-diversity
                              (swap! behavior conj result))
-                           ; Error is Levenshtein distance of printed strings
+                           ; Error is difference of integers
                            (if (number? result)
                              (abs (- result correct-output)) ;distance from correct integer
                              1000) ;penalty for no return value
@@ -198,5 +198,5 @@
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
-   ;:max-error 1
+   :max-error 1000
    })

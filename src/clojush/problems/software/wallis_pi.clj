@@ -160,4 +160,5 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :error-threshold 0.001
+   :max-error 1000000.0
    })

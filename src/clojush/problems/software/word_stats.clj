@@ -286,7 +286,7 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :error-threshold 0.02
-   ;:max-error 1
+   :max-error 10000
    })
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

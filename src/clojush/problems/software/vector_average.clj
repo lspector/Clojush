@@ -100,8 +100,8 @@
                            (round-to-n-decimal-places
                              (if (number? result)
                               (abs (- result correct-output)) ; distance from correct integer
-                              1000000.0)
-                             4) ; penalty for no return value
+                              1000000.0) ; penalty for no return value
+                             4)
                            )))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
@@ -154,4 +154,5 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :error-threshold 1.0E-3
+   :max-error 1000000.0
    })

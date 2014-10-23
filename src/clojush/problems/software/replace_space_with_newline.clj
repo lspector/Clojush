@@ -179,5 +179,5 @@
    :print-homology-data true
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000
+   :max-error 5000
    })
