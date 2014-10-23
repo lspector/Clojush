@@ -290,7 +290,8 @@
       (println "Behavioral diversity:" (behavioral-diversity))
       ;(println "Number of behaviors:" (count @population-behaviors))
       (reset! population-behaviors ()))
-    (println "Number of evaluations used so far:" @evaluations-count)
+    (println "Number of program evaluations used so far:" @evaluations-count)
+    (println "Number of point (instruction) evaluations so far:" @point-evaluations-count)
     (println "--- Timings ---")
     (println "Current time:" (System/currentTimeMillis) "milliseconds")
     (when print-timings
