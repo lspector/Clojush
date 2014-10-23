@@ -142,24 +142,30 @@
         (the-actual-string-differences-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
-              errors (doall
-                       (for [[[input1 input2] correct-output] (case data-cases
-                                                                :train train-cases
-                                                                :test test-cases
-                                                                [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input2 :input)
-                                                       (push-item input1 :input)
-                                                       (push-item "" :output)))
-                               result (stack-ref :output 0 final-state)]
-                           (when print-outputs
-                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
-                           ; Error is Levenshtein distance of printed strings
-                           (levenshtein-distance correct-output result))))] ;;NOTE: SEE NOTE IN INTRO
+              errors (flatten (doall
+                                (for [[[input1 input2] correct-output] (case data-cases
+                                                                         :train train-cases
+                                                                         :test test-cases
+                                                                         [])]
+                                  (let [final-state (run-push program
+                                                              (->> (make-push-state)
+                                                                (push-item input2 :input)
+                                                                (push-item input1 :input)
+                                                                (push-item "" :output)))
+                                        result (stack-ref :output 0 final-state)]
+                                    (when print-outputs
+                                      (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                                    ; Record the behavior
+                                    (when @global-print-behavioral-diversity
+                                      (swap! behavior conj result))
+                                    ; Error is:
+                                    ;   1. Levenshtein distance of printed strings
+                                    ;   2. Difference in number of lines using the correct format
+                                    (vector
+                                      (levenshtein-distance correct-output result)
+                                      (abs (- (count (re-seq #"(?m)^\d+ \S \S$" correct-output))
+                                              (count (re-seq #"(?m)^\d+ \S \S$" result))))
+                                      )))))] ;;NOTE: SEE NOTE IN INTRO
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
