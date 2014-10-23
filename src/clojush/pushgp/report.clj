@@ -218,7 +218,7 @@
            error-threshold max-generations population-size
            print-errors print-history print-cosmos-data print-timings
            problem-specific-report total-error-method
-           parent-selection
+           parent-selection max-point-evaluations
            print-error-frequencies-by-case
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
@@ -316,6 +316,8 @@
     (cond (or (<= (:total-error best) error-threshold)
               (:success best)) [:success best]
           (>= generation max-generations) [:failure best]
+          (and (< 0 max-point-evaluations)
+               (>= @point-evaluations-count max-point-evaluations)) [:failure best]
           :else [:continue best])))
 
 (defn initial-report
