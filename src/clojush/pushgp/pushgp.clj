@@ -115,6 +115,7 @@
           :maintain-ancestors false  ; If true, save all ancestors in each individual (costly)
           :print-ancestors-of-solution false ; If true, final report prints the ancestors of the solution. Requires :maintain-ancestors to be true.
           :print-behavioral-diversity false ; If true, prints the behavioral diversity of the population each generation. Note: The error function for the problem must support behavioral diversity. For an example, see wc.clj
+          :print-homology-data false ; If true, prints the homology statistics
           ;;
           ;;----------------------------------------
           ;; Arguments related to printing JSON or CSV logs

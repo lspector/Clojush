@@ -1,4 +1,4 @@
-;; wc.clj
+;; wc_bench.clj
 ;; Tom Helmuth, thelmuth@cs.umass.edu
 ;;
 ;; This is code for the problem emulating the "wc" unix command,
@@ -6,19 +6,18 @@
 ;; It uses faked IO instructions such as string_readchar
 ;; and string_readline to read strings from the file and place them
 ;; on the string stack. The end of file happens when the file string
-;; on the :auxiliary stack is empty, which can be checked with the
+;; on the :input stack is empty, which can be checked with the
 ;; file_EOF instruction. Output is an integer that comes from one
 ;; of the three output instructions.
 ;;
-
 ;; NOTE: A word is defined by any characters separated by any number
 ;; of spaces, tabs, and newlines. Any other character can be part of
 ;; a word.
-
-;; NOTE: auxiliary stack has, from top: working_file, full_file,
+;;
+;; NOTE: input stack has, from top: working_file, full_file,
 ;; char_count_out, word_count_out, line_count_out
 
-(ns clojush.problems.software.wc
+(ns clojush.problems.software.wc-bench
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -27,30 +26,32 @@
 
 ; Define new instructions
 (define-registered
-  string_readchar
+  file_readchar
+  ^{:stack-types [:char]}
   (fn [state]
-    (let [file (top-item :auxiliary state)
+    (let [file (top-item :input state)
           first-char (first file)
-          aux-result (push-item (apply str (rest file))
-                                :auxiliary
-                                (pop-item :auxiliary state))]
+          inp-result (push-item (apply str (rest file))
+                                :input
+                                (pop-item :input state))]
       (if (= file "")
         state
-        (push-item (str first-char)
-                   :string
-                   aux-result)))))
+        (push-item first-char
+                   :char
+                   inp-result)))))
 
 (define-registered
-  string_readline
+  file_readline
+  ^{:stack-types [:string]}
   (fn [state]
-    (let [file (top-item :auxiliary state)
+    (let [file (top-item :input state)
           index (inc (.indexOf file "\n"))
           has-no-newline (= 0 index)
           aux-result (push-item (if has-no-newline
                                   ""
                                   (subs file index))
-                                :auxiliary
-                                (pop-item :auxiliary state))]
+                                :input
+                                (pop-item :input state))]
       (if (= file "")
         state
         (if has-no-newline
@@ -61,6 +62,7 @@
 
 (define-registered 
   string_whitespace ;;returns true if top string is entirely composed of spaces, tabs, and newlines (even if empty)
+  ^{:stack-types [:string]}
   (fn [state]
     (if (not (empty? (:string state)))
       (push-item (every? #{\space \tab \newline} (top-item :string state))
@@ -70,124 +72,72 @@
 
 (define-registered
   file_EOF
+  ^{:stack-types [:boolean]}
   (fn [state]
-    (let [file (top-item :auxiliary state)
+    (let [file (top-item :input state)
           result (empty? file)]
       (push-item result :boolean state))))
 
 (define-registered
   file_begin
+  ^{:stack-types [:input]}
   (fn [state]
-    (push-item (stack-ref :auxiliary 1 state)
-               :auxiliary
-               (pop-item :auxiliary state))))
+    (push-item (stack-ref :input 1 state)
+               :input
+               (pop-item :input state))))
 
 (define-registered
   output_charcount
+  ^{:stack-types [:output]}
   (fn [state]
     (if (empty? (:integer state))
       state
       (let [top-int (top-item :integer state)]
-        (stack-assoc top-int :auxiliary 2
+        (stack-assoc top-int :input 2
                      (pop-item :integer state))))))
 
 (define-registered
   output_wordcount
+  ^{:stack-types [:output]}
   (fn [state]
     (if (empty? (:integer state))
       state
       (let [top-int (top-item :integer state)]
-        (stack-assoc top-int :auxiliary 3
+        (stack-assoc top-int :input 3
                      (pop-item :integer state))))))
 
 (define-registered
   output_linecount
+  ^{:stack-types [:output]}
   (fn [state]
     (if (empty? (:integer state))
       state
       (let [top-int (top-item :integer state)]
-        (stack-assoc top-int :auxiliary 4
+        (stack-assoc top-int :input 4
                      (pop-item :integer state))))))
 
 ; Atom generators
 (def wc-atom-generators
-  (list
-    (fn [] (- (lrand-int 201) 100))
-    (fn [] (lrand-nth ["\n" "\t" " "]))
-    (fn [] (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127)))))
-    (tag-instruction-erc [:exec :string :integer] 1000)
-    (tagged-instruction-erc 1000)
-    ;;;; end ERCs
-    'string_readchar
-    'string_readline
-    'string_whitespace
-    'file_EOF
-    'file_begin
-    'output_charcount
-    'output_wordcount
-    'output_linecount
-    ;;;; end problem-specific instructions
-    'string_pop
-    'string_take
-    'string_eq
-    'string_stackdepth
-    'string_rot
-    'string_parse_to_chars
-    ;'string_rand
-    'string_contained
-    'string_reverse
-    'string_yank
-    'string_swap
-    'string_yankdup
-    'string_flush
-    'string_length
-    'string_concat
-    ;'string_atoi
-    'string_shove
-    'string_dup
-    'string_split
-    ;;; end string instructions
-    'integer_add
-    'integer_swap
-    'integer_yank
-    'integer_dup
-    'integer_yankdup
-    'integer_shove
-    'integer_mult
-    'integer_div
-    'integer_max
-    'integer_sub
-    'integer_mod
-    'integer_rot
-    'integer_min
-    'integer_inc
-    'integer_dec
-    ;;; end integer instructions
-    'exec_y
-    'exec_pop
-    'exec_eq
-    'exec_stackdepth
-    'exec_rot
-    'exec_when
-    'exec_do*times
-    'exec_do*count
-    'exec_s
-    'exec_do*range
-    'exec_if
-    'exec_k
-    'exec_yank
-    'exec_yankdup
-    'exec_swap
-    'exec_dup
-    'exec_shove
-    ;;; end exec instructions
-    'boolean_swap
-    'boolean_and
-    'boolean_not
-    'boolean_or
-    'boolean_frominteger
-    'boolean_stackdepth
-    'boolean_dup))
+  (concat
+    (registered-for-stacks [:string :char :integer :boolean :exec])
+    (list
+      (fn [] (- (lrand-int 201) 100))
+      (fn [] (lrand-nth ["\n" "\t" " "]))
+      (fn [] (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127)))))
+      (tag-instruction-erc [:string :char :integer :boolean :exec] 1000)
+      (tagged-instruction-erc 1000)
+      ;;;; end ERCs
+      'string_whitespace
+      'file_readchar
+      'file_readline
+      'file_EOF
+      'file_begin
+      'output_charcount
+      'output_wordcount
+      'output_linecount
+      ;;;; end problem-specific instructions
+      )
+    ))
 
 ;; Define test cases
 (defn wc-input
@@ -198,9 +148,9 @@
                      (fn []
                        (let [rand-cond (lrand)]
                          (cond
-                           (< rand-cond 0.05) \tab
-                           (< rand-cond 0.1) \newline
-                           (< rand-cond 0.35) \space
+                           (< rand-cond 0.05) \tab ;tab = 5%
+                           (< rand-cond 0.1) \newline ;newline = 5%
+                           (< rand-cond 0.35) \space ;space = 25%
                            :else (lrand-nth (map char (range 32 127)))))))))
 
 ;; A list of data domains for the WC problem. Each domain is a vector containing
@@ -221,8 +171,8 @@
           (apply str (take 100 (cycle (list \F \tab))))
           (apply str (take 100 (cycle (list \x \newline \y \space))))
           (apply str (take 100 (cycle (list \space \newline))))) 22 0] ;; "Special" inputs covering most base cases
-   [(fn [] (str (wc-input (inc (lrand-int 99))) \newline)) 20 50] ;; Inputs ending in a newline
-   [(fn [] (wc-input (inc (lrand-int 100)))) 200 500] ;; Inputs that may or may not end in a newline
+   [(fn [] (str (wc-input (inc (lrand-int 99))) \newline)) 20 200] ;; Inputs ending in a newline
+   [(fn [] (wc-input (inc (lrand-int 100)))) 158 1800] ;; Inputs that may or may not end in a newline
    ])
 
 ;;Can make WC test data like this:
@@ -275,6 +225,8 @@
       ([program]
         (the-actual-wc-error-function program :train))
       ([program data-cases] ;; data-cases should be :train or :test
+        (the-actual-wc-error-function program data-cases false))
+      ([program data-cases print-outputs]
         (let [behavior (atom '())
               errors (flatten
                        (doall
@@ -284,14 +236,17 @@
                                                                     [])]
                            (let [final-state (run-push program
                                                        (->> (make-push-state)
-                                                         (push-item nil :auxiliary)
-                                                         (push-item nil :auxiliary)
-                                                         (push-item nil :auxiliary)
-                                                         (push-item input :auxiliary)
-                                                         (push-item input :auxiliary)))
-                                 result-char (stack-ref :auxiliary 2 final-state)
-                                 result-word (stack-ref :auxiliary 3 final-state)
-                                 result-line (stack-ref :auxiliary 4 final-state)]
+                                                         (push-item nil :input)
+                                                         (push-item nil :input)
+                                                         (push-item nil :input)
+                                                         (push-item input :input)
+                                                         (push-item input :input)))
+                                 result-char (stack-ref :input 2 final-state)
+                                 result-word (stack-ref :input 3 final-state)
+                                 result-line (stack-ref :input 4 final-state)]
+                             (when print-outputs
+                               (println (format "\nCorrect outputs | char: %d | word: %d | line: %d" out-char out-word out-line))
+                               (println (format "Program outputs | char: %s | word: %s | line: %s" (pr-str result-char) (pr-str result-word) (pr-str result-line))))
                              ; Record the behavior
                              (when @global-print-behavioral-diversity
                                (swap! behavior concat [result-char result-word result-line]))
@@ -324,7 +279,13 @@
     (println "Test total error for best:" best-total-test-error)
     (println (format "Test mean error for best: %.5f" (double (/ best-total-test-error (count best-test-errors)))))
     (when (zero? (:total-error best))
-      (println "Test errors for best:" best-test-errors))
+      (doseq [[i error] (map vector
+                             (range)
+                             best-test-errors)]
+        (println (format "Test Case  %3d | Error: %s" i (str error)))))
+    (println ";;------------------------------")
+    (println "Outputs of best individual on training cases:")
+    (error-function best-program :train true)
     (println ";;******************************")
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
@@ -335,7 +296,7 @@
   {:error-function (wc-error-function wc-data-domains)
    :atom-generators wc-atom-generators
    :max-points 1000
-   :max-points-in-initial-program 400
+   :max-points-in-initial-program 500
    :evalpush-limit 2000
    :population-size 1000
    :max-generations 300

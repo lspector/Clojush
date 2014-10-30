@@ -44,6 +44,21 @@
   (float (/ (count (distinct @population-behaviors))
             (count @population-behaviors))))
 
+(defn sample-population-edit-distance
+  "Returns a sample of Levenshtein distances between programs in the population,
+   where each is divided by the length of the longer program."
+  [pop samples]
+  (let [instr-programs (map #(map :instruction %)
+                            (map :genome pop))]
+    (repeatedly samples
+                #(let [prog1 (random/lrand-nth instr-programs)
+                       prog2 (random/lrand-nth instr-programs)
+                       longer-length (max (count prog1) (count prog2))]
+                   (if (zero? longer-length)
+                     0
+                     (float (/ (levenshtein-distance prog1 prog2)
+                               longer-length)))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; log printing (csv and json)
 
@@ -224,7 +239,7 @@
            error-threshold max-generations population-size
            print-errors print-history print-cosmos-data print-timings
            problem-specific-report total-error-method
-           parent-selection
+           parent-selection print-homology-data
            print-error-frequencies-by-case
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
@@ -240,7 +255,41 @@
         psr-best (problem-specific-report err-fn-best population generation error-function report-simplifications)
         best (if (= (type psr-best) clojush.individual.individual)
                psr-best
-               err-fn-best)]
+               err-fn-best)
+        average (fn [nums]
+                  (if (zero? (count nums))
+                    "Cannot find average of zero numbers."
+                    (float (/ (apply +' nums) (count nums)))))
+        standard-deviation (fn [nums]
+                             (if (<= (count nums) 1)
+                               (str "Cannot find standard deviation of " (count nums) "numbers. Must have at least 2.")
+                               (let [mean (average nums)]
+                                 (Math/sqrt (/ (apply +' (map #(* (- % mean) (- % mean))
+                                                              nums))
+                                               (dec (count nums)))))))
+        median (fn [nums]
+                 (if (zero? (count nums))
+                   "Cannot find median of zero numbers."
+                   (let [sorted (sort nums)]
+                     (if (odd? (count nums))
+                       (nth sorted
+                            (truncate (/ (count nums) 2)))
+                       (/ (+' (nth sorted
+                                   (/ (count nums) 2))
+                              (nth sorted
+                                   (dec (/ (count nums) 2))))
+                          2.0)))))
+        quartiles (fn [nums]
+                    (if (zero? (count nums))
+                      "Cannot find quartiles of zero numbers."
+                      (let [sorted (sort nums)]
+                        (vector (nth sorted
+                                     (truncate (/ (count nums) 4)))
+                                (nth sorted
+                                     (truncate (/ (count nums) 2)))
+                                (nth sorted
+                                     (truncate (/ (* 3 (count nums)) 4)))))))
+        ]
     (when print-error-frequencies-by-case
       (println "Error frequencies by case:" (doall (map frequencies (apply map vector (map :errors population))))))
     (when (some #{parent-selection} #{:lexicase :elitegroup-lexicase}) (lexicase-report population argmap))
@@ -301,11 +350,30 @@
       (println "Min copy number of one program:" (apply min (vals frequency-map)))
       (println "Median copy number:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
     (when @global-print-behavioral-diversity
-      (swap! population-behaviors #(take-last population-size %))
+      (swap! population-behaviors #(take-last population-size %)) ; Only use behaviors during evaluation, not those during simplification
       (println "Behavioral diversity:" (behavioral-diversity))
       ;(println "Number of behaviors:" (count @population-behaviors))
       (reset! population-behaviors ()))
     (println "Number of evaluations used so far:" @evaluations-count)
+    (when print-homology-data
+      (let [num-samples 1000
+            sample-1 (sample-population-edit-distance population num-samples)
+            sample-2 (sample-population-edit-distance population num-samples)
+            [first-quart-1 median-1 third-quart-1] (quartiles sample-1)
+            [first-quart-2 median-2 third-quart-2] (quartiles sample-2)]
+        (println "--- Population Homology Statistics (all stats reference the sampled population edit distance of programs) ---")
+        (println "Number of homology samples in each sample:" num-samples)
+        (println "Average            (sample 1):" (average sample-1))
+        (println "Average            (sample 2):" (average sample-2))
+        (println "Standard deviation (sample 1):" (standard-deviation sample-1))
+        (println "Standard deviation (sample 2):" (standard-deviation sample-2))
+        (println "First quartile (sample 1):" first-quart-1)
+        (println "Median         (sample 1):" median-1)
+        (println "Third quartile (sample 1):" third-quart-1)
+        (println "First quartile (sample 2):" first-quart-2)
+        (println "Median         (sample 2):" median-2)
+        (println "Third quartile (sample 2):" third-quart-2)
+        ))
     (println "--- Timings ---")
     (println "Current time:" (System/currentTimeMillis) "milliseconds")
     (when print-timings
@@ -372,11 +440,15 @@
 (defn final-report
   "Prints the final report of a PushGP run if the run is successful."
   [generation best
-   {:keys [error-function final-report-simplifications print-ancestors-of-solution]}]
+   {:keys [error-function final-report-simplifications report-simplifications
+           print-ancestors-of-solution problem-specific-report]}]
   (printf "\n\nSUCCESS at generation %s\nSuccessful program: %s\nErrors: %s\nTotal error: %s\nHistory: %s\nSize: %s\n\n"
           generation (pr-str (not-lazy (:program best))) (not-lazy (:errors best)) (:total-error best) 
           (not-lazy (:history best)) (count-points (:program best)))
   (when print-ancestors-of-solution
     (printf "\nAncestors of solution:\n")
     (prn (:ancestors best)))
-  (auto-simplify best error-function final-report-simplifications true 500))
+  (let [simplified-best (auto-simplify best error-function final-report-simplifications true 500)]
+    (println "\n;;******************************")
+    (println ";; Problem-Specific Report of Simplified Solution")
+    (problem-specific-report simplified-best [] generation error-function report-simplifications)))
