@@ -12,7 +12,7 @@
 ;; in pushgp.clj and should be passed to whatever functions use them as arguments.
 
 ;; push-types is the list of stacks used by the Push interpreter
-(def push-types '(:exec :integer :float :code :boolean :char :string :zip
+(def push-types '(:exec :code :integer :float :boolean :char :string :zip
                         :vector_integer :vector_float :vector_boolean :vector_string
                         :input :output :auxiliary
                         :tag :return :environment)) ;; Stack types
@@ -21,8 +21,8 @@
 ;; or when using random instructions.
 (def max-number-magnitude 1000000000000) ;; Used by keep-number-reasonable as the maximum size of any integer or float
 (def min-number-magnitude 1.0E-10) ;; Used by keep-number-reasonable as the minimum magnitude of any float
-(def max-string-length 500) ;; Used by string instructions to ensure that strings don't get too large
-(def max-vector-length 500) ;; Used by vector instructions to ensure that vectors don't get too large
+(def max-string-length 5000) ;; Used by string instructions to ensure that strings don't get too large
+(def max-vector-length 5000) ;; Used by vector instructions to ensure that vectors don't get too large
 (def min-random-integer -10) ;; The minumum value created by the integer_rand instruction
 (def max-random-integer 10) ;; The maximum value created by the integer_rand instruction
 (def min-random-float -1.0) ;; The minumum value created by the float_rand instruction
@@ -56,4 +56,5 @@
 (def global-pop-when-tagging (atom true)) ;; When true, tagging instructions will pop the exec stack when tagging; otherwise, the exec stack is not popped
 
 ;; These definitions are used by some problem-specific error functions, and must therefore be global
+(def global-parent-selection (atom :lexicase)) ;; The type of parent selection used
 (def global-print-behavioral-diversity (atom false)) ;; When true, reports will print the behavioral diversity of the population

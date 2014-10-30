@@ -139,9 +139,9 @@
     (println summed-reward-on-test-cases)
     (assert (every? (fn [error] (< -0.0000001 error 1.0000001))
                     (flatten (map :errors pop)))
-            (str "All errors must be in range [0,1]. Please normalize them. Here are the offending errors:\n"
-                 (not-lazy (filter (fn [error] (not (< 0.0 error 1.0)))
-                                   (flatten (map :errors pop))))))
+            (str "All errors must be in range [0,1]. Please normalize them. Here are the first 20 offending errors:\n"
+                 (not-lazy (take 20 (filter (fn [error] (not (< 0.0 error 1.0)))
+                                            (flatten (map :errors pop)))))))
     (dorun (map #((if use-single-thread swap! send)
                    %
                    assign-ifs-error-to-individual
