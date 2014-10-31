@@ -1,4 +1,4 @@
-;; number_IO.clj
+;; number_io.clj
 ;; Tom Helmuth, thelmuth@cs.umass.edu
 ;;
 ;; Problem Source: iJava (http://ijava.cs.umass.edu/)
@@ -10,7 +10,7 @@
 ;; NOTE: input stack: in1 (float), in2 (int)
 ;;       output stack: printed output
 
-(ns clojush.problems.software.number-IO
+(ns clojush.problems.software.number-io
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
