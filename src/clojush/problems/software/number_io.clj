@@ -84,7 +84,7 @@
                                                          (push-item "" :output)))
                                  printed-result (stack-ref :output 0 final-state)]
                              (when print-outputs
-                               (println (format "Correct output: %-19s | Program output: %-19s" (str out-float) printed-result)))
+                               (println (format "Correct output: %-14s | Program output: %-14s" (pr-str (round-to-n-decimal-places out-float 10)) printed-result)))
                              ; Record the behavior
                              (when @global-print-behavioral-diversity
                                (swap! behavior conj printed-result))
@@ -97,7 +97,7 @@
                                        (try (min 1000.0 (abs (- out-float (Double/parseDouble printed-result))))
                                          (catch Exception e 1000.0))
                                        4)
-                                     (levenshtein-distance printed-result (str out-float)))))))]
+                                     (levenshtein-distance printed-result (pr-str (round-to-n-decimal-places out-float 10))))))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
