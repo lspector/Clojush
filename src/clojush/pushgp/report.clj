@@ -234,7 +234,7 @@
            print-errors print-history print-cosmos-data print-timings
            problem-specific-report total-error-method
            parent-selection print-homology-data max-point-evaluations
-           print-error-frequencies-by-case
+           print-error-frequencies-by-case normalization
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
@@ -299,6 +299,8 @@
     (println "Total:" (:total-error best))
     (println "Mean:" (float (/ (:total-error best)
                                (count (:errors best)))))
+    (when (not= normalization :none)
+      (println "Normalized error:" (:normalized-error best)))
     (case total-error-method
       :hah (println "HAH-error:" (:weighted-error best))
       :rmse (println "RMS-error:" (:weighted-error best))
