@@ -110,19 +110,13 @@
    error across each test case."
   [ind summed-reward-on-test-cases]
   (let [ifs-reward (apply +' (map #(if (zero? %2) 1.0 (/ %1 %2))
-                                  (map #(- 1.0 %) (:errors ind)) ; Should be dividing REWARD by summed (not ERRORS)
+                                  (map #(- 1.0 %) (:errors ind))
                                   summed-reward-on-test-cases))
         ifs-er (cond
                  (< 1e20 ifs-reward) 0.0
                  (zero? ifs-reward) 1e20
                  (< 1e20 (/ 1.0 ifs-reward)) 1e20
                  :else (/ 1.0 ifs-reward))]
-    ;(println "\n\n\n")
-    ;(println "IFS Fitness rewards:")
-    ; (doseq [[e s i] (map vector (:errors ind) summed-reward-on-test-cases (range))]
-    ; (println (format "T%2d | Error (e): %.4f | 1-e: %.5f | s: %8.4f | (1-e)/s: %.4f" i e (- 1.0 e) s (/ (- 1.0 e) s))))
-    ;(println (format "IFS Reward: %7.4f" ifs-reward))
-    ;(println (format "IFS Error: %7.4f" ifs-er))
     (assoc ind :weighted-error ifs-er)))
 
 (defn calculate-implicit-fitness-sharing

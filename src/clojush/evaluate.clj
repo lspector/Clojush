@@ -67,14 +67,19 @@
     {:keys [reuse-errors print-history total-error-method normalization max-error]}]
     (random/with-rng rand-gen
       (let [p (:program i)
-            e (vec (if (and (not (nil? (:errors i))) reuse-errors)
+            raw-errors (if (or (not reuse-errors) (nil? (:errors i)) (nil? (:total-error i)))
+                         (error-function p))
+            e (vec (if (and reuse-errors (not (nil? (:errors i))))
                      (:errors i)
                      (do
                        (swap! evaluations-count inc)
-                       (normalize-errors (error-function p) normalization max-error)
+                       (normalize-errors raw-errors normalization max-error)
                        )))
-            te (if (and (not (nil? (:total-error i))) reuse-errors)
+            te (if (and reuse-errors (not (nil? (:total-error i))))
                  (:total-error i)
+                 (compute-total-error raw-errors))
+            ne (if (and reuse-errors (not (nil? (:normalized-error i))))
+                 (:normalized-error i)
                  (compute-total-error e))
             we (case total-error-method
                  :sum nil
@@ -83,7 +88,7 @@
                  :rmse (compute-root-mean-square-error e)
                  nil)]
         (make-individual :program p :genome (:genome i)
-                         :errors e :total-error te :weighted-error we
+                         :errors e :total-error te :weighted-error we :normalized-error ne
                          :history (if print-history (cons te (:history i)) (:history i))
                          :ancestors (:ancestors i)
                          :parent (:parent i))))))
