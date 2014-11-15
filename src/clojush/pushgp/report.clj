@@ -233,7 +233,7 @@
            error-threshold max-generations population-size
            print-errors print-history print-cosmos-data print-timings
            problem-specific-report total-error-method
-           parent-selection print-homology-data
+           parent-selection print-homology-data max-point-evaluations
            print-error-frequencies-by-case normalization
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
@@ -243,7 +243,8 @@
   (println)
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
   (println ";; -*- Report at generation" generation)
-  (let [err-fn (if (= total-error-method :rmse) :weighted-error :total-error)
+  (let [point-evaluations-before-report @point-evaluations-count
+        err-fn (if (= total-error-method :rmse) :weighted-error :total-error)
         sorted (sort-by err-fn < population)
         err-fn-best (first sorted)
         psr-best (problem-specific-report err-fn-best population generation error-function report-simplifications)
@@ -341,7 +342,6 @@
       (println "Behavioral diversity:" (behavioral-diversity))
       ;(println "Number of behaviors:" (count @population-behaviors))
       (reset! population-behaviors ()))
-    (println "Number of evaluations used so far:" @evaluations-count)
     (when print-homology-data
       (let [num-samples 1000
             sample-1 (sample-population-edit-distance population num-samples)
@@ -354,6 +354,9 @@
         (println "Median:         " median-1)
         (println "Third quartile: " third-quart-1)
         ))
+    (println "Number of program evaluations used so far:" @evaluations-count)
+    (println "Number of point (instruction) evaluations so far:" point-evaluations-before-report)
+    (reset! point-evaluations-count point-evaluations-before-report)
     (println "--- Timings ---")
     (println "Current time:" (System/currentTimeMillis) "milliseconds")
     (when print-timings
@@ -378,6 +381,7 @@
     (cond (or (<= (:total-error best) error-threshold)
               (:success best)) [:success best]
           (>= generation max-generations) [:failure best]
+          (>= @point-evaluations-count max-point-evaluations) [:failure best]
           :else [:continue best])))
 
 (defn initial-report
