@@ -345,21 +345,14 @@
     (when print-homology-data
       (let [num-samples 1000
             sample-1 (sample-population-edit-distance population num-samples)
-            sample-2 (sample-population-edit-distance population num-samples)
-            [first-quart-1 median-1 third-quart-1] (quartiles sample-1)
-            [first-quart-2 median-2 third-quart-2] (quartiles sample-2)]
+            [first-quart-1 median-1 third-quart-1] (quartiles sample-1)]
         (println "--- Population Homology Statistics (all stats reference the sampled population edit distance of programs) ---")
-        (println "Number of homology samples in each sample:" num-samples)
-        (println "Average            (sample 1):" (average sample-1))
-        (println "Average            (sample 2):" (average sample-2))
-        (println "Standard deviation (sample 1):" (standard-deviation sample-1))
-        (println "Standard deviation (sample 2):" (standard-deviation sample-2))
-        (println "First quartile (sample 1):" first-quart-1)
-        (println "Median         (sample 1):" median-1)
-        (println "Third quartile (sample 1):" third-quart-1)
-        (println "First quartile (sample 2):" first-quart-2)
-        (println "Median         (sample 2):" median-2)
-        (println "Third quartile (sample 2):" third-quart-2)
+        (println "Number of homology samples:" num-samples)
+        (println "Average:            " (average sample-1))
+        (println "Standard deviation: " (standard-deviation sample-1))
+        (println "First quartile: " first-quart-1)
+        (println "Median:         " median-1)
+        (println "Third quartile: " third-quart-1)
         ))
     (println "--- Timings ---")
     (println "Current time:" (System/currentTimeMillis) "milliseconds")
