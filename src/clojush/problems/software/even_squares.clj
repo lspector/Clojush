@@ -34,9 +34,9 @@
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
 (def even-squares-data-domains
-  [[(list 1 2 3 4 5 6 15 16 17 18) 10 0] ;; Small edge cases
+  [[(list 1 2 3 4 5 6 15 16 17 18 36 37 64 65) 14 0] ;; Small edge cases
    [(list 9600 9700 9999) 3 0] ;; Large edge cases
-   [(fn [] (+ 20 (lrand-int 9980))) 87 1000] ;; Random cases
+   [(fn [] (+ 20 (lrand-int 9980))) 83 1000] ;; Random cases
    ])
 
 ;;Can make Even Squares test data like this:
@@ -59,8 +59,8 @@
   "Returns the error function for the Even Squares problem. Takes as
    input Even Squares data domains."
   [data-domains]
-  (let [[train-cases test-cases] (map even-squares-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
+  (let [[train-cases test-cases] (map sort (map even-squares-test-cases
+                                                (test-and-train-data-from-domains data-domains)))]
     (when true ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))

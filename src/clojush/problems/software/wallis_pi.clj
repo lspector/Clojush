@@ -6,7 +6,7 @@
 ;; John Wallis gave an infinite product that converges to pi/4 as the following:
 ;;      (2/3)*(4/3)*(4/5)*(6/5)*(6/7)*(8/7)*(8/9)*(10/9)*(10/11)*...
 ;; Given an integer input 1 <= N <= 200, compute an approximation of this
-;; product out to N terms.
+;; product out to N terms. Results are rounded to 5 decimal places.
 ;;
 ;; input stack has integer N
 

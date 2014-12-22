@@ -17,6 +17,10 @@
 ;; NOTE: I could add a second error value per case. For example, comparing the
 ;; number of newlines to the correct number of newlines. Or that the format
 ;; of each line is correct (number, space, char, space, char). Or something similar.
+;;
+;; NOTE 2: I have added an error for the correct format. This problem is still too
+;; difficult. It could possibly be made easier by guaranteeing that the two
+;; strings are of the same length.
 
 (ns clojush.problems.software.string-differences
   (:use clojush.pushgp.pushgp
