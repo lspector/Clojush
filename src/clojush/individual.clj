@@ -1,24 +1,24 @@
-(ns clojush.individual
-  (:require [clojure.string :as s]))
+(ns clojush.individual)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Individuals are records.
 ;; Populations are vectors of agents with individuals as their states (along with error and
 ;; history information).
 
-(defrecord individual [genome program errors total-error weighted-error meta-errors history ancestors parent])
+(defrecord individual [genome program errors total-error normalized-error weighted-error meta-errors history ancestors parent])
 
-(defn make-individual [& {:keys [genome program errors total-error weighted-error meta-errors history ancestors parent]
+(defn make-individual [& {:keys [genome program errors total-error normalized-error weighted-error meta-errors history ancestors parent]
                           :or {genome nil
                                program nil
                                errors nil
                                total-error nil ;; a non-number is used to indicate no value
+                               normalized-error nil
                                weighted-error nil
                                meta-errors nil
                                history nil
                                ancestors nil
                                parent nil}}]
-  (individual. genome program errors total-error weighted-error meta-errors history ancestors parent))
+  (individual. genome program errors total-error normalized-error weighted-error meta-errors history ancestors parent))
 
 (defn printable [thing]
   (letfn [(unlazy [[head & tail]]
@@ -30,6 +30,6 @@
 
 (defn individual-string [i]
   (cons 'individual.
-        (let [k '(:genome :program :errors :total-error :weighted-error :meta-errors :history :ancestors :parent)]
+        (let [k '(:genome :program :errors :total-error :normalized-error :weighted-error :meta-errors :history :ancestors :parent)]
           (interleave k  (map #(printable (get i %)) k)))))
 
