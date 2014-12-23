@@ -73,23 +73,32 @@
         (the-actual-even-squares-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
-              errors (doall
-                       (for [[input1 correct-output] (case data-cases
-                                                                  :train train-cases
-                                                                  :test test-cases
-                                                                  [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input1 :input)
-                                                       (push-item "" :output)))
-                               result (stack-ref :output 0 final-state)]
-                           (when print-outputs
-                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
-                           ; Error is Levenshtein distance of printed strings
-                           (levenshtein-distance correct-output result))))]
+              errors (flatten
+                       (doall
+                         (for [[input1 correct-output] (case data-cases
+                                                         :train train-cases
+                                                         :test test-cases
+                                                         [])]
+                           (let [final-state (run-push program
+                                                       (->> (make-push-state)
+                                                         (push-item input1 :input)
+                                                         (push-item "" :output)))
+                                 result (stack-ref :output 0 final-state)]
+                             (when print-outputs
+                               (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                             ; Record the behavior
+                             (when @global-print-behavioral-diversity
+                               (swap! behavior conj result))
+                             (vector
+                               ; Error 1: Levenshtein distance of printed strings
+                               (levenshtein-distance correct-output result)
+                               ; Error 2: difference in number of lines with integer-parseable strings
+                               (let [correct-number-lines (count (filter #(= % \newline) correct-output))]
+                                 
+                                 
+                                 )
+                               ; Error 3: For each line in the result, find the integer error compared to correct integer. Sum these.
+                               )))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
@@ -124,7 +133,7 @@
    :atom-generators even-squares-atom-generators
    :max-points 400
    :max-points-in-initial-program 200
-   :evalpush-limit 1000
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -142,3 +151,58 @@
    :final-report-simplifications 5000
    :max-error 5000
    })
+
+;;;;;
+
+;| Correct output: "4"
+;| Program output: "4\n1514"
+;
+;| Correct output: "4"
+;| Program output: ""
+;
+;| Correct output: "4\n16"
+;| Program output: "4\n1716"
+;
+;| Correct output: "4\n16"
+;| Program output: "4\n1817"
+;
+;| Correct output: "4\n16\n36\n64\n100\n144\n196\n256\n324\n400\n484\n576\n676\n784\n900\n1024\n1156\n1296\n1444\n1600\n1764\n1936\n2116\n2304\\
+;n2500\n2704\n2916\n3136\n3364\n3600\n3844\n4096\n4356\n4624\n4900\n5184\n5476\n5776\n6084\n6400\n6724\n7056\n7396\n7744\n8100\n8464\n8836\n921\
+;6"
+;| Program output: "4\n16\n36\n64\n100\n144\n196\n256\n324\n400\n484\n576\n676\n784\n900\n1024\n1156\n1296\n1444\n1600\n1764\n1936\n2116\n2304\\
+;n2500\n2704\n2916\n3136\n3364\n3600\n3844\n4096\n4356\n4624\n4900\n5184\n5476\n5776"
+;
+;| Correct output: "4\n16\n36\n64\n100\n144\n196\n256\n324\n400\n484\n576\n676\n784\n900\n1024\n1156\n1296\n1444\n1600\n1764\n1936\n2116\n2304\\
+;n2500\n2704\n2916\n3136\n3364\n3600\n3844\n4096\n4356\n4624\n4900\n5184\n5476\n5776\n6084\n6400\n6724\n7056\n7396\n7744\n8100\n8464\n8836\n921\
+;6\n9604"
+;| Program output: "4\n16\n36\n64\n100\n144\n196\n256\n324\n400\n484\n576\n676\n784\n900\n1024\n1156\n1296\n1444\n1600\n1764\n1936\n2116\n2304\\
+;n2500\n2704\n2916\n3136\n3364\n3600\n3844\n4096\n4356\n4624\n4900\n5184\n5476\n5776"
+
+;;;;;;;;;;
+;; Below here is for testing a hand-written solution.
+
+;(reset! global-evalpush-limit 2000)
+;
+;(reset! global-max-points 400)
+;
+;(defn test-program-on-training
+;  [program print-outputs]
+;  ((even-squares-error-function even-squares-data-domains) program :train print-outputs))
+;
+;(def tom-program
+;  '(
+;     4 in1 integer_lt
+;     exec_when
+;     (
+;       4 print_integer
+;       4 integer_dup integer_dup integer_mult integer_dup in1 integer_lt
+;       exec_while
+;       (
+;         print_newline print_integer 
+;         integer_inc integer_inc
+;         integer_dup integer_dup integer_mult integer_dup in1 integer_lt
+;         )
+;       )
+;     ))
+;
+;(test-program-on-training tom-program false)
