@@ -13,7 +13,7 @@
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
         [clojure.math numeric-tower])
-    (:require [clojure.string :as string]))
+  (:require [clojure.string :as string]))
 
 ; Atom generators
 (def even-squares-atom-generators
