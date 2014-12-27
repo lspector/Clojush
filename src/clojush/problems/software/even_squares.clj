@@ -12,8 +12,8 @@
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
-        [clojure.math numeric-tower]
-        ))
+        [clojure.math numeric-tower])
+    (:require [clojure.string :as string]))
 
 ; Atom generators
 (def even-squares-atom-generators
@@ -47,11 +47,13 @@
   "Takes a sequence of inputs and gives IO test cases of the form
    [input output]."
   [inputs]
-  (map (fn [in] (vector in
-                        (apply str (interpose \newline
-                                              (rest (take-while #(< % in)
-                                                                (map #(* 4 % %)
-                                                                     (range))))))))
+  (map (fn [in]
+         (let [nums (rest (take-while #(< % in)
+                                                 (map #(* 4 % %)
+                                                      (range))))]
+               (vector in
+                       (vector (apply str (interpose \newline nums))
+                               nums))))
        inputs))
 
 ; Define error function. For now, each run uses different random inputs
@@ -59,9 +61,10 @@
   "Returns the error function for the Even Squares problem. Takes as
    input Even Squares data domains."
   [data-domains]
-  (let [[train-cases test-cases] (map sort (map even-squares-test-cases
-                                                (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
+  (let [[train-cases test-cases] (map #(sort-by first %)
+                                      (map even-squares-test-cases
+                                           (test-and-train-data-from-domains data-domains)))]
+    (when false ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
@@ -75,10 +78,10 @@
         (let [behavior (atom '())
               errors (flatten
                        (doall
-                         (for [[input1 correct-output] (case data-cases
-                                                         :train train-cases
-                                                         :test test-cases
-                                                         [])]
+                         (for [[input1 [correct-output correct-integers]] (case data-cases
+                                                                            :train train-cases
+                                                                            :test test-cases
+                                                                            [])]
                            (let [final-state (run-push program
                                                        (->> (make-push-state)
                                                          (push-item input1 :input)
@@ -89,16 +92,32 @@
                              ; Record the behavior
                              (when @global-print-behavioral-diversity
                                (swap! behavior conj result))
-                             (vector
-                               ; Error 1: Levenshtein distance of printed strings
-                               (levenshtein-distance correct-output result)
-                               ; Error 2: difference in number of lines with integer-parseable strings
-                               (let [correct-number-lines (count (filter #(= % \newline) correct-output))]
-                                 
-                                 
-                                 )
-                               ; Error 3: For each line in the result, find the integer error compared to correct integer. Sum these.
-                               )))))]
+                             (let [correct-number-lines (count correct-integers)
+                                   result-lines (if (= result "")
+                                                  []
+                                                  (string/split-lines result))
+                                   int-parse-strings (filter #(re-matches #"-?\d+" %) result-lines)
+                                   lines-with-integer-parseable-strings (count int-parse-strings)
+                                   lines-without-integer-parseable-strings (- (count result-lines) lines-with-integer-parseable-strings)]
+                               (vector
+                                 ; Error 1: Levenshtein distance of printed strings
+                                 (levenshtein-distance correct-output result)
+                                 ; Error 2: Difference in number of lines with integer-parseable strings. Also, each line without an integer-parseable string contributes 1 error
+                                 (+ (abs (- correct-number-lines lines-with-integer-parseable-strings))
+                                    lines-without-integer-parseable-strings)
+                                 ; Error 3: For each line in the result with a parseable integer, find the integer error compared to correct integer. Sum these.
+                                 (let [correct-result-int-pairs (map vector
+                                                                     correct-integers
+                                                                     (concat (map (fn [int-str]
+                                                                                    (try (Integer/parseInt int-str)
+                                                                                      (catch Exception e :no-result)))
+                                                                                  int-parse-strings)
+                                                                             (repeat :no-result)))]
+                                   (apply +' (map (fn [[cor-int res-int]]
+                                                    (if (not (number? res-int))
+                                                      100 ; penalty for not enough lines with parseable integers
+                                                      (abs (- cor-int res-int))))
+                                                  correct-result-int-pairs)))))))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
