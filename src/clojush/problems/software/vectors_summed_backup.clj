@@ -93,34 +93,30 @@
         (the-actual-vectors-summed-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
-              errors (flatten
-                       (doall
-                         (for [[[input1 input2] correct-output] (case data-cases
-                                                                             :train train-cases
-                                                                             :test test-cases
-                                                                             [])]
-                           (let [final-state (run-push program
-                                                       (->> (make-push-state)
-                                                         (push-item input2 :input)
-                                                         (push-item input1 :input)))
-                                 result (top-item :vector_integer final-state)]
-                             (when print-outputs
-                               (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                             ; Record the behavior
-                             (when @global-print-behavioral-diversity
-                               (swap! behavior conj result))
-                             (vector
-                               ; Error 1: integer error at each position in the vectors, with additional penalties for incorrect size vector
-                               (if (vector? result)
-                                 (+' (apply +' (map (fn [cor res]
-                                                      (abs (- cor res)))
-                                                    correct-output
-                                                    result))
-                                     (*' 10000 (abs (- (count correct-output) (count result))))) ; penalty of 10000 times difference in sizes of vectors
-                                 1000000000) ; penalty for no return value
-                               ; Error 2: Levenshtein distance
-                               (levenshtein-distance correct-output result)
-                               )))))]
+              errors (doall
+                       (for [[[input1 input2] correct-output] (case data-cases
+                                                                           :train train-cases
+                                                                           :test test-cases
+                                                                           [])]
+                         (let [final-state (run-push program
+                                                     (->> (make-push-state)
+                                                       (push-item input2 :input)
+                                                       (push-item input1 :input)))
+                               result (top-item :vector_integer final-state)]
+                           (when print-outputs
+                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                           ; Record the behavior
+                           (when @global-print-behavioral-diversity
+                             (swap! behavior conj result))
+                           ; Error is integer error at each position in the vectors, with additional penalties for incorrect size vector
+                           (if (vector? result)
+                             (+' (apply +' (map (fn [cor res]
+                                                  (abs (- cor res)))
+                                                correct-output
+                                                result))
+                                 (*' 10000 (abs (- (count correct-output) (count result))))) ; penalty of 10000 times difference in sizes of vectors
+                             1000000000) ; penalty for no return value
+                           )))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
@@ -182,7 +178,7 @@
 ;
 ;(defn test-program-on-training
 ;  [program]
-;  ((vectors-summed-error-function vectors-summed-data-domains) program :train false))
+;  ((vectors-summed-error-function vectors-summed-data-domains) program :train true))
 ;
 ;(defn run-prog
 ;  [program print-steps]
@@ -210,7 +206,7 @@
 ;       )
 ;     ))
 ;
-;
+
 ;(test-program-on-training tom-program)
 
 ;(run-prog tom-program false)
