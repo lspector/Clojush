@@ -119,7 +119,9 @@
                                      (*' 10000 (abs (- (count correct-output) (count result))))) ; penalty of 10000 times difference in sizes of vectors
                                  1000000000) ; penalty for no return value
                                ; Error 2: Levenshtein distance
-                               (levenshtein-distance correct-output result)
+                               (if (vector? result)
+                                 (levenshtein-distance correct-output result)
+                                 1000000000) ; penalty for no return value
                                )))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
