@@ -179,3 +179,44 @@
    :final-report-simplifications 5000
    :max-error 5000
    })
+
+;;;;;;;;;;
+;; Below here is for testing a hand-written solution.
+
+;(reset! global-evalpush-limit 2000)
+;
+;(reset! global-max-points 1000)
+;
+;(defn test-program-on-training
+;  [program print-outputs]
+;  ((pig-latin-error-function pig-latin-data-domains) program :train print-outputs))
+;
+; This program works
+;(def tom-program
+;  '(
+;     in1 string_split
+;     string_empty boolean_not
+;     exec_while
+;     (
+;       string_dup
+;       string_first "aeiou" string_containschar ;true if first letter of word is a vowel
+;       exec_if
+;       ( ;vowel case
+;         print_string
+;         )
+;       ( ;consonant case
+;         string_dup
+;         string_rest print_string
+;         string_first print_char
+;         )
+;       "ay" print_string
+;       string_empty boolean_not exec_when (\space print_char)
+;       string_empty boolean_not
+;       )
+;     ))
+;
+;(test-program-on-training tom-program false)
+;
+;(run-push tom-program
+;          (push-item "nap time on planets" :input (push-item "" :output (make-push-state)))
+;          false)
