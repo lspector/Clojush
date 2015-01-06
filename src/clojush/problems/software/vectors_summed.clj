@@ -186,18 +186,6 @@
 ;  [program]
 ;  ((vectors-summed-error-function vectors-summed-data-domains) program :train false))
 ;
-;(defn run-prog
-;  [program print-steps]
-;  (let [input "dl2HKsdJ2 jad2E\"d2n\nad3!"
-;        final-state (run-push program
-;                              (->> (make-push-state)
-;                                (push-item input :input)
-;                                (push-item "" :output))
-;                              print-steps)
-;        printed-result (stack-ref :output 0 final-state)]
-;    (doseq [[nm stack] (sort-by #(name (first %)) final-state)]
-;      (println (format "%-12s | %s" nm (pr-str stack))))))
-;
 ;(def tom-program
 ;  '(
 ;     in1 in1 vector_integer_length
@@ -212,8 +200,4 @@
 ;       )
 ;     ))
 ;
-;
 ;(test-program-on-training tom-program)
-
-;(run-prog tom-program false)
-

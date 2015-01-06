@@ -158,6 +158,8 @@
                                                                 (push-item "" :output)))
                                         result (stack-ref :output 0 final-state)]
                                     (when print-outputs
+                                      (println "INPUT1: %s" (pr-str input1))
+                                      (println "INPUT2: %s" (pr-str input2))
                                       (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
                                     ; Record the behavior
                                     (when @global-print-behavioral-diversity
@@ -222,3 +224,52 @@
    :final-report-simplifications 5000
    :max-error 5000
    })
+
+;;;;;;;;;;
+;; Below here is for testing a hand-written solution.
+;
+;(reset! global-evalpush-limit 2000)
+;
+;(reset! global-max-points 1000)
+;
+;(defn test-program-on-training
+;  [program print-outputs]
+;  ((string-differences-error-function string-differences-data-domains) program :train print-outputs))
+;
+;; This program works
+;(def tom-program
+;  '(
+;     in1 string_length in2 string_length integer_min ;get length of shorter string
+;     integer_dup 0 integer_lte exec_when exec_flush ;when shorter string has length <= 0, don't do anything
+;     exec_do*count
+;     (
+;       integer_dup integer_dup
+;       in1 string_nth in2 string_nth
+;       char_eq boolean_not
+;       exec_when
+;       (
+;         boolean_empty boolean_not exec_when
+;         print_newline
+;         true ; put on boolean stack just to know when have been here before
+;         integer_dup integer_dup integer_dup
+;         print_integer
+;         \space print_char
+;         in1 string_nth print_char
+;         \space print_char
+;         in2 string_nth print_char
+;         )
+;       )
+;     ))
+;
+;(test-program-on-training tom-program true)
+;
+;(run-push tom-program
+;          (push-item "" :output (push-item "dealer" :input (push-item "dollars" :input (make-push-state)))))
+;
+;(run-push tom-program
+;          (push-item "" :output (push-item "uUT|b~" :input (push-item "uSQ|b~" :input (make-push-state))))
+;          false)
+;
+;(run-push tom-program
+;          (push-item "" :output (push-item "abcdefg" :input (push-item "ABCDE" :input (make-push-state))))
+;          false)
