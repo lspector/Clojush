@@ -26,6 +26,7 @@
             (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
+            'in2
             ;;; end input instructions
             )
           (registered-for-stacks [:integer :vector_integer :exec])))

@@ -9,14 +9,16 @@
 ;;
 ;; Note that start < finish for all test cases, so will always require printing something.
 ;;
+;; Note: tried adding extra error, did not help
+;;
 ;; input stack has 3 input integers: in1 = start, in2 = finish, in3 = step-size
 
 (ns clojush.problems.software.for-loop-index
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
-        [clojure.math numeric-tower])
-  (:require [clojure.string :as string]))
+        [clojure.math numeric-tower]
+        ))
 
 ; Atom generators
 (def loop-atom-generators
@@ -66,8 +68,7 @@
    [input output]."
   [inputs]
   (map #(vector %
-                (vector (apply str (interpose \newline (apply range %)))
-                        (apply range %)))
+                (apply str (interpose \newline (apply range %))))
        inputs))
 
 ; Define error function. For now, each run uses different random inputs
@@ -89,50 +90,25 @@
         (the-actual-loop-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
-              errors (flatten
-                       (doall
-                         (for [[[input1 input2 input3] [correct-output correct-integers]] (case data-cases
-                                                                                            :train train-cases
-                                                                                            :test test-cases
-                                                                                            [])]
-                           (let [final-state (run-push program
-                                                       (->> (make-push-state)
-                                                         (push-item input3 :input)
-                                                         (push-item input2 :input)
-                                                         (push-item input1 :input)
-                                                         (push-item "" :output)))
-                                 result (stack-ref :output 0 final-state)]
-                             (when print-outputs
-                               (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                             ; Record the behavior
-                             (when @global-print-behavioral-diversity
-                               (swap! behavior conj result))
-                             (let [correct-number-lines (count correct-integers)
-                                   result-lines (if (= result "")
-                                                  []
-                                                  (string/split-lines result))
-                                   int-parse-strings (filter #(re-matches #"-?\d+" %) result-lines)
-                                   lines-with-integer-parseable-strings (count int-parse-strings)
-                                   lines-without-integer-parseable-strings (- (count result-lines) lines-with-integer-parseable-strings)]
-                               (vector
-                                 ; Error 1: Levenshtein distance of printed strings
-                                 (levenshtein-distance correct-output result)
-                                 ; Error 2: Difference in number of lines with integer-parseable strings. Also, each line without an integer-parseable string contributes 1 error
-                                 (+ (abs (- correct-number-lines lines-with-integer-parseable-strings))
-                                    lines-without-integer-parseable-strings)
-                                 ; Error 3: For each line in the result with a parseable integer, find the integer error compared to correct integer. Sum these.
-                                 (let [correct-result-int-pairs (map vector
-                                                                     correct-integers
-                                                                     (concat (map (fn [int-str]
-                                                                                    (try (Integer/parseInt int-str)
-                                                                                      (catch Exception e :no-result)))
-                                                                                  int-parse-strings)
-                                                                             (repeat :no-result)))]
-                                   (apply +' (map (fn [[cor-int res-int]]
-                                                    (if (not (number? res-int))
-                                                      100 ; penalty for not enough lines with parseable integers
-                                                      (abs (- cor-int res-int))))
-                                                  correct-result-int-pairs)))))))))]
+              errors (doall
+                       (for [[[input1 input2 input3] correct-output] (case data-cases
+                                                                                  :train train-cases
+                                                                                  :test test-cases
+                                                                                  [])]
+                         (let [final-state (run-push program
+                                                     (->> (make-push-state)
+                                                       (push-item input3 :input)
+                                                       (push-item input2 :input)
+                                                       (push-item input1 :input)
+                                                       (push-item "" :output)))
+                               result (stack-ref :output 0 final-state)]
+                           (when print-outputs
+                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                           ; Record the behavior
+                           (when @global-print-behavioral-diversity
+                             (swap! behavior conj result))
+                           ; Error is Levenshtein distance of printed strings
+                           (levenshtein-distance correct-output result))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))

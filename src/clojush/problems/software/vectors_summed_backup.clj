@@ -8,7 +8,7 @@
 ;;
 ;; input stack has 2 input vectors of integers
 
-(ns clojush.problems.software.vectors-summed
+(ns clojush.problems.software.vectors-summed-backup
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -26,6 +26,7 @@
             (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
+            'in2
             ;;; end input instructions
             )
           (registered-for-stacks [:integer :vector_integer :exec])))

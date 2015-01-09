@@ -4,7 +4,7 @@
 ;; Problem Source: iJava (http://ijava.cs.umass.edu/)
 ;;
 ;; Given a vector of floats with length in [1,50], with each float in [-1000,1000],
-;; return the average of those floats.
+;; return the average of those floats. Results are rounded to 4 decimal places.
 ;;
 ;; input stack has 1 input vector of floats
 

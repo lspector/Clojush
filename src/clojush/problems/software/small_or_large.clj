@@ -3,8 +3,8 @@
 ;;
 ;; Problem Source: iJava (http://ijava.cs.umass.edu/)
 ;;
-;; For a given integer n, print "small" if n < 1000 and "large" if n >= 2000
-;; (and nothing if 1000 <= n < 2000).
+;; Given an integer n in the range [-10000, 10000], print "small" if n < 1000
+;; and "large" if n >= 2000 (and nothing if 1000 <= n < 2000).
 ;;
 ;; input stack has input integer n
 
