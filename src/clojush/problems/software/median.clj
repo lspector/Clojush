@@ -3,7 +3,7 @@
 ;;
 ;; Problem Source: Program Repair Benchmark Paper (add citation later)
 ;;
-;; Program must inputs 3 integers, and return their median.
+;; Given 3 integers, print their median.
 ;;
 ;; input stack has the 3 integers
 

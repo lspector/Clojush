@@ -6,6 +6,10 @@
 ;; Given a vector of integers in [-1000,1000] with length <= 50, return the
 ;; vector where all negative integers have been replaced by 0.
 ;;
+;; NOTE: This problem gets lots of solutions that don't generalize. We could add
+;; another error that finds the integer error at each position in vector with
+;; penalty for wrong size of vector, which might help with generalization (but might not).
+;;
 ;; input stack has 1 input vector of integers
 
 (ns clojush.problems.software.negative-to-zero

@@ -222,7 +222,7 @@
                              ; Errors:
                              ;  1. Levenshtein distance of outputs
                              ;  2. If contains a line of the form #"number of sentences: (-?\d+)", then integer distance from correct output; otherwise penalty
-                             ;  3. If contains a line of the form "average sentence length: (-?\d+.\d+)", then float distance from correct output, rounded to 4 places; otherwise penalty
+                             ;  3. If contains a line of the form #"average sentence length: (-?\d+.\d+)", then float distance from correct output, rounded to 4 places; otherwise penalty
                              (vector
                                (levenshtein-distance correct-output result)
                                (if-let [result-n (try (Integer/parseInt (second (re-find #"number of sentences: (-?\d+)" result)))
