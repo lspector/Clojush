@@ -159,7 +159,7 @@
 ;  [program print-outputs]
 ;  ((sum-of-squares-error-function sum-of-squares-data-domains) program :test print-outputs))
 ;
-; This program only works if evalpush-limit > 4000 (works at 5000)
+; This program works
 ;(def tom-program
 ;  '(
 ;     in1 integer_inc exec_do*count

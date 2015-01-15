@@ -31,7 +31,7 @@
 
 ;; Define test cases
 (defn vector-average-input
-  "Makes a Vector Average input vector of length len with probability prob of being odd."
+  "Makes a Vector Average input vector of length len."
   [len]
   (vec (repeatedly len
                    #(- (* (lrand) 2000.0) 1000.0))))
