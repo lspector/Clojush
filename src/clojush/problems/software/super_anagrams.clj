@@ -207,31 +207,3 @@
    :final-report-simplifications 5000
    :max-error 1
    })
-
-;;;;;;;;;;
-;; Below here is for testing a hand-written solution.
-
-;(reset! global-evalpush-limit 1600)
-;
-;(reset! global-max-points 800)
-;
-;(defn test-program-on-training
-;  [program print-outputs]
-;  ((super-anagrams-error-function super-anagrams-data-domains) program :train print-outputs))
-;
-; This program works
-;(def tom-program
-;  '(
-;     in2 in1 exec_string_iterate
-;     (
-;       string_dup char_dup
-;       string_containschar boolean_not exec_when (false exec_flush) ;test if char is in string
-;       \! string_replacefirstchar
-;       )
-;     true
-;     ))
-;
-;(test-program-on-training tom-program false)
-;
-;(run-push tom-program
-;          (push-item "clinteastwood" :input (push-item "oldowestact" :input (make-push-state))))

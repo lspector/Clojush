@@ -170,33 +170,3 @@
    :final-report-simplifications 5000
    :max-error 1000000000
    })
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;(reset! global-evalpush-limit 1500)
-;
-;(reset! global-max-points 500)
-;
-;(defn test-program-on-training
-;  [program]
-;  ((vectors-summed-error-function vectors-summed-data-domains) program :train true))
-;
-;(def tom-program
-;  '(
-;     in1 in1 vector_integer_length
-;     exec_do*count
-;     (
-;       integer_dup integer_dup
-;       in1 vector_integer_nth
-;       integer_swap
-;       in2 vector_integer_nth
-;       integer_add
-;       integer_swap vector_integer_set
-;       )
-;     ))
-;
-
-;(test-program-on-training tom-program)
-
-;(run-prog tom-program false)
-

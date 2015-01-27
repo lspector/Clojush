@@ -147,28 +147,3 @@
    :final-report-simplifications 5000
    :max-error 1000000000
    })
-
-;;;;;;;;;;
-;; Below here is for testing a hand-written solution.
-
-;(reset! global-evalpush-limit 4000)
-;
-;(reset! global-max-points 400)
-;
-;(defn test-program-on-training
-;  [program print-outputs]
-;  ((sum-of-squares-error-function sum-of-squares-data-domains) program :test print-outputs))
-;
-; This program works
-;(def tom-program
-;  '(
-;     in1 integer_inc exec_do*count
-;     (
-;       integer_dup integer_mult integer_add
-;       )
-;     ))
-;
-;(test-program-on-training tom-program false)
-;
-;(run-push tom-program
-;          (push-item 100 :input (make-push-state)))

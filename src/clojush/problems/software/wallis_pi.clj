@@ -168,33 +168,3 @@
    :error-threshold 0.001
    :max-error 1000000.0
    })
-
-;;;;;;;;;;
-;; Below here is for testing a hand-written solution.
-
-;(reset! global-evalpush-limit 8000)
-;
-;(reset! global-max-points 600)
-;
-;(defn test-program-on-training
-;  [program print-outputs]
-;  ((wallis-pi-error-function wallis-pi-data-domains) program :train print-outputs))
-;
-;; This program works. It uses more than 4000 eval-push steps for input 200, and
-;; less than 5000. So, I changed the GP to use at most 8000 steps to give room
-;; for larger programs.
-;(def tom-program
-;  '(
-;     in1 1.0
-;     exec_do*count
-;     (
-;       integer_dup integer_dup
-;       2 integer_mod 0 integer_eq ;; now (even? in1) on boolean stack
-;       exec_if
-;       (2 integer_add float_frominteger 3 integer_add float_frominteger)
-;       (3 integer_add float_frominteger 2 integer_add float_frominteger)
-;       float_div float_mult
-;       )
-;     ))
-;
-;(test-program-on-training tom-program false)
