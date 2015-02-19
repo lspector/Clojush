@@ -12,8 +12,8 @@
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
-        [clojure.math numeric-tower]
-        ))
+        [clojure.math numeric-tower])
+  (:require [clojure.string :as string]))
 
 ; Atom generators
 (def even-squares-atom-generators
@@ -34,9 +34,9 @@
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
 (def even-squares-data-domains
-  [[(list 1 2 3 4 5 6 15 16 17 18) 10 0] ;; Small edge cases
+  [[(list 1 2 3 4 5 6 15 16 17 18 36 37 64 65) 14 0] ;; Small edge cases
    [(list 9600 9700 9999) 3 0] ;; Large edge cases
-   [(fn [] (+ 20 (lrand-int 9980))) 87 1000] ;; Random cases
+   [(fn [] (+ 20 (lrand-int 9980))) 83 1000] ;; Random cases
    ])
 
 ;;Can make Even Squares test data like this:
@@ -47,11 +47,13 @@
   "Takes a sequence of inputs and gives IO test cases of the form
    [input output]."
   [inputs]
-  (map (fn [in] (vector in
-                        (apply str (interpose \newline
-                                              (rest (take-while #(< % in)
-                                                                (map #(* 4 % %)
-                                                                     (range))))))))
+  (map (fn [in]
+         (let [nums (rest (take-while #(< % in)
+                                                 (map #(* 4 % %)
+                                                      (range))))]
+               (vector in
+                       (vector (apply str (interpose \newline nums))
+                               nums))))
        inputs))
 
 ; Define error function. For now, each run uses different random inputs
@@ -59,8 +61,9 @@
   "Returns the error function for the Even Squares problem. Takes as
    input Even Squares data domains."
   [data-domains]
-  (let [[train-cases test-cases] (map even-squares-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
+  (let [[train-cases test-cases] (map #(sort-by first %)
+                                      (map even-squares-test-cases
+                                           (test-and-train-data-from-domains data-domains)))]
     (when true ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
@@ -73,23 +76,48 @@
         (the-actual-even-squares-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
-              errors (doall
-                       (for [[input1 correct-output] (case data-cases
-                                                                  :train train-cases
-                                                                  :test test-cases
-                                                                  [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input1 :input)
-                                                       (push-item "" :output)))
-                               result (stack-ref :output 0 final-state)]
-                           (when print-outputs
-                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
-                           ; Error is Levenshtein distance of printed strings
-                           (levenshtein-distance correct-output result))))]
+              errors (flatten
+                       (doall
+                         (for [[input1 [correct-output correct-integers]] (case data-cases
+                                                                            :train train-cases
+                                                                            :test test-cases
+                                                                            [])]
+                           (let [final-state (run-push program
+                                                       (->> (make-push-state)
+                                                         (push-item input1 :input)
+                                                         (push-item "" :output)))
+                                 result (stack-ref :output 0 final-state)]
+                             (when print-outputs
+                               (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                             ; Record the behavior
+                             (when @global-print-behavioral-diversity
+                               (swap! behavior conj result))
+                             (let [correct-number-lines (count correct-integers)
+                                   result-lines (if (= result "")
+                                                  []
+                                                  (string/split-lines result))
+                                   int-parse-strings (filter #(re-matches #"-?\d+" %) result-lines)
+                                   lines-with-integer-parseable-strings (count int-parse-strings)
+                                   lines-without-integer-parseable-strings (- (count result-lines) lines-with-integer-parseable-strings)]
+                               (vector
+                                 ; Error 1: Levenshtein distance of printed strings
+                                 (levenshtein-distance correct-output result)
+                                 ; Error 2: Difference in number of lines with integer-parseable strings. Also, each line without an integer-parseable string contributes 1 error
+                                 (+ (abs (- correct-number-lines lines-with-integer-parseable-strings))
+                                    lines-without-integer-parseable-strings)
+                                 ; Error 3: For each line in the result with a parseable integer, find the integer error compared to correct integer. Sum these.
+                                 (let [correct-result-int-pairs (map vector
+                                                                     correct-integers
+                                                                     (concat (map (fn [int-str]
+                                                                                    (try (Integer/parseInt int-str)
+                                                                                      (catch Exception e :no-result)))
+                                                                                  int-parse-strings)
+                                                                             (repeat :no-result)))]
+                                   (apply +' (map (fn [[cor-int res-int]]
+                                                    (if (not (number? res-int))
+                                                      100 ; penalty for not enough lines with parseable integers
+                                                      (abs (- cor-int res-int))))
+                                                  correct-result-int-pairs)))))))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
@@ -124,7 +152,7 @@
    :atom-generators even-squares-atom-generators
    :max-points 400
    :max-points-in-initial-program 200
-   :evalpush-limit 1000
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -142,3 +170,58 @@
    :final-report-simplifications 5000
    :max-error 5000
    })
+
+;;;;;
+
+;| Correct output: "4"
+;| Program output: "4\n1514"
+;
+;| Correct output: "4"
+;| Program output: ""
+;
+;| Correct output: "4\n16"
+;| Program output: "4\n1716"
+;
+;| Correct output: "4\n16"
+;| Program output: "4\n1817"
+;
+;| Correct output: "4\n16\n36\n64\n100\n144\n196\n256\n324\n400\n484\n576\n676\n784\n900\n1024\n1156\n1296\n1444\n1600\n1764\n1936\n2116\n2304\\
+;n2500\n2704\n2916\n3136\n3364\n3600\n3844\n4096\n4356\n4624\n4900\n5184\n5476\n5776\n6084\n6400\n6724\n7056\n7396\n7744\n8100\n8464\n8836\n921\
+;6"
+;| Program output: "4\n16\n36\n64\n100\n144\n196\n256\n324\n400\n484\n576\n676\n784\n900\n1024\n1156\n1296\n1444\n1600\n1764\n1936\n2116\n2304\\
+;n2500\n2704\n2916\n3136\n3364\n3600\n3844\n4096\n4356\n4624\n4900\n5184\n5476\n5776"
+;
+;| Correct output: "4\n16\n36\n64\n100\n144\n196\n256\n324\n400\n484\n576\n676\n784\n900\n1024\n1156\n1296\n1444\n1600\n1764\n1936\n2116\n2304\\
+;n2500\n2704\n2916\n3136\n3364\n3600\n3844\n4096\n4356\n4624\n4900\n5184\n5476\n5776\n6084\n6400\n6724\n7056\n7396\n7744\n8100\n8464\n8836\n921\
+;6\n9604"
+;| Program output: "4\n16\n36\n64\n100\n144\n196\n256\n324\n400\n484\n576\n676\n784\n900\n1024\n1156\n1296\n1444\n1600\n1764\n1936\n2116\n2304\\
+;n2500\n2704\n2916\n3136\n3364\n3600\n3844\n4096\n4356\n4624\n4900\n5184\n5476\n5776"
+
+;;;;;;;;;;
+;; Below here is for testing a hand-written solution.
+
+;(reset! global-evalpush-limit 2000)
+;
+;(reset! global-max-points 400)
+;
+;(defn test-program-on-training
+;  [program print-outputs]
+;  ((even-squares-error-function even-squares-data-domains) program :train print-outputs))
+;
+;(def tom-program
+;  '(
+;     4 in1 integer_lt
+;     exec_when
+;     (
+;       4 print_integer
+;       4 integer_dup integer_dup integer_mult integer_dup in1 integer_lt
+;       exec_while
+;       (
+;         print_newline print_integer 
+;         integer_inc integer_inc
+;         integer_dup integer_dup integer_mult integer_dup in1 integer_lt
+;         )
+;       )
+;     ))
+;
+;(test-program-on-training tom-program false)

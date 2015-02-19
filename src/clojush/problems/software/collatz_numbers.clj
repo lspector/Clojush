@@ -57,7 +57,7 @@
       len
       (if (even? n)
         (recur (/ n 2) (inc len))
-        (recur (inc (* 3 n)) (inc len))))))
+        (recur (inc (*' 3 n)) (inc len))))))
 
 (defn collatz-numbers-test-cases
   "Takes a sequence of inputs and gives IO test cases of the form
@@ -140,7 +140,7 @@
    :atom-generators collatz-numbers-atom-generators
    :max-points 600
    :max-points-in-initial-program 300
-   :evalpush-limit 4000
+   :evalpush-limit 15000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -158,3 +158,47 @@
    :final-report-simplifications 5000
    :max-error 1000000
    })
+
+;;;;;;;;;;
+;; Below here is for testing a hand-written solution.
+
+;(reset! global-evalpush-limit 5000)
+;
+;(reset! global-max-points 600)
+;
+;(defn test-program-on-training
+;  [program print-outputs]
+;  ((collatz-numbers-error-function collatz-numbers-data-domains) program :train print-outputs))
+;
+;; This program only works if evalpush-limit > 4000 (works at 5000)
+;(def tom-program
+;  '(
+;     tag_exec_100
+;     (
+;       integer_dup
+;       1 integer_gt
+;       exec_if
+;       (
+;        float_inc integer_dup
+;        2 integer_mod 0 integer_eq
+;        exec_if ; condition for even/odd (first even, then odd)
+;        ( ;even case
+;          2 integer_div
+;          )
+;        ( ;odd case
+;          3 integer_mult integer_inc
+;          )
+;        tagged_50
+;        )
+;       (
+;         integer_fromfloat
+;         )
+;       )
+;     in1 1.0
+;     tagged_50
+;     ))
+;
+;(test-program-on-training tom-program false)
+;
+;(run-push tom-program
+;          (push-item 5 :input (make-push-state)))

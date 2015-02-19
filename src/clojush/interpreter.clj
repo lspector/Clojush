@@ -12,6 +12,7 @@
   ;; for debugging only, e.g. for stress-test
   ;(def debug-recent-instructions (cons instruction debug-recent-instructions))
   ;(def debug-recent-state state)
+  (swap! point-evaluations-count inc)
   (if (= instruction nil) ;; tests for nil and ignores it
     state
     (let [literal-type (recognize-literal instruction)]

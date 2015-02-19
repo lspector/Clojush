@@ -6,7 +6,7 @@
 ;; John Wallis gave an infinite product that converges to pi/4 as the following:
 ;;      (2/3)*(4/3)*(4/5)*(6/5)*(6/7)*(8/7)*(8/9)*(10/9)*(10/11)*...
 ;; Given an integer input 1 <= N <= 200, compute an approximation of this
-;; product out to N terms.
+;; product out to N terms. Results are rounded to 5 decimal places.
 ;;
 ;; input stack has integer N
 
@@ -52,12 +52,13 @@
 (defn wallis-pi-approximation
   "The Wallis pi approximation to n terms."
   [n]
-  (float (apply *' (map #(apply / %)
-                        (take n (iterate (fn [[x1 x2]]
-                                           (if (> x1 x2)
-                                             [x1 (+' 2 x2)]
-                                             [(+' 2 x1) x2]))
-                                         [2 3]))))))
+  (round-to-n-decimal-places (apply *' (map #(apply / %)
+                                            (take n (iterate (fn [[x1 x2]]
+                                                               (if (> x1 x2)
+                                                                 [x1 (+' 2 x2)]
+                                                                 [(+' 2 x1) x2]))
+                                                             [2 3]))))
+                             5))
 
 (defn wallis-pi-test-cases
   "Takes a sequence of inputs and gives IO test cases of the form
@@ -87,27 +88,32 @@
         (the-actual-wallis-pi-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
-              errors (doall
-                       (for [[input1 correct-output] (case data-cases
-                                                                  :train train-cases
-                                                                  :test test-cases
-                                                                  [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input1 :input)))
-                               result (stack-ref :float 0 final-state)]
-                           (when print-outputs
-                             (println (format "Correct output: %f | Program output: %f" correct-output result)))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
-                           ; Error is float error rounded to 5 decimal places
-                           (round-to-n-decimal-places
-                             (if (number? result)
-                               (abs (- result correct-output)) ;distance from correct integer
-                               1000000.0) ;penalty for no return value
-                             5)
-                           )))]
+              errors (flatten
+                       (doall
+                         (for [[input1 correct-output] (case data-cases
+                                                                    :train train-cases
+                                                                    :test test-cases
+                                                                    [])]
+                           (let [final-state (run-push program
+                                                       (->> (make-push-state)
+                                                         (push-item input1 :input)))
+                                 result (round-to-n-decimal-places
+                                          (stack-ref :float 0 final-state)
+                                          5)]
+                             (when print-outputs
+                               (println (format "Correct output: %.5f | Program output: %.5f" correct-output result)))
+                             ; Record the behavior
+                             (when @global-print-behavioral-diversity
+                               (swap! behavior conj result))
+                             ; Outputs rounded to 5 decimal places
+                             (vector
+                               ; Error 1: float absolute error
+                               (if (number? result)
+                                 (float (abs (- result correct-output))) ;distance from correct integer
+                                 1000000.0) ;penalty for no return value
+                               ; Error 2: Levenshtein distance of strings
+                               (levenshtein-distance (str correct-output) (str result))
+                               )))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
@@ -142,7 +148,7 @@
    :atom-generators wallis-pi-atom-generators
    :max-points 600
    :max-points-in-initial-program 300
-   :evalpush-limit 4000
+   :evalpush-limit 8000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -162,3 +168,33 @@
    :error-threshold 0.001
    :max-error 1000000.0
    })
+
+;;;;;;;;;;
+;; Below here is for testing a hand-written solution.
+
+;(reset! global-evalpush-limit 8000)
+;
+;(reset! global-max-points 600)
+;
+;(defn test-program-on-training
+;  [program print-outputs]
+;  ((wallis-pi-error-function wallis-pi-data-domains) program :train print-outputs))
+;
+;; This program works. It uses more than 4000 eval-push steps for input 200, and
+;; less than 5000. So, I changed the GP to use at most 8000 steps to give room
+;; for larger programs.
+;(def tom-program
+;  '(
+;     in1 1.0
+;     exec_do*count
+;     (
+;       integer_dup integer_dup
+;       2 integer_mod 0 integer_eq ;; now (even? in1) on boolean stack
+;       exec_if
+;       (2 integer_add float_frominteger 3 integer_add float_frominteger)
+;       (3 integer_add float_frominteger 2 integer_add float_frominteger)
+;       float_div float_mult
+;       )
+;     ))
+;
+;(test-program-on-training tom-program false)

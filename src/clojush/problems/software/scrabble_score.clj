@@ -53,13 +53,13 @@
             scrabble-letter-values
             ;;; end constants
             ;;; end ERCs
-            (tag-instruction-erc [:string :char :integer :boolean :exec] 1000)
+            (tag-instruction-erc [:string :char :integer :boolean :vector_integer :exec] 1000)
             (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
             )
-          (registered-for-stacks [:string :char :integer :boolean :exec])))
+          (registered-for-stacks [:string :char :integer :boolean :vector_integer :exec])))
 
 ;; Define test cases
 (defn scrabble-score-input
@@ -200,3 +200,30 @@
    :final-report-simplifications 5000
    :max-error 1000
    })
+
+;;;;;;;;;;
+;; Below here is for testing a hand-written solution.
+
+;(reset! global-evalpush-limit 2000)
+;
+;(reset! global-max-points 1000)
+;
+;(defn test-program-on-training
+;  [program print-outputs]
+;  ((scrabble-score-error-function scrabble-score-data-domains) program :train print-outputs))
+;
+; This program works
+;(def tom-program
+;  '(
+;     0 in1 exec_string_iterate
+;     (
+;       [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 3 3 2 1 4 2 4 1 8 5 1 3 1 1 3 10 1 1 1 1 4 4 8 4 10 0 0 0 0 0 0 1 3 3 2 1 4 2 4 1 8 5 1 3 1 1 3 10 1 1 1 1 4 4 8 4 10 0 0 0 0]
+;       integer_fromchar vector_integer_nth
+;       integer_add
+;       )
+;     ))
+;
+;(test-program-on-training tom-program false)
+;
+;(run-push tom-program
+;          (push-item "h w h j##r##r\n+JJL" :input (make-push-state)))

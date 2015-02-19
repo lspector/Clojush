@@ -1,131 +1,112 @@
-;; checksum_char.clj
+;; sum_of_squares.clj
 ;; Tom Helmuth, thelmuth@cs.umass.edu
 ;;
-;; Problem Source: Program Repair Benchmark Paper (add citation later)
+;; Problem Source: iJava (http://ijava.cs.umass.edu/)
 ;;
-;; Given a string (max length 50), compute the integer values of the characters
-;; in the string, sum them, take the sum modulo 64, add the value of the \space 
-;; character, and then convert that integer back into its corresponding character
-;; (the checksum).
+;; Given integer 0 < n <= 100, return the sum of squaring each positive integer
+;; between 1 and n inclusive.
 ;;
-;; This differs from checksum in that it doesn't require the answer to be printed.
-;;
-;; input stack has the input string
+;; input stack has integer n
 
-(ns clojush.problems.software.checksum-char
+(ns clojush.problems.software.sum-of-squares
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
-        clojure.math.numeric-tower
+        [clojure.math numeric-tower]
         ))
 
 ; Atom generators
-(def checksum-atom-generators
+(def sum-of-squares-atom-generators
   (concat (list
-            \space
-            64
+            0
+            1
             ;;; end constants
-            (fn [] (- (lrand-int 257) 128)) ;Integer ERC [-128,128]
-            (fn [] (lrand-nth (concat [\newline \tab] (map char (range 32 127))))) ;Visible character ERC
+            (fn [] (- (lrand-int 201) 100)) ;Integer ERC [-100,100]
             ;;; end ERCs
-            (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
+            (tag-instruction-erc [:integer :boolean :exec] 1000)
             (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
             )
-          (registered-for-stacks [:integer :boolean :string :char :exec])))
+          (registered-for-stacks [:integer :boolean :exec])))
 
-
-;; Define test cases
-(defn checksum-input
-  "Makes a checksum input of length len."
-  [len]
-  (apply str
-         (repeatedly len
-                     #(lrand-nth (concat [\newline \tab]
-                                         (map char (range 32 127)))))))
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
 ;; should be used as training and testing cases respectively. Each "set" of
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
-(def checksum-data-domains
-  [[(list "", "A", "\t", "\n", "B\n", "\n\n",
-          (apply str (repeat 50 \newline))
-          (apply str (repeat 50 \space))
-          (apply str (repeat 50 \s))
-          (apply str (take 50 (cycle (list \C \D \newline))))
-          (apply str (take 50 (cycle (list \x \newline \y \space))))
-          (apply str (take 50 (cycle (list \space \newline))))) 12 0] ;; "Special" inputs covering some base cases
-   [(fn [] (checksum-input (inc (lrand-int 50)))) 88 1000]
+(def sum-of-squares-data-domains
+  [[(range 1 6) 5 0] ; Small cases
+   [(list 100) 1 0] ; Last case
+   [(fn [] (+ 6 (lrand-int 94))) 14 0] ; Random cases [6,99]
+   [(range 1 101) 0 100] ; Test all integers in [1,100]
    ])
 
-;;Can make checksum test data like this:
-;(test-and-train-data-from-domains checksum-data-domains)
+;;Can make Sum Of Squares test data like this:
+;(test-and-train-data-from-domains sum-of-squares-data-domains)
 
 ; Helper function for error function
-(defn checksum-test-cases
+(defn sum-of-squares-test-cases
   "Takes a sequence of inputs and gives IO test cases of the form
    [input output]."
   [inputs]
-  (map #(vector %
-                (char (+ (mod (apply + (map int %)) 64)
-                         (int \space))))
+  (map (fn [in]
+         (vector in
+                 (apply +' (map #(*' % %) (range (inc in))))))
        inputs))
 
 ; Define error function. For now, each run uses different random inputs
-(defn checksum-error-function
-  "Returns the error function for the checksum problem. Takes as
-   input checksum data domains."
+(defn sum-of-squares-error-function
+  "Returns the error function for the Sum Of Squares problem. Takes as
+   input Sum Of Squares data domains."
   [data-domains]
-  (let [[train-cases test-cases] (map #(sort-by (comp count first) %)
-                                      (map checksum-test-cases
-                                           (test-and-train-data-from-domains data-domains)))]
+  (let [[train-cases test-cases] (map sort (map sum-of-squares-test-cases
+                                                (test-and-train-data-from-domains data-domains)))]
     (when true ;; Change to false to not print test cases
       (doseq [[i case] (map vector (range) train-cases)]
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
         (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-checksum-error-function
+    (fn the-actual-sum-of-squares-error-function
       ([program]
-        (the-actual-checksum-error-function program :train))
+        (the-actual-sum-of-squares-error-function program :train))
       ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-checksum-error-function program data-cases false))
+        (the-actual-sum-of-squares-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
               errors (doall
-                       (for [[input correct-output] (case data-cases
-                                                      :train train-cases
-                                                      :test test-cases
-                                                      [])]
+                       (for [[input1 correct-output] (case data-cases
+                                                                  :train train-cases
+                                                                  :test test-cases
+                                                                  [])]
                          (let [final-state (run-push program
                                                      (->> (make-push-state)
-                                                       (push-item input :input)))
-                               char-result (top-item :char final-state)]
+                                                       (push-item input1 :input)))
+                               result (stack-ref :integer 0 final-state)]
                            (when print-outputs
-                             (println (format "Correct output: %c | Program output: %c" correct-output char-result)))
+                             (println (format "Correct output: %6d | Program output: %s" correct-output (str result))))
                            ; Record the behavior
                            (when @global-print-behavioral-diversity
-                             (swap! behavior conj char-result))
-                           ; Error is distance from correct character
-                           (if (char? char-result)
-                             (abs (- (int correct-output) (int char-result))) ;distance from correct last character
-                             1000) ;penalty for no character on stack
+                             (swap! behavior conj result))
+                           ; Error is integer distance
+                           (if (number? result)
+                             (abs (- result correct-output)) ;distance from correct integer
+                             1000000000) ;penalty for no return value
                            )))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
 
-(defn checksum-report
+(defn sum-of-squares-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
   (let [best-program (not-lazy (:program best))
         best-test-errors (error-function best-program :test)
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
-    (printf ";; -*- Checksum problem report - generation %s\n" generation)(flush)
+    (printf ";; -*- Sum Of Squares problem report - generation %s\n" generation)(flush)
     (println "Test total error for best:" best-total-test-error)
     (println (format "Test mean error for best: %.5f" (double (/ best-total-test-error (count best-test-errors)))))
     (when (zero? (:total-error best))
@@ -144,11 +125,11 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (checksum-error-function checksum-data-domains)
-   :atom-generators checksum-atom-generators
-   :max-points 800
-   :max-points-in-initial-program 400
-   :evalpush-limit 1500
+  {:error-function (sum-of-squares-error-function sum-of-squares-data-domains)
+   :atom-generators sum-of-squares-atom-generators
+   :max-points 400
+   :max-points-in-initial-program 200
+   :evalpush-limit 4000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -160,9 +141,34 @@
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
-   :problem-specific-report checksum-report
+   :problem-specific-report sum-of-squares-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000
+   :max-error 1000000000
    })
+
+;;;;;;;;;;
+;; Below here is for testing a hand-written solution.
+
+;(reset! global-evalpush-limit 4000)
+;
+;(reset! global-max-points 400)
+;
+;(defn test-program-on-training
+;  [program print-outputs]
+;  ((sum-of-squares-error-function sum-of-squares-data-domains) program :test print-outputs))
+;
+; This program works
+;(def tom-program
+;  '(
+;     in1 integer_inc exec_do*count
+;     (
+;       integer_dup integer_mult integer_add
+;       )
+;     ))
+;
+;(test-program-on-training tom-program false)
+;
+;(run-push tom-program
+;          (push-item 100 :input (make-push-state)))

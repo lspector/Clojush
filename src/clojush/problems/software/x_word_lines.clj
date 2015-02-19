@@ -7,6 +7,8 @@
 ;; contains spaces and newlines, print the string with exactly X words per line.
 ;; The last line may have fewer than X words.
 ;;
+;; This version uses 3 error metrics on each training case
+;;
 ;; input stack has the input string and integer
 
 (ns clojush.problems.software.x-word-lines
@@ -80,6 +82,7 @@
           ["9 22 3d 4r" 2]
           ["9 2a 3 4 g" 2]
           ["9 2a 3 4 g" 10]
+          ["  hi   there  \n  world  lots    of\nspace         here !   \n \n" 3]
           ["Well well, what is this?\n211 days in a row that you've stopped by to see ME?\nThen, go away!" 3]
           [(apply str (take 76 (cycle (list \i \space \!)))) 4]
           [(apply str (repeat 100 \space)) 6]
@@ -94,11 +97,11 @@
           [(apply str (take 100 (cycle (list \x \space \y \!)))) 5]
           [(apply str (take 100 (cycle (list \K \space \h \newline)))) 1]
           [(apply str (take 100 (cycle (list \G \space \w \newline)))) 8]
-          [(apply str (take 100 (cycle (list \space \space \3 \space \space \newline \newline \space \space)))) 7]
+          [(apply str (take 100 (cycle (list \space \space \3 \space \space \newline \newline \space \space)))) 3]
           [(apply str (take 100 (cycle (list \> \_ \= \])))) 2]
-          [(apply str (take 100 (cycle (list \^ \_ \^ \space)))) 1]) 45 0] ; Edge case inputs
+          [(apply str (take 100 (cycle (list \^ \_ \^ \space)))) 1]) 46 0] ; Edge case inputs
    [(fn [] [(x-word-lines-input (inc (lrand-int 100)))
-            (lrand-nth (concat (range 1 11) (range 1 6) (range 1 4)))]) 105 2000] ; Random inputs. For X, [1,3] will have 1/6 chance each, [4,5] will have 1/9 chance each, and [6,10] will have 1/18 chance each
+            (lrand-nth (concat (range 1 11) (range 1 6) (range 1 4)))]) 104 2000] ; Random inputs. For X, [1,3] will have 1/6 chance each, [4,5] will have 1/9 chance each, and [6,10] will have 1/18 chance each
    ])
 
 ;;Can make X-Word Lines test data like this:
@@ -137,24 +140,38 @@
         (the-actual-x-word-lines-error-function program data-cases false))
       ([program data-cases print-outputs]
         (let [behavior (atom '())
-              errors (doall
-                       (for [[[input1 input2] correct-output] (case data-cases
-                                                                           :train train-cases
-                                                                           :test test-cases
-                                                                           [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input2 :input)
-                                                       (push-item input1 :input)
-                                                       (push-item "" :output)))
-                               result (stack-ref :output 0 final-state)]
-                           (when print-outputs
-                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
-                           ; Error is Levenshtein distance of printed strings
-                           (levenshtein-distance correct-output result))))]
+              errors (flatten
+                       (doall
+                         (for [[[input1 input2] correct-output] (case data-cases
+                                                                  :train train-cases
+                                                                  :test test-cases
+                                                                  [])]
+                           (let [final-state (run-push program
+                                                       (->> (make-push-state)
+                                                         (push-item input2 :input)
+                                                         (push-item input1 :input)
+                                                         (push-item "" :output)))
+                                 result (stack-ref :output 0 final-state)]
+                             (when print-outputs
+                               (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                             ; Record the behavior
+                             (when @global-print-behavioral-diversity
+                               (swap! behavior conj result))
+                             (vector
+                               ; First error is Levenshtein distance of printed strings
+                               (levenshtein-distance correct-output result)
+                               ; Second error is integer distance from the correct number of newlines
+                               (abs (- (count (filter #(= % \newline) correct-output))
+                                       (count (filter #(= % \newline) result))))
+                               ; Third error is summed error of integer distances over the lines of the correct number of words per line
+                               (+ (apply + (map #(abs (- input2
+                                                         (count (string/split (string/trim %) #"\s+"))))
+                                                (butlast (string/split-lines result))))
+                                  (abs (- (count (string/split (string/trim (last (string/split-lines correct-output))) #"\s+"))
+                                          (count (string/split (string/trim (let [last-line (last (string/split-lines result))]
+                                                                              (if last-line last-line "")))
+                                                               #"\s+")))))
+                               )))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
