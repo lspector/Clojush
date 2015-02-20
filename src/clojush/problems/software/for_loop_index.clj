@@ -9,6 +9,8 @@
 ;;
 ;; Note that start < finish for all test cases, so will always require printing something.
 ;;
+;; Note: tried adding extra error, did not help
+;;
 ;; input stack has 3 input integers: in1 = start, in2 = finish, in3 = step-size
 
 (ns clojush.problems.software.for-loop-index

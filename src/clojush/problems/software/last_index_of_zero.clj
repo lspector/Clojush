@@ -3,7 +3,7 @@
 ;;
 ;; Problem Source: iJava (http://ijava.cs.umass.edu/)
 ;;
-;; Given a vector of integers of length <= 50, each integer in the range [-20,20],
+;; Given a vector of integers of length <= 50, each integer in the range [-50,50],
 ;; at least one of which is 0, return the index of the last occurance of 0 in the vector.
 ;;
 ;; input stack has 1 input vector of integers

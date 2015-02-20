@@ -3,8 +3,8 @@
 ;;
 ;; Problem Source: iJava (http://ijava.cs.umass.edu/)
 ;;
-;; For a given integer n, print "small" if n < 1000 and "large" if n >= 2000
-;; (and nothing if 1000 <= n < 2000).
+;; Given an integer n in the range [-10000, 10000], print "small" if n < 1000
+;; and "large" if n >= 2000 (and nothing if 1000 <= n < 2000).
 ;;
 ;; input stack has input integer n
 
@@ -41,7 +41,7 @@
   [[(concat (list -10000 0 980) (range 995 1005) (list 1020 1980)
             (range 1995 2005) (list 2020 10000)) 27 0] ;; "Special" inputs covering most base cases.
    [(concat (range 980 1020) (range 1980 2020)) 0 80] ;; Some cases to test generality.
-   [(fn [] (- (lrand-int 20001) 10000)) 73 1000] ;; Inputs between -10,000 and 10,000
+   [(fn [] (- (lrand-int 20001) 10000)) 73 920] ;; Inputs between -10,000 and 10,000
    ])
 
 ;;Can make Small Or Large test data like this:

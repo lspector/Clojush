@@ -40,7 +40,7 @@
 (def sum-of-squares-data-domains
   [[(range 1 6) 5 0] ; Small cases
    [(list 100) 1 0] ; Last case
-   [(fn [] (+ 6 (lrand-int 94))) 14 0] ; Random cases [6,99]
+   [(fn [] (+ 6 (lrand-int 94))) 44 0] ; Random cases [6,99]
    [(range 1 101) 0 100] ; Test all integers in [1,100]
    ])
 

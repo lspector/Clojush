@@ -118,14 +118,12 @@
                              ; Error is Levenshtein distance and, if ends in an integer, distance from correct integer
                              (vector
                                (levenshtein-distance correct-output printed-result)
-                               (let [num-result (try (read-string (last (string/split printed-result #"\s+")))
-                                                  (catch Exception e nil))]
-                                 (if (integer? num-result)
-                                   (abs (- (try (read-string (last (string/split correct-output #"\s+")))
-                                             (catch Exception e nil))
-                                           num-result)) ;distance from correct integer
-                                   1000)
-                                 ))))))]
+                               (if-let [num-result (try (Integer/parseInt (last (string/split printed-result #"\s+")))
+                                                      (catch Exception e nil))]
+                                 (abs (- (Integer/parseInt (last (string/split correct-output #"\s+")))
+                                         num-result)) ;distance from correct integer
+                                 1000)
+                               )))))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
           errors)))))
