@@ -8,7 +8,7 @@
 ;;
 ;; input stack has 2 input vectors of integers
 
-(ns clojush.problems.software.vectors-summed
+(ns clojush.problems.software.vectors-summed-backup
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -26,6 +26,7 @@
             (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
+            'in2
             ;;; end input instructions
             )
           (registered-for-stacks [:integer :vector_integer :exec])))
@@ -169,47 +170,3 @@
    :final-report-simplifications 5000
    :max-error 1000000000
    })
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;(reset! global-evalpush-limit 1500)
-;
-;(reset! global-max-points 500)
-;
-;(defn test-program-on-training
-;  [program]
-;  ((vectors-summed-error-function vectors-summed-data-domains) program :train true))
-;
-;(defn run-prog
-;  [program print-steps]
-;  (let [input "dl2HKsdJ2 jad2E\"d2n\nad3!"
-;        final-state (run-push program
-;                              (->> (make-push-state)
-;                                (push-item input :input)
-;                                (push-item "" :output))
-;                              print-steps)
-;        printed-result (stack-ref :output 0 final-state)]
-;    (doseq [[nm stack] (sort-by #(name (first %)) final-state)]
-;      (println (format "%-12s | %s" nm (pr-str stack))))))
-;
-;(def tom-program
-;  '(
-;     in1 in1 vector_integer_length
-;     exec_do*count
-;     (
-;       integer_dup integer_dup
-;       in1 vector_integer_nth
-;       integer_swap
-;       in2 vector_integer_nth
-;       integer_add
-;       integer_swap vector_integer_set
-;       )
-;     ))
-
-
-
-;(test-program-on-training tom-program)
-
-;(run-prog tom-program false)
-
-;(test-program-on-training while-program)

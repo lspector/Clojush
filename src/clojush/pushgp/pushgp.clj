@@ -30,6 +30,7 @@
                                      (fn [] (lrand))))
           :population-size 1000 ;; Number of individuals in the population
           :max-generations 1001 ;; The maximum number of generations to run GP
+          :max-point-evaluations 10e100 ;; The limit for the number of point (instruction) evaluations to execute during the run
           :max-points 50 ;; Maximum size of push programs, as counted by points in the program
           :max-points-in-initial-program 50 ;; Maximum size of initial programs in generation 0
           :evalpush-limit 150 ;; The number of Push instructions that can be evaluated before stopping evaluation

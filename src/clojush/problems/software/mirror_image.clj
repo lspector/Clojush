@@ -73,7 +73,7 @@
    [(map #(vector [33 45 -941] (vec %))
          (permutations [33 45 -941])) 6 0] ;; Permutations of a 3 item vector
    [(fn [] (let [inA (mirror-image-input (inc (lrand-int 50)))]
-             (vector inA (vec (reverse inA))))) 38 500] ;; true cases
+             (vector inA (vec (reverse inA))))) 37 500] ;; true cases
    [(fn [] (let [inA (mirror-image-input (inc (lrand-int 50)))]
              (vector inA inA))) 10 100] ;; equal vector cases
    [(fn [] (let [inA (mirror-image-input (inc (lrand-int 50)))]

@@ -57,7 +57,7 @@
       len
       (if (even? n)
         (recur (/ n 2) (inc len))
-        (recur (inc (* 3 n)) (inc len))))))
+        (recur (inc (*' 3 n)) (inc len))))))
 
 (defn collatz-numbers-test-cases
   "Takes a sequence of inputs and gives IO test cases of the form
@@ -140,7 +140,7 @@
    :atom-generators collatz-numbers-atom-generators
    :max-points 600
    :max-points-in-initial-program 300
-   :evalpush-limit 4000
+   :evalpush-limit 15000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase

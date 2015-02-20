@@ -53,13 +53,13 @@
             scrabble-letter-values
             ;;; end constants
             ;;; end ERCs
-            (tag-instruction-erc [:string :char :integer :boolean :exec] 1000)
+            (tag-instruction-erc [:string :char :integer :boolean :vector_integer :exec] 1000)
             (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
             )
-          (registered-for-stacks [:string :char :integer :boolean :exec])))
+          (registered-for-stacks [:string :char :integer :boolean :vector_integer :exec])))
 
 ;; Define test cases
 (defn scrabble-score-input
