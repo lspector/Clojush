@@ -308,6 +308,11 @@ Push3 stuff not (yet) implemented:
   spec have not been implemented here. The approach here is quite different,
   so this may never be implemented
 
+How to Contribute
+-----------------
+
+See [these instructions](https://gist.github.com/thelmuth/1361411).
+
 To Do (sometime, maybe)
 -----------------------
 
