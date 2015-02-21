@@ -66,38 +66,78 @@
   "Prints a csv of the population, with each individual's fitness and size.
    If log-fitnesses-for-all-cases is true, it also prints the value
    of each fitness case."
-  [population generation csv-log-filename log-fitnesses-for-all-cases]
-  (if (not log-fitnesses-for-all-cases)
-    (do
-      (when (zero? generation)
-        (spit csv-log-filename "generation,individual,total-error,size\n" :append false))
-      (doseq [[ind p] (map-indexed vector population)]
-        (spit csv-log-filename
-              (format "%s,%s,%s,%s\n"
-                      generation
-                      ind
-                      (:total-error p)
-                      (count-points (:program p)))
-              :append true)))
-    (do
-      (when (zero? generation)
-        (spit csv-log-filename "generation,individual,total-error,size," :append false)
-        (spit csv-log-filename
-              (format "%s\n"
-                      (apply str
-                             "TC"
-                             (interpose ",TC"
-                                        (range (count (:errors (first population)))))))
-              :append true))
-      (doseq [[ind p] (map-indexed vector population)]
-        (spit csv-log-filename
-              (format "%s,%s,%s,%s,%s\n"
-                      generation
-                      ind
-                      (:total-error p)
-                      (count-points (:program p))
-                      (apply str (interpose "," (:errors p))))
-              :append true)))))
+  [population generation {:keys [csv-log-filename csv-columns]}]
+  (let [columns (concat [:generation :individual]
+                        (when (some #{:parent-indices} csv-columns)
+                          [:parent1 :parent2])
+                        (filter #(some #{%} csv-columns)
+                                [:push-program-size :plush-genome-size :push-program :plush-genome :total-error]))]
+    (when (zero? generation)
+      (spit csv-log-filename
+            (str (apply str (not-lazy (interpose "," (map name columns))))
+                 (when (some #{:test-case-errors} csv-columns)
+                   (apply str
+                          ",TC"
+                          (interpose ",TC"
+                                     (range (count (:errors (first population)))))))
+                 "\n")
+            :append false))
+    (doseq [[index individual] (map-indexed vector population)]
+      (spit csv-log-filename
+            (str (apply str
+                        (interpose \,
+                                   (map (assoc (clojure.set/rename-keys individual {:program :push-program})
+                                               :generation generation
+                                               :individual index
+                                               :parent1 "???"
+                                               :parent2 "???"
+                                               :push-program-size (count-points (:program individual))
+                                               :plush-genome-size (count (:genome individual))
+                                               :plush-genome (clojure.string/replace (str (not-lazy (:genome individual)))
+                                                                                     ","
+                                                                                     "")
+                                               ) ; This is a map of an individual
+                                        columns)))
+                 \,
+                 (apply str (interpose \, (:errors individual)))
+                 \newline)
+            :append true))))
+    
+    
+;    (spit csv-log-filename (str generation "\n") :append true)))
+  
+  
+;  (if (not log-fitnesses-for-all-cases)
+;    (do
+;      (when (zero? generation)
+;        (spit csv-log-filename "generation,individual,total-error,size\n" :append false))
+;      (doseq [[ind p] (map-indexed vector population)]
+;        (spit csv-log-filename
+;              (format "%s,%s,%s,%s\n"
+;                      generation
+;                      ind
+;                      (:total-error p)
+;                      (count-points (:program p)))
+;              :append true)))
+;    (do
+;      (when (zero? generation)
+;        (spit csv-log-filename "generation,individual,total-error,size," :append false)
+;        (spit csv-log-filename
+;              (format "%s\n"
+;                      (apply str
+;                             "TC"
+;                             (interpose ",TC"
+;                                        (range (count (:errors (first population)))))))
+;              :append true))
+;      (doseq [[ind p] (map-indexed vector population)]
+;        (spit csv-log-filename
+;              (format "%s,%s,%s,%s,%s\n"
+;                      generation
+;                      ind
+;                      (:total-error p)
+;                      (count-points (:program p))
+;                      (apply str (interpose "," (:errors p))))
+;              :append true)))))
 
 (defn jsonize-individual
   "Takes an individual and returns it with only the items of interest
@@ -374,8 +414,7 @@
         (printf "Other:           %8.1f seconds, %4.1f%%\n" (/ other 1000.0) (* 100.0 (/ other total-time)))))
     (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
     (flush)
-    (when print-csv-logs (csv-print population generation csv-log-filename
-                                    log-fitnesses-for-all-cases))
+    (when print-csv-logs (csv-print population generation argmap))
     (when print-json-logs (json-print population generation json-log-filename
                                       log-fitnesses-for-all-cases json-log-program-strings))
     (cond (or (<= (:total-error best) error-threshold)
