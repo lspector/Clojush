@@ -4,7 +4,9 @@
   (:require [clojure.string :as string]
             [config :as config]
             [clj-random.core :as random]
-            [local-file]))
+            [local-file]
+            [clojure.data.csv :as csv]
+            [clojure.java.io :as io]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; helper functions
@@ -69,75 +71,32 @@
   [population generation {:keys [csv-log-filename csv-columns]}]
   (let [columns (concat [:generation :individual]
                         (when (some #{:parent-indices} csv-columns)
-                          [:parent1 :parent2])
+                          [:parent :parent2])
                         (filter #(some #{%} csv-columns)
                                 [:push-program-size :plush-genome-size :push-program :plush-genome :total-error]))]
     (when (zero? generation)
-      (spit csv-log-filename
-            (str (apply str (not-lazy (interpose "," (map name columns))))
-                 (when (some #{:test-case-errors} csv-columns)
-                   (apply str
-                          ",TC"
-                          (interpose ",TC"
-                                     (range (count (:errors (first population)))))))
-                 "\n")
-            :append false))
-    (doseq [[index individual] (map-indexed vector population)]
-      (spit csv-log-filename
-            (str (apply str
-                        (interpose \,
-                                   (map (assoc (clojure.set/rename-keys individual {:program :push-program})
-                                               :generation generation
-                                               :individual index
-                                               :parent1 "???"
-                                               :parent2 "???"
-                                               :push-program-size (count-points (:program individual))
-                                               :plush-genome-size (count (:genome individual))
-                                               :plush-genome (clojure.string/replace (str (not-lazy (:genome individual)))
-                                                                                     ","
-                                                                                     "")
-                                               ) ; This is a map of an individual
-                                        columns)))
-                 \,
-                 (apply str (interpose \, (:errors individual)))
-                 \newline)
-            :append true))))
-    
-    
-;    (spit csv-log-filename (str generation "\n") :append true)))
-  
-  
-;  (if (not log-fitnesses-for-all-cases)
-;    (do
-;      (when (zero? generation)
-;        (spit csv-log-filename "generation,individual,total-error,size\n" :append false))
-;      (doseq [[ind p] (map-indexed vector population)]
-;        (spit csv-log-filename
-;              (format "%s,%s,%s,%s\n"
-;                      generation
-;                      ind
-;                      (:total-error p)
-;                      (count-points (:program p)))
-;              :append true)))
-;    (do
-;      (when (zero? generation)
-;        (spit csv-log-filename "generation,individual,total-error,size," :append false)
-;        (spit csv-log-filename
-;              (format "%s\n"
-;                      (apply str
-;                             "TC"
-;                             (interpose ",TC"
-;                                        (range (count (:errors (first population)))))))
-;              :append true))
-;      (doseq [[ind p] (map-indexed vector population)]
-;        (spit csv-log-filename
-;              (format "%s,%s,%s,%s,%s\n"
-;                      generation
-;                      ind
-;                      (:total-error p)
-;                      (count-points (:program p))
-;                      (apply str (interpose "," (:errors p))))
-;              :append true)))))
+      (with-open [csv-file (io/writer csv-log-filename :append false)]
+        (csv/write-csv csv-file
+                       (vector (concat (map name columns)
+                                       (when (some #{:test-case-errors} csv-columns)
+                                         (map #(str "TC" %)
+                                              (range (count (:errors (first population)))))))))))
+    (with-open [csv-file (io/writer csv-log-filename :append true)]
+      (csv/write-csv csv-file
+                     (map-indexed (fn [index individual]
+                                    (concat (map (assoc (clojure.set/rename-keys individual {:program :push-program})
+                                                        :generation generation
+                                                        :individual index
+                                                        ;:parent1 "???"
+                                                        :parent2 "???"
+                                                        :push-program-size (count-points (:program individual))
+                                                        :plush-genome-size (count (:genome individual))
+                                                        :plush-genome (not-lazy (:genome individual))
+                                                        ) ; This is a map of an individual
+                                                 columns)
+                                            (when (some #{:test-case-errors} csv-columns)
+                                              (:errors individual))))
+                                  population)))))
 
 (defn jsonize-individual
   "Takes an individual and returns it with only the items of interest

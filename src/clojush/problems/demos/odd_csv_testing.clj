@@ -19,7 +19,7 @@
           :print-json-logs false
           :csv-log-filename "log.csv"
           :json-log-filename "log.json"
-          :csv-columns [:total-error :test-case-errors :push-program :plush-genome
+          :csv-columns [:total-error :push-program :plush-genome :test-case-errors
                         :push-program-size :plush-genome-size :parent-indices]
           :log-fitnesses-for-all-cases true
           :json-log-program-strings false
