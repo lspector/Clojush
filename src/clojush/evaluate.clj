@@ -87,8 +87,10 @@
                  :hah (compute-hah-error e)
                  :rmse (compute-root-mean-square-error e)
                  nil)]
-        (make-individual :program p :genome (:genome i)
-                         :errors e :total-error te :weighted-error we :normalized-error ne
-                         :history (if print-history (cons te (:history i)) (:history i))
-                         :ancestors (:ancestors i)
-                         :parent (:parent i))))))
+        (assoc i ; Assign errors and history to i
+               :errors e
+               :total-error te
+               :weighted-error we
+               :normalized-error ne
+               :history (if print-history (cons te (:history i)) (:history i))
+               )))))
