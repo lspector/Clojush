@@ -5,9 +5,9 @@
 ;; Populations are vectors of agents with individuals as their states (along with error and
 ;; history information).
 
-(defrecord individual [genome program errors total-error normalized-error weighted-error history ancestors parent location parent-locations])
+(defrecord individual [genome program errors total-error normalized-error weighted-error history ancestors parent uuid parent-uuids genetic-operators])
 
-(defn make-individual [& {:keys [genome program errors total-error normalized-error weighted-error history ancestors parent location parent-locations]
+(defn make-individual [& {:keys [genome program errors total-error normalized-error weighted-error history ancestors parent uuid parent-uuids genetic-operators]
                           :or {genome nil
                                program nil
                                errors nil
@@ -17,9 +17,10 @@
                                history nil
                                ancestors nil
                                parent nil
-                               location nil
-                               parent-locations nil}}]
-  (individual. genome program errors total-error normalized-error weighted-error history ancestors parent location parent-locations))
+                               uuid nil
+                               parent-uuids nil
+                               genetic-operators nil}}]
+  (individual. genome program errors total-error normalized-error weighted-error history ancestors parent uuid parent-uuids genetic-operators))
 
 (defn printable [thing]
   (letfn [(unlazy [[head & tail]]
@@ -31,5 +32,5 @@
 
 (defn individual-string [i]
   (cons 'individual.
-        (let [k '(:genome :program :errors :total-error :normalized-error :weighted-error :history :ancestors :parent :location :parent-locations)]
+        (let [k '(:genome :program :errors :total-error :normalized-error :weighted-error :history :ancestors :parent :uuid :parent-uuids :genetic-operators)]
           (interleave k  (map #(printable (get i %)) k)))))

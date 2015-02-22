@@ -69,11 +69,9 @@
    If log-fitnesses-for-all-cases is true, it also prints the value
    of each fitness case."
   [population generation {:keys [csv-log-filename csv-columns]}]
-  (let [columns (concat [:generation :location]
-                        (when (some #{:parent-indices} csv-columns)
-                          [:parent1 :parent2])
+  (let [columns (concat [:uuid]
                         (filter #(some #{%} csv-columns)
-                                [:push-program-size :plush-genome-size :push-program :plush-genome :total-error]))]
+                                [:generation :location :parent-uuids :genetic-operators :push-program-size :plush-genome-size :push-program :plush-genome :total-error]))]
     (when (zero? generation)
       (with-open [csv-file (io/writer csv-log-filename :append false)]
         (csv/write-csv csv-file
@@ -85,18 +83,17 @@
       (println individual))
     (with-open [csv-file (io/writer csv-log-filename :append true)]
       (csv/write-csv csv-file
-                     (map (fn [individual]
-                            (concat (map (assoc (clojure.set/rename-keys individual {:program :push-program})
-                                                :generation generation
-                                                :parent1 "???"
-                                                :parent2 "???"
-                                                :push-program-size (count-points (:program individual))
-                                                :plush-genome-size (count (:genome individual))
-                                                :plush-genome (not-lazy (:genome individual))
-                                                ) ; This is a map of an individual
-                                         columns)
-                                    (when (some #{:test-case-errors} csv-columns)
-                                      (:errors individual))))
+                     (map-indexed (fn [location individual]
+                                    (concat (map (assoc (clojure.set/rename-keys individual {:program :push-program})
+                                                        :generation generation
+                                                        :location location
+                                                        :push-program-size (count-points (:program individual))
+                                                        :plush-genome-size (count (:genome individual))
+                                                        :plush-genome (not-lazy (:genome individual))
+                                                        ) ; This is a map of an individual
+                                                 columns)
+                                            (when (some #{:test-case-errors} csv-columns)
+                                              (:errors individual))))
                           population)))))
 
 (defn jsonize-individual
