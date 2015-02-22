@@ -91,4 +91,5 @@
                          :errors e :total-error te :weighted-error we :normalized-error ne
                          :history (if print-history (cons te (:history i)) (:history i))
                          :ancestors (:ancestors i)
-                         :parent (:parent i))))))
+                         :parent (:parent i)
+                         :location (:location i) :parent-locations (:parent-locations i))))))
