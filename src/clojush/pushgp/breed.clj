@@ -64,7 +64,9 @@
           num-parents (:parents (get genetic-operators operator))
           other-parents (repeatedly (dec num-parents) #(select population location argmap))
           op-fn (:fn (get genetic-operators operator))
-          child (apply op-fn (concat (vector first-parent) other-parents (vector argmap)))]
+          child (assoc (apply op-fn (concat (vector first-parent) other-parents (vector argmap)))
+                       :parent-uuids (concat (:parent-uuids first-parent)
+                                             (map :uuid other-parents)))]
       (recur (rest op-list)
              (if revertable
                (revert-to-parent-if-worse child first-parent rand-gen argmap)
@@ -79,16 +81,18 @@
    and performs them to create a new individual. Uses recursive helper function
    even with a single operator by putting that operator in a vector."
   [operator population location rand-gen {:keys [max-points] :as argmap}]
-  (let [real-child (let [first-parent (select population location argmap)
-                         child (if (sequential? operator)
-                                 (perform-genetic-operator-list operator first-parent population location rand-gen argmap)
-                                 (perform-genetic-operator-list (vector operator) first-parent population location rand-gen argmap))]
-                     (if (> (count (:genome child)) max-points) ; Check if too big
-                       (revert-too-big-child first-parent argmap)
-                       (assoc child :parent first-parent)))]
-    ;(println location)
-    ;(println real-child)
-    (assoc real-child :location location)))
+  (let [first-parent (select population location argmap)
+        operator-vector (if (sequential? operator) operator (vector operator))
+        child (perform-genetic-operator-list operator-vector
+                                             (assoc first-parent :parent-uuids (vector (:uuid first-parent)))
+                                             population location rand-gen argmap)]
+    (if (> (count (:genome child)) max-points) ; Check if too big
+      (revert-too-big-child first-parent argmap)
+      (assoc child
+             :parent first-parent
+             :genetic-operators operator
+;             :parent-uuids (cons (:uuid first-parent) (:parent-uuids child))
+             ))))
 
 (defn breed
   "Returns an individual bred from the given population using the given parameters."

@@ -79,14 +79,13 @@
                                        (when (some #{:test-case-errors} csv-columns)
                                          (map #(str "TC" %)
                                               (range (count (:errors (first population)))))))))))
-    (doseq [individual population]
-      (println individual))
     (with-open [csv-file (io/writer csv-log-filename :append true)]
       (csv/write-csv csv-file
                      (map-indexed (fn [location individual]
                                     (concat (map (assoc (clojure.set/rename-keys individual {:program :push-program})
                                                         :generation generation
                                                         :location location
+                                                        :parent-uuids (not-lazy (map str (:parent-uuids individual)))
                                                         :push-program-size (count-points (:program individual))
                                                         :plush-genome-size (count (:genome individual))
                                                         :plush-genome (not-lazy (:genome individual))
