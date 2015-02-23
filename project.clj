@@ -13,7 +13,6 @@
                  [clojure-csv "2.0.0-alpha2"]
                  [org.clojure/data.json "0.1.3"]
                  [clj-random "0.1.7"]
-                 [danlentz/clj-uuid "0.1.2-SNAPSHOT"]
                  ;[incanter/incanter-core "1.5.2"]
                  ]
   :dev-dependencies [[lein-ccw "1.2.0"]]
