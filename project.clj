@@ -1,4 +1,4 @@
-(defproject clojush "2.0.15"
+(defproject clojush "2.0.16"
   :description "The Push programming language and the PushGP genetic programming
                 system implemented in Clojure.
                 See http://hampshire.edu/lspector/push.html"
@@ -8,10 +8,12 @@
                  [org.clojars.etosch/cosmos "1.0.0"]
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [org.clojure/math.combinatorics "0.0.8"]
+                 [org.clojure/data.csv "0.1.2"]
                  [local-file "0.1.0"]
                  [clojure-csv "2.0.0-alpha2"]
                  [org.clojure/data.json "0.1.3"]
                  [clj-random "0.1.7"]
+                 [danlentz/clj-uuid "0.1.2-SNAPSHOT"]
                  ;[incanter/incanter-core "1.5.2"]
                  ]
   :dev-dependencies [[lein-ccw "1.2.0"]]

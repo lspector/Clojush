@@ -125,6 +125,7 @@
           :print-json-logs false ;; Prints a JSON log of the population each generation
           :csv-log-filename "log.csv" ;; The file to print CSV log to
           :json-log-filename "log.json" ;; The file to print JSON log to
+          :csv-columns [:generation :location :total-error :push-program-size] ;; The columns to include in a printed CSV beyond the generation and individual. Options include: [:generation :location :parent-uuids :genetic-operators :push-program-size :plush-genome-size :push-program :plush-genome :total-error :test-case-errors]
           :log-fitnesses-for-all-cases false ;; If true, the CSV and JSON logs will include the fitnesses of each individual on every test case
           :json-log-program-strings false ;; If true, JSON logs will include program strings for each individual
           )))

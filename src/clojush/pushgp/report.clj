@@ -4,7 +4,9 @@
   (:require [clojure.string :as string]
             [config :as config]
             [clj-random.core :as random]
-            [local-file]))
+            [local-file]
+            [clojure.data.csv :as csv]
+            [clojure.java.io :as io]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; helper functions
@@ -66,38 +68,32 @@
   "Prints a csv of the population, with each individual's fitness and size.
    If log-fitnesses-for-all-cases is true, it also prints the value
    of each fitness case."
-  [population generation csv-log-filename log-fitnesses-for-all-cases]
-  (if (not log-fitnesses-for-all-cases)
-    (do
-      (when (zero? generation)
-        (spit csv-log-filename "generation,individual,total-error,size\n" :append false))
-      (doseq [[ind p] (map-indexed vector population)]
-        (spit csv-log-filename
-              (format "%s,%s,%s,%s\n"
-                      generation
-                      ind
-                      (:total-error p)
-                      (count-points (:program p)))
-              :append true)))
-    (do
-      (when (zero? generation)
-        (spit csv-log-filename "generation,individual,total-error,size," :append false)
-        (spit csv-log-filename
-              (format "%s\n"
-                      (apply str
-                             "TC"
-                             (interpose ",TC"
-                                        (range (count (:errors (first population)))))))
-              :append true))
-      (doseq [[ind p] (map-indexed vector population)]
-        (spit csv-log-filename
-              (format "%s,%s,%s,%s,%s\n"
-                      generation
-                      ind
-                      (:total-error p)
-                      (count-points (:program p))
-                      (apply str (interpose "," (:errors p))))
-              :append true)))))
+  [population generation {:keys [csv-log-filename csv-columns]}]
+  (let [columns (concat [:uuid]
+                        (filter #(some #{%} csv-columns)
+                                [:generation :location :parent-uuids :genetic-operators :push-program-size :plush-genome-size :push-program :plush-genome :total-error]))]
+    (when (zero? generation)
+      (with-open [csv-file (io/writer csv-log-filename :append false)]
+        (csv/write-csv csv-file
+                       (vector (concat (map name columns)
+                                       (when (some #{:test-case-errors} csv-columns)
+                                         (map #(str "TC" %)
+                                              (range (count (:errors (first population)))))))))))
+    (with-open [csv-file (io/writer csv-log-filename :append true)]
+      (csv/write-csv csv-file
+                     (map-indexed (fn [location individual]
+                                    (concat (map (assoc (clojure.set/rename-keys individual {:program :push-program})
+                                                        :generation generation
+                                                        :location location
+                                                        :parent-uuids (not-lazy (map str (:parent-uuids individual)))
+                                                        :push-program-size (count-points (:program individual))
+                                                        :plush-genome-size (count (:genome individual))
+                                                        :plush-genome (not-lazy (:genome individual))
+                                                        ) ; This is a map of an individual
+                                                 columns)
+                                            (when (some #{:test-case-errors} csv-columns)
+                                              (:errors individual))))
+                          population)))))
 
 (defn jsonize-individual
   "Takes an individual and returns it with only the items of interest
@@ -389,8 +385,7 @@
         (printf "Other:           %8.1f seconds, %4.1f%%\n" (/ other 1000.0) (* 100.0 (/ other total-time)))))
     (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
     (flush)
-    (when print-csv-logs (csv-print population generation csv-log-filename
-                                    log-fitnesses-for-all-cases))
+    (when print-csv-logs (csv-print population generation argmap))
     (when print-json-logs (json-print population generation json-log-filename
                                       log-fitnesses-for-all-cases json-log-program-strings))
     (cond (or (<= (:total-error best) error-threshold)
