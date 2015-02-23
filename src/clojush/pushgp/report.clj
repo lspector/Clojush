@@ -69,11 +69,9 @@
    If log-fitnesses-for-all-cases is true, it also prints the value
    of each fitness case."
   [population generation {:keys [csv-log-filename csv-columns]}]
-  (let [columns (concat [:generation :individual]
-                        (when (some #{:parent-indices} csv-columns)
-                          [:parent :parent2])
+  (let [columns (concat [:uuid]
                         (filter #(some #{%} csv-columns)
-                                [:push-program-size :plush-genome-size :push-program :plush-genome :total-error]))]
+                                [:generation :location :parent-uuids :genetic-operators :push-program-size :plush-genome-size :push-program :plush-genome :total-error]))]
     (when (zero? generation)
       (with-open [csv-file (io/writer csv-log-filename :append false)]
         (csv/write-csv csv-file
@@ -83,12 +81,11 @@
                                               (range (count (:errors (first population)))))))))))
     (with-open [csv-file (io/writer csv-log-filename :append true)]
       (csv/write-csv csv-file
-                     (map-indexed (fn [index individual]
+                     (map-indexed (fn [location individual]
                                     (concat (map (assoc (clojure.set/rename-keys individual {:program :push-program})
                                                         :generation generation
-                                                        :individual index
-                                                        ;:parent1 "???"
-                                                        :parent2 "???"
+                                                        :location location
+                                                        :parent-uuids (not-lazy (map str (:parent-uuids individual)))
                                                         :push-program-size (count-points (:program individual))
                                                         :plush-genome-size (count (:genome individual))
                                                         :plush-genome (not-lazy (:genome individual))
@@ -96,7 +93,7 @@
                                                  columns)
                                             (when (some #{:test-case-errors} csv-columns)
                                               (:errors individual))))
-                                  population)))))
+                          population)))))
 
 (defn jsonize-individual
   "Takes an individual and returns it with only the items of interest
