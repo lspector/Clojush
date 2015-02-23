@@ -85,7 +85,11 @@
                                     (concat (map (assoc (clojure.set/rename-keys individual {:program :push-program})
                                                         :generation generation
                                                         :location location
-                                                        :parent-uuids (not-lazy (map str (:parent-uuids individual)))
+                                                        :parent-uuids (let [parent-uuids (not-lazy (map str (:parent-uuids individual)))]
+                                                                        (if (empty? parent-uuids)
+                                                                          []
+                                                                          parent-uuids))
+                                                        :genetic-operators (if (nil? (:genetic-operators individual)) [] (:genetic-operators individual))
                                                         :push-program-size (count-points (:program individual))
                                                         :plush-genome-size (count (:genome individual))
                                                         :plush-genome (not-lazy (:genome individual))

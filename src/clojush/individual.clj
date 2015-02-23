@@ -1,5 +1,4 @@
-(ns clojush.individual
-  (:require [clj-uuid :as uuid]))
+(ns clojush.individual)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Individuals are records.
@@ -19,7 +18,7 @@
                                history nil
                                ancestors nil
                                parent nil
-                               uuid (uuid/v4)
+                               uuid (java.util.UUID/randomUUID)
                                parent-uuids nil
                                genetic-operators nil}}]
   (individual. genome program errors total-error normalized-error weighted-error meta-errors history ancestors parent uuid parent-uuids genetic-operators))
