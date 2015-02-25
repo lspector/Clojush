@@ -5,7 +5,7 @@ import os, stat
 number_runs = 10
 
 clojush_directory = "/home/thelmuth/Clojush/"
-output_directory = "../Results/odd/"
+output_directory = "/home/thelmuth/Results/odd/"
 
 example_file = "clojush.problems.demos.odd"
 
@@ -33,10 +33,10 @@ service_tag = "tom"
 # Check to make sure directory doesn't exist; if not, create it
 if output_directory[-1] != "/":
     output_directory += "/"
-if os.path.isdir(clojush_directory + output_directory):
+if os.path.isdir(output_directory):
     raise RuntimeError, "Output directory already exists"
 
-os.mkdir(clojush_directory + output_directory)
+os.mkdir(output_directory)
 
 # Make description file
 description_file_string = output_directory + "description.txt"
