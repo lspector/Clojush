@@ -29,8 +29,9 @@
            :as argmap}]
   (case replace-child-that-exceeds-size-limit-with
     :parent parent
-    :empty (make-individual :genome '())
-    :random (make-individual :genome (random-plush-genome max-points-in-initial-program atom-generators argmap))
+    :empty (make-individual :genome '() :genetic-operators :empty)
+    :random (make-individual :genome (random-plush-genome max-points-in-initial-program atom-generators argmap)
+                             :genetic-operators :random)
     ))
 
 (defn revert-to-parent-if-worse

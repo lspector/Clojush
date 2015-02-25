@@ -163,7 +163,8 @@
     {:pop-agents (let [pa (doall (for [_ (range population-size)]
                                    (make-individual
                                      :genome (random-plush-genome max-points-in-initial-program
-                                                          atom-generators argmap))))
+                                                          atom-generators argmap)
+                                     :genetic-operators :random)))
                        f (str "data/" (System/currentTimeMillis) ".ser")]
                    (when save-initial-population
                      (io/make-parents f)
