@@ -164,7 +164,8 @@
     {:pop-agents (let [pa (doall (for [_ (range population-size)]
                                    (make-individual
                                      :genome (random-plush-genome max-points-in-initial-program
-                                                          atom-generators argmap))))
+                                                          atom-generators argmap)
+                                     :genetic-operators :random)))
                        f (str "data/" (System/currentTimeMillis) ".ser")]
                    (when save-initial-population
                      (io/make-parents f)
@@ -188,16 +189,6 @@
                     % evaluate-individual error-function %2 argmap)
               pop-agents
               rand-gens))
-  (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
-
-(defn remove-parents
-  "Removes value from :parent for each individual in the population. This will
-   save memory."
-  [pop-agents {:keys [use-single-thread]}]
-  (dorun (map #((if use-single-thread swap! send)
-                    %
-                    (fn [i] (assoc i :parent nil)))
-              pop-agents))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
 
 (defn produce-new-offspring
@@ -279,8 +270,6 @@
           (compute-errors pop-agents rand-gens @push-argmap)
           (println "Done computing errors.")
           (timer @push-argmap :fitness)
-          ;; stop tracking parents since they aren't used any more
-          (remove-parents pop-agents @push-argmap)
           ;; calculate solution rates if necessary for historically-assessed hardness
           (calculate-hah-solution-rates pop-agents @push-argmap)
           ;; create global structure to support elite group lexicase selection

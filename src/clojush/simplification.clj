@@ -62,7 +62,8 @@
                          :history (:history ind) 
                          :ancestors (if maintain-ancestors
                                       (cons (:program ind) (:ancestors ind))
-                                      (:ancestors ind)))
+                                      (:ancestors ind))
+                         :genetic-operators :simplification)
         (let [new-program (if (< (lrand-int 5) 4)
                             ;; remove a small number of random things
                             (loop [p program how-many (inc (lrand-int 2))]
@@ -84,7 +85,8 @@
   (let [errs (error-function p)]
     (auto-simplify (make-individual :program p
                                     :errors errs
-                                    :total-error (reduce + errs))
+                                    :total-error (reduce + errs)
+                                    :genetic-operators :simplification)
                    error-function
                    steps
                    print?
