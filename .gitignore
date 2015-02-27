@@ -15,3 +15,5 @@ results/
 logs/
 lib/
 /bin
+*.csv
+*.json
