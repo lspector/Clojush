@@ -82,7 +82,7 @@
     (with-open [csv-file (io/writer csv-log-filename :append true)]
       (csv/write-csv csv-file
                      (map-indexed (fn [location individual]
-                                    (concat (map (assoc (clojure.set/rename-keys individual {:program :push-program})
+                                    (concat (map (assoc (into {} individual)
                                                         :generation generation
                                                         :location location
                                                         :parent-uuids (let [parent-uuids (not-lazy (map str (:parent-uuids individual)))]
@@ -91,8 +91,14 @@
                                                                           parent-uuids))
                                                         :genetic-operators (if (nil? (:genetic-operators individual)) [] (:genetic-operators individual))
                                                         :push-program-size (count-points (:program individual))
+                                                        :push-program (if (and (seq? (:program individual))
+                                                                               (empty? (:program individual)))
+                                                                        "()"
+                                                                        (:program individual))
                                                         :plush-genome-size (count (:genome individual))
-                                                        :plush-genome (not-lazy (:genome individual))
+                                                        :plush-genome (if (empty? (:genome individual))
+                                                                        "()"
+                                                                        (not-lazy (:genome individual)))
                                                         ) ; This is a map of an individual
                                                  columns)
                                             (when (some #{:test-case-errors} csv-columns)
