@@ -194,7 +194,7 @@
                                    output
                                    result-output)))))]
     (conj errors 
-          (if (:clone individual)
+          (if (:random-replacement-for-clone individual)
             0.5
             (if (some #{errors} (map rest (:parent-errors individual)))
               0.1

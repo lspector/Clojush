@@ -36,7 +36,7 @@
           :evalpush-limit 150 ;; The number of Push instructions that can be evaluated before stopping evaluation
           :evalpush-time-limit 0 ;; The time in nanoseconds that a program can evaluate before stopping, 0 means no time limit
           :reuse-errors true ;; When true, children produced through direct reproduction will not be re-evaluated but will have the error vector of their parent
-          :pass-individual-to-error-function false ;; When true, entire error functions (rather than just programs) are passed to error functions
+          :pass-individual-to-error-function false ;; When true, entire individuals (rather than just programs) are passed to error functions
           ;;
           ;;----------------------------------------
           ;; Genetic operator probabilities

@@ -84,8 +84,7 @@
    and performs them to create a new individual. Uses recursive helper function
    even with a single operator by putting that operator in a vector."
   [operator population location rand-gen 
-   {:keys [max-points max-points-in-initial-program atom-generators] 
-    :as argmap}]
+   {:keys [max-points] :as argmap}]
   (let [first-parent (select population location argmap)
         operator-vector (if (sequential? operator) operator (vector operator))
         child (perform-genetic-operator-list operator-vector

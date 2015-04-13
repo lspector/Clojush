@@ -221,10 +221,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; autoconstuction
 
+;; NOTE: EXPERIMENTAL!
+
 (define-registered
   autoconstructive_integer_rand ;; replace with integer_rand during construction; noop otherwise
   ^{:stack-types [:exec]} (fn [state] state))
-
 
 (defn process-genome-for-autoconstruction
   "Replace input instructions with noops and replace autoconstructive_integer_rand with integer_rand."
@@ -276,4 +277,4 @@ parent2, and a random genome on top of the genome stack."
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
            :parent-errors [(:errors parent1)(:errors parent2)]
-           :clone clone)))
+           :random-replacement-for-clone (if clone true false))))
