@@ -64,11 +64,13 @@
                           :normalization :none
                           :max-error 1000}))
   ([i error-function rand-gen
-    {:keys [reuse-errors print-history total-error-method normalization max-error]}]
+    {:keys [reuse-errors print-history total-error-method normalization max-error pass-individual-to-error-function]}]
     (random/with-rng rand-gen
       (let [p (:program i)
             raw-errors (if (or (not reuse-errors) (nil? (:errors i)) (nil? (:total-error i)))
-                         (error-function p))
+                         (if pass-individual-to-error-function
+                           (error-function i)
+                           (error-function p)))
             e (vec (if (and reuse-errors (not (nil? (:errors i))))
                      (:errors i)
                      (do
