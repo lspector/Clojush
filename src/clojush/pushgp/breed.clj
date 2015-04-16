@@ -14,6 +14,7 @@
    :uniform-close-mutation {:fn uniform-close-mutation :parents 1}
    :uniform-silence-mutation {:fn uniform-silence-mutation :parents 1}
    :make-next-operator-revertable {:fn nil :parents 0}
+   :autoconstruction {:fn autoconstruction :parents 2}
    })
 
 (defn revert-too-big-child
@@ -82,7 +83,8 @@
   "Takes a single genetic operator keyword or a sequence of operator keywords,
    and performs them to create a new individual. Uses recursive helper function
    even with a single operator by putting that operator in a vector."
-  [operator population location rand-gen {:keys [max-points] :as argmap}]
+  [operator population location rand-gen 
+   {:keys [max-points] :as argmap}]
   (let [first-parent (select population location argmap)
         operator-vector (if (sequential? operator) operator (vector operator))
         child (perform-genetic-operator-list operator-vector
@@ -90,9 +92,9 @@
                                              population location rand-gen argmap)]
     (if (> (count (:genome child)) max-points) ; Check if too big
       (revert-too-big-child first-parent argmap)
-      (assoc child
-             :genetic-operators operator
-             ))))
+        (assoc child
+               :genetic-operators operator
+               ))))
 
 (defn breed
   "Returns an individual bred from the given population using the given parameters."

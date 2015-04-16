@@ -1,5 +1,5 @@
 (ns clojush.pushgp.genetic-operators
-  (:use [clojush util random individual globals]
+  (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
         [clojure.math.numeric-tower])
   (:require [clojure.string :as string]))
@@ -217,3 +217,64 @@
                        :ancestors (if maintain-ancestors
                                     (cons (:genome parent1) (:ancestors parent1))
                                     (:ancestors parent1))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; autoconstuction
+
+;; NOTE: EXPERIMENTAL!
+
+(define-registered
+  autoconstructive_integer_rand ;; replace with integer_rand during construction; noop otherwise
+  ^{:stack-types [:exec]} (fn [state] state))
+
+(defn process-genome-for-autoconstruction
+  "Replace input instructions with noops and replace autoconstructive_integer_rand with integer_rand."
+  [genome]
+  (let [input-instruction? (fn [instruction]
+                             (and (symbol? instruction) 
+                                  (or (re-seq #"in\d+" (name instruction)) ;; from input-output
+                                      (re-seq #"in_dm" (name instruction)))))] ;; from digital-multiplier
+    (map (fn [instruction-map]
+           (if (input-instruction? (:instruction instruction-map))
+             (assoc instruction-map :instruction 'code_noop)
+             (if (= (:instruction instruction-map) 'autoconstructive_integer_rand)
+               (assoc instruction-map :instruction 'integer_rand)
+               instruction-map)))
+         genome)))
+
+(defn autoconstruction
+  "Returns a genome for child produced by autoconstruction by executing parent1 with parent1,
+parent2, and a random genome on top of the genome stack."
+  [parent1 parent2 {:keys [maintain-ancestors atom-generators max-points-in-initial-program] 
+                    :as argmap}]
+  (let [parent1-genome (:genome parent1)
+        parent2-genome (:genome parent2)
+        random-genome (random-plush-genome max-points-in-initial-program atom-generators argmap)
+        child-genome-fn (fn [] 
+                          (top-item :genome
+                                    (run-push
+                                      (translate-plush-genome-to-push-program
+                                        {:genome (process-genome-for-autoconstruction
+                                                   parent1-genome)})
+                                      (-> (->> (make-push-state)
+                                            (push-item random-genome :genome)
+                                            (push-item parent2-genome :genome)
+                                            (push-item parent1-genome :genome))
+                                        (assoc :parent1-genome parent1-genome)
+                                        (assoc :parent2-genome parent2-genome)
+                                        (assoc :random-genome random-genome)))))
+        child1-genome (child-genome-fn)
+        other-child-genomes (repeatedly 1 child-genome-fn)
+        clone (some #{child1-genome}
+                    (concat [parent1-genome parent2-genome]
+                            other-child-genomes))
+        new-genome (if clone
+                     random-genome
+                     child1-genome)]
+    (assoc (make-individual :genome new-genome
+                            :history (:history parent1)
+                            :ancestors (if maintain-ancestors
+                                         (cons (:genome parent1) (:ancestors parent1))
+                                         (:ancestors parent1)))
+           :parent-errors [(:errors parent1)(:errors parent2)]
+           :random-replacement-for-clone (if clone true false))))
