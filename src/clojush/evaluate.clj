@@ -36,7 +36,7 @@
                         (cond
                           (fn? cat) (cat ind)
                           (= cat :size) (count (:genome ind))
-                          (= cat :compressibility) 555 ;;TMH fix later
+;                          (= cat :compressibility) 555 ;;TMH fix later
                           (= cat :total-error) (:total-error ind)
                           (= cat :unsolved-cases) (count (filter #(> % error-threshold) (:errors ind)))
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
