@@ -146,7 +146,7 @@
 (defn lexicase-report
   "This extra report is printed whenever lexicase selection is used."
   [population {:keys [error-function report-simplifications print-errors
-                      print-history
+                      print-history meta-error-categories
                       ]}]
   (let [min-error-by-case (apply map
                                  (fn [& args] (apply min args))
@@ -181,6 +181,8 @@
       (println "Lexicase best partial simplification:"
                (pr-str (not-lazy (:program (auto-simplify lex-best error-function report-simplifications false 1000))))))
     (when print-errors (println "Lexicase best errors:" (not-lazy (:errors lex-best))))
+    (when (and print-errors (not (empty? meta-error-categories)))
+      (println "Lexicase best meta-errors:" (not-lazy (:meta-errors lex-best))))
     (println "Lexicase best number of elite cases:" (apply + (map #(if (== %1 %2) 1 0)
                                                                   (:errors lex-best)
                                                                   min-error-by-case)))
@@ -197,6 +199,8 @@
       (println "Zero cases best partial simplification:"
                (pr-str (not-lazy (:program (auto-simplify most-zero-cases-best error-function report-simplifications false 1000))))))
     (when print-errors (println "Zero cases best errors:" (not-lazy (:errors most-zero-cases-best))))
+    (when (and print-errors (not (empty? meta-error-categories)))
+      (println "Zero cases best meta-errors:" (not-lazy (:meta-errors most-zero-cases-best))))
     (println "Zero cases best number of elite cases:" (apply + (map #(if (== %1 %2) 1 0)
                                                                   (:errors most-zero-cases-best)
                                                                   min-error-by-case)))
@@ -217,12 +221,14 @@
 
 (defn implicit-fitness-sharing-report
   "This extra report is printed whenever implicit fitness sharing selection is used."
-  [population {:keys [print-errors]}]
+  [population {:keys [print-errors meta-error-categories]}]
   (let [ifs-best (apply min-key :weighted-error population)]
     (println "--- Program with Best Implicit Fitness Sharing Error Statistics ---")
     (println "IFS best genome:" (pr-str (not-lazy (:genome ifs-best))))
     (println "IFS best program:" (pr-str (not-lazy (:program ifs-best))))
     (when print-errors (println "IFS best errors:" (not-lazy (:errors ifs-best))))
+    (when (and print-errors (not (empty? meta-error-categories)))
+      (println "IFS best meta-errors:" (not-lazy (:meta-errors ifs-best))))
     (println "IFS best total error:" (:total-error ifs-best))
     (println "IFS best mean error:" (float (/ (:total-error ifs-best)
                                               (count (:errors ifs-best)))))
@@ -235,7 +241,7 @@
   "Reports on the specified generation of a pushgp run. Returns the best
    individual of the generation."
   [population generation
-   {:keys [error-function report-simplifications
+   {:keys [error-function report-simplifications meta-error-categories
            error-threshold max-generations population-size
            print-errors print-history print-cosmos-data print-timings
            problem-specific-report total-error-method
@@ -302,6 +308,8 @@
       (println "Partial simplification:"
                (pr-str (not-lazy (:program (auto-simplify best error-function report-simplifications false 1000))))))
     (when print-errors (println "Errors:" (not-lazy (:errors best))))
+    (when (and print-errors (not (empty? meta-error-categories)))
+      (println "Meta-Errors:" (not-lazy (:meta-errors best))))
     (println "Total:" (:total-error best))
     (println "Mean:" (float (/ (:total-error best)
                                (count (:errors best)))))
@@ -330,6 +338,13 @@
     (when print-errors (println "Error minima by case:"
                                 (apply map (fn [& args] (apply min args))
                                        (map :errors population))))
+    (when (and print-errors (not (empty? meta-error-categories)))
+      (println "Meta-Error averages by category:"
+               (apply map (fn [& args] (*' 1.0 (/ (reduce +' args) (count args))))
+                      (map :meta-errors population)))
+      (println "Meta-Error minima by category:"
+               (apply map (fn [& args] (apply min args))
+                      (map :meta-errors population))))
     (println "Average genome size in population (length):"
              (*' 1.0 (/ (reduce +' (map count (map :genome sorted)))
                         (count population))))
