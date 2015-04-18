@@ -271,10 +271,8 @@ parent2, and a random genome on top of the genome stack."
         new-genome (if clone
                      random-genome
                      child1-genome)]
-    (assoc (make-individual :genome new-genome
-                            :history (:history parent1)
-                            :ancestors (if maintain-ancestors
-                                         (cons (:genome parent1) (:ancestors parent1))
-                                         (:ancestors parent1)))
-           :parent-errors [(:errors parent1)(:errors parent2)]
-           :random-replacement-for-clone (if clone true false))))
+    (make-individual :genome new-genome
+                     :history (:history parent1)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome parent1) (:ancestors parent1))
+                                  (:ancestors parent1)))))

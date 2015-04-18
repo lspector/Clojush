@@ -91,7 +91,7 @@
                             'boolean_rot)))
     (fn [] (lrand-nth (concat (map second (in-symbols (* 2 num-bits-n)))
                               (map second (out-symbols (* 2 num-bits-n))))))
-    (fn [] (- (lrand-int 101) 50))
+    (fn [] (- (lrand-int 1001) 500))
     (fn [] (lrand-nth (list 'integer_add
                             'integer_sub
                             'integer_mult
@@ -104,7 +104,12 @@
                             'genome_gene_delete
                             'genome_rotate
                             'genome_gene_copy
+                            'genome_gene_randomize
                             'genome_toggle_silent
+                            'genome_silence
+                            'genome_unsilence
+                            'genome_close_inc
+                            'genome_close_dec
                             'genome_new
                             'genome_parent1
                             'genome_parent2
@@ -193,12 +198,7 @@
                                        :else 1))
                                    output
                                    result-output)))))]
-    (conj errors 
-          (if (:random-replacement-for-clone individual)
-            0.5
-            (if (some #{errors} (map rest (:parent-errors individual)))
-              0.1
-              0)))))
+    errors))
 
 ;; Define argmap for pushgp
 (defn define-digital-multiplier
@@ -210,11 +210,11 @@
                               num-bits-n
                               (dm-test-cases num-bits-n))
      :atom-generators (dm-atom-generators num-bits-n)
-     :population-size 2000
-     :max-generations 2000
+     :population-size 500
+     :max-generations 10000
      :max-points 500
      :max-points-in-initial-program 100
-     :evalpush-limit 5000
+     :evalpush-limit 10000
      :epigenetic-markers [:close :silent]
      :genetic-operator-probabilities {:autoconstruction 1}
      :parent-selection :lexicase

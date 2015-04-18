@@ -31,6 +31,23 @@
       state)))
 
 (define-registered
+  genome_gene_randomize
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (if (and (not (empty? (:integer state)))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))]
+        (->> (pop-item :integer state)
+             (pop-item :genome)
+             (push-item (concat (take index genome)
+                                (list (rand-nth (:random-genome state)))
+                                (drop (inc index) genome))
+                        :genome)))
+      state)))
+
+(define-registered
   genome_gene_delete
   ^{:stack-types [:genome :integer]}
   (fn [state]
@@ -96,6 +113,78 @@
              (push-item (concat (take index genome)
                                 (let [g (nth genome index)]
                                   (list (assoc g :silent (not (:silent g)))))
+                                (drop (inc index) genome))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_silence
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (if (and (not (empty? (:integer state)))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))]
+        (->> (pop-item :integer state)
+             (pop-item :genome)
+             (push-item (concat (take index genome)
+                                (let [g (nth genome index)]
+                                  (list (assoc g :silent true)))
+                                (drop (inc index) genome))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_unsilence
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (if (and (not (empty? (:integer state)))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))]
+        (->> (pop-item :integer state)
+             (pop-item :genome)
+             (push-item (concat (take index genome)
+                                (let [g (nth genome index)]
+                                  (list (assoc g :silent false)))
+                                (drop (inc index) genome))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_close_inc
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (if (and (not (empty? (:integer state)))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))]
+        (->> (pop-item :integer state)
+             (pop-item :genome)
+             (push-item (concat (take index genome)
+                                (let [g (nth genome index)]
+                                  (list (assoc g :close (inc (:close g)))))
+                                (drop (inc index) genome))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_close_dec
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (if (and (not (empty? (:integer state)))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))]
+        (->> (pop-item :integer state)
+             (pop-item :genome)
+             (push-item (concat (take index genome)
+                                (let [g (nth genome index)]
+                                  (list (assoc g :close (max 0 (dec (:close g))))))
                                 (drop (inc index) genome))
                         :genome)))
       state)))
