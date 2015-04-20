@@ -25,22 +25,22 @@
 (defn calculate-meta-errors
   "Calculates one meta-error for each meta-error category provided. Each
    meta-error-category should either be a keyword for a built-in meta category
-   or a function that takes an individual and returns a meta error value.
+   or a function that takes an individual and an argmap and returns a meta error value.
    The built-in meta categories include:
      :size (minimize size of program)
      :compressibility (minimize ammount a program compresses compared to itself)
      :total-error (minimize total error)
      :unsolved-cases (maximize number of cases with zero error)"
-  [ind {:keys [meta-error-categories error-threshold]}]
+  [ind {:keys [meta-error-categories error-threshold] :as argmap}]
   (let [meta-error-fn (fn [cat]
                         (cond
-                          (fn? cat) (cat ind)
+                          (fn? cat) (cat ind argmap)
                           (= cat :size) (count (:genome ind))
 ;                          (= cat :compressibility) 555 ;;TMH fix later
                           (= cat :total-error) (:total-error ind)
                           (= cat :unsolved-cases) (count (filter #(> % error-threshold) (:errors ind)))
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
-    (map meta-error-fn meta-error-categories)))
+    (doall (map meta-error-fn meta-error-categories))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; evaluate individuals

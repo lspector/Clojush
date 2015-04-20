@@ -2,7 +2,15 @@
 ;; a version of digital-multiplier.clj modified to use only the autoconstriction
 ;; genetic operator.
 
+;;*****************************************************************************
+;; NOTE: This is work in progress, based on ideas that are under development.
+;; For the time being you shouldn't expect it to work well or remain stable.
+;; Documentation is also spotty. 
+;;*****************************************************************************
+
+
 ;; Documentation for the original digital-multiplier.clj file:
+
 ;; digital-multiplier.clj
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Tom Helmuth, thelmuth@cs.umass.edu
@@ -19,17 +27,9 @@
 ;; Each of these vectors has 2*n items, accessed by instructions in0 through
 ;; in(2*n) and out0 through out(2*n) respectively.
 
-
-;;; TO DO
-;; epigenetic markers, and genome instructions for modifying them
-;; exec instructions.... what does this mean for epigenetic markers to get the closes?
-;; geography?
-
-
-
 (ns clojush.problems.demos.autoconstructive-digital-multiplier
-  (:use clojush.pushgp.pushgp
-        [clojush pushstate interpreter random]
+  (:use [clojush.pushgp pushgp genetic-operators]
+        [clojush pushstate interpreter random translate]
         clojure.math.numeric-tower))
 
 ;; Borrowed from mux examples
@@ -144,6 +144,7 @@
           output-bits (vec (int->bits (* num1 num2) (* 2 num-bits-n)))]
       (vector input-bits output-bits))))
 
+;; Version from digital-multiplier.clj 
 ;; Create error function; it is applied partially when defined, and takes
 ;; a program and returns its error vector.
 ;(defn dm-error-function
@@ -175,9 +176,8 @@
 ;; a program and returns its error vector.
 (defn dm-error-function
   "Defines the error function of num-bits binary multiplier."
-  [num-bits-n test-cases individual]
-  (let [program (:program individual)
-        errors (doall
+  [num-bits-n test-cases program]
+  (let [errors (doall
                  (for [[input output] test-cases]
                    (let [initial-output-vector (vec (repeat (* 2 num-bits-n) nil))
                          final-state (run-push program
@@ -200,15 +200,45 @@
                                    result-output)))))]
     errors))
 
+(defn error-difference
+  [errors1 errors2]
+  (reduce + (map #(Math/abs (- %1 %2))
+                 errors1
+                 errors2)))
+
+(declare full-dm-error-function)
+
+(defn dm-meta-error-fn
+  "Takes an individual and an argmap and returns a meta-error value."
+  [ind {:keys [atom-generators max-points-in-initial-program] :as argmap}]
+  (let [random-genome (random-plush-genome max-points-in-initial-program atom-generators argmap)
+        semantics-fn (fn [g1 g2 g3]
+                       (full-dm-error-function
+                         (translate-plush-genome-to-push-program
+                           {:genome
+                            (produce-child-genome-by-autoconstruction g1 g2 g3)})))
+        e1 (semantics-fn (:genome ind) (:genome ind) (:genome ind))
+        e2 (semantics-fn (:genome ind) (:genome ind) random-genome)
+        e3 (semantics-fn (:genome ind) random-genome (:genome ind))]
+    (if (and (distinct? e1 e2)
+             (distinct? e1 e3))
+      #_(and (apply distinct? [e1 e2 e3])
+            (< (error-difference e1 e2)
+               (error-difference e1 e3)))
+         0
+         1)))
+
 ;; Define argmap for pushgp
 (defn define-digital-multiplier
   [num-bits-n]
   (define-ins (* 2 num-bits-n))
   (define-outs (* 2 num-bits-n))
+  (def full-dm-error-function
+    (partial dm-error-function
+             num-bits-n
+             (dm-test-cases num-bits-n)))
   (def argmap
-    {:error-function (partial dm-error-function
-                              num-bits-n
-                              (dm-test-cases num-bits-n))
+    {:error-function full-dm-error-function
      :atom-generators (dm-atom-generators num-bits-n)
      :population-size 500
      :max-generations 10000
@@ -220,7 +250,9 @@
      :parent-selection :lexicase
      ;:trivial-geography-radius 50
      :report-simplifications 0
-     :pass-individual-to-error-function true}
+     ;:pass-individual-to-error-function true
+     :meta-error-categories [dm-meta-error-fn]
+     }
     )
   )
 
