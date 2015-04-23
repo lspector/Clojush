@@ -144,6 +144,14 @@
     (when-not use-single-thread (apply await pop-agents)))) ;; SYNCHRONIZE
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform selection (i.e. no selection, for use as a baseline)
+
+(defn uniform-selection
+  "Returns an individual uniformly at random."
+  [pop]
+  (lrand-nth pop))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; parent selection
 
 (defn select
@@ -156,5 +164,6 @@
       :tournament (tournament-selection pop-with-meta-errors location argmap)
       :lexicase (lexicase-selection pop-with-meta-errors location argmap)
       :elitegroup-lexicase (elitegroup-lexicase-selection pop-with-meta-errors)
+      :uniform (uniform-selection pop-with-meta-errors)
       (throw (Exception. (str "Unrecognized argument for parent-selection: "
                               parent-selection))))))
