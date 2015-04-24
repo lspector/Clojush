@@ -1,5 +1,5 @@
 (ns clojush.instructions.genome  
-  (:use [clojush pushstate globals]
+  (:use [clojush pushstate globals random]
         clojush.instructions.common))
 
 (define-registered genome_pop (with-meta (popper :genome) {:stack-types [:genome]}))
@@ -42,7 +42,11 @@
         (->> (pop-item :integer state)
              (pop-item :genome)
              (push-item (concat (take index genome)
-                                (list (rand-nth (:random-genome state)))
+                                (list (random-plush-instruction-map 
+                                        @global-atom-generators
+                                        {:epigenetic-markers @global-epigenetic-markers
+                                         :close-parens-probabilities @global-close-parens-probabilities
+                                         :silent-instruction-probability @global-silent-instruction-probability}))
                                 (drop (inc index) genome))
                         :genome)))
       state)))

@@ -79,7 +79,7 @@
           ;; Epignenetics
           ;;----------------------------------------
           :epigenetic-markers [:close] ;; A vector of the epigenetic markers that should be used in the individuals. Implemented options include: :close, :silent
-          :close-probabilities [0.772 0.206 0.021 0.001] ;; A vector of the probabilities for the number of parens ending at that position. See random-closes in clojush.random          
+          :close-parens-probabilities [0.772 0.206 0.021 0.001] ;; A vector of the probabilities for the number of parens ending at that position. See random-closes in clojush.random          
           :silent-instruction-probability 0.2 ;; If :silent is used as an epigenetic-marker, this is the probability of random instructions having :silent be true
           ;;
           ;;----------------------------------------

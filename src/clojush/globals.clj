@@ -48,6 +48,9 @@
 (def global-atom-generators (atom ())) ;; The instructions and literals that may be used in Push programs.
 (def global-max-points (atom 100)) ;; The maximum size of a Push program. Also, the maximum size of code that can appear on the exec or code stacks.
 (def global-tag-limit (atom 10000)) ;; The size of the tag space
+(def global-epigenetic-markers (atom [:close])) ;; A vector of the epigenetic markers that should be used in the individuals. Implemented options include: :close, :silent
+(def global-close-parens-probabilities (atom [0.772 0.206 0.021 0.001])) ;; A vector of the probabilities for the number of parens ending at that position. See random-closes in clojush.random          
+(def global-silent-instruction-probability (atom 0.2)) ;; If :silent is used as an epigenetic-marker, this is the probability of random instructions having :silent be true
 
 ;; These definitions are used by run-push (and functions it calls), and must be global since run-push is called by the problem-specifc error functions
 (def global-top-level-push-code (atom false)) ;; When true, run-push will push the program's code onto the code stack prior to running
