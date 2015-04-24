@@ -113,7 +113,6 @@
                             'genome_new
                             'genome_parent1
                             'genome_parent2
-                            'genome_random
                             'genome_dup
                             'genome_swap
                             'genome_rot)))
@@ -200,11 +199,11 @@
                                    result-output)))))]
     errors))
 
-(defn error-difference
-  [errors1 errors2]
-  (reduce + (map #(Math/abs (- %1 %2))
-                 errors1
-                 errors2)))
+;(defn error-difference
+;  [errors1 errors2]
+;  (reduce + (map #(Math/abs (- %1 %2))
+;                 errors1
+;                 errors2)))
 
 (declare full-dm-error-function)
 
@@ -212,21 +211,15 @@
   "Takes an individual and an argmap and returns a meta-error value."
   [ind {:keys [atom-generators max-points-in-initial-program] :as argmap}]
   (let [random-genome (random-plush-genome max-points-in-initial-program atom-generators argmap)
-        semantics-fn (fn [g1 g2 g3]
+        semantics-fn (fn [g1 g2]
                        (full-dm-error-function
                          (translate-plush-genome-to-push-program
                            {:genome
-                            (produce-child-genome-by-autoconstruction g1 g2 g3)})))
-        e1 (semantics-fn (:genome ind) (:genome ind) (:genome ind))
-        e2 (semantics-fn (:genome ind) (:genome ind) random-genome)
-        e3 (semantics-fn (:genome ind) random-genome (:genome ind))]
-    (if (and (distinct? e1 e2)
-             (distinct? e1 e3))
-      #_(and (apply distinct? [e1 e2 e3])
-            (< (error-difference e1 e2)
-               (error-difference e1 e3)))
-         0
-         1)))
+                            (produce-child-genome-by-autoconstruction g1 g2)})))
+        e1 (semantics-fn (:genome ind) random-genome)]
+    (if (= (:errors ind) e1)
+      1
+      0)))
 
 ;; Define argmap for pushgp
 (defn define-digital-multiplier

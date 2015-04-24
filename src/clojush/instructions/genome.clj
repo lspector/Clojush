@@ -211,9 +211,3 @@
   (fn [state]
     (push-item (:parent2-genome state) :genome state)))
 
-(define-registered
-  genome_random
-  ^{:stack-types [:genome]}
-  (fn [state]
-    (push-item (:random-genome state) :genome state)))
-

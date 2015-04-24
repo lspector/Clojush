@@ -243,37 +243,34 @@
          genome)))
 
 (defn produce-child-genome-by-autoconstruction
-  [parent1-genome parent2-genome parent3-genome]
+  [parent1-genome parent2-genome]
   (top-item :genome
             (run-push
               (translate-plush-genome-to-push-program
                 {:genome (process-genome-for-autoconstruction
                            parent1-genome)})
               (-> (->> (make-push-state)
-                    (push-item parent3-genome :genome)
                     (push-item parent2-genome :genome)
                     (push-item parent1-genome :genome))
                 (assoc :parent1-genome parent1-genome)
-                (assoc :parent2-genome parent2-genome)
-                (assoc :random-genome parent3-genome)))))
+                (assoc :parent2-genome parent2-genome)))))
 
 (defn autoconstruction
   "Returns a genome for child produced by autoconstruction by executing parent1 with parent1,
-parent2, and a random genome on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
+and parent2 on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-points-in-initial-program] 
                     :as argmap}]
   (let [parent1-genome (:genome parent1)
         parent2-genome (:genome parent2)
-        random-genome (random-plush-genome max-points-in-initial-program atom-generators argmap)
         child-genome-fn (fn [] 
-                          (produce-child-genome-by-autoconstruction parent1-genome parent2-genome random-genome))
+                          (produce-child-genome-by-autoconstruction parent1-genome parent2-genome))
         child1-genome (child-genome-fn)
         other-child-genomes (repeatedly 1 child-genome-fn)
         clone (some #{child1-genome}
                     (concat [parent1-genome parent2-genome]
                             other-child-genomes))
         new-genome (if clone
-                     random-genome
+                     (random-plush-genome max-points-in-initial-program atom-generators argmap)
                      child1-genome)]
     (make-individual :genome new-genome
                      :history (:history parent1)
