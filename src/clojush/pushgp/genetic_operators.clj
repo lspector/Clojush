@@ -265,7 +265,7 @@ and parent2 on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
         child-genome-fn (fn [] 
                           (produce-child-genome-by-autoconstruction parent1-genome parent2-genome))
         child1-genome (child-genome-fn)
-        other-child-genomes (repeatedly 1 child-genome-fn)
+        other-child-genomes (repeatedly 2 child-genome-fn)
         clone (some #{child1-genome}
                     (concat [parent1-genome parent2-genome]
                             other-child-genomes))

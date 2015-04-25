@@ -104,6 +104,7 @@
                             'genome_gene_delete
                             'genome_rotate
                             'genome_gene_copy
+                            'genome_gene_copy_range
                             'genome_gene_randomize
                             'genome_toggle_silent
                             'genome_silence
