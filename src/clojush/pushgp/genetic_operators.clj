@@ -258,7 +258,7 @@
 (defn autoconstruction
   "Returns a genome for child produced by autoconstruction by executing parent1 with parent1,
 and parent2 on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
-  [parent1 parent2 {:keys [maintain-ancestors atom-generators max-points-in-initial-program] 
+  [parent1 parent2 {:keys [maintain-ancestors atom-generators max-points-in-initial-program error-function] 
                     :as argmap}]
   (let [parent1-genome (:genome parent1)
         parent2-genome (:genome parent2)
@@ -266,13 +266,24 @@ and parent2 on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
                           (produce-child-genome-by-autoconstruction parent1-genome parent2-genome))
         child1-genome (child-genome-fn)
         other-child-genomes (repeatedly 2 child-genome-fn)
-        reproductively-incompetent (some #{child1-genome}
-                                         (concat [parent1-genome parent2-genome]
-                                                 other-child-genomes))
+        clone (some #{child1-genome}
+                    (concat [parent1-genome parent2-genome]
+                            other-child-genomes))
+        child1-errors (if clone nil (error-function (translate-plush-genome-to-push-program {:genome child1-genome})))
+        reproductively-incompetent (or clone
+                                       (= child1-errors
+                                          (error-function 
+                                            (translate-plush-genome-to-push-program 
+                                              {:genome (produce-child-genome-by-autoconstruction 
+                                                         child1-genome
+                                                         (random-plush-genome 
+                                                           max-points-in-initial-program atom-generators argmap))}))))
         new-genome (if reproductively-incompetent
                      (random-plush-genome max-points-in-initial-program atom-generators argmap)
                      child1-genome)]
     (assoc (make-individual :genome new-genome
+                            ;:errors (if reproductively-incompetent nil child1-errors)
+                            ;:total-errors (if reproductively-incompetent (reduce + child1-errors)
                             :history (:history parent1)
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
