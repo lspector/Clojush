@@ -272,8 +272,9 @@ and parent2 on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
         new-genome (if clone
                      (random-plush-genome max-points-in-initial-program atom-generators argmap)
                      child1-genome)]
-    (make-individual :genome new-genome
-                     :history (:history parent1)
-                     :ancestors (if maintain-ancestors
-                                  (cons (:genome parent1) (:ancestors parent1))
-                                  (:ancestors parent1)))))
+    (assoc (make-individual :genome new-genome
+                            :history (:history parent1)
+                            :ancestors (if maintain-ancestors
+                                         (cons (:genome parent1) (:ancestors parent1))
+                                         (:ancestors parent1)))
+           :random-replacement-for-clone (if clone true false))))

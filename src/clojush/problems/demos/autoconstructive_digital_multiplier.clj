@@ -245,7 +245,7 @@
      ;:trivial-geography-radius 50
      :report-simplifications 0
      ;:pass-individual-to-error-function true
-     :meta-error-categories [dm-meta-error-fn]
+     ;:meta-error-categories [dm-meta-error-fn]
      }
     )
   )
