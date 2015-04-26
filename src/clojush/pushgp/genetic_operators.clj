@@ -266,10 +266,10 @@ and parent2 on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
                           (produce-child-genome-by-autoconstruction parent1-genome parent2-genome))
         child1-genome (child-genome-fn)
         other-child-genomes (repeatedly 2 child-genome-fn)
-        clone (some #{child1-genome}
-                    (concat [parent1-genome parent2-genome]
-                            other-child-genomes))
-        new-genome (if clone
+        reproductively-incompetent (some #{child1-genome}
+                                         (concat [parent1-genome parent2-genome]
+                                                 other-child-genomes))
+        new-genome (if reproductively-incompetent
                      (random-plush-genome max-points-in-initial-program atom-generators argmap)
                      child1-genome)]
     (assoc (make-individual :genome new-genome
@@ -277,4 +277,5 @@ and parent2 on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
-           :random-replacement-for-clone (if clone true false))))
+           :random-replacement-for-reproductively-incompetent-genome 
+           (if reproductively-incompetent true false))))
