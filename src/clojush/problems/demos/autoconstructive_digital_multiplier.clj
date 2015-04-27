@@ -236,12 +236,13 @@
      :atom-generators (dm-atom-generators num-bits-n)
      :population-size 500
      :max-generations 10000
-     :max-points 500
+     :max-points 2000
      :max-points-in-initial-program 100
      :evalpush-limit 10000
      :epigenetic-markers [:close :silent]
      :genetic-operator-probabilities {:autoconstruction 1}
-     :parent-selection :lexicase
+     :parent-selection :leaky-lexicase
+     :lexicase-leakage 0.1
      ;:trivial-geography-radius 50
      :report-simplifications 0
      ;:pass-individual-to-error-function true

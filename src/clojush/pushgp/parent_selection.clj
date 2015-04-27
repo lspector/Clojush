@@ -156,5 +156,8 @@
       :tournament (tournament-selection pop-with-meta-errors location argmap)
       :lexicase (lexicase-selection pop-with-meta-errors location argmap)
       :elitegroup-lexicase (elitegroup-lexicase-selection pop-with-meta-errors)
+      :leaky-lexicase (if (< (lrand) (:lexicase-leakage argmap))
+                        (tournament-selection pop-with-meta-errors location (merge argmap {:tournament-size 1}))
+                        (lexicase-selection pop-with-meta-errors location argmap))
       (throw (Exception. (str "Unrecognized argument for parent-selection: "
                               parent-selection))))))

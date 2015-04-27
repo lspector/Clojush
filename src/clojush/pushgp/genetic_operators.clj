@@ -276,12 +276,19 @@ and parent2 on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
                                             (translate-plush-genome-to-push-program 
                                               {:genome (produce-child-genome-by-autoconstruction 
                                                          child1-genome
+                                                         child1-genome)})))
+                                       (= child1-errors
+                                          (error-function 
+                                            (translate-plush-genome-to-push-program 
+                                              {:genome (produce-child-genome-by-autoconstruction 
+                                                         child1-genome
                                                          (random-plush-genome 
                                                            max-points-in-initial-program atom-generators argmap))}))))
         new-genome (if reproductively-incompetent
                      (random-plush-genome max-points-in-initial-program atom-generators argmap)
                      child1-genome)]
     (assoc (make-individual :genome new-genome
+                            ;; Would be nice not to recompute errors but not sure what's needed for normalization, evaluation counts, etc.
                             ;:errors (if reproductively-incompetent nil child1-errors)
                             ;:total-errors (if reproductively-incompetent (reduce + child1-errors)
                             :history (:history parent1)

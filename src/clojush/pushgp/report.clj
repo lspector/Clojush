@@ -299,7 +299,7 @@
         ]
     (when print-error-frequencies-by-case
       (println "Error frequencies by case:" (doall (map frequencies (apply map vector (map :errors population))))))
-    (when (some #{parent-selection} #{:lexicase :elitegroup-lexicase}) (lexicase-report population argmap))
+    (when (some #{parent-selection} #{:lexicase :elitegroup-lexicase :leaky-lexicase}) (lexicase-report population argmap))
     (when (= total-error-method :ifs) (implicit-fitness-sharing-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
     (println "Best genome:" (pr-str (not-lazy (:genome best))))
