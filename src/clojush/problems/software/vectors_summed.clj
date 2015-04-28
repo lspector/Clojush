@@ -8,7 +8,7 @@
 ;;
 ;; input stack has 2 input vectors of integers
 
-(ns clojush.problems.software.vectors-summed-backup
+(ns clojush.problems.software.vectors-summed
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
