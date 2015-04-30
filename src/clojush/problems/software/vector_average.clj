@@ -92,7 +92,10 @@
                                                        (push-item input1 :input)))
                                result (top-item :float final-state)]
                            (when print-outputs
-                             (println (format "Correct output: %19.14f | Program output: %19.14f" correct-output result)))
+                             (let [res-str (if (float? result)
+                                             (format "%19.14f" result)
+                                             (str result))]
+                               (println (format "Correct output: %19.14f | Program output: %s" correct-output res-str))))
                            ; Record the behavior
                            (when @global-print-behavioral-diversity
                              (swap! behavior conj result))

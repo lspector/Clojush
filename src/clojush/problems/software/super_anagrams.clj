@@ -147,7 +147,7 @@
                                                        (push-item "" :output)))
                                result (top-item :boolean final-state)]
                            (when print-outputs
-                             (println (format "Correct output: %5b | Program output: %5b" correct-output result)))
+                             (println (format "Correct output: %5b | Program output: %s" correct-output (str result))))
                            ; Record the behavior
                            (when @global-print-behavioral-diversity
                              (swap! behavior conj result))
