@@ -229,7 +229,7 @@
 
 (defn process-genome-for-autoconstruction
   "Replace input instructions with noops and replace autoconstructive_integer_rand with integer_rand."
-  [genome]
+  [genome deterministic?]
   (let [input-instruction? (fn [instruction]
                              (and (symbol? instruction) 
                                   (or (re-seq #"in\d+" (name instruction)) ;; from input-output
@@ -237,23 +237,44 @@
     (map (fn [instruction-map]
            (if (input-instruction? (:instruction instruction-map))
              (assoc instruction-map :instruction 'code_noop)
-             (if (= (:instruction instruction-map) 'autoconstructive_integer_rand)
+             (if (and (not deterministic?)
+                      (= (:instruction instruction-map) 'autoconstructive_integer_rand))
                (assoc instruction-map :instruction 'integer_rand)
                instruction-map)))
          genome)))
 
 (defn produce-child-genome-by-autoconstruction
-  [parent1-genome parent2-genome]
-  (top-item :genome
-            (run-push
-              (translate-plush-genome-to-push-program
-                {:genome (process-genome-for-autoconstruction
-                           parent1-genome)})
-              (-> (->> (make-push-state)
-                    (push-item parent2-genome :genome)
-                    (push-item parent1-genome :genome))
-                (assoc :parent1-genome parent1-genome)
-                (assoc :parent2-genome parent2-genome)))))
+  [parent1-genome parent2-genome deterministic?]
+  (let [run-result (top-item :genome
+                             (run-push
+                               (translate-plush-genome-to-push-program
+                                 {:genome (process-genome-for-autoconstruction
+                                            parent1-genome
+                                            deterministic?)})
+                               (-> (->> (make-push-state)
+                                     (push-item parent2-genome :genome)
+                                     (push-item parent1-genome :genome))
+                                 (assoc :parent1-genome parent1-genome)
+                                 (assoc :parent2-genome parent2-genome))))]
+    (if (or (seq? run-result) (vector? run-result))
+      run-result
+      ())))
+
+(defn reproductively-competent?
+  [genome {:keys [atom-generators max-points-in-initial-program error-function] 
+                    :as argmap}]
+  (let [child-self (produce-child-genome-by-autoconstruction genome genome false)
+        child-random (let [g (random-plush-genome max-points-in-initial-program atom-generators argmap)]
+                       (produce-child-genome-by-autoconstruction g g false))
+        child-self-child (produce-child-genome-by-autoconstruction child-self genome true)
+        child-random-child (produce-child-genome-by-autoconstruction child-random genome true)
+        csc-errors (error-function 
+                     (translate-plush-genome-to-push-program 
+                       {:genome child-self-child}))
+        crc-errors (error-function 
+                     (translate-plush-genome-to-push-program 
+                       {:genome child-random-child}))]
+    (not (= csc-errors crc-errors))))
 
 (defn autoconstruction
   "Returns a genome for child produced by autoconstruction by executing parent1 with parent1,
@@ -262,38 +283,15 @@ and parent2 on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
                     :as argmap}]
   (let [parent1-genome (:genome parent1)
         parent2-genome (:genome parent2)
-        child-genome-fn (fn [] 
-                          (produce-child-genome-by-autoconstruction parent1-genome parent2-genome))
-        child1-genome (child-genome-fn)
-        other-child-genomes (repeatedly 2 child-genome-fn)
-        clone (some #{child1-genome}
-                    (concat [parent1-genome parent2-genome]
-                            other-child-genomes))
-        child1-errors (if clone nil (error-function (translate-plush-genome-to-push-program {:genome child1-genome})))
-        reproductively-incompetent (or clone
-                                       (= child1-errors
-                                          (error-function 
-                                            (translate-plush-genome-to-push-program 
-                                              {:genome (produce-child-genome-by-autoconstruction 
-                                                         child1-genome
-                                                         child1-genome)})))
-                                       (= child1-errors
-                                          (error-function 
-                                            (translate-plush-genome-to-push-program 
-                                              {:genome (produce-child-genome-by-autoconstruction 
-                                                         child1-genome
-                                                         (random-plush-genome 
-                                                           max-points-in-initial-program atom-generators argmap))}))))
-        new-genome (if reproductively-incompetent
-                     (random-plush-genome max-points-in-initial-program atom-generators argmap)
-                     child1-genome)]
+        child-genome  (produce-child-genome-by-autoconstruction parent1-genome parent2-genome false)
+        competent (reproductively-competent? child-genome argmap)
+        new-genome (if competent
+                     child-genome
+                     (random-plush-genome max-points-in-initial-program atom-generators argmap))]
     (assoc (make-individual :genome new-genome
-                            ;; Would be nice not to recompute errors but not sure what's needed for normalization, evaluation counts, etc.
-                            ;:errors (if reproductively-incompetent nil child1-errors)
-                            ;:total-errors (if reproductively-incompetent (reduce + child1-errors)
                             :history (:history parent1)
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
            :random-replacement-for-reproductively-incompetent-genome 
-           (if reproductively-incompetent true false))))
+           (if competent false true))))

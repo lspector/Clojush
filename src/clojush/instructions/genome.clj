@@ -20,7 +20,8 @@
   (fn [state]
     (if (and (not (empty? (:integer state)))
              (not (empty? (:genome state)))
-             (not (empty? (stack-ref :genome 0 state))))
+             (not (empty? (stack-ref :genome 0 state)))
+             (< (count (first (:genome state))) @global-max-points)) ;; should really be max genome length
       (let [genome (stack-ref :genome 0 state)
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)

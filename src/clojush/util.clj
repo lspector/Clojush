@@ -80,6 +80,26 @@
     (let [factor (math/expt 10 n)]
       (double (/ (math/round (* f factor)) factor)))))
 
+;(defn count-points
+;  "Returns the number of points in tree, where each atom and each pair of parentheses 
+;   counts as a point."
+;  [tree]
+;  (if (seq? tree)
+;    (inc (apply + (map count-points tree)))
+;    1))
+
+;(defn count-parens
+;  "Returns the number of paren pairs in tree"
+;  [tree]
+;  (if (seq? tree)
+;    (inc (apply + (map count-parens tree)))
+;    0))
+
+(defn count-parens
+  "Returns the number of paren pairs in tree"
+  [tree]
+  (count (filter #(= % \() (str tree))))
+
 (defn count-points
   "Returns the number of points in tree, where each atom and each pair of parentheses 
    counts as a point."
@@ -87,13 +107,6 @@
   (if (seq? tree)
     (inc (apply + (map count-points tree)))
     1))
-
-(defn count-parens
-  "Returns the number of paren pairs in tree"
-  [tree]
-  (if (seq? tree)
-    (inc (apply + (map count-parens tree)))
-    0))
 
 (defn code-at-point 
   "Returns a subtree of tree indexed by point-index in a depth first traversal."
