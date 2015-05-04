@@ -98,7 +98,7 @@
 (defn count-parens
   "Returns the number of paren pairs in tree"
   [tree]
-  (count (filter #(= % \() (str tree))))
+  (count (filter #(= % \() (pr-str tree))))
 
 (defn count-points
   "Returns the number of points in tree, where each atom and each pair of parentheses 
