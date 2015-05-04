@@ -105,7 +105,8 @@
    counts as a point."
   [tree]
   (if (seq? tree)
-    (inc (apply + (map count-points tree)))
+    (+ (count (flatten tree))
+       (count-parens tree))
     1))
 
 (defn code-at-point 
