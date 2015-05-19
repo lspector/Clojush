@@ -21,10 +21,14 @@
   ;:jvm-opts ["-Xmx12g" "-Xms12g" "-XX:+UseParallelGC"]
   ;:jvm-opts ["-Xmx58g" "-Xms58g" "-XX:+UseParallelGC" "-Djava.awt.headless=true"]
   ;; the following should automatically take 80% of the machine's RAM and also use the G1 garbage collector
-  :jvm-opts ~(let [mem-to-use (long (* (.getTotalPhysicalMemorySize
-                                         (java.lang.management.ManagementFactory/getOperatingSystemMXBean))
-                                       0.8))]
-               [(str "-Xmx" mem-to-use)
-                (str "-Xms" mem-to-use)
-                "-XX:+UseG1GC"])
+  :jvm-opts ~(let [mem-to-use
+                   (long (* (.getTotalPhysicalMemorySize
+                              (java.lang.management.ManagementFactory/getOperatingSystemMXBean))
+                            0.8))]
+               ^:replace [(str "-Xmx" mem-to-use)
+                          (str "-Xms" mem-to-use)
+                          "-server"
+                          "-XX:-TieredCompilation"
+                          "-XX:+AggressiveOpts"])
+  ;;"-XX:+UseG1GC"
   :main clojush.core)

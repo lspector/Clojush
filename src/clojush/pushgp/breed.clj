@@ -13,6 +13,7 @@
    :uniform-mutation {:fn uniform-mutation :parents 1}
    :uniform-close-mutation {:fn uniform-close-mutation :parents 1}
    :uniform-silence-mutation {:fn uniform-silence-mutation :parents 1}
+   :uniform-deletion {:fn uniform-deletion :parents 1}
    :make-next-operator-revertable {:fn nil :parents 0}
    :autoconstruction {:fn autoconstruction :parents 2}
    })

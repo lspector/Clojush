@@ -56,6 +56,7 @@
                                            :uniform-silence-mutation 0.0
                                            [:make-next-operator-revertable :uniform-silence-mutation] 0.0 ;Equivalent to a hill-climbing version of uniform-silence-mutation
                                            :autoconstruction 0.0
+                                           :uniform-deletion 0.0
                                            }
           ;;
           ;;----------------------------------------
@@ -71,6 +72,7 @@
           :uniform-mutation-tag-gaussian-standard-deviation 100 ;; The standard deviation used when tweaking tag locations with Gaussian noise
           :uniform-close-mutation-rate 0.1 ;; The probability of each :close being incremented or decremented during uniform close mutation
           :close-increment-rate 0.2 ;; The probability of making an increment change to :close during uniform close mutation, as opposed to a decrement change
+          :uniform-deletion-rate 0.01 ;; The probability that any instruction will be deleted during uniform deletion
           :uniform-silence-mutation-rate 0.1 ;; The probability of each :silent being switched during uniform silent mutation
           :replace-child-that-exceeds-size-limit-with :random ;; When a child is produced that exceeds the size limit of max-points, this is used to determine what program to return. Options include :parent, :empty, :random
           :parent-reversion-probability 1.0 ;; The probability of a child being reverted to its parent by a genetic operator that has been made revertable, if the child is not as good as the parent on at least one test case

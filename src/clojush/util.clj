@@ -80,34 +80,46 @@
     (let [factor (math/expt 10 n)]
       (double (/ (math/round (* f factor)) factor)))))
 
-;(defn count-points
-;  "Returns the number of points in tree, where each atom and each pair of parentheses 
-;   counts as a point."
-;  [tree]
-;  (if (seq? tree)
-;    (inc (apply + (map count-points tree)))
-;    1))
-
-;(defn count-parens
-;  "Returns the number of paren pairs in tree"
-;  [tree]
-;  (if (seq? tree)
-;    (inc (apply + (map count-parens tree)))
-;    0))
-
 (defn count-parens
   "Returns the number of paren pairs in tree"
   [tree]
-  (count (filter #(= % \() (pr-str tree))))
+  (loop [remaining tree
+         total 0]
+    (cond (not (seq? remaining)) 
+          total
+          ;; 
+          (empty? remaining) 
+          (inc total)
+          ;;
+          (not (seq? (first remaining))) 
+          (recur (rest remaining) 
+                 total)
+          ;;
+          :else 
+          (recur (concat (first remaining) 
+                         (rest remaining)) 
+                 (inc total)))))
 
 (defn count-points
   "Returns the number of points in tree, where each atom and each pair of parentheses 
    counts as a point."
   [tree]
-  (if (seq? tree)
-    (+ (count (flatten tree))
-       (count-parens tree))
-    1))
+  (loop [remaining tree
+         total 0]
+    (cond (not (seq? remaining)) 
+          (inc total)
+          ;; 
+          (empty? remaining) 
+          (inc total)
+          ;;
+          (not (seq? (first remaining))) 
+          (recur (rest remaining) 
+                 (inc total))
+          ;;
+          :else 
+          (recur (concat (first remaining) 
+                         (rest remaining)) 
+                 (inc total)))))
 
 (defn code-at-point 
   "Returns a subtree of tree indexed by point-index in a depth first traversal."

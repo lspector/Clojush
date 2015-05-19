@@ -138,6 +138,22 @@
                                     (:ancestors ind))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform deletion
+
+(defn uniform-deletion
+  "Returns the individual with each element of its genome possibly deleted, with probability
+given by uniform-deletion-rate."
+  [ind {:keys [uniform-deletion-rate maintain-ancestors]}]
+  (let [new-genome (filter identity 
+                           (map #(if (< (lrand) uniform-deletion-rate) % nil)
+                                (:genome ind)))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; alternation
 
 (defn alternation
@@ -262,19 +278,29 @@
 
 (defn reproductively-competent?
   [genome {:keys [atom-generators max-points-in-initial-program error-function] 
-                    :as argmap}]
-  (let [child-self (produce-child-genome-by-autoconstruction genome genome false)
-        child-random (let [g (random-plush-genome max-points-in-initial-program atom-generators argmap)]
-                       (produce-child-genome-by-autoconstruction g g false))
-        child-self-child (produce-child-genome-by-autoconstruction child-self genome true)
-        child-random-child (produce-child-genome-by-autoconstruction child-random genome true)
-        csc-errors (error-function 
+           :as argmap}]
+  (let [child-1 (produce-child-genome-by-autoconstruction genome genome false)
+        child-2 (produce-child-genome-by-autoconstruction genome genome false)]
+    (if (= child-1 child-2)
+      false
+      (let [child-1-child (produce-child-genome-by-autoconstruction child-1 genome true)
+            child-2-child (produce-child-genome-by-autoconstruction child-2 genome true)]
+        (if (= child-1-child child-2-child)
+          false
+          (if (= (translate-plush-genome-to-push-program {:genome child-1-child})
+                 (translate-plush-genome-to-push-program {:genome child-2-child}))
+            false
+            (if (= (translate-plush-genome-to-push-program 
+                     {:genome (produce-child-genome-by-autoconstruction child-1-child genome true)})
+                   (translate-plush-genome-to-push-program 
+                     {:genome (produce-child-genome-by-autoconstruction child-1-child child-1 true)}))
+              false
+              (if (= (translate-plush-genome-to-push-program 
+                       {:genome (produce-child-genome-by-autoconstruction child-2-child genome true)})
                      (translate-plush-genome-to-push-program 
-                       {:genome child-self-child}))
-        crc-errors (error-function 
-                     (translate-plush-genome-to-push-program 
-                       {:genome child-random-child}))]
-    (not (= csc-errors crc-errors))))
+                       {:genome (produce-child-genome-by-autoconstruction child-2-child child-2 true)}))
+                false
+                true))))))))
 
 (defn autoconstruction
   "Returns a genome for child produced by autoconstruction by executing parent1 with parent1,

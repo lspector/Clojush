@@ -208,19 +208,19 @@
 
 (declare full-dm-error-function)
 
-(defn dm-meta-error-fn
-  "Takes an individual and an argmap and returns a meta-error value."
-  [ind {:keys [atom-generators max-points-in-initial-program] :as argmap}]
-  (let [random-genome (random-plush-genome max-points-in-initial-program atom-generators argmap)
-        semantics-fn (fn [g1 g2]
-                       (full-dm-error-function
-                         (translate-plush-genome-to-push-program
-                           {:genome
-                            (produce-child-genome-by-autoconstruction g1 g2)})))
-        e1 (semantics-fn (:genome ind) random-genome)]
-    (if (= (:errors ind) e1)
-      1
-      0)))
+;(defn dm-meta-error-fn
+;  "Takes an individual and an argmap and returns a meta-error value."
+;  [ind {:keys [atom-generators max-points-in-initial-program] :as argmap}]
+;  (let [random-genome (random-plush-genome max-points-in-initial-program atom-generators argmap)
+;        semantics-fn (fn [g1 g2]
+;                       (full-dm-error-function
+;                         (translate-plush-genome-to-push-program
+;                           {:genome
+;                            (produce-child-genome-by-autoconstruction g1 g2)})))
+;        e1 (semantics-fn (:genome ind) random-genome)]
+;    (if (= (:errors ind) e1)
+;      1
+;      0)))
 
 ;; Define argmap for pushgp
 (defn define-digital-multiplier
@@ -240,13 +240,17 @@
      :max-points-in-initial-program 100
      :evalpush-limit 10000
      :epigenetic-markers [:close :silent]
-     :genetic-operator-probabilities {:autoconstruction 1}
-     :parent-selection :leaky-lexicase
-     :lexicase-leakage 0.1
+     :genetic-operator-probabilities {:autoconstruction 0.9
+                                      :uniform-deletion 0.1}
+     :uniform-deletion-rate 0.01
+     :parent-selection :lexicase
+     ;:parent-selection :leaky-lexicase
+     ;:lexicase-leakage 0.1
      ;:trivial-geography-radius 50
      :report-simplifications 0
      ;:pass-individual-to-error-function true
      ;:meta-error-categories [dm-meta-error-fn]
+     ;:meta-error-categories [:size]
      }
     )
   )
