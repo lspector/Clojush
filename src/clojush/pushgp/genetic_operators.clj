@@ -292,22 +292,19 @@ given by uniform-deletion-rate."
             c2c (produce-child-genome-by-autoconstruction c2 g true)]
         (if (express-same-programs? c1c c2c)
           false
-          (let [c1cc1 (produce-child-genome-by-autoconstruction c1c g true)
-                c1cc2 (produce-child-genome-by-autoconstruction c1c c1 true)]
-            (if (express-same-programs? c1cc1 c1cc2)
+          (let [c1cc (produce-child-genome-by-autoconstruction c1c g true)
+                c2cc (produce-child-genome-by-autoconstruction c2c g true)]
+            (if (express-same-programs? c1cc c2cc)
               false
-              (let [c2cc1 (produce-child-genome-by-autoconstruction c2c g true)
-                    c2cc2 (produce-child-genome-by-autoconstruction c2c c2 true)]
-                (if (express-same-programs? c2cc1 c2cc2)
-                  false
-                  (if (let [g-size (count g)
-                            descendant-sizes (map count [c1cc1 c1cc2 c2cc1 c2cc2])]
-                        (or (>= (apply min descendant-sizes)
-                                g-size)
-                            (<= (apply max descendant-sizes)
-                                g-size)))
-                    false
-                    true))))))))))
+              (if false
+                #_(let [g-size (count g)
+                       descendant-sizes (map count [c1cc1 c1cc2 c2cc1 c2cc2])]
+                   (or (>= (apply min descendant-sizes)
+                           g-size)
+                       (<= (apply max descendant-sizes)
+                           g-size)))
+                false
+                true))))))))
 
 (defn autoconstruction
   "Returns a genome for child produced by autoconstruction by executing parent1 with parent1,
