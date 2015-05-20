@@ -87,7 +87,7 @@
           ;;----------------------------------------
           ;; Arguments related to parent selection
           ;;----------------------------------------
-          :parent-selection :lexicase ;; The parent selection method. Options include :tournament, :lexicase, :elitegroup-lexicase, :leaky-lexicase
+          :parent-selection :lexicase ;; The parent selection method. Options include :tournament, :lexicase, :elitegroup-lexicase, :uniform :leaky-lexicase
           :lexicase-leakage 0.1 ;; If using leaky lexicase selection, the percentage of selection events that will return random (tourny 1) individuals
           :tournament-size 7 ;; If using tournament selection, the size of the tournaments
           :total-error-method :sum ;; The method used to compute total error. Options include :sum (standard), :hah (historically-assessed hardness), :rmse (root mean squared error), and :ifs (implicit fitness sharing)

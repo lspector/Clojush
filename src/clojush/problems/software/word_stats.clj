@@ -282,7 +282,6 @@
    :uniform-mutation-rate 0.01
    :problem-specific-report word-stats-report
    :print-behavioral-diversity true
-   :print-homology-data true
    :report-simplifications 0
    :final-report-simplifications 5000
    :error-threshold 0.02

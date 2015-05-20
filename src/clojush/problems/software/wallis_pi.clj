@@ -101,7 +101,10 @@
                                           (stack-ref :float 0 final-state)
                                           5)]
                              (when print-outputs
-                               (println (format "Correct output: %.5f | Program output: %.5f" correct-output result)))
+                               (let [res-str (if (float? result)
+                                               (format "%.5f" result)
+                                               (str result))]
+                                 (println (format "Correct output: %.5f | Program output: %s" correct-output res-str))))
                              ; Record the behavior
                              (when @global-print-behavioral-diversity
                                (swap! behavior conj result))
