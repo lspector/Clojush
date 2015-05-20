@@ -276,31 +276,38 @@ given by uniform-deletion-rate."
       run-result
       ())))
 
+(defn express-same-programs?
+  [g1 g2]
+  (or (= g1 g2) ;; avoid translation for equivalent genomes 
+      (= (translate-plush-genome-to-push-program {:genome g1})
+         (translate-plush-genome-to-push-program {:genome g2}))))
+
 (defn reproductively-competent?
-  [genome {:keys [atom-generators max-points-in-initial-program error-function] 
-           :as argmap}]
-  (let [child-1 (produce-child-genome-by-autoconstruction genome genome false)
-        child-2 (produce-child-genome-by-autoconstruction genome genome false)]
-    (if (= child-1 child-2)
+  [g]
+  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+        c2 (produce-child-genome-by-autoconstruction g g false)]
+    (if (express-same-programs? c1 c2)
       false
-      (let [child-1-child (produce-child-genome-by-autoconstruction child-1 genome true)
-            child-2-child (produce-child-genome-by-autoconstruction child-2 genome true)]
-        (if (= child-1-child child-2-child)
+      (let [c1c (produce-child-genome-by-autoconstruction c1 g true)
+            c2c (produce-child-genome-by-autoconstruction c2 g true)]
+        (if (express-same-programs? c1c c2c)
           false
-          (if (= (translate-plush-genome-to-push-program {:genome child-1-child})
-                 (translate-plush-genome-to-push-program {:genome child-2-child}))
-            false
-            (if (= (translate-plush-genome-to-push-program 
-                     {:genome (produce-child-genome-by-autoconstruction child-1-child genome true)})
-                   (translate-plush-genome-to-push-program 
-                     {:genome (produce-child-genome-by-autoconstruction child-1-child child-1 true)}))
+          (let [c1cc1 (produce-child-genome-by-autoconstruction c1c g true)
+                c1cc2 (produce-child-genome-by-autoconstruction c1c c1 true)]
+            (if (express-same-programs? c1cc1 c1cc2)
               false
-              (if (= (translate-plush-genome-to-push-program 
-                       {:genome (produce-child-genome-by-autoconstruction child-2-child genome true)})
-                     (translate-plush-genome-to-push-program 
-                       {:genome (produce-child-genome-by-autoconstruction child-2-child child-2 true)}))
-                false
-                true))))))))
+              (let [c2cc1 (produce-child-genome-by-autoconstruction c2c g true)
+                    c2cc2 (produce-child-genome-by-autoconstruction c2c c2 true)]
+                (if (express-same-programs? c2cc1 c2cc2)
+                  false
+                  (if (let [g-size (count g)
+                            descendant-sizes (map count [c1cc1 c1cc2 c2cc1 c2cc2])]
+                        (or (>= (apply min descendant-sizes)
+                                g-size)
+                            (<= (apply max descendant-sizes)
+                                g-size)))
+                    false
+                    true))))))))))
 
 (defn autoconstruction
   "Returns a genome for child produced by autoconstruction by executing parent1 with parent1,
@@ -310,7 +317,7 @@ and parent2 on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
   (let [parent1-genome (:genome parent1)
         parent2-genome (:genome parent2)
         child-genome  (produce-child-genome-by-autoconstruction parent1-genome parent2-genome false)
-        competent (reproductively-competent? child-genome argmap)
+        competent (reproductively-competent? child-genome)
         new-genome (if competent
                      child-genome
                      (random-plush-genome max-points-in-initial-program atom-generators argmap))]

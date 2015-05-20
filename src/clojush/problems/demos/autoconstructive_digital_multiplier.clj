@@ -240,8 +240,9 @@
      :max-points-in-initial-program 100
      :evalpush-limit 10000
      :epigenetic-markers [:close :silent]
-     :genetic-operator-probabilities {:autoconstruction 0.9
-                                      :uniform-deletion 0.1}
+     :genetic-operator-probabilities {:autoconstruction 1.0}
+     ;:genetic-operator-probabilities {:autoconstruction 0.9
+     ;                                 :uniform-deletion 0.1}
      :uniform-deletion-rate 0.01
      :parent-selection :lexicase
      ;:parent-selection :leaky-lexicase
