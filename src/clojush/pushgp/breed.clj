@@ -23,15 +23,17 @@
    size limit. Options are:
      :parent -- one of the parents (default)
      :empty  -- an empty program
+     :truncate -- truncate child after max points
      :random -- a random program
    In future, may implement :delete, which deletes some of the instructions
    in a parent."
-  [parent {:keys [replace-child-that-exceeds-size-limit-with atom-generators
-                  max-points-in-initial-program]
-           :as argmap}]
+  [parent child {:keys [replace-child-that-exceeds-size-limit-with atom-generators
+                        max-points-in-initial-program max-points]
+                 :as argmap}]
   (case replace-child-that-exceeds-size-limit-with
     :parent parent
     :empty (make-individual :genome '() :genetic-operators :empty)
+    :truncate (assoc child :genome (take max-points (:genome child)))
     :random (make-individual :genome (random-plush-genome max-points-in-initial-program atom-generators argmap)
                              :genetic-operators :random)
     ))
@@ -92,7 +94,7 @@
                                              (assoc first-parent :parent-uuids (vector (:uuid first-parent)))
                                              population location rand-gen argmap)]
     (if (> (count (:genome child)) max-points) ; Check if too big
-      (revert-too-big-child first-parent argmap)
+      (revert-too-big-child first-parent child argmap)
         (assoc child
                :genetic-operators operator
                ))))
