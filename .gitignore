@@ -2,6 +2,7 @@
 .DS_Store
 .lein-deps-sum
 .lein-repl-history
+.nrepl-port
 /pom.xml
 /pom.xml.asc
 /clojush*.jar
