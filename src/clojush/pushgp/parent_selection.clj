@@ -165,7 +165,7 @@
       :lexicase (lexicase-selection pop-with-meta-errors location argmap)
       :elitegroup-lexicase (elitegroup-lexicase-selection pop-with-meta-errors)
       :leaky-lexicase (if (< (lrand) (:lexicase-leakage argmap))
-                        (tournament-selection pop-with-meta-errors location (merge argmap {:tournament-size 1}))
+                        (uniform-selection pop-with-meta-errors)
                         (lexicase-selection pop-with-meta-errors location argmap))
       :uniform (uniform-selection pop-with-meta-errors)
       (throw (Exception. (str "Unrecognized argument for parent-selection: "
