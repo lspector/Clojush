@@ -296,9 +296,8 @@ given by uniform-deletion-rate."
                 c2cc (produce-child-genome-by-autoconstruction c2c g true)]
             (if (express-same-programs? c1cc c2cc)
               false
-              (if false
-                #_(let [g-size (count g)
-                       descendant-sizes (map count [c1cc1 c1cc2 c2cc1 c2cc2])]
+              (if (let [g-size (count g)
+                        descendant-sizes (map count [c1 c2 c1c c2c c1cc c2cc])]
                    (or (>= (apply min descendant-sizes)
                            g-size)
                        (<= (apply max descendant-sizes)

@@ -222,6 +222,13 @@
 ;      1
 ;      0)))
 
+(defn dm-meta-error-fn
+  "Takes an individual and an argmap and returns a meta-error value."
+  [ind argmap]
+  (if (:random-replacement-for-reproductively-incompetent-genome ind)
+    1
+    0))
+
 ;; Define argmap for pushgp
 (defn define-digital-multiplier
   [num-bits-n]
@@ -251,7 +258,7 @@
      :report-simplifications 0
      ;:pass-individual-to-error-function true
      ;:meta-error-categories [dm-meta-error-fn]
-     ;:meta-error-categories [:size]
+     :meta-error-categories [:size dm-meta-error-fn]
      }
     )
   )
