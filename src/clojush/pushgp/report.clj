@@ -247,6 +247,7 @@
            problem-specific-report total-error-method
            parent-selection print-homology-data max-point-evaluations
            print-error-frequencies-by-case normalization
+           print-selection-counts
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
@@ -360,6 +361,10 @@
       (println "Median copy number:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
     (println "Number of random replacements for reproductively incompetent individuals:" 
              (count (filter :random-replacement-for-reproductively-incompetent-genome population)))
+    (when print-selection-counts
+      (println "SOMETHING TMH:" (sort > (concat (vals @selection-counts)
+                                                (repeat (- population-size (count @selection-counts)) 0))))
+      (reset! selection-counts {}))
     (when @global-print-behavioral-diversity
       (swap! population-behaviors #(take-last population-size %)) ; Only use behaviors during evaluation, not those during simplification
       (println "Behavioral diversity:" (behavioral-diversity))

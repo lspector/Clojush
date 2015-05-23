@@ -39,6 +39,7 @@
 (def solution-rates (atom (repeat 0))) ;; Used in historically-assessed hardness
 (def elitegroups (atom ())) ;; Used for elitegroup lexicase selection (will only work if lexicase-selection is off)
 (def population-behaviors (atom ())) ;; Used to store the behaviors of the population for use in tracking behavioral diversity
+(def selection-counts (atom {})) ;; Used to store the number of selections for each individual, indexed by UUIDs
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The globals below may be reset by arguments to pushgp
