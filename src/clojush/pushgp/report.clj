@@ -362,8 +362,8 @@
     (println "Number of random replacements for reproductively incompetent individuals:" 
              (count (filter :random-replacement-for-reproductively-incompetent-genome population)))
     (when print-selection-counts
-      (println "SOMETHING TMH:" (sort > (concat (vals @selection-counts)
-                                                (repeat (- population-size (count @selection-counts)) 0))))
+      (println "Selection counts:" (sort > (concat (vals @selection-counts)
+                                                   (repeat (- population-size (count @selection-counts)) 0))))
       (reset! selection-counts {}))
     (when @global-print-behavioral-diversity
       (swap! population-behaviors #(take-last population-size %)) ; Only use behaviors during evaluation, not those during simplification
