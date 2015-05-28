@@ -276,8 +276,8 @@
                       'float_cos
                       ;'float_tan
                       )
-   :max-points 30
-   :max-points-in-initial-program 30
+   :max-points 60
+   :max-genome-size-in-initial-program 30
    :evalpush-limit 50
    :population-size 500
    :epigenetic-markers []

@@ -72,8 +72,8 @@
                        )
    :population-size 1000
    :max-generations 500
-   :max-points 500
-   :max-points-in-initial-program 100
+   :max-points 1000
+   :max-genome-size-in-initial-program 100
    :evalpush-limit 1000
    :genetic-operator-probabilities {[:alternation :uniform-mutation] 0.5
                                     [:alternation :uniform-mutation :uniform-close-mutation] 0.5}

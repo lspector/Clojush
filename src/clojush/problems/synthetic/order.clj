@@ -43,8 +43,8 @@ depth and number of nodes."
     (reset! global-problem-size size)
     (println "problem-size =" size)
     (def argmap
-      {:max-points (* 10 size)
-       :max-points-in-initial-program (* 10 size)
+      {:max-points (* 10 2 size)
+       :max-genome-size-in-initial-program (* 10 size)
        :error-function order-fitness
        :atom-generators atom-generators
        :epigenetic-markers []
