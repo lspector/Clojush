@@ -216,7 +216,8 @@
 ;                       (full-dm-error-function
 ;                         (translate-plush-genome-to-push-program
 ;                           {:genome
-;                            (produce-child-genome-by-autoconstruction g1 g2)})))
+;                            (produce-child-genome-by-autoconstruction g1 g2)}
+;                           argmap)))
 ;        e1 (semantics-fn (:genome ind) random-genome)]
 ;    (if (= (:errors ind) e1)
 ;      1

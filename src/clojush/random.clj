@@ -90,7 +90,10 @@
 (defn random-push-code
   "Returns a random Push expression with size limited by max-points."
   ([max-points atom-generators]
-    (random-push-code max-points atom-generators {}))
+    (random-push-code max-points atom-generators {:max-points @global-max-points}))
   ([max-points atom-generators argmap]
     (translate-plush-genome-to-push-program
-      {:genome (random-plush-genome (int (/ max-points 2)) atom-generators argmap)})))
+      {:genome (random-plush-genome (max (int (/ max-points 2)) 1)
+                                    atom-generators
+                                    argmap)}
+      argmap)))
