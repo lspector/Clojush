@@ -148,8 +148,8 @@
 (def argmap
   {:error-function (double-letters-error-function double-letters-data-domains)
    :atom-generators double-letters-atom-generators
-   :max-points 800
-   :max-points-in-initial-program 400
+   :max-points 1600
+   :max-genome-size-in-initial-program 400
    :evalpush-limit 1600
    :population-size 1000
    :max-generations 300

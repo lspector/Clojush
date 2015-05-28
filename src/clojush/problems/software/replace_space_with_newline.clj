@@ -160,8 +160,8 @@
 (def argmap
   {:error-function (replace-space-error-function replace-space-data-domains)
    :atom-generators replace-space-atom-generators
-   :max-points 800
-   :max-points-in-initial-program 400
+   :max-points 1600
+   :max-genome-size-in-initial-program 400
    :evalpush-limit 1600
    :population-size 1000
    :max-generations 300

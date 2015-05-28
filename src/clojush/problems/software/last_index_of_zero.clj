@@ -148,8 +148,8 @@
 (def argmap
   {:error-function (last-index-of-zero-error-function last-index-of-zero-data-domains)
    :atom-generators last-index-of-zero-atom-generators
-   :max-points 300
-   :max-points-in-initial-program 150
+   :max-points 600
+   :max-genome-size-in-initial-program 150
    :evalpush-limit 600
    :population-size 1000
    :max-generations 300
