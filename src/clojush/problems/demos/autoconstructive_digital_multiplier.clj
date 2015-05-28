@@ -210,8 +210,8 @@
 
 ;(defn dm-meta-error-fn
 ;  "Takes an individual and an argmap and returns a meta-error value."
-;  [ind {:keys [atom-generators max-points-in-initial-program] :as argmap}]
-;  (let [random-genome (random-plush-genome max-points-in-initial-program atom-generators argmap)
+;  [ind {:keys [atom-generators max-genome-size-in-initial-program] :as argmap}]
+;  (let [random-genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
 ;        semantics-fn (fn [g1 g2]
 ;                       (full-dm-error-function
 ;                         (translate-plush-genome-to-push-program

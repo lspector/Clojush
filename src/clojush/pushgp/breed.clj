@@ -28,13 +28,13 @@
    In future, may implement :delete, which deletes some of the instructions
    in a parent."
   [parent child {:keys [replace-child-that-exceeds-size-limit-with atom-generators
-                        max-points-in-initial-program max-points]
+                        max-genome-size-in-initial-program max-points]
                  :as argmap}]
   (case replace-child-that-exceeds-size-limit-with
     :parent parent
     :empty (make-individual :genome '() :genetic-operators :empty)
-    :truncate (assoc child :genome (take max-points (:genome child)))
-    :random (make-individual :genome (random-plush-genome max-points-in-initial-program atom-generators argmap)
+    :truncate (assoc child :genome (take (/ max-points 2) (:genome child)))
+    :random (make-individual :genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
                              :genetic-operators :random)
     ))
 
@@ -93,7 +93,8 @@
         child (perform-genetic-operator-list operator-vector
                                              (assoc first-parent :parent-uuids (vector (:uuid first-parent)))
                                              population location rand-gen argmap)]
-    (if (> (count (:genome child)) max-points) ; Check if too big
+    (if (> (count (:genome child))
+           (/ max-points 2)) ; Check if too big
       (revert-too-big-child first-parent child argmap)
         (assoc child
                :genetic-operators operator

@@ -69,18 +69,18 @@
 
 (defn random-plush-genome-with-size
   "Returns a random Plush genome containing the given number of points."
-  [points atom-generators argmap]
-  (repeatedly points
+  [genome-size atom-generators argmap]
+  (repeatedly genome-size
               #(random-plush-instruction-map
                  atom-generators
                  argmap)))
 
 (defn random-plush-genome
-  "Returns a random Plush genome with size limited by max-points."
-  ([max-points atom-generators]
-    (random-plush-genome max-points atom-generators {}))
-  ([max-points atom-generators argmap]
-    (random-plush-genome-with-size (inc (lrand-int max-points))
+  "Returns a random Plush genome with size limited by max-genome-size."
+  ([max-genome-size atom-generators]
+    (random-plush-genome max-genome-size atom-generators {}))
+  ([max-genome-size atom-generators argmap]
+    (random-plush-genome-with-size (inc (lrand-int max-genome-size))
                            atom-generators
                            argmap)))
 
@@ -93,4 +93,4 @@
     (random-push-code max-points atom-generators {}))
   ([max-points atom-generators argmap]
     (translate-plush-genome-to-push-program
-      {:genome (random-plush-genome max-points atom-generators argmap)})))
+      {:genome (random-plush-genome (int (/ max-points 2)) atom-generators argmap)})))
