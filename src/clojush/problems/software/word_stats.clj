@@ -266,8 +266,8 @@
 (def argmap
   {:error-function (word-stats-error-function word-stats-data-domains)
    :atom-generators word-stats-atom-generators
-   :max-points 800
-   :max-points-in-initial-program 400
+   :max-points 1600
+   :max-genome-size-in-initial-program 400
    :evalpush-limit 6000
    :population-size 1000
    :max-generations 300

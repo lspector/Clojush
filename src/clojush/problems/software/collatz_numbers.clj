@@ -138,8 +138,8 @@
 (def argmap
   {:error-function (collatz-numbers-error-function collatz-numbers-data-domains)
    :atom-generators collatz-numbers-atom-generators
-   :max-points 600
-   :max-points-in-initial-program 300
+   :max-points 1200
+   :max-genome-size-in-initial-program 300
    :evalpush-limit 15000
    :population-size 1000
    :max-generations 300

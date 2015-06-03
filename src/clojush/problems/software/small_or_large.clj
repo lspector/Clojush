@@ -127,8 +127,8 @@
 (def argmap
   {:error-function (small-or-large-error-function small-or-large-data-domains)
    :atom-generators small-or-large-atom-generators
-   :max-points 200
-   :max-points-in-initial-program 100
+   :max-points 400
+   :max-genome-size-in-initial-program 100
    :evalpush-limit 300
    :population-size 1000
    :max-generations 300

@@ -150,8 +150,8 @@
 (def argmap
   {:error-function (vectors-summed-error-function vectors-summed-data-domains)
    :atom-generators vectors-summed-atom-generators
-   :max-points 500
-   :max-points-in-initial-program 250
+   :max-points 1000
+   :max-genome-size-in-initial-program 250
    :evalpush-limit 1500
    :population-size 1000
    :max-generations 300

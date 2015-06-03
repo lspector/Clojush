@@ -73,8 +73,8 @@
                               d0 d1 d2 d3
                               ;boolean_dup boolean_swap boolean_pop boolean_rot
                               )
-   :max-points 200
-   :max-points-in-initial-program 200
+   :max-points 400
+   :max-genome-size-in-initial-program 200
    :genetic-operator-probabilities {:uniform-close-mutation 0.1
                                     :alternation 0.45
                                     :uniform-mutation 0.45}

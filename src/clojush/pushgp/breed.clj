@@ -28,13 +28,13 @@
    In future, may implement :delete, which deletes some of the instructions
    in a parent."
   [parent child {:keys [replace-child-that-exceeds-size-limit-with atom-generators
-                        max-points-in-initial-program max-points]
+                        max-genome-size-in-initial-program max-points]
                  :as argmap}]
   (case replace-child-that-exceeds-size-limit-with
     :parent parent
     :empty (make-individual :genome '() :genetic-operators :empty)
-    :truncate (assoc child :genome (take max-points (:genome child)))
-    :random (make-individual :genome (random-plush-genome max-points-in-initial-program atom-generators argmap)
+    :truncate (assoc child :genome (take (/ max-points 2) (:genome child)))
+    :random (make-individual :genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
                              :genetic-operators :random)
     ))
 
@@ -42,12 +42,12 @@
   "Evaluates child and parent, returning the child if it is at least as good as
    the parent on every test case."
   [child parent rand-gen {:keys [error-function parent-reversion-probability] :as argmap}]
-  (let [evaluated-child (evaluate-individual (assoc child :program (translate-plush-genome-to-push-program child))
+  (let [evaluated-child (evaluate-individual (assoc child :program (translate-plush-genome-to-push-program child argmap))
                                              error-function rand-gen argmap)]
     (if (>= (lrand) parent-reversion-probability)
       evaluated-child
       (let [child-errors (:errors evaluated-child)
-            evaluated-parent (evaluate-individual (assoc parent :program (translate-plush-genome-to-push-program parent))
+            evaluated-parent (evaluate-individual (assoc parent :program (translate-plush-genome-to-push-program parent argmap))
                                                   error-function rand-gen argmap)
             parent-errors (:errors evaluated-parent)]
         (if (reduce #(and %1 %2)
@@ -93,7 +93,8 @@
         child (perform-genetic-operator-list operator-vector
                                              (assoc first-parent :parent-uuids (vector (:uuid first-parent)))
                                              population location rand-gen argmap)]
-    (if (> (count (:genome child)) max-points) ; Check if too big
+    (if (> (count (:genome child))
+           (/ max-points 2)) ; Check if too big
       (revert-too-big-child first-parent child argmap)
         (assoc child
                :genetic-operators operator

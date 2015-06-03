@@ -138,8 +138,8 @@
 (def argmap
   {:error-function (csl-error-function csl-data-domains)
    :atom-generators csl-atom-generators
-   :max-points 400
-   :max-points-in-initial-program 200
+   :max-points 800
+   :max-genome-size-in-initial-program 200
    :evalpush-limit 600
    :population-size 1000
    :max-generations 300

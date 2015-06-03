@@ -97,8 +97,8 @@
 ;                                   (repeat 25 
 ;                                           '(boolean_and boolean_or boolean_not exec_if))))
 ;   :use-lexicase-selection true
-;   :max-points 10000
-;   :max-points-in-initial-program 10
+;   :max-points 20000
+;   :max-genome-size-in-initial-program 10
 ;   :population-size 100
 ;   :evalpush-limit 10000
 ;   :mutation-probability 0.4
@@ -121,8 +121,8 @@
                             (apply concat 
                                    (repeat 25 
                                            '(boolean_and boolean_or boolean_not exec_if))))
-   :max-points 1000
-   :max-points-in-initial-program 100
+   :max-points 2000
+   :max-genome-size-in-initial-program 100
    :population-size 100
    :evalpush-limit 2000
    :genetic-operator-probabilities {[:alternation :uniform-mutation] 1.0} ;Somewhat equivalent to normal Push's ULTRA operator

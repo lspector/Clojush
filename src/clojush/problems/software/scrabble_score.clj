@@ -180,8 +180,8 @@
 (def argmap
   {:error-function (scrabble-score-error-function scrabble-score-data-domains)
    :atom-generators scrabble-score-atom-generators
-   :max-points 1000
-   :max-points-in-initial-program 500
+   :max-points 2000
+   :max-genome-size-in-initial-program 500
    :evalpush-limit 2000
    :population-size 1000
    :max-generations 300

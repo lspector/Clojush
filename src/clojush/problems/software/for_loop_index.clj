@@ -141,8 +141,8 @@
 (def argmap
   {:error-function (loop-error-function loop-data-domains)
    :atom-generators loop-atom-generators
-   :max-points 300
-   :max-points-in-initial-program 150
+   :max-points 600
+   :max-genome-size-in-initial-program 150
    :evalpush-limit 600
    :population-size 1000
    :max-generations 300

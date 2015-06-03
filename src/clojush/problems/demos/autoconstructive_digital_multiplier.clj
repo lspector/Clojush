@@ -210,13 +210,14 @@
 
 ;(defn dm-meta-error-fn
 ;  "Takes an individual and an argmap and returns a meta-error value."
-;  [ind {:keys [atom-generators max-points-in-initial-program] :as argmap}]
-;  (let [random-genome (random-plush-genome max-points-in-initial-program atom-generators argmap)
+;  [ind {:keys [atom-generators max-genome-size-in-initial-program] :as argmap}]
+;  (let [random-genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
 ;        semantics-fn (fn [g1 g2]
 ;                       (full-dm-error-function
 ;                         (translate-plush-genome-to-push-program
 ;                           {:genome
-;                            (produce-child-genome-by-autoconstruction g1 g2)})))
+;                            (produce-child-genome-by-autoconstruction g1 g2)}
+;                           argmap)))
 ;        e1 (semantics-fn (:genome ind) random-genome)]
 ;    (if (= (:errors ind) e1)
 ;      1
@@ -243,8 +244,8 @@
      :atom-generators (dm-atom-generators num-bits-n)
      :population-size 500
      :max-generations 10000
-     :max-points 2000
-     :max-points-in-initial-program 100
+     :max-points 4000
+     :max-genome-size-in-initial-program 100
      :evalpush-limit 10000
      :epigenetic-markers [:close :silent]
      :genetic-operator-probabilities {:autoconstruction 1.0}
