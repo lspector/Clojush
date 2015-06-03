@@ -2,7 +2,8 @@
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
         [clojure.math.numeric-tower])
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as string]
+            [incanter.stats :as stats]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; reproduction
@@ -276,34 +277,571 @@ given by uniform-deletion-rate."
       run-result
       ())))
 
-(defn express-same-programs?
+;(defn express-same-programs?
+;  [g1 g2]
+;  (or (= g1 g2) ;; avoid translation for equivalent genomes 
+;      (= (translate-plush-genome-to-push-program {:genome g1})
+;         (translate-plush-genome-to-push-program {:genome g2}))))
+
+;(defn expressively-indistinct?
+;  [genomes]
+;  (or (not (distinct? genomes)) ;; avoid translation for equivalent genomes 
+;      (not (distinct? (map #(translate-plush-genome-to-push-program {:genome %}) genomes)))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)]
+;    (if (expressively-indistinct? [c1 c2])
+;      false
+;      (let [c1c (produce-child-genome-by-autoconstruction c1 g true)
+;            c2c (produce-child-genome-by-autoconstruction c2 g true)]
+;        (if (expressively-indistinct? [c1 c2 c1c c2c])
+;          false
+;          (let [c1cc (produce-child-genome-by-autoconstruction c1c g true)
+;                c2cc (produce-child-genome-by-autoconstruction c2c g true)]
+;            (if (expressively-indistinct? [c1 c2 c1c c2c c1cc c2cc])
+;              false
+;              (if (let [g-size (count g)
+;                        descendant-sizes (map count [c1 c2 c1c c2c c1cc c2cc])]
+;                   (or (>= (apply min descendant-sizes)
+;                           g-size)
+;                       (<= (apply max descendant-sizes)
+;                           g-size)))
+;                false
+;                true))))))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)]
+;    (if (expressively-indistinct? [c1 c2])
+;      false
+;      (let [c1c (produce-child-genome-by-autoconstruction c1 g true)
+;            c2c (produce-child-genome-by-autoconstruction c2 g true)]
+;        (if (expressively-indistinct? [c1 c2 c1c c2c])
+;          false
+;          (if (= (levenshtein-distance c1 c1c)
+;                 (levenshtein-distance c2 c2c))
+;            false
+;            true))))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)]
+;    (if (expressively-indistinct? [c1 c2])
+;      false
+;      (if (= (levenshtein-distance g c1)
+;             (levenshtein-distance g c2))
+;        false
+;        true))))
+
+(defn expressed-program-sequence-from-genome
+  [g]
+  (ensure-list
+    (list-to-open-close-sequence 
+      (translate-plush-genome-to-push-program {:genome g}))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        g-seq (expressed-program-sequence-from-genome g)
+;        c1-seq (expressed-program-sequence-from-genome c1)
+;        c2-seq (expressed-program-sequence-from-genome c2)]
+;    (if (not (distinct? 0
+;                        (levenshtein-distance g-seq c1-seq)
+;                        (levenshtein-distance g-seq c2-seq)))
+;      false
+;      (let [c1c1 (produce-child-genome-by-autoconstruction c1 g false)
+;            c1c2 (produce-child-genome-by-autoconstruction c1 g false)
+;            c1c1-seq (expressed-program-sequence-from-genome c1c1)
+;            c1c2-seq (expressed-program-sequence-from-genome c1c2)]
+;        (if (not (distinct? 0
+;                            (levenshtein-distance g-seq c1-seq)
+;                            (levenshtein-distance c1-seq c1c1-seq)
+;                            (levenshtein-distance c1-seq c1c2-seq)))
+;          false
+;          (let [c2c1 (produce-child-genome-by-autoconstruction c2 g false)
+;                c2c2 (produce-child-genome-by-autoconstruction c2 g false)
+;                c2c1-seq (expressed-program-sequence-from-genome c2c1)
+;                c2c2-seq (expressed-program-sequence-from-genome c2c2)]
+;            (if (not (distinct? 0
+;                                (levenshtein-distance g-seq c2-seq)
+;                                (levenshtein-distance c2-seq c2c1-seq)
+;                                (levenshtein-distance c2-seq c2c2-seq)))
+;              false
+;              true)))))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        g-seq (expressed-program-sequence-from-genome g)
+;        c1-seq (expressed-program-sequence-from-genome c1)
+;        c2-seq (expressed-program-sequence-from-genome c2)]
+;    (distinct? 0
+;               (levenshtein-distance g-seq c1-seq)
+;               (levenshtein-distance g-seq c2-seq))))
+
+(defn expressively-indistinct?
+  [genomes]
+  (or (not (apply distinct? genomes)) ;; avoid translation for equivalent genomes 
+      (not (apply distinct? (map #(translate-plush-genome-to-push-program {:genome %}) genomes)))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)]
+;    (if (expressively-indistinct? [c1 c2])
+;      false
+;      (let [c1c (produce-child-genome-by-autoconstruction c1 g true)
+;            c2c (produce-child-genome-by-autoconstruction c2 g true)]
+;        (if (expressively-indistinct? [c1 c2 c1c c2c])
+;          false
+;          (let [c1cc (produce-child-genome-by-autoconstruction c1c g true)
+;                c2cc (produce-child-genome-by-autoconstruction c2c g true)]
+;            (if (expressively-indistinct? [c1 c2 c1c c2c c1cc c2cc])
+;              false
+;              #_(if (let [g-size (count g)
+;                         descendant-sizes (map count [c1 c2 c1c c2c c1cc c2cc])]
+;                    (or (>= (apply min descendant-sizes)
+;                            g-size)
+;                        (<= (apply max descendant-sizes)
+;                            g-size)))
+;                 false
+;                 true)
+;              true)))))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c1c (produce-child-genome-by-autoconstruction c1 g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c2c (produce-child-genome-by-autoconstruction c2 g false)
+;        c1-seq (expressed-program-sequence-from-genome c1)
+;        c2-seq (expressed-program-sequence-from-genome c2)
+;        c1c-seq (expressed-program-sequence-from-genome c1c)
+;        c2c-seq (expressed-program-sequence-from-genome c2c)]
+;    (distinct? 0
+;               (levenshtein-distance c1-seq c1c-seq)
+;               (levenshtein-distance c2-seq c2c-seq))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c1-seq (expressed-program-sequence-from-genome c1)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c2-seq (expressed-program-sequence-from-genome c2)]
+;    (if (not (distinct? c1-seq c2-seq))
+;      false
+;      (let [c1c (produce-child-genome-by-autoconstruction c1 g false)
+;            c1c-seq (expressed-program-sequence-from-genome c1c)
+;            c2c (produce-child-genome-by-autoconstruction c2 g false)
+;            c2c-seq (expressed-program-sequence-from-genome c2c)]
+;        (and (distinct? c1-seq c2-seq c1c-seq c2c-seq)
+;             (distinct? 0
+;                        (levenshtein-distance c1-seq c1c-seq)
+;                        (levenshtein-distance c2-seq c2c-seq)))))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c1-seq (expressed-program-sequence-from-genome c1)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c2-seq (expressed-program-sequence-from-genome c2)]
+;    (if (not (distinct? c1-seq c2-seq))
+;      false
+;      (let [c1c (produce-child-genome-by-autoconstruction c1 g true)
+;            c1c-seq (expressed-program-sequence-from-genome c1c)
+;            c2c (produce-child-genome-by-autoconstruction c2 g true)
+;            c2c-seq (expressed-program-sequence-from-genome c2c)]
+;        (and (distinct? c1-seq c2-seq c1c-seq c2c-seq)
+;             (distinct? 0
+;                        (levenshtein-distance c1-seq c1c-seq)
+;                        (levenshtein-distance c2-seq c2c-seq)))))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)]
+;    (if (expressively-indistinct? [c1 c2])
+;      false
+;      (let [c1c (produce-child-genome-by-autoconstruction c1 g true)
+;            c2c (produce-child-genome-by-autoconstruction c2 g true)]
+;        (if (expressively-indistinct? [c1 c2 c1c c2c])
+;          false
+;          (let [c1cc (produce-child-genome-by-autoconstruction c1c g true)
+;                c2cc (produce-child-genome-by-autoconstruction c2c g true)]
+;            (if (expressively-indistinct? [c1 c2 c1c c2c c1cc c2cc])
+;              false
+;              (distinct? 0
+;                         (levenshtein-distance 
+;                           (expressed-program-sequence-from-genome c1c)
+;                           (expressed-program-sequence-from-genome c1cc))
+;                         (levenshtein-distance 
+;                           (expressed-program-sequence-from-genome c2c)
+;                           (expressed-program-sequence-from-genome c2cc))))))))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)]
+;    (if (expressively-indistinct? [c1 c2])
+;      false
+;      (let [c1c (produce-child-genome-by-autoconstruction c1 g true)
+;            c2c (produce-child-genome-by-autoconstruction c2 g true)]
+;        (if (or (expressively-indistinct? [c1 c2 c1c c2c])
+;                (not (distinct?
+;                       (levenshtein-distance 
+;                         (expressed-program-sequence-from-genome c1)
+;                         (expressed-program-sequence-from-genome c1c))
+;                       (levenshtein-distance 
+;                         (expressed-program-sequence-from-genome c2)
+;                         (expressed-program-sequence-from-genome c2c)))))
+;          false
+;          (let [c1cc (produce-child-genome-by-autoconstruction c1c g true)
+;                c2cc (produce-child-genome-by-autoconstruction c2c g true)]
+;            (not (expressively-indistinct? [c1 c2 c1c c2c c1cc c2cc]))))))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)]
+;    (if (not (distinct?
+;               0
+;               (levenshtein-distance 
+;                 (expressed-program-sequence-from-genome g)
+;                 (expressed-program-sequence-from-genome c1))
+;               (levenshtein-distance 
+;                 (expressed-program-sequence-from-genome g)
+;                 (expressed-program-sequence-from-genome c2))))
+;      false
+;      (let [c1c (produce-child-genome-by-autoconstruction c1 g true)
+;            c2c (produce-child-genome-by-autoconstruction c2 g true)]
+;        (if (expressively-indistinct? [c1 c2 c1c c2c])             
+;          false
+;          (let [c1cc (produce-child-genome-by-autoconstruction c1c g true)
+;                c2cc (produce-child-genome-by-autoconstruction c2c g true)]
+;            (not (expressively-indistinct? [c1 c2 c1c c2c c1cc c2cc]))))))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)]
+;    (if (expressively-indistinct? [c1 c2])
+;      false
+;      (let [c1c (produce-child-genome-by-autoconstruction c1 g true)
+;            c2c (produce-child-genome-by-autoconstruction c2 g true)]
+;        (if (expressively-indistinct? [c1 c2 c1c c2c])             
+;          false
+;          (let [c1cc (produce-child-genome-by-autoconstruction c1c g true)
+;                c2cc (produce-child-genome-by-autoconstruction c2c g true)]
+;            (not (expressively-indistinct? [c1 c2 c1c c2c c1cc c2cc]))))))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c1c (produce-child-genome-by-autoconstruction c1 g false)
+;        c2c (produce-child-genome-by-autoconstruction c2 g false)]
+;    (distinct?
+;      0
+;      (levenshtein-distance 
+;        (expressed-program-sequence-from-genome c1)
+;        (expressed-program-sequence-from-genome c1c))
+;      (levenshtein-distance 
+;        (expressed-program-sequence-from-genome c2)
+;        (expressed-program-sequence-from-genome c2c)))))
+
+(defn translate
+  [g]
+  (translate-plush-genome-to-push-program {:genome g}))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c1c (produce-child-genome-by-autoconstruction c1 g false)
+;        c2c (produce-child-genome-by-autoconstruction c2 g false)]
+;    (and (apply distinct? (map translate [g c1 c2 c1c c2c]))
+;         (distinct?
+;           0
+;           (levenshtein-distance 
+;             (expressed-program-sequence-from-genome c1)
+;             (expressed-program-sequence-from-genome c1c))
+;           (levenshtein-distance 
+;             (expressed-program-sequence-from-genome c2)
+;             (expressed-program-sequence-from-genome c2c))))))
+
+(defn expressed-difference
   [g1 g2]
-  (or (= g1 g2) ;; avoid translation for equivalent genomes 
-      (= (translate-plush-genome-to-push-program {:genome g1})
-         (translate-plush-genome-to-push-program {:genome g2}))))
+  (levenshtein-distance (expressed-program-sequence-from-genome g1)
+                        (expressed-program-sequence-from-genome g2)))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c1c1 (produce-child-genome-by-autoconstruction c1 g false)
+;        c1c2 (produce-child-genome-by-autoconstruction c1 g false)
+;        c2c1 (produce-child-genome-by-autoconstruction c2 g false)
+;        c2c2 (produce-child-genome-by-autoconstruction c2 g false)]
+;    (and (apply distinct? (map translate [g c1 c2 c1c1 c1c2 c2c1 c2c2]))
+;         (= (expressed-difference g c1)
+;            (expressed-difference g c2))
+;         (= (expressed-difference c1 c1c1)
+;            (expressed-difference c1 c1c2))
+;         (= (expressed-difference c2 c2c1)
+;            (expressed-difference c2 c2c2))
+;         (distinct?
+;           0
+;           (expressed-difference g c1)
+;           (expressed-difference c1 c1c1)
+;           (expressed-difference c1 c2c1)))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c1c (produce-child-genome-by-autoconstruction c1 g false)
+;        c2c (produce-child-genome-by-autoconstruction c2 g false)]
+;    (distinct?
+;      0
+;      (expressed-difference g c1)
+;      (expressed-difference g c2)
+;      (expressed-difference c1 c1c)
+;      (expressed-difference c2 c2c))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c1c1 (produce-child-genome-by-autoconstruction c1 g false)
+;        c1c2 (produce-child-genome-by-autoconstruction c1 g false)
+;        c2c1 (produce-child-genome-by-autoconstruction c2 g false)
+;        c2c2 (produce-child-genome-by-autoconstruction c2 g false)]
+;    (distinct?
+;      0
+;      (expressed-difference g c1)
+;      (expressed-difference g c2)
+;      (expressed-difference c1 c1c1)
+;      (expressed-difference c1 c1c2)
+;      (expressed-difference c2 c2c1)
+;      (expressed-difference c2 c2c2))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c1-diff (expressed-difference g c1)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c2-diff (expressed-difference g c2)
+;        c1c1 (produce-child-genome-by-autoconstruction c1 g false)
+;        c1c1-diff (expressed-difference c1 c1c1)
+;        c1c2 (produce-child-genome-by-autoconstruction c1 g false)
+;        c1c2-diff (expressed-difference c1 c1c2)
+;        c2c1 (produce-child-genome-by-autoconstruction c2 g false)
+;        c2c1-diff (expressed-difference c2 c2c1)
+;        c2c2 (produce-child-genome-by-autoconstruction c2 g false)
+;        c2c2-diff (expressed-difference c2 c2c2)]
+;    (and (apply distinct? (map translate [g c1 c2 c1c1 c1c2 c2c1 c2c2]))
+;         (distinct? 0 c1-diff c1c1-diff)
+;         (distinct? 0 c1-diff c1c2-diff)
+;         (distinct? 0 c2-diff c2c1-diff)
+;         (distinct? 0 c2-diff c2c2-diff))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c1-diff (expressed-difference g c1)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c2-diff (expressed-difference g c2)
+;        c1c1 (produce-child-genome-by-autoconstruction c1 c1 false)
+;        c1c1-diff (expressed-difference c1 c1c1)
+;        c1c2 (produce-child-genome-by-autoconstruction c1 c1 false)
+;        c1c2-diff (expressed-difference c1 c1c2)
+;        c2c1 (produce-child-genome-by-autoconstruction c2 c2 false)
+;        c2c1-diff (expressed-difference c2 c2c1)
+;        c2c2 (produce-child-genome-by-autoconstruction c2 c2 false)
+;        c2c2-diff (expressed-difference c2 c2c2)]
+;    (and (apply distinct? (map translate [g c1 c2 c1c1 c1c2 c2c1 c2c2]))
+;         (distinct? 0 c1-diff c1c1-diff)
+;         (distinct? 0 c1-diff c1c2-diff)
+;         (distinct? 0 c2-diff c2c1-diff)
+;         (distinct? 0 c2-diff c2c2-diff))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c1-diff (expressed-difference g c1)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c2-diff (expressed-difference g c2)
+;        c1c1 (produce-child-genome-by-autoconstruction c1 c1 false)
+;        c1c1-diff (expressed-difference c1 c1c1)
+;        c1c1-total-diff (expressed-difference g c1c1)
+;        c1c2 (produce-child-genome-by-autoconstruction c1 c1 false)
+;        c1c2-diff (expressed-difference c1 c1c2)
+;        c1c2-total-diff (expressed-difference g c1c2)
+;        c2c1 (produce-child-genome-by-autoconstruction c2 c2 false)
+;        c2c1-diff (expressed-difference c2 c2c1)
+;        c2c1-total-diff (expressed-difference g c2c1)
+;        c2c2 (produce-child-genome-by-autoconstruction c2 c2 false)
+;        c2c2-diff (expressed-difference c2 c2c2)
+;        c2c2-total-diff (expressed-difference c2 c2c2)]
+;    (and (apply distinct? (map translate [g c1 c2 c1c1 c1c2 c2c1 c2c2]))
+;         (distinct? 0 c1-diff c1c1-diff)
+;         (distinct? 0 c1-diff c1c2-diff)
+;         (distinct? 0 c2-diff c2c1-diff)
+;         (distinct? 0 c2-diff c2c2-diff)
+;         (< 0 c1-diff c1c1-total-diff)
+;         (< 0 c1-diff c1c2-total-diff)
+;         (< 0 c2-diff c2c1-total-diff)
+;         (< 0 c2-diff c2c2-total-diff)
+;         )))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c1-diff (expressed-difference g c1)
+;        c1c (produce-child-genome-by-autoconstruction c1 c1 true)
+;        c1c-diff (expressed-difference c1 c1c)
+;        c1cc (produce-child-genome-by-autoconstruction c1c c1c true)
+;        c1cc-diff (expressed-difference c1c c1cc)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c2-diff (expressed-difference g c2)
+;        c2c (produce-child-genome-by-autoconstruction c2 c2 true)
+;        c2c-diff (expressed-difference c2 c2c)
+;        c2cc (produce-child-genome-by-autoconstruction c2c c2c true)
+;        c2cc-diff (expressed-difference c2c c2cc)]
+;    (and (apply distinct? (map translate [g c1 c1c c1cc c2 c2c c2cc]))
+;         (distinct? 0 (- c1c-diff c1-diff) (- c1cc-diff c1c-diff))
+;         (distinct? 0 (- c2c-diff c2-diff) (- c2cc-diff c2c-diff)))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c3 (produce-child-genome-by-autoconstruction g g true)
+;        c4 (produce-child-genome-by-autoconstruction g c1 true)]
+;    (apply distinct? (map translate [g c1 c2 c3 c4]))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [num-kids 20
+;        c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)]
+;    (if (not (apply distinct? (map translate [g c1 c2])))
+;      false
+;      (let [c1-child-diffs (mapv #(expressed-difference c1 %)
+;                                 (loop [kids []]
+;                                   (if (>= (count kids) num-kids)
+;                                     kids
+;                                     (recur (conj kids 
+;                                                  (produce-child-genome-by-autoconstruction c1 c1 false))))))
+;            c2-child-diffs (mapv #(expressed-difference c2 %)
+;                                 (loop [kids []]
+;                                   (if (>= (count kids) num-kids)
+;                                     kids
+;                                     (recur (conj kids 
+;                                                  (produce-child-genome-by-autoconstruction c2 c2 false))))))]
+;        (< (if (and (apply = c1-child-diffs)
+;                    (apply = c2-child-diffs)) ;; this case will cause t-test to error
+;             (if (= (first c1-child-diffs) (first c2-child-diffs))
+;               1.0
+;               0.0)
+;             (:p-value (stats/t-test c1-child-diffs :y c2-child-diffs)))
+;           0.1)))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [num-kids 20
+;        c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)]
+;    (if (not (apply distinct? (map translate [g c1 c2])))
+;      false
+;      (let [c1-kids (for [_ (range num-kids)]
+;                      (produce-child-genome-by-autoconstruction c1 c1 false))
+;            c2-kids (for [_ (range num-kids)]
+;                      (produce-child-genome-by-autoconstruction c2 c2 false))]
+;        (if (not (apply distinct? (map translate (concat c1-kids c2-kids [g c1 c2]))))
+;          false
+;          (let [c1-kid-diffs (mapv #(expressed-difference c1 %) c1-kids)
+;                c2-kid-diffs (mapv #(expressed-difference c2 %) c2-kids)]
+;        (< (if (and (apply = c1-kid-diffs)
+;                    (apply = c2-kid-diffs)) ;; this case will cause t-test to error
+;             (if (= (first c1-kid-diffs) (first c2-kid-diffs))
+;               1.0
+;               0.0)
+;             (:p-value (stats/t-test c1-kid-diffs :y c2-kid-diffs)))
+;           0.01)))))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [num-kids 20
+;        c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)]
+;    (if (not (apply distinct? (map translate [g c1 c2])))
+;      false
+;      (let [c1-kids (for [_ (range num-kids)]
+;                      (produce-child-genome-by-autoconstruction c1 g false))
+;            c2-kids (for [_ (range num-kids)]
+;                      (produce-child-genome-by-autoconstruction c2 g false))]
+;        (if (not (apply distinct? (map translate (concat c1-kids c2-kids [g c1 c2]))))
+;          false
+;          (let [c1-kid-diffs (mapv #(expressed-difference c1 %) c1-kids)
+;                c2-kid-diffs (mapv #(expressed-difference c2 %) c2-kids)]
+;        (< (if (and (apply = c1-kid-diffs)
+;                    (apply = c2-kid-diffs)) ;; this case will cause t-test to error
+;             (if (= (first c1-kid-diffs) (first c2-kid-diffs))
+;               1.0
+;               0.0)
+;             (:p-value (stats/t-test c1-kid-diffs :y c2-kid-diffs)))
+;           0.01)))))))
+
+;(defn reproductively-competent?
+;  [g]
+;  (let [num-kids 20
+;        c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)]
+;    (if (not (apply distinct? (map translate [g c1 c2])))
+;      false
+;      (let [c1-kids (for [_ (range num-kids)]
+;                      (produce-child-genome-by-autoconstruction c1 g false))
+;            c2-kids (for [_ (range num-kids)]
+;                      (produce-child-genome-by-autoconstruction c2 g false))]
+;        (if (not (apply distinct? (map translate (concat c1-kids c2-kids [g c1 c2]))))
+;          false
+;          (let [c1-kid-diffs (mapv #(expressed-difference c1 %) c1-kids)
+;                c2-kid-diffs (mapv #(expressed-difference c2 %) c2-kids)]
+;            (< (if (and (apply = c1-kid-diffs)
+;                        (apply = c2-kid-diffs)) ;; this case will cause t-test to error
+;                 1.0
+;                 (:p-value (stats/t-test c1-kid-diffs :y c2-kid-diffs)))
+;               0.01)))))))
 
 (defn reproductively-competent?
   [g]
-  (let [c1 (produce-child-genome-by-autoconstruction g g false)
+  (let [num-kids 20
+        c1 (produce-child-genome-by-autoconstruction g g false)
         c2 (produce-child-genome-by-autoconstruction g g false)]
-    (if (express-same-programs? c1 c2)
+    (if (not (apply distinct? (map translate [g c1 c2])))
       false
-      (let [c1c (produce-child-genome-by-autoconstruction c1 g true)
-            c2c (produce-child-genome-by-autoconstruction c2 g true)]
-        (if (express-same-programs? c1c c2c)
+      (let [c1-kids (for [_ (range num-kids)]
+                      (produce-child-genome-by-autoconstruction c1 g false))
+            c2-kids (for [_ (range num-kids)]
+                      (produce-child-genome-by-autoconstruction c2 g false))]
+        (if (not (apply distinct? (map translate (concat c1-kids c2-kids [g c1 c2]))))
           false
-          (let [c1cc (produce-child-genome-by-autoconstruction c1c g true)
-                c2cc (produce-child-genome-by-autoconstruction c2c g true)]
-            (if (express-same-programs? c1cc c2cc)
+          (let [c1-kid-diffs (mapv #(expressed-difference c1 %) c1-kids)
+                c2-kid-diffs (mapv #(expressed-difference c2 %) c2-kids)]
+            (if (or (apply = c1-kid-diffs)
+                    (apply = c2-kid-diffs))
               false
-              (if (let [g-size (count g)
-                        descendant-sizes (map count [c1 c2 c1c c2c c1cc c2cc])]
-                   (or (>= (apply min descendant-sizes)
-                           g-size)
-                       (<= (apply max descendant-sizes)
-                           g-size)))
-                false
-                true))))))))
+              (or (< (:p-value (stats/t-test c1-kid-diffs :y c2-kid-diffs))
+                     0.01)
+                  (< (stats/f-test c1-kid-diffs c2-kid-diffs)
+                     0.01)))))))))
 
 (defn autoconstruction
   "Returns a genome for child produced by autoconstruction by executing parent1 with parent1,

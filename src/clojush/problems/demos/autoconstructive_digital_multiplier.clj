@@ -29,7 +29,7 @@
 
 (ns clojush.problems.demos.autoconstructive-digital-multiplier
   (:use [clojush.pushgp pushgp genetic-operators]
-        [clojush pushstate interpreter random translate]
+        [clojush pushstate interpreter random translate util]
         clojure.math.numeric-tower))
 
 ;; Borrowed from mux examples
@@ -229,39 +229,79 @@
     1
     0))
 
-;; Define argmap for pushgp
-(defn define-digital-multiplier
-  [num-bits-n]
-  (define-ins (* 2 num-bits-n))
-  (define-outs (* 2 num-bits-n))
-  (def full-dm-error-function
-    (partial dm-error-function
-             num-bits-n
-             (dm-test-cases num-bits-n)))
-  (def argmap
-    {:error-function full-dm-error-function
-     :atom-generators (dm-atom-generators num-bits-n)
-     :population-size 500
-     :max-generations 10000
-     :max-points 2000
-     :max-points-in-initial-program 100
-     :evalpush-limit 10000
-     :epigenetic-markers [:close :silent]
-     :genetic-operator-probabilities {:autoconstruction 1.0}
-     ;:genetic-operator-probabilities {:autoconstruction 0.9
-     ;                                 :uniform-deletion 0.1}
-     :uniform-deletion-rate 0.01
-     :parent-selection :lexicase
-     ;:parent-selection :leaky-lexicase
-     ;:lexicase-leakage 0.1
-     ;:trivial-geography-radius 50
-     :report-simplifications 0
-     ;:pass-individual-to-error-function true
-     ;:meta-error-categories [dm-meta-error-fn]
-     :meta-error-categories [:size dm-meta-error-fn]
-     }
-    )
-  )
+;(defn variation-meta-error-fn
+;  "Takes an individual and an argmap and returns a meta-error value."
+;  [ind argmap]
+;  (let [g (:genome ind)
+;        c1 (produce-child-genome-by-autoconstruction g g false)
+;        c2 (produce-child-genome-by-autoconstruction g g false)
+;        c1c (produce-child-genome-by-autoconstruction c1 g false)
+;        c2c (produce-child-genome-by-autoconstruction c2 g false)]
+;    (if (distinct?
+;          0
+;          (expressed-difference c1 c1c)
+;          (expressed-difference c2 c2c))
+;      0
+;      1)))
 
-;; Create the argmap passing the number of bits for the problem
-(define-digital-multiplier 3)
+(defn variation-meta-error-fn
+  "Takes an individual and an argmap and returns a meta-error value."
+  [ind argmap]
+  (let [g (:genome ind)
+        c1 (produce-child-genome-by-autoconstruction g g false)
+        c2 (produce-child-genome-by-autoconstruction g g false)
+        c1c (produce-child-genome-by-autoconstruction c1 g true)
+        c2c (produce-child-genome-by-autoconstruction c2 g true)]
+    (if (and (distinct?
+               0
+               (expressed-difference g c1)
+               (expressed-difference c1 c1c))
+             (distinct?
+               0
+               (expressed-difference g c2)
+               (expressed-difference c2 c2c))
+             (distinct?
+               0
+               (expressed-difference c1 c1c)
+               (expressed-difference c2 c2c)))
+      0
+      1)))
+
+  ;; Define argmap for pushgp
+  (defn define-digital-multiplier
+    [num-bits-n]
+    (define-ins (* 2 num-bits-n))
+    (define-outs (* 2 num-bits-n))
+    (def full-dm-error-function
+      (partial dm-error-function
+               num-bits-n
+               (dm-test-cases num-bits-n)))
+    (def argmap
+      {:error-function full-dm-error-function
+       :atom-generators (dm-atom-generators num-bits-n)
+       :population-size 500
+       :max-generations 10000
+       :max-points 500
+       :max-points-in-initial-program 100
+       :evalpush-limit 2000
+       :epigenetic-markers [:close :silent]
+       :genetic-operator-probabilities {:autoconstruction 1.0}
+       ;:genetic-operator-probabilities {:autoconstruction 0.9
+       ;                                 :uniform-deletion 0.1}
+       ;:uniform-deletion-rate 0.01
+       :parent-selection :lexicase
+       ;:parent-selection :leaky-lexicase
+       ;:lexicase-leakage 0.1
+       ;:trivial-geography-radius 50
+       :report-simplifications 0
+       ;:pass-individual-to-error-function true
+       ;:meta-error-categories [dm-meta-error-fn]
+       ;:meta-error-categories (repeat 64 dm-meta-error-fn)
+       ;:meta-error-categories [:size dm-meta-error-fn]
+       ;:meta-error-categories [variation-meta-error-fn]
+       }
+      )
+    )
+
+  ;; Create the argmap passing the number of bits for the problem
+  (define-digital-multiplier 3)
