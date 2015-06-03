@@ -293,7 +293,7 @@
    ;:simplification-probability 0.3
    ;:reproduction-probability 0.1
    ;:reproduction-simplifications 10
-   :max-points 200
-   :max-points-in-initial-program 200
+   :max-points 400
+   :max-genome-size-in-initial-program 200
    :evalpush-limit 1000
    })

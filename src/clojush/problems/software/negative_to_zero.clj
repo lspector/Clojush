@@ -148,8 +148,8 @@
 (def argmap
   {:error-function (negative-to-zero-error-function negative-to-zero-data-domains)
    :atom-generators negative-to-zero-atom-generators
-   :max-points 500
-   :max-points-in-initial-program 250
+   :max-points 1000
+   :max-genome-size-in-initial-program 250
    :evalpush-limit 1500
    :population-size 1000
    :max-generations 300

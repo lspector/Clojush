@@ -198,8 +198,8 @@
 (def argmap
   {:error-function (grade-error-function grade-data-domains)
    :atom-generators grade-atom-generators
-   :max-points 400
-   :max-points-in-initial-program 200
+   :max-points 800
+   :max-genome-size-in-initial-program 200
    :evalpush-limit 800
    :population-size 1000
    :max-generations 300

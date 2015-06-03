@@ -87,8 +87,8 @@
   {:error-function (partial error-function (count data));; Use all samples
    :atom-generators atom-generators
    :report-simplifications 0
-   :max-points 500
-   :max-points-in-initial-program 500
+   :max-points 1000
+   :max-genome-size-in-initial-program 500
    :evalpush-limit 500
    :population-size 1000
    :max-generations 1000

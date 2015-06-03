@@ -168,7 +168,7 @@ given by uniform-deletion-rate."
                           use-s1 (lrand-nth [true false])
                           result-genome []]
                      (if (or (>= i (count (if use-s1 s1 s2))) ;; finished current program
-                             (> (count result-genome) (* 2 max-points))) ;; runaway growth
+                             (> (count result-genome) max-points)) ;; runaway growth
                        (seq result-genome);; Return, converting back into a sequence
                        (if (< (lrand) alternation-rate)
                          (recur (max 0 (+' i (Math/round (*' alignment-deviation (gaussian-noise-factor)))))
@@ -846,7 +846,7 @@ given by uniform-deletion-rate."
 (defn autoconstruction
   "Returns a genome for child produced by autoconstruction by executing parent1 with parent1,
 and parent2 on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
-  [parent1 parent2 {:keys [maintain-ancestors atom-generators max-points-in-initial-program error-function] 
+  [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program error-function] 
                     :as argmap}]
   (let [parent1-genome (:genome parent1)
         parent2-genome (:genome parent2)
@@ -854,7 +854,7 @@ and parent2 on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
         competent (reproductively-competent? child-genome)
         new-genome (if competent
                      child-genome
-                     (random-plush-genome max-points-in-initial-program atom-generators argmap))]
+                     (random-plush-genome max-genome-size-in-initial-program atom-generators argmap))]
     (assoc (make-individual :genome new-genome
                             :history (:history parent1)
                             :ancestors (if maintain-ancestors

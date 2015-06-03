@@ -151,8 +151,8 @@
 (def argmap
   {:error-function (checksum-error-function checksum-data-domains)
    :atom-generators checksum-atom-generators
-   :max-points 800
-   :max-points-in-initial-program 400
+   :max-points 1600
+   :max-genome-size-in-initial-program 400
    :evalpush-limit 1500
    :population-size 1000
    :max-generations 300

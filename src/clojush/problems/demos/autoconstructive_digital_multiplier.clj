@@ -210,13 +210,14 @@
 
 ;(defn dm-meta-error-fn
 ;  "Takes an individual and an argmap and returns a meta-error value."
-;  [ind {:keys [atom-generators max-points-in-initial-program] :as argmap}]
-;  (let [random-genome (random-plush-genome max-points-in-initial-program atom-generators argmap)
+;  [ind {:keys [atom-generators max-genome-size-in-initial-program] :as argmap}]
+;  (let [random-genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
 ;        semantics-fn (fn [g1 g2]
 ;                       (full-dm-error-function
 ;                         (translate-plush-genome-to-push-program
 ;                           {:genome
-;                            (produce-child-genome-by-autoconstruction g1 g2)})))
+;                            (produce-child-genome-by-autoconstruction g1 g2)}
+;                           argmap)))
 ;        e1 (semantics-fn (:genome ind) random-genome)]
 ;    (if (= (:errors ind) e1)
 ;      1
@@ -267,41 +268,41 @@
       0
       1)))
 
-  ;; Define argmap for pushgp
-  (defn define-digital-multiplier
-    [num-bits-n]
-    (define-ins (* 2 num-bits-n))
-    (define-outs (* 2 num-bits-n))
-    (def full-dm-error-function
-      (partial dm-error-function
-               num-bits-n
-               (dm-test-cases num-bits-n)))
-    (def argmap
-      {:error-function full-dm-error-function
-       :atom-generators (dm-atom-generators num-bits-n)
-       :population-size 500
-       :max-generations 10000
-       :max-points 500
-       :max-points-in-initial-program 100
-       :evalpush-limit 2000
-       :epigenetic-markers [:close :silent]
-       :genetic-operator-probabilities {:autoconstruction 1.0}
-       ;:genetic-operator-probabilities {:autoconstruction 0.9
-       ;                                 :uniform-deletion 0.1}
-       ;:uniform-deletion-rate 0.01
-       :parent-selection :lexicase
-       ;:parent-selection :leaky-lexicase
-       ;:lexicase-leakage 0.1
-       ;:trivial-geography-radius 50
-       :report-simplifications 0
-       ;:pass-individual-to-error-function true
-       ;:meta-error-categories [dm-meta-error-fn]
-       ;:meta-error-categories (repeat 64 dm-meta-error-fn)
-       ;:meta-error-categories [:size dm-meta-error-fn]
-       ;:meta-error-categories [variation-meta-error-fn]
-       }
-      )
+;; Define argmap for pushgp
+(defn define-digital-multiplier
+  [num-bits-n]
+  (define-ins (* 2 num-bits-n))
+  (define-outs (* 2 num-bits-n))
+  (def full-dm-error-function
+    (partial dm-error-function
+             num-bits-n
+             (dm-test-cases num-bits-n)))
+  (def argmap
+    {:error-function full-dm-error-function
+     :atom-generators (dm-atom-generators num-bits-n)
+     :population-size 500
+     :max-generations 10000
+     :max-points 500
+     :max-points-in-initial-program 100
+     :evalpush-limit 2000
+     :epigenetic-markers [:close :silent]
+     :genetic-operator-probabilities {:autoconstruction 1.0}
+     ;:genetic-operator-probabilities {:autoconstruction 0.9
+     ;                                 :uniform-deletion 0.1}
+     ;:uniform-deletion-rate 0.01
+     :parent-selection :lexicase
+     ;:parent-selection :leaky-lexicase
+     ;:lexicase-leakage 0.1
+     ;:trivial-geography-radius 50
+     :report-simplifications 0
+     ;:pass-individual-to-error-function true
+     ;:meta-error-categories [dm-meta-error-fn]
+     ;:meta-error-categories (repeat 64 dm-meta-error-fn)
+     ;:meta-error-categories [:size dm-meta-error-fn]
+     ;:meta-error-categories [variation-meta-error-fn]
+     }
     )
+  )
 
-  ;; Create the argmap passing the number of bits for the problem
-  (define-digital-multiplier 3)
+;; Create the argmap passing the number of bits for the problem
+(define-digital-multiplier 3)

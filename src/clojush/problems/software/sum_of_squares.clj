@@ -127,8 +127,8 @@
 (def argmap
   {:error-function (sum-of-squares-error-function sum-of-squares-data-domains)
    :atom-generators sum-of-squares-atom-generators
-   :max-points 400
-   :max-points-in-initial-program 200
+   :max-points 800
+   :max-genome-size-in-initial-program 200
    :evalpush-limit 4000
    :population-size 1000
    :max-generations 300
