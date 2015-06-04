@@ -204,8 +204,8 @@
 (def argmap
   {:error-function (x-word-lines-error-function x-word-lines-data-domains)
    :atom-generators x-word-lines-atom-generators
-   :max-points 800
-   :max-points-in-initial-program 400
+   :max-points 1600
+   :max-genome-size-in-initial-program 400
    :evalpush-limit 1600
    :population-size 1000
    :max-generations 300

@@ -149,8 +149,8 @@
 (def argmap
   {:error-function (wallis-pi-error-function wallis-pi-data-domains)
    :atom-generators wallis-pi-atom-generators
-   :max-points 600
-   :max-points-in-initial-program 300
+   :max-points 1200
+   :max-genome-size-in-initial-program 300
    :evalpush-limit 8000
    :population-size 1000
    :max-generations 300

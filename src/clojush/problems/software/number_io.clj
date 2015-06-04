@@ -130,8 +130,8 @@
 (def argmap
   {:error-function (num-io-error-function num-io-data-domains)
    :atom-generators num-io-atom-generators
-   :max-points 200
-   :max-points-in-initial-program 100
+   :max-points 400
+   :max-genome-size-in-initial-program 100
    :evalpush-limit 200
    :population-size 1000
    :max-generations 200

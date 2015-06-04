@@ -31,8 +31,8 @@
           :population-size 1000 ;; Number of individuals in the population
           :max-generations 1001 ;; The maximum number of generations to run GP
           :max-point-evaluations 10e100 ;; The limit for the number of point (instruction) evaluations to execute during the run
-          :max-points 50 ;; Maximum size of push programs, as counted by points in the program
-          :max-points-in-initial-program 50 ;; Maximum size of initial programs in generation 0
+          :max-points 100 ;; Maximum size of push programs and push code, as counted by points in the program. 1/2 this limit is used as the limit for sizes of Plush genomes.
+          :max-genome-size-in-initial-program 50 ;; Maximum size of initial Plush genomes in generation 0. Keep in mind that genome lengths will otherwise be limited by 1/2 of :max-points
           :evalpush-limit 150 ;; The number of Push instructions that can be evaluated before stopping evaluation
           :evalpush-time-limit 0 ;; The time in nanoseconds that a program can evaluate before stopping, 0 means no time limit
           :reuse-errors true ;; When true, children produced through direct reproduction will not be re-evaluated but will have the error vector of their parent
@@ -74,7 +74,7 @@
           :close-increment-rate 0.2 ;; The probability of making an increment change to :close during uniform close mutation, as opposed to a decrement change
           :uniform-deletion-rate 0.01 ;; The probability that any instruction will be deleted during uniform deletion
           :uniform-silence-mutation-rate 0.1 ;; The probability of each :silent being switched during uniform silent mutation
-          :replace-child-that-exceeds-size-limit-with :random ;; When a child is produced that exceeds the size limit of max-points, this is used to determine what program to return. Options include :parent, :empty, :random, :truncate
+          :replace-child-that-exceeds-size-limit-with :random ;; When a child is produced that exceeds the size limit of (max-points / 2), this is used to determine what program to return. Options include :parent, :empty, :random, :truncate
           :parent-reversion-probability 1.0 ;; The probability of a child being reverted to its parent by a genetic operator that has been made revertable, if the child is not as good as the parent on at least one test case
           ;;
           ;;----------------------------------------
@@ -150,8 +150,8 @@
       (throw (Exception. (str "globals.clj definition " gname " has no matching argument in push-argmap. Only such definitions should use the prefix 'global-'."))))))
 
 (defn make-agents-and-rng
-  [{:keys [use-single-thread population-size
-           max-points-in-initial-program atom-generators random-seed
+  [{:keys [use-single-thread population-size random-seed
+           max-genome-size-in-initial-program atom-generators
            save-initial-population]
     :as argmap}]
   (let [agent-error-handler (fn [agnt except]
@@ -169,8 +169,9 @@
                            seeds)))]
     {:pop-agents (let [pa (doall (for [_ (range population-size)]
                                    (make-individual
-                                     :genome (random-plush-genome max-points-in-initial-program
-                                                          atom-generators argmap)
+                                     :genome (random-plush-genome max-genome-size-in-initial-program
+                                                                  atom-generators
+                                                                  argmap)
                                      :genetic-operators :random)))
                        f (str "data/" (System/currentTimeMillis) ".ser")]
                    (when save-initial-population

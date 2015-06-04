@@ -76,8 +76,8 @@
 (def argmap
   {:error-function (change-error-function 150)
    :atom-generators change-atom-generators
-   :max-points 500
-   :max-points-in-initial-program 500
+   :max-points 1000
+   :max-genome-size-in-initial-program 500
    :evalpush-limit 800
    :population-size 2000
    :max-generations 1000
