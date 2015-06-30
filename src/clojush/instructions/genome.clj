@@ -242,3 +242,9 @@
   (fn [state]
     (push-item (:parent2-genome state) :genome state)))
 
+(define-registered
+  autoconstructive_integer_rand 
+  ;; pushes a constant integer, but is replaced with integer_rand during 
+  ;; nondetermistic autoconstruction
+  ^{:stack-types [:genome]} (fn [state] (push-item 23 :integer state)))
+
