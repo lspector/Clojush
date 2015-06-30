@@ -22,7 +22,7 @@
 ;;
 ;; input stack has the input string
 
-(ns clojush.problems.autoconstruction.autoconstructive-replace-space-with-newline
+(ns clojush.problems.autoconstruction.autoconstructive-replace-space-with-newline ;; #auto
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
