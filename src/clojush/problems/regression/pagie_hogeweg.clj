@@ -1,14 +1,14 @@
-; pagie_hogeweg_no_erc.clj
+; pagie_hogeweg.clj
 ;
 ; The Pagie-Hogeweg problem without a float ERC; instead, just
 ; uses the constant 1.0 as an atom generator.
 
 (ns clojush.problems.regression.pagie-hogeweg
   (:use clojush.pushgp.pushgp)
-  (:require clojush.examples.pagie-hogeweg))
+  (:require clojush.problems.regression.pagie-hogeweg-with-erc))
 
 (def argmap
-  (merge clojush.examples.pagie-hogeweg/argmap
+  (merge clojush.problems.regression.pagie-hogeweg-with-erc/argmap
          {:atom-generators (list 1.0
                                  'x
                                  'y
