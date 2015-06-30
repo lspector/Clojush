@@ -239,12 +239,6 @@ given by uniform-deletion-rate."
 
 ;; NOTE: EXPERIMENTAL!
 
-(define-registered
-  autoconstructive_integer_rand 
-  ;; pushes a constant integer, but is replaced with integer_rand during 
-  ;; nondetermistic autoconstruction
-  ^{:stack-types [:genome]} (fn [state] (push-item 23 :integer state)))
-
 (defn process-genome-for-autoconstruction
   "Replaces input instructions with noops and replaces autoconstructive_integer_rand with 
 integer_rand if deterministic? is false."
