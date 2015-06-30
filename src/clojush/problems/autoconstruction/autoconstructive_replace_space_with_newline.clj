@@ -181,9 +181,9 @@
    :parent-selection :lexicase
    :genetic-operator-probabilities {:autoconstruction 1.0} ;; #auto
    :epigenetic-markers [:close :silent] ;; #auto
-   ;:alternation-rate 0.01 ;; #auto
-   ;:alignment-deviation 10 ;; #auto
-   ;:uniform-mutation-rate 0.01 ;; #auto
+   :alternation-rate 0.01
+   :alignment-deviation 10
+   :uniform-mutation-rate 0.01
    :problem-specific-report replace-space-report
    :print-behavioral-diversity true
    :report-simplifications 0
