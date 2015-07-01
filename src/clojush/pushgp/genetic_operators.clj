@@ -239,12 +239,9 @@ given by uniform-deletion-rate."
 
 ;; NOTE: EXPERIMENTAL!
 
-(define-registered
-  autoconstructive_integer_rand ;; replace with integer_rand during construction; noop otherwise
-  ^{:stack-types [:exec]} (fn [state] state))
-
 (defn process-genome-for-autoconstruction
-  "Replace input instructions with noops and replace autoconstructive_integer_rand with integer_rand."
+  "Replaces input instructions with noops and replaces autoconstructive_integer_rand with 
+integer_rand if deterministic? is false."
   [genome deterministic?]
   (let [input-instruction? (fn [instruction]
                              (and (symbol? instruction) 
@@ -260,13 +257,17 @@ given by uniform-deletion-rate."
          genome)))
 
 (defn produce-child-genome-by-autoconstruction
-  [parent1-genome parent2-genome deterministic?]
+  "Runs the program expressed by parent1-genome with both parent genomes
+on the genome stack and also available via input instructions, and returns
+the resulting top genome."
+  [parent1-genome parent2-genome deterministic? argmap]
   (let [run-result (top-item :genome
                              (run-push
                                (translate-plush-genome-to-push-program
                                  {:genome (process-genome-for-autoconstruction
                                             parent1-genome
-                                            deterministic?)})
+                                            deterministic?)}
+                                 argmap)
                                (-> (->> (make-push-state)
                                      (push-item parent2-genome :genome)
                                      (push-item parent1-genome :genome))
@@ -276,44 +277,52 @@ given by uniform-deletion-rate."
       run-result
       ())))
 
-(defn express-same-programs?
-  [g1 g2]
-  (or (= g1 g2) ;; avoid translation for equivalent genomes 
-      (= (translate-plush-genome-to-push-program {:genome g1})
-         (translate-plush-genome-to-push-program {:genome g2}))))
+(defn expressed-program-sequence-from-genome
+  "Returns an open-close sequenc for the program produced by expressing
+genome g."
+  [g argmap]
+  (ensure-list
+    (list-to-open-close-sequence 
+      (translate-plush-genome-to-push-program {:genome g} argmap))))
+
+(defn expressed-difference
+  "Returns the levenshtein distance between the open-close sequences for the
+programs encoded by genomes g1 and g2."
+  [g1 g2 argmap]
+  (levenshtein-distance (expressed-program-sequence-from-genome g1 argmap)
+                        (expressed-program-sequence-from-genome g2 argmap)))
 
 (defn reproductively-competent?
-  [g]
-  (let [c1 (produce-child-genome-by-autoconstruction g g false)
-        c2 (produce-child-genome-by-autoconstruction g g false)]
-    (if (express-same-programs? c1 c2)
-      false
-      (let [c1c (produce-child-genome-by-autoconstruction c1 g true)
-            c2c (produce-child-genome-by-autoconstruction c2 g true)]
-        (if (express-same-programs? c1c c2c)
-          false
-          (let [c1cc (produce-child-genome-by-autoconstruction c1c g true)
-                c2cc (produce-child-genome-by-autoconstruction c2c g true)]
-            (if (express-same-programs? c1cc c2cc)
-              false
-              (if (let [g-size (count g)
-                        descendant-sizes (map count [c1 c2 c1c c2c c1cc c2cc])]
-                   (or (>= (apply min descendant-sizes)
-                           g-size)
-                       (<= (apply max descendant-sizes)
-                           g-size)))
-                false
-                true))))))))
+  "Returns true iff genome g is considered reproductively competent."
+  [g argmap]
+  (let [translate #(translate-plush-genome-to-push-program {:genome %} argmap)
+        child1 (produce-child-genome-by-autoconstruction g g true argmap)
+        gc1a (produce-child-genome-by-autoconstruction child1 child1 true argmap)
+        gc1b (produce-child-genome-by-autoconstruction child1 [] true argmap)
+        gc1c (produce-child-genome-by-autoconstruction child1 child1 false argmap)
+        child2 (produce-child-genome-by-autoconstruction g g false argmap)
+        gc2a (produce-child-genome-by-autoconstruction child2 child2 true argmap)
+        gc2b (produce-child-genome-by-autoconstruction child2 [] true argmap)
+        gc2c (produce-child-genome-by-autoconstruction child2 child2 false argmap)]
+    (and (apply distinct? (map translate [g child1 child2 gc1a gc1b gc1c gc2a gc2b gc2c]))
+         (distinct? (expressed-difference child1 gc1b argmap)
+                    (expressed-difference child2 gc2b argmap)))))
 
 (defn autoconstruction
-  "Returns a genome for child produced by autoconstruction by executing parent1 with parent1,
-and parent2 on top of the genome stack. EXPERIMENTAL AND SUBJECT TO CHANGE."
+  "Returns a genome for a child produced either by autoconstruction (executing parent1 
+with both parents on top of the genome stack and also available via input instructions)
+or by cloning. In either case if the child is not reproductively competent then a random 
+genome is returned instead. The construct/clone ration is hardcoded here, but might
+be set globally in the future."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program error-function] 
                     :as argmap}]
-  (let [parent1-genome (:genome parent1)
+  (let [construct-clone-ratio 0.9 ;; maybe make this a global parameter
+        parent1-genome (:genome parent1)
         parent2-genome (:genome parent2)
-        child-genome  (produce-child-genome-by-autoconstruction parent1-genome parent2-genome false)
-        competent (reproductively-competent? child-genome)
+        child-genome (if (< (lrand) construct-clone-ratio)
+                       (produce-child-genome-by-autoconstruction parent1-genome parent2-genome false argmap)
+                       parent1-genome)
+        competent (reproductively-competent? child-genome argmap)
         new-genome (if competent
                      child-genome
                      (random-plush-genome max-genome-size-in-initial-program atom-generators argmap))]

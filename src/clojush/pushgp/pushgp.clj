@@ -76,6 +76,8 @@
           :uniform-silence-mutation-rate 0.1 ;; The probability of each :silent being switched during uniform silent mutation
           :replace-child-that-exceeds-size-limit-with :random ;; When a child is produced that exceeds the size limit of (max-points / 2), this is used to determine what program to return. Options include :parent, :empty, :random, :truncate
           :parent-reversion-probability 1.0 ;; The probability of a child being reverted to its parent by a genetic operator that has been made revertable, if the child is not as good as the parent on at least one test case
+          :autoconstructive false ;; if true then :genetic-operator-probabilities will be {:autoconstruction 1.0}, :epigenetic-markers will be [:close :silent], and :atom-generators will include everything in (registered-for-stacks [:integer :boolean :exec :genome]). You will probably also want to provide a high value for :max-generations.
+          :autoconstructive-integer-rand-enrichment 1 ;; the number of extra instances (beyond the 1 automatic one) of autoconstructive_integer_rand to include in :atom-generators for autoconstruction.
           ;;
           ;;----------------------------------------
           ;; Epignenetics
@@ -140,7 +142,15 @@
   [argmap]
   (doseq [[argkey argval] argmap]
     (assert (contains? @push-argmap argkey) (str "Argument key " argkey " is not a recognized argument to pushgp."))
-    (swap! push-argmap assoc argkey argval)))
+    (swap! push-argmap assoc argkey argval))
+  (when (:autoconstructive @push-argmap)
+    (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0})
+    (swap! push-argmap assoc :epigenetic-markers [:close :silent])
+    (doseq [instr (registered-for-stacks [:integer :boolean :exec :genome])]
+      (when (not (some #{instr} (:atom-generators @push-argmap)))
+        (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
+    (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
+      (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_integer_rand)))))
 
 (defn reset-globals
   []
