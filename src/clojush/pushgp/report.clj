@@ -246,7 +246,7 @@
            print-errors print-history print-cosmos-data print-timings
            problem-specific-report total-error-method
            parent-selection print-homology-data max-point-evaluations
-           print-error-frequencies-by-case normalization
+           print-error-frequencies-by-case normalization autoconstructive
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
@@ -353,17 +353,22 @@
                         (count population))))
     (printf "Average percent parens in population: %.3f\n" (/ (apply + (map #(double (/ (count-parens (:program %)) (count-points (:program %)))) sorted))
                                                               (count population)))
+    (println "--- Population Diversity Statistics ---")
+    (let [genome-frequency-map (frequencies (map :genome population))]
+      (println "Min copy number of one Plush genome:" (apply min (vals genome-frequency-map)))
+      (println "Median copy number of one Plush genome:" (nth (sort (vals genome-frequency-map)) (Math/floor (/ (count genome-frequency-map) 2))))
+      (println "Max copy number of one Plush genome:" (apply max (vals genome-frequency-map)))
+      (println "Genome diversity (% unique Plush genomes):\t" (float (/ (count genome-frequency-map) (count population)))))
     (let [frequency-map (frequencies (map :program population))]
-      (println "Number of unique programs in population:" (count frequency-map))
-      (println "Max copy number of one program:" (apply max (vals frequency-map)))
-      (println "Min copy number of one program:" (apply min (vals frequency-map)))
-      (println "Median copy number:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2)))))
-    (println "Number of random replacements for reproductively incompetent individuals:" 
-             (count (filter :random-replacement-for-reproductively-incompetent-genome population)))
+      (println "Min copy number of one Push program:" (apply min (vals frequency-map)))
+      (println "Median copy number of one Push program:" (nth (sort (vals frequency-map)) (Math/floor (/ (count frequency-map) 2))))
+      (println "Max copy number of one Push program:" (apply max (vals frequency-map)))
+      (println "Syntactic diversity (% unique Push programs):\t" (float (/ (count frequency-map) (count population)))))
+    (println "Total error diversity:\t\t\t\t" (float (/ (count (frequencies (map :total-error population))) (count population))))
+    (println "Error (vector) diversity:\t\t\t" (float (/ (count (frequencies (map :errors population))) (count population))))
     (when @global-print-behavioral-diversity
       (swap! population-behaviors #(take-last population-size %)) ; Only use behaviors during evaluation, not those during simplification
-      (println "Behavioral diversity:" (behavioral-diversity))
-      ;(println "Number of behaviors:" (count @population-behaviors))
+      (println "Behavioral diversity:\t\t\t\t" (behavioral-diversity))
       (reset! population-behaviors ()))
     (when print-homology-data
       (let [num-samples 1000
@@ -377,6 +382,10 @@
         (println "Median:         " median-1)
         (println "Third quartile: " third-quart-1)
         ))
+    (when autoconstructive
+      (println "Number of random replacements for reproductively incompetent individuals:" 
+               (count (filter :random-replacement-for-reproductively-incompetent-genome population))))
+    (println "--- Run Statistics ---")
     (println "Number of program evaluations used so far:" @evaluations-count)
     (println "Number of point (instruction) evaluations so far:" point-evaluations-before-report)
     (reset! point-evaluations-count point-evaluations-before-report)
