@@ -1,16 +1,17 @@
 ;; winkler01.clj
 ;; Bill Tozier, bill@vagueinnovation.com
 ;;
-;; This is code for running my variant on Winkler's Zeros-and-Ones puzzle:
-;; For any positive integer input, return a strictly positive integer which
-;;   when multiplied by the input produces a result which contains only the
+;; This is code for running Tozier's variant on Winkler's Zeros-and-Ones puzzle:
+;;   For any positive (non-zero) integer input, return a strictly positive integer which
+;;   when multiplied by the input value produces a result which contains only the
 ;;   digits 0 and 1 (in base 10 notation)
 ;;
-;; Input and output are given as single integers using the integer stack.
+;; Input and output are given as integers using the integer stack.
 
 (ns clojush.problems.tozier.winkler01
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random]
+        [clojure.math.numeric-tower]
         ))
 
 ; Create the error function
@@ -41,14 +42,26 @@
             1000))))))
 
 
+; Atom generators
+(def winkler-atom-generators
+  (concat (list
+            (fn [] (lrand-int 65536)) ;Integer ERC [0,65536]
+            ;;; end ERCs
+            'in1
+            ;;; end input instructions
+            )
+            (registered-for-stacks [:integer :boolean :exec])))
+
+
 ; Define the argmap
 (def argmap
-  {:error-function (winkler-error-function 80)
+  {:error-function (winkler-error-function 100)
+   :atom-generators winkler-atom-generators
    :max-points 1000
    :max-genome-size-in-initial-program 500
-   :evalpush-limit 800
+   :evalpush-limit 2000
    :population-size 1000
-   :max-generations 1000
+   :max-generations 300
    :parent-selection :lexicase
    :final-report-simplifications 1000
    })
