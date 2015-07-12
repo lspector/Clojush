@@ -26,6 +26,12 @@
                (get counts "1" 0)) 
             (count-digits num)))))
 
+(defn kill-trailing-zeroes
+  "Returns an integer with all trailing zeroes stripped off"
+  [num]
+    (read-string (clojure.string/replace (str num) #"(0+)$" ""))
+  )
+
 (defn winkler-error-function
   "Returns the error function for Tozier's 01 problem."
   [number-test-cases]
@@ -37,9 +43,14 @@
             (push-item input :integer
               (make-push-state))))
              result-output (top-item :integer final-state)]
+          (when false (println  ;; change to true to print every result (which is awful)
+            (if (and (number? result-output) (pos? result-output))
+            (* input result-output)
+            "N/A")))
           (if (and (number? result-output) (pos? result-output))
-            (proportion-not-01 (* input result-output))
-            1000))))))
+            (proportion-not-01 (kill-trailing-zeroes (* input result-output)))
+            100)
+          )))))
 
 
 ; Atom generators
@@ -55,13 +66,13 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (winkler-error-function 100)
+  {:error-function (winkler-error-function 133)
    :atom-generators winkler-atom-generators
    :max-points 1000
    :max-genome-size-in-initial-program 500
    :evalpush-limit 2000
    :population-size 1000
-   :max-generations 300
+   :max-generations 500
    :parent-selection :lexicase
    :final-report-simplifications 1000
    })
