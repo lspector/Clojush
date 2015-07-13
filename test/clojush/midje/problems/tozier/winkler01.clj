@@ -8,6 +8,7 @@
 
 (ns clojush.midje.problems.tozier.winkler01
   (:use clojure.test
+        clojush.pushstate
         midje.sweet
         clojush.problems.tozier.winkler01))
 
@@ -35,6 +36,22 @@
   (kill-trailing-zeroes 1.23000) => 1.23) ;; yes, the interpreter already does this
 
 
+(facts "prime-factors returns a cons containing the prime factors of the argument"
+  (type (prime-factors 2)) => clojure.lang.Cons
+  (prime-factors 7) => [7]
+  (prime-factors 256) => [2 2 2 2 2 2 2 2]
+  (sort (prime-factors 1000)) => [2 2 2 5 5 5]
+  (sort (prime-factors 11010011011100010)) => [2 3 3 5 7 13 199 1511 4470811]
+  )
+
+(facts "prime-factors-as-sorted-vector should return the factors as a sorted vector"
+  (type (prime-factors-as-sorted-vector 2)) => clojure.lang.PersistentVector
+  (prime-factors-as-sorted-vector 1000) => [2 2 2 5 5 5]
+  (prime-factors-as-sorted-vector 11010011011100010) => [2 3 3 5 7 13 199 1511 4470811]
+)
+
+(facts "checking the new instruction is registered"
+  (registered-for-stacks [:integer :vector_integer]) => (contains 'integer_factors))
 
 ;; how does one test an error function like 'winkler-error-function?
 ;;
