@@ -11,18 +11,29 @@
         midje.sweet
         clojush.problems.tozier.winkler01))
 
+
 (facts "count-digits returns the number of digits in a number"
   (count-digits 999) => 3
   (count-digits -123456789) => 9
   (count-digits -1.23) => 3  ;; you really shouldn't do this
   (count-digits "foo") => 0) ;; or this
 
+
 (facts "proportion-not-01 returns the fraction of (all) digits not 0 or 1 in a number"
   (proportion-not-01 999) => 1
   (proportion-not-01 111234) => 1/2
-  (proportion-not-01 -1.23) => 2/3) 
-;;(proportion-not-01 "foo") => not defined
-;;   (would expect it to raise a divide by zero error)
+  (proportion-not-01 1001221330) => 4/10
+  (proportion-not-01 1100110011) => 0
+  (proportion-not-01 -1.23) => 2/3 
+  (proportion-not-01 "foo") => (throws Exception #"Divide by zero"))
+
+
+(facts "kill-trailing-zeroes returns an integer with all trailing zeroes trimmed off"
+  (kill-trailing-zeroes 999) => 999
+  (kill-trailing-zeroes 110000) => 11
+  (kill-trailing-zeroes 100020003000) => 100020003
+  (kill-trailing-zeroes 1.23000) => 1.23) ;; yes, the interpreter already does this
+
 
 
 ;; how does one test an error function like 'winkler-error-function?

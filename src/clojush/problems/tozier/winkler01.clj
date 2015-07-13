@@ -16,7 +16,8 @@
 
 ; Create the error function
 (defn count-digits [num] (count (re-seq #"\d" (str num))))
- 
+
+
 (defn proportion-not-01
     "Returns the proportion of digits in the argument integer which are not 0 or 1"
     [num] 
@@ -26,11 +27,13 @@
                (get counts "1" 0)) 
             (count-digits num)))))
 
+
 (defn kill-trailing-zeroes
   "Returns an integer with all trailing zeroes stripped off"
   [num]
     (read-string (clojure.string/replace (str num) #"(0+)$" ""))
   )
+
 
 (defn winkler-error-function
   "Returns an error function for Tozier's 01 problem."
