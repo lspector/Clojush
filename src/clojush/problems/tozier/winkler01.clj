@@ -119,7 +119,7 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (winkler-error-function-02 44) ;; change the error function to follow along...
+  {:error-function (winkler-error-function-01 44) ;; change the error function to follow along...
    :atom-generators winkler-atom-generators
    :max-points 1000
    :max-genome-size-in-initial-program 500
