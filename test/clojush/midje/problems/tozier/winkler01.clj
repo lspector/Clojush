@@ -50,8 +50,17 @@
   (prime-factors-as-sorted-vector 11010011011100010) => [2 3 3 5 7 13 199 1511 4470811]
 )
 
-(facts "checking the new instruction is registered"
+(facts "prime-factors-as-sorted-vector returns 'reasonable' results for bad integer inputs"
+  (prime-factors-as-sorted-vector -2) => [-1 2]
+  (prime-factors-as-sorted-vector -21) => [-1 3 7]
+  (prime-factors-as-sorted-vector 0 ) => [0]
+  (prime-factors-as-sorted-vector -11010011011100010) => [-1 2 3 3 5 7 13 199 1511 4470811]
+  )
+
+
+(fact "checking the new instruction is registered"
   (registered-for-stacks [:integer :vector_integer]) => (contains 'integer_factors))
+
 
 ;; how does one test an error function like 'winkler-error-function?
 ;;

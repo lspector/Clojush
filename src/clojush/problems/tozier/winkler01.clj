@@ -34,6 +34,8 @@
     (read-string (clojure.string/replace (str num) #"(0+)$" ""))
   )
 
+
+;; "obvious" first attempt at an error function
 (defn winkler-error-function-01
   "Returns the proportion of digits in the product of input * output that are not 0 or 1."
   [number-test-cases]
@@ -55,6 +57,8 @@
           )))))
 
 
+;; "obvious" second attempt at an error function;
+;; accommodation to trivial strategy of multiplying by 10000000...
 (defn winkler-error-function-02
   "Returns the proportion of digits in the product of input * output that are not 0 or 1, after trimming trailing zeroes."
   [number-test-cases]
@@ -75,6 +79,9 @@
             100)
           )))))
 
+
+;; trying to give it some raw materials it might want to use
+
 (defn prime-factors
   "Return a vector of the prime factors of the argument integer; cadged from http://rosettacode.org/wiki/Prime_decomposition#Clojure"
   ([num]
@@ -88,9 +95,13 @@
 
 
 (defn prime-factors-as-sorted-vector
-  "Return the argument's prime factors as a sorted vector of integers"
+  "Return the argument's prime factors as a sorted vector of integers; if the argument is 0, it returns (0); if the argument is negative, it returns the factors of the positive number with -1 added to the list;"
   [num]
-  (into [] (sort (prime-factors num))))
+  (cond 
+    (pos? num) (into [] (sort (prime-factors num)))
+    (neg? num) (into [] (cons -1 (sort (prime-factors (abs num)))))
+    :else [0]
+  ))
 
 
 ; Define new instructions
@@ -99,7 +110,7 @@
   ^{:stack-types [:integer :vector_integer]}
   (fn [state]
     (if (not (empty? (:integer state)))
-      (push-item (keep-number-reasonable (sort (prime-factors-as-sorted-vector (stack-ref :integer 0 state))))
+      (push-item (prime-factors-as-sorted-vector (stack-ref :integer 0 state))
                  :vector_integer
                  (pop-item :integer state))
       state)))
@@ -113,19 +124,19 @@
             'in1
             ;;; end input instructions
             )
-            (registered-for-stacks [:integer :float :code :boolean :exec :vector_integer :vector_boolean])))
+            (registered-for-stacks [:integer :code :boolean :exec :vector_integer])))
 
 
 
 ; Define the argmap
 (def argmap
-  {:error-function (winkler-error-function-01 44) ;; change the error function to follow along...
+  {:error-function (winkler-error-function-02 33) ;; change the error function to follow along...
    :atom-generators winkler-atom-generators
    :max-points 1000
-   :max-genome-size-in-initial-program 500
+   :max-genome-size-in-initial-program 300
    :evalpush-limit 1000
    :population-size 1000
    :max-generations 500
-   :parent-selection :lexicase
+   :parent-selection :tournament 
    :final-report-simplifications 1000
    })
