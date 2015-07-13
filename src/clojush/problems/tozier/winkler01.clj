@@ -100,7 +100,7 @@
   (fn [state]
     (if (not (empty? (:integer state)))
       (push-item (keep-number-reasonable (sort (prime-factors-as-sorted-vector (stack-ref :integer 0 state))))
-                 :integer
+                 :vector_integer
                  (pop-item :integer state))
       state)))
 
