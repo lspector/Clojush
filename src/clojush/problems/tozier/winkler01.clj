@@ -15,7 +15,7 @@
         ))
 
 ; Create the error function
-(defn count-digits [num] (count (str num)))
+(defn count-digits [num] (count (re-seq #"\d" (str num))))
  
 (defn proportion-not-01
     "Returns the proportion of digits in the argument integer which are not 0 or 1"
@@ -33,7 +33,7 @@
   )
 
 (defn winkler-error-function
-  "Returns the error function for Tozier's 01 problem."
+  "Returns an error function for Tozier's 01 problem."
   [number-test-cases]
   (fn [program]
     (doall
@@ -61,16 +61,16 @@
             'in1
             ;;; end input instructions
             )
-            (registered-for-stacks [:integer :boolean :exec])))
+            (registered-for-stacks [:integer :float :code :boolean :exec :vector_integer :vector_boolean])))
 
 
 ; Define the argmap
 (def argmap
-  {:error-function (winkler-error-function 133)
+  {:error-function (winkler-error-function 44)
    :atom-generators winkler-atom-generators
    :max-points 1000
    :max-genome-size-in-initial-program 500
-   :evalpush-limit 2000
+   :evalpush-limit 1000
    :population-size 1000
    :max-generations 500
    :parent-selection :lexicase
