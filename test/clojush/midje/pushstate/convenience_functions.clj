@@ -29,6 +29,11 @@
     (just [1 2 3] [4 5 6])
   )
 
+(fact "passing in weird keys just drops them into the pushstate"
+  (:foo (push-state-now! :foo '(:a :b :c))) => (just :a :b :c) ;; a victimless crime?
+  )
+
 (fact "the result of push-state-now! can be used to run code and stuff"
   (:integer (run-push '(integer_add integer_add) (push-state-now! :integer '(1 2 3 4)))) => (just 6 4) 
   )
+
