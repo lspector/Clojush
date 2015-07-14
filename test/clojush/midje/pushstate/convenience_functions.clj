@@ -13,36 +13,36 @@
         midje.sweet
         ))
 
-(fact "push-state-now! creates a push-state with all available stacks"
-  (keys (push-state-now!)) => (just clojush.globals/push-types :in-any-order)
+(fact "push-state-from-stacks creates a push-state with all available stacks"
+  (keys (push-state-from-stacks)) => (just clojush.globals/push-types :in-any-order)
   )
 
-(fact "push-state-now! creates a empty stacks if none are passed in"
-  (concat (vals (push-state-now!))) => (has every? nil?)
+(fact "push-state-from-stacks creates a empty stacks if none are passed in"
+  (concat (vals (push-state-from-stacks))) => (has every? nil?)
   )
 
-(facts "push-state-now! sets a named stack to the values passed in as arguments"
-  (:integer (push-state-now! :integer '(1 2 3))) => (just 1 2 3)
-  (:boolean (push-state-now! :boolean '(false true))) => (just false true )
-  (:code (push-state-now! :code '( 122 false integer_add))) => (contains   #{ 122 false 'integer_add})
-  (:vector_integer (push-state-now! :vector_integer '([1 2 3] [4 5 6]))) =>
+(facts "push-state-from-stacks sets a named stack to the values passed in as arguments"
+  (:integer (push-state-from-stacks :integer '(1 2 3))) => (just 1 2 3)
+  (:boolean (push-state-from-stacks :boolean '(false true))) => (just false true )
+  (:code (push-state-from-stacks :code '( 122 false integer_add))) => (contains   #{ 122 false 'integer_add})
+  (:vector_integer (push-state-from-stacks :vector_integer '([1 2 3] [4 5 6]))) =>
     (just [1 2 3] [4 5 6])
   )
 
 
-(def big-state (push-state-now! :integer '(1 2) :boolean '(false) :char '(\f \w \i \w) :rational '(3/4 111/9)))
+(def big-state (push-state-from-stacks :integer '(1 2) :boolean '(false) :char '(\f \w \i \w) :rational '(3/4 111/9)))
 
-(facts "push-state-now! works for multiple stacks"
+(facts "push-state-from-stacks works for multiple stacks"
   (:integer big-state) => (just 1 2)
   (:boolean big-state) => (just false)
   (:char big-state) => (just \f \w \i \w)
   (:rational big-state) => (just 3/4 111/9))
 
 (fact "passing in weird keys just drops them into the pushstate"
-  (:foo (push-state-now! :foo '(:a :b :c))) => (just :a :b :c) ;; a victimless crime?
+  (:foo (push-state-from-stacks :foo '(:a :b :c))) => (just :a :b :c) ;; a victimless crime?
   )
 
-(fact "the result of push-state-now! can be used to run code and stuff"
-  (:integer (run-push '(integer_add integer_add) (push-state-now! :integer '(1 2 3 4)))) => (just 6 4) 
+(fact "the result of push-state-from-stacks can be used to run code and stuff"
+  (:integer (run-push '(integer_add integer_add) (push-state-from-stacks :integer '(1 2 3 4)))) => (just 6 4) 
   )
 

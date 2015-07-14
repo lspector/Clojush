@@ -140,7 +140,7 @@
                @instruction-table)))
 
 
-(defn push-state-now!
+(defn push-state-from-stacks
   "Takes a map of stack names and entire stack states, and returns a new push-state
    with those stacks set."
   [& {:as stack-assignments}]
