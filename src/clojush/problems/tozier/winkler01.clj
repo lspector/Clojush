@@ -28,8 +28,8 @@
             (count-digits num)))))
 
 
-(defn kill-trailing-zeroes
-  "Returns an integer with all trailing zeroes stripped off"
+(defn kill-trailing-zeros
+  "Returns an integer with all trailing zeros stripped off"
   [num]
     (read-string (clojure.string/replace (str num) #"(0+)$" ""))
   )
@@ -44,8 +44,7 @@
       (for [input (range 1 number-test-cases)]
         (let [final-state (run-push program
           (push-item input :input
-            (push-item input :integer
-              (make-push-state))))
+              (make-push-state)))
              result-output (top-item :integer final-state)]
           (when false (println  ;; change to true to print every result (which is awful)
             (if (and (number? result-output) (pos? result-output))
@@ -60,22 +59,21 @@
 ;; "obvious" second attempt at an error function;
 ;; accommodation to trivial strategy of multiplying by 10000000...
 (defn winkler-error-function-02
-  "Returns the proportion of digits in the product of input * output that are not 0 or 1, after trimming trailing zeroes."
+  "Returns the proportion of digits in the product of input * output that are not 0 or 1, after trimming trailing zeros."
   [number-test-cases]
   (fn [program]
     (doall
       (for [input (range 1 number-test-cases)]
         (let [final-state (run-push program
           (push-item input :input
-            (push-item input :integer
-              (make-push-state))))
+              (make-push-state)))
              result-output (top-item :integer final-state)]
           (when false (println  ;; change to true to print every result (which is awful)
             (if (and (number? result-output) (pos? result-output))
             (* input result-output)
             "N/A")))
           (if (and (number? result-output) (pos? result-output))
-            (proportion-not-01 (kill-trailing-zeroes (* input result-output)))
+            (proportion-not-01 (kill-trailing-zeros (* input result-output)))
             100)
           )))))
 
@@ -118,13 +116,9 @@
 
 ; Atom generators
 (def winkler-atom-generators
-  (concat (list
-            (fn [] (lrand-int 65536)) ;Integer ERC [0,65536]
-            ;;; end ERCs
-            'in1
-            ;;; end input instructions
-            )
-            (registered-for-stacks [:integer :code :boolean :exec :vector_integer])))
+  (concat (take 100 (repeat 'in1))
+          (take 100 (repeat (fn [] (lrand-int 65536)))) ;Integer ERC [0,65536]
+          (registered-for-stacks [:integer :code :boolean :exec :vector_integer])))
 
 
 
