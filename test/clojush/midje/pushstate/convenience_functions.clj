@@ -29,6 +29,15 @@
     (just [1 2 3] [4 5 6])
   )
 
+
+(def big-state (push-state-now! :integer '(1 2) :boolean '(false) :char '(\f \w \i \w) :rational '(3/4 111/9)))
+
+(facts "push-state-now! works for multiple stacks"
+  (:integer big-state) => (just 1 2)
+  (:boolean big-state) => (just false)
+  (:char big-state) => (just \f \w \i \w)
+  (:rational big-state) => (just 3/4 111/9))
+
 (fact "passing in weird keys just drops them into the pushstate"
   (:foo (push-state-now! :foo '(:a :b :c))) => (just :a :b :c) ;; a victimless crime?
   )
