@@ -12,7 +12,7 @@
         clojure.test
         midje.sweet
         ))
-
+   
 (fact "push-state-from-stacks creates a push-state with all available stacks"
   (keys (push-state-from-stacks)) => (just clojush.globals/push-types :in-any-order)
   )
@@ -30,6 +30,11 @@
   )
 
 
+(facts "the unspecified stacks are still empty"
+  (:foo (push-state-from-stacks :foo '(:some :webgl :commands :here))) => (just :some :webgl :commands :here)
+  (:integer (push-state-from-stacks :foo '(:some :webgl :commands :here))) => nil
+  )
+
 (def big-state (push-state-from-stacks :integer '(1 2) :boolean '(false) :char '(\f \w \i \w) :rational '(3/4 111/9)))
 
 (facts "push-state-from-stacks works for multiple stacks"
@@ -44,5 +49,15 @@
 
 (fact "the result of push-state-from-stacks can be used to run code and stuff"
   (:integer (run-push '(integer_add integer_add) (push-state-from-stacks :integer '(1 2 3 4)))) => (just 6 4) 
+  )
+
+
+;; if I want to merge whole new stacks into a pre-existing push-state,
+;; I just want to make sure there is a simple way of doing that...
+
+(def test-state (push-state-from-stacks :integer '(1 2)))
+
+(fact "I don't need to write a special merge-push-state to overwrite the stack in a push-state"
+  (:integer (merge test-state {:integer '(7 7 7)})) => (just 7 7 7)
   )
 

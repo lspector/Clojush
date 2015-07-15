@@ -144,8 +144,5 @@
   "Takes a map of stack names and entire stack states, and returns a new push-state
    with those stacks set."
   [& {:as stack-assignments}]
-  (let [tabula-rasa (make-push-state)]
-    (reduce-kv
-      (fn [my-map next-key next-value] (assoc my-map next-key next-value))
-      tabula-rasa
-      stack-assignments)))
+    (merge (make-push-state) stack-assignments)
+    )
