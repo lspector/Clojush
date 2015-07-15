@@ -117,20 +117,23 @@
 ; Atom generators
 (def winkler-atom-generators
   (concat (take 100 (repeat 'in1))
-          (take 100 (repeat (fn [] (lrand-int 65536)))) ;Integer ERC [0,65536]
+          (take 50 (repeat (fn [] (lrand-int 65536)))) ;Integer ERC [0,65536]
           (registered-for-stacks [:integer :code :boolean :exec :vector_integer])))
 
 
 
 ; Define the argmap
 (def argmap
-  {:error-function (winkler-error-function-02 33) ;; change the error function to follow along...
+  {:error-function (winkler-error-function-02 44) ;; change the error function to follow along...
    :atom-generators winkler-atom-generators
    :max-points 1000
-   :max-genome-size-in-initial-program 300
+   :print-csv-logs true
+   :csv-columns [:generation :location :parent-uuids :genetic-operators :push-program-size :push-program :total-error :test-case-errors]
+   :csv-log-filename "log.csv"
+   :max-genome-size-in-initial-program 500
    :evalpush-limit 1000
    :population-size 1000
-   :max-generations 500
-   :parent-selection :tournament 
+   :max-generations 1000
+   :parent-selection :lexicase 
    :final-report-simplifications 1000
    })
