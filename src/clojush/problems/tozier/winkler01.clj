@@ -118,7 +118,7 @@
 (def winkler-atom-generators
   (concat (take 100 (repeat 'in1))
           (take 50 (repeat (fn [] (lrand-int 65536)))) ;Integer ERC [0,65536]
-          (registered-for-stacks [:integer :code :boolean :exec :vector_integer])))
+          (registered-for-stacks [:integer :code :boolean :exec :vector_integer :char :string :float])))
 
 
 
