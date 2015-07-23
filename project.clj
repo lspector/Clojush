@@ -14,6 +14,7 @@
                  [org.clojure/data.json "0.1.3"]
                  [clj-random "0.1.7"]]
   :dev-dependencies [[lein-ccw "1.2.0"]]
+  :profiles {:dev {:dependencies [[midje "1.6.3"]]}}
   ;;;;;;;;;; jvm settings for high performance, using most of the machine's RAM
 ;  :jvm-opts ~(let [mem-to-use
 ;                   (long (* (.getTotalPhysicalMemorySize
