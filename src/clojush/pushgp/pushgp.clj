@@ -99,6 +99,7 @@
           :trivial-geography-radius 0 ;; If non-zero, this is used as the radius from which to select individuals for tournament or lexicase selection
           :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population size that is retained before breeding. If 0 < decimation-ratio < 1, decimation tournaments will be used to reduce the population to size (* population-size decimation-ratio) before breeding.
           :decimation-tournament-size 2 ;; Size of the decimation tournaments
+          :print-selection-counts false ;; If true, keeps track of and prints the number of times each individual was selected to be a parent
           ;;
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter

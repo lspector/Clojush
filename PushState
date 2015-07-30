@@ -1,4 +1,0 @@
-src/clojush/pushgp/report.clj:                     (map-indexed (fn [location individual]
-src/clojush/pushgp/report.clj~:      (doseq [[ind p] (map-indexed vector population)]
-src/clojush/pushgp/report.clj~:      (doseq [[ind p] (map-indexed vector population)]
-src/clojush/pushstate.clj:(let [empty-state (map->PushState {})]

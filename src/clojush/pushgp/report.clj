@@ -247,6 +247,7 @@
            problem-specific-report total-error-method
            parent-selection print-homology-data max-point-evaluations
            print-error-frequencies-by-case normalization autoconstructive
+           print-selection-counts
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
@@ -382,6 +383,10 @@
         (println "Median:         " median-1)
         (println "Third quartile: " third-quart-1)
         ))
+    (when print-selection-counts
+      (println "Selection counts:" (sort > (concat (vals @selection-counts)
+                                                   (repeat (- population-size (count @selection-counts)) 0))))
+      (reset! selection-counts {}))
     (when autoconstructive
       (println "Number of random replacements for reproductively incompetent individuals:" 
                (count (filter :random-replacement-for-reproductively-incompetent-genome population))))
