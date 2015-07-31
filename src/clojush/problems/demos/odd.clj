@@ -26,8 +26,7 @@
                            (if (not (= top-bool :no-stack-item))
                              (if (= top-bool (odd? input)) 0 1)
                              1000)))))
-   :atom-generators (concat (registered-nonrandom)
+   :atom-generators (concat (registered-for-stacks [:integer :boolean :code :exec])
                             (list (fn [] (lrand-int 100))
-                                  'in1
-                                  'code_rand))
+                                  'in1))
    })
