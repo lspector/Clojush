@@ -103,6 +103,8 @@
                                       (vec (take number-of-rule30-datapoints-per-generation 
                                                  (lshuffle rule30-data))))
                                 (println "rule30-data-this-generation:" @rule30-data-this-generation))
+   :autoconstructive-integer-rand-enrichment -1 
+   :autoconstructive-boolean-rand-enrichment 31
    })
 
 (defn total-error-on-all-rule30-data ;; for validation

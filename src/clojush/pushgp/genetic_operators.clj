@@ -240,8 +240,8 @@ given by uniform-deletion-rate."
 ;; NOTE: EXPERIMENTAL!
 
 (defn process-genome-for-autoconstruction
-  "Replaces input instructions with noops and replaces autoconstructive_integer_rand with 
-integer_rand if deterministic? is false."
+  "Replaces input instructions with noops and replaces autoconstructive_<type>_rand with 
+<type>_rand if deterministic? is false."
   [genome deterministic?]
   (let [input-instruction? (fn [instruction]
                              (and (symbol? instruction) 
@@ -250,10 +250,13 @@ integer_rand if deterministic? is false."
     (map (fn [instruction-map]
            (if (input-instruction? (:instruction instruction-map))
              (assoc instruction-map :instruction 'code_noop)
-             (if (and (not deterministic?)
-                      (= (:instruction instruction-map) 'autoconstructive_integer_rand))
-               (assoc instruction-map :instruction 'integer_rand)
-               instruction-map)))
+             (if deterministic?
+               instruction-map
+               (if (= (:instruction instruction-map) 'autoconstructive_integer_rand)
+                 (assoc instruction-map :instruction 'integer_rand)
+                 (if (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
+                   (assoc instruction-map :instruction 'boolean_rand)
+                   instruction-map)))))
          genome)))
 
 (defn produce-child-genome-by-autoconstruction
