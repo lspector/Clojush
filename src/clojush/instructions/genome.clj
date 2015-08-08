@@ -246,11 +246,11 @@
   autoconstructive_integer_rand 
   ;; pushes a constant integer, but is replaced with integer_rand during 
   ;; nondetermistic autoconstruction
-  ^{:stack-types [:genome :integer]} (fn [state] (push-item 23 :integer state)))
+  ^{:stack-types [:genome :integer]} (fn [state] (push-item 0 :integer state)))
 
 (define-registered
   autoconstructive_boolean_rand 
-  ;; pushes true, but is replaced with boolean_rand during 
+  ;; pushes false, but is replaced with boolean_rand during 
   ;; nondetermistic autoconstruction
-  ^{:stack-types [:genome :boolean]} (fn [state] (push-item true :boolean state)))
+  ^{:stack-types [:genome :boolean]} (fn [state] (push-item false :boolean state)))
 
