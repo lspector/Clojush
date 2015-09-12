@@ -85,7 +85,7 @@
    
    :max-points 512
    :max-genome-size-in-initial-program 128
-   :evalpush-limit 512
+   :evalpush-limit 2048
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1
@@ -103,8 +103,8 @@
                                       (vec (take number-of-rule30-datapoints-per-generation 
                                                  (lshuffle rule30-data))))
                                 (println "rule30-data-this-generation:" @rule30-data-this-generation))
-   :autoconstructive-integer-rand-enrichment 3 
-   :autoconstructive-boolean-rand-enrichment 3
+   :autoconstructive-integer-rand-enrichment -1
+   :autoconstructive-boolean-rand-enrichment 7
    })
 
 (defn total-error-on-all-rule30-data ;; for validation
