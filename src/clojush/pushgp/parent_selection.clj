@@ -156,17 +156,23 @@
 
 (defn select
   "Returns a selected parent."
-  [pop location {:keys [parent-selection]
+  [pop location {:keys [parent-selection print-selection-counts]
                  :as argmap}]
   (let [pop-with-meta-errors (map (fn [ind] (update-in ind [:errors] concat (:meta-errors ind)))
-                                  pop)]
-    (case parent-selection
-      :tournament (tournament-selection pop-with-meta-errors location argmap)
-      :lexicase (lexicase-selection pop-with-meta-errors location argmap)
-      :elitegroup-lexicase (elitegroup-lexicase-selection pop-with-meta-errors)
-      :leaky-lexicase (if (< (lrand) (:lexicase-leakage argmap))
-                        (uniform-selection pop-with-meta-errors)
-                        (lexicase-selection pop-with-meta-errors location argmap))
-      :uniform (uniform-selection pop-with-meta-errors)
-      (throw (Exception. (str "Unrecognized argument for parent-selection: "
-                              parent-selection))))))
+                                  pop)
+        selected (case parent-selection
+                   :tournament (tournament-selection pop-with-meta-errors location argmap)
+                   :lexicase (lexicase-selection pop-with-meta-errors location argmap)
+                   :elitegroup-lexicase (elitegroup-lexicase-selection pop-with-meta-errors)
+                   :leaky-lexicase (if (< (lrand) (:lexicase-leakage argmap))
+                                     (uniform-selection pop-with-meta-errors)
+                                     (lexicase-selection pop-with-meta-errors location argmap))
+                   :uniform (uniform-selection pop-with-meta-errors)
+                   (throw (Exception. (str "Unrecognized argument for parent-selection: "
+                                           parent-selection))))]
+    (when print-selection-counts
+      (swap! selection-counts update-in [(:uuid selected)] (fn [sel-count]
+                                                             (if (nil? sel-count)
+                                                               1
+                                                               (inc sel-count)))))
+    selected))
