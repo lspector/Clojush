@@ -336,6 +336,4 @@ be set globally in the future."
                                          (:ancestors parent1)))
            :is-random-replacement
            (if competent false true)
-           :genetic-operators
-           (if competent :autoconstruction :random)
       )))
