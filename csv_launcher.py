@@ -2,25 +2,33 @@ import os, stat
 
 ##########################################################################
 # Settings
-number_runs = 100
+number_runs = 10
 
-namespace = "string-differences"
+namespace = "replace-space-with-newline"
+
+selection = "lexicase"
 
 clojush_directory = "/home/thelmuth/Autoconstruction/"
-output_directory = "/home/thelmuth/Results/autoconstruction/" + namespace + "/trial1/"
+output_directory = "/home/thelmuth/Results/autoconstruction/" + namespace + "/csv-printing/"
 
 example_file = "clojush.problems.software." + namespace
 
-title_string = "Autoconstruction | %s | Trial 1" % (namespace.replace("-", " ").title())
+title_string = "Autoconstruction | %s | CSV Printing" % (namespace.replace("-", " ").title())
 
-# Push args
+description = """A first try at systematic runs of benchark problems using autoconstruction
+The problem is %s
+These runs will print CSVs to load into the graph DB's we've been using.
+""" % namespace.replace("-", " ").title()
+
+# Push args                                                                                                                                   
 example_file += " :autoconstructive true"
 example_file += " :print-homology-data true"
 example_file += " :max-generations 3000"
 
-description = """A first try at systematic runs of benchark problems using autoconstruction
-The problem is %s
-""" % namespace.replace("-", " ").title()
+# Clustering experiment stuff
+example_file += " :print-csv-logs true"
+example_file += """ :csv-columns '[:generation :location :parent-uuids :genetic-operators :push-program-size :plush-genome-size :push-program :plush-genome :total-error :test-case-errors]'"""
+
 
 ##########################################################################
 # Uncomment the following if you want to print timings in the logs
@@ -45,6 +53,8 @@ if os.path.isdir(output_directory):
     raise RuntimeError, "Output directory already exists"
 
 os.mkdir(output_directory)
+os.mkdir(output_directory + "logs/")
+os.mkdir(output_directory + "csv/")
 
 # Make description file
 description_file_string = output_directory + "description.txt"
@@ -63,9 +73,12 @@ Job -title {%s} -subtasks {
 
 for run in range(0, number_runs):
     intro_command = "echo Starting run;export PATH=$PATH:/usr/java/latest/bin; cd %s;" % (clojush_directory)
-    outro_command = " > %s%s%i%s; echo Finished Run" % (output_directory, output_prefix, run, output_postfix)
+    csv_command = """ :csv-log-filename '"%scsv/data%i.csv"'""" % (output_directory, run)
+    output_command = " > %slogs/%s%i%s;" % (output_directory, output_prefix, run, output_postfix)
+    tar_command = " echo gzip CSV; cd %scsv/; gzip data%i.csv; cd %s;" % (output_directory, run, clojush_directory)
+    outro_command = " echo Finished Run"
 
-    full_command = intro_command + command + outro_command
+    full_command = intro_command + command + csv_command + output_command + tar_command + outro_command
 
     alfcode += """    Task -title {%s - run %i} -cmds {
         RemoteCmd {/bin/sh -c {%s}} -service {%s}
