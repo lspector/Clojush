@@ -71,7 +71,7 @@
                                         (integer? const) (round (perturb-with-gaussian-noise uniform-mutation-int-gaussian-standard-deviation const))
                                         (string? const) (string-tweak const)
                                         (or (= const true) (= const false)) (lrand-nth [true false])
-                                        :else (:instruction (first (random-plush-genome 1 atom-generators argmap))))))))               
+                                        :else (:instruction (first (random-plush-genome 1 atom-generators argmap))))))))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
                           (if (< (lrand) uniform-mutation-constant-tweak-rate)
@@ -144,7 +144,7 @@
   "Returns the individual with each element of its genome possibly deleted, with probability
 given by uniform-deletion-rate."
   [ind {:keys [uniform-deletion-rate maintain-ancestors]}]
-  (let [new-genome (filter identity 
+  (let [new-genome (filter identity
                            (map #(if (< (lrand) uniform-deletion-rate) % nil)
                                 (:genome ind)))]
     (make-individual :genome new-genome
@@ -240,20 +240,23 @@ given by uniform-deletion-rate."
 ;; NOTE: EXPERIMENTAL!
 
 (defn process-genome-for-autoconstruction
-  "Replaces input instructions with noops and replaces autoconstructive_integer_rand with 
-integer_rand if deterministic? is false."
+  "Replaces input instructions with noops and replaces autoconstructive_<type>_rand with
+<type>_rand if deterministic? is false."
   [genome deterministic?]
   (let [input-instruction? (fn [instruction]
-                             (and (symbol? instruction) 
+                             (and (symbol? instruction)
                                   (or (re-seq #"in\d+" (name instruction)) ;; from input-output
                                       (re-seq #"in_dm" (name instruction)))))] ;; from digital-multiplier
     (map (fn [instruction-map]
            (if (input-instruction? (:instruction instruction-map))
              (assoc instruction-map :instruction 'code_noop)
-             (if (and (not deterministic?)
-                      (= (:instruction instruction-map) 'autoconstructive_integer_rand))
-               (assoc instruction-map :instruction 'integer_rand)
-               instruction-map)))
+             (if deterministic?
+               instruction-map
+               (if (= (:instruction instruction-map) 'autoconstructive_integer_rand)
+                 (assoc instruction-map :instruction 'integer_rand)
+                 (if (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
+                   (assoc instruction-map :instruction 'boolean_rand)
+                   instruction-map)))))
          genome)))
 
 (defn produce-child-genome-by-autoconstruction
@@ -282,7 +285,7 @@ the resulting top genome."
 genome g."
   [g argmap]
   (ensure-list
-    (list-to-open-close-sequence 
+    (list-to-open-close-sequence
       (translate-plush-genome-to-push-program {:genome g} argmap))))
 
 (defn expressed-difference
@@ -309,12 +312,12 @@ programs encoded by genomes g1 and g2."
                     (expressed-difference child2 gc2b argmap)))))
 
 (defn autoconstruction
-  "Returns a genome for a child produced either by autoconstruction (executing parent1 
+  "Returns a genome for a child produced either by autoconstruction (executing parent1
 with both parents on top of the genome stack and also available via input instructions)
-or by cloning. In either case if the child is not reproductively competent then a random 
+or by cloning. In either case if the child is not reproductively competent then a random
 genome is returned instead. The construct/clone ration is hardcoded here, but might
 be set globally in the future."
-  [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program error-function] 
+  [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program error-function]
                     :as argmap}]
   (let [construct-clone-ratio 0.9 ;; maybe make this a global parameter
         parent1-genome (:genome parent1)
@@ -331,5 +334,6 @@ be set globally in the future."
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
-           :random-replacement-for-reproductively-incompetent-genome 
-           (if competent false true))))
+           :is-random-replacement
+           (if competent false true)
+      )))
