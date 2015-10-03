@@ -71,7 +71,7 @@
   [population generation {:keys [csv-log-filename csv-columns]}]
   (let [columns (concat [:uuid]
                         (filter #(some #{%} csv-columns)
-                                [:generation :location :parent-uuids :genetic-operators :push-program-size :plush-genome-size :push-program :plush-genome :total-error]))]
+                                [:generation :location :parent-uuids :genetic-operators :push-program-size :plush-genome-size :push-program :plush-genome :total-error :is-random-replacement]))]
     (when (zero? generation)
       (with-open [csv-file (io/writer csv-log-filename :append false)]
         (csv/write-csv csv-file
@@ -388,8 +388,8 @@
                                                    (repeat (- population-size (count @selection-counts)) 0))))
       (reset! selection-counts {}))
     (when autoconstructive
-      (println "Number of random replacements for reproductively incompetent individuals:" 
-               (count (filter :random-replacement-for-reproductively-incompetent-genome population))))
+      (println "Number of random replacements for reproductively incompetent individuals:"
+               (count (filter :is-random-replacement population))))
     (println "--- Run Statistics ---")
     (println "Number of program evaluations used so far:" @evaluations-count)
     (println "Number of point (instruction) evaluations so far:" point-evaluations-before-report)
@@ -463,7 +463,7 @@
    {:keys [error-function final-report-simplifications report-simplifications
            print-ancestors-of-solution problem-specific-report]}]
   (printf "\n\nSUCCESS at generation %s\nSuccessful program: %s\nErrors: %s\nTotal error: %s\nHistory: %s\nSize: %s\n\n"
-          generation (pr-str (not-lazy (:program best))) (not-lazy (:errors best)) (:total-error best) 
+          generation (pr-str (not-lazy (:program best))) (not-lazy (:errors best)) (:total-error best)
           (not-lazy (:history best)) (count-points (:program best)))
   (when print-ancestors-of-solution
     (printf "\nAncestors of solution:\n")
