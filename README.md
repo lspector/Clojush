@@ -24,6 +24,7 @@ http://clojure.org/. The current version of Clojush requires Clojure 1.5.1.
 Clojure is available for most OS platforms. [A good starting point for
 obtaining and using Clojure](http://dev.clojure.org/display/doc/Getting+Started).
 
+
 Quickstart
 ----------
 
@@ -60,6 +61,16 @@ To run the examples in an IDE (Integrated Development Environment) for
 Clojure such as Clooj or Eclipse/Counterclockwise, load one of the
 files in src/clojush/problems into the IDE's REPL, type "(pushgp argmap)"
 into the REPL's input area, and hit the enter key.
+
+You can also use [Docker](https://docs.docker.com/) to run examples, if you
+don't want to install Clojure on your machine directly.
+
+```bash
+# first build the image. This needs to be re-done if any of the code changes
+docker build -t lspector/clojush .
+# then run it on a specific problem
+docker run --rm lspector/clojush lein run clojush.problems.demos.simple-regression
+```
 
 For large-scale runs you may want to provide additional arguments to 
 Java in order to allow  access to more memory and/or to take maximal 
