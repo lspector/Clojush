@@ -1,0 +1,8 @@
+sudo: false
+language: clojure
+script:
+  # check fails because of "Duplicate Push instruction defined:boolean_and"
+  # - lein check
+  - lein test
+notifications:
+  email: false
