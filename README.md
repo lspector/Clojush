@@ -1,6 +1,8 @@
 Clojush
 =======
 
+[![Build Status](https://travis-ci.org/lspector/Clojush.svg?branch=master)](https://travis-ci.org/lspector/Clojush)
+
 Lee Spector (lspector@hampshire.edu), started 20100227
 [See version history](https://github.com/lspector/Clojush/commits/master).
 Older version history is in old-version-history.txt.
