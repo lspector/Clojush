@@ -13,6 +13,11 @@
                  [clojure-csv "2.0.1"]
                  [org.clojure/data.json "0.2.6"]
                  [clj-random "0.1.7"]]
+  :plugins [[codox "0.8.14"]]
+  :codox {:src-dir-uri "http://github.com/lspector/Clojush/blob/master/"
+          :src-linenum-anchor-prefix "L"
+          ; :exclude #"^clojush\.problems\."
+          :defaults {:doc/format :markdown}}
   :dev-dependencies [[lein-ccw "1.2.0"][lein-midje "3.1.3"]]
   :profiles {:dev {:dependencies [[midje "1.7.0"]]}}
   ;;;;;;;;;; jvm settings for high performance, using most of the machine's RAM

@@ -2,6 +2,7 @@ Clojush
 =======
 
 [![Build Status](https://travis-ci.org/lspector/Clojush.svg?branch=master)](https://travis-ci.org/lspector/Clojush)
+[![API Docs](https://img.shields.io/badge/api%20docs-master-blue.svg)](http://lspector.github.io/Clojush/)
 
 Lee Spector (lspector@hampshire.edu), started 20100227
 [See version history](https://github.com/lspector/Clojush/commits/master).
@@ -83,6 +84,20 @@ on the method that you use to launch your code.
 
 An additional tutorial is available in src/clojush/problems/demos/tutorial.clj.
 
+## Docs
+
+Docs are auto generated from function metadata using [`codox`](https://github.com/weavejester/codox).
+
+On every commit to master, the docs are automatically regenerated and pushed
+to [github pages](http://lspector.github.io/Clojush/), through Travis.
+
+To generate them locally run `lein doc` and then open `doc/index.html`.
+
+Currently generating the docs have some unintended side effects of running some examples,
+[because we couldn't figure out how stop codox from loading all the files](https://github.com/weavejester/codox/issues/100).
+
+In the metadata, you can [skip functions](https://github.com/weavejester/codox#metadata-options)
+and also [link to other functions](https://github.com/weavejester/codox#docstring-formats).
 
 Description
 -----------
