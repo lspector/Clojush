@@ -6,6 +6,7 @@ script:
   - lein test
 after_success:
   - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && ./deploy-docs.sh
+  - test $TRAVIS_TAG && && ./release.sh
 
 notifications:
   email: false
