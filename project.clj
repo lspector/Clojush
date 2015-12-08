@@ -1,4 +1,4 @@
-(defproject clojush "2.0.40"
+(defproject clojush "2.0.41-SNAPSHOT"
   :description "The Push programming language and the PushGP genetic programming
                 system implemented in Clojure.
                 See http://hampshire.edu/lspector/push.html"
@@ -20,7 +20,19 @@
           :defaults {:doc/format :markdown}}
   :dev-dependencies [[lein-ccw "1.2.0"][lein-midje "3.1.3"]]
   :profiles {:dev {:dependencies [[midje "1.7.0"]]}}
-  ;;;;;;;;;; jvm settings for high performance, using most of the machine's RAM
+  :repositories [["releases" {:url "https://clojars.org/repo"
+                              :username :env
+                              :sign-releases false
+                              :password :env}]]
+  :release-tasks [["vcs" "assert-committed"]
+                  ["change" "version" "leiningen.release/bump-version" "release"]
+                  ["vcs" "commit"]
+                  ["vcs" "tag" "v" "--no-sign"] ; disable signing and add "v" prefix
+                  ["deploy"]
+                  ["change" "version" "leiningen.release/bump-version"]
+                  ["vcs" "commit"]
+                  ["vcs" "push"]]
+;;;;;;;;;; jvm settings for high performance, using most of the machine's RAM
 ;  :jvm-opts ~(let [mem-to-use
 ;                   (long (* (.getTotalPhysicalMemorySize
 ;                              (java.lang.management.ManagementFactory/getOperatingSystemMXBean))

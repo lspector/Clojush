@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # modified from https://github.com/X1011/git-directory-deploy/raw/master/deploy.sh
 # changed to support automatically intializing, if it deteched the remote branch didnt exist
+
 set -o errexit #abort if any command fails
 
 main() {
-	deploy_directory=${GIT_DEPLOY_DIR:-dist}
+	deploy_directory=${GIT_DEPLOY_DIR:-doc}
 	deploy_branch=${GIT_DEPLOY_BRANCH:-gh-pages}
 
 	#if no user identity is already set in the current git environment, use this:
 	default_username=${GIT_DEPLOY_USERNAME:-deploy.sh}
-	default_email=${GIT_DEPLOY_EMAIL:-}
+	default_email=${GIT_DEPLOY_EMAIL:-"_@_"}
 
 	#repository to deploy to. must be readable and writable.
 	repo=${GIT_DEPLOY_REPO:-origin}
