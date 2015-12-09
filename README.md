@@ -1,9 +1,7 @@
-Clojush
+Clojush [![Travis branch](https://img.shields.io/travis/lspector/Clojush/master.svg?style=flat-square)](https://travis-ci.org/lspector/Clojush) [![API Docs](https://img.shields.io/badge/api%20docs-master-blue.svg?style=flat-square)](http://lspector.github.io/Clojush/) [![Clojars Project](https://img.shields.io/clojars/v/clojush.svg?style=flat-square)](http://clojars.org/clojush)
 =======
 
-[![Build Status](https://travis-ci.org/lspector/Clojush.svg?branch=master)](https://travis-ci.org/lspector/Clojush)
-[![API Docs](https://img.shields.io/badge/api%20docs-master-blue.svg)](http://lspector.github.io/Clojush/)
-[![Clojars Project](http://clojars.org/clojush/latest-version.svg)](http://clojars.org/clojush)
+
 
 Lee Spector (lspector@hampshire.edu), started 20100227
 [See version history](https://github.com/lspector/Clojush/commits/master).
