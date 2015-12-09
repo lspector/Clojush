@@ -45,4 +45,13 @@ the [repository settings in Travis](http://docs.travis-ci.com/user/environment-v
 so that it can the release to Clojars. It also needs the `GITHUB_TOKEN`
 in order to push the added tag and commit back to Github.
 
-Currently it will always bump a minor version. It
+So Travis will:
+
+1. Build docs + push those to `gh-pages` branch after every master branch build
+2. Run `lein release` as well on those builds. This will:
+    1. create new git commit and tag for new commit w/ out `-SNAPSHOT` in it
+    2. Create jar and push that to clojars
+    3. bump release number to next minor version
+    4. Push new commits + tag back to github
+
+
