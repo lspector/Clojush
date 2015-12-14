@@ -13,7 +13,8 @@
                  [clojure-csv "2.0.1"]
                  [org.clojure/data.json "0.2.6"]
                  [clj-random "0.1.7"]]
-  :plugins [[codox "0.8.14"]]
+  :plugins [[codox "0.8.14"]
+            [lein-shell "0.5.0"]]
   :codox {:src-dir-uri "http://github.com/lspector/Clojush/blob/master/"
           :src-linenum-anchor-prefix "L"
           ; :exclude #"^clojush\.problems\."
@@ -26,11 +27,11 @@
                               :password :env}]]
   :release-tasks [["vcs" "assert-committed"]
                   ["change" "version" "leiningen.release/bump-version" "release"]
-                  ["vcs" "commit"]
+                  ["shell" "git" "commit" "-am" "Version ${:version} [ci skip]"]
                   ["vcs" "tag" "v" "--no-sign"] ; disable signing and add "v" prefix
                   ["deploy"]
                   ["change" "version" "leiningen.release/bump-version"]
-                  ["vcs" "commit"]
+                  ["shell" "git" "commit" "-am" "Version ${:version} [ci skip]"]
                   ["vcs" "push"]]
 ;;;;;;;;;; jvm settings for high performance, using most of the machine's RAM
 ;  :jvm-opts ~(let [mem-to-use
