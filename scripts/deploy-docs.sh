@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # modified from https://github.com/X1011/git-directory-deploy/raw/master/deploy.sh
-# changed to support automatically intializing, if it deteched the remote branch didnt exist
+# changed to support automatically intializing, if it detected the remote branch didnt exist
 
 set -o errexit # abort if any command fails
 
