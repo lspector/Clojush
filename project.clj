@@ -14,7 +14,8 @@
                  [org.clojure/data.json "0.2.6"]
                  [clj-random "0.1.7"]]
   :plugins [[codox "0.8.14"]
-            [lein-shell "0.5.0"]]
+            [lein-shell "0.5.0"]
+            [lein-gorilla "0.3.5"]]
   :codox {:src-dir-uri "http://github.com/lspector/Clojush/blob/master/"
           :src-linenum-anchor-prefix "L"
           ; :exclude #"^clojush\.problems\."
