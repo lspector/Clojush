@@ -295,8 +295,8 @@ programs encoded by genomes g1 and g2."
   (levenshtein-distance (expressed-program-sequence-from-genome g1 argmap)
                         (expressed-program-sequence-from-genome g2 argmap)))
 
-(defn reproductively-competent?
-  "Returns true iff genome g is considered reproductively competent."
+(defn recursively-variant?
+  "Returns true iff genome g is considered recursively variant."
   [g argmap]
   (let [translate #(translate-plush-genome-to-push-program {:genome %} argmap)
         child1 (produce-child-genome-by-autoconstruction g g true argmap)
@@ -314,7 +314,7 @@ programs encoded by genomes g1 and g2."
 (defn autoconstruction
   "Returns a genome for a child produced either by autoconstruction (executing parent1
 with both parents on top of the genome stack and also available via input instructions)
-or by cloning. In either case if the child is not reproductively competent then a random
+or by cloning. In either case if the child is not recursively variant then a random
 genome is returned instead. The construct/clone ration is hardcoded here, but might
 be set globally in the future."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program error-function]
@@ -325,8 +325,8 @@ be set globally in the future."
         child-genome (if (< (lrand) construct-clone-ratio)
                        (produce-child-genome-by-autoconstruction parent1-genome parent2-genome false argmap)
                        parent1-genome)
-        competent (reproductively-competent? child-genome argmap)
-        new-genome (if competent
+        variant (recursively-variant? child-genome argmap)
+        new-genome (if variant
                      child-genome
                      (random-plush-genome max-genome-size-in-initial-program atom-generators argmap))]
     (assoc (make-individual :genome new-genome
@@ -335,5 +335,5 @@ be set globally in the future."
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
            :is-random-replacement
-           (if competent false true)
+           (if variant false true)
       )))
