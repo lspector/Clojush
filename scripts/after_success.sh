@@ -14,7 +14,7 @@ git config user.email "$AUTOMATED_AUTHOR_EMAIL"
 git config push.default simple
 # dont output all of lein doc, because its overly long because it tries
 # to run experiments
-lein doc 2>&1 | head -n 100
+lein codox 2>&1 | head -n 100
 ./scripts/deploy-docs.sh --verbose
 git checkout master
 lein release
