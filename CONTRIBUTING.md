@@ -21,7 +21,7 @@ Docs are auto generated from function metadata using
 On every commit to master, the docs are automatically regenerated and pushed
 to the [`gh-pages` branch](http://lspector.github.io/Clojush/).
 
-To generate them locally run `lein doc` and then open `doc/index.html`.
+To generate them locally run `lein codox` and then open `doc/index.html`.
 
 Currently, generating the docs have the side effect of running some examples,
 [because I couldn't figure out how stop codox from loading all example files](https://github.com/weavejester/codox/issues/100).
