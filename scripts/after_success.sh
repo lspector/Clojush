@@ -4,6 +4,9 @@ set -o nounset
 set -o xtrace
 set -o pipefail
 
+# exit if not on master branch
+[ $TRAVIS_BRANCH = master ]
+
 AUTOMATED_AUTHOR_EMAIL=_@_._
 AUTOMATED_AUTHOR_NAME=_
 
@@ -15,6 +18,9 @@ git config push.default simple
 # dont output all of lein doc, because its overly long because it tries
 # to run experiments
 lein codox 2>&1 | head -n 100
+git checkout gh-page
+git pull origin gh-pages
 ./scripts/deploy-docs.sh --verbose
 git checkout master
+git pull origin master
 lein release
