@@ -1,4 +1,4 @@
-(defproject clojush "2.0.51"
+(defproject clojush "2.0.52-SNAPSHOT"
   :description "The Push programming language and the PushGP genetic programming
                 system implemented in Clojure.
                 See http://hampshire.edu/lspector/push.html"
