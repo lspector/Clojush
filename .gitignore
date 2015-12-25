@@ -20,3 +20,4 @@ lib/
 *.json
 .lein-failures
 doc/
+cov/*

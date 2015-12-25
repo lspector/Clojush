@@ -8,6 +8,8 @@ script:
   # check fails because of "Duplicate Push instruction defined:boolean_and"
   # - lein check
   - lein test
-after_success: ./scripts/after_success.sh 2>&1 | sed "s/$GITHUB_TOKEN/<hidden github token>/"
+after_success:
+  - ./scripts/coveralls.sh
+  - ./scripts/after_success.sh 2>&1 | sed "s/$GITHUB_TOKEN/<hidden github token>/"
 notifications:
   email: false
