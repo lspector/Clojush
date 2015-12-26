@@ -317,11 +317,15 @@ programs encoded by genomes g1 and g2."
   (let [translate #(translate-plush-genome-to-push-program {:genome %} argmap)
         c1 (produce-child-genome-by-autoconstruction g g true argmap)
         c1c (produce-child-genome-by-autoconstruction c1 [] true argmap)
+        c1cc (produce-child-genome-by-autoconstruction c1c [] true argmap)
         c2 (produce-child-genome-by-autoconstruction g [] true argmap)
-        c2c (produce-child-genome-by-autoconstruction c2 [] true argmap)]
-    (and (apply distinct? (map translate [g c1 c1c c2 c2c]))
-         (distinct? (expressed-difference c1 c1c argmap)
-                    (expressed-difference c2 c2c argmap)))))
+        c2c (produce-child-genome-by-autoconstruction c2 [] true argmap)
+        c2cc (produce-child-genome-by-autoconstruction c2c [] true argmap)]
+    (and (apply distinct? (map translate [g c1 c1c c1cc c2 c2c c2cc]))
+         (apply distinct? [(expressed-difference c1 c1c argmap)
+                           (expressed-difference c1c c1cc argmap)
+                           (expressed-difference c2 c2c argmap)
+                           (expressed-difference c2c c2cc argmap)]))))
 
 (defn autoconstruction
   "Returns a genome for a child produced either by autoconstruction (executing parent1

@@ -29,5 +29,21 @@
    :atom-generators []
    :autoconstructive true
    :report-simplifications 0
-   :pass-individual-to-error-function true})
+   :pass-individual-to-error-function true
+   :max-points 500
+   :evalpush-limit 1000})
+
+;(reset-globals argmap)
+
+;(recursively-variant?
+;  '({:close 0, :silent false, :instruction autoconstructive_integer_rand} 
+;     {:close 0, :silent false, :instruction exec_s} 
+;     {:close 1, :silent false, :instruction boolean_invert_first_then_and} 
+;     {:close 1, :silent false, :instruction genome_empty} 
+;     {:close 1, :silent false, :instruction genome_stackdepth} 
+;     {:close 0, :silent false, :instruction genome_gene_randomize} 
+;     {:close 0, :silent true, :instruction integer_mod} 
+;     {:close 0, :silent false, :instruction exec_swap} 
+;     {:close 1, :silent false, :instruction integer_inc})
+;  @push-argmap)
 

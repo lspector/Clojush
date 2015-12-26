@@ -21,3 +21,4 @@ lib/
 .lein-failures
 doc/
 cov/*
+out
