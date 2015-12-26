@@ -1,4 +1,4 @@
-(defproject clojush "2.0.46-SNAPSHOT"
+(defproject clojush "2.0.53-SNAPSHOT"
   :description "The Push programming language and the PushGP genetic programming
                 system implemented in Clojure.
                 See http://hampshire.edu/lspector/push.html"
@@ -13,13 +13,14 @@
                  [clojure-csv "2.0.1"]
                  [org.clojure/data.json "0.2.6"]
                  [clj-random "0.1.7"]]
-  :plugins [[codox "0.8.14"]
+  :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
-            [lein-gorilla "0.3.5"]]
-  :codox {:src-dir-uri "http://github.com/lspector/Clojush/blob/master/"
-          :src-linenum-anchor-prefix "L"
-          ; :exclude #"^clojush\.problems\."
-          :defaults {:doc/format :markdown}}
+            [lein-gorilla "0.3.5"]
+            [lein-cloverage "1.0.6"]]
+  :codox {:source-uri "http://github.com/lspector/Clojush/blob/master/{filepath}#L{line}"
+          :namespaces [#"^(?!clojush\.problems)"]
+          :output-path "doc"
+          :metadata {:doc/format :markdown}}
   :dev-dependencies [[lein-ccw "1.2.0"][lein-midje "3.1.3"]]
   :profiles {:dev {:dependencies [[midje "1.7.0"]]}}
   :repositories [["releases" {:url "https://clojars.org/repo"
