@@ -314,7 +314,8 @@ programs encoded by genomes g1 and g2."
 (defn recursively-variant?
   "Returns true iff genome g is considered recursively variant."
   [g argmap]
-  (let [c1 (produce-child-genome-by-autoconstruction g g true argmap)
+  (let [translate #(translate-plush-genome-to-push-program {:genome %} argmap)
+        c1 (produce-child-genome-by-autoconstruction g g true argmap)
         c1c (produce-child-genome-by-autoconstruction c1 [] true argmap)
         c2 (produce-child-genome-by-autoconstruction g [] true argmap)
         c2c (produce-child-genome-by-autoconstruction c2 [] true argmap)]
