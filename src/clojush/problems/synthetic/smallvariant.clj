@@ -34,16 +34,36 @@
    :evalpush-limit 1000})
 
 ;(reset-globals argmap)
-
+;
 ;(recursively-variant?
-;  '({:close 0, :silent false, :instruction autoconstructive_integer_rand} 
-;     {:close 0, :silent false, :instruction exec_s} 
-;     {:close 1, :silent false, :instruction boolean_invert_first_then_and} 
-;     {:close 1, :silent false, :instruction genome_empty} 
+;  '({:close 0, :silent false, :instruction integer_dec} 
+;     {:close 0, :silent true, :instruction boolean_or} 
+;     {:close 0, :silent false, :instruction exec_noop} 
 ;     {:close 1, :silent false, :instruction genome_stackdepth} 
+;     {:close 0, :silent false, :instruction integer_empty} 
+;     {:close 1, :silent false, :instruction exec_dup} 
+;     {:close 1, :silent false, :instruction exec_pop} 
+;     {:close 1, :silent false, :instruction integer_fromboolean} 
+;     {:close 0, :silent true, :instruction integer_flush} 
+;     {:close 1, :silent false, :instruction genome_gene_copy_range} 
+;     {:close 0, :silent false, :instruction exec_dup} 
+;     {:close 0, :silent false, :instruction exec_while} 
+;     {:close 0, :silent false, :instruction integer_pop} 
+;     {:close 0, :silent true, :instruction boolean_shove} 
+;     {:close 0, :silent false, :instruction autoconstructive_integer_rand} 
+;     {:close 0, :silent true, :instruction genome_gene_delete} 
+;     {:close 1, :silent false, :instruction exec_yankdup} 
 ;     {:close 0, :silent false, :instruction genome_gene_randomize} 
-;     {:close 0, :silent true, :instruction integer_mod} 
-;     {:close 0, :silent false, :instruction exec_swap} 
-;     {:close 1, :silent false, :instruction integer_inc})
+;     {:close 0, :silent false, :instruction genome_gene_delete} 
+;     {:close 0, :silent false, :instruction exec_stackdepth} 
+;     {:close 1, :silent false, :instruction genome_gene_delete} 
+;     {:close 0, :silent false, :instruction exec_do*count} 
+;     {:close 0, :silent false, :instruction integer_lt} 
+;     {:close 0, :silent false, :instruction exec_empty} 
+;     {:close 0, :silent true, :instruction genome_rotate} 
+;     {:close 0, :silent false, :instruction boolean_pop} 
+;     {:close 0, :silent false, :instruction exec_shove} 
+;     {:close 0, :silent false, :instruction integer_lte})
 ;  @push-argmap)
+
 
