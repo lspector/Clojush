@@ -301,37 +301,21 @@ programs encoded by genomes g1 and g2."
   (levenshtein-distance (expressed-program-sequence-from-genome g1 argmap)
                         (expressed-program-sequence-from-genome g2 argmap)))
 
-;(defn recursively-variant?
-;  "Returns true iff genome g is considered recursively variant."
-;  [g argmap]
-;  (let [translate #(translate-plush-genome-to-push-program {:genome %} argmap)
-;        child1 (produce-child-genome-by-autoconstruction g g true argmap)
-;        gc1a (produce-child-genome-by-autoconstruction child1 child1 true argmap)
-;        gc1b (produce-child-genome-by-autoconstruction child1 [] true argmap)
-;        gc1c (produce-child-genome-by-autoconstruction child1 child1 false argmap)
-;        child2 (produce-child-genome-by-autoconstruction g g false argmap)
-;        gc2a (produce-child-genome-by-autoconstruction child2 child2 true argmap)
-;        gc2b (produce-child-genome-by-autoconstruction child2 [] true argmap)
-;        gc2c (produce-child-genome-by-autoconstruction child2 child2 false argmap)]
-;    (and (apply distinct? (map translate [g child1 child2 gc1a gc1b gc1c gc2a gc2b gc2c]))
-;         (distinct? (expressed-difference child1 gc1b argmap)
-;                    (expressed-difference child2 gc2b argmap)))))
-
 (defn recursively-variant?
   "Returns true iff genome g is considered recursively variant."
   [g argmap]
   (let [translate #(translate-plush-genome-to-push-program {:genome %} argmap)
-        c1 (produce-child-genome-by-autoconstruction g g true argmap)
-        c1c (produce-child-genome-by-autoconstruction c1 [] true argmap)
-        c1cc (produce-child-genome-by-autoconstruction c1c [] true argmap)
-        c2 (produce-child-genome-by-autoconstruction g [] true argmap)
-        c2c (produce-child-genome-by-autoconstruction c2 [] true argmap)
-        c2cc (produce-child-genome-by-autoconstruction c2c [] true argmap)]
-    (and (apply distinct? (map translate [g c1 c1c c1cc c2 c2c c2cc]))
-         (apply distinct? [(expressed-difference c1 c1c argmap)
-                           (expressed-difference c1c c1cc argmap)
-                           (expressed-difference c2 c2c argmap)
-                           (expressed-difference c2c c2cc argmap)]))))
+        child1 (produce-child-genome-by-autoconstruction g g true argmap)
+        gc1a (produce-child-genome-by-autoconstruction child1 child1 true argmap)
+        gc1b (produce-child-genome-by-autoconstruction child1 [] true argmap)
+        gc1c (produce-child-genome-by-autoconstruction child1 child1 false argmap)
+        child2 (produce-child-genome-by-autoconstruction g g false argmap)
+        gc2a (produce-child-genome-by-autoconstruction child2 child2 true argmap)
+        gc2b (produce-child-genome-by-autoconstruction child2 [] true argmap)
+        gc2c (produce-child-genome-by-autoconstruction child2 child2 false argmap)]
+    (and (apply distinct? (map translate [g child1 child2 gc1a gc1b gc1c gc2a gc2b gc2c]))
+         (distinct? (expressed-difference child1 gc1b argmap)
+                    (expressed-difference child2 gc2b argmap)))))
 
 (defn autoconstruction
   "Returns a genome for a child produced either by autoconstruction (executing parent1
