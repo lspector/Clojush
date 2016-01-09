@@ -258,7 +258,7 @@
 (define-registered code_fromboolean (with-meta (codemaker :boolean) {:stack-types [:code :boolean]}))
 (define-registered code_fromfloat (with-meta (codemaker :float) {:stack-types [:code :float]}))
 (define-registered code_frominteger (with-meta (codemaker :integer) {:stack-types [:code :integer]}))
-(define-registered code_quote (with-meta (codemaker :exec) {:stack-types [:code :exec]}))
+(define-registered code_quote (with-meta (codemaker :exec) {:stack-types [:code :exec] :parentheses 1}))
 
 (define-registered 
   code_if
