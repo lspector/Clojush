@@ -2,18 +2,18 @@ import os, stat
 
 ##########################################################################
 # Settings
-number_runs = 10
+number_runs = 20
 
 namespace = "replace-space-with-newline"
 
 selection = "lexicase"
 
 clojush_directory = "/home/thelmuth/Autoconstruction/"
-output_directory = "/home/thelmuth/Results/autoconstruction/" + namespace + "/csv-printing/"
+output_directory = "/home/thelmuth/Results/autoconstruction/" + namespace + "/csv-printing-better-parent-tracking/"
 
 example_file = "clojush.problems.software." + namespace
 
-title_string = "Autoconstruction | %s | CSV Printing" % (namespace.replace("-", " ").title())
+title_string = "Autoconstruction | %s | CSV Printing - Better Parent Tracking" % (namespace.replace("-", " ").title())
 
 description = """A first try at systematic runs of benchark problems using autoconstruction
 The problem is %s
@@ -23,11 +23,11 @@ These runs will print CSVs to load into the graph DB's we've been using.
 # Push args                                                                                                                                   
 example_file += " :autoconstructive true"
 example_file += " :print-homology-data true"
-example_file += " :max-generations 3000"
+example_file += " :max-generations 2000"
 
 # Clustering experiment stuff
 example_file += " :print-csv-logs true"
-example_file += """ :csv-columns '[:generation :location :parent-uuids :genetic-operators :push-program-size :plush-genome-size :push-program :plush-genome :total-error :test-case-errors]'"""
+example_file += """ :csv-columns '[:generation :location :parent-uuids :genetic-operators :is-random-replacement :push-program-size :plush-genome-size :plush-genome :total-error :test-case-errors]'"""
 
 
 ##########################################################################
