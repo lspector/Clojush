@@ -9,9 +9,9 @@
 
 ;(defmacro define-push-state-structure []
 ;  `(defstruct push-state ~@push-types))
-
+;
 ;(define-push-state-structure)
-
+;
 ;(defn make-push-state
 ;  "Returns an empty push state."
 ;  []

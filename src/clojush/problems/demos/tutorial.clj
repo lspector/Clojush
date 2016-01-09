@@ -27,8 +27,8 @@
 
 ;(run-push '(1 2 integer_add) 
 ;          (make-push-state)
-;          true)
-
+;          true)          
+          
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of x^3 - 2x^2 - x (problem 5 from the 
 ;; trivial geography chapter) with minimal integer instructions and an 
