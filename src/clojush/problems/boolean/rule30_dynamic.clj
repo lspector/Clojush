@@ -1,8 +1,6 @@
 ;; rule30_dynamic.clj
 ;; Lee Spector, lspector@hampshire.edu
 ;;
-;; Problem Source: iJava (http://ijava.cs.umass.edu/)
-;;
 ;; Given an integer, return a boolean indicating whether the location indexed
 ;; by the integer in the output of a rule 30 cellular automation is 1.
 ;; The automaton is started in the state ...00000100000..., and indexing starts

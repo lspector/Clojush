@@ -19,3 +19,6 @@ lib/
 *.csv
 *.json
 .lein-failures
+doc/
+cov/*
+out

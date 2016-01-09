@@ -162,11 +162,16 @@
                                                         (:atom-generators @push-argmap))))))
 
 (defn reset-globals
-  []
-  (doseq [[gname gatom] (filter (fn [[a _]] (.startsWith (name a) "global-")) (ns-publics 'clojush.globals))]
-    (if (contains? @push-argmap (keyword (.substring (name gname) (count "global-"))))
-      (reset! @gatom (get @push-argmap (keyword (.substring (str gname) (count "global-")))))
-      (throw (Exception. (str "globals.clj definition " gname " has no matching argument in push-argmap. Only such definitions should use the prefix 'global-'."))))))
+  "Resets all Clojush globals according to values in @push-argmap. If an argmap argument is provided then it is loaded 
+into @push-argmap first."
+  ([]
+    (doseq [[gname gatom] (filter (fn [[a _]] (.startsWith (name a) "global-")) (ns-publics 'clojush.globals))]
+      (if (contains? @push-argmap (keyword (.substring (name gname) (count "global-"))))
+        (reset! @gatom (get @push-argmap (keyword (.substring (str gname) (count "global-")))))
+        (throw (Exception. (str "globals.clj definition " gname " has no matching argument in push-argmap. Only such definitions should use the prefix 'global-'."))))))
+  ([argmap]
+    (load-push-argmap argmap)
+    (reset-globals)))
 
 (defn make-agents-and-rng
   [{:keys [use-single-thread population-size random-seed
