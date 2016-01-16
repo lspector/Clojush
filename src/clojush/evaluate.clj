@@ -1,5 +1,5 @@
 (ns clojush.evaluate
-  (:use [clojush util pushstate random globals individual])
+  (:use [clojush util pushstate random globals individual pushgp.genetic-operators])
   (:require [clojure.math.numeric-tower :as math]
             [clj-random.core :as random]))
 
@@ -90,7 +90,10 @@
     {:keys [reuse-errors print-history total-error-method normalization max-error pass-individual-to-error-function]
      :as argmap}]
     (random/with-rng rand-gen
-      (let [p (:program i)
+      (let [p (if (and (:autoconstructive argmap)
+                       (not (recursively-variant? (:genome i))))
+                []
+                (:program i))
             raw-errors (if (or (not reuse-errors) (nil? (:errors i)) (nil? (:total-error i)))
                          (if pass-individual-to-error-function
                            (error-function i)
