@@ -402,15 +402,15 @@ programs encoded by genomes g1 and g2."
 ;                    (expressed-difference c gc argmap))
 ;         (apply distinct? (map translate [g c c2 gc])))))
 
-;(defn recursively-variant?
-;  "Returns true iff genome g is considered recursively variant."
-;  [g argmap]
-;  (let [translate #(translate-plush-genome-to-push-program {:genome %} argmap)
-;        c1 (produce-child-genome-by-autoconstruction g g false argmap)
-;        c2 (produce-child-genome-by-autoconstruction g g false argmap)]
-;    (and (distinct? (expressed-difference g c1 argmap)
-;                    (expressed-difference g c2 argmap))
-;         (apply distinct? (map translate [g c1 c2])))))
+(defn recursively-variant?
+  "Returns true iff genome g is considered recursively variant."
+  [g argmap]
+  (let [translate #(translate-plush-genome-to-push-program {:genome %} argmap)
+        c1 (produce-child-genome-by-autoconstruction g g false argmap)
+        c2 (produce-child-genome-by-autoconstruction g g false argmap)]
+    (and (distinct? (expressed-difference g c1 argmap)
+                    (expressed-difference g c2 argmap))
+         (apply distinct? (map translate [g c1 c2])))))
 
 ;(defn recursively-variant?
 ;  "Returns true iff genome g is considered recursively variant."
@@ -460,24 +460,24 @@ programs encoded by genomes g1 and g2."
 ;         (some #(< (count %) (count g)) kids)
 ;         (some #(> (count %) (count g)) kids))))
 
-(defn recursively-variant?
-  "Returns true iff genome g is considered recursively variant."
-  [g argmap]
-  (let [spawn (fn [genome]
-                (repeatedly 
-                  5 
-                  #(produce-child-genome-by-autoconstruction 
-                     genome genome false argmap)))
-        variant? (fn [genome children]
-                   (let [diffs (map #(expressed-difference genome % argmap) 
-                                    children)]
-                     (and (> (reduce min diffs) 0)
-                          (> (count (distinct diffs)) 1)
-                          (some #(< (count %) (count genome)) children)
-                          (some #(> (count %) (count genome)) children))))
-        kids (spawn g)]
-    (and (variant? g kids)
-         (every? #(variant? % (spawn %)) kids))))
+;(defn recursively-variant?
+;  "Returns true iff genome g is considered recursively variant."
+;  [g argmap]
+;  (let [spawn (fn [genome]
+;                (repeatedly 
+;                  5 
+;                  #(produce-child-genome-by-autoconstruction 
+;                     genome genome false argmap)))
+;        variant? (fn [genome children]
+;                   (let [diffs (map #(expressed-difference genome % argmap) 
+;                                    children)]
+;                     (and (> (reduce min diffs) 0)
+;                          (> (count (distinct diffs)) 1)
+;                          (some #(< (count %) (count genome)) children)
+;                          (some #(> (count %) (count genome)) children))))
+;        kids (spawn g)]
+;    (and (variant? g kids)
+;         (every? #(variant? % (spawn %)) kids))))
     
 
 ;; lein run clojush.problems.demos.simple-regression :autoconstructive true :max-points 1600 :max-genome-size-in-initial-program 400 :evalpush-limit 1600 :population-size 1000 :max-generations 10000 :parent-selection :lexicase | tee out
@@ -500,7 +500,9 @@ be set globally in the future."
         new-genome (if variant
                      child-genome
                      (random-plush-genome max-genome-size-in-initial-program atom-generators argmap))]
-    (assoc (make-individual :genome new-genome
+    (assoc (make-individual :genome (if (or variant (recursively-variant? new-genome argmap))
+                                      new-genome
+                                      [])
                             :history (:history parent1)
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
