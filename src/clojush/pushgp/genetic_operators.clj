@@ -304,18 +304,13 @@ programs encoded by genomes g1 and g2."
 (defn recursively-variant?
   "Returns true iff genome g is considered recursively variant."
   [g argmap]
-  (let [translate #(translate-plush-genome-to-push-program {:genome %} argmap)
-        child1 (produce-child-genome-by-autoconstruction g g true argmap)
-        gc1a (produce-child-genome-by-autoconstruction child1 child1 true argmap)
-        gc1b (produce-child-genome-by-autoconstruction child1 [] true argmap)
-        gc1c (produce-child-genome-by-autoconstruction child1 child1 false argmap)
-        child2 (produce-child-genome-by-autoconstruction g g false argmap)
-        gc2a (produce-child-genome-by-autoconstruction child2 child2 true argmap)
-        gc2b (produce-child-genome-by-autoconstruction child2 [] true argmap)
-        gc2c (produce-child-genome-by-autoconstruction child2 child2 false argmap)]
-    (and (apply distinct? (map translate [g child1 child2 gc1a gc1b gc1c gc2a gc2b gc2c]))
-         (distinct? (expressed-difference child1 gc1b argmap)
-                    (expressed-difference child2 gc2b argmap)))))
+  (let [delta #(expressed-difference 
+                 g
+                 (produce-child-genome-by-autoconstruction g g false argmap)
+                 argmap)
+        diffs (repeatedly 5 delta)]
+    (and (> (reduce min diffs) 0)
+         (> (count (distinct diffs)) 1))))
 
 (defn autoconstruction
   "Returns a genome for a child produced either by autoconstruction (executing parent1
@@ -325,7 +320,7 @@ genome is returned instead. The construct/clone ration is hardcoded here, but mi
 be set globally in the future."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program error-function]
                     :as argmap}]
-  (let [construct-clone-ratio 0.9 ;; maybe make this a global parameter
+  (let [construct-clone-ratio 1.0 ;; maybe make this a global parameter
         parent1-genome (:genome parent1)
         parent2-genome (:genome parent2)
         child-genome (if (< (lrand) construct-clone-ratio)
@@ -335,7 +330,9 @@ be set globally in the future."
         new-genome (if variant
                      child-genome
                      (random-plush-genome max-genome-size-in-initial-program atom-generators argmap))]
-    (assoc (make-individual :genome new-genome
+    (assoc (make-individual :genome (if (or variant (recursively-variant? new-genome argmap))
+                                      new-genome
+                                      [])
                             :history (:history parent1)
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
