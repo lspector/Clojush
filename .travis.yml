@@ -7,7 +7,7 @@ before_install: yes y | sudo lein upgrade
 script:
   # check fails because of "Duplicate Push instruction defined:boolean_and"
   # - lein check
-  - lein test
+  - lein midje 'clojush.test.*' 'clojush.midje.*'
 after_success:
   - ./scripts/coveralls.sh
   - ./scripts/after_success.sh 2>&1 | sed "s/$GITHUB_TOKEN/<hidden github token>/"

@@ -1,4 +1,5 @@
 (ns clojush.translate
+  "Functions converting Plush genomes into Push programs."
   (:use [clojush util]
         clojush.instructions.common))
 
@@ -41,24 +42,37 @@
                    number-close-parens
                    found-first-close))))
 
+
 (defn translate-plush-genome-to-push-program
-  "Takes as input an individual (or map) containing a Plush genome (:genome)
-   and translates it to the correct Push program with
-   balanced parens. The linear Plush genome is made up of a list of instruction
-   maps, each including an :instruction key as well as other epigenetic marker
-   keys. As the linear Plush genome is traversed, each instruction that requires
-   parens will push :close and/or :close-open onto the paren-stack, and will
-   also put an open paren after it in the program. For example, an instruction
-   that requires 3 paren groupings will push :close, then :close-open, then :close-open.
-   When a positive number is encountered in the :close key of the
-   instruction map, it is set to num-parens-here during the next recur. This
-   indicates the number of parens to put here, if need is indicated on the
-   paren-stack. If the top item of the paren-stack is :close, a close paren
-   will be inserted. If the top item is :close-open, a close paren followed by
-   an open paren will be inserted.
-   If the end of the program is reached but parens are still needed (as indicated by
-   the paren-stack), parens are added until the paren-stack is empty.
-   Instruction maps that have :silence set to true will be ignored entirely."
+  "Converts a Plush genome into a Push program with balanced parenthesis.
+
+  Refer to the `./docs/PLUSH.md` file for background on Plush genomes.
+
+  Takes as input an [[clojush/indvidual/->individual]] (or map). It only looks
+  for the `:genome` and the `:program`. If the `:program` is not `nil` it will
+  just return that. Otherwise it will convert the `:genome` into a `:program`.
+
+  The Plush genome (`:genome`) is a list of maps. Each map has at least an
+  `:instruction` key, and optionally a `:silent` and `:parens` key.
+
+  If `:silent` is true, then this instruciton will be ignored and not output
+  at all. It defaults to false.
+
+  The linear Plush genome is made up of a list of instruction
+  maps, each including an :instruction key as well as other epigenetic marker
+  keys. As the linear Plush genome is traversed, each instruction that requires
+  parens will push :close and/or :close-open onto the paren-stack, and will
+  also put an open paren after it in the program. For example, an instruction
+  that requires 3 paren groupings will push :close, then :close-open, then :close-open.
+  When a positive number is encountered in the :close key of the
+  instruction map, it is set to num-parens-here during the next recur. This
+  indicates the number of parens to put here, if need is indicated on the
+  paren-stack. If the top item of the paren-stack is :close, a close paren
+  will be inserted. If the top item is :close-open, a close paren followed by
+  an open paren will be inserted.
+  If the end of the program is reached but parens are still needed (as indicated by
+  the paren-stack), parens are added until the paren-stack is empty.
+  Instruction maps that have :silence set to true will be ignored entirely."
   [{:keys [genome program]}
    {:keys [max-points] :as argmap}]
   (if program
@@ -121,7 +135,11 @@
                  argmap))))))
 
 (defn population-translate-plush-to-push
-  "Converts the population of Plush genomes into Push programs."
+  "Converts the population of Plush genomes into Push programs.
+
+  Associates the `:program` key of each `pop-agent` to
+  [[translate-plush-genome-to-push-program]] called with that `pop-agent`
+  "
   [pop-agents {:keys [use-single-thread] :as argmap}]
   (dorun (map #((if use-single-thread swap! send)
                     %

@@ -13,6 +13,9 @@ Primarily it serves as a way to test every branch and pull request, using comman
 like `lein check` and `lein test`. Currently, the test cases are very limited
 and do not cover much of the codebase.
 
+All new tests should be written with [Midje](https://github.com/marick/Midje)
+You can run these with `lein midje :autotest test`.
+
 ### Docs
 
 Docs are auto generated from function metadata using
@@ -36,11 +39,11 @@ It needs this so it can push the updated docs back to Github.
 ### Releases
 
 We use [the `lein release` command](https://github.com/technomancy/leiningen/blob/master/doc/DEPLOY.md#releasing-simplified)
-to add a new release on every build on the `master` branch. Check the 
-`:release-tasks` key in the [`project.clj`](./project.clj) for a list of 
+to add a new release on every build on the `master` branch. Check the
+`:release-tasks` key in the [`project.clj`](./project.clj) for a list of
 all steps it takes.
 
-This requires setting the `LEIN_USERNAME` and `LEIN_PASSWORD` in 
+This requires setting the `LEIN_USERNAME` and `LEIN_PASSWORD` in
 the [repository settings in Travis](http://docs.travis-ci.com/user/environment-variables/#Defining-Variables-in-Repository-Settings),
 so that it can the release to Clojars. It also needs the `GITHUB_TOKEN`
 in order to push the added tag and commit back to Github.
