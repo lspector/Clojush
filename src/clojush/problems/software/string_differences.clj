@@ -158,8 +158,8 @@
                                                                 (push-item "" :output)))
                                         result (stack-ref :output 0 final-state)]
                                     (when print-outputs
-                                      (println "INPUT1: %s" (pr-str input1))
-                                      (println "INPUT2: %s" (pr-str input2))
+                                      (println (format "INPUT1: %s" (pr-str input1)))
+                                      (println (format "INPUT2: %s" (pr-str input2)))
                                       (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
                                     ; Record the behavior
                                     (when @global-print-behavioral-diversity
