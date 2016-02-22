@@ -37,8 +37,8 @@
     (push-item (nth (first (:auxiliary state)) i)
                :boolean state)))
 
-(define-registered a0 (a 0))
-(define-registered a1 (a 1))
+(define-registered a0 (with-meta (a 0) {:stack-types [:boolean]}))
+(define-registered a1 (with-meta (a 1) {:stack-types [:boolean]}))
 
 (defn d
   [i]
@@ -46,10 +46,10 @@
     (push-item (nth (second (:auxiliary state)) i)
                :boolean state)))
 
-(define-registered d0 (d 0))
-(define-registered d1 (d 1))
-(define-registered d2 (d 2))
-(define-registered d3 (d 3))
+(define-registered d0 (with-meta (d 0) {:stack-types [:boolean]}))
+(define-registered d1 (with-meta (d 1) {:stack-types [:boolean]}))
+(define-registered d2 (with-meta (d 2) {:stack-types [:boolean]}))
+(define-registered d3 (with-meta (d 3) {:stack-types [:boolean]}))
 
 (def argmap
   {:error-function (fn [program]
