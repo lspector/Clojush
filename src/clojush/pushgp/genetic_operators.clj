@@ -247,7 +247,9 @@ is false replaces autoconstructive_<type>_rand with <type>_rand."
   (let [input-instruction? (fn [instruction]
                              (and (symbol? instruction)
                                   (or (re-seq #"in\d+" (name instruction)) ;; from input-output
-                                      (re-seq #"in_dm" (name instruction)))))] ;; from digital-multiplier
+                                      (re-seq #"in_dm" (name instruction)) ;; from digital-multiplier
+                                      (some #{instruction}
+                                            '(a0 a1 a2 d0 d1 d2 d3 d4 d5 d6 d7)))))] ;; from mux problems
     (map (fn [instruction-map]
            (if (input-instruction? (:instruction instruction-map))
              (assoc instruction-map :instruction 'code_noop)
