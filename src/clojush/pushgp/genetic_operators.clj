@@ -310,7 +310,7 @@ programs encoded by genomes g1 and g2."
                  g
                  (produce-child-genome-by-autoconstruction g g false argmap)
                  argmap)
-        diffs (repeatedly 5 delta)]
+        diffs (repeatedly 2 delta)]
     (and (> (reduce min diffs) 0)
          (> (count (distinct diffs)) 1))))
 
