@@ -1,3 +1,17 @@
+;; levenshtein.clj
+;; Lee Spector, lspector@hampshire.edu
+;;
+;; Given two string inputs, return the Levenshtein distance between them.
+;; The input strings will not have tabs or newlines, but may have multiple 
+;; spaces in a row. They will have maximum length of 100 characters. 
+;;
+;; This problem is defined to be solved with a different small set of test
+;; cases each generation, so errors will change from generation to generation
+;; even for the same program.
+;;
+;; input stack has the two input strings
+
+
 (ns clojush.problems.software.levenshtein
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
@@ -40,10 +54,10 @@
   (let [behavior (atom '())
         errors (doall
                  (for [[[str1 str2] distance] @levenshtein-cases]
-                   (let [state (run-push program 
-                                         (push-item str2 :input 
-                                                    (push-item str1 :input 
-                                                               (make-push-state))))
+                   (let [state (->> (make-push-state)
+                                 (push-item str1 :input)
+                                 (push-item str2 :input)
+                                 (run-push program))
                          top-int (top-item :integer state)]
                      (when @global-print-behavioral-diversity
                        (swap! behavior conj [top-int]))
@@ -84,4 +98,5 @@
    :final-report-simplifications 5000
    :max-error 5000
    :use-single-thread false
+   :reuse-errors false
    })
