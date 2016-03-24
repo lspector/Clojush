@@ -40,37 +40,48 @@
 
 (defn generate-levenshtein-cases
   []
-  (repeatedly 5 (fn []
-                  (let [str1 (random-string 100)
-                        str2 (random-string 100)]
-                    [[str1 str2] (levenshtein-distance str1 str2)]))))
+  (repeatedly 10 (fn []
+                   (let [str1 (random-string 100)
+                         str2 (random-string 100)]
+                     [[str1 str2] (levenshtein-distance str1 str2)]))))
 
 (def levenshtein-cases (atom (generate-levenshtein-cases)))
 
 (println "Initial test cases:" (pr-str @levenshtein-cases))
 
+(def levenshtein-validation-cases
+  (apply concat (repeatedly 10 generate-levenshtein-cases)))
+
+(println "Validation cases:" (pr-str levenshtein-validation-cases))
+
 (defn levenshtein-error
-  [program]
-  (let [behavior (atom '())
-        errors (doall
-                 (for [[[str1 str2] distance] @levenshtein-cases]
-                   (let [state (->> (make-push-state)
-                                 (push-item str1 :input)
-                                 (push-item str2 :input)
-                                 (run-push program))
-                         top-int (top-item :integer state)]
-                     (when @global-print-behavioral-diversity
-                       (swap! behavior conj [top-int]))
-                     (if (number? top-int)
-                       (#(if (neg? %) (- %) %) (- top-int distance))
-                       1000))))]
-    (when @global-print-behavioral-diversity
-      (swap! population-behaviors conj @behavior))
-    errors))
+  ([program]
+    (levenshtein-error program @levenshtein-cases))
+  ([program cases]
+    (let [behavior (atom '())
+          errors (doall
+                   (for [[[str1 str2] distance] cases]
+                     (let [state (->> (make-push-state)
+                                   (push-item str1 :input)
+                                   (push-item str2 :input)
+                                   (run-push program))
+                           top-int (top-item :integer state)]
+                       (when @global-print-behavioral-diversity
+                         (swap! behavior conj [top-int]))
+                       (if (number? top-int)
+                         (#(if (neg? %) (- %) %) (- top-int distance))
+                         1000))))]
+      (when @global-print-behavioral-diversity
+        (swap! population-behaviors conj @behavior))
+      errors)))
 
 (defn levenshtein-report
   "Not actually used to report; instead, change test cases."
   [best population generation error-function report-simplifications]
+  (let [validation-errors (levenshtein-error (:program best) 
+                                             levenshtein-validation-cases)]
+    (println "Validation errors:" validation-errors)
+    (println "Total validation errors:" (reduce + validation-errors)))
   (let [new-cases (generate-levenshtein-cases)]
     (println "New test cases:" (pr-str new-cases))
     (reset! levenshtein-cases new-cases)))
