@@ -303,8 +303,8 @@ programs encoded by genomes g1 and g2."
   (levenshtein-distance (expressed-program-sequence-from-genome g1 argmap)
                         (expressed-program-sequence-from-genome g2 argmap)))
 
-(defn recursively-variant?
-  "Returns true iff genome g is considered recursively variant."
+(defn diversifying?
+  "Returns true iff genome g passes the diversification test."
   [g argmap]
   (let [delta #(expressed-difference 
                  g
@@ -317,22 +317,23 @@ programs encoded by genomes g1 and g2."
 (defn autoconstruction
   "Returns a genome for a child produced either by autoconstruction (executing parent1
 with both parents on top of the genome stack and also available via input instructions)
-or by cloning. In either case if the child is not recursively variant then a random
-genome is returned instead. The construct/clone ration is hardcoded here, but might
-be set globally in the future."
+or by cloning. In either case if the child is not diversifying then a random
+genome is returned instead IF that is itself diversifying; if it isn't then an empty 
+genome is returned. The construct/clone ration is hardcoded here, but might
+be set globally or eliminated in the future."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program error-function]
                     :as argmap}]
-  (let [construct-clone-ratio 1.0 ;; maybe make this a global parameter
+  (let [construct-clone-ratio 1.0 ;; maybe make this a global parameter or eliminate
         parent1-genome (:genome parent1)
         parent2-genome (:genome parent2)
         child-genome (if (< (lrand) construct-clone-ratio)
                        (produce-child-genome-by-autoconstruction parent1-genome parent2-genome false argmap)
                        parent1-genome)
-        variant (recursively-variant? child-genome argmap)
+        variant (diversifying? child-genome argmap)
         new-genome (if variant
                      child-genome
                      (random-plush-genome max-genome-size-in-initial-program atom-generators argmap))]
-    (assoc (make-individual :genome (if (or variant (recursively-variant? new-genome argmap))
+    (assoc (make-individual :genome (if (or variant (diversifying? new-genome argmap))
                                       new-genome
                                       [])
                             :history (:history parent1)
