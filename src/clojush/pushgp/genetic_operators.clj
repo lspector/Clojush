@@ -311,7 +311,7 @@ programs encoded by genomes g1 and g2."
                  (produce-child-genome-by-autoconstruction g g false argmap)
                  argmap)
         diffs (repeatedly 2 delta)]
-    (and (> (reduce min diffs) 0)
+    (and (> (reduce min diffs) 0) ;; diversification threshold set here
          (> (count (distinct diffs)) 1))))
 
 (defn autoconstruction

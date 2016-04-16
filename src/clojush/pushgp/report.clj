@@ -388,7 +388,7 @@
                                                    (repeat (- population-size (count @selection-counts)) 0))))
       (reset! selection-counts {}))
     (when autoconstructive
-      (println "Number of random replacements for recursively invariant individuals:"
+      (println "Number of random replacements for non-diversifying individuals:"
                (count (filter :is-random-replacement population))))
     (println "--- Run Statistics ---")
     (println "Number of program evaluations used so far:" @evaluations-count)
