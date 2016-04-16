@@ -76,7 +76,7 @@
           :uniform-silence-mutation-rate 0.1 ;; The probability of each :silent being switched during uniform silent mutation
           :replace-child-that-exceeds-size-limit-with :random ;; When a child is produced that exceeds the size limit of (max-points / 2), this is used to determine what program to return. Options include :parent, :empty, :random, :truncate
           :parent-reversion-probability 1.0 ;; The probability of a child being reverted to its parent by a genetic operator that has been made revertable, if the child is not as good as the parent on at least one test case
-          :autoconstructive false ;; if true then :genetic-operator-probabilities will be {:autoconstruction 1.0}, :epigenetic-markers will be [:close :silent], and :atom-generators will include everything in (registered-for-stacks [:integer :boolean :exec :genome]). You will probably also want to provide a high value for :max-generations.
+          :autoconstructive false ;; if true then :genetic-operator-probabilities will be {:autoconstruction 1.0}, :epigenetic-markers will be [:close :silent], and :atom-generators will include everything in (registered-for-stacks [:integer :boolean :exec :genome]). Also sets :replace-child-that-exceeds-size-limit-with to :empty. You will probably also want to provide a high value for :max-generations.
           :autoconstructive-integer-rand-enrichment 1 ;; the number of extra instances of autoconstructive_integer_rand to include in :atom-generators for autoconstruction. If negative then autoconstructive_integer_rand will not be in :atom-generators at all
           :autoconstructive-boolean-rand-enrichment -1 ;; the number of extra instances of autoconstructive_boolean_rand to include in :atom-generators for autoconstruction. If negative then autoconstructive_boolean_rand will not be in :atom-generators at all
           ;;
@@ -159,7 +159,8 @@
       (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_boolean_rand)))
     (if (neg? (:autoconstructive-boolean-rand-enrichment @push-argmap))
       (swap! push-argmap assoc :atom-generators (remove #(= % 'autoconstructive_boolean_rand)
-                                                        (:atom-generators @push-argmap))))))
+                                                        (:atom-generators @push-argmap))))
+    (swap! push-argmap assoc :replace-child-that-exceeds-size-limit-with :empty)))
 
 (defn reset-globals
   "Resets all Clojush globals according to values in @push-argmap. If an argmap argument is provided then it is loaded 
