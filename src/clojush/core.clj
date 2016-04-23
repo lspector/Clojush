@@ -16,7 +16,7 @@
 ;; for more details.
 
 (ns clojush.core
-  (:use [clojush.pushgp.pushgp])
+  (:use [clojush.pushgp pushgp report])
   (:gen-class))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -38,5 +38,9 @@
     (require (symbol (first args)))
     (let [example-params (eval (symbol (str (first args) "/argmap")))
           params (merge example-params (apply sorted-map param-list))]
+      (println "######################################")
+      (println "Parameters set at command line or in problem file argmap; may or may not be default:")
+      (print-params (into (sorted-map) params))
+      (println "######################################")
       (pushgp params)
       (System/exit 0))))
