@@ -23,11 +23,14 @@
 ;; main function
 
 (defn -main 
-  "A main function for clojush, which assumes that the first/only argument is the name
-   of a problem file that contains a top level call. Exits after completion of the call.
+  "A main function for Clojush, which assumes that the first argument is the name
+   of a problem file that contains an argmap of arguments to PushGP.
+   Exits after completion of the call.
+   Any arguments after the first are treated as arguments to PushGP as key-value pairs.
    This allows one to run an example with a call from the OS shell prompt like:
-       lein run examples.simple-regression"
+       lein run examples.simple-regression :population-size 3000"
   [& args]
+  (println "Command line args:" (apply str (interpose \space args)))
   (let [param-list (map #(if (.endsWith % ".ser")
                            (str %)
                            (read-string %))
