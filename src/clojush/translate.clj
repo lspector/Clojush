@@ -110,15 +110,9 @@
                                (rest gn)
                                (get (first gn) :close 0) ; The number of close parens to put after this instruction; if :close isn't in instruction map, default to zero
                                new-paren-stack)))))]
-      (if (<= (count-points translated-program) max-points)
-        translated-program
-        (do
-          (println "WARNING: A translated program was bigger than max-points. Recuring translation after removing the last instruction in genome.")
-          (println "  genome length:" (count genome))
-          (println "  points in program:" (count-points translated-program))
-          (println "  :max-points:" max-points)
-          (recur {:genome (butlast genome)}
-                 argmap))))))
+      (if (> (count-points translated-program) max-points)
+        '() ; Translates to an empty programs if program exceeds max-points
+        translated-program))))
 
 (defn population-translate-plush-to-push
   "Converts the population of Plush genomes into Push programs."
