@@ -156,7 +156,7 @@
 (def argmap
   {:error-function (syllables-error-function syllables-data-domains)
    :atom-generators syllables-atom-generators
-   :max-points 1600
+   :max-points 3200
    :max-genome-size-in-initial-program 400
    :evalpush-limit 1600
    :population-size 1000
