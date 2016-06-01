@@ -51,7 +51,7 @@
    :genetic-operator-probabilities {:alternation 0.5
                                     :uniform-mutation 0.4
                                     :uniform-close-mutation 0.1}
-   :max-points 200
+   :max-points 400
    :max-genome-size-in-initial-program 100
    :population-size 5000
    })
