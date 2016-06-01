@@ -489,7 +489,7 @@
    :max-generations 100000
    :evalpush-limit 3000
    :tag-limit 10000
-   :max-points 6000
+   :max-points 12000
    :max-genome-size-in-initial-program 500 ;;100
    :mutation-probability 0.0
    :crossover-probability 0.0
