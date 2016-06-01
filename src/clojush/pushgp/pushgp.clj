@@ -31,7 +31,7 @@
           :population-size 1000 ;; Number of individuals in the population
           :max-generations 1001 ;; The maximum number of generations to run GP
           :max-point-evaluations 10e100 ;; The limit for the number of point (instruction) evaluations to execute during the run
-          :max-points 100 ;; Maximum size of push programs and push code, as counted by points in the program. 1/4 this limit is used as the limit for sizes of Plush genomes.
+          :max-points 200 ;; Maximum size of push programs and push code, as counted by points in the program. 1/4 this limit is used as the limit for sizes of Plush genomes.
           :max-genome-size-in-initial-program 50 ;; Maximum size of initial Plush genomes in generation 0. Keep in mind that genome lengths will otherwise be limited by 1/4 of :max-points
           :evalpush-limit 150 ;; The number of Push instructions that can be evaluated before stopping evaluation
           :evalpush-time-limit 0 ;; The time in nanoseconds that a program can evaluate before stopping, 0 means no time limit
