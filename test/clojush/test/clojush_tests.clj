@@ -333,7 +333,7 @@
 ;; ;                                                  (registered-for-type :boolean)
 ;; ;                                                  (list (fn [] (rand-int 100))
 ;; ;                                                        'in))
-;; ;                         :max-points 100
+;; ;                         :max-points 200
 ;; ;                         :population-size 10000
 ;; ;                         :reproduction-simplifications 2})
 ;; ;
