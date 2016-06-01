@@ -130,7 +130,7 @@
 (def argmap
   {:error-function (smallest-error-function smallest-data-domains)
    :atom-generators smallest-atom-generators
-   :max-points 400
+   :max-points 800
    :max-genome-size-in-initial-program 100
    :evalpush-limit 200
    :population-size 1000
