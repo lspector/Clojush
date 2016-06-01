@@ -31,8 +31,8 @@
           :population-size 1000 ;; Number of individuals in the population
           :max-generations 1001 ;; The maximum number of generations to run GP
           :max-point-evaluations 10e100 ;; The limit for the number of point (instruction) evaluations to execute during the run
-          :max-points 100 ;; Maximum size of push programs and push code, as counted by points in the program. 1/2 this limit is used as the limit for sizes of Plush genomes.
-          :max-genome-size-in-initial-program 50 ;; Maximum size of initial Plush genomes in generation 0. Keep in mind that genome lengths will otherwise be limited by 1/2 of :max-points
+          :max-points 100 ;; Maximum size of push programs and push code, as counted by points in the program. 1/4 this limit is used as the limit for sizes of Plush genomes.
+          :max-genome-size-in-initial-program 50 ;; Maximum size of initial Plush genomes in generation 0. Keep in mind that genome lengths will otherwise be limited by 1/4 of :max-points
           :evalpush-limit 150 ;; The number of Push instructions that can be evaluated before stopping evaluation
           :evalpush-time-limit 0 ;; The time in nanoseconds that a program can evaluate before stopping, 0 means no time limit
           :reuse-errors true ;; When true, children produced through direct reproduction will not be re-evaluated but will have the error vector of their parent
@@ -74,7 +74,7 @@
           :close-increment-rate 0.2 ;; The probability of making an increment change to :close during uniform close mutation, as opposed to a decrement change
           :uniform-deletion-rate 0.01 ;; The probability that any instruction will be deleted during uniform deletion
           :uniform-silence-mutation-rate 0.1 ;; The probability of each :silent being switched during uniform silent mutation
-          :replace-child-that-exceeds-size-limit-with :random ;; When a child is produced that exceeds the size limit of (max-points / 2), this is used to determine what program to return. Options include :parent, :empty, :random, :truncate
+          :replace-child-that-exceeds-size-limit-with :random ;; When a child is produced that exceeds the size limit of (max-points / 4), this is used to determine what program to return. Options include :parent, :empty, :random, :truncate
           :parent-reversion-probability 1.0 ;; The probability of a child being reverted to its parent by a genetic operator that has been made revertable, if the child is not as good as the parent on at least one test case
           :autoconstructive false ;; if true then :genetic-operator-probabilities will be {:autoconstruction 1.0}, :epigenetic-markers will be [:close :silent], and :atom-generators will include everything in (registered-for-stacks [:integer :boolean :exec :genome]). Also sets :replace-child-that-exceeds-size-limit-with to :empty. You will probably also want to provide a high value for :max-generations.
           :autoconstructive-integer-rand-enrichment 1 ;; the number of extra instances of autoconstructive_integer_rand to include in :atom-generators for autoconstruction. If negative then autoconstructive_integer_rand will not be in :atom-generators at all
