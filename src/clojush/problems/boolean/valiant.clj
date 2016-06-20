@@ -97,7 +97,7 @@
 ;                                   (repeat 25 
 ;                                           '(boolean_and boolean_or boolean_not exec_if))))
 ;   :use-lexicase-selection true
-;   :max-points 20000
+;   :max-points 40000
 ;   :max-genome-size-in-initial-program 10
 ;   :population-size 100
 ;   :evalpush-limit 10000
@@ -121,7 +121,7 @@
                             (apply concat 
                                    (repeat 25 
                                            '(boolean_and boolean_or boolean_not exec_if))))
-   :max-points 2000
+   :max-points 4000
    :max-genome-size-in-initial-program 100
    :population-size 100
    :evalpush-limit 2000
