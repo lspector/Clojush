@@ -216,8 +216,8 @@
    :crossover-probability 0.3
    :simplification-probability 0.3
    :reproduction-simplifications 10
-   :max-points 200
-   :max-points-in-initial-program 200
+   :max-points 400
+   :max-points-in-initial-program 400
    :evalpush-limit 1000
    })
 
