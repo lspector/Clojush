@@ -81,7 +81,7 @@
                                   'in1)
                             (registered-for-stacks [:integer :boolean :exec]))
    
-   :max-points 512
+   :max-points 1024
    :max-genome-size-in-initial-program 128
    :evalpush-limit 2048
    :genetic-operator-probabilities {:alternation 0.2
