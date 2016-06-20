@@ -138,7 +138,7 @@
 (def argmap
   {:error-function (vector-average-error-function vector-average-data-domains)
    :atom-generators vector-average-atom-generators
-   :max-points 800
+   :max-points 1600
    :max-genome-size-in-initial-program 200
    :evalpush-limit 800
    :population-size 1000
