@@ -87,7 +87,7 @@
                           ;integer_add integer_sub integer_mult integer_div integer_mod
                           ;integer_dup integer_swap integer_pop integer_rot
                           ))
-   :max-points 400
+   :max-points 800
    :max-genome-size-in-initial-program 200
    :genetic-operator-probabilities {:uniform-close-mutation 0.1
                                     :alternation 0.45

@@ -93,7 +93,7 @@
     (random-push-code max-points atom-generators {:max-points @global-max-points}))
   ([max-points atom-generators argmap]
     (translate-plush-genome-to-push-program
-      {:genome (random-plush-genome (max (int (/ max-points 2)) 1)
+      {:genome (random-plush-genome (max (int (/ max-points 4)) 1)
                                     atom-generators
                                     argmap)}
       argmap)))

@@ -138,7 +138,7 @@
 (def argmap
   {:error-function (partial bioavailability-error-function :train)
    :atom-generators bioavailability-atom-generators
-   :max-points 1000
+   :max-points 2000
    :max-genome-size-in-initial-program 500
    :evalpush-limit 500
    :population-size 500
