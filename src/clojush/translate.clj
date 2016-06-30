@@ -12,11 +12,11 @@
     (cond
       ; Check if reversed-prog is empty, in which case we are done
       (empty? reversed-prog) (vec (reverse new-prog))
-      ; Chech if done, which is if we've found the first :close, the paren-stack is empty, and the first item in reversed-prog is :open
+      ; Check if done, which is if we've found the first :close, the paren-stack is empty, and the first item in reversed-prog is :open
       (and found-first-close
            (zero? number-close-parens)
            (= :open (first reversed-prog))) (vec (reverse (concat new-prog (rest reversed-prog))))
-      ; Chech if looking for the correct :open but found an :open for a different paren
+      ; Check if looking for the correct :open but found an :open for a different paren
       (and found-first-close
            (< 0 number-close-parens)
            (= :open (first reversed-prog))) (recur (rest reversed-prog)

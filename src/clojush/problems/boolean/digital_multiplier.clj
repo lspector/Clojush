@@ -129,7 +129,7 @@
      :atom-generators (dm-atom-generators num-bits-n)
      :population-size 1000
      :max-generations 500
-     :max-points 800
+     :max-points 1600
      :max-genome-size-in-initial-program 200
      :evalpush-limit 400
      :epigenetic-markers []

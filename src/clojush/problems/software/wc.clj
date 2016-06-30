@@ -334,7 +334,7 @@
 (def argmap
   {:error-function (wc-error-function wc-data-domains)
    :atom-generators wc-atom-generators
-   :max-points 2000
+   :max-points 4000
    :max-genome-size-in-initial-program 400
    :evalpush-limit 2000
    :population-size 1000

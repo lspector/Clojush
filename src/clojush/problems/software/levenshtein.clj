@@ -89,7 +89,7 @@
 (def argmap
   {:error-function levenshtein-error
    :atom-generators levenshtein-atom-generators
-   :max-points 1600
+   :max-points 3200
    :max-genome-size-in-initial-program 400
    :evalpush-limit 1600
    :population-size 1000

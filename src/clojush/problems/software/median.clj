@@ -127,7 +127,7 @@
 (def argmap
   {:error-function (median-error-function median-data-domains)
    :atom-generators median-atom-generators
-   :max-points 400
+   :max-points 800
    :max-genome-size-in-initial-program 100
    :evalpush-limit 200
    :population-size 1000
