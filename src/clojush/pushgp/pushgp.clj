@@ -18,6 +18,7 @@
           :use-single-thread false ;; When true, Clojush will only use a single thread
           :random-seed (random/generate-mersennetwister-seed) ;; The seed for the random number generator
           :save-initial-population false ;; When true, saves the initial population
+          :run-uuid nil ;; This will be set to a new type 4 pseudorandom UUID on every run
           ;;
           ;;----------------------------------------
           ;; Standard GP arguments
@@ -144,6 +145,7 @@
   (doseq [[argkey argval] argmap]
     (assert (contains? @push-argmap argkey) (str "Argument key " argkey " is not a recognized argument to pushgp."))
     (swap! push-argmap assoc argkey argval))
+  (swap! push-argmap assoc :run-uuid (java.util.UUID/randomUUID))
   (when (:autoconstructive @push-argmap)
     (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0})
     (swap! push-argmap assoc :epigenetic-markers [:close :silent])
