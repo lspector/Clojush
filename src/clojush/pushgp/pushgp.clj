@@ -283,7 +283,7 @@ into @push-argmap first."
     (random/with-rng (random/make-mersennetwister-rng (:random-seed @push-argmap))
       ;; set globals from parameters
       (reset-globals)
-      (initial-report) ;; Print the inital report
+      (initial-report @push-argmap) ;; Print the inital report
       (print-params @push-argmap)
       (check-genetic-operator-probabilities-add-to-one @push-argmap)
       (timer @push-argmap :initialization)

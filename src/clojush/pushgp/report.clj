@@ -424,7 +424,7 @@
 
 (defn initial-report
   "Prints the initial report of a PushGP run."
-  []
+  [push-argmap]
   (println "Registered instructions:" @registered-instructions)
   (println "Starting PushGP run.")
   (printf "Clojush version = ")
