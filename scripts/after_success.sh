@@ -9,7 +9,7 @@ set -o pipefail
 
 AUTOMATED_AUTHOR_EMAIL=_@_._
 AUTOMATED_AUTHOR_NAME=_
-LEIN_RELEASE_COMMAND=$(git log --format=%B --no-merges -n 1 | grep -o 'lein release :[a-z]*')
+LEIN_RELEASE_COMMAND=$(git log --format=%B -n 1 | grep -o 'lein release :[a-z]*')
 
 # exit if no lein release
 [ -n "$LEIN_RELEASE_COMMAND" ]
