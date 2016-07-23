@@ -48,6 +48,35 @@
 (define-registered string_dup (with-meta (duper :string) {:stack-types [:string]}))
 (define-registered char_dup (with-meta (duper :char) {:stack-types [:char]}))
 
+(defn dup-timeser
+  "For integer argument n, duplicate n copies of the top item on the stack, leaving
+   n copies there. For n=2, this is equivalent to dup. For n=0, equivalent to pop. Negative
+   n values are treated as 0. The maximum items added to the stack will be limited by
+   global-max-points."
+  [type]
+  (fn [state]
+    (if (or (and (= type :integer)
+                 (>= (count (:integer state)) 2))
+            (and (not (= type :integer))
+                 (not (empty? (type state)))
+                 (not (empty? (:integer state)))))
+      (let [times-duplicated (min (top-item :integer state)
+                                  (- @global-max-points (count (rest (type (pop-item :integer state))))))
+            new-type-stack (concat (repeat times-duplicated
+                                           (top-item type (pop-item :integer state)))
+                                   (rest (type (pop-item :integer state))))]
+        (assoc (pop-item :integer state)
+               type
+               new-type-stack))
+      state)))
+
+(define-registered string_dup_times (with-meta (dup-timeser :string) {:stack-types [:string] :parentheses 0}))
+
+;TEST: integers and exec
+
+; dup_items - for the top integer n, duplicate the top n items on the exec stack one time each.
+; (3 dup_items "hi") -> ("hi" "hi" "hi") on the exec stack after first two instructions
+
 (defn swapper
   "Returns a function that takes a state and swaps the top 2 items of the appropriate 
    stack of the state."
