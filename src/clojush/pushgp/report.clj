@@ -105,6 +105,25 @@
                                               (:errors individual))))
                           population)))))
 
+(defn edn-print
+  "Takes a population and appends all the individuals to the EDN log file.
+   If the internal representation of individuals changes in future versions
+   of Clojush, this code will likely continue to work, but will produce
+   output corresponding to the new representation."
+  [population generation edn-log-filename keys additional-keys]
+  (with-open [w (io/writer edn-log-filename :append true)] ;; Opens and closes the file once per call
+    (doall
+     (map-indexed (fn [index individual]
+            (let [additional-data {:generation generation
+                                   :location index
+                                   :push-program-size (count-points (:program individual))
+                                   :plush-genome-size (count (:genome individual))}]
+              (.write w "#clojush/individual")
+              (.write w (prn-str (merge
+                                  (select-keys additional-data additional-keys)
+                                  (select-keys individual keys))))))
+          population))))
+
 (defn jsonize-individual
   "Takes an individual and returns it with only the items of interest
    for the json logs."
@@ -251,6 +270,7 @@
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
+           print-edn-logs edn-keys edn-log-filename edn-additional-keys
            ]
     :as argmap}]
   (println)
@@ -388,7 +408,7 @@
                                                    (repeat (- population-size (count @selection-counts)) 0))))
       (reset! selection-counts {}))
     (when autoconstructive
-      (println "Number of random replacements for recursively invariant individuals:"
+      (println "Number of random replacements for non-diversifying individuals:"
                (count (filter :is-random-replacement population))))
     (println "--- Run Statistics ---")
     (println "Number of program evaluations used so far:" @evaluations-count)
@@ -410,10 +430,13 @@
         (printf "Report:          %8.1f seconds, %4.1f%%\n" (/ report-time 1000.0) (* 100.0 (/ report-time total-time)))
         (printf "Other:           %8.1f seconds, %4.1f%%\n" (/ other 1000.0) (* 100.0 (/ other total-time)))))
     (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
+    (println ";; -*- End of report for generation" generation)
+    (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
     (flush)
     (when print-csv-logs (csv-print population generation argmap))
     (when print-json-logs (json-print population generation json-log-filename
                                       log-fitnesses-for-all-cases json-log-program-strings))
+    (when print-edn-logs (edn-print population generation edn-log-filename edn-keys edn-additional-keys))
     (cond (or (<= (:total-error best) error-threshold)
               (:success best)) [:success best]
           (>= generation max-generations) [:failure best]
@@ -422,7 +445,7 @@
 
 (defn initial-report
   "Prints the initial report of a PushGP run."
-  []
+  [push-argmap]
   (println "Registered instructions:" @registered-instructions)
   (println "Starting PushGP run.")
   (printf "Clojush version = ")
@@ -455,7 +478,18 @@
     (catch Exception e
            (printf "Hash of last Git commit = unavailable\n")
            (printf "GitHub link = unavailable\n")
-           (flush))))
+           (flush)))
+  (if (:print-edn-logs push-argmap)
+    ;; The edn log is overwritten if it exists
+    (with-open [w (io/writer (:edn-log-filename push-argmap) :append false)]
+      (.write w "#clojush/run")
+      (.write w (prn-str (dissoc push-argmap
+                                 ;; These keys have functions
+                                 :atom-generators
+                                 :error-function
+                                 :problem-specific-report
+                                 :random-seed))))))
+
 
 (defn final-report
   "Prints the final report of a PushGP run if the run is successful."

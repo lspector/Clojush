@@ -37,9 +37,9 @@
     (push-item (nth (first (:auxiliary state)) i)
                :boolean state)))
 
-(define-registered a0 (a 0))
-(define-registered a1 (a 1))
-(define-registered a2 (a 2))
+(define-registered a0 (with-meta (a 0) {:stack-types [:boolean]}))
+(define-registered a1 (with-meta (a 1) {:stack-types [:boolean]}))
+(define-registered a2 (with-meta (a 2) {:stack-types [:boolean]}))
 
 (defn d
   [i]
@@ -47,14 +47,14 @@
     (push-item (nth (second (:auxiliary state)) i)
                :boolean state)))
 
-(define-registered d0 (d 0))
-(define-registered d1 (d 1))
-(define-registered d2 (d 2))
-(define-registered d3 (d 3))
-(define-registered d4 (d 4))
-(define-registered d5 (d 5))
-(define-registered d6 (d 6))
-(define-registered d7 (d 7))
+(define-registered d0 (with-meta (d 0) {:stack-types [:boolean]}))
+(define-registered d1 (with-meta (d 1) {:stack-types [:boolean]}))
+(define-registered d2 (with-meta (d 2) {:stack-types [:boolean]}))
+(define-registered d3 (with-meta (d 3) {:stack-types [:boolean]}))
+(define-registered d4 (with-meta (d 4) {:stack-types [:boolean]}))
+(define-registered d5 (with-meta (d 5) {:stack-types [:boolean]}))
+(define-registered d6 (with-meta (d 6) {:stack-types [:boolean]}))
+(define-registered d7 (with-meta (d 7) {:stack-types [:boolean]}))
 
 (def argmap
   {:error-function (fn [program]
@@ -79,7 +79,7 @@
                               ;boolean_dup boolean_swap boolean_pop boolean_rot
                               )
    :population-size 100
-   :max-points 200
+   :max-points 400
    :max-genome-size-in-initial-program 100
    :genetic-operator-probabilities {:uniform-close-mutation 0.1
                                     :alternation 0.45

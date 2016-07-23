@@ -158,8 +158,8 @@
                                                                 (push-item "" :output)))
                                         result (stack-ref :output 0 final-state)]
                                     (when print-outputs
-                                      (println "INPUT1: %s" (pr-str input1))
-                                      (println "INPUT2: %s" (pr-str input2))
+                                      (println (format "INPUT1: %s" (pr-str input1)))
+                                      (println (format "INPUT2: %s" (pr-str input2)))
                                       (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
                                     ; Record the behavior
                                     (when @global-print-behavioral-diversity
@@ -204,7 +204,7 @@
 (def argmap
   {:error-function (string-differences-error-function string-differences-data-domains)
    :atom-generators string-differences-atom-generators
-   :max-points 2000
+   :max-points 4000
    :max-genome-size-in-initial-program 500
    :evalpush-limit 2000
    :population-size 1000

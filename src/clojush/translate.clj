@@ -12,11 +12,11 @@
     (cond
       ; Check if reversed-prog is empty, in which case we are done
       (empty? reversed-prog) (vec (reverse new-prog))
-      ; Chech if done, which is if we've found the first :close, the paren-stack is empty, and the first item in reversed-prog is :open
+      ; Check if done, which is if we've found the first :close, the paren-stack is empty, and the first item in reversed-prog is :open
       (and found-first-close
            (zero? number-close-parens)
            (= :open (first reversed-prog))) (vec (reverse (concat new-prog (rest reversed-prog))))
-      ; Chech if looking for the correct :open but found an :open for a different paren
+      ; Check if looking for the correct :open but found an :open for a different paren
       (and found-first-close
            (< 0 number-close-parens)
            (= :open (first reversed-prog))) (recur (rest reversed-prog)
@@ -110,15 +110,9 @@
                                (rest gn)
                                (get (first gn) :close 0) ; The number of close parens to put after this instruction; if :close isn't in instruction map, default to zero
                                new-paren-stack)))))]
-      (if (<= (count-points translated-program) max-points)
-        translated-program
-        (do
-          (println "WARNING: A translated program was bigger than max-points. Recuring translation after removing the last instruction in genome.")
-          (println "  genome length:" (count genome))
-          (println "  points in program:" (count-points translated-program))
-          (println "  :max-points:" max-points)
-          (recur {:genome (butlast genome)}
-                 argmap))))))
+      (if (> (count-points translated-program) max-points)
+        '() ; Translates to an empty programs if program exceeds max-points
+        translated-program))))
 
 (defn population-translate-plush-to-push
   "Converts the population of Plush genomes into Push programs."

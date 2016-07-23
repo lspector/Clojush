@@ -164,7 +164,7 @@
 (def argmap
   {:error-function (mirror-image-error-function mirror-image-data-domains)
    :atom-generators mirror-image-atom-generators
-   :max-points 600
+   :max-points 1200
    :max-genome-size-in-initial-program 150
    :evalpush-limit 600
    :population-size 1000

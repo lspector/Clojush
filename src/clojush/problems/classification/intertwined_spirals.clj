@@ -39,12 +39,15 @@
                (inc k))))))
        
 (define-registered x
+  ^{:stack-types [float]}
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :float state)))
 
 (define-registered y
+  ^{:stack-types [float]}
   (fn [state] (push-item (stack-ref :auxiliary 1 state) :float state)))
 
 (define-registered iflte
+  ^{:stack-types [:exec :float] :parentheses 2}
   (fn [state]
     (if (and (not (empty? (rest (:float state))))
              (not (empty? (rest (:exec state)))))
@@ -81,10 +84,6 @@
                                    (> top-float 0) 1
                                    :else           0)]
         (list x y spiral predicted-spiral (if (= spiral predicted-spiral) 1 0))))))
-
-; Set paren requirements for new instructions
-(swap! instr-paren-requirements assoc
-       'iflte 2)
 
 (def spiral-instructions 
   {:basic (list (fn [] (lrand))

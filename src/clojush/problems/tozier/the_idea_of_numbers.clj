@@ -47,7 +47,7 @@
 (def argmap
   {:error-function (missing-numbers-error-function 20)
    :atom-generators missing-numbers-atom-generators
-   :max-points 500
+   :max-points 1000
    :max-genome-size-in-initial-program 300
    :evalpush-limit 1000
    :population-size 1000

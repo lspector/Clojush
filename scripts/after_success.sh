@@ -9,6 +9,10 @@ set -o pipefail
 
 AUTOMATED_AUTHOR_EMAIL=_@_._
 AUTOMATED_AUTHOR_NAME=_
+LEIN_RELEASE_COMMAND=$(git log --format=%B -n 1 | grep -o 'lein release :[a-z]*')
+
+# exit if no lein release
+[ -n "$LEIN_RELEASE_COMMAND" ]
 
 git remote set-url origin https://$GITHUB_TOKEN@github.com/$TRAVIS_REPO_SLUG.git
 git branch --set-upstream-to origin/master master
@@ -22,4 +26,4 @@ git pull origin gh-pages
 ./scripts/deploy-docs.sh --verbose
 git checkout master
 git pull origin master
-lein release
+eval $LEIN_RELEASE_COMMAND
