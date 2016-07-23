@@ -42,12 +42,17 @@
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
 (def vector-average-data-domains
-  [[(list [0.0] [100.0] [-100.0]) 3 0] ;; Length 1 vectors
+  [[(list [0.0] [100.0] [-100.0] [1000.0] [-1000.0]) 5 0] ;; Length-1 vectors
+   [(fn [] (vector-average-input 1)) 45 500] ;; Random Length-1 vectors
    [(list [2.0 129.0]
           [0.12345 -4.678]
-          [999.99 74.113]) 3 0] ;; Length 2 vectors
-   [(fn [] (vector-average-input 50)) 4 50] ;; Length 50 vectors
-   [(fn [] (vector-average-input (inc (lrand-int 50)))) 90 950] ;; Random length, random floats
+          [999.99 74.113]
+          [987.654321 995.0003]
+          [-788.788 -812.19]) 5 0] ;; Length-2 vectors
+   [(fn [] (vector-average-input 2)) 45 500] ;; Random Length-2 vectors
+   [(fn [] (vector-average-input (+ 3 (lrand-int 3)))) 50 500] ;; Random Length-3, -4, and -5 vectors
+   [(fn [] (vector-average-input 50)) 5 50] ;; Random Length-50 vectors
+   [(fn [] (vector-average-input (inc (lrand-int 50)))) 95 1000] ;; Random length, random floats
    ])
 
 ;;Can make Vector Average test data like this:
