@@ -46,6 +46,7 @@
              (push-item (concat (take index genome)
                                 (list (random-plush-instruction-map 
                                         @global-atom-generators
+                                        true
                                         {:epigenetic-markers @global-epigenetic-markers
                                          :close-parens-probabilities @global-close-parens-probabilities
                                          :silent-instruction-probability @global-silent-instruction-probability}))
