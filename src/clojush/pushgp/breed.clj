@@ -34,7 +34,7 @@
     :parent parent
     :empty (make-individual :genome '() :genetic-operators :empty)
     :truncate (assoc child :genome (take (/ max-points 4) (:genome child)))
-    :random (make-individual :genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
+    :random (make-individual :genome (random-plush-genome max-genome-size-in-initial-program atom-generators true argmap)
                              :genetic-operators :random)
     ))
 
