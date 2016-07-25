@@ -42,30 +42,36 @@
   "Returns a random instruction map given the atom-generators and the required
    epigenetic-markers."
   ([atom-generators]
-    (random-plush-instruction-map atom-generators {}))
-  ([atom-generators {:keys [epigenetic-markers
-                            close-parens-probabilities
-                            silent-instruction-probability]
-                     :or {epigenetic-markers []
-                          close-parens-probabilities [0.772 0.206 0.021 0.001]
-                          silent-instruction-probability 0}}]
-    (let [markers (conj epigenetic-markers :instruction)]
-      (zipmap markers
-              (map (fn [marker]
-                     (case marker
-                       :instruction (let [element (lrand-nth atom-generators)]
-                                      (if (fn? element)
-                                        (let [fn-element (element)]
-                                          (if (fn? fn-element)
-                                            (fn-element)
-                                            fn-element))
-                                        element))
-                       :close (random-closes close-parens-probabilities)
-                       :silent (if (< (lrand) silent-instruction-probability)
-                                 true
-                                 false)
-                       ))
-                   markers)))))
+   (random-plush-instruction-map atom-generators {}))
+  ([atom-generators argmap]
+   (random-plush-instruction-map atom-generators false argmap))
+  ([atom-generators random-insertion {:keys [epigenetic-markers
+                                             close-parens-probabilities
+                                             silent-instruction-probability]
+                                      :or {epigenetic-markers []
+                                           close-parens-probabilities [0.772 0.206 0.021 0.001]
+                                           silent-instruction-probability 0}}]
+   (let [markers (concat epigenetic-markers
+                         (if random-insertion
+                           [:instruction :random-insertion]
+                           [:instruction]))]
+     (zipmap markers
+             (map (fn [marker]
+                    (case marker
+                      :instruction (let [element (lrand-nth atom-generators)]
+                                     (if (fn? element)
+                                       (let [fn-element (element)]
+                                         (if (fn? fn-element)
+                                           (fn-element)
+                                           fn-element))
+                                       element))
+                      :close (random-closes close-parens-probabilities)
+                      :silent (if (< (lrand) silent-instruction-probability)
+                                true
+                                false)
+                      :random-insertion true
+                      ))
+                  markers)))))
 
 (defn random-plush-genome-with-size
   "Returns a random Plush genome containing the given number of points."
