@@ -82,6 +82,20 @@
              rand-gen
              argmap))))
 
+(defn update-instruction-map-uuids
+  "Takes an individual and updates the UUIDs on every instruction-map in its
+   :geneome, except for the ones which are a random insertion."
+  [individual]
+  (update individual :genome
+          (fn [genome]
+            (map (fn [instruction-map]
+                   (if (:random-insertion instruction-map)
+                     (dissoc instruction-map :random-insertion)
+                     (assoc instruction-map
+                            :parent-uuid (:uuid instruction-map)
+                            :uuid (java.util.UUID/randomUUID))))
+                 genome))))
+
 (defn perform-genetic-operator
   "Takes a single genetic operator keyword or a sequence of operator keywords,
    and performs them to create a new individual. Uses recursive helper function
