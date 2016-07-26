@@ -52,9 +52,8 @@
                                            close-parens-probabilities [0.772 0.206 0.021 0.001]
                                            silent-instruction-probability 0}}]
    (let [markers (concat epigenetic-markers
-                         (if random-insertion
-                           [:instruction :random-insertion]
-                           [:instruction]))]
+                         [:instruction]
+                         (if random-insertion [:random-insertion]))]
      (zipmap markers
              (map (fn [marker]
                     (case marker
