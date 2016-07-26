@@ -52,7 +52,7 @@
                                            close-parens-probabilities [0.772 0.206 0.021 0.001]
                                            silent-instruction-probability 0}}]
    (let [markers (concat epigenetic-markers
-                         [:instruction]
+                         [:instruction :uuid]
                          (if random-insertion [:random-insertion]))]
      (zipmap markers
              (map (fn [marker]
@@ -69,6 +69,7 @@
                                 true
                                 false)
                       :random-insertion true
+                      :uuid (java.util.UUID/randomUUID)
                       ))
                   markers)))))
 
