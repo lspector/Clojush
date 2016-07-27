@@ -52,7 +52,7 @@ Another option is to evaluate in the leinigen REPL (Read Eval Print Loop):
 
     sh> lein repl
     ...
-    clojush.core=> (use 'clojush.examples.simple-regression)
+    clojush.core=> (use 'clojush.problems.demos.simple-regression)
     ...
     clojush.core=> (pushgp argmap)
 
