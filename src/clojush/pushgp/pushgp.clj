@@ -17,7 +17,7 @@
           ;;----------------------------------------
           :use-single-thread false ;; When true, Clojush will only use a single thread
           :random-seed (random/generate-mersennetwister-seed) ;; The seed for the random number generator
-          :save-initial-population false ;; When true, saves the initial population
+          :run-uuid nil ;; This will be set to a new type 4 pseudorandom UUID on every run
           ;;
           ;;----------------------------------------
           ;; Standard GP arguments
@@ -128,13 +128,17 @@
           :print-homology-data false ; If true, prints the homology statistics
           ;;
           ;;----------------------------------------
-          ;; Arguments related to printing JSON or CSV logs
+          ;; Arguments related to printing JSON, EDN, or CSV logs
           ;;----------------------------------------
           :print-csv-logs false ;; Prints a CSV log of the population each generation
+          :print-edn-logs false ;; Prints an EDN log of the run
           :print-json-logs false ;; Prints a JSON log of the population each generation
           :csv-log-filename "log.csv" ;; The file to print CSV log to
+          :edn-log-filename "log.edn" ;; The file to print EDN log to
           :json-log-filename "log.json" ;; The file to print JSON log to
           :csv-columns [:generation :location :total-error :push-program-size] ;; The columns to include in a printed CSV beyond the generation and individual. Options include: [:generation :location :parent-uuids :genetic-operators :push-program-size :plush-genome-size :push-program :plush-genome :total-error :test-case-errors]
+          :edn-keys [:uuid :parent-uuids :genetic-operators :program :genome :total-error :errors] ;; Keys from clojush.individual.individual that should be included.
+          :edn-additional-keys [:generation :location] ;; additional information to include in the edn-printout. Available options are [:generation :location :push-program-size :plush-genome-size].
           :log-fitnesses-for-all-cases false ;; If true, the CSV and JSON logs will include the fitnesses of each individual on every test case
           :json-log-program-strings false ;; If true, JSON logs will include program strings for each individual
           )))
@@ -144,6 +148,7 @@
   (doseq [[argkey argval] argmap]
     (assert (contains? @push-argmap argkey) (str "Argument key " argkey " is not a recognized argument to pushgp."))
     (swap! push-argmap assoc argkey argval))
+  (swap! push-argmap assoc :run-uuid (java.util.UUID/randomUUID))
   (when (:autoconstructive @push-argmap)
     (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0})
     (swap! push-argmap assoc :epigenetic-markers [:close :silent])
@@ -174,17 +179,45 @@ into @push-argmap first."
     (load-push-argmap argmap)
     (reset-globals)))
 
-(defn make-agents-and-rng
-  [{:keys [use-single-thread population-size random-seed
-           max-genome-size-in-initial-program atom-generators
-           save-initial-population]
+(defn agent-error-handler
+  "Given to individual agents for handling errors."
+  [agnt except]
+  ;(.printStackTrace except System/out)
+  ;(.printStackTrace except)
+  (repl/pst except 10000)
+  (System/exit 0))
+
+(defn make-pop-agents
+  "Makes the population of agents containing the initial random individuals in the population.
+   Argument is a push argmap"
+  [{:keys [use-single-thread population-size
+           max-genome-size-in-initial-program atom-generators]
     :as argmap}]
-  (let [agent-error-handler (fn [agnt except]
-                              ;(.printStackTrace except System/out)
-                              ;(.printStackTrace except)
-                              (repl/pst except 10000)
-                              (System/exit 0))
-        random-seeds (loop [seeds '()]
+  (let [population-agents (repeatedly population-size
+                                      #(make-individual
+                                         :genome (random-plush-genome max-genome-size-in-initial-program
+                                                                      atom-generators
+                                                                      argmap)
+                                         :genetic-operators :random))]
+    (mapv #(if use-single-thread
+             (atom %)
+             (agent % :error-handler agent-error-handler))
+          population-agents)))
+
+(defn make-child-agents
+  "Makes the population of agents containing the initial random individuals in the population.
+   Argument is a push argmap."
+  [{:keys [use-single-thread population-size]}]
+  (vec (repeatedly population-size
+                   #((if use-single-thread atom agent)
+                      (make-individual)
+                      :error-handler agent-error-handler))))
+
+(defn make-rng
+  "Creates the random number generators used by the agents in the population.
+   Argument is a push argmap"
+  [{:keys [population-size]}]
+  (let [random-seeds (loop [seeds '()]
                        (let [num-remaining (- population-size (count seeds))]
                          (if (pos? num-remaining)
                            (let [new-seeds (repeatedly num-remaining #(random/lrand-bytes (:mersennetwister random/*seed-length*)))]                             
@@ -192,25 +225,7 @@ into @push-argmap first."
                                                             (not (some #(random/=byte-array % candidate)
                                                                        seeds))) new-seeds)))); only add seeds that we do not already have
                            seeds)))]
-    {:pop-agents (let [pa (doall (for [_ (range population-size)]
-                                   (make-individual
-                                     :genome (random-plush-genome max-genome-size-in-initial-program
-                                                                  atom-generators
-                                                                  argmap)
-                                     :genetic-operators :random)))
-                       f (str "data/" (System/currentTimeMillis) ".ser")]
-                   (when save-initial-population
-                     (io/make-parents f)
-                     (spit f (printable (map individual-string pa))))
-                   (vec (map #(if use-single-thread
-                                (atom %)
-                                (agent % :error-handler agent-error-handler))
-                             pa)))
-     :child-agents (vec (doall (for [_ (range population-size)]
-                                 ((if use-single-thread atom agent)
-                                      (make-individual)
-                                      :error-handler agent-error-handler))))
-     :random-seeds random-seeds
+    {:random-seeds random-seeds
      :rand-gens (vec (doall (for [k (range population-size)]                      
                               (random/make-mersennetwister-rng (nth random-seeds k)))))
      }))
@@ -283,13 +298,15 @@ into @push-argmap first."
     (random/with-rng (random/make-mersennetwister-rng (:random-seed @push-argmap))
       ;; set globals from parameters
       (reset-globals)
-      (initial-report) ;; Print the inital report
+      (initial-report @push-argmap) ;; Print the inital report
       (print-params @push-argmap)
       (check-genetic-operator-probabilities-add-to-one @push-argmap)
       (timer @push-argmap :initialization)
       (println "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
       (println "\nGenerating initial population...")
-      (let [{:keys [pop-agents child-agents rand-gens random-seeds]} (make-agents-and-rng @push-argmap)]
+      (let [pop-agents (make-pop-agents @push-argmap)
+            child-agents (make-child-agents @push-argmap)
+            {:keys [rand-gens random-seeds]} (make-rng @push-argmap)]
         ;(print "Random seeds: ")
         ;(doseq [seed random-seeds] (print " " seed))
         ;(println)

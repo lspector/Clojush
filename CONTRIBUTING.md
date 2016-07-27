@@ -45,10 +45,12 @@ the [repository settings in Travis](http://docs.travis-ci.com/user/environment-v
 so that it can the release to Clojars. It also needs the `GITHUB_TOKEN`
 in order to push the added tag and commit back to Github.
 
-So Travis will:
+Travis will:
 
-1. Build docs + push those to `gh-pages` branch after every master branch build
-2. Run `lein release` as well on those builds. This will:
+1. Build docs + push those to `gh-pages` branch after every master branch build with the keyword `lein release $LEVEL`
+   For example, you could have a commit message like `add some stuff lein release :patch` which would cause it to do a patch release.
+   The available levels are listed in [the lein docs](https://github.com/technomancy/leiningen/blob/stable/doc/DEPLOY.md#releasing-simplified)
+2. Run `lein release $LEVEL` as well on those builds. This will:
     1. create new git commit and tag for new commit w/ out `-SNAPSHOT` in it
     2. Create jar and push that to clojars
     3. bump release number to next minor version
