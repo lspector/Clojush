@@ -108,8 +108,30 @@
 
 (defn apply-simplification-step-to-genome
   [genome simplification-step-probabilities]
-  (let [transformation-map (select-random-weighted-item simplification-step-probabilities)]
+  (let [transformation-map (select-random-weighted-item simplification-step-probabilities)
+        silencings (get transformation-map :silence 0)
+        unsilencings (get transformation-map :unsilence 0)
+        no-opings (get transformation-map :no-op 0)
+        silent-values (map :silent genome)
+        indices-available-to-silence (if (> silencings 0)
+                                       (map second
+                                            (filter #(not= (first %) true)
+                                                    (map vector silent-values (range))))
+                                       nil)
+        indices-available-to-unsilence (if (> unsilencings 0) ;this isn't correct
+                                         (map second
+                                              (filter #(not= (first %) false)
+                                                      (map vector silent-values (range))))
+                                         nil)
+        indices-available-to-no-op (if (> no-opings 0) ;this isn't correct
+                                     (map second
+                                          (filter #(not= (first %) :no-op)
+                                                  (map vector silent-values (range))))
+                                     nil)]
+    (println indices-available-to-unsilence)
+    genome
     ;;;MAKE CHANGES HERE
+    ))
 
 (defn auto-simplify-plush
   "Automatically simplifies the genome of an individual without changing its error vector on
@@ -173,11 +195,11 @@
 (def ind-test
   (make-individual :genome 
                    '({:close 0, :instruction exec_shove}
-                      {:close 0, :instruction exec_eq}
-                      {:close 1, :instruction boolean_dup}
-                      {:close 0, :instruction boolean_eq}
+                      {:close 0, :instruction exec_eq :silent true}
+                      {:close 1, :instruction boolean_dup :silent false}
+                      {:close 0, :instruction boolean_eq :silent true}
                       {:close 0,
-                       :instruction code_stackdepth}
+                       :instruction code_stackdepth :silent false}
                       {:close 0,
                        :instruction boolean_yankdup}
                       {:close 0, :instruction 64}
@@ -206,7 +228,7 @@
   [ind]
   (auto-simplify-plush ind
                        (:error-function clojush.problems.demos.odd/argmap)
-                       1000
+                       5 ;1000
                        100))
 
 (test-autosimp-genome ind-test)
