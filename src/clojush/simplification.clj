@@ -96,6 +96,7 @@
 ;; auto-simplification of Plush genomes
 
 (defn select-random-weighted-item
+  "Given map of item/probability key/values, picks an item probabilistically based on the probabilities."
   [prob-map]
   (let [summed-probs (reductions (fn [[_ prev-prob] [item prob]]
                                    (vector item (+ prev-prob prob)))
@@ -106,7 +107,24 @@
         (first (first items-and-probs))
         (recur (rest items-and-probs))))))
 
+(defn choose-random-k-without-replacement
+  "Selects k random elements of input list, without replacement. If fewer than k exist, selects all."
+  [k elements]
+  (take k (shuffle elements)))
+
+(defn change-silent-at-indices
+  "Changes the value of the :silent tag on the gene at each index of indices into new-value."
+  [genome indices new-value]
+  (if (empty? indices)
+    genome
+    (recur (assoc-in genome [(first indices) :silent] new-value)
+           (rest indices)
+           new-value)))
+
 (defn apply-simplification-step-to-genome
+  "Takes a genome and a map of transformation/probability pairs. Picks a transformation
+   probabilistically, and then applies it to the genome by silencing/unsilencing/no-oping
+   random genes that aren't already of that type."
   [genome simplification-step-probabilities]
   (let [transformation-map (select-random-weighted-item simplification-step-probabilities)
         silencings (get transformation-map :silence 0)
@@ -115,23 +133,30 @@
         silent-values (map :silent genome)
         indices-available-to-silence (if (> silencings 0)
                                        (map second
-                                            (filter #(not= (first %) true)
+                                            (remove #(= (first %) true)
                                                     (map vector silent-values (range))))
-                                       nil)
-        indices-available-to-unsilence (if (> unsilencings 0) ;this isn't correct
+                                       '())
+        indices-available-to-unsilence (if (> unsilencings 0)
                                          (map second
-                                              (filter #(not= (first %) false)
+                                              (remove #(or (= (first %) false)
+                                                           (= (first %) nil))
                                                       (map vector silent-values (range))))
-                                         nil)
-        indices-available-to-no-op (if (> no-opings 0) ;this isn't correct
+                                         '())
+        indices-available-to-no-op (if (> no-opings 0)
                                      (map second
-                                          (filter #(not= (first %) :no-op)
+                                          (remove #(= (first %) :no-op)
                                                   (map vector silent-values (range))))
-                                     nil)]
-    (println indices-available-to-unsilence)
-    genome
-    ;;;MAKE CHANGES HERE
-    ))
+                                     '())
+        indices-to-silence (choose-random-k-without-replacement silencings indices-available-to-silence)
+        indices-to-unsilence (choose-random-k-without-replacement unsilencings indices-available-to-unsilence)
+        indices-to-no-op (choose-random-k-without-replacement no-opings indices-available-to-no-op)]
+    ; Order of changes is: unsilence -> no-op -> silence
+    ; This makes it so silencings take highest priority.
+    (-> genome
+      vec      ; Needs to be a vector for change-silent-at-indices
+      (change-silent-at-indices indices-to-unsilence false)
+      (change-silent-at-indices indices-to-no-op :no-op)
+      (change-silent-at-indices indices-to-silence true))))
 
 (defn auto-simplify-plush
   "Automatically simplifies the genome of an individual without changing its error vector on
@@ -143,22 +168,21 @@
    following options for the keys, each of which has an integer of how many of those changes to make:
      :silence - number of unsilenced or no-op genes to set :silent = true
      :unsilence - number of silenced or no-op genes to set :silent = false
-     :no-op - number of unsilenced or silenced genes to set :silent = :no-op
-"
+     :no-op - number of unsilenced or silenced genes to set :silent = :no-op"
   ([ind error-function steps print-progress-interval]
     (auto-simplify-plush ind error-function steps print-progress-interval
                          {{:silence 1} 0.5
                           {:silence 2} 0.3
                           {:silence 3} 0.1
                           {:silence 4} 0.1
-                          ;{:silence 1 :unsilence 1} 0.05 ;Not used by default
-                          ;{:silence 2 :unsilence 1} 0.1 ;Not used by default
-                          ;{:silence 3 :unsilence 1} 0.05 ;Not used by default
-                          ;{:no-op 1} 0.1 ;Not used by default
+                          ;{:silence 1 :unsilence 1} 0.05  ;Not used by default
+                          ;{:silence 2 :unsilence 1} 0.1   ;Not used by default
+                          ;{:silence 3 :unsilence 1} 0.05  ;Not used by default
+                          ;{:no-op 1} 0.05                 ;Not used by default
                           }))
   ([ind error-function steps print-progress-interval simplification-step-probabilities]
     (when (not (zero? print-progress-interval))
-      (printf "\nAuto-simplifying Plush genome with starting size: %s" (count-points (:program ind))))
+      (printf "\nAuto-simplifying Plush genome with starting size: %s" (count (:genome ind))))
     (loop [step 0
            genome (:genome ind)
            program (if (:program ind)
@@ -168,9 +192,6 @@
            errors (if (:errors ind)
                     (:errors ind)
                     (error-function program))]
-;           total-errors (if (:total-error ind)
-;                          (:total-error ind)
-;                          (apply + errors))]
       (when (and (not (zero? print-progress-interval))
                  (or (>= step steps)
                      (zero? (mod step print-progress-interval))))
@@ -184,51 +205,10 @@
         (make-individual :genome genome :program program :errors errors :total-error (apply + errors)
                          :history (:history ind) :genetic-operators :simplification)
         (let [new-genome (apply-simplification-step-to-genome genome simplification-step-probabilities)
-              new-program (translate-plush-genome-to-push-program ind
-                                                             {:max-points (* 10 (count genome))})
+              new-program (translate-plush-genome-to-push-program (assoc ind :genome new-genome)
+                                                                  {:max-points (* 10 (count genome))})
               new-errors (error-function new-program)]
-          (if (= new-errors errors)
+          (if (and (= new-errors errors)
+                   (<= (count-points new-program) (count-points program)))
             (recur (inc step) new-genome new-program new-errors)
             (recur (inc step) genome program errors)))))))
-
-;;;;;;;;;;;;;;;
-(def ind-test
-  (make-individual :genome 
-                   '({:close 0, :instruction exec_shove}
-                      {:close 0, :instruction exec_eq :silent true}
-                      {:close 1, :instruction boolean_dup :silent false}
-                      {:close 0, :instruction boolean_eq :silent true}
-                      {:close 0,
-                       :instruction code_stackdepth :silent false}
-                      {:close 0,
-                       :instruction boolean_yankdup}
-                      {:close 0, :instruction 64}
-                      {:close 0, :instruction code_flush}
-                      {:close 1, :instruction code_yank}
-                      {:close 1, :instruction exec_yank}
-                      {:close 0, :instruction exec_swap}
-                      {:close 1, :instruction code_shove}
-                      {:close 0, :instruction integer_yank}
-                      {:close 0, :instruction exec_rot}
-                      {:close 0, :instruction code_flush}
-                      {:close 0, :instruction integer_swap}
-                      {:close 0, :instruction code_pop}
-                      {:close 0, :instruction code_pop}
-                      {:close 1, :instruction in1}
-                      {:close 1, :instruction code_yank})))
-;                   (random-plush-genome-with-size 20
-;                                                  (concat (registered-for-stacks [:integer :boolean :code :exec])
-;                                                          (list (fn [] (lrand-int 100))
-;                                                                'in1))
-;                                                  {:epigenetic-markers [:close]})))
-
-(require 'clojush.problems.demos.odd)
-
-(defn test-autosimp-genome
-  [ind]
-  (auto-simplify-plush ind
-                       (:error-function clojush.problems.demos.odd/argmap)
-                       5 ;1000
-                       100))
-
-(test-autosimp-genome ind-test)

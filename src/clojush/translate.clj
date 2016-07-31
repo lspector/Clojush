@@ -85,6 +85,11 @@
                                                       paren-stack)
               ; Check if done
               (empty? gn) (open-close-sequence-to-list (apply list prog))
+              ; Check for no-oped instruction. This instruction will be replaced by exec_noop, but will still have effects like :close count
+              (= (:silent (first gn)) :no-op) (recur (conj prog 'exec_noop)
+                                                     (rest gn)
+                                                     (get (first gn) :close 0)
+                                                     paren-stack)
               ; Check for silenced instruction
               (get (first gn) :silent false) (recur prog
                                                     (rest gn)
