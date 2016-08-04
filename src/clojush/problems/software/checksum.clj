@@ -52,14 +52,17 @@
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
 (def checksum-data-domains
-  [[(list "", "A", "\t", "\n", "B\n", "\n\n",
+  [[(list "", "\t", "\n", "B\n", "\n\n",
           (apply str (repeat 50 \newline))
           (apply str (repeat 50 \space))
           (apply str (repeat 50 \s))
           (apply str (take 50 (cycle (list \C \D \newline))))
           (apply str (take 50 (cycle (list \x \newline \y \space))))
-          (apply str (take 50 (cycle (list \space \newline))))) 12 0] ;; "Special" inputs covering some base cases
-   [(fn [] (checksum-input (inc (lrand-int 50)))) 88 1000]
+          (apply str (take 50 (cycle (list \space \newline))))) 11 0] ;; "Special" inputs covering some base cases
+   [(map str (map char (range 32 127))) 95 0] ; All visible characters once
+   [(fn [] (checksum-input 2)) 55 500] ; Random length-2 inputs
+   [(fn [] (checksum-input 3)) 50 500] ; Random length-3 inputs
+   [(fn [] (checksum-input (+ 2 (lrand-int 49)))) 89 1000] ; Random >= 2 length inputs
    ])
 
 ;;Can make checksum test data like this:

@@ -106,15 +106,15 @@
   [type]
   (fn [state]
     (if (not (empty? (rest (rest (type state)))))
-      (let [first (stack-ref type 0 state)
-            second (stack-ref type 1 state)
-            third (stack-ref type 2 state)]
+      (let [first-item (stack-ref type 0 state)
+            second-item (stack-ref type 1 state)
+            third-item (stack-ref type 2 state)]
         (->> (pop-item type state)
              (pop-item type)
              (pop-item type)
-             (push-item second type)
-             (push-item first type)
-             (push-item third type)))
+             (push-item second-item type)
+             (push-item first-item type)
+             (push-item third-item type)))
       state)))
 
 (define-registered exec_rot (with-meta (rotter :exec) {:stack-types [:exec] :parentheses 3}))
@@ -147,11 +147,11 @@
   [type]
   (fn [state]
     (if (not (empty? (rest (type state))))
-      (let [first (stack-ref type 0 state)
-            second (stack-ref type 1 state)]
+      (let [first-item (stack-ref type 0 state)
+            second-item (stack-ref type 1 state)]
         (->> (pop-item type state)
              (pop-item type)
-             (push-item (= first second) :boolean)))
+             (push-item (= first-item second-item) :boolean)))
       state)))
 
 (define-registered exec_eq (with-meta (eqer :exec) {:stack-types [:exec :boolean] :parentheses 0}))
