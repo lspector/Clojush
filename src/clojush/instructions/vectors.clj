@@ -15,6 +15,16 @@
 (define-registered vector_boolean_dup (with-meta (duper :vector_boolean) {:stack-types [:vector_boolean]}))
 (define-registered vector_string_dup (with-meta (duper :vector_string) {:stack-types [:vector_string]}))
 
+(define-registered vector_integer_dup_times (with-meta (dup-timeser :vector_integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_dup_times (with-meta (dup-timeser :vector_float) {:stack-types [:vector_float :integer]}))
+(define-registered vector_boolean_dup_times (with-meta (dup-timeser :vector_boolean) {:stack-types [:vector_boolean :integer]}))
+(define-registered vector_string_dup_times (with-meta (dup-timeser :vector_string) {:stack-types [:vector_string :integer]}))
+
+(define-registered vector_integer_dup_items (with-meta (dup-itemser :vector_integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_dup_items (with-meta (dup-itemser :vector_float) {:stack-types [:vector_float :integer]}))
+(define-registered vector_boolean_dup_items (with-meta (dup-itemser :vector_boolean) {:stack-types [:vector_boolean :integer]}))
+(define-registered vector_string_dup_items (with-meta (dup-itemser :vector_string) {:stack-types [:vector_string :integer]}))
+
 (define-registered vector_integer_swap (with-meta (swapper :vector_integer) {:stack-types [:vector_integer]}))
 (define-registered vector_float_swap (with-meta (swapper :vector_float) {:stack-types [:vector_float]}))
 (define-registered vector_boolean_swap (with-meta (swapper :vector_boolean) {:stack-types [:vector_boolean]}))
@@ -468,3 +478,32 @@
 (define-registered exec_do*vector_float (with-meta (iterateer :vector_float :float 'exec_do*vector_float) {:stack-types [:vector_float :float :exec] :parentheses 1}))
 (define-registered exec_do*vector_boolean (with-meta (iterateer :vector_boolean :boolean 'exec_do*vector_boolean) {:stack-types [:vector_boolean :boolean :exec] :parentheses 1}))
 (define-registered exec_do*vector_string (with-meta (iterateer :vector_string :string 'exec_do*vector_string) {:stack-types [:vector_string :string :exec] :parentheses 1}))
+
+(defn seq-multiplier
+  "For integer argument n, concatenates n copies of the top item of the 'type' stack together.
+   If result is larger than max-vector-length, instead returns the first max-vector-length items
+   of the resulting concatenation."
+  [type]
+  (fn [state]
+    (if (or (empty? (type state))
+            (empty? (:integer state)))
+      state
+      (let [vect (top-item type state)
+            result-vect (take (if (= type :string)
+                                max-string-length
+                                max-vector-length)
+                              (apply concat
+                                     (repeat (top-item :integer state)
+                                             vect)))
+            result (if (= type :string)
+                     (apply str result-vect)
+                     (vec result-vect))]
+        (->> state
+          (pop-item type)
+          (pop-item :integer)
+          (push-item result type))))))
+
+(define-registered vector_integer_multiple_concat (with-meta (seq-multiplier :vector_integer) {:stack-types [:vector_integer :integer]}))
+(define-registered vector_float_multiple_concat (with-meta (seq-multiplier :vector_float) {:stack-types [:vector_float :integer]}))
+(define-registered vector_boolean_multiple_concat (with-meta (seq-multiplier :vector_boolean) {:stack-types [:vector_boolean :integer]}))
+(define-registered vector_string_multiple_concat (with-meta (seq-multiplier :vector_string) {:stack-types [:vector_string :integer]}))

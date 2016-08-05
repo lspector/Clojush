@@ -1,6 +1,7 @@
 (ns clojush.instructions.string
   (:use [clojush pushstate globals]
-        [clojure.string :only [split trim]])
+        [clojure.string :only [split trim]]
+        clojush.instructions.vectors)
   (:require [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -387,3 +388,5 @@
                 (push-item (apply str (rest s)) :exec)
                 (push-item (top-item :exec state) :exec)
                 (push-item (first s) :char)))))))
+
+(define-registered string_multiple_concat (with-meta (seq-multiplier :string) {:stack-types [:string :integer]}))
