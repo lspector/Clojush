@@ -68,19 +68,9 @@
                    (count %)))
        inputs))
 
-; Define error function. For now, each run uses different random inputs
-(defn vector-average-error-function
-  "Returns the error function for the vector-average problem. Takes as
-   input Vector Average data domains."
-  [data-domains]
-  (let [[train-cases test-cases] (map vector-average-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-vector-average-error-function
+(defn make-vector-average-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-vector-average-error-function
       ([program]
         (the-actual-vector-average-error-function program :train))
       ([program data-cases] ;; data-cases should be :train or :test
@@ -113,7 +103,21 @@
                            )))]
           (when @global-print-behavioral-diversity
             (swap! population-behaviors conj @behavior))
-          errors)))))
+          errors))))
+
+; Define error function. For now, each run uses different random inputs
+(defn vector-average-error-function
+  "Returns the error function for the vector-average problem. Takes as
+   input Vector Average data domains."
+  [data-domains]
+  (let [[train-cases test-cases] (map vector-average-test-cases
+                                      (test-and-train-data-from-domains data-domains))]
+    (when true ;; Change to false to not print test cases
+      (doseq [[i case] (map vector (range) train-cases)]
+        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+      (doseq [[i case] (map vector (range) test-cases)]
+        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
+    (make-vector-average-error-function-from-cases train-cases test-cases)))
 
 (defn vector-average-report
   "Custom generational report."

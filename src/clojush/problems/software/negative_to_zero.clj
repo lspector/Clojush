@@ -78,6 +78,38 @@
                            in))))
        inputs))
 
+(defn make-negative-to-zero-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-negative-to-zero-error-function
+    ([program]
+      (the-actual-negative-to-zero-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-negative-to-zero-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (doall
+                     (for [[input1 correct-output] (case data-cases
+                                                     :train train-cases
+                                                     :test test-cases
+                                                     [])]
+                       (let [final-state (run-push program
+                                                   (->> (make-push-state)
+                                                     (push-item input1 :input)))
+                             result (top-item :vector_integer final-state)]
+                         (when print-outputs
+                           (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                         ; Record the behavior
+                         (when @global-print-behavioral-diversity
+                           (swap! behavior conj result))
+                         ; Error is Levenshtein distance of vectors
+                         (if (vector? result)
+                           (levenshtein-distance correct-output result)
+                           5000) ; penalty for no return value
+                         )))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
 ; Define error function. For now, each run uses different random inputs
 (defn negative-to-zero-error-function
   "Returns the error function for the negative-to-zero problem. Takes as
@@ -90,35 +122,7 @@
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
         (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-negative-to-zero-error-function
-      ([program]
-        (the-actual-negative-to-zero-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-negative-to-zero-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (doall
-                       (for [[input1 correct-output] (case data-cases
-                                                                  :train train-cases
-                                                                  :test test-cases
-                                                                  [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input1 :input)))
-                               result (top-item :vector_integer final-state)]
-                           (when print-outputs
-                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
-                           ; Error is Levenshtein distance of vectors
-                           (if (vector? result)
-                             (levenshtein-distance correct-output result)
-                             5000) ; penalty for no return value
-                           )))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+    (make-negative-to-zero-error-function-from-cases train-cases test-cases)))
 
 (defn negative-to-zero-report
   "Custom generational report."

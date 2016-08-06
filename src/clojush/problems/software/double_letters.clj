@@ -79,6 +79,36 @@
                                           in)))))
        inputs))
 
+(defn make-double-letters-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-double-letters-error-function
+    ([program]
+      (the-actual-double-letters-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-double-letters-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (doall
+                     (for [[input correct-output] (case data-cases
+                                                    :train train-cases
+                                                    :test test-cases
+                                                    [])]
+                       (let [final-state (run-push program
+                                                   (->> (make-push-state)
+                                                     (push-item input :input)
+                                                     (push-item "" :output)))
+                             printed-result (stack-ref :output 0 final-state)]
+                         (when print-outputs
+                           (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str printed-result))))
+                         ; Record the behavior
+                         (when @global-print-behavioral-diversity
+                           (swap! behavior conj printed-result))
+                         ; Error is Levenshtein distance
+                         (levenshtein-distance correct-output printed-result))))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
 ; Define error function. For now, each run uses different random inputs
 (defn double-letters-error-function
   "Returns the error function for the Double Letters problem. Takes as
@@ -92,33 +122,7 @@
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
         (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-double-letters-error-function
-      ([program]
-        (the-actual-double-letters-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-double-letters-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (doall
-                       (for [[input correct-output] (case data-cases
-                                                      :train train-cases
-                                                      :test test-cases
-                                                      [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input :input)
-                                                       (push-item "" :output)))
-                               printed-result (stack-ref :output 0 final-state)]
-                           (when print-outputs
-                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str printed-result))))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj printed-result))
-                           ; Error is Levenshtein distance
-                           (levenshtein-distance correct-output printed-result))))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+    (make-double-letters-error-function-from-cases train-cases test-cases)))
 
 (defn double-letters-report
   "Custom generational report."
