@@ -182,6 +182,51 @@
                            (float (/ (count words) num-sentences))))))
        inputs))
 
+(defn make-word-stats-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-word-stats-error-function
+    ([program]
+      (the-actual-word-stats-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-word-stats-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (flatten
+                     (doall
+                       (for [[input [correct-output sentences words-per-sentence]] (case data-cases
+                                                                                     :train train-cases
+                                                                                     :test test-cases
+                                                                                     [])]
+                         (let [final-state (run-push program
+                                                     (->> (make-push-state)
+                                                       (push-item input :input)
+                                                       (push-item input :input)
+                                                       (push-item "" :output)))
+                               result (stack-ref :output 0 final-state)]
+                           (when print-outputs
+                             (println (format "\n| Correct output: %s\n| Program output: %s" (pr-str correct-output) (pr-str result))))
+                           ; Record the behavior
+                           (when @global-print-behavioral-diversity
+                             (swap! behavior conj result))
+                           ; Errors:
+                           ;  1. Levenshtein distance of outputs
+                           ;  2. If contains a line of the form #"number of sentences: (-?\d+)", then integer distance from correct output; otherwise penalty
+                           ;  3. If contains a line of the form #"average sentence length: (-?\d+.\d+)", then float distance from correct output, rounded to 4 places; otherwise penalty
+                           (vector
+                             (levenshtein-distance correct-output result)
+                             (if-let [result-n (try (Integer/parseInt (second (re-find #"number of sentences: (-?\d+)" result)))
+                                                 (catch Exception e nil))]
+                               (abs (- result-n sentences))
+                               10000) ;Penalty
+                             (if-let [result-f (try (Float/parseFloat (second (re-find #"average sentence length: (-?\d+\.\d+)" result)))
+                                                 (catch Exception e nil))]
+                               (round-to-n-decimal-places (abs (- result-f words-per-sentence)) 4)
+                               10000.0) ;Penalty
+                             )))))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
 ; Define error function. For now, each run uses different random inputs
 (defn word-stats-error-function
   "Returns the error function for the Word Stats problem. Takes as
@@ -195,48 +240,7 @@
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
         (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-word-stats-error-function
-      ([program]
-        (the-actual-word-stats-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-word-stats-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (flatten
-                       (doall
-                         (for [[input [correct-output sentences words-per-sentence]] (case data-cases
-                                                                                       :train train-cases
-                                                                                       :test test-cases
-                                                                                       [])]
-                           (let [final-state (run-push program
-                                                       (->> (make-push-state)
-                                                         (push-item input :input)
-                                                         (push-item input :input)
-                                                         (push-item "" :output)))
-                                 result (stack-ref :output 0 final-state)]
-                             (when print-outputs
-                               (println (format "\n| Correct output: %s\n| Program output: %s" (pr-str correct-output) (pr-str result))))
-                             ; Record the behavior
-                             (when @global-print-behavioral-diversity
-                               (swap! behavior conj result))
-                             ; Errors:
-                             ;  1. Levenshtein distance of outputs
-                             ;  2. If contains a line of the form #"number of sentences: (-?\d+)", then integer distance from correct output; otherwise penalty
-                             ;  3. If contains a line of the form #"average sentence length: (-?\d+.\d+)", then float distance from correct output, rounded to 4 places; otherwise penalty
-                             (vector
-                               (levenshtein-distance correct-output result)
-                               (if-let [result-n (try (Integer/parseInt (second (re-find #"number of sentences: (-?\d+)" result)))
-                                                   (catch Exception e nil))]
-                                 (abs (- result-n sentences))
-                                 10000) ;Penalty
-                               (if-let [result-f (try (Float/parseFloat (second (re-find #"average sentence length: (-?\d+\.\d+)" result)))
-                                                   (catch Exception e nil))]
-                                 (round-to-n-decimal-places (abs (- result-f words-per-sentence)) 4)
-                                 10000.0) ;Penalty
-                               )))))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+    (make-word-stats-error-function-from-cases train-cases test-cases)))
 
 (defn word-stats-report
   "Custom generational report."

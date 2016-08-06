@@ -56,6 +56,61 @@
                                nums))))
        inputs))
 
+(defn make-even-squares-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-even-squares-error-function
+    ([program]
+      (the-actual-even-squares-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-even-squares-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (flatten
+                     (doall
+                       (for [[input1 [correct-output correct-integers]] (case data-cases
+                                                                          :train train-cases
+                                                                          :test test-cases
+                                                                          [])]
+                         (let [final-state (run-push program
+                                                     (->> (make-push-state)
+                                                       (push-item input1 :input)
+                                                       (push-item "" :output)))
+                               result (stack-ref :output 0 final-state)]
+                           (when print-outputs
+                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                           ; Record the behavior
+                           (when @global-print-behavioral-diversity
+                             (swap! behavior conj result))
+                           (let [correct-number-lines (count correct-integers)
+                                 result-lines (if (= result "")
+                                                []
+                                                (string/split-lines result))
+                                 int-parse-strings (filter #(re-matches #"-?\d+" %) result-lines)
+                                 lines-with-integer-parseable-strings (count int-parse-strings)
+                                 lines-without-integer-parseable-strings (- (count result-lines) lines-with-integer-parseable-strings)]
+                             (vector
+                               ; Error 1: Levenshtein distance of printed strings
+                               (levenshtein-distance correct-output result)
+                               ; Error 2: Difference in number of lines with integer-parseable strings. Also, each line without an integer-parseable string contributes 1 error
+                               (+ (abs (- correct-number-lines lines-with-integer-parseable-strings))
+                                  lines-without-integer-parseable-strings)
+                               ; Error 3: For each line in the result with a parseable integer, find the integer error compared to correct integer. Sum these.
+                               (let [correct-result-int-pairs (map vector
+                                                                   correct-integers
+                                                                   (concat (map (fn [int-str]
+                                                                                  (try (Integer/parseInt int-str)
+                                                                                    (catch Exception e :no-result)))
+                                                                                int-parse-strings)
+                                                                           (repeat :no-result)))]
+                                 (apply +' (map (fn [[cor-int res-int]]
+                                                  (if (not (number? res-int))
+                                                    100 ; penalty for not enough lines with parseable integers
+                                                    (abs (- cor-int res-int))))
+                                                correct-result-int-pairs)))))))))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
 ; Define error function. For now, each run uses different random inputs
 (defn even-squares-error-function
   "Returns the error function for the Even Squares problem. Takes as
@@ -69,58 +124,7 @@
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
         (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-even-squares-error-function
-      ([program]
-        (the-actual-even-squares-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-even-squares-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (flatten
-                       (doall
-                         (for [[input1 [correct-output correct-integers]] (case data-cases
-                                                                            :train train-cases
-                                                                            :test test-cases
-                                                                            [])]
-                           (let [final-state (run-push program
-                                                       (->> (make-push-state)
-                                                         (push-item input1 :input)
-                                                         (push-item "" :output)))
-                                 result (stack-ref :output 0 final-state)]
-                             (when print-outputs
-                               (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                             ; Record the behavior
-                             (when @global-print-behavioral-diversity
-                               (swap! behavior conj result))
-                             (let [correct-number-lines (count correct-integers)
-                                   result-lines (if (= result "")
-                                                  []
-                                                  (string/split-lines result))
-                                   int-parse-strings (filter #(re-matches #"-?\d+" %) result-lines)
-                                   lines-with-integer-parseable-strings (count int-parse-strings)
-                                   lines-without-integer-parseable-strings (- (count result-lines) lines-with-integer-parseable-strings)]
-                               (vector
-                                 ; Error 1: Levenshtein distance of printed strings
-                                 (levenshtein-distance correct-output result)
-                                 ; Error 2: Difference in number of lines with integer-parseable strings. Also, each line without an integer-parseable string contributes 1 error
-                                 (+ (abs (- correct-number-lines lines-with-integer-parseable-strings))
-                                    lines-without-integer-parseable-strings)
-                                 ; Error 3: For each line in the result with a parseable integer, find the integer error compared to correct integer. Sum these.
-                                 (let [correct-result-int-pairs (map vector
-                                                                     correct-integers
-                                                                     (concat (map (fn [int-str]
-                                                                                    (try (Integer/parseInt int-str)
-                                                                                      (catch Exception e :no-result)))
-                                                                                  int-parse-strings)
-                                                                             (repeat :no-result)))]
-                                   (apply +' (map (fn [[cor-int res-int]]
-                                                    (if (not (number? res-int))
-                                                      100 ; penalty for not enough lines with parseable integers
-                                                      (abs (- cor-int res-int))))
-                                                  correct-result-int-pairs)))))))))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+   (make-even-squares-error-function-from-cases train-cases test-cases)))
 
 (defn even-squares-report
   "Custom generational report."

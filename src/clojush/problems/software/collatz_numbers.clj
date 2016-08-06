@@ -68,6 +68,38 @@
                  (tail-collatz-sequence in)))
        inputs))
 
+(defn make-collatz-numbers-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-collatz-numbers-error-function
+    ([program]
+      (the-actual-collatz-numbers-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-collatz-numbers-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (doall
+                     (for [[input1 correct-output] (case data-cases
+                                                     :train train-cases
+                                                     :test test-cases
+                                                     [])]
+                       (let [final-state (run-push program
+                                                   (->> (make-push-state)
+                                                     (push-item input1 :input)))
+                             result (stack-ref :integer 0 final-state)]
+                         (when print-outputs
+                           (println (format "Correct output: %3d | Program output: %s" correct-output (str result))))
+                         ; Record the behavior
+                         (when @global-print-behavioral-diversity
+                           (swap! behavior conj result))
+                         ; Error is difference of integers
+                         (if (number? result)
+                           (abs (- result correct-output)) ;distance from correct integer
+                           1000000) ;penalty for no return value
+                         )))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+  
 ; Define error function. For now, each run uses different random inputs
 (defn collatz-numbers-error-function
   "Returns the error function for the Collatz Numbers problem. Takes as
@@ -80,35 +112,7 @@
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
         (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-collatz-numbers-error-function
-      ([program]
-        (the-actual-collatz-numbers-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-collatz-numbers-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (doall
-                       (for [[input1 correct-output] (case data-cases
-                                                                  :train train-cases
-                                                                  :test test-cases
-                                                                  [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input1 :input)))
-                               result (stack-ref :integer 0 final-state)]
-                           (when print-outputs
-                             (println (format "Correct output: %3d | Program output: %s" correct-output (str result))))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
-                           ; Error is difference of integers
-                           (if (number? result)
-                             (abs (- result correct-output)) ;distance from correct integer
-                             1000000) ;penalty for no return value
-                           )))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+    (make-collatz-numbers-error-function-from-cases train-cases test-cases)))
 
 (defn collatz-numbers-report
   "Custom generational report."

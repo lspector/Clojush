@@ -1,7 +1,10 @@
 ;; syllables.clj
 ;; Tom Helmuth, thelmuth@cs.umass.edu
 ;;
-;; Problem Source: Program Repair Benchmark Paper (add citation later)
+;; Problem Source:
+;;   C. Le Goues et al., "The ManyBugs and IntroClass Benchmarks for Automated Repair of C Programs,"
+;;   in IEEE Transactions on Software Engineering, vol. 41, no. 12, pp. 1236-1256, Dec. 1 2015.
+;;   doi: 10.1109/TSE.2015.2454513
 ;;
 ;; Given a string (max length 20, containing symbols, spaces, digits, and
 ;; lowercase letters), count the number of occurrences of vowels (a,e,i,o,u,y)
@@ -79,6 +82,44 @@
                  (str "The number of syllables is " (count (filter #(some #{%} "aeiouy") in)))))
        inputs))
 
+(defn make-syllables-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-syllables-error-function
+    ([program]
+      (the-actual-syllables-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-syllables-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (flatten
+                     (doall
+                       (for [[input correct-output] (case data-cases
+                                                      :train train-cases
+                                                      :test test-cases
+                                                      [])]
+                         (let [final-state (run-push program
+                                                     (->> (make-push-state)
+                                                       (push-item input :input)
+                                                       (push-item "" :output)))
+                               printed-result (stack-ref :output 0 final-state)]
+                           (when print-outputs
+                             (println (format "\n| Correct output: %s\n| Program output: %s" (pr-str correct-output) (pr-str printed-result))))
+                           ; Record the behavior
+                           (when @global-print-behavioral-diversity
+                             (swap! behavior conj printed-result))
+                           ; Error is Levenshtein distance and, if ends in an integer, distance from correct integer
+                           (vector
+                             (levenshtein-distance correct-output printed-result)
+                             (if-let [num-result (try (Integer/parseInt (last (string/split printed-result #"\s+")))
+                                                   (catch Exception e nil))]
+                               (abs (- (Integer/parseInt (last (string/split correct-output #"\s+")))
+                                       num-result)) ;distance from correct integer
+                               1000)
+                             )))))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
 ; Define error function. For now, each run uses different random inputs
 (defn syllables-error-function
   "Returns the error function for the Syllables problem. Takes as
@@ -92,41 +133,7 @@
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
         (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-syllables-error-function
-      ([program]
-        (the-actual-syllables-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-syllables-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (flatten
-                       (doall
-                         (for [[input correct-output] (case data-cases
-                                                                   :train train-cases
-                                                                   :test test-cases
-                                                                   [])]
-                           (let [final-state (run-push program
-                                                       (->> (make-push-state)
-                                                         (push-item input :input)
-                                                         (push-item "" :output)))
-                                 printed-result (stack-ref :output 0 final-state)]
-                             (when print-outputs
-                               (println (format "\n| Correct output: %s\n| Program output: %s" (pr-str correct-output) (pr-str printed-result))))
-                             ; Record the behavior
-                             (when @global-print-behavioral-diversity
-                               (swap! behavior conj printed-result))
-                             ; Error is Levenshtein distance and, if ends in an integer, distance from correct integer
-                             (vector
-                               (levenshtein-distance correct-output printed-result)
-                               (if-let [num-result (try (Integer/parseInt (last (string/split printed-result #"\s+")))
-                                                      (catch Exception e nil))]
-                                 (abs (- (Integer/parseInt (last (string/split correct-output #"\s+")))
-                                         num-result)) ;distance from correct integer
-                                 1000)
-                               )))))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+    (make-syllables-error-function-from-cases train-cases test-cases)))
 
 (defn syllables-report
   "Custom generational report."

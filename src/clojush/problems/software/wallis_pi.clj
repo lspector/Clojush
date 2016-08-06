@@ -69,6 +69,48 @@
                  (wallis-pi-approximation in)))
        inputs))
 
+(defn make-wallis-pi-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-wallis-pi-error-function
+    ([program]
+      (the-actual-wallis-pi-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-wallis-pi-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (flatten
+                     (doall
+                       (for [[input1 correct-output] (case data-cases
+                                                       :train train-cases
+                                                       :test test-cases
+                                                       [])]
+                         (let [final-state (run-push program
+                                                     (->> (make-push-state)
+                                                       (push-item input1 :input)))
+                               result (round-to-n-decimal-places
+                                        (stack-ref :float 0 final-state)
+                                        5)]
+                           (when print-outputs
+                             (let [res-str (if (float? result)
+                                             (format "%.5f" result)
+                                             (str result))]
+                               (println (format "Correct output: %.5f | Program output: %s" correct-output res-str))))
+                           ; Record the behavior
+                           (when @global-print-behavioral-diversity
+                             (swap! behavior conj result))
+                           ; Outputs rounded to 5 decimal places
+                           (vector
+                             ; Error 1: float absolute error
+                             (if (number? result)
+                               (float (abs (- result correct-output))) ;distance from correct integer
+                               1000000.0) ;penalty for no return value
+                             ; Error 2: Levenshtein distance of strings
+                             (levenshtein-distance (str correct-output) (str result))
+                             )))))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
 ; Define error function. For now, each run uses different random inputs
 (defn wallis-pi-error-function
   "Returns the error function for the Wallis Pi problem. Takes as
@@ -81,45 +123,7 @@
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
         (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-wallis-pi-error-function
-      ([program]
-        (the-actual-wallis-pi-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-wallis-pi-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (flatten
-                       (doall
-                         (for [[input1 correct-output] (case data-cases
-                                                                    :train train-cases
-                                                                    :test test-cases
-                                                                    [])]
-                           (let [final-state (run-push program
-                                                       (->> (make-push-state)
-                                                         (push-item input1 :input)))
-                                 result (round-to-n-decimal-places
-                                          (stack-ref :float 0 final-state)
-                                          5)]
-                             (when print-outputs
-                               (let [res-str (if (float? result)
-                                               (format "%.5f" result)
-                                               (str result))]
-                                 (println (format "Correct output: %.5f | Program output: %s" correct-output res-str))))
-                             ; Record the behavior
-                             (when @global-print-behavioral-diversity
-                               (swap! behavior conj result))
-                             ; Outputs rounded to 5 decimal places
-                             (vector
-                               ; Error 1: float absolute error
-                               (if (number? result)
-                                 (float (abs (- result correct-output))) ;distance from correct integer
-                                 1000000.0) ;penalty for no return value
-                               ; Error 2: Levenshtein distance of strings
-                               (levenshtein-distance (str correct-output) (str result))
-                               )))))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+    (make-wallis-pi-error-function-from-cases train-cases test-cases)))
 
 (defn wallis-pi-report
   "Custom generational report."
