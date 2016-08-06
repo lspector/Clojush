@@ -57,6 +57,38 @@
                  (apply +' (map #(*' % %) (range (inc in))))))
        inputs))
 
+(defn make-sum-of-squares-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-sum-of-squares-error-function
+    ([program]
+      (the-actual-sum-of-squares-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-sum-of-squares-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (doall
+                     (for [[input1 correct-output] (case data-cases
+                                                     :train train-cases
+                                                     :test test-cases
+                                                     [])]
+                       (let [final-state (run-push program
+                                                   (->> (make-push-state)
+                                                     (push-item input1 :input)))
+                             result (stack-ref :integer 0 final-state)]
+                         (when print-outputs
+                           (println (format "Correct output: %6d | Program output: %s" correct-output (str result))))
+                         ; Record the behavior
+                         (when @global-print-behavioral-diversity
+                           (swap! behavior conj result))
+                         ; Error is integer distance
+                         (if (number? result)
+                           (abs (- result correct-output)) ;distance from correct integer
+                           1000000000) ;penalty for no return value
+                         )))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
 ; Define error function. For now, each run uses different random inputs
 (defn sum-of-squares-error-function
   "Returns the error function for the Sum Of Squares problem. Takes as
@@ -69,35 +101,7 @@
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
         (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-sum-of-squares-error-function
-      ([program]
-        (the-actual-sum-of-squares-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-sum-of-squares-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (doall
-                       (for [[input1 correct-output] (case data-cases
-                                                                  :train train-cases
-                                                                  :test test-cases
-                                                                  [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input1 :input)))
-                               result (stack-ref :integer 0 final-state)]
-                           (when print-outputs
-                             (println (format "Correct output: %6d | Program output: %s" correct-output (str result))))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
-                           ; Error is integer distance
-                           (if (number? result)
-                             (abs (- result correct-output)) ;distance from correct integer
-                             1000000000) ;penalty for no return value
-                           )))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+    (make-sum-of-squares-error-function-from-cases train-cases test-cases)))
 
 (defn sum-of-squares-report
   "Custom generational report."

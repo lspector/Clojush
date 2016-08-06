@@ -76,6 +76,40 @@
   (map #(vector % (.lastIndexOf % 0))
        inputs))
 
+(defn make-last-index-of-zero-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-last-index-of-zero-error-function
+    ([program]
+      (the-actual-last-index-of-zero-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-last-index-of-zero-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (doall
+                     (for [[input correct-output] (case data-cases
+                                                    :train train-cases
+                                                    :test test-cases
+                                                    [])]
+                       (let [final-state (run-push program
+                                                   (->> (make-push-state)
+                                                     (push-item input :input)))
+                             result (top-item :integer final-state)]
+                         (when print-outputs
+                           (println (format "Correct output: %2d | Program output: %s"
+                                            correct-output
+                                            (str result))))
+                         ; Record the behavior
+                         (when @global-print-behavioral-diversity
+                           (swap! behavior conj result))
+                         ; Error is absolute distance from correct index
+                         (if (number? result)
+                           (abs (- result correct-output)) ; distance from correct integer
+                           1000000) ; penalty for no return value
+                         )))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
 ; Define error function. For now, each run uses different random inputs
 (defn last-index-of-zero-error-function
   "Returns the error function for the last-index-of-zero problem. Takes
@@ -88,37 +122,7 @@
         (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
       (doseq [[i case] (map vector (range) test-cases)]
         (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-last-index-of-zero-error-function
-      ([program]
-        (the-actual-last-index-of-zero-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-last-index-of-zero-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (doall
-                      (for [[input correct-output] (case data-cases
-                                                     :train train-cases
-                                                     :test test-cases
-                                                     [])]
-                        (let [final-state (run-push program
-                                                    (->> (make-push-state)
-                                                         (push-item input :input)))
-                              result (top-item :integer final-state)]
-                          (when print-outputs
-                            (println (format "Correct output: %2d | Program output: %s"
-                                             correct-output
-                                             (str result))))
-                          ; Record the behavior
-                          (when @global-print-behavioral-diversity
-                            (swap! behavior conj result))
-                          ; Error is absolute distance from correct index
-                          (if (number? result)
-                             (abs (- result correct-output)) ; distance from correct integer
-                             1000000) ; penalty for no return value
-                          )))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+    (make-last-index-of-zero-error-function-from-cases train-cases test-cases)))
 
 (defn last-index-of-zero-report
   "Custom generational report."
