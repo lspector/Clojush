@@ -115,7 +115,8 @@
           ;;----------------------------------------
           :report-simplifications 100 ;; The number of simplification steps that will happen during report simplifications
           :final-report-simplifications 1000 ;; The number of simplification steps that will happen during final report simplifications
-          :problem-specific-report default-problem-specific-report ;; A function can be called to provide a problem-specific report, which happens after the normal generational report is printed
+          :problem-specific-initial-report default-problem-specific-initial-report ;; A function can be called to provide a problem-specific initial report, which happens before the normal initial report is printed
+          :problem-specific-report default-problem-specific-report ;; A function can be called to provide a problem-specific report, which happens before the normal generational report is printed
           :return-simplified-on-failure false ;; When true, will simplify the best indivual and return it, even if the error threshold has not been reached. This will make failures return the same as successes
           :print-errors true ;; When true, prints the error vector of the best individual
           :print-history false ;; When true, prints the history of the best individual's ancestors' total errors

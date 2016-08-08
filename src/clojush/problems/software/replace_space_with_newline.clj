@@ -132,19 +132,21 @@
 (def replace-space-train-and-test-cases
   (get-replace-space-train-and-test replace-space-data-domains))
 
+(defn replace-space-with-newline-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first replace-space-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second replace-space-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
+
 (defn replace-space-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
   (let [best-program (not-lazy (:program best))
         best-test-errors (error-function best-program :test)
         best-total-test-error (apply +' best-test-errors)]
-    (when (zero? generation)
-      (println ";;******************************")
-      (println "Train and test cases:")
-      (doseq [[i case] (map vector (range) (first replace-space-train-and-test-cases))]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) (second replace-space-train-and-test-cases))]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
     (println ";;******************************")
     (printf ";; -*- Replace Space With Newline problem report - generation %s\n" generation)(flush)
     (println "Test total error for best:" best-total-test-error)
@@ -183,6 +185,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report replace-space-report
+   :problem-specific-initial-report replace-space-with-newline-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
