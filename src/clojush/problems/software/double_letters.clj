@@ -109,20 +109,25 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn double-letters-error-function
-  "Returns the error function for the Double Letters problem. Takes as
-   input Double Letters data domains."
+(defn get-double-letters-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map #(sort-by (comp count first) %)
-                                      (map double-letters-test-cases
-                                           (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-double-letters-error-function-from-cases train-cases test-cases)))
+  (map #(sort-by (comp count first) %)
+       (map double-letters-test-cases
+            (test-and-train-data-from-domains data-domains))))
+
+; Define train and test cases
+(def double-letters-train-and-test-cases
+  (get-double-letters-train-and-test double-letters-data-domains))
+
+(defn double-letters-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first double-letters-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second double-letters-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn double-letters-report
   "Custom generational report."
@@ -150,7 +155,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (double-letters-error-function double-letters-data-domains)
+  {:error-function (make-double-letters-error-function-from-cases (first double-letters-train-and-test-cases)
+                                                                  (second double-letters-train-and-test-cases))
    :atom-generators double-letters-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400
@@ -167,6 +173,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report double-letters-report
+   :problem-specific-initial-report double-letters-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

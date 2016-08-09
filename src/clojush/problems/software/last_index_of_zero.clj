@@ -110,19 +110,24 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn last-index-of-zero-error-function
-  "Returns the error function for the last-index-of-zero problem. Takes
-   Last Index of Zero data domains as input."
+(defn get-last-index-of-zero-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map last-index-of-zero-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-last-index-of-zero-error-function-from-cases train-cases test-cases)))
+  (map last-index-of-zero-test-cases
+       (test-and-train-data-from-domains data-domains)))
+
+; Define train and test cases
+(def last-index-of-zero-train-and-test-cases
+  (get-last-index-of-zero-train-and-test last-index-of-zero-data-domains))
+
+(defn last-index-of-zero-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first last-index-of-zero-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second last-index-of-zero-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn last-index-of-zero-report
   "Custom generational report."
@@ -150,7 +155,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (last-index-of-zero-error-function last-index-of-zero-data-domains)
+  {:error-function (make-last-index-of-zero-error-function-from-cases (first last-index-of-zero-train-and-test-cases)
+                                                                      (second last-index-of-zero-train-and-test-cases))
    :atom-generators last-index-of-zero-atom-generators
    :max-points 1200
    :max-genome-size-in-initial-program 150
@@ -167,6 +173,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report last-index-of-zero-report
+   :problem-specific-initial-report last-index-of-zero-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

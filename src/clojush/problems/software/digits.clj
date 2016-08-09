@@ -97,19 +97,24 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn digits-error-function
-  "Returns the error function for the Digits problem. Takes as
-   input Digits data domains."
+(defn get-digits-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map sort (map digits-test-cases
-                                                (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-digits-error-function-from-cases train-cases test-cases)))
+  (map sort (map digits-test-cases
+                 (test-and-train-data-from-domains data-domains))))
+
+; Define train and test cases
+(def digits-train-and-test-cases
+  (get-digits-train-and-test digits-data-domains))
+
+(defn digits-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first digits-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second digits-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn digits-report
   "Custom generational report."
@@ -137,7 +142,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (digits-error-function digits-data-domains)
+  {:error-function (make-digits-error-function-from-cases (first digits-train-and-test-cases)
+                                                          (second digits-train-and-test-cases))
    :atom-generators digits-atom-generators
    :max-points 1200
    :max-genome-size-in-initial-program 150
@@ -154,6 +160,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report digits-report
+   :problem-specific-initial-report digits-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

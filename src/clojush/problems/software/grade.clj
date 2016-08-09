@@ -163,19 +163,24 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn grade-error-function
-  "Returns the error function for the Grade problem. Takes as
-   input Grade data domains."
+(defn get-grade-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map grade-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-grade-error-function-from-cases train-cases test-cases)))
+  (map grade-test-cases
+       (test-and-train-data-from-domains data-domains)))
+
+; Define train and test cases
+(def grade-train-and-test-cases
+  (get-grade-train-and-test grade-data-domains))
+
+(defn grade-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first grade-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second grade-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn grade-report
   "Custom generational report."
@@ -203,7 +208,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (grade-error-function grade-data-domains)
+  {:error-function (make-grade-error-function-from-cases (first grade-train-and-test-cases)
+                                                         (second grade-train-and-test-cases))
    :atom-generators grade-atom-generators
    :max-points 1600
    :max-genome-size-in-initial-program 200
@@ -221,6 +227,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report grade-report
+   :problem-specific-initial-report grade-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
