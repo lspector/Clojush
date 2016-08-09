@@ -141,20 +141,25 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn scrabble-score-error-function
-  "Returns the error function for the Scrabble Score problem. Takes as
-   input Scrabble Score data domains."
+(defn get-scrabble-score-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map #(sort-by (comp count first) %)
-                                      (map scrabble-score-test-cases
-                                           (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-scrabble-score-error-function-from-cases train-cases test-cases)))
+  (map #(sort-by (comp count first) %)
+       (map scrabble-score-test-cases
+            (test-and-train-data-from-domains data-domains))))
+
+; Define train and test cases
+(def scrabble-score-train-and-test-cases
+  (get-scrabble-score-train-and-test scrabble-score-data-domains))
+
+(defn scrabble-score-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first scrabble-score-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second scrabble-score-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn scrabble-score-report
   "Custom generational report."
@@ -182,7 +187,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (scrabble-score-error-function scrabble-score-data-domains)
+  {:error-function (make-scrabble-score-error-function-from-cases (first scrabble-score-train-and-test-cases)
+                                                                  (second scrabble-score-train-and-test-cases))
    :atom-generators scrabble-score-atom-generators
    :max-points 4000
    :max-genome-size-in-initial-program 500
@@ -199,6 +205,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report scrabble-score-report
+   :problem-specific-initial-report scrabble-score-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

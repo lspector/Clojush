@@ -126,19 +126,24 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn mirror-image-error-function
-  "Returns the error function for the mirror-image problem. Takes as
-   input Mirror Image data domains."
+(defn get-mirror-image-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map mirror-image-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-mirror-image-error-function-from-cases train-cases test-cases)))
+  (map mirror-image-test-cases
+       (test-and-train-data-from-domains data-domains)))
+
+; Define train and test cases
+(def mirror-image-train-and-test-cases
+  (get-mirror-image-train-and-test mirror-image-data-domains))
+
+(defn mirror-image-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first mirror-image-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second mirror-image-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn mirror-image-report
   "Custom generational report."
@@ -166,7 +171,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (mirror-image-error-function mirror-image-data-domains)
+  {:error-function (make-mirror-image-error-function-from-cases (first mirror-image-train-and-test-cases)
+                                                                (second mirror-image-train-and-test-cases))
    :atom-generators mirror-image-atom-generators
    :max-points 1200
    :max-genome-size-in-initial-program 150
@@ -183,6 +189,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report mirror-image-report
+   :problem-specific-initial-report mirror-image-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
