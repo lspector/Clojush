@@ -121,20 +121,25 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn replace-space-error-function
-  "Returns the error function for the Replace Space With Newline problem. Takes as
-   input Replace Space With Newline data domains."
+(defn get-replace-space-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map #(sort-by (comp count first) %)
-                                      (map replace-space-test-cases
-                                           (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-replace-space-with-newline-error-function-from-cases train-cases test-cases)))
+  (map #(sort-by (comp count first) %)
+       (map replace-space-test-cases
+            (test-and-train-data-from-domains data-domains))))
+
+; Define train and test cases
+(def replace-space-train-and-test-cases
+  (get-replace-space-train-and-test replace-space-data-domains))
+
+(defn replace-space-with-newline-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first replace-space-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second replace-space-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn replace-space-report
   "Custom generational report."
@@ -162,7 +167,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (replace-space-error-function replace-space-data-domains)
+  {:error-function (make-replace-space-with-newline-error-function-from-cases (first replace-space-train-and-test-cases)
+                                                                              (second replace-space-train-and-test-cases))
    :atom-generators replace-space-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400
@@ -179,6 +185,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report replace-space-report
+   :problem-specific-initial-report replace-space-with-newline-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

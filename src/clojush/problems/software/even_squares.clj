@@ -111,6 +111,26 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
+(defn get-even-squares-train-and-test
+  "Returns the train and test cases."
+  [data-domains]
+  (map #(sort-by first %)
+       (map even-squares-test-cases
+            (test-and-train-data-from-domains data-domains))))
+
+; Define train and test cases
+(def even-squares-train-and-test-cases
+  (get-even-squares-train-and-test even-squares-data-domains))
+
+(defn even-squares-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first even-squares-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second even-squares-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
+
 ; Define error function. For now, each run uses different random inputs
 (defn even-squares-error-function
   "Returns the error function for the Even Squares problem. Takes as
@@ -152,7 +172,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (even-squares-error-function even-squares-data-domains)
+  {:error-function (make-even-squares-error-function-from-cases (first even-squares-train-and-test-cases)
+                                                                (second even-squares-train-and-test-cases))
    :atom-generators even-squares-atom-generators
    :max-points 800
    :max-genome-size-in-initial-program 200
@@ -169,6 +190,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report even-squares-report
+   :problem-specific-initial-report even-squares-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

@@ -118,20 +118,25 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn checksum-error-function
-  "Returns the error function for the checksum problem. Takes as
-   input checksum data domains."
+(defn get-checksum-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map #(sort-by (comp count first) %)
-                                      (map checksum-test-cases
-                                           (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-checksum-error-function-from-cases train-cases test-cases)))
+  (map #(sort-by (comp count first) %)
+       (map checksum-test-cases
+            (test-and-train-data-from-domains data-domains))))
+
+; Define train and test cases
+(def checksum-train-and-test-cases
+  (get-checksum-train-and-test checksum-data-domains))
+
+(defn checksum-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first checksum-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second checksum-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn checksum-report
   "Custom generational report."
@@ -159,7 +164,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (checksum-error-function checksum-data-domains)
+  {:error-function (make-checksum-error-function-from-cases (first checksum-train-and-test-cases)
+                                                            (second checksum-train-and-test-cases))
    :atom-generators checksum-atom-generators
    :max-points 1600
    :max-genome-size-in-initial-program 400
@@ -176,6 +182,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report checksum-report
+   :problem-specific-initial-report checksum-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

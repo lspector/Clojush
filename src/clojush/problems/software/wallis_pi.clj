@@ -111,19 +111,24 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn wallis-pi-error-function
-  "Returns the error function for the Wallis Pi problem. Takes as
-   input Wallis Pi data domains."
+(defn get-wallis-pi-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map sort (map wallis-pi-test-cases
-                                                (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-wallis-pi-error-function-from-cases train-cases test-cases)))
+  (map sort (map wallis-pi-test-cases
+                 (test-and-train-data-from-domains data-domains))))
+
+; Define train and test cases
+(def wallis-pi-train-and-test-cases
+  (get-wallis-pi-train-and-test wallis-pi-data-domains))
+
+(defn wallis-pi-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first wallis-pi-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second wallis-pi-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn wallis-pi-report
   "Custom generational report."
@@ -151,7 +156,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (wallis-pi-error-function wallis-pi-data-domains)
+  {:error-function (make-wallis-pi-error-function-from-cases (first wallis-pi-train-and-test-cases)
+                                                             (second wallis-pi-train-and-test-cases))
    :atom-generators wallis-pi-atom-generators
    :max-points 2400
    :max-genome-size-in-initial-program 300
@@ -169,6 +175,7 @@
    :uniform-mutation-rate 0.01
    :uniform-mutation-constant-tweak-rate 0.9
    :problem-specific-report wallis-pi-report
+   :problem-specific-initial-report wallis-pi-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

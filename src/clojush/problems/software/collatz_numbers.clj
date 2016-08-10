@@ -99,20 +99,25 @@
         (when @global-print-behavioral-diversity
           (swap! population-behaviors conj @behavior))
         errors))))
-  
-; Define error function. For now, each run uses different random inputs
-(defn collatz-numbers-error-function
-  "Returns the error function for the Collatz Numbers problem. Takes as
-   input Collatz Numbers data domains."
+
+(defn get-collatz-numbers-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map sort (map collatz-numbers-test-cases
-                                                (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-collatz-numbers-error-function-from-cases train-cases test-cases)))
+  (map sort (map collatz-numbers-test-cases
+                 (test-and-train-data-from-domains data-domains))))
+
+; Define train and test cases
+(def collatz-numbers-train-and-test-cases
+  (get-collatz-numbers-train-and-test collatz-numbers-data-domains))
+
+(defn collatz-numbers-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first collatz-numbers-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second collatz-numbers-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn collatz-numbers-report
   "Custom generational report."
@@ -140,7 +145,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (collatz-numbers-error-function collatz-numbers-data-domains)
+  {:error-function (make-collatz-numbers-error-function-from-cases (first collatz-numbers-train-and-test-cases)
+                                                                   (second collatz-numbers-train-and-test-cases))
    :atom-generators collatz-numbers-atom-generators
    :max-points 1200
    :max-genome-size-in-initial-program 300
@@ -157,6 +163,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report collatz-numbers-report
+   :problem-specific-initial-report collatz-numbers-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

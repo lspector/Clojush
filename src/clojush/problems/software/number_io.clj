@@ -92,19 +92,24 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn num-io-error-function
-  "Returns the error function for the number IO problem. Takes as
-   input number IO data domains."
+(defn get-number-io-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map num-io-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-   (make-number-io-error-function-from-cases train-cases test-cases)))
+  (map num-io-test-cases
+       (test-and-train-data-from-domains data-domains)))
+
+; Define train and test cases
+(def number-io-train-and-test-cases
+  (get-number-io-train-and-test num-io-data-domains))
+
+(defn number-io-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first number-io-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second number-io-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn num-io-report
   "Custom generational report."
@@ -132,7 +137,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (num-io-error-function num-io-data-domains)
+  {:error-function (make-number-io-error-function-from-cases (first number-io-train-and-test-cases)
+                                                             (second number-io-train-and-test-cases))
    :atom-generators num-io-atom-generators
    :max-points 800
    :max-genome-size-in-initial-program 100
@@ -149,6 +155,7 @@
    :alignment-deviation 5
    :uniform-mutation-rate 0.01
    :problem-specific-report num-io-report
+   :problem-specific-initial-report number-io-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
