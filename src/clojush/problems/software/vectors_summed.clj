@@ -112,19 +112,24 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn vectors-summed-error-function
-  "Returns the error function for the vectors-summed problem. Takes as
-   input Vectors Summed data domains."
+(defn get-vectors-summed-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map vectors-summed-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-vectors-summed-error-function-from-cases train-cases test-cases)))
+  (map vectors-summed-test-cases
+       (test-and-train-data-from-domains data-domains)))
+
+; Define train and test cases
+(def vectors-summed-train-and-test-cases
+  (get-vectors-summed-train-and-test vectors-summed-data-domains))
+
+(defn vectors-summed-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first vectors-summed-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second vectors-summed-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn vectors-summed-report
   "Custom generational report."
@@ -152,7 +157,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (vectors-summed-error-function vectors-summed-data-domains)
+  {:error-function (make-vectors-summed-error-function-from-cases (first vectors-summed-train-and-test-cases)
+                                                                  (second vectors-summed-train-and-test-cases))
    :atom-generators vectors-summed-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
@@ -169,6 +175,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report vectors-summed-report
+   :problem-specific-initial-report vectors-summed-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

@@ -166,19 +166,24 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn string-differences-error-function
-  "Returns the error function for the String Differences problem. Takes as
-   input String Differences data domains."
+(defn get-string-differences-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map string-differences-test-cases
-                                          (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-string-differences-error-function-from-cases train-cases test-cases)))
+  (map string-differences-test-cases
+       (test-and-train-data-from-domains data-domains)))
+
+; Define train and test cases
+(def string-differences-train-and-test-cases
+  (get-string-differences-train-and-test string-differences-data-domains))
+
+(defn string-differences-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first string-differences-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second string-differences-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn string-differences-report
   "Custom generational report."
@@ -206,7 +211,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (string-differences-error-function string-differences-data-domains)
+  {:error-function (make-string-differences-error-function-from-cases (first string-differences-train-and-test-cases)
+                                                                      (second string-differences-train-and-test-cases))
    :atom-generators string-differences-atom-generators
    :max-points 4000
    :max-genome-size-in-initial-program 500
@@ -223,6 +229,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report string-differences-report
+   :problem-specific-initial-report string-differences-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

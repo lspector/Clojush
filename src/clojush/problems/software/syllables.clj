@@ -120,20 +120,25 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn syllables-error-function
-  "Returns the error function for the Syllables problem. Takes as
-   input Syllables data domains."
+(defn get-syllables-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map #(sort-by (comp count first) %)
-                                      (map syllables-test-cases
-                                           (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-syllables-error-function-from-cases train-cases test-cases)))
+  (map #(sort-by (comp count first) %)
+       (map syllables-test-cases
+            (test-and-train-data-from-domains data-domains))))
+
+; Define train and test cases
+(def syllables-train-and-test-cases
+  (get-syllables-train-and-test syllables-data-domains))
+
+(defn syllables-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first syllables-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second syllables-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn syllables-report
   "Custom generational report."
@@ -161,7 +166,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (syllables-error-function syllables-data-domains)
+  {:error-function (make-syllables-error-function-from-cases (first syllables-train-and-test-cases)
+                                                             (second syllables-train-and-test-cases))
    :atom-generators syllables-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400
@@ -178,6 +184,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report syllables-report
+   :problem-specific-initial-report syllables-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

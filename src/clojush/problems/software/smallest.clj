@@ -95,19 +95,24 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn smallest-error-function
-  "Returns the error function for the Smallest problem. Takes as
-   input Smallest data domains."
+(defn get-smallest-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map smallest-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-smallest-error-function-from-cases train-cases test-cases)))
+  (map smallest-test-cases
+       (test-and-train-data-from-domains data-domains)))
+
+; Define train and test cases
+(def smallest-train-and-test-cases
+  (get-smallest-train-and-test smallest-data-domains))
+
+(defn smallest-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first smallest-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second smallest-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn smallest-report
   "Custom generational report."
@@ -135,7 +140,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (smallest-error-function smallest-data-domains)
+  {:error-function (make-smallest-error-function-from-cases (first smallest-train-and-test-cases)
+                                                            (second smallest-train-and-test-cases))
    :atom-generators smallest-atom-generators
    :max-points 400
    :max-genome-size-in-initial-program 100
@@ -153,6 +159,7 @@
    :alignment-deviation 5
    :uniform-mutation-rate 0.01
    :problem-specific-report smallest-report
+   :problem-specific-initial-report smallest-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

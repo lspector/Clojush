@@ -227,20 +227,25 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn word-stats-error-function
-  "Returns the error function for the Word Stats problem. Takes as
-   input Word Stats data domains."
+(defn get-word-stats-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map #(sort-by (comp count first) %)
-                                      (map word-stats-test-cases
-                                           (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-word-stats-error-function-from-cases train-cases test-cases)))
+  (map #(sort-by (comp count first) %)
+       (map word-stats-test-cases
+            (test-and-train-data-from-domains data-domains))))
+
+; Define train and test cases
+(def word-stats-train-and-test-cases
+  (get-word-stats-train-and-test word-stats-data-domains))
+
+(defn word-stats-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first word-stats-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second word-stats-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn word-stats-report
   "Custom generational report."
@@ -268,7 +273,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (word-stats-error-function word-stats-data-domains)
+  {:error-function (make-word-stats-error-function-from-cases (first word-stats-train-and-test-cases)
+                                                              (second word-stats-train-and-test-cases))
    :atom-generators word-stats-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400
@@ -285,6 +291,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report word-stats-report
+   :problem-specific-initial-report word-stats-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

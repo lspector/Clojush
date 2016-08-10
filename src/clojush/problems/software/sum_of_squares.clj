@@ -89,19 +89,24 @@
           (swap! population-behaviors conj @behavior))
         errors))))
 
-; Define error function. For now, each run uses different random inputs
-(defn sum-of-squares-error-function
-  "Returns the error function for the Sum Of Squares problem. Takes as
-   input Sum Of Squares data domains."
+(defn get-sum-of-squares-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map sort (map sum-of-squares-test-cases
-                                                (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (make-sum-of-squares-error-function-from-cases train-cases test-cases)))
+  (map sort (map sum-of-squares-test-cases
+                 (test-and-train-data-from-domains data-domains))))
+
+; Define train and test cases
+(def sum-of-squares-train-and-test-cases
+  (get-sum-of-squares-train-and-test sum-of-squares-data-domains))
+
+(defn sum-of-squares-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first sum-of-squares-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second sum-of-squares-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn sum-of-squares-report
   "Custom generational report."
@@ -129,7 +134,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (sum-of-squares-error-function sum-of-squares-data-domains)
+  {:error-function (make-sum-of-squares-error-function-from-cases (first sum-of-squares-train-and-test-cases)
+                                                                  (second sum-of-squares-train-and-test-cases))
    :atom-generators sum-of-squares-atom-generators
    :max-points 1600
    :max-genome-size-in-initial-program 200
@@ -146,6 +152,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report sum-of-squares-report
+   :problem-specific-initial-report sum-of-squares-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
