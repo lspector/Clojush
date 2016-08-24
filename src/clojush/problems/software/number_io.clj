@@ -52,55 +52,64 @@
                 (apply + %))
        inputs))
 
-; Define error function. For now, each run uses different random inputs
-(defn num-io-error-function
-  "Returns the error function for the number IO problem. Takes as
-   input number IO data domains."
+(defn make-number-io-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-num-io-error-function
+    ([program]
+      (the-actual-num-io-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-num-io-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (flatten
+                     (doall
+                       (for [[[in-float in-int] out-float] (case data-cases
+                                                             :train train-cases
+                                                             :test test-cases
+                                                             [])]
+                         (let [final-state (run-push program
+                                                     (->> (make-push-state)
+                                                       (push-item in-int :input)
+                                                       (push-item in-float :input)
+                                                       (push-item "" :output)))
+                               printed-result (stack-ref :output 0 final-state)]
+                           (when print-outputs
+                             (println (format "Correct output: %-14s | Program output: %-14s" (pr-str (round-to-n-decimal-places out-float 10)) printed-result)))
+                           ; Record the behavior
+                           (when @global-print-behavioral-diversity
+                             (swap! behavior conj printed-result))
+                           ; Each test case results in two error values:
+                           ;   1. Numeric difference between correct output and the printed
+                           ;      output read into a float, rounded to 4 decimal places;
+                           ;      if such a conversion fails, the error is a penalty of 1000.
+                           ;   2. Levenstein distance between printed output and correct output as strings
+                           (vector (round-to-n-decimal-places
+                                     (try (min 1000.0 (abs (- out-float (Double/parseDouble printed-result))))
+                                       (catch Exception e 1000.0))
+                                     4)
+                                   (levenshtein-distance printed-result (pr-str (round-to-n-decimal-places out-float 10))))))))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
+(defn get-number-io-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map num-io-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-num-io-error-function
-      ([program]
-        (the-actual-num-io-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-num-io-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (flatten
-                       (doall
-                         (for [[[in-float in-int] out-float] (case data-cases
-                                                                          :train train-cases
-                                                                          :test test-cases
-                                                                          [])]
-                           (let [final-state (run-push program
-                                                       (->> (make-push-state)
-                                                         (push-item in-int :input)
-                                                         (push-item in-float :input)
-                                                         (push-item "" :output)))
-                                 printed-result (stack-ref :output 0 final-state)]
-                             (when print-outputs
-                               (println (format "Correct output: %-14s | Program output: %-14s" (pr-str (round-to-n-decimal-places out-float 10)) printed-result)))
-                             ; Record the behavior
-                             (when @global-print-behavioral-diversity
-                               (swap! behavior conj printed-result))
-                             ; Each test case results in two error values:
-                             ;   1. Numeric difference between correct output and the printed
-                             ;      output read into a float, rounded to 4 decimal places;
-                             ;      if such a conversion fails, the error is a penalty of 1000.
-                             ;   2. Levenstein distance between printed output and correct output as strings
-                             (vector (round-to-n-decimal-places
-                                       (try (min 1000.0 (abs (- out-float (Double/parseDouble printed-result))))
-                                         (catch Exception e 1000.0))
-                                       4)
-                                     (levenshtein-distance printed-result (pr-str (round-to-n-decimal-places out-float 10))))))))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+  (map num-io-test-cases
+       (test-and-train-data-from-domains data-domains)))
+
+; Define train and test cases
+(def number-io-train-and-test-cases
+  (get-number-io-train-and-test num-io-data-domains))
+
+(defn number-io-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first number-io-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second number-io-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn num-io-report
   "Custom generational report."
@@ -128,7 +137,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (num-io-error-function num-io-data-domains)
+  {:error-function (make-number-io-error-function-from-cases (first number-io-train-and-test-cases)
+                                                             (second number-io-train-and-test-cases))
    :atom-generators num-io-atom-generators
    :max-points 800
    :max-genome-size-in-initial-program 100
@@ -145,6 +155,7 @@
    :alignment-deviation 5
    :uniform-mutation-rate 0.01
    :problem-specific-report num-io-report
+   :problem-specific-initial-report number-io-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

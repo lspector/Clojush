@@ -67,48 +67,57 @@
                 (apply < (map count %)))
        inputs))
 
-; Define error function. For now, each run uses different random inputs
-(defn csl-error-function
-  "Returns the error function for the csl problem. Takes as
-   input Compare String Lengths data domains."
+(defn make-compare-string-lengths-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-csl-error-function
+    ([program]
+      (the-actual-csl-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-csl-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (doall
+                     (for [[[input1 input2 input3] correct-output] (case data-cases
+                                                                     :train train-cases
+                                                                     :test test-cases
+                                                                     [])]
+                       (let [final-state (run-push program
+                                                   (->> (make-push-state)
+                                                     (push-item input3 :input)
+                                                     (push-item input2 :input)
+                                                     (push-item input1 :input)))
+                             result (top-item :boolean final-state)]
+                         (when print-outputs
+                           (println (format "Correct output: %5b | Program output: %s" correct-output (str result))))
+                         ; Record the behavior
+                         (when @global-print-behavioral-diversity
+                           (swap! behavior conj result))
+                         ; Error is boolean error
+                         (if (= result correct-output)
+                           0
+                           1))))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+  
+(defn get-compare-string-lengths-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map csl-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-csl-error-function
-      ([program]
-        (the-actual-csl-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-csl-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (doall
-                       (for [[[input1 input2 input3] correct-output] (case data-cases
-                                                                                  :train train-cases
-                                                                                  :test test-cases
-                                                                                  [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input3 :input)
-                                                       (push-item input2 :input)
-                                                       (push-item input1 :input)))
-                               result (top-item :boolean final-state)]
-                           (when print-outputs
-                             (println (format "Correct output: %5b | Program output: %s" correct-output (str result))))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
-                           ; Error is boolean error
-                           (if (= result correct-output)
-                             0
-                             1))))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+  (map csl-test-cases
+       (test-and-train-data-from-domains data-domains)))
+
+; Define train and test cases
+(def compare-string-lengths-train-and-test-cases
+  (get-compare-string-lengths-train-and-test csl-data-domains))
+
+(defn compare-string-lengths-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first compare-string-lengths-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second compare-string-lengths-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn csl-report
   "Custom generational report."
@@ -136,7 +145,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (csl-error-function csl-data-domains)
+  {:error-function (make-compare-string-lengths-error-function-from-cases (first compare-string-lengths-train-and-test-cases)
+                                                                          (second compare-string-lengths-train-and-test-cases))
    :atom-generators csl-atom-generators
    :max-points 800
    :max-genome-size-in-initial-program 200
@@ -153,6 +163,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report csl-report
+   :problem-specific-initial-report compare-string-lengths-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

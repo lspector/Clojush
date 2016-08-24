@@ -1,7 +1,10 @@
 ;; median.clj
 ;; Tom Helmuth, thelmuth@cs.umass.edu
 ;;
-;; Problem Source: Program Repair Benchmark Paper (add citation later)
+;; Problem Source:
+;;   C. Le Goues et al., "The ManyBugs and IntroClass Benchmarks for Automated Repair of C Programs,"
+;;   in IEEE Transactions on Software Engineering, vol. 41, no. 12, pp. 1236-1256, Dec. 1 2015.
+;;   doi: 10.1109/TSE.2015.2454513
 ;;
 ;; Given 3 integers, print their median.
 ;;
@@ -55,49 +58,58 @@
                 (second (sort %)))
        inputs))
 
-; Define error function. For now, each run uses different random inputs
-(defn median-error-function
-  "Returns the error function for the median problem. Takes as
-   input median data domains."
+(defn make-median-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-median-error-function
+    ([program]
+      (the-actual-median-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-median-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (doall
+                     (for [[[input1 input2 input3] out-int] (case data-cases
+                                                              :train train-cases
+                                                              :test test-cases
+                                                              [])]
+                       (let [final-state (run-push program
+                                                   (->> (make-push-state)
+                                                     (push-item input3 :input)
+                                                     (push-item input2 :input)
+                                                     (push-item input1 :input)
+                                                     (push-item "" :output)))
+                             printed-result (stack-ref :output 0 final-state)]
+                         (when print-outputs
+                           (println (format "Correct output: %-19s | Program output: %-19s" (str out-int) printed-result)))
+                         ; Record the behavior
+                         (when @global-print-behavioral-diversity
+                           (swap! behavior conj printed-result))
+                         ; Each test case is either right or wrong
+                         (if (= printed-result (str out-int))
+                           0
+                           1))))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
+(defn get-median-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map median-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-median-error-function
-      ([program]
-        (the-actual-median-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-median-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (doall
-                       (for [[[input1 input2 input3] out-int] (case data-cases
-                                                                           :train train-cases
-                                                                           :test test-cases
-                                                                           [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input3 :input)
-                                                       (push-item input2 :input)
-                                                       (push-item input1 :input)
-                                                       (push-item "" :output)))
-                               printed-result (stack-ref :output 0 final-state)]
-                           (when print-outputs
-                             (println (format "Correct output: %-19s | Program output: %-19s" (str out-int) printed-result)))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj printed-result))
-                           ; Each test case is either right or wrong
-                           (if (= printed-result (str out-int))
-                             0
-                             1))))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+  (map median-test-cases
+       (test-and-train-data-from-domains data-domains)))
+
+; Define train and test cases
+(def median-train-and-test-cases
+  (get-median-train-and-test median-data-domains))
+
+(defn median-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first median-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second median-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn median-report
   "Custom generational report."
@@ -115,8 +127,8 @@
                              best-test-errors)]
         (println (format "Test Case  %3d | Error: %s" i (str error)))))
     (println ";;------------------------------")
-    ;(println "Outputs of best individual on training cases:")
-    ;(error-function best-program :train true)
+    (println "Outputs of best individual on training cases:")
+    (error-function best-program :train true)
     (println ";;******************************")
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
@@ -125,7 +137,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (median-error-function median-data-domains)
+  {:error-function (make-median-error-function-from-cases (first median-train-and-test-cases)
+                                                          (second median-train-and-test-cases))
    :atom-generators median-atom-generators
    :max-points 800
    :max-genome-size-in-initial-program 100
@@ -143,6 +156,7 @@
    :alignment-deviation 5
    :uniform-mutation-rate 0.01
    :problem-specific-report median-report
+   :problem-specific-initial-report median-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

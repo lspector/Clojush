@@ -75,52 +75,61 @@
                  (vec (map + (first in) (second in)))))
        inputs))
 
-; Define error function. For now, each run uses different random inputs
-(defn vectors-summed-error-function
-  "Returns the error function for the vectors-summed problem. Takes as
-   input Vectors Summed data domains."
+(defn make-vectors-summed-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-vectors-summed-error-function
+    ([program]
+      (the-actual-vectors-summed-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-vectors-summed-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (doall
+                     (for [[[input1 input2] correct-output] (case data-cases
+                                                              :train train-cases
+                                                              :test test-cases
+                                                              [])]
+                       (let [final-state (run-push program
+                                                   (->> (make-push-state)
+                                                     (push-item input2 :input)
+                                                     (push-item input1 :input)))
+                             result (top-item :vector_integer final-state)]
+                         (when print-outputs
+                           (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                         ; Record the behavior
+                         (when @global-print-behavioral-diversity
+                           (swap! behavior conj result))
+                         ; Error is integer error at each position in the vectors, with additional penalties for incorrect size vector
+                         (if (vector? result)
+                           (+' (apply +' (map (fn [cor res]
+                                                (abs (- cor res)))
+                                              correct-output
+                                              result))
+                               (*' 10000 (abs (- (count correct-output) (count result))))) ; penalty of 10000 times difference in sizes of vectors
+                           1000000000) ; penalty for no return value
+                         )))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
+(defn get-vectors-summed-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map vectors-summed-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-vectors-summed-error-function
-      ([program]
-        (the-actual-vectors-summed-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-vectors-summed-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (doall
-                       (for [[[input1 input2] correct-output] (case data-cases
-                                                                           :train train-cases
-                                                                           :test test-cases
-                                                                           [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input2 :input)
-                                                       (push-item input1 :input)))
-                               result (top-item :vector_integer final-state)]
-                           (when print-outputs
-                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
-                           ; Error is integer error at each position in the vectors, with additional penalties for incorrect size vector
-                           (if (vector? result)
-                             (+' (apply +' (map (fn [cor res]
-                                                  (abs (- cor res)))
-                                                correct-output
-                                                result))
-                                 (*' 10000 (abs (- (count correct-output) (count result))))) ; penalty of 10000 times difference in sizes of vectors
-                             1000000000) ; penalty for no return value
-                           )))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+  (map vectors-summed-test-cases
+       (test-and-train-data-from-domains data-domains)))
+
+; Define train and test cases
+(def vectors-summed-train-and-test-cases
+  (get-vectors-summed-train-and-test vectors-summed-data-domains))
+
+(defn vectors-summed-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first vectors-summed-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second vectors-summed-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn vectors-summed-report
   "Custom generational report."
@@ -148,7 +157,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (vectors-summed-error-function vectors-summed-data-domains)
+  {:error-function (make-vectors-summed-error-function-from-cases (first vectors-summed-train-and-test-cases)
+                                                                  (second vectors-summed-train-and-test-cases))
    :atom-generators vectors-summed-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
@@ -165,6 +175,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report vectors-summed-report
+   :problem-specific-initial-report vectors-summed-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

@@ -48,6 +48,66 @@
 (define-registered string_dup (with-meta (duper :string) {:stack-types [:string]}))
 (define-registered char_dup (with-meta (duper :char) {:stack-types [:char]}))
 
+(defn dup-timeser
+  "For integer argument n, duplicate n copies of the top item on the stack, leaving
+   n copies there. For n=2, this is equivalent to dup. For n=0, equivalent to pop. Negative
+   n values are treated as 0. The maximum items added to the stack will be limited by
+   global-max-points."
+  [type]
+  (fn [state]
+    (if (or (and (= type :integer)
+                 (>= (count (:integer state)) 2))
+            (and (not (= type :integer))
+                 (not (empty? (type state)))
+                 (not (empty? (:integer state)))))
+      (let [times-duplicated (min (top-item :integer state)
+                                  (- @global-max-points (count (rest (type (pop-item :integer state))))))
+            new-type-stack (concat (repeat times-duplicated
+                                           (top-item type (pop-item :integer state)))
+                                   (rest (type (pop-item :integer state))))]
+        (assoc (pop-item :integer state)
+               type
+               new-type-stack))
+      state)))
+
+(define-registered exec_dup_times (with-meta (dup-timeser :exec) {:stack-types [:exec :integer] :parentheses 1}))
+(define-registered integer_dup_times (with-meta (dup-timeser :integer) {:stack-types [:integer]}))
+(define-registered float_dup_times (with-meta (dup-timeser :float) {:stack-types [:float :integer]}))
+(define-registered code_dup_times (with-meta (dup-timeser :code) {:stack-types [:code :integer]}))
+(define-registered boolean_dup_times (with-meta (dup-timeser :boolean) {:stack-types [:boolean :integer]}))
+(define-registered zip_dup_times (with-meta (dup-timeser :zip) {:stack-types [:zip :integer]}))
+(define-registered string_dup_times (with-meta (dup-timeser :string) {:stack-types [:string :integer]}))
+(define-registered char_dup_times (with-meta (dup-timeser :char) {:stack-types [:char :integer]}))
+
+(defn dup-itemser
+  "For integer argument n, duplicate the top n items on the stack one time each.
+   If n <= 0, no items will be duplicated. If fewer than n items are on the stack, the
+   entire stack will be duplicated. The maximum number of items to duplicate
+   will be limited by global-max-points.
+     ex: (3 1.0 2.0 3.0 4.0 5.0 float_dup_items) ->
+          (5.0 4.0 3.0 5.0 4.0 3.0 2.0 1.0) on the float stack"
+  [type]
+  (fn [state]
+    (if (empty? (:integer state))
+      state
+      (let [items-to-duplicate (min (top-item :integer state)
+                                    (- @global-max-points (count (type (pop-item :integer state)))))
+            new-type-stack (concat (take items-to-duplicate
+                                           (type (pop-item :integer state)))
+                                   (type (pop-item :integer state)))]
+        (assoc (pop-item :integer state)
+               type
+               new-type-stack)))))
+
+(define-registered exec_dup_items (with-meta (dup-itemser :exec) {:stack-types [:exec :integer] :parentheses 0}))
+(define-registered integer_dup_items (with-meta (dup-itemser :integer) {:stack-types [:integer]}))
+(define-registered float_dup_items (with-meta (dup-itemser :float) {:stack-types [:float :integer]}))
+(define-registered code_dup_items (with-meta (dup-itemser :code) {:stack-types [:code :integer]}))
+(define-registered zip_dup_items (with-meta (dup-itemser :zip) {:stack-types [:zip :integer]}))
+(define-registered boolean_dup_items (with-meta (dup-itemser :boolean) {:stack-types [:boolean :integer]}))
+(define-registered string_dup_items (with-meta (dup-itemser :string) {:stack-types [:string :integer]}))
+(define-registered char_dup_items (with-meta (dup-itemser :char) {:stack-types [:char :integer]}))
+
 (defn swapper
   "Returns a function that takes a state and swaps the top 2 items of the appropriate 
    stack of the state."

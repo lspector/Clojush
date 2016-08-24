@@ -120,61 +120,70 @@
                                                 (partition-all in-int (string/split (string/trim in-str) #"\s+"))))))))
        inputs))
 
-; Define error function. For now, each run uses different random inputs
-(defn x-word-lines-error-function
-  "Returns the error function for the X-Word Lines problem. Takes as
-   input X-Word Lines data domains."
+(defn make-x-word-lines-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-x-word-lines-error-function
+    ([program]
+      (the-actual-x-word-lines-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-x-word-lines-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (flatten
+                     (doall
+                       (for [[[input1 input2] correct-output] (case data-cases
+                                                                :train train-cases
+                                                                :test test-cases
+                                                                [])]
+                         (let [final-state (run-push program
+                                                     (->> (make-push-state)
+                                                       (push-item input2 :input)
+                                                       (push-item input1 :input)
+                                                       (push-item "" :output)))
+                               result (stack-ref :output 0 final-state)]
+                           (when print-outputs
+                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                           ; Record the behavior
+                           (when @global-print-behavioral-diversity
+                             (swap! behavior conj result))
+                           (vector
+                             ; First error is Levenshtein distance of printed strings
+                             (levenshtein-distance correct-output result)
+                             ; Second error is integer distance from the correct number of newlines
+                             (abs (- (count (filter #(= % \newline) correct-output))
+                                     (count (filter #(= % \newline) result))))
+                             ; Third error is summed error of integer distances over the lines of the correct number of words per line
+                             (+ (apply + (map #(abs (- input2
+                                                       (count (string/split (string/trim %) #"\s+"))))
+                                              (butlast (string/split-lines result))))
+                                (abs (- (count (string/split (string/trim (last (string/split-lines correct-output))) #"\s+"))
+                                        (count (string/split (string/trim (let [last-line (last (string/split-lines result))]
+                                                                            (if last-line last-line "")))
+                                                             #"\s+")))))
+                             )))))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
+(defn get-x-word-lines-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map #(sort-by (comp count first first) %)
-                                      (map x-word-lines-test-cases
-                                           (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-x-word-lines-error-function
-      ([program]
-        (the-actual-x-word-lines-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-x-word-lines-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (flatten
-                       (doall
-                         (for [[[input1 input2] correct-output] (case data-cases
-                                                                  :train train-cases
-                                                                  :test test-cases
-                                                                  [])]
-                           (let [final-state (run-push program
-                                                       (->> (make-push-state)
-                                                         (push-item input2 :input)
-                                                         (push-item input1 :input)
-                                                         (push-item "" :output)))
-                                 result (stack-ref :output 0 final-state)]
-                             (when print-outputs
-                               (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                             ; Record the behavior
-                             (when @global-print-behavioral-diversity
-                               (swap! behavior conj result))
-                             (vector
-                               ; First error is Levenshtein distance of printed strings
-                               (levenshtein-distance correct-output result)
-                               ; Second error is integer distance from the correct number of newlines
-                               (abs (- (count (filter #(= % \newline) correct-output))
-                                       (count (filter #(= % \newline) result))))
-                               ; Third error is summed error of integer distances over the lines of the correct number of words per line
-                               (+ (apply + (map #(abs (- input2
-                                                         (count (string/split (string/trim %) #"\s+"))))
-                                                (butlast (string/split-lines result))))
-                                  (abs (- (count (string/split (string/trim (last (string/split-lines correct-output))) #"\s+"))
-                                          (count (string/split (string/trim (let [last-line (last (string/split-lines result))]
-                                                                              (if last-line last-line "")))
-                                                               #"\s+")))))
-                               )))))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+  (map #(sort-by (comp count first first) %)
+       (map x-word-lines-test-cases
+            (test-and-train-data-from-domains data-domains))))
+
+; Define train and test cases
+(def x-word-lines-train-and-test-cases
+  (get-x-word-lines-train-and-test x-word-lines-data-domains))
+
+(defn x-word-lines-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first x-word-lines-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second x-word-lines-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn x-word-lines-report
   "Custom generational report."
@@ -202,7 +211,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (x-word-lines-error-function x-word-lines-data-domains)
+  {:error-function (make-x-word-lines-error-function-from-cases (first x-word-lines-train-and-test-cases)
+                                                                (second x-word-lines-train-and-test-cases))
    :atom-generators x-word-lines-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400
@@ -219,6 +229,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report x-word-lines-report
+   :problem-specific-initial-report x-word-lines-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

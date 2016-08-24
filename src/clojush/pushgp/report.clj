@@ -11,8 +11,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; helper functions
 
+(defn default-problem-specific-initial-report
+  "Customize this for your own problem. It will be called at the beginning of the initial report."
+  [argmap]
+  :no-problem-specific-initial-report-function-defined)
+
 (defn default-problem-specific-report
-  "Customize this for your own problem. It will be called at the end of the generational report."
+  "Customize this for your own problem. It will be called at the beginning of the generational report."
   [best population generation error-function report-simplifications]
   :no-problem-specific-report-function-defined)
 
@@ -445,7 +450,8 @@
 
 (defn initial-report
   "Prints the initial report of a PushGP run."
-  [push-argmap]
+  [{:keys [problem-specific-initial-report] :as push-argmap}]
+  (problem-specific-initial-report push-argmap)
   (println "Registered instructions:" @registered-instructions)
   (println "Starting PushGP run.")
   (printf "Clojush version = ")

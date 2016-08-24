@@ -71,47 +71,56 @@
                 (apply str (interpose \newline (apply range %))))
        inputs))
 
-; Define error function. For now, each run uses different random inputs
-(defn loop-error-function
-  "Returns the error function for the For Loop Index problem. Takes as
-   input For Loop Index data domains."
+(defn make-for-loop-index-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-loop-error-function
+    ([program]
+      (the-actual-loop-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-loop-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (doall
+                     (for [[[input1 input2 input3] correct-output] (case data-cases
+                                                                     :train train-cases
+                                                                     :test test-cases
+                                                                     [])]
+                       (let [final-state (run-push program
+                                                   (->> (make-push-state)
+                                                     (push-item input3 :input)
+                                                     (push-item input2 :input)
+                                                     (push-item input1 :input)
+                                                     (push-item "" :output)))
+                             result (stack-ref :output 0 final-state)]
+                         (when print-outputs
+                           (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                         ; Record the behavior
+                         (when @global-print-behavioral-diversity
+                           (swap! behavior conj result))
+                         ; Error is Levenshtein distance of printed strings
+                         (levenshtein-distance correct-output result))))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
+(defn get-for-loop-index-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map loop-test-cases
-                                      (test-and-train-data-from-domains data-domains))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-loop-error-function
-      ([program]
-        (the-actual-loop-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-loop-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (doall
-                       (for [[[input1 input2 input3] correct-output] (case data-cases
-                                                                                  :train train-cases
-                                                                                  :test test-cases
-                                                                                  [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input3 :input)
-                                                       (push-item input2 :input)
-                                                       (push-item input1 :input)
-                                                       (push-item "" :output)))
-                               result (stack-ref :output 0 final-state)]
-                           (when print-outputs
-                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
-                           ; Error is Levenshtein distance of printed strings
-                           (levenshtein-distance correct-output result))))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+  (map loop-test-cases
+       (test-and-train-data-from-domains data-domains)))
+
+; Define train and test cases
+(def for-loop-index-train-and-test-cases
+  (get-for-loop-index-train-and-test loop-data-domains))
+
+(defn for-loop-index-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first for-loop-index-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second for-loop-index-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn loop-report
   "Custom generational report."
@@ -139,7 +148,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (loop-error-function loop-data-domains)
+  {:error-function (make-for-loop-index-error-function-from-cases (first for-loop-index-train-and-test-cases)
+                                                                  (second for-loop-index-train-and-test-cases))
    :atom-generators loop-atom-generators
    :max-points 600
    :max-genome-size-in-initial-program 150
@@ -156,6 +166,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report loop-report
+   :problem-specific-initial-report for-loop-index-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000

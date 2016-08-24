@@ -115,49 +115,58 @@
                                   (string/replace-first i2 (first i1) \space))))))
        inputs))
 
-; Define error function. For now, each run uses different random inputs
-(defn super-anagrams-error-function
-  "Returns the error function for the Super Anagrams problem. Takes as
-   input Super Anagrams data domains."
+(defn make-super-anagrams-error-function-from-cases
+  [train-cases test-cases]
+  (fn the-actual-super-anagrams-error-function
+    ([program]
+      (the-actual-super-anagrams-error-function program :train))
+    ([program data-cases] ;; data-cases should be :train or :test
+                          (the-actual-super-anagrams-error-function program data-cases false))
+    ([program data-cases print-outputs]
+      (let [behavior (atom '())
+            errors (doall
+                     (for [[[input1 input2] correct-output] (case data-cases
+                                                              :train train-cases
+                                                              :test test-cases
+                                                              [])]
+                       (let [final-state (run-push program
+                                                   (->> (make-push-state)
+                                                     (push-item input2 :input)
+                                                     (push-item input1 :input)
+                                                     (push-item "" :output)))
+                             result (top-item :boolean final-state)]
+                         (when print-outputs
+                           (println (format "Correct output: %5b | Program output: %s" correct-output (str result))))
+                         ; Record the behavior
+                         (when @global-print-behavioral-diversity
+                           (swap! behavior conj result))
+                         ; Error is boolean error
+                         (if (= result correct-output)
+                           0
+                           1))))]
+        (when @global-print-behavioral-diversity
+          (swap! population-behaviors conj @behavior))
+        errors))))
+
+(defn get-super-anagrams-train-and-test
+  "Returns the train and test cases."
   [data-domains]
-  (let [[train-cases test-cases] (map #(sort-by second %)
-                                      (map super-anagrams-test-cases
-                                          (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-    (fn the-actual-super-anagrams-error-function
-      ([program]
-        (the-actual-super-anagrams-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-super-anagrams-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (doall
-                       (for [[[input1 input2] correct-output] (case data-cases
-                                                                :train train-cases
-                                                                :test test-cases
-                                                                [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input2 :input)
-                                                       (push-item input1 :input)
-                                                       (push-item "" :output)))
-                               result (top-item :boolean final-state)]
-                           (when print-outputs
-                             (println (format "Correct output: %5b | Program output: %s" correct-output (str result))))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
-                           ; Error is boolean error
-                           (if (= result correct-output)
-                             0
-                             1))))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+  (map #(sort-by second %)
+       (map super-anagrams-test-cases
+            (test-and-train-data-from-domains data-domains))))
+
+; Define train and test cases
+(def super-anagrams-train-and-test-cases
+  (get-super-anagrams-train-and-test super-anagrams-data-domains))
+
+(defn super-anagrams-initial-report
+  [argmap]
+  (println "Train and test cases:")
+  (doseq [[i case] (map vector (range) (first super-anagrams-train-and-test-cases))]
+    (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
+  (doseq [[i case] (map vector (range) (second super-anagrams-train-and-test-cases))]
+    (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
+  (println ";;******************************"))
 
 (defn super-anagrams-report
   "Custom generational report."
@@ -185,7 +194,8 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (super-anagrams-error-function super-anagrams-data-domains)
+  {:error-function (make-super-anagrams-error-function-from-cases (first super-anagrams-train-and-test-cases)
+                                                                  (second super-anagrams-train-and-test-cases))
    :atom-generators super-anagrams-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400
@@ -202,6 +212,7 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report super-anagrams-report
+   :problem-specific-initial-report super-anagrams-initial-report
    :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
