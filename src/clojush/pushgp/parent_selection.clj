@@ -56,6 +56,32 @@
                          survivors)
                  (rest cases)))))))
 
+(defn epsilon-lexicase-selection
+    ""
+  [pop location {:keys [epsilon-lexicase-epsilon]}]
+  (let [lower (mod (- location trivial-geography-radius) (count pop))
+        upper (mod (+ location trivial-geography-radius) (count pop))
+        popvec (vec pop)
+        subpop (if (zero? trivial-geography-radius)
+                 pop
+                 (if (< lower upper)
+                   (subvec popvec lower (inc upper))
+                   (into (subvec popvec lower (count pop))
+                         (subvec popvec 0 (inc upper)))))]
+    (loop [survivors (retain-one-individual-per-error-vector subpop)
+           cases (lshuffle (range (count (:errors (first subpop)))))]
+      (if (or (empty? cases)
+              (empty? (rest survivors)))
+        (lrand-nth survivors)
+        (let [min-err-for-case (apply min (map #(nth % (first cases))
+                                               (map #(:errors %) survivors)))]
+          (recur (filter #(< (nth (:errors %)
+                                  (first cases))
+                             (+ min-err-for-case
+                                epsilon-lexicase-epsilon))
+                         survivors)
+                                  (rest cases)))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; elitegroup lexicase selection
 
