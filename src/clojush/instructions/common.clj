@@ -1,5 +1,5 @@
 (ns clojush.instructions.common
-  (:use [clojush pushstate globals]))
+  (:use [clojush pushstate globals util]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lookup function to see how many paren groups a function requires. Uses metadata.
@@ -62,9 +62,9 @@
                  (not (empty? (:integer state)))))
       (let [times-duplicated (min (top-item :integer state)
                                   (- @global-max-points (count (rest (type (pop-item :integer state))))))
-            new-type-stack (concat (repeat times-duplicated
-                                           (top-item type (pop-item :integer state)))
-                                   (rest (type (pop-item :integer state))))]
+            new-type-stack (not-lazy (concat (repeat times-duplicated
+                                                     (top-item type (pop-item :integer state)))
+                                             (rest (type (pop-item :integer state)))))]
         (assoc (pop-item :integer state)
                type
                new-type-stack))
@@ -92,9 +92,9 @@
       state
       (let [items-to-duplicate (min (top-item :integer state)
                                     (- @global-max-points (count (type (pop-item :integer state)))))
-            new-type-stack (concat (take items-to-duplicate
-                                           (type (pop-item :integer state)))
-                                   (type (pop-item :integer state)))]
+            new-type-stack (not-lazy (concat (take items-to-duplicate
+                                             (type (pop-item :integer state)))
+                                     (type (pop-item :integer state))))]
         (assoc (pop-item :integer state)
                type
                new-type-stack)))))
