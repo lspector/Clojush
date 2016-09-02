@@ -27,8 +27,8 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (concat (take (inc index) genome)
-                                (drop index genome))
+             (push-item (into (subvec genome 0 (inc index))
+                              (subvec genome index))
                         :genome)))
       state)))
 
@@ -43,13 +43,13 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (concat (take index genome)
-                                (list (random-plush-instruction-map 
-                                        @global-atom-generators
-                                        {:epigenetic-markers @global-epigenetic-markers
-                                         :close-parens-probabilities @global-close-parens-probabilities
-                                         :silent-instruction-probability @global-silent-instruction-probability}))
-                                (drop (inc index) genome))
+             (push-item (assoc genome 
+                          index
+                          (random-plush-instruction-map 
+                            @global-atom-generators
+                            {:epigenetic-markers @global-epigenetic-markers
+                             :close-parens-probabilities @global-close-parens-probabilities
+                             :silent-instruction-probability @global-silent-instruction-probability}))
                         :genome)))
       state)))
 
@@ -64,8 +64,8 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (concat (take index genome)
-                                (drop (inc index) genome))
+             (push-item (into (subvec genome 0 index)
+                              (subvec genome (inc index)))
                         :genome)))
       state)))
 
@@ -80,8 +80,8 @@
             distance (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (concat (drop distance genome)
-                                (take distance genome))
+             (push-item (into (subvec genome distance)
+                              (subvec genome 0 distance))
                         :genome)))
       state)))
 
@@ -99,9 +99,9 @@
             index (mod (stack-ref :integer 0 state) (count source))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (seq (assoc (vec destination)
-                                    (min index (count destination))
-                                    (nth source index)))
+             (push-item (assoc (vec destination)
+                          (min index (count destination))
+                          (nth source index))
                         :genome)))
       state)))
 
@@ -123,14 +123,14 @@
         (->> (pop-item :integer state)
           (pop-item :integer)
           (pop-item :genome)
-          (push-item (seq (loop [i low-index
-                                 result (vec destination)]
-                            (if (> i high-index)
-                              result
-                              (recur (inc i)
-                                     (assoc result
-                                            (min i (count destination))
-                                            (nth source i))))))
+          (push-item (loop [i low-index
+                            result destination]
+                       (if (> i high-index)
+                         result
+                         (recur (inc i)
+                                (assoc result
+                                  (min i (count destination))
+                                  (nth source i)))))
                      :genome)))
       state)))
 
@@ -145,10 +145,10 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (concat (take index genome)
-                                (let [g (nth genome index)]
-                                  (list (assoc g :silent (not (:silent g)))))
-                                (drop (inc index) genome))
+             (push-item (assoc genome
+                          index
+                          (let [g (nth genome index)]
+                            (assoc g :silent (not (:silent g)))))
                         :genome)))
       state)))
 
@@ -163,10 +163,10 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (concat (take index genome)
-                                (let [g (nth genome index)]
-                                  (list (assoc g :silent true)))
-                                (drop (inc index) genome))
+             (push-item (assoc genome
+                          index
+                          (let [g (nth genome index)]
+                            (assoc g :silent true)))
                         :genome)))
       state)))
 
@@ -181,10 +181,10 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (concat (take index genome)
-                                (let [g (nth genome index)]
-                                  (list (assoc g :silent false)))
-                                (drop (inc index) genome))
+             (push-item (assoc genome
+                          index
+                          (let [g (nth genome index)]
+                            (assoc g :silent false)))
                         :genome)))
       state)))
 
@@ -199,10 +199,10 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (concat (take index genome)
-                                (let [g (nth genome index)]
-                                  (list (assoc g :close (inc (:close g)))))
-                                (drop (inc index) genome))
+             (push-item (assoc genome
+                          index 
+                          (let [g (nth genome index)]
+                            (assoc g :close (inc (:close g)))))
                         :genome)))
       state)))
 
@@ -217,10 +217,10 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (concat (take index genome)
-                                (let [g (nth genome index)]
-                                  (list (assoc g :close (max 0 (dec (:close g))))))
-                                (drop (inc index) genome))
+             (push-item (assoc genome
+                          index
+                          (let [g (nth genome index)]
+                            (assoc g :close (max 0 (dec (:close g))))))
                         :genome)))
       state)))
 
@@ -228,19 +228,19 @@
   genome_new
   ^{:stack-types [:genome]}
   (fn [state]
-    (push-item () :genome state)))
+    (push-item [] :genome state)))
 
 (define-registered
   genome_parent1
   ^{:stack-types [:genome]}
   (fn [state]
-    (push-item (:parent1-genome state) :genome state)))
+    (push-item (vec (:parent1-genome state)) :genome state)))
 
 (define-registered
   genome_parent2
   ^{:stack-types [:genome]}
   (fn [state]
-    (push-item (:parent2-genome state) :genome state)))
+    (push-item (vec (:parent2-genome state)) :genome state)))
 
 (define-registered
   autoconstructive_integer_rand 
