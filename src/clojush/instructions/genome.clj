@@ -54,6 +54,29 @@
       state)))
 
 (define-registered
+  genome_gene_replace
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (if (and (not (empty? (rest (:integer state))))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))
+            atom-gen (mod (stack-ref :integer 1 state) (count @global-atom-generators))]
+        (->> (pop-item :integer state)
+             (pop-item :integer)
+             (pop-item :genome)
+             (push-item (assoc genome
+                          index
+                          (random-plush-instruction-map 
+                                    [(nth @global-atom-generators atom-gen)]
+                                    {:epigenetic-markers @global-epigenetic-markers
+                                     :close-parens-probabilities @global-close-parens-probabilities
+                                     :silent-instruction-probability @global-silent-instruction-probability}))
+                        :genome)))
+      state)))
+
+(define-registered
   genome_gene_delete
   ^{:stack-types [:genome :integer]}
   (fn [state]
