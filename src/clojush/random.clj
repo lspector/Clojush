@@ -49,15 +49,15 @@
                 value))
           val fs))
 ;; Example usage of conditional-thread (the function)
-;; (conditional-thread 0 [inc inc inc])
+;; (conditional-thread 0 inc inc inc)
 ;; => 3
-;; (conditional-thread 0 [#(when (= 0 %) 2)
+;; (conditional-thread 0 #(when (= 0 %) 2)
 ;;                        inc
-;;                        inc])
+;;                        inc)
 ;; => 4
-;; (conditional-thread 0 [#(when (= 1 %) 2)
+;; (conditional-thread 0 #(when (= 1 %) 2)
 ;;                        inc
-;;                        inc])
+;;                        inc)
 ;; => 2
 
 (defn random-plush-instruction-map
