@@ -43,11 +43,8 @@
    returns nil, the old value will be the value passed to the next
    function."
   [val & fs]
-  (reduce (fn [value f]
-              (if-let [new-value (f value)]
-                new-value
-                value))
-          val fs))
+  (reduce #(or (%2 %1) %1) val fs))
+
 ;; Example usage of conditional-thread (the function)
 ;; (conditional-thread 0 inc inc inc)
 ;; => 3
