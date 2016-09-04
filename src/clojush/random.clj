@@ -60,21 +60,6 @@
 ;;                        inc])
 ;; => 2
 
-;; (defmacro conditional-thread
-;;   "This macro acts a lot like ->, but is conditional. val can be
-;;    any value. clauses should be of the form (boolean1 f1 boolean2 f2 ...
-;;    This will transform to (... (if boolean2 (f2 (if boolean1 (f1 val) val)) (if boolean1 (f1 val) val))"
-;;   ([val] val)
-;;   ([val clauses]
-;;    (if clauses
-;;      (list 'if (first clauses)
-;;            (if (next clauses)
-;;              `(conditional-thread (~(second clauses) ~val) ~(next (next clauses)))
-;;              (throw (IllegalArgumentException.
-;;                      "The second argument to conditional-thrush must be a list with an even number of forms")))
-;;            `(conditional-thread ~val ~(next (next clauses))))
-;;      val)))
-
 (defn random-plush-instruction-map
   "Returns a random instruction map given the atom-generators and the required
    epigenetic-markers."
