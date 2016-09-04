@@ -66,13 +66,16 @@
    (random-plush-instruction-map atom-generators false argmap))
   ([atom-generators random-insertion {:keys [epigenetic-markers
                                              close-parens-probabilities
-                                             silent-instruction-probability]
+                                             silent-instruction-probability
+                                             track-instruction-maps]
                                       :or {epigenetic-markers []
                                            close-parens-probabilities [0.772 0.206 0.021 0.001]
                                            silent-instruction-probability 0}}]
-   (let [markers (concat epigenetic-markers
-                         [:instruction :uuid]
-                         (if random-insertion [:random-insertion]))]
+   (let [markers (conditional-thread epigenetic-markers
+                                     #(conj % :instruction)
+                                     #(when track-instruction-maps (conj % :uuid))
+                                     #(when (and track-instruction-maps
+                                               random-insertion) (conj % :random-insertion)))]
      (zipmap markers
              (map (fn [marker]
                     (case marker
