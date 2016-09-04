@@ -107,12 +107,11 @@
         child (perform-genetic-operator-list operator-vector
                                              (assoc first-parent :parent-uuids (vector (:uuid first-parent)))
                                              population location rand-gen argmap)]
-    (if (> (count (:genome child))
-           (/ max-points 4)) ; Check if too big
-      (revert-too-big-child first-parent child argmap)
-        (assoc child
-               :genetic-operators operator
-               ))))
+    (conditional-thread
+     (assoc child :genetic-operators operator)
+     #(when (> (count (:genome %))
+                (/ max-points 4))
+      (revert-too-big-child first-parent % argmap)))
 
 (defn breed
   "Returns an individual bred from the given population using the given parameters."
