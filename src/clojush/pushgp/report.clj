@@ -37,7 +37,7 @@
       (println (name param) "=" val))))
 
 (defn print-genome [individual]
-  (pr-str (not-lazy (:genome individual))))
+  (pr-str (not-lazy (map #(dissoc % :uuid :parent-uuid) (:genome individual)))))
 
 (defn behavioral-diversity
   "Returns the behavioral diversity of the population, as described by David
