@@ -101,7 +101,8 @@
    and performs them to create a new individual. Uses recursive helper function
    even with a single operator by putting that operator in a vector."
   [operator population location rand-gen 
-   {:keys [max-points] :as argmap}]
+   {:keys [max-points
+           track-instruction-maps] :as argmap}]
   (let [first-parent (select population location argmap)
         operator-vector (if (sequential? operator) operator (vector operator))
         child (perform-genetic-operator-list operator-vector
@@ -111,7 +112,9 @@
      (assoc child :genetic-operators operator)
      #(when (> (count (:genome %))
                 (/ max-points 4))
-      (revert-too-big-child first-parent % argmap)))
+      (revert-too-big-child first-parent % argmap))
+     #(when track-instruction-maps
+        (update-instruction-map-uuids %)))))
 
 (defn breed
   "Returns an individual bred from the given population using the given parameters."
