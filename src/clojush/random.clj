@@ -81,8 +81,8 @@
     (random-plush-genome max-genome-size atom-generators {}))
   ([max-genome-size atom-generators argmap]
     (random-plush-genome-with-size (inc (lrand-int max-genome-size))
-                           atom-generators
-                           argmap)))
+                                   atom-generators
+                                   argmap)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random Push code generator
