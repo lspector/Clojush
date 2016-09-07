@@ -70,10 +70,10 @@
 (defn random-plush-genome-with-size
   "Returns a random Plush genome containing the given number of points."
   [genome-size atom-generators argmap]
-  (repeatedly genome-size
-              #(random-plush-instruction-map
-                 atom-generators
-                 argmap)))
+  (vec (repeatedly genome-size
+                   #(random-plush-instruction-map
+                      atom-generators
+                      argmap))))
 
 (defn random-plush-genome
   "Returns a random Plush genome with size limited by max-genome-size."
