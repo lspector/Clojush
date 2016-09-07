@@ -285,8 +285,8 @@ the resulting top genome."
                                  (assoc :parent1-genome parent1-genome)
                                  (assoc :parent2-genome parent2-genome))))]
     (if (or (seq? run-result) (vector? run-result))
-      run-result
-      ())))
+      (vec run-result)
+      [])))
 
 (defn expressed-program-sequence-from-genome
   "Returns an open-close sequenc for the program produced by expressing
