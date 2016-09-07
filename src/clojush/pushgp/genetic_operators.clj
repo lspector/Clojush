@@ -314,6 +314,24 @@ programs encoded by genomes g1 and g2."
     (and (> (reduce min diffs) 0) ;; diversification threshold set here
          (> (count (distinct diffs)) 1))))
 
+;; One of many possible alternative definitions of diversifying?
+;(defn diversifying?
+;  "Returns true iff genome g passes the diversification test."
+;  [g argmap]
+;  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+;        diff #(expressed-difference %1 %2 argmap)
+;        c1 (make-child g)
+;        c2 (make-child g)
+;        gc1 (make-child c1)
+;        gc2 (make-child c2)
+;        c1-diff (diff g c1)
+;        c2-diff (diff g c2)
+;        gc1-diff (diff c1 gc1)
+;        gc2-diff (diff c2 gc1)
+;        diffs [c1-diff c2-diff gc1-diff gc2-diff]]
+;    (and (> (reduce min diffs) 0)
+;         (apply distinct? diffs))))
+
 (defn autoconstruction
   "Returns a genome for a child produced either by autoconstruction (executing parent1
 with both parents on top of the genome stack and also available via input instructions)
