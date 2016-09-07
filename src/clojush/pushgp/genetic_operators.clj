@@ -250,21 +250,21 @@ is false replaces autoconstructive_<type>_rand with <type>_rand."
                                       (re-seq #"in_dm" (name instruction)) ;; from digital-multiplier
                                       (some #{instruction}
                                             '(a0 a1 a2 d0 d1 d2 d3 d4 d5 d6 d7)))))] ;; from mux problems
-    (map (fn [instruction-map]
-           (if (input-instruction? (:instruction instruction-map))
-             (assoc instruction-map :instruction 'code_noop)
-             (if deterministic?
-               (if (some #{(:instruction instruction-map)}
-                          '(boolean_rand integer_rand float_rand code_rand
-                                         string_rand char_rand 
-                                         genome_gene_randomize))
-                 (assoc instruction-map :instruction 'code_noop)
-                 instruction-map)
-               (if (= (:instruction instruction-map) 'autoconstructive_integer_rand)
-                 (assoc instruction-map :instruction 'integer_rand)
-                 (if (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
-                   (assoc instruction-map :instruction 'boolean_rand)
-                   instruction-map)))))
+    (mapv (fn [instruction-map]
+            (if (input-instruction? (:instruction instruction-map))
+              (assoc instruction-map :instruction 'code_noop)
+              (if deterministic?
+                (if (some #{(:instruction instruction-map)}
+                           '(boolean_rand integer_rand float_rand code_rand
+                                          string_rand char_rand 
+                                          genome_gene_randomize))
+                  (assoc instruction-map :instruction 'code_noop)
+                  instruction-map)
+                (if (= (:instruction instruction-map) 'autoconstructive_integer_rand)
+                  (assoc instruction-map :instruction 'integer_rand)
+                  (if (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
+                    (assoc instruction-map :instruction 'boolean_rand)
+                    instruction-map)))))
          genome)))
 
 (defn produce-child-genome-by-autoconstruction
