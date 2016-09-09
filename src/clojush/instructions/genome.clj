@@ -47,6 +47,7 @@
                           index
                           (random-plush-instruction-map 
                             @global-atom-generators
+                            true
                             {:epigenetic-markers @global-epigenetic-markers
                              :close-parens-probabilities @global-close-parens-probabilities
                              :silent-instruction-probability @global-silent-instruction-probability}))
@@ -70,6 +71,7 @@
                           index
                           (random-plush-instruction-map 
                                     [(nth @global-atom-generators atom-gen)]
+                                    true
                                     {:epigenetic-markers @global-epigenetic-markers
                                      :close-parens-probabilities @global-close-parens-probabilities
                                      :silent-instruction-probability @global-silent-instruction-probability}))

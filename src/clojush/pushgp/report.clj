@@ -41,6 +41,9 @@
       (println (name param) "=" (random/seed-to-string val))
       (println (name param) "=" val))))
 
+(defn print-genome [individual]
+  (pr-str (not-lazy (map #(dissoc % :uuid :parent-uuid) (:genome individual)))))
+
 (defn behavioral-diversity
   "Returns the behavioral diversity of the population, as described by David
    Jackson in 'Promoting phenotypic diversity in genetic programming'. It is
@@ -199,7 +202,7 @@
         count-zero-by-case (map #(apply + %) (apply mapv vector pop-zero-by-case))
         ]
     (println "--- Lexicse Program with Most Elite Cases Statistics ---")
-    (println "Lexicase best genome:" (pr-str (not-lazy (:genome lex-best))))
+    (println "Lexicase best genome:" (print-genome lex-best))
     (println "Lexicase best program:" (pr-str (not-lazy (:program lex-best))))
     (when (> report-simplifications 0)
       (println "Lexicase best partial simplification:"
@@ -217,7 +220,7 @@
     (println "Lexicase best size:" (count-points (:program lex-best)))
     (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program lex-best)) (count-points (:program lex-best))))) ;Number of (open) parens / points
     (println "--- Lexicse Program with Most Zero Cases Statistics ---")
-    (println "Zero cases best genome:" (pr-str (not-lazy (:genome most-zero-cases-best))))
+    (println "Zero cases best genome:" (print-genome most-zero-cases-best))
     (println "Zero cases best program:" (pr-str (not-lazy (:program most-zero-cases-best))))
     (when (> report-simplifications 0)
       (println "Zero cases best partial simplification:"
@@ -248,7 +251,7 @@
   [population {:keys [print-errors meta-error-categories]}]
   (let [ifs-best (apply min-key :weighted-error population)]
     (println "--- Program with Best Implicit Fitness Sharing Error Statistics ---")
-    (println "IFS best genome:" (pr-str (not-lazy (:genome ifs-best))))
+    (println "IFS best genome:" (print-genome ifs-best))
     (println "IFS best program:" (pr-str (not-lazy (:program ifs-best))))
     (when print-errors (println "IFS best errors:" (not-lazy (:errors ifs-best))))
     (when (and print-errors (not (empty? meta-error-categories)))
@@ -328,7 +331,7 @@
     (when (some #{parent-selection} #{:lexicase :elitegroup-lexicase :leaky-lexicase}) (lexicase-report population argmap))
     (when (= total-error-method :ifs) (implicit-fitness-sharing-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
-    (println "Best genome:" (pr-str (not-lazy (:genome best))))
+    (println "Best genome:" (print-genome best))
     (println "Best program:" (pr-str (not-lazy (:program best))))
     (when (> report-simplifications 0)
       (println "Partial simplification:"

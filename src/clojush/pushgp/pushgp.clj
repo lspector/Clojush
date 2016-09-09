@@ -127,6 +127,7 @@
           :print-ancestors-of-solution false ; If true, final report prints the ancestors of the solution. Requires :maintain-ancestors to be true.
           :print-behavioral-diversity false ; If true, prints the behavioral diversity of the population each generation. Note: The error function for the problem must support behavioral diversity. For an example, see wc.clj
           :print-homology-data false ; If true, prints the homology statistics
+          :track-instruction-maps false ;; If true, each Plush instruction map will have a UUID attached to it. If the gene has a "parent gene", it will also have the UUID of its parent.
           ;;
           ;;----------------------------------------
           ;; Arguments related to printing JSON, EDN, or CSV logs

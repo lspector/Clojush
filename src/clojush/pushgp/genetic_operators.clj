@@ -350,7 +350,7 @@ be set globally or eliminated in the future."
         variant (diversifying? child-genome argmap)
         new-genome (if variant
                      child-genome
-                     (random-plush-genome max-genome-size-in-initial-program atom-generators argmap))]
+                     (random-plush-genome max-genome-size-in-initial-program atom-generators true argmap))]
     (assoc (make-individual :genome (if (or variant (diversifying? new-genome argmap))
                                       new-genome
                                       [])
