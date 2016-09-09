@@ -56,9 +56,20 @@
                          survivors)
                  (rest cases)))))))
 
+(defn mad
+  "returns median absolute deviation (MAD)"
+  [x]
+  (let [; Get median of x
+        x-median (median x)
+        ; calculate absolute deviation from median
+        dev (map #(Math/abs (- % x-median))
+                 x)]
+    (median dev)))
+
 (defn epsilon-lexicase-selection
-    ""
-  [pop location {:keys [epsilon-lexicase-epsilon]}]
+    "Returns an individual that does within epsilon of the best on the fitness cases when considered one at a
+   time in random order.  If trivial-geography-radius is non-zero, selection is limited to parents within +/- r of location"
+  [pop location {:keys [trivial-geography-radius epsilon-lexicase-epsilon]}]
   (let [lower (mod (- location trivial-geography-radius) (count pop))
         upper (mod (+ location trivial-geography-radius) (count pop))
         popvec (vec pop)
@@ -73,14 +84,21 @@
       (if (or (empty? cases)
               (empty? (rest survivors)))
         (lrand-nth survivors)
-        (let [min-err-for-case (apply min (map #(nth % (first cases))
+        (let [; If epsilon-lexicase-epsilon is set in the argmap, use it for epsilon.
+              ; Otherwise, use automatic epsilon selections. aka use MAD for epsilon.
+              epsilon (if epsilon-lexicase-epsilon
+                        epsilon-lexicase-epsilon
+                        (mad (map #(nth (:errors %)
+                                        (first cases))
+                                  survivors)))
+              min-err-for-case (apply min (map #(nth % (first cases))
                                                (map #(:errors %) survivors)))]
-          (recur (filter #(< (nth (:errors %)
-                                  (first cases))
-                             (+ min-err-for-case
-                                epsilon-lexicase-epsilon))
-                         survivors)
-                                  (rest cases)))))))
+        (recur (filter #(<= (nth (:errors %)
+                                 (first cases))
+                            (+ min-err-for-case
+                               epsilon))
+                       survivors)
+               (rest cases)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; elitegroup lexicase selection
@@ -189,6 +207,7 @@
         selected (case parent-selection
                    :tournament (tournament-selection pop-with-meta-errors location argmap)
                    :lexicase (lexicase-selection pop-with-meta-errors location argmap)
+                   :epsilon-lexicase (epsilon-lexicase-selection pop-with-meta-errors location argmap)
                    :elitegroup-lexicase (elitegroup-lexicase-selection pop-with-meta-errors)
                    :leaky-lexicase (if (< (lrand) (:lexicase-leakage argmap))
                                      (uniform-selection pop-with-meta-errors)

@@ -144,5 +144,5 @@
   "Takes a map of stack names and entire stack states, and returns a new push-state
    with those stacks set."
   [& {:as stack-assignments}]
-    (merge (make-push-state) stack-assignments)
-    )
+  (merge (make-push-state) stack-assignments))
+    
