@@ -88,7 +88,7 @@
   [individual]
   (update individual :genome
           (fn [genome]
-            (map (fn [instruction-map]
+            (mapv (fn [instruction-map]
                    (if (:random-insertion instruction-map)
                      (dissoc instruction-map :random-insertion)
                      (assoc instruction-map
