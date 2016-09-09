@@ -1,4 +1,4 @@
-(defproject clojush "2.7.0-SNAPSHOT" 
+(defproject clojush "2.6.0-1-SNAPSHOT" 
   :description "The Push programming language and the PushGP genetic programming
                 system implemented in Clojure.
                 See http://hampshire.edu/lspector/push.html"
@@ -28,11 +28,12 @@
                               :sign-releases false
                               :password :env}]]
   :release-tasks [["vcs" "assert-committed"]
+                  ["change" "version" "leiningen.release/bump-version"]
                   ["change" "version" "leiningen.release/bump-version" "release"]
                   ["shell" "git" "commit" "-am" "Version ${:version} [ci skip]"]
                   ["vcs" "tag" "v" "--no-sign"] ; disable signing and add "v" prefix
                   ["deploy"]
-                  ["change" "version" "leiningen.release/bump-version"]
+                  ["change" "version" "leiningen.release/bump-version" "qualifier"]
                   ["shell" "git" "commit" "-am" "Version ${:version} [ci skip]"]
                   ["vcs" "push"]]
 ;;;;;;;;;; jvm settings for high performance, using most of the machine's RAM
