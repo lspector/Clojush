@@ -160,12 +160,12 @@
           ;; :replace-child-that-exceeds-size-limit-with to :empty. You will probably also want to
           ;; provide a high value for :max-generations.
           
-          :autoconstructive-integer-rand-enrichment 1 
+          :autoconstructive-integer-rand-enrichment 0 
           ;; The number of extra instances of autoconstructive_integer_rand to include in 
           ;; :atom-generators for autoconstruction. If negative then autoconstructive_integer_rand 
           ;; will not be in :atom-generators at all.
           
-          :autoconstructive-boolean-rand-enrichment -1 
+          :autoconstructive-boolean-rand-enrichment 0 
           ;; The number of extra instances of autoconstructive_boolean_rand to include in 
           ;; :atom-generators for autoconstruction. If negative then autoconstructive_boolean_rand 
           ;; will not be in :atom-generators at all.
