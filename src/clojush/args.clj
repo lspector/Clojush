@@ -146,11 +146,16 @@
           ;; test case.
           
           :autoconstructive false 
-          ;; if truthy, then :genetic-operator-probabilities will be {:autoconstruction 1.0}, 
+          ;; If truthy, then :genetic-operator-probabilities will be {:autoconstruction 1.0}, 
           ;; :epigenetic-markers will be [:close :silent], and :atom-generators will include 
           ;; everything in (registered-for-stacks [:integer :boolean :exec :genome]). Also sets 
           ;; :replace-child-that-exceeds-size-limit-with to :empty. You will probably also want to
           ;; provide a high value for :max-generations.
+          ;; The specific truthy value may be used to conditionalize the autoconstruction method,
+          ;; for example the choice of diversification test. A value of true is equivalent to
+          ;; a value of :gecco2106, which uses the diversification test used in the work for the
+          ;; paper "Evolution Evolves with Autoconstruction" in the ECADA workshop at GECCO 2016.
+          ;; For other options and their effects, see genetic-operators.clj.
           
           :autoconstructive-integer-rand-enrichment 0 
           ;; The number of extra instances of autoconstructive_integer_rand to include in 
