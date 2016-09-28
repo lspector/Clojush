@@ -6,6 +6,7 @@
 
 (ns clojush.problems.software.calc
   (:use [clojush.pushgp.pushgp]
+        [clojush.args]
         [clojush.pushstate]
         [clojush.interpreter]
         [clojush.random]

@@ -11,7 +11,8 @@
 ;; penalty otherwise.
 
 (ns clojush.problems.synthetic.smallvariant
-  (:use [clojush.pushgp.pushgp]
+  (:use [clojush.args]
+        [clojush.pushgp.pushgp]
         [clojush.util]
         [clojush.pushgp.genetic-operators]))
 

@@ -388,5 +388,3 @@
                 (push-item (apply str (rest s)) :exec)
                 (push-item (top-item :exec state) :exec)
                 (push-item (first s) :char)))))))
-
-(define-registered string_multiple_concat (with-meta (seq-multiplier :string) {:stack-types [:string :integer]}))

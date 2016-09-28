@@ -250,21 +250,21 @@ is false replaces autoconstructive_<type>_rand with <type>_rand."
                                       (re-seq #"in_dm" (name instruction)) ;; from digital-multiplier
                                       (some #{instruction}
                                             '(a0 a1 a2 d0 d1 d2 d3 d4 d5 d6 d7)))))] ;; from mux problems
-    (map (fn [instruction-map]
-           (if (input-instruction? (:instruction instruction-map))
-             (assoc instruction-map :instruction 'code_noop)
-             (if deterministic?
-               (if (some #{(:instruction instruction-map)}
-                          '(boolean_rand integer_rand float_rand code_rand
-                                         string_rand char_rand 
-                                         genome_gene_randomize))
-                 (assoc instruction-map :instruction 'code_noop)
-                 instruction-map)
-               (if (= (:instruction instruction-map) 'autoconstructive_integer_rand)
-                 (assoc instruction-map :instruction 'integer_rand)
-                 (if (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
-                   (assoc instruction-map :instruction 'boolean_rand)
-                   instruction-map)))))
+    (mapv (fn [instruction-map]
+            (if (input-instruction? (:instruction instruction-map))
+              (assoc instruction-map :instruction 'code_noop)
+              (if deterministic?
+                (if (some #{(:instruction instruction-map)}
+                           '(boolean_rand integer_rand float_rand code_rand
+                                          string_rand char_rand 
+                                          genome_gene_randomize))
+                  (assoc instruction-map :instruction 'code_noop)
+                  instruction-map)
+                (if (= (:instruction instruction-map) 'autoconstructive_integer_rand)
+                  (assoc instruction-map :instruction 'integer_rand)
+                  (if (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
+                    (assoc instruction-map :instruction 'boolean_rand)
+                    instruction-map)))))
          genome)))
 
 (defn produce-child-genome-by-autoconstruction
@@ -285,8 +285,8 @@ the resulting top genome."
                                  (assoc :parent1-genome parent1-genome)
                                  (assoc :parent2-genome parent2-genome))))]
     (if (or (seq? run-result) (vector? run-result))
-      run-result
-      ())))
+      (vec run-result)
+      [])))
 
 (defn expressed-program-sequence-from-genome
   "Returns an open-close sequenc for the program produced by expressing
@@ -303,7 +303,7 @@ programs encoded by genomes g1 and g2."
   (levenshtein-distance (expressed-program-sequence-from-genome g1 argmap)
                         (expressed-program-sequence-from-genome g2 argmap)))
 
-(defn diversifying?
+(defn gecco2016-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   (let [delta #(expressed-difference 
@@ -313,6 +313,33 @@ programs encoded by genomes g1 and g2."
         diffs (repeatedly 2 delta)]
     (and (> (reduce min diffs) 0) ;; diversification threshold set here
          (> (count (distinct diffs)) 1))))
+
+;; One of many possible alternative definitions of diversifying?
+(defn august2016-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+        diff #(expressed-difference %1 %2 argmap)
+        c1 (make-child g)
+        c2 (make-child g)
+        gc1 (make-child c1)
+        gc2 (make-child c2)
+        c1-diff (diff g c1)
+        c2-diff (diff g c2)
+        gc1-diff (diff c1 gc1)
+        gc2-diff (diff c2 gc1)
+        diffs [c1-diff c2-diff gc1-diff gc2-diff]]
+    (and (> (reduce min diffs) 0)
+         (apply distinct? diffs))))
+
+(defn diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  ((case (:autoconstructive argmap)
+     (true :gecco2016) gecco2016-diversifying?
+     :august2016 august2016-diversifying?)
+    g
+    argmap))
 
 (defn autoconstruction
   "Returns a genome for a child produced either by autoconstruction (executing parent1
