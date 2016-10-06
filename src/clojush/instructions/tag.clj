@@ -168,6 +168,17 @@
       state)))
 
 (define-registered
+  integer_untag_instruction
+  ^{:stack-types [:integer :tag :exec]}
+  (fn [state]
+    (if (not (empty? (:integer state)))
+      (push-item (symbol (str "untag_" (mod (#(if (neg? %) (= %) %) (stack-ref :integer 0 state))
+                                            @global-tag-limit)))
+                 :exec
+                 (pop-item :integer state))
+      state)))
+
+(define-registered
   integer_tag_exec_instruction
   ^{:stack-types [:integer :tag :exec]}
   (fn [state]
