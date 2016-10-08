@@ -38,25 +38,6 @@
         (recur (inc parens)
                (rest probabilities))))))
 
-(defn conditional-thread
-  "Takes a value and threads it through the functions. If a function
-   returns nil, the old value will be the value passed to the next
-   function."
-  [val & fs]
-  (reduce #(or (%2 %1) %1) val fs))
-
-;; Example usage of conditional-thread (the function)
-;; (conditional-thread 0 inc inc inc)
-;; => 3
-;; (conditional-thread 0 #(when (= 0 %) 2)
-;;                        inc
-;;                        inc)
-;; => 4
-;; (conditional-thread 0 #(when (= 1 %) 2)
-;;                        inc
-;;                        inc)
-;; => 2
-
 (defn random-plush-instruction-map
   "Returns a random instruction map given the atom-generators and the required
    epigenetic-markers."
@@ -71,11 +52,12 @@
                                       :or {epigenetic-markers []
                                            close-parens-probabilities [0.772 0.206 0.021 0.001]
                                            silent-instruction-probability 0}}]
-   (let [markers (conditional-thread epigenetic-markers
-                                     #(conj % :instruction)
-                                     #(when track-instruction-maps (conj % :uuid))
-                                     #(when (and track-instruction-maps
-                                               random-insertion) (conj % :random-insertion)))]
+   (let [markers (cond->
+                     (conj epigenetic-markers :instruction)
+                   track-instruction-maps (conj :uuid)
+                   (and
+                    track-instruction-maps
+                    random-insertion) (conj :random-insertion))]
      (zipmap markers
              (map (fn [marker]
                     (case marker
