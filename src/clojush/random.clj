@@ -58,24 +58,24 @@
                    (and
                     track-instruction-maps
                     random-insertion) (conj :random-insertion))]
-     (zipmap markers
-             (map (fn [marker]
-                    (case marker
-                      :instruction (let [element (lrand-nth atom-generators)]
-                                     (if (fn? element)
-                                       (let [fn-element (element)]
-                                         (if (fn? fn-element)
-                                           (fn-element)
-                                           fn-element))
-                                       element))
-                      :close (random-closes close-parens-probabilities)
-                      :silent (if (< (lrand) silent-instruction-probability)
-                                true
-                                false)
-                      :random-insertion true
-                      :uuid (java.util.UUID/randomUUID)
-                      ))
-                  markers)))))
+      (zipmap markers
+              (map (fn [marker]
+                     (case marker
+                       :instruction (let [element (lrand-nth atom-generators)]
+                                      (if (fn? element)
+                                        (let [fn-element (element)]
+                                          (if (fn? fn-element)
+                                            (fn-element)
+                                            fn-element))
+                                        element))
+                       :close (random-closes close-parens-probabilities)
+                       :silent (if (< (lrand) silent-instruction-probability)
+                                 true
+                                 false)
+                       :random-insertion true
+                       :uuid (java.util.UUID/randomUUID)
+                       ))
+                   markers)))))
 
 (defn random-plush-genome-with-size
   "Returns a random Plush genome containing the given number of points."
