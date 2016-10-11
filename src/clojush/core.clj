@@ -22,7 +22,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; main function
 
-(defn -main 
+(defn -main
   "A main function for Clojush, which assumes that the first argument is the name
    of a problem file that contains an argmap of arguments to PushGP.
    Exits after completion of the call.
@@ -32,8 +32,8 @@
   [& args]
   (println "Command line args:" (apply str (interpose \space args)))
   (let [param-list (map #(if (.endsWith % ".ser")
-                           (str %)
-                           (read-string %))
+                          (str %)
+                          (read-string %))
                         (rest args))]
     (require (symbol (first args)))
     (let [example-params (eval (symbol (str (first args) "/argmap")))
