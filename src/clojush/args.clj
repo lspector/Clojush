@@ -342,6 +342,12 @@
           
           :json-log-program-strings false 
           ;; If true, JSON logs will include program strings for each individual.
+
+          ;;----------------------------------------
+          ;; Arguments related to collider-based evolution
+          ;;----------------------------------------
+
+          :collider true
           )))
 
 (defn load-push-argmap
