@@ -347,7 +347,9 @@
           ;; Arguments related to collider-based evolution
           ;;----------------------------------------
 
-          :collider true
+          :use-collider false
+          :collider-target-population-size 100
+          :collider-collision-threshold 10
           )))
 
 (defn load-push-argmap

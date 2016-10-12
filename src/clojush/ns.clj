@@ -7,4 +7,4 @@
                     simplification translate util))
      (use '(clojush.instructions boolean code common numbers random-instructions return string 
                                  tag zip))
-     (use '(clojush.pushgp breed genetic-operators parent-selection pushgp report))))
+     (use '(clojush.pushgp breed genetic-operators parent-selection pushgp report collider))))

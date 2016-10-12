@@ -134,7 +134,7 @@
      (print-params @push-argmap)
      (check-genetic-operator-probabilities-add-to-one @push-argmap)
      (timer @push-argmap :initialization)
-     (if (:collider @push-argmap)
+     (if (:use-collider @push-argmap)
        (run-collider @push-argmap)
        (do (println "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
            (println "\nGenerating initial population...")
