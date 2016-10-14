@@ -348,8 +348,8 @@
           ;;----------------------------------------
 
           :use-collider false
-          :collider-target-population-size 100
-          :collider-collision-threshold 10
+          :collider-target-population-size 1000
+          :collider-collision-threshold 100
           )))
 
 (defn load-push-argmap
