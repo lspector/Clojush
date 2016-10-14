@@ -67,7 +67,8 @@
 
 (defn collider-variation
   [parent1 parent2]
-  (uniform-mutation (alternation parent1 parent2 @push-argmap) @push-argmap))
+  (-> (alternation parent1 parent2 @push-argmap)
+      (uniform-mutation @push-argmap)))
 
 (defn constructive-collision
   "Returns the provided population with the possible addition of an individual created by running a genetic
