@@ -2,11 +2,17 @@
   (:use [clojush args globals individual random translate]
         [clojush.pushgp genetic-operators breed]))
 
+(defn collider-random-individual
+  "Returns a random individual using parameters in @push-argmap."
+  []
+  (make-individual
+    :genome (random-plush-genome (:max-genome-size-in-initial-program @push-argmap)
+                                 @global-atom-generators
+                                 @push-argmap)))
 
 (defn satisfies-constraints?
   [genome]
   true)
-
 
 (defn lex
   "Returns a single individual from the provided population (vector of individuals) via lexicase selection."
@@ -70,17 +76,16 @@
   {:solution solution-individual}."
   [population]
   (let [child (if (< (count population) (:collider-collision-threshold @push-argmap))
-                (make-individual
-                  :genome (random-plush-genome (:max-genome-size-in-initial-program @push-argmap)
-                                               @global-atom-generators
-                                               @push-argmap))
+                (collider-random-individual)
                 (let [parent1 (parent-selection-collision population)
                       parent2 (parent-selection-collision population)
                       varied (collider-variation parent1 parent2)]
-                  (if (> (count (:genome varied))
-                         (/ (:max-points @push-argmap)))
-                    (revert-too-big-child parent1 varied @push-argmap)
-                    varied)))]
+                  (if (empty? (:genome varied))
+                    (collider-random-individual)
+                    (if (> (count (:genome varied))
+                           (/ (:max-points @push-argmap)))
+                      (revert-too-big-child parent1 varied @push-argmap)
+                      varied))))]
     (if (satisfies-constraints? (:genome child))
       (let [program (translate-plush-genome-to-push-program child @push-argmap)
             errors ((:error-function @push-argmap) program)
