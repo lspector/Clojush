@@ -1,6 +1,6 @@
 (ns clojush.pushgp.collider
   (:use [clojush args globals individual random translate]
-        [clojush.pushgp genetic-operators]))
+        [clojush.pushgp genetic-operators breed]))
 
 
 (defn satisfies-constraints?
@@ -59,6 +59,10 @@
   (remove-one (inverse-lex [(rand-nth population) (rand-nth population)])
               population))
 
+(defn collider-variation
+  [parent1 parent2]
+  (uniform-mutation (alternation parent1 parent2 @push-argmap) @push-argmap))
+
 (defn constructive-collision
   "Returns the provided population with the possible addition of an individual created by running a genetic
   operator on selected parents. The new individual must bass the test of `satisfiesconstraints?` in order
@@ -71,8 +75,12 @@
                                                @global-atom-generators
                                                @push-argmap))
                 (let [parent1 (parent-selection-collision population)
-                      parent2 (parent-selection-collision population)]
-                  (uniform-mutation (alternation parent1 parent2 @push-argmap) @push-argmap)))]
+                      parent2 (parent-selection-collision population)
+                      varied (collider-variation parent1 parent2)]
+                  (if (> (count (:genome varied))
+                         (/ (:max-points @push-argmap)))
+                    (revert-too-big-child parent1 varied @push-argmap)
+                    varied)))]
     (if (satisfies-constraints? (:genome child))
       (let [program (translate-plush-genome-to-push-program child @push-argmap)
             errors ((:error-function @push-argmap) program)
