@@ -99,7 +99,7 @@
         (println "Average genome size:" (float (/ (reduce + (map count (map :genome population))) (count population)))))
       (if (:solution population)
         (println "Success at step" step ":" (:solution population))
-        (if (> step 100000)
+        (if (> step 1000000)
           (println "Failure")
           (recur (if (or (empty? population)
                          (< (lrand)

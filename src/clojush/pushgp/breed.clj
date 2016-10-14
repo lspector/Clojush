@@ -21,7 +21,7 @@
 (defn revert-too-big-child
   "Determines what individual should replace a child program that exceeds the
    size limit. Options are:
-     :parent -- one of the parents (default)
+     :parent -- one of the parents
      :empty  -- an empty program
      :truncate -- truncate child after max points
      :random -- a random program
