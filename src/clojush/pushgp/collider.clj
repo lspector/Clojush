@@ -67,7 +67,11 @@
 (defn collider-variation
   [parent1 parent2]
   (-> (alternation parent1 parent2 @push-argmap)
-      (uniform-mutation @push-argmap)))
+      (uniform-mutation @push-argmap)
+      (uniform-close-mutation @push-argmap)
+      (uniform-silence-mutation @push-argmap)
+      (uniform-deletion @push-argmap)
+      (uniform-addition @push-argmap)))
 
 (def solution (atom nil))
 
