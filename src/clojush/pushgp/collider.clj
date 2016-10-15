@@ -1,6 +1,6 @@
 (ns clojush.pushgp.collider
   (:use [clojush args globals individual random translate]
-        [clojush.pushgp genetic-operators breed])
+        [clojush.pushgp genetic-operators breed report])
   (:require [com.climate.claypoole :as cp]))
 
 (defn collider-random-individual
@@ -115,10 +115,8 @@
                     (+ @point-evaluations-at-last-collider-report
                        (:collider-point-evaluations-per-report @push-argmap))))
         (println "=== Report at point evaluations:" @point-evaluations-count)
-        (println "Population size:" (count population))
-        (println "Best total error:" (apply min (map :total-error population)))
-        (println "Average total error:" (float (/ (reduce + (map :total-error population)) (count population))))
-        (println "Average genome size:" (float (/ (reduce + (map count (map :genome population))) (count population))))
+        (println "Collider population size:" (count population))
+        (report-and-check-for-success population @point-evaluations-count @push-argmap)
         (reset! point-evaluations-at-last-collider-report @point-evaluations-count))
       (if @solution
         (do (println "Success at point evaluations:" @point-evaluations-count @solution)
