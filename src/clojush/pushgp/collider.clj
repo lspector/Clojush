@@ -21,7 +21,7 @@
          cases (shuffle (range (count (:errors (first popvec)))))]
     (if (or (empty? cases)
             (empty? (rest survivors)))
-      (lrand-nth survivors)
+      (rand-nth survivors)
       (let [min-err-for-case (apply min (map #(nth % (first cases))
                                              (map #(:errors %) survivors)))]
         (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
@@ -42,49 +42,49 @@
   "Returns a single individual from the provided pooulation (vector of individuals) via inverse lexicase selection."
   [popvec]
   (loop [survivors popvec
-         cases (lshuffle (range (count (:errors (first popvec)))))]
+         cases (shuffle (range (count (:errors (first popvec)))))]
     (if (or (empty? cases)
             (empty? (rest survivors)))
-      (lrand-nth survivors)
+      (rand-nth survivors)
       (let [max-err-for-case (apply max (map #(nth % (first cases))
                                              (map #(:errors %) survivors)))]
         (recur (filter #(= (nth (:errors %) (first cases)) max-err-for-case)
                        survivors)
                (rest cases))))))
 
-(defn parent-selection-collision
-  "Returns a parent by colliding two elements of the population and returning the one selected that lexicase
-  selection selects."
-  [population]
-  (lex [(lrand-nth population) (lrand-nth population)]))
+;(defn parent-selection-collision
+;  "Returns a parent by colliding two elements of the population and returning the one selected that lexicase
+;  selection selects."
+;  [population]
+;  (lex [(rand-nth population) (rand-nth population)]))
 
 (defn destructive-collision
-  "Returns the provided population without one individual, chosen by performing inverse lexicase selection
-  on two random individuals."
-  [population]
-  (remove-one (inverse-lex [(rand-nth population) (rand-nth population)])
-              population))
+  "Returns a collection containing only one of the two given individuals, the one that wins a lexicase selection
+  tournament."
+  [[i1 i2]]
+  [(lex [i1 i2])])
 
 (defn collider-variation
   [parent1 parent2]
   (-> (alternation parent1 parent2 @push-argmap)
       (uniform-mutation @push-argmap)))
 
+(def solution (atom nil))
+
 (defn constructive-collision
-  "Returns the provided population with the possible addition of an individual created by running a genetic
-  operator on selected parents. The new individual must bass the test of `satisfiesconstraints?` in order
-  to be added. If the collision produces a solution, then instead of the augmented population, this returns
-  {:solution solution-individual}."
-  [population]
-  (let [child (if (< (count population) (:collider-collision-threshold @push-argmap))
+  "Returns the provided individuals with the possible addition of an individual created by varying them. The new
+  individual must bass the test of `satisfiesconstraints?` in order to be returned. If the collision produces a
+  solution, then it is stored in the solution atom."
+  [args] ;; args should be :from-scratch or a collection of 4 individuals
+  (let [child (if (= args :from-scratch)
                 (collider-random-individual)
-                (let [parent1 (lrand-nth population) ;(parent-selection-collision population)
-                      parent2 (lrand-nth population) ;(parent-selection-collision population)
+                (let [parent1 (lex [(nth args 0) (nth args 1)])
+                      parent2 (lex [(nth args 2) (nth args 3)])
                       varied (collider-variation parent1 parent2)]
                   (if (empty? (:genome varied))
                     (collider-random-individual)
                     (if (> (count (:genome varied))
-                           (/ (:max-points @push-argmap)))
+                           (:max-points @push-argmap))
                       (revert-too-big-child parent1 varied @push-argmap)
                       varied))))]
     (if (satisfies-constraints? (:genome child))
@@ -95,30 +95,57 @@
                               :program program
                               :errors errors
                               :total-error total-error)]
-        (if (<= total-error (:error-threshold @push-argmap))
-          {:solution evaluated-child}
-          (conj population evaluated-child)))
-      population)))
+        (when (<= total-error (:error-threshold @push-argmap))
+          (reset! solution evaluated-child))
+        (if (= args :from-scratch)
+          [evaluated-child]
+          (conj args evaluated-child)))
+      (if (= args :from-scratch)
+        []
+        args))))
+
+(defn mapper
+  []
+  (if (:use-single-thread @push-argmap)
+    map
+    pmap))
+
+(def point-evaluations-at-last-collider-report (atom 0))
 
 (defn run-collider
   [argmap]
-  (let [target-size (:collider-target-population-size @push-argmap)]
-    (loop [population []
-           step 0]
-      (when (and (zero? (mod step (:collider-steps-per-report @push-argmap)))
-                 (not-empty population))
-        (println "=== Report at step:" step)
+  (reset! solution nil)
+  (reset! point-evaluations-at-last-collider-report 0)
+  (let [target-size (:collider-target-population-size @push-argmap)
+        simultaneous-collisions (if (:use-single-thread @push-argmap)
+                                  1
+                                  (:collider-simultaneous-collisions @push-argmap))]
+    (loop [population []]
+      (when (and (not-empty population)
+                 (> @point-evaluations-count
+                    (+ @point-evaluations-at-last-collider-report
+                       (:collider-point-evaluations-per-report @push-argmap))))
+        (println "=== Report at point evaluations:" @point-evaluations-count)
         (println "Population size:" (count population))
         (println "Best total error:" (apply min (map :total-error population)))
         (println "Average total error:" (float (/ (reduce + (map :total-error population)) (count population))))
-        (println "Average genome size:" (float (/ (reduce + (map count (map :genome population))) (count population)))))
-      (if (:solution population)
-        (println "Success at step" step ":" (:solution population))
+        (println "Average genome size:" (float (/ (reduce + (map count (map :genome population))) (count population))))
+        (reset! point-evaluations-at-last-collider-report @point-evaluations-count))
+      (if @solution
+        (println "Success at point evaluations:" @point-evaluations-count @solution)
         (if (>= @point-evaluations-count (:max-point-evaluations @push-argmap))
           (println "Failure")
-          (recur (if (or (empty? population)
-                         (< (lrand)
-                            (/ target-size (+ target-size (count population)))))
-                   (constructive-collision population)
-                   (destructive-collision population))
-                 (inc step)))))))
+          (if (< (count population) (:collider-collision-threshold @push-argmap))
+            (recur (concat population (constructive-collision :from-scratch)))
+            (let [shuffled-population (shuffle population)
+                  construction-ratio (/ target-size (+ target-size (count population)))
+                  collisions (repeatedly simultaneous-collisions
+                                         #(if (< (rand) construction-ratio) :constructive :destructive))
+                  constructive (count (filter #{:constructive} collisions))
+                  destructive (- (count collisions) constructive)]
+              (recur (concat (drop (+ (* 4 constructive) (* 2 destructive)) shuffled-population)
+                             (apply concat (map destructive-collision
+                                                (partition 2 (take (* 2 destructive) shuffled-population))))
+                             (apply concat ((mapper) constructive-collision
+                                             (partition 4 (take (* 4 constructive)
+                                                                (drop (* 2 destructive) shuffled-population))))))))))))))
