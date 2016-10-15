@@ -29,14 +29,24 @@
                        survivors)
                (rest cases))))))
 
+;(defn remove-one
+;  "Returns the provided vector v without its first instance of the provided item. Assumes that item is in v."
+;  [item v]
+;  (loop [processed []
+;         remaining v]
+;    (if (= item (first remaining))
+;      (vec (concat processed (rest remaining)))
+;      (recur (vec (conj processed (first remaining)))
+;             (rest remaining)))))
+
 (defn remove-one
-  "Returns the provided vector v without its first instance of the provided item. Assumes that item is in v."
-  [item v]
+  "Returns the provided collection coll without its first instance of the provided item. Assumes that item is in coll."
+  [item coll]
   (loop [processed []
-         remaining v]
+         remaining coll]
     (if (= item (first remaining))
-      (vec (concat processed (rest remaining)))
-      (recur (vec (conj processed (first remaining)))
+      (concat processed (rest remaining))
+      (recur (conj processed (first remaining))
              (rest remaining)))))
 
 (defn inverse-lex
@@ -64,6 +74,17 @@
   tournament."
   [[i1 i2]]
   [(lex [i1 i2])])
+
+(defn destructive-collision
+  "Returns the given individuals without the loser of an iterated lexicase selection process."
+  [pool]
+  (loop [remaining pool
+         result []]
+    (if (= (count remaining) 1)
+      result
+      (let [winner (lex remaining)]
+        (recur (remove-one winner remaining)
+               (conj result winner))))))
 
 (defn collider-variation
   [parent1 parent2]
@@ -115,47 +136,45 @@
 
 (defn mapper
   []
-  (if (:use-single-thread @push-argmap)
-    map
-    (partial cp/pmap @collider-pool)))
+  (partial cp/upmap (if (:use-single-thread @push-argmap) :serial @collider-pool)))
 
 (defn run-collider
   [argmap]
-  (let [multithread (not (:use-single-thread @push-argmap))]
-    (reset! solution nil)
-    (reset! point-evaluations-at-last-collider-report 0)
-    (when multithread
-      (reset! collider-pool (cp/threadpool (:collider-simultaneous-collisions @push-argmap))))
-    (let [target-size (:collider-target-population-size @push-argmap)
-          simultaneous-collisions (if multithread (:collider-simultaneous-collisions @push-argmap) 1)]
-      (loop [population []]
-        (when (and (not-empty population)
-                   (> @point-evaluations-count
-                      (+ @point-evaluations-at-last-collider-report
-                         (:collider-point-evaluations-per-report @push-argmap))))
-          (println "=== Report at point evaluations:" @point-evaluations-count)
-          (println "Population size:" (count population))
-          (println "Best total error:" (apply min (map :total-error population)))
-          (println "Average total error:" (float (/ (reduce + (map :total-error population)) (count population))))
-          (println "Average genome size:" (float (/ (reduce + (map count (map :genome population))) (count population))))
-          (reset! point-evaluations-at-last-collider-report @point-evaluations-count))
-        (if @solution
-          (do (println "Success at point evaluations:" @point-evaluations-count @solution)
-              (when multithread (cp/shutdown @collider-pool)))
-          (if (>= @point-evaluations-count (:max-point-evaluations @push-argmap))
-            (do (println "Failure")
-                (when multithread (cp/shutdown @collider-pool)))
-            (if (< (count population) (:collider-collision-threshold @push-argmap))
-              (recur (concat population (constructive-collision :from-scratch)))
-              (let [shuffled-population (shuffle population)
-                    construction-ratio (/ target-size (+ target-size (count population)))
-                    collisions (repeatedly simultaneous-collisions
-                                           #(if (< (rand) construction-ratio) :constructive :destructive))
-                    constructive (count (filter #{:constructive} collisions))
-                    destructive (- (count collisions) constructive)]
-                (recur (concat (drop (+ (* 4 constructive) (* 2 destructive)) shuffled-population)
-                               (apply concat (map destructive-collision
-                                                  (partition 2 (take (* 2 destructive) shuffled-population))))
-                               (apply concat ((mapper) constructive-collision
-                                               (partition 4 (take (* 4 constructive)
-                                                                  (drop (* 2 destructive) shuffled-population)))))))))))))))
+  (reset! solution nil)
+  (reset! point-evaluations-at-last-collider-report 0)
+  (reset! collider-pool (cp/threadpool (:collider-threads @push-argmap)))
+  (let [target-size (:collider-target-population-size @push-argmap)]
+    (loop [population []]
+      (when (and (not-empty population)
+                 (> @point-evaluations-count
+                    (+ @point-evaluations-at-last-collider-report
+                       (:collider-point-evaluations-per-report @push-argmap))))
+        (println "=== Report at point evaluations:" @point-evaluations-count)
+        (println "Population size:" (count population))
+        (println "Best total error:" (apply min (map :total-error population)))
+        (println "Average total error:" (float (/ (reduce + (map :total-error population)) (count population))))
+        (println "Average genome size:" (float (/ (reduce + (map count (map :genome population))) (count population))))
+        (reset! point-evaluations-at-last-collider-report @point-evaluations-count))
+      (if @solution
+        (do (println "Success at point evaluations:" @point-evaluations-count @solution)
+            (cp/shutdown @collider-pool))
+        (if (>= @point-evaluations-count (:max-point-evaluations @push-argmap))
+          (do (println "Failure")
+              (cp/shutdown @collider-pool))
+          (if (< (count population) (/ (:collider-target-population-size @push-argmap) 2))
+            (recur (concat population
+                           (apply concat
+                                  (doall ((mapper) constructive-collision
+                                           (repeat (:collider-threads @push-argmap) :from-scratch))))))
+            (let [shuffled-population (shuffle population)
+                  construction-ratio (/ target-size (+ target-size (count population)))
+                  collisions (repeatedly (int (/ (count population) 8))
+                                         #(if (< (rand) construction-ratio)
+                                           constructive-collision
+                                           destructive-collision))]
+              (recur (concat (drop (* 4 (count collisions)) shuffled-population)
+                             (apply concat
+                                    (doall ((mapper)
+                                             #(%1 %2)
+                                             collisions
+                                             (partition 4 shuffled-population)))))))))))))

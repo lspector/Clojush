@@ -354,9 +354,8 @@
 
           :use-collider false
           :collider-target-population-size 1000
-          :collider-collision-threshold 100
-          :collider-point-evaluations-per-report 100000
-          :collider-simultaneous-collisions 16 ;; should be > (2 x cores) and < (collision-threshold / 4)
+          :collider-point-evaluations-per-report 1000000
+          :collider-threads 8
           )))
 
 (defn load-push-argmap
