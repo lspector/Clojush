@@ -78,8 +78,8 @@
   [population]
   (let [child (if (< (count population) (:collider-collision-threshold @push-argmap))
                 (collider-random-individual)
-                (let [parent1 (parent-selection-collision population)
-                      parent2 (parent-selection-collision population)
+                (let [parent1 (lrand-nth population) ;(parent-selection-collision population)
+                      parent2 (lrand-nth population) ;(parent-selection-collision population)
                       varied (collider-variation parent1 parent2)]
                   (if (empty? (:genome varied))
                     (collider-random-individual)
@@ -105,7 +105,8 @@
   (let [target-size (:collider-target-population-size @push-argmap)]
     (loop [population []
            step 0]
-      (when (and (zero? (mod step 1000)) (not-empty population))
+      (when (and (zero? (mod step (:collider-steps-per-report @push-argmap)))
+                 (not-empty population))
         (println "=== Report at step:" step)
         (println "Population size:" (count population))
         (println "Best total error:" (apply min (map :total-error population)))

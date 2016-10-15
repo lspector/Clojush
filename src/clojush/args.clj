@@ -350,6 +350,7 @@
           :use-collider false
           :collider-target-population-size 1000
           :collider-collision-threshold 100
+          :collider-steps-per-report 1000
           )))
 
 (defn load-push-argmap
