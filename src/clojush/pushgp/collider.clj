@@ -1,6 +1,7 @@
 (ns clojush.pushgp.collider
   (:use [clojush args globals individual random translate]
-        [clojush.pushgp genetic-operators breed]))
+        [clojush.pushgp genetic-operators breed])
+  (:require [com.climate.claypoole :as cp]))
 
 (defn collider-random-individual
   "Returns a random individual using parameters in @push-argmap."
@@ -108,48 +109,53 @@
         []
         args))))
 
+(def point-evaluations-at-last-collider-report (atom 0))
+
+(def collider-pool (atom nil))
+
 (defn mapper
   []
   (if (:use-single-thread @push-argmap)
     map
-    pmap))
-
-(def point-evaluations-at-last-collider-report (atom 0))
+    (partial cp/pmap @collider-pool)))
 
 (defn run-collider
   [argmap]
-  (reset! solution nil)
-  (reset! point-evaluations-at-last-collider-report 0)
-  (let [target-size (:collider-target-population-size @push-argmap)
-        simultaneous-collisions (if (:use-single-thread @push-argmap)
-                                  1
-                                  (:collider-simultaneous-collisions @push-argmap))]
-    (loop [population []]
-      (when (and (not-empty population)
-                 (> @point-evaluations-count
-                    (+ @point-evaluations-at-last-collider-report
-                       (:collider-point-evaluations-per-report @push-argmap))))
-        (println "=== Report at point evaluations:" @point-evaluations-count)
-        (println "Population size:" (count population))
-        (println "Best total error:" (apply min (map :total-error population)))
-        (println "Average total error:" (float (/ (reduce + (map :total-error population)) (count population))))
-        (println "Average genome size:" (float (/ (reduce + (map count (map :genome population))) (count population))))
-        (reset! point-evaluations-at-last-collider-report @point-evaluations-count))
-      (if @solution
-        (println "Success at point evaluations:" @point-evaluations-count @solution)
-        (if (>= @point-evaluations-count (:max-point-evaluations @push-argmap))
-          (println "Failure")
-          (if (< (count population) (:collider-collision-threshold @push-argmap))
-            (recur (concat population (constructive-collision :from-scratch)))
-            (let [shuffled-population (shuffle population)
-                  construction-ratio (/ target-size (+ target-size (count population)))
-                  collisions (repeatedly simultaneous-collisions
-                                         #(if (< (rand) construction-ratio) :constructive :destructive))
-                  constructive (count (filter #{:constructive} collisions))
-                  destructive (- (count collisions) constructive)]
-              (recur (concat (drop (+ (* 4 constructive) (* 2 destructive)) shuffled-population)
-                             (apply concat (map destructive-collision
-                                                (partition 2 (take (* 2 destructive) shuffled-population))))
-                             (apply concat ((mapper) constructive-collision
-                                             (partition 4 (take (* 4 constructive)
-                                                                (drop (* 2 destructive) shuffled-population))))))))))))))
+  (let [multithread (not (:use-single-thread @push-argmap))]
+    (reset! solution nil)
+    (reset! point-evaluations-at-last-collider-report 0)
+    (when multithread
+      (reset! collider-pool (cp/threadpool (:collider-simultaneous-collisions @push-argmap))))
+    (let [target-size (:collider-target-population-size @push-argmap)
+          simultaneous-collisions (if multithread (:collider-simultaneous-collisions @push-argmap) 1)]
+      (loop [population []]
+        (when (and (not-empty population)
+                   (> @point-evaluations-count
+                      (+ @point-evaluations-at-last-collider-report
+                         (:collider-point-evaluations-per-report @push-argmap))))
+          (println "=== Report at point evaluations:" @point-evaluations-count)
+          (println "Population size:" (count population))
+          (println "Best total error:" (apply min (map :total-error population)))
+          (println "Average total error:" (float (/ (reduce + (map :total-error population)) (count population))))
+          (println "Average genome size:" (float (/ (reduce + (map count (map :genome population))) (count population))))
+          (reset! point-evaluations-at-last-collider-report @point-evaluations-count))
+        (if @solution
+          (do (println "Success at point evaluations:" @point-evaluations-count @solution)
+              (when multithread (cp/shutdown @collider-pool)))
+          (if (>= @point-evaluations-count (:max-point-evaluations @push-argmap))
+            (do (println "Failure")
+                (when multithread (cp/shutdown @collider-pool)))
+            (if (< (count population) (:collider-collision-threshold @push-argmap))
+              (recur (concat population (constructive-collision :from-scratch)))
+              (let [shuffled-population (shuffle population)
+                    construction-ratio (/ target-size (+ target-size (count population)))
+                    collisions (repeatedly simultaneous-collisions
+                                           #(if (< (rand) construction-ratio) :constructive :destructive))
+                    constructive (count (filter #{:constructive} collisions))
+                    destructive (- (count collisions) constructive)]
+                (recur (concat (drop (+ (* 4 constructive) (* 2 destructive)) shuffled-population)
+                               (apply concat (map destructive-collision
+                                                  (partition 2 (take (* 2 destructive) shuffled-population))))
+                               (apply concat ((mapper) constructive-collision
+                                               (partition 4 (take (* 4 constructive)
+                                                                  (drop (* 2 destructive) shuffled-population)))))))))))))))

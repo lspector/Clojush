@@ -13,7 +13,7 @@
                  [clojure-csv "2.0.1"]
                  [org.clojure/data.json "0.2.6"]
                  [clj-random "0.1.7"]
-                 [com.climate/claypool "1.1.3"]]
+                 [com.climate/claypoole "1.1.3"]]
   :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
             [lein-gorilla "0.3.5"]
