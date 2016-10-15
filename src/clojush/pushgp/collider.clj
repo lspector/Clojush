@@ -29,16 +29,6 @@
                        survivors)
                (rest cases))))))
 
-;(defn remove-one
-;  "Returns the provided vector v without its first instance of the provided item. Assumes that item is in v."
-;  [item v]
-;  (loop [processed []
-;         remaining v]
-;    (if (= item (first remaining))
-;      (vec (concat processed (rest remaining)))
-;      (recur (vec (conj processed (first remaining)))
-;             (rest remaining)))))
-
 (defn remove-one
   "Returns the provided collection coll without its first instance of the provided item. Assumes that item is in coll."
   [item coll]
@@ -48,32 +38,6 @@
       (concat processed (rest remaining))
       (recur (conj processed (first remaining))
              (rest remaining)))))
-
-(defn inverse-lex
-  "Returns a single individual from the provided pooulation (vector of individuals) via inverse lexicase selection."
-  [popvec]
-  (loop [survivors popvec
-         cases (shuffle (range (count (:errors (first popvec)))))]
-    (if (or (empty? cases)
-            (empty? (rest survivors)))
-      (rand-nth survivors)
-      (let [max-err-for-case (apply max (map #(nth % (first cases))
-                                             (map #(:errors %) survivors)))]
-        (recur (filter #(= (nth (:errors %) (first cases)) max-err-for-case)
-                       survivors)
-               (rest cases))))))
-
-;(defn parent-selection-collision
-;  "Returns a parent by colliding two elements of the population and returning the one selected that lexicase
-;  selection selects."
-;  [population]
-;  (lex [(rand-nth population) (rand-nth population)]))
-
-(defn destructive-collision
-  "Returns a collection containing only one of the two given individuals, the one that wins a lexicase selection
-  tournament."
-  [[i1 i2]]
-  [(lex [i1 i2])])
 
 (defn destructive-collision
   "Returns the given individuals without the loser of an iterated lexicase selection process."
@@ -87,6 +51,7 @@
                (conj result winner))))))
 
 (defn collider-variation
+  "Returns an individual that is a recombination/mutation of the provided 2 parents."
   [parent1 parent2]
   (-> (alternation parent1 parent2 @push-argmap)
       (uniform-mutation @push-argmap)
