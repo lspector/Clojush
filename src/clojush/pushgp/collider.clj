@@ -94,6 +94,7 @@
                               :program program
                               :errors errors
                               :total-error total-error)]
+        (swap! evaluations-count inc)
         (when (<= total-error (:error-threshold @push-argmap))
           (reset! solution evaluated-child))
         (if from-scratch
