@@ -354,7 +354,7 @@
 
           :use-collider false
           :collider-target-population-size 1000
-          :collider-point-evaluations-per-report 1000000
+          :collider-point-evaluations-per-report 10000000
           :collider-threads 8
           )))
 

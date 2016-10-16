@@ -66,18 +66,19 @@
   "Returns the provided individuals with the possible addition of an individual created by varying them. The new
   individual must bass the test of `satisfiesconstraints?` in order to be returned. If the collision produces a
   solution, then it is stored in the solution atom."
-  [args] ;; args should be :from-scratch or a collection of 4 individuals
-  (let [child (if (= args :from-scratch)
-                (collider-random-individual)
-                (let [parent1 (lex [(nth args 0) (nth args 1)])
-                      parent2 (lex [(nth args 2) (nth args 3)])
-                      varied (collider-variation parent1 parent2)]
+  [args] ;; args should be :from-scratch or a collection of 3 individuals
+  (let [[parent1 parent2] (if (= args :from-scratch)
+                            [nil nil]
+                            (destructive-collision args))
+        child (if parent1
+                (let [varied (collider-variation parent1 parent2)]
                   (if (empty? (:genome varied))
                     (collider-random-individual)
                     (if (> (count (:genome varied))
                            (:max-points @push-argmap))
                       (revert-too-big-child parent1 varied @push-argmap)
-                      varied))))]
+                      varied)))
+                (collider-random-individual))]
     (if (satisfies-constraints? (:genome child))
       (let [program (translate-plush-genome-to-push-program child @push-argmap)
             errors ((:error-function @push-argmap) program)
@@ -88,12 +89,10 @@
                               :total-error total-error)]
         (when (<= total-error (:error-threshold @push-argmap))
           (reset! solution evaluated-child))
-        (if (= args :from-scratch)
-          [evaluated-child]
-          (conj args evaluated-child)))
-      (if (= args :from-scratch)
-        []
-        args))))
+        (if parent1
+          (conj args evaluated-child)
+          [evaluated-child]))
+      (if parent1 args []))))
 
 (def point-evaluations-at-last-collider-report (atom 0))
 
@@ -114,7 +113,7 @@
                  (> @point-evaluations-count
                     (+ @point-evaluations-at-last-collider-report
                        (:collider-point-evaluations-per-report @push-argmap))))
-        (println "=== Report at point evaluations:" @point-evaluations-count)
+        (println "=== Collider report at point evaluations:" @point-evaluations-count)
         (println "Collider population size:" (count population))
         (report-and-check-for-success population @point-evaluations-count @push-argmap)
         (reset! point-evaluations-at-last-collider-report @point-evaluations-count))
@@ -131,13 +130,13 @@
                                            (repeat (:collider-threads @push-argmap) :from-scratch))))))
             (let [shuffled-population (shuffle population)
                   construction-ratio (/ target-size (+ target-size (count population)))
-                  collisions (repeatedly (int (/ (count population) 8))
+                  collisions (repeatedly (int (/ (count population) 6))
                                          #(if (< (rand) construction-ratio)
                                            constructive-collision
                                            destructive-collision))]
-              (recur (concat (drop (* 4 (count collisions)) shuffled-population)
+              (recur (concat (drop (* 3 (count collisions)) shuffled-population)
                              (apply concat
                                     (doall ((mapper)
                                              #(%1 %2)
                                              collisions
-                                             (partition 4 shuffled-population)))))))))))))
+                                             (partition 3 shuffled-population)))))))))))))
