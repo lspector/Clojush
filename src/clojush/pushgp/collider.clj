@@ -119,7 +119,9 @@
         (report-and-check-for-success population @point-evaluations-count @push-argmap)
         (reset! point-evaluations-at-last-collider-report @point-evaluations-count))
       (if @solution
-        (do (println "Success at point evaluations:" @point-evaluations-count @solution)
+        (do (println "Success at point evaluations:" @point-evaluations-count)
+            (println "Solution:" @solution)
+            (final-report @point-evaluations-count @solution @push-argmap)
             (cp/shutdown @collider-pool))
         (if (>= @point-evaluations-count (:max-point-evaluations @push-argmap))
           (do (println "Failure")
