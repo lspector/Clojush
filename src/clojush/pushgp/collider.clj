@@ -53,12 +53,19 @@
 (defn collider-variation
   "Returns an individual that is a recombination/mutation of the provided 2 parents."
   [parent1 parent2]
-  (-> (alternation parent1 parent2 @push-argmap)
-      (uniform-mutation @push-argmap)
-      (uniform-close-mutation @push-argmap)
-      (uniform-silence-mutation @push-argmap)
-      (uniform-deletion @push-argmap)
-      (uniform-addition @push-argmap)))
+  (if (rand-nth [true false])
+    (-> (lex [parent1 parent2])
+        (uniform-mutation @push-argmap)
+        (uniform-close-mutation @push-argmap)
+        (uniform-silence-mutation @push-argmap)
+        (uniform-deletion @push-argmap)
+        (uniform-addition @push-argmap))
+    (-> (alternation parent1 parent2 @push-argmap)
+        (uniform-mutation @push-argmap)
+        (uniform-close-mutation @push-argmap)
+        (uniform-silence-mutation @push-argmap)
+        (uniform-deletion @push-argmap)
+        (uniform-addition @push-argmap))))
 
 (def solution (atom nil))
 
