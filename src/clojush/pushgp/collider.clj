@@ -29,6 +29,20 @@
                        survivors)
                (rest cases))))))
 
+(defn inverse-lex
+  "Returns a single individual from the provided population (vector of individuals) via inverse lexicase selection."
+  [popvec]
+  (loop [survivors popvec
+         cases (shuffle (range (count (:errors (first popvec)))))]
+    (if (or (empty? cases)
+            (empty? (rest survivors)))
+      (rand-nth survivors)
+      (let [max-err-for-case (apply max (map #(nth % (first cases))
+                                             (map #(:errors %) survivors)))]
+        (recur (filter #(= (nth (:errors %) (first cases)) max-err-for-case)
+                       survivors)
+               (rest cases))))))
+
 (defn remove-one
   "Returns the provided collection coll without its first instance of the provided item. Assumes that item is in coll."
   [item coll]
@@ -39,16 +53,21 @@
       (recur (conj processed (first remaining))
              (rest remaining)))))
 
+;(defn destructive-collision
+;  "Returns the given individuals without the loser of an iterated lexicase selection process."
+;  [pool]
+;  (loop [remaining pool
+;         result []]
+;    (if (= (count remaining) 1)
+;      result
+;      (let [winner (lex remaining)]
+;        (recur (remove-one winner remaining)
+;               (conj result winner))))))
+
 (defn destructive-collision
   "Returns the given individuals without the loser of an iterated lexicase selection process."
   [pool]
-  (loop [remaining pool
-         result []]
-    (if (= (count remaining) 1)
-      result
-      (let [winner (lex remaining)]
-        (recur (remove-one winner remaining)
-               (conj result winner))))))
+  (remove-one (inverse-lex pool) pool))
 
 (defn collider-variation
   "Returns an individual that is a recombination/mutation of the provided 2 parents."
@@ -141,7 +160,7 @@
                                            (repeat (:collider-threads @push-argmap) :from-scratch))))))
             (let [shuffled-population (shuffle population)
                   construction-ratio (/ target-size (+ target-size (count population)))
-                  collisions (repeatedly (int (/ (count population) arity))
+                  collisions (repeatedly (* 2 (:collider-threads @push-argmap)) ;(int (/ (count population) arity))
                                          #(if (< (rand) construction-ratio)
                                            constructive-collision
                                            destructive-collision))]
