@@ -14,6 +14,7 @@
    :uniform-close-mutation {:fn uniform-close-mutation :parents 1}
    :uniform-silence-mutation {:fn uniform-silence-mutation :parents 1}
    :uniform-deletion {:fn uniform-deletion :parents 1}
+   :uniform-addition {:fn uniform-addition :parents 1}
    :make-next-operator-revertable {:fn nil :parents 0}
    :autoconstruction {:fn autoconstruction :parents 2}
    })
@@ -21,7 +22,7 @@
 (defn revert-too-big-child
   "Determines what individual should replace a child program that exceeds the
    size limit. Options are:
-     :parent -- one of the parents (default)
+     :parent -- one of the parents
      :empty  -- an empty program
      :truncate -- truncate child after max points
      :random -- a random program

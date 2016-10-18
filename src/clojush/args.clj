@@ -81,6 +81,7 @@
                                            [:make-next-operator-revertable :uniform-silence-mutation] 0.0 
                                            :autoconstruction 0.0
                                            :uniform-deletion 0.0
+                                           :uniform-addition 0.0
                                            }
           ;; The map supplied to :genetic-operator-probabilities should contain genetic operators
           ;; that sum to 1.0. All available genetic operators are defined in clojush.pushgp.breed.
@@ -131,6 +132,10 @@
           
           :uniform-deletion-rate 0.01 
           ;; The probability that any instruction will be deleted during uniform deletion.
+          
+          :uniform-addition-rate 0.01
+          ;; The probability that any instruction will have a new one added before or after it during
+          ;; uniform addition.
           
           :uniform-silence-mutation-rate 0.1 
           ;; The probability of each :silent being switched during uniform silent mutation.
