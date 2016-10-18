@@ -154,6 +154,24 @@ given by uniform-deletion-rate."
                                   (:ancestors ind)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform addition
+
+(defn uniform-addition
+  "Returns the individual with each element of its genome possibly preceded or followed by
+  a new gene, with probability given by uniform-addition-rate."
+  [ind {:keys [uniform-addition-rate maintain-ancestors atom-generators]}]
+  (let [new-genome (vec (apply concat
+                               (map #(if (< (lrand) uniform-addition-rate)
+                                      (lshuffle [% (random-plush-instruction-map atom-generators)])
+                                      [%])
+                                    (:genome ind))))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; alternation
 
 (defn alternation
