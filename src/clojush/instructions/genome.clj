@@ -22,7 +22,7 @@
              (not (empty? (:genome state)))
              (not (empty? (stack-ref :genome 0 state)))
              (< (count (first (:genome state)))
-                (/ @global-max-points 2)))
+                (/ @global-max-points 4)))
       (let [genome (stack-ref :genome 0 state)
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
@@ -276,4 +276,3 @@
   ;; pushes false, but is replaced with boolean_rand during 
   ;; nondetermistic autoconstruction
   ^{:stack-types [:genome :boolean]} (fn [state] (push-item false :boolean state)))
-
