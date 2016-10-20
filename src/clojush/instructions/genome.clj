@@ -1,6 +1,7 @@
 (ns clojush.instructions.genome  
   (:use [clojush pushstate globals random]
-        clojush.instructions.common))
+        clojush.instructions.common
+        clojush.pushgp.genetic-operators))
 
 (define-registered genome_pop (with-meta (popper :genome) {:stack-types [:genome]}))
 (define-registered genome_dup (with-meta (duper :genome) {:stack-types [:genome]}))

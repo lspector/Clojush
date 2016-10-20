@@ -86,6 +86,30 @@
                                   (:ancestors ind)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform instruction mutation
+
+(defn uniform-instruction-mutation
+  "Uniformly mutates individual. For each token in program, there is
+   uniform-mutation-rate probability of being mutated. If a token is to be
+   mutated it will be replaced with a random instruction."
+  [ind {:keys [uniform-mutation-rate maintain-ancestors atom-generators]
+        :as argmap}]
+  (let [instruction-mutator (fn [token]
+                              (assoc token
+                                     :instruction
+                                     (:instruction (first (random-plush-genome 1 atom-generators argmap)))))
+        token-mutator (fn [token]
+                        (if (< (lrand) uniform-mutation-rate)
+                          (instruction-mutator token))
+                          token)
+        new-genome (map token-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; uniform close mutation
 
 (defn uniform-close-mutation
