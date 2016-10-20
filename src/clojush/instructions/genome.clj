@@ -1,5 +1,5 @@
 (ns clojush.instructions.genome  
-  (:use [clojush pushstate globals random]
+  (:use [clojush pushstate globals args random]
         clojush.instructions.common
         clojush.pushgp.genetic-operators))
 
@@ -277,3 +277,19 @@
   ;; pushes false, but is replaced with boolean_rand during 
   ;; nondetermistic autoconstruction
   ^{:stack-types [:genome :boolean]} (fn [state] (push-item false :boolean state)))
+
+(define-registered 
+  genome_uniform_instruction_mutation
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (:float state)))
+             (not (empty? (:genome state))))
+      (let [rate (mod (Math/abs (first (:float state))) 1.0)
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-instruction-mutation
+                                        {:genome genome}
+                                        (merge @push-argmap {:uniform-mutation-rate rate}))))
+                        :genome)))
+      state)))

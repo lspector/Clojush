@@ -73,6 +73,7 @@
           :genetic-operator-probabilities {:reproduction 0.0
                                            :alternation 0.7
                                            :uniform-mutation 0.1
+                                           :uniform-instruction-mutation 0.0
                                            ; Similar to the old ULTRA operator:
                                            [:alternation :uniform-mutation] 0.2 
                                            :uniform-close-mutation 0.0
@@ -358,7 +359,7 @@
   (when (:autoconstructive @push-argmap)
     (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0})
     (swap! push-argmap assoc :epigenetic-markers [:close :silent])
-    (doseq [instr (registered-for-stacks [:integer :boolean :exec :genome])]
+    (doseq [instr (registered-for-stacks [:integer :boolean :exec :genome :float])] ;;; ONLY ADD FLOAT IF USING GENOME DSL
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
