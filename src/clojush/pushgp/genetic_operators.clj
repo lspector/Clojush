@@ -369,7 +369,7 @@ programs encoded by genomes g1 and g2."
         c1-diff (diff g c1)
         c2-diff (diff g c2)
         gc1-diff (diff c1 gc1)
-        gc2-diff (diff c2 gc1)
+        gc2-diff (diff c2 gc2)
         diffs [c1-diff c2-diff gc1-diff gc2-diff]]
     (and (> (reduce min diffs) 0)
          (apply distinct? diffs))))
