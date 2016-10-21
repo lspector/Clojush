@@ -309,3 +309,23 @@
                                         (merge @push-argmap {:uniform-mutation-rate rate}))))
                         :genome)))
       state)))
+
+(define-registered
+  genome_uniform_integer_mutation
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (if (and (not (empty? (rest (:integer state))))
+             (not (empty? (:genome state))))
+      (let [rate (+ 0.001 (* 0.001 (mod (first (:integer state)) 100)))
+            stdev (+ 1 (#(if (pos? %) % (- %)) (second (:integer state))))
+            genome (first (:genome state))]
+        (->> (pop-item :integer state)
+             (pop-item :integer)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-integer-mutation
+                                        {:genome genome}
+                                        (merge @push-argmap
+                                               {:uniform-mutation-constant-tweak-rate rate
+                                                :uniform-mutation-int-gaussian-standard-deviation stdev}))))
+                        :genome)))
+      state)))

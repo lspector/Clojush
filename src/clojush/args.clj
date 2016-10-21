@@ -74,6 +74,7 @@
                                            :alternation 0.7
                                            :uniform-mutation 0.1
                                            :uniform-instruction-mutation 0.0
+                                           :uniform-integer-mutation 0.0
                                            ; Similar to the old ULTRA operator:
                                            [:alternation :uniform-mutation] 0.2 
                                            :uniform-close-mutation 0.0

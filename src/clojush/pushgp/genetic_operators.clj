@@ -38,7 +38,7 @@
     (assoc instr-map :instruction new-instr)))
 
 (defn uniform-mutation
-  "Uniformly mutates individual. For each token in program, there is
+  "Uniformly mutates individual. For each token in the genome, there is
    uniform-mutation-rate probability of being mutated. If a token is to be
    mutated, it has a uniform-mutation-constant-tweak-rate probability of being
    mutated using a constant mutator (which varies depending on the type of the
@@ -89,19 +89,47 @@
 ;; uniform instruction mutation
 
 (defn uniform-instruction-mutation
-  "Uniformly mutates individual. For each token in program, there is
+  "Uniformly mutates individual. For each token in the genome, there is
    uniform-mutation-rate probability of being mutated. If a token is to be
    mutated it will be replaced with a random instruction."
   [ind {:keys [uniform-mutation-rate maintain-ancestors atom-generators]
         :as argmap}]
   (let [instruction-mutator (fn [token]
                               (assoc token
-                                     :instruction
-                                     (:instruction (first (random-plush-genome 1 atom-generators argmap)))))
+                                :instruction
+                                (:instruction (first (random-plush-genome 1 atom-generators argmap)))))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
                           (instruction-mutator token))
-                          token)
+                        token)
+        new-genome (map token-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform integer mutation
+
+(defn uniform-integer-mutation
+  "Uniformly mutates individual. For each integer in program, there is
+   uniform-mutation-rate probability of being mutated. If a token is to be
+   mutated it will be replaced with a random instruction."
+  [ind {:keys [uniform-mutation-constant-tweak-rate uniform-mutation-int-gaussian-standard-deviation
+               maintain-ancestors atom-generators]
+        :as argmap}]
+  (let [constant-mutator (fn [token]
+                           (let [const (:instruction token)]
+                             (if (integer? const)
+                               (assoc token
+                                 :instruction
+                                 (round (perturb-with-gaussian-noise uniform-mutation-int-gaussian-standard-deviation const)))
+                               token)))
+        token-mutator (fn [token]
+                        (if (< (lrand) uniform-mutation-constant-tweak-rate)
+                          (constant-mutator token))
+                        token)
         new-genome (map token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
