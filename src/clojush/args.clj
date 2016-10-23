@@ -1,3 +1,6 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
 (ns clojush.args
     (:require [clj-random.core :as random])
   (:use [clojush globals random util pushstate]
@@ -75,6 +78,7 @@
                                            :uniform-mutation 0.1
                                            :uniform-instruction-mutation 0.0
                                            :uniform-integer-mutation 0.0
+                                           :uniform-float-mutation 0.0
                                            ; Similar to the old ULTRA operator:
                                            [:alternation :uniform-mutation] 0.2 
                                            :uniform-close-mutation 0.0
@@ -386,3 +390,4 @@ into @push-argmap first."
   ([argmap]
     (load-push-argmap argmap)
     (reset-globals)))
+;; @@

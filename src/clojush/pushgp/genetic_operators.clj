@@ -81,7 +81,7 @@
                             (constant-mutator token)
                             (instruction-mutator token))
                           token))
-        new-genome (map token-mutator (:genome ind))]
+        new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
                      :ancestors (if maintain-ancestors
@@ -117,8 +117,7 @@
 
 (defn uniform-integer-mutation
   "Uniformly mutates individual. For each integer in program, there is
-   uniform-mutation-rate probability of being mutated. If a token is to be
-   mutated it will be replaced with a random instruction."
+   uniform-mutation-constant-tweak-rate probability of being mutated."
   [ind {:keys [uniform-mutation-constant-tweak-rate uniform-mutation-int-gaussian-standard-deviation
                maintain-ancestors atom-generators]
         :as argmap}]
@@ -133,7 +132,34 @@
                         (if (< (lrand) uniform-mutation-constant-tweak-rate)
                           (constant-mutator token))
                         token)
-        new-genome (map token-mutator (:genome ind))]
+        new-genome (mapv token-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform float mutation
+
+(defn uniform-float-mutation
+  "Uniformly mutates individual. For each float in program, there is
+   uniform-mutation-constant-tweak-rate probability of being mutated."
+  [ind {:keys [uniform-mutation-constant-tweak-rate uniform-mutation-float-gaussian-standard-deviation
+               maintain-ancestors atom-generators]
+        :as argmap}]
+  (let [constant-mutator (fn [token]
+                           (let [const (:instruction token)]
+                             (if (float? const)
+                               (assoc token
+                                 :instruction
+                                 (perturb-with-gaussian-noise uniform-mutation-float-gaussian-standard-deviation const))
+                               token)))
+        token-mutator (fn [token]
+                        (if (< (lrand) uniform-mutation-constant-tweak-rate)
+                          (constant-mutator token))
+                        token)
+        new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
                      :ancestors (if maintain-ancestors

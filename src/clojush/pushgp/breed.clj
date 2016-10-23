@@ -1,3 +1,6 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
 (ns clojush.pushgp.breed
   (:use [clojush globals random simplification individual evaluate translate]
         [clojush.pushgp parent-selection genetic-operators])
@@ -11,6 +14,9 @@
    :two-point-crossover {:fn two-point-crossover :parents 2}
    :uniform-crossover {:fn uniform-crossover :parents 2}
    :uniform-mutation {:fn uniform-mutation :parents 1}
+   :uniform-instruction-mutation {:fn uniform-instruction-mutation :parents 1}
+   :uniform-integer-mutation {:fn uniform-integer-mutation :parents 1}
+   :uniform-float-mutation {:fn uniform-float-mutation :parents 1}
    :uniform-close-mutation {:fn uniform-close-mutation :parents 1}
    :uniform-silence-mutation {:fn uniform-silence-mutation :parents 1}
    :uniform-deletion {:fn uniform-deletion :parents 1}
@@ -113,3 +119,5 @@
         (if (<= prob (second (first vectored-go-probabilities)))
           (perform-genetic-operator (first (first vectored-go-probabilities)) population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
+
+;; @@

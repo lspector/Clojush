@@ -316,4 +316,24 @@
                                                 :uniform-mutation-int-gaussian-standard-deviation stdev}))))
                         :genome)))
       state)))
+
+(define-registered
+  genome_uniform_float_mutation
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (rest (:float state))))
+             (not (empty? (:genome state))))
+      (let [rate (mod (first (:float state)) 1.0)
+            stdev (+ 1 (#(if (pos? %) % (- %)) (second (:float state))))
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :float)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-float-mutation
+                                        {:genome genome}
+                                        (merge @push-argmap
+                                               {:uniform-mutation-constant-tweak-rate rate
+                                                :uniform-mutation-float-gaussian-standard-deviation stdev}))))
+                        :genome)))
+      state)))
 ;; @@
