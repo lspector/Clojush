@@ -455,4 +455,26 @@
                                         (merge @push-argmap {:uniform-addition-rate rate}))))
                         :genome)))
       state)))
+
+(define-registered
+  genome_alternation
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (rest (:float state))))
+             (not (empty? (rest (:genome state)))))
+      (let [rate (mod (first (:float state)) 1.0)
+            dev (#(if (pos? %) % (- %)) (second (:float state)))
+            genome1 (first (:genome state))
+            genome2 (second (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :float)
+             (pop-item :genome)
+             (pop-item :genome)
+             (push-item (vec (:genome (alternation
+                                        {:genome genome}
+                                        (merge @push-argmap
+                                               {:alternation-rate rate
+                                                :alignment-deviation dev}))))
+                        :genome)))
+      state)))
 ;; @@
