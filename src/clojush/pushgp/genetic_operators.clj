@@ -321,10 +321,10 @@ given by uniform-deletion-rate."
 (defn uniform-addition
   "Returns the individual with each element of its genome possibly preceded or followed by
   a new gene, with probability given by uniform-addition-rate."
-  [ind {:keys [uniform-addition-rate maintain-ancestors atom-generators]}]
+  [ind {:keys [uniform-addition-rate maintain-ancestors atom-generators] :as argmap}]
   (let [new-genome (vec (apply concat
                                (map #(if (< (lrand) uniform-addition-rate)
-                                      (lshuffle [% (random-plush-instruction-map atom-generators)])
+                                      (lshuffle [% (random-plush-instruction-map atom-generators argmap)])
                                       [%])
                                     (:genome ind))))]
     (make-individual :genome new-genome
@@ -345,17 +345,21 @@ given by uniform-deletion-rate."
         s2 (:genome parent2)
         new-genome (loop [i 0
                           use-s1 (lrand-nth [true false])
-                          result-genome []]
+                          result-genome []
+                          iteration-budget (+ (count s1) (count s2))]
                      (if (or (>= i (count (if use-s1 s1 s2))) ;; finished current program
-                             (> (count result-genome) max-points)) ;; runaway growth
-                       (seq result-genome);; Return, converting back into a sequence
+                             (> (count result-genome) max-points) ;; runaway growth
+                             (<= iteration-budget 0)) ;; looping too long
+                       result-genome ;; Return
                        (if (< (lrand) alternation-rate)
                          (recur (max 0 (+' i (Math/round (*' alignment-deviation (gaussian-noise-factor)))))
                                 (not use-s1)
-                                result-genome)
+                                result-genome
+                                (dec iteration-budget))
                          (recur (inc i)
                                 use-s1
-                                (conj result-genome (nth (if use-s1 s1 s2) i))))))]
+                                (conj result-genome (nth (if use-s1 s1 s2) i))
+                                (dec iteration-budget)))))]
     (make-individual :genome new-genome
                      :history (:history parent1)
                      :ancestors (if maintain-ancestors
