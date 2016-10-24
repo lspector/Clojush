@@ -371,4 +371,24 @@
                                         (merge @push-argmap {:uniform-mutation-rate rate}))))
                         :genome)))
       state)))
+
+(define-registered
+  genome_uniform_close_mutation
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (rest (:float state))))
+             (not (empty? (:genome state))))
+      (let [rate1 (mod (first (:float state)) 1.0)
+            rate2 (mod (first (:float state)) 1.0)
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :float)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-close-mutation
+                                        {:genome genome}
+                                        (merge @push-argmap
+                                               {:uniform-close-mutation-rate rate1
+                                                :close-increment-rate rate2}))))
+                        :genome)))
+      state)))
 ;; @@
