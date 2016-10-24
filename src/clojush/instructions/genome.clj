@@ -477,4 +477,19 @@
                                                 :alignment-deviation dev}))))
                         :genome)))
       state)))
+
+(define-registered
+  genome_two_point_crossover
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (if (not (empty? (rest (:genome state))))
+      (let [genome1 (first (:genome state))
+            genome2 (second (:genome state))]
+        (->> (pop-item :genome state)
+             (pop-item :genome)
+             (push-item (vec (:genome (two-point-crossover
+                                        {:genome genome}
+                                        @push-argmap)))
+                        :genome)))
+      state)))
 ;; @@
