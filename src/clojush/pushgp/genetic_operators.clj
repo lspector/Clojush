@@ -1,3 +1,6 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
 
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
@@ -346,7 +349,7 @@ given by uniform-deletion-rate."
                           result-genome []
                           iteration-budget (+ (count s1) (count s2))]
                      (if (or (>= i (count (if use-s1 s1 s2))) ;; finished current program
-                             (> (count result-genome) max-points) ;; runaway growth
+                             (> (count result-genome) (/ max-points 4)) ;; runaway growth
                              (<= iteration-budget 0)) ;; looping too long
                        result-genome ;; Return
                        (if (< (lrand) alternation-rate)
@@ -563,3 +566,5 @@ be set globally or eliminated in the future."
            :is-random-replacement
            (if variant false true)
       )))
+
+;; @@
