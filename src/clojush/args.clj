@@ -86,6 +86,8 @@
                                            [:alternation :uniform-mutation] 0.2 
                                            :uniform-close-mutation 0.0
                                            :uniform-silence-mutation 0.0
+                                           :uniform-crossover 0.0
+                                           :two-point-crossover 0.0
                                            ; A hill-climbing version of uniform-silence-mutation:
                                            [:make-next-operator-revertable :uniform-silence-mutation] 0.0 
                                            :autoconstruction 0.0
