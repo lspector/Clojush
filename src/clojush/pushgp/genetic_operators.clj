@@ -167,6 +167,31 @@
                                   (:ancestors ind)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform tag mutation
+
+(defn uniform-tag-mutation
+  "Uniformly mutates individual. For each tag instruction in program, there is
+   uniform-mutation-rate probability of being mutated."
+  [ind {:keys [uniform-mutation-rate uniform-mutation-tag-gaussian-standard-deviation
+               maintain-ancestors atom-generators]
+        :as argmap}]
+  (let [constant-mutator (fn [token]
+                           (let [const (:instruction token)]
+                             (if (tag-instruction? const)
+                               (tag-gaussian-tweak token uniform-mutation-tag-gaussian-standard-deviation)
+                               token)))
+        token-mutator (fn [token]
+                        (if (< (lrand) uniform-mutation-rate)
+                          (constant-mutator token))
+                        token)
+        new-genome (mapv token-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; uniform close mutation
 
 (defn uniform-close-mutation

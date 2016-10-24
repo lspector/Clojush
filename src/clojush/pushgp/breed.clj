@@ -17,6 +17,7 @@
    :uniform-instruction-mutation {:fn uniform-instruction-mutation :parents 1}
    :uniform-integer-mutation {:fn uniform-integer-mutation :parents 1}
    :uniform-float-mutation {:fn uniform-float-mutation :parents 1}
+   :uniform-tag-mutation {:fn uniform-tag-mutation :parents 1}
    :uniform-close-mutation {:fn uniform-close-mutation :parents 1}
    :uniform-silence-mutation {:fn uniform-silence-mutation :parents 1}
    :uniform-deletion {:fn uniform-deletion :parents 1}
