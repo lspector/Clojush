@@ -471,7 +471,8 @@
              (pop-item :genome)
              (pop-item :genome)
              (push-item (vec (:genome (alternation
-                                        {:genome genome}
+                                        {:genome genome1}
+                                        {:genome genome2}
                                         (merge @push-argmap
                                                {:alternation-rate rate
                                                 :alignment-deviation dev}))))
@@ -488,7 +489,24 @@
         (->> (pop-item :genome state)
              (pop-item :genome)
              (push-item (vec (:genome (two-point-crossover
-                                        {:genome genome}
+                                        {:genome genome1}
+                                        {:genome genome2}
+                                        @push-argmap)))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_uniform_crossover
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (if (not (empty? (rest (:genome state))))
+      (let [genome1 (first (:genome state))
+            genome2 (second (:genome state))]
+        (->> (pop-item :genome state)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-crossover
+                                        {:genome genome1}
+                                        {:genome genome2}
                                         @push-argmap)))
                         :genome)))
       state)))
