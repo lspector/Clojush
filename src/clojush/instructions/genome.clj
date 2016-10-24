@@ -352,7 +352,7 @@
              (push-item (vec (:genome (uniform-tag-mutation
                                         {:genome genome}
                                         (merge @push-argmap {:uniform-mutation-rate rate
-                                                             :uniform-mutation-tag-gaussian-standard-deviation stddev}))))
+                                                             :uniform-mutation-tag-gaussian-standard-deviation stdev}))))
                         :genome)))
       state)))
 
@@ -360,15 +360,18 @@
   genome_uniform_string_mutation
   ^{:stack-types [:genome :float :string]}
   (fn [state]
-    (if (and (not (empty? (:float state)))
+    (if (and (not (empty? (rest (:float state))))
              (not (empty? (:genome state))))
-      (let [rate (mod (first (:float state)) 1.0)
+      (let [rate1 (mod (first (:float state)) 1.0)
+            rate2 (mod (second (:float state)) 1.0)
             genome (first (:genome state))]
         (->> (pop-item :float state)
+             (pop-item :float)
              (pop-item :genome)
              (push-item (vec (:genome (uniform-string-mutation
                                         {:genome genome}
-                                        (merge @push-argmap {:uniform-mutation-rate rate}))))
+                                        (merge @push-argmap {:uniform-mutation-rate rate1
+                                                             :uniform-mutation-string-char-change-rate rate2}))))
                         :genome)))
       state)))
 

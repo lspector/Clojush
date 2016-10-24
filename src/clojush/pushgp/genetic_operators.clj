@@ -197,10 +197,16 @@
 (defn uniform-string-mutation
   "Uniformly mutates individual. For each string literal in the genome, there is
    uniform-mutation-rate probability of being mutated."
-  [ind {:keys [uniform-mutation-rate
+  [ind {:keys [uniform-mutation-rate uniform-mutation-string-char-change-rate
                maintain-ancestors atom-generators]
         :as argmap}]
-  (let [constant-mutator (fn [token]
+  (let [string-tweak (fn [st]
+                       (apply str (map (fn [c]
+                                         (if (< (lrand) uniform-mutation-string-char-change-rate)
+                                           (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127))))
+                                           c))
+                                       st)))
+        constant-mutator (fn [token]
                            (let [const (:instruction token)]
                              (if (string? const) 
                                (string-tweak const)
