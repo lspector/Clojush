@@ -116,7 +116,7 @@
 ;; uniform integer mutation
 
 (defn uniform-integer-mutation
-  "Uniformly mutates individual. For each integer in program, there is
+  "Uniformly mutates individual. For each integer in the genome, there is
    uniform-mutation-constant-tweak-rate probability of being mutated."
   [ind {:keys [uniform-mutation-constant-tweak-rate uniform-mutation-int-gaussian-standard-deviation
                maintain-ancestors atom-generators]
@@ -143,7 +143,7 @@
 ;; uniform float mutation
 
 (defn uniform-float-mutation
-  "Uniformly mutates individual. For each float in program, there is
+  "Uniformly mutates individual. For each float in the genome, there is
    uniform-mutation-constant-tweak-rate probability of being mutated."
   [ind {:keys [uniform-mutation-constant-tweak-rate uniform-mutation-float-gaussian-standard-deviation
                maintain-ancestors atom-generators]
@@ -170,7 +170,7 @@
 ;; uniform tag mutation
 
 (defn uniform-tag-mutation
-  "Uniformly mutates individual. For each tag instruction in program, there is
+  "Uniformly mutates individual. For each tag instruction in the genome, there is
    uniform-mutation-rate probability of being mutated."
   [ind {:keys [uniform-mutation-rate uniform-mutation-tag-gaussian-standard-deviation
                maintain-ancestors atom-generators]
@@ -179,6 +179,31 @@
                            (let [const (:instruction token)]
                              (if (tag-instruction? const)
                                (tag-gaussian-tweak token uniform-mutation-tag-gaussian-standard-deviation)
+                               token)))
+        token-mutator (fn [token]
+                        (if (< (lrand) uniform-mutation-rate)
+                          (constant-mutator token))
+                        token)
+        new-genome (mapv token-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform string mutation
+
+(defn uniform-string-mutation
+  "Uniformly mutates individual. For each string literal in the genome, there is
+   uniform-mutation-rate probability of being mutated."
+  [ind {:keys [uniform-mutation-rate
+               maintain-ancestors atom-generators]
+        :as argmap}]
+  (let [constant-mutator (fn [token]
+                           (let [const (:instruction token)]
+                             (if (string? const) 
+                               (string-tweak const)
                                token)))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
