@@ -217,6 +217,31 @@
                                   (:ancestors ind)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform boolean mutation
+
+(defn uniform-boolean-mutation
+  "Uniformly mutates individual. For each boolean in the genome, there is
+   uniform-mutation-constant-tweak-rate probability of being mutated."
+  [ind {:keys [uniform-mutation-constant-tweak-rate 
+               maintain-ancestors atom-generators]
+        :as argmap}]
+  (let [constant-mutator (fn [token]
+                           (let [const (:instruction token)]
+                             (if (or (= const true) (= const false)) 
+                               (assoc token :instruction (not const))
+                               token)))
+        token-mutator (fn [token]
+                        (if (< (lrand) uniform-mutation-constant-tweak-rate)
+                          (constant-mutator token))
+                        token)
+        new-genome (mapv token-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; uniform close mutation
 
 (defn uniform-close-mutation

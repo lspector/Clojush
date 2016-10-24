@@ -81,6 +81,7 @@
                                            :uniform-float-mutation 0.0
                                            :uniform-tag-mutation 0.0
                                            :uniform-string-mutation 0.0
+                                           :uniform-boolean-mutation 0.0
                                            ; Similar to the old ULTRA operator:
                                            [:alternation :uniform-mutation] 0.2 
                                            :uniform-close-mutation 0.0
