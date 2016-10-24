@@ -423,4 +423,36 @@
                                         (merge @push-argmap {:uniform-silence-mutation-rate rate}))))
                         :genome)))
       state)))
+
+(define-registered
+  genome_uniform_deletion
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (:float state)))
+             (not (empty? (:genome state))))
+      (let [rate (mod (first (:float state)) 1.0)
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-deletion
+                                        {:genome genome}
+                                        (merge @push-argmap {:uniform-deletion-rate rate}))))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_uniform_addition
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (:float state)))
+             (not (empty? (:genome state))))
+      (let [rate (mod (first (:float state)) 1.0)
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-addition
+                                        {:genome genome}
+                                        (merge @push-argmap {:uniform-addition-rate rate}))))
+                        :genome)))
+      state)))
 ;; @@
