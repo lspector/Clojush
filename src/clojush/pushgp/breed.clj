@@ -1,6 +1,4 @@
-;; gorilla-repl.fileformat = 1
 
-;; @@
 (ns clojush.pushgp.breed
   (:use [clojush globals random simplification individual evaluate translate]
         [clojush.pushgp parent-selection genetic-operators])
@@ -123,4 +121,3 @@
           (perform-genetic-operator (first (first vectored-go-probabilities)) population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
 
-;; @@

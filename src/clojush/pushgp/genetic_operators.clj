@@ -1,6 +1,4 @@
-;; gorilla-repl.fileformat = 1
 
-;; @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
@@ -565,4 +563,3 @@ be set globally or eliminated in the future."
            :is-random-replacement
            (if variant false true)
       )))
-;; @@

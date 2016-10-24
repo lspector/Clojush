@@ -1,6 +1,4 @@
-;; gorilla-repl.fileformat = 1
 
-;; @@
 (ns clojush.args
     (:require [clj-random.core :as random])
   (:use [clojush globals random util pushstate]
@@ -164,7 +162,7 @@
           :autoconstructive false 
           ;; If truthy, then :genetic-operator-probabilities will be {:autoconstruction 1.0}, 
           ;; :epigenetic-markers will be [:close :silent], and :atom-generators will include 
-          ;; everything in (registered-for-stacks [:integer :boolean :exec :genome]). Also sets 
+          ;; everything in (registered-for-stacks [:integer :boolean :exec :genome :float]). Also sets 
           ;; :replace-child-that-exceeds-size-limit-with to :empty. You will probably also want to
           ;; provide a high value for :max-generations.
           ;; The specific truthy value may be used to conditionalize the autoconstruction method,
@@ -396,4 +394,3 @@ into @push-argmap first."
   ([argmap]
     (load-push-argmap argmap)
     (reset-globals)))
-;; @@
