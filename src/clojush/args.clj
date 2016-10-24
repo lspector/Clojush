@@ -372,6 +372,7 @@
     (doseq [instr (registered-for-stacks [:integer :boolean :exec :genome :float])]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
+    (swap@ push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) (fn [] (lrand))))
     (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
       (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_integer_rand)))
     (if (neg? (:autoconstructive-integer-rand-enrichment @push-argmap))
