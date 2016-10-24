@@ -369,7 +369,7 @@
   (when (:autoconstructive @push-argmap)
     (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0})
     (swap! push-argmap assoc :epigenetic-markers [:close :silent])
-    (doseq [instr (registered-for-stacks [:integer :boolean :exec :genome])]
+    (doseq [instr (registered-for-stacks [:integer :boolean :exec :genome :float])]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
