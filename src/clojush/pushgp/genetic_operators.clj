@@ -209,7 +209,7 @@
         constant-mutator (fn [token]
                            (let [const (:instruction token)]
                              (if (string? const) 
-                               (string-tweak const)
+                               (assoc token :instruction (string-tweak const))
                                token)))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
