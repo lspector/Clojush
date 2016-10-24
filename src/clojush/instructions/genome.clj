@@ -1,4 +1,6 @@
+;; gorilla-repl.fileformat = 1
 
+;; @@
 
 (ns clojush.instructions.genome  
   (:use [clojush pushstate globals args random]
@@ -17,7 +19,7 @@
 (define-registered genome_shove (with-meta (shover :genome) {:stack-types [:genome :integer]}))
 (define-registered genome_empty (with-meta (emptyer :genome) {:stack-types [:genome :boolean]}))
 
-(define-registered
+#_(define-registered
   genome_gene_dup
   ^{:stack-types [:genome :integer]}
   (fn [state]
@@ -35,7 +37,7 @@
                         :genome)))
       state)))
 
-(define-registered
+#_(define-registered
   genome_gene_randomize
   ^{:stack-types [:genome :integer]}
   (fn [state]
@@ -56,7 +58,7 @@
                         :genome)))
       state)))
 
-(define-registered
+#_(define-registered
   genome_gene_replace
   ^{:stack-types [:genome :integer]}
   (fn [state]
@@ -79,7 +81,7 @@
                         :genome)))
       state)))
 
-(define-registered
+#_(define-registered
   genome_gene_delete
   ^{:stack-types [:genome :integer]}
   (fn [state]
@@ -111,7 +113,7 @@
                         :genome)))
       state)))
 
-(define-registered
+#_(define-registered
   genome_gene_copy
   ^{:stack-types [:genome :integer]}
   ;; copies from the second genome to the first
@@ -131,7 +133,7 @@
                         :genome)))
       state)))
 
-(define-registered
+#_(define-registered
   genome_gene_copy_range
   ^{:stack-types [:genome :integer]}
   ;; copies from the second genome to the first
@@ -160,7 +162,7 @@
                      :genome)))
       state)))
 
-(define-registered
+#_(define-registered
   genome_toggle_silent
   ^{:stack-types [:genome :integer]}
   (fn [state]
@@ -178,7 +180,7 @@
                         :genome)))
       state)))
 
-(define-registered
+#_(define-registered
   genome_silence
   ^{:stack-types [:genome :integer]}
   (fn [state]
@@ -196,7 +198,7 @@
                         :genome)))
       state)))
 
-(define-registered
+#_(define-registered
   genome_unsilence
   ^{:stack-types [:genome :integer]}
   (fn [state]
@@ -214,7 +216,7 @@
                         :genome)))
       state)))
 
-(define-registered
+#_(define-registered
   genome_close_inc
   ^{:stack-types [:genome :integer]}
   (fn [state]
@@ -232,7 +234,7 @@
                         :genome)))
       state)))
 
-(define-registered
+#_(define-registered
   genome_close_dec
   ^{:stack-types [:genome :integer]}
   (fn [state]
@@ -483,7 +485,7 @@
                         :genome)))
       state)))
 
-(define-registered
+#_(define-registered
   genome_two_point_crossover
   ^{:stack-types [:genome]}
   (fn [state]
@@ -515,3 +517,4 @@
                         :genome)))
       state)))
 
+;; @@

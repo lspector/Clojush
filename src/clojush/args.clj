@@ -1,3 +1,6 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
 
 (ns clojush.args
     (:require [clj-random.core :as random])
@@ -371,6 +374,7 @@
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) (fn [] (lrand))))
+    (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) (fn [] (lrand-int 100))))
     (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
       (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_integer_rand)))
     (if (neg? (:autoconstructive-integer-rand-enrichment @push-argmap))
@@ -394,3 +398,5 @@ into @push-argmap first."
   ([argmap]
     (load-push-argmap argmap)
     (reset-globals)))
+
+;; @@
