@@ -407,4 +407,20 @@
                                                 :close-increment-rate rate2}))))
                         :genome)))
       state)))
+
+(define-registered
+  genome_uniform_silence_mutation
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (:float state)))
+             (not (empty? (:genome state))))
+      (let [rate (mod (first (:float state)) 1.0)
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-boolean-mutation
+                                        {:genome genome}
+                                        (merge @push-argmap {:uniform-silence-mutation-rate rate}))))
+                        :genome)))
+      state)))
 ;; @@
