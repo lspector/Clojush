@@ -358,7 +358,7 @@
 
 (define-registered
   genome_uniform_string_mutation
-  ^{:stack-types [:genome :float]}
+  ^{:stack-types [:genome :float :string]}
   (fn [state]
     (if (and (not (empty? (:float state)))
              (not (empty? (:genome state))))
