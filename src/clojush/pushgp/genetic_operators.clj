@@ -499,7 +499,7 @@ programs encoded by genomes g1 and g2."
     (and (> (reduce min diffs) 0) ;; diversification threshold set here
          (> (count (distinct diffs)) 1))))
 
-(defn august2016-diversifying?
+(defn three-gens-diff-diffs-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
@@ -516,24 +516,38 @@ programs encoded by genomes g1 and g2."
     (and (> (reduce min diffs) 0)
          (apply distinct? diffs))))
 
-(defn october2016-diversifying?
+(defn size-and-instruction-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [kids (repeatedly 2 #(produce-child-genome-by-autoconstruction g g false argmap))
-        everybody (conj kids g)
+  (let [kids (repeatedly 8 #(produce-child-genome-by-autoconstruction g g false argmap))
         instruction-set (fn [genome]
                           (hash-set (keys (frequencies (map :instruction genome)))))]
-    (and (apply distinct? (map count everybody))
-         (apply distinct? (map instruction-set everybody))
-         )))
+    (and (not (some #{g} kids))
+         (not (apply = (map count kids)))
+         (not (apply = (map instruction-set kids))))))
+
+(defn three-gens-size-and-instruction-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+        instruction-set (fn [genome]
+                          (hash-set (keys (frequencies (map :instruction genome)))))
+        kids (repeatedly 8 #(make-child g))
+        grandkids (map make-child kids)]
+    (and (apply distinct? (concat kids grandkids [g]))
+         (not (apply = (map count kids)))
+         (not (apply = (map count grandkids)))
+         (not (apply = (map instruction-set kids)))
+         (not (apply = (map instruction-set grandkids))))))
 
 (defn diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  ((case (:autoconstructive argmap)
-     (true :gecco2016) gecco2016-diversifying?
-     :august2016 august2016-diversifying?
-     :october2016 october2016-diversifying?)
+  ((case (:autoconstructive-diversification-test argmap)
+     :gecco2016 gecco2016-diversifying?
+     :three-gens-diff-diffs three-gens-diff-diffs-diversifying?
+     :size-and-instruction size-and-instruction-diversifying?
+     :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?)
     g
     argmap))
 
