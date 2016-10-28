@@ -2,7 +2,7 @@
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
 ;; Lee Spector, lspector@hampshire.edu, 2010
 
-(ns clojush.problems.regression.sextic
+(ns clojush.problems.regression.sextic-epsilon
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.random]
@@ -42,12 +42,12 @@
                         'in1))
    :population-size 1000
    :epigenetic-markers []
-   :parent-selection :tournament
+   :parent-selection :epsilon-lexicase
    :genetic-operator-probabilities {:alternation 0.5
                                     :uniform-mutation 0.5}
    :uniform-mutation-rate 0.1
    :alternation-rate 0.1
-   :alignment-deviation 100                                
+   :alignment-deviation 100
    :uniform-mutation-constant-tweak-rate 0.8
    :uniform-mutation-float-gaussian-standard-deviation 0.1
    })
