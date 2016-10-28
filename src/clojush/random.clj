@@ -1,3 +1,4 @@
+
 (ns clojush.random
   (:use [clojush globals translate])
   (:require [clj-random.core :as random]))
@@ -70,10 +71,10 @@
 (defn random-plush-genome-with-size
   "Returns a random Plush genome containing the given number of points."
   [genome-size atom-generators argmap]
-  (repeatedly genome-size
-              #(random-plush-instruction-map
-                 atom-generators
-                 argmap)))
+  (vec (repeatedly genome-size
+                   #(random-plush-instruction-map
+                      atom-generators
+                      argmap))))
 
 (defn random-plush-genome
   "Returns a random Plush genome with size limited by max-genome-size."
@@ -81,8 +82,8 @@
     (random-plush-genome max-genome-size atom-generators {}))
   ([max-genome-size atom-generators argmap]
     (random-plush-genome-with-size (inc (lrand-int max-genome-size))
-                           atom-generators
-                           argmap)))
+                                   atom-generators
+                                   argmap)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random Push code generator
@@ -97,3 +98,4 @@
                                     atom-generators
                                     argmap)}
       argmap)))
+

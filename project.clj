@@ -1,4 +1,4 @@
-(defproject clojush "2.5.0-SNAPSHOT"
+(defproject clojush "2.11.0-1-SNAPSHOT"
   :description "The Push programming language and the PushGP genetic programming
                 system implemented in Clojure.
                 See http://hampshire.edu/lspector/push.html"
@@ -15,7 +15,7 @@
                  [clj-random "0.1.7"]]
   :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
-            [lein-gorilla "0.3.5"]
+            [org.clojars.benfb/lein-gorilla "0.4.0"]
             [lein-cloverage "1.0.6"]]
   :codox {:source-uri "http://github.com/lspector/Clojush/blob/master/{filepath}#L{line}"
           :namespaces [#"^(?!clojush\.problems)"]
@@ -28,11 +28,12 @@
                               :sign-releases false
                               :password :env}]]
   :release-tasks [["vcs" "assert-committed"]
+                  ["change" "version" "leiningen.release/bump-version"]
                   ["change" "version" "leiningen.release/bump-version" "release"]
                   ["shell" "git" "commit" "-am" "Version ${:version} [ci skip]"]
                   ["vcs" "tag" "v" "--no-sign"] ; disable signing and add "v" prefix
                   ["deploy"]
-                  ["change" "version" "leiningen.release/bump-version"]
+                  ["change" "version" "leiningen.release/bump-version" "qualifier"]
                   ["shell" "git" "commit" "-am" "Version ${:version} [ci skip]"]
                   ["vcs" "push"]]
 ;;;;;;;;;; jvm settings for high performance, using most of the machine's RAM

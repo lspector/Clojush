@@ -2,14 +2,16 @@
   (:require [clojure.java.io :as io]
             [clj-random.core :as random]
             [clojure.repl :as repl])
-  (:use [clojush globals util pushstate random individual evaluate simplification translate]
-        [clojush.instructions boolean code common numbers random-instructions string char vectors tag zip return input-output genome]
+  (:use [clojush args globals util pushstate random individual evaluate simplification translate]
+        [clojush.instructions boolean code common numbers random-instructions string char vectors 
+         tag zip return input-output genome]
         [clojush.pushgp breed parent-selection report]
         [clojush.experimental.decimation]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; pushgp
 
+<<<<<<< HEAD
 (def push-argmap
   (atom (sorted-map
           ;;----------------------------------------
@@ -181,6 +183,8 @@ into @push-argmap first."
     (load-push-argmap argmap)
     (reset-globals)))
 
+=======
+>>>>>>> master
 (defn agent-error-handler
   "Given to individual agents for handling errors."
   [agnt except]

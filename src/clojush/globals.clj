@@ -9,7 +9,7 @@
 ;;
 ;; Most of the values and atoms in this file are those that are used by Push
 ;; instructions; all others, with few exceptions, should be defined in push-argmap
-;; in pushgp.clj and should be passed to whatever functions use them as arguments.
+;; in args.clj and should be passed to whatever functions use them as arguments.
 
 ;; push-types is the list of stacks used by the Push interpreter
 (def push-types '(:exec :code :integer :float :boolean :char :string :zip
