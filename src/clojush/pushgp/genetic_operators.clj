@@ -1,3 +1,7 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
+
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
@@ -38,7 +42,7 @@
     (assoc instr-map :instruction new-instr)))
 
 (defn uniform-mutation
-  "Uniformly mutates individual. For each token in program, there is
+  "Uniformly mutates individual. For each token in the genome, there is
    uniform-mutation-rate probability of being mutated. If a token is to be
    mutated, it has a uniform-mutation-constant-tweak-rate probability of being
    mutated using a constant mutator (which varies depending on the type of the
@@ -78,7 +82,166 @@
                             (constant-mutator token)
                             (instruction-mutator token))
                           token))
+        new-genome (mapv token-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform instruction mutation
+
+(defn uniform-instruction-mutation
+  "Uniformly mutates individual. For each token in the genome, there is
+   uniform-mutation-rate probability of being mutated. If a token is to be
+   mutated it will be replaced with a random instruction."
+  [ind {:keys [uniform-mutation-rate maintain-ancestors atom-generators]
+        :as argmap}]
+  (let [instruction-mutator (fn [token]
+                              (assoc token
+                                :instruction
+                                (:instruction (first (random-plush-genome 1 atom-generators argmap)))))
+        token-mutator (fn [token]
+                        (if (< (lrand) uniform-mutation-rate)
+                          (instruction-mutator token))
+                        token)
         new-genome (map token-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform integer mutation
+
+(defn uniform-integer-mutation
+  "Uniformly mutates individual. For each integer in the genome, there is
+   uniform-mutation-constant-tweak-rate probability of being mutated."
+  [ind {:keys [uniform-mutation-constant-tweak-rate uniform-mutation-int-gaussian-standard-deviation
+               maintain-ancestors atom-generators]
+        :as argmap}]
+  (let [constant-mutator (fn [token]
+                           (let [const (:instruction token)]
+                             (if (integer? const)
+                               (assoc token
+                                 :instruction
+                                 (round (perturb-with-gaussian-noise uniform-mutation-int-gaussian-standard-deviation const)))
+                               token)))
+        token-mutator (fn [token]
+                        (if (< (lrand) uniform-mutation-constant-tweak-rate)
+                          (constant-mutator token))
+                        token)
+        new-genome (mapv token-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform float mutation
+
+(defn uniform-float-mutation
+  "Uniformly mutates individual. For each float in the genome, there is
+   uniform-mutation-constant-tweak-rate probability of being mutated."
+  [ind {:keys [uniform-mutation-constant-tweak-rate uniform-mutation-float-gaussian-standard-deviation
+               maintain-ancestors atom-generators]
+        :as argmap}]
+  (let [constant-mutator (fn [token]
+                           (let [const (:instruction token)]
+                             (if (float? const)
+                               (assoc token
+                                 :instruction
+                                 (perturb-with-gaussian-noise uniform-mutation-float-gaussian-standard-deviation const))
+                               token)))
+        token-mutator (fn [token]
+                        (if (< (lrand) uniform-mutation-constant-tweak-rate)
+                          (constant-mutator token))
+                        token)
+        new-genome (mapv token-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform tag mutation
+
+(defn uniform-tag-mutation
+  "Uniformly mutates individual. For each tag instruction in the genome, there is
+   uniform-mutation-rate probability of being mutated."
+  [ind {:keys [uniform-mutation-rate uniform-mutation-tag-gaussian-standard-deviation
+               maintain-ancestors atom-generators]
+        :as argmap}]
+  (let [constant-mutator (fn [token]
+                           (let [const (:instruction token)]
+                             (if (tag-instruction? const)
+                               (tag-gaussian-tweak token uniform-mutation-tag-gaussian-standard-deviation)
+                               token)))
+        token-mutator (fn [token]
+                        (if (< (lrand) uniform-mutation-rate)
+                          (constant-mutator token))
+                        token)
+        new-genome (mapv token-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform string mutation
+
+(defn uniform-string-mutation
+  "Uniformly mutates individual. For each string literal in the genome, there is
+   uniform-mutation-rate probability of being mutated."
+  [ind {:keys [uniform-mutation-rate uniform-mutation-string-char-change-rate
+               maintain-ancestors atom-generators]
+        :as argmap}]
+  (let [string-tweak (fn [st]
+                       (apply str (map (fn [c]
+                                         (if (< (lrand) uniform-mutation-string-char-change-rate)
+                                           (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127))))
+                                           c))
+                                       st)))
+        constant-mutator (fn [token]
+                           (let [const (:instruction token)]
+                             (if (string? const) 
+                               (assoc token :instruction (string-tweak const))
+                               token)))
+        token-mutator (fn [token]
+                        (if (< (lrand) uniform-mutation-rate)
+                          (constant-mutator token))
+                        token)
+        new-genome (mapv token-mutator (:genome ind))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform boolean mutation
+
+(defn uniform-boolean-mutation
+  "Uniformly mutates individual. For each boolean in the genome, there is
+   uniform-mutation-constant-tweak-rate probability of being mutated."
+  [ind {:keys [uniform-mutation-constant-tweak-rate 
+               maintain-ancestors atom-generators]
+        :as argmap}]
+  (let [constant-mutator (fn [token]
+                           (let [const (:instruction token)]
+                             (if (or (= const true) (= const false)) 
+                               (assoc token :instruction (not const))
+                               token)))
+        token-mutator (fn [token]
+                        (if (< (lrand) uniform-mutation-constant-tweak-rate)
+                          (constant-mutator token))
+                        token)
+        new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
                      :ancestors (if maintain-ancestors
@@ -154,6 +317,24 @@ given by uniform-deletion-rate."
                                   (:ancestors ind)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform addition
+
+(defn uniform-addition
+  "Returns the individual with each element of its genome possibly preceded or followed by
+  a new gene, with probability given by uniform-addition-rate."
+  [ind {:keys [uniform-addition-rate maintain-ancestors atom-generators] :as argmap}]
+  (let [new-genome (vec (apply concat
+                               (map #(if (< (lrand) uniform-addition-rate)
+                                      (lshuffle [% (random-plush-instruction-map atom-generators argmap)])
+                                      [%])
+                                    (:genome ind))))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; alternation
 
 (defn alternation
@@ -165,17 +346,21 @@ given by uniform-deletion-rate."
         s2 (:genome parent2)
         new-genome (loop [i 0
                           use-s1 (lrand-nth [true false])
-                          result-genome []]
+                          result-genome []
+                          iteration-budget (+ (count s1) (count s2))]
                      (if (or (>= i (count (if use-s1 s1 s2))) ;; finished current program
-                             (> (count result-genome) max-points)) ;; runaway growth
-                       (seq result-genome);; Return, converting back into a sequence
+                             (> (count result-genome) (/ max-points 4)) ;; runaway growth
+                             (<= iteration-budget 0)) ;; looping too long
+                       result-genome ;; Return
                        (if (< (lrand) alternation-rate)
                          (recur (max 0 (+' i (Math/round (*' alignment-deviation (gaussian-noise-factor)))))
                                 (not use-s1)
-                                result-genome)
+                                result-genome
+                                (dec iteration-budget))
                          (recur (inc i)
                                 use-s1
-                                (conj result-genome (nth (if use-s1 s1 s2) i))))))]
+                                (conj result-genome (nth (if use-s1 s1 s2) i))
+                                (dec iteration-budget)))))]
     (make-individual :genome new-genome
                      :history (:history parent1)
                      :ancestors (if maintain-ancestors
@@ -303,7 +488,7 @@ programs encoded by genomes g1 and g2."
   (levenshtein-distance (expressed-program-sequence-from-genome g1 argmap)
                         (expressed-program-sequence-from-genome g2 argmap)))
 
-(defn diversifying?
+(defn gecco2016-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   (let [delta #(expressed-difference 
@@ -314,23 +499,57 @@ programs encoded by genomes g1 and g2."
     (and (> (reduce min diffs) 0) ;; diversification threshold set here
          (> (count (distinct diffs)) 1))))
 
-;; One of many possible alternative definitions of diversifying?
-;(defn diversifying?
-;  "Returns true iff genome g passes the diversification test."
-;  [g argmap]
-;  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
-;        diff #(expressed-difference %1 %2 argmap)
-;        c1 (make-child g)
-;        c2 (make-child g)
-;        gc1 (make-child c1)
-;        gc2 (make-child c2)
-;        c1-diff (diff g c1)
-;        c2-diff (diff g c2)
-;        gc1-diff (diff c1 gc1)
-;        gc2-diff (diff c2 gc1)
-;        diffs [c1-diff c2-diff gc1-diff gc2-diff]]
-;    (and (> (reduce min diffs) 0)
-;         (apply distinct? diffs))))
+(defn three-gens-diff-diffs-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+        diff #(expressed-difference %1 %2 argmap)
+        c1 (make-child g)
+        c2 (make-child g)
+        gc1 (make-child c1)
+        gc2 (make-child c2)
+        c1-diff (diff g c1)
+        c2-diff (diff g c2)
+        gc1-diff (diff c1 gc1)
+        gc2-diff (diff c2 gc2)
+        diffs [c1-diff c2-diff gc1-diff gc2-diff]]
+    (and (> (reduce min diffs) 0)
+         (apply distinct? diffs))))
+
+(defn size-and-instruction-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [kids (repeatedly 8 #(produce-child-genome-by-autoconstruction g g false argmap))
+        instruction-set (fn [genome]
+                          (hash-set (keys (frequencies (map :instruction genome)))))]
+    (and (not (some #{g} kids))
+         (not (apply = (map count kids)))
+         (not (apply = (map instruction-set kids))))))
+
+(defn three-gens-size-and-instruction-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+        instruction-set (fn [genome]
+                          (hash-set (keys (frequencies (map :instruction genome)))))
+        kids (repeatedly 8 #(make-child g))
+        grandkids (map make-child kids)]
+    (and (apply distinct? (concat kids grandkids [g]))
+         (not (apply = (map count kids)))
+         (not (apply = (map count grandkids)))
+         (not (apply = (map instruction-set kids)))
+         (not (apply = (map instruction-set grandkids))))))
+
+(defn diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  ((case (:autoconstructive-diversification-test argmap)
+     :gecco2016 gecco2016-diversifying?
+     :three-gens-diff-diffs three-gens-diff-diffs-diversifying?
+     :size-and-instruction size-and-instruction-diversifying?
+     :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?)
+    g
+    argmap))
 
 (defn autoconstruction
   "Returns a genome for a child produced either by autoconstruction (executing parent1
@@ -361,3 +580,5 @@ be set globally or eliminated in the future."
            :is-random-replacement
            (if variant false true)
       )))
+
+;; @@

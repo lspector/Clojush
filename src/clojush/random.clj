@@ -1,3 +1,4 @@
+
 (ns clojush.random
   (:use [clojush globals translate])
   (:require [clj-random.core :as random]))
@@ -113,3 +114,4 @@
                                     atom-generators
                                     argmap)}
       argmap)))
+

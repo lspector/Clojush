@@ -1,6 +1,11 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
+
 (ns clojush.instructions.genome  
-  (:use [clojush pushstate globals random]
-        clojush.instructions.common))
+  (:use [clojush pushstate globals args random]
+        clojush.instructions.common
+        clojush.pushgp.genetic-operators))
 
 (define-registered genome_pop (with-meta (popper :genome) {:stack-types [:genome]}))
 (define-registered genome_dup (with-meta (duper :genome) {:stack-types [:genome]}))
@@ -22,7 +27,7 @@
              (not (empty? (:genome state)))
              (not (empty? (stack-ref :genome 0 state)))
              (< (count (first (:genome state)))
-                (/ @global-max-points 2)))
+                (/ @global-max-points 4)))
       (let [genome (stack-ref :genome 0 state)
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
@@ -279,3 +284,239 @@
   ;; nondetermistic autoconstruction
   ^{:stack-types [:genome :boolean]} (fn [state] (push-item false :boolean state)))
 
+(define-registered
+  genome_uniform_instruction_mutation
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (:float state)))
+             (not (empty? (:genome state))))
+      (let [rate (mod (first (:float state)) 1.0)
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-instruction-mutation
+                                        {:genome genome}
+                                        (merge @push-argmap {:uniform-mutation-rate rate}))))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_uniform_integer_mutation
+  ^{:stack-types [:genome :integer :float]}
+  (fn [state]
+    (if (and (not (empty? (rest (:float state))))
+             (not (empty? (:genome state))))
+      (let [rate (mod (first (:float state)) 1.0)
+            stdev (+ 1 (#(if (pos? %) % (- %)) (second (:float state))))
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :float)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-integer-mutation
+                                        {:genome genome}
+                                        (merge @push-argmap
+                                               {:uniform-mutation-constant-tweak-rate rate
+                                                :uniform-mutation-int-gaussian-standard-deviation stdev}))))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_uniform_float_mutation
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (rest (:float state))))
+             (not (empty? (:genome state))))
+      (let [rate (mod (first (:float state)) 1.0)
+            stdev (+ 1 (#(if (pos? %) % (- %)) (second (:float state))))
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :float)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-float-mutation
+                                        {:genome genome}
+                                        (merge @push-argmap
+                                               {:uniform-mutation-constant-tweak-rate rate
+                                                :uniform-mutation-float-gaussian-standard-deviation stdev}))))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_uniform_tag_mutation
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (rest (:float state))))
+             (not (empty? (:genome state))))
+      (let [rate (mod (first (:float state)) 1.0)
+            stdev (+ 1 (#(if (pos? %) % (- %)) (second (:float state))))
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :float)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-tag-mutation
+                                        {:genome genome}
+                                        (merge @push-argmap {:uniform-mutation-rate rate
+                                                             :uniform-mutation-tag-gaussian-standard-deviation stdev}))))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_uniform_string_mutation
+  ^{:stack-types [:genome :float :string]}
+  (fn [state]
+    (if (and (not (empty? (rest (:float state))))
+             (not (empty? (:genome state))))
+      (let [rate1 (mod (first (:float state)) 1.0)
+            rate2 (mod (second (:float state)) 1.0)
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :float)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-string-mutation
+                                        {:genome genome}
+                                        (merge @push-argmap {:uniform-mutation-rate rate1
+                                                             :uniform-mutation-string-char-change-rate rate2}))))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_uniform_boolean_mutation
+  ^{:stack-types [:genome :float :boolean]}
+  (fn [state]
+    (if (and (not (empty? (:float state)))
+             (not (empty? (:genome state))))
+      (let [rate (mod (first (:float state)) 1.0)
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-boolean-mutation
+                                        {:genome genome}
+                                        (merge @push-argmap {:uniform-mutation-rate rate}))))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_uniform_close_mutation
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (rest (:float state))))
+             (not (empty? (:genome state))))
+      (let [rate1 (mod (first (:float state)) 1.0)
+            rate2 (mod (first (:float state)) 1.0)
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :float)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-close-mutation
+                                        {:genome genome}
+                                        (merge @push-argmap
+                                               {:uniform-close-mutation-rate rate1
+                                                :close-increment-rate rate2}))))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_uniform_silence_mutation
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (:float state)))
+             (not (empty? (:genome state))))
+      (let [rate (mod (first (:float state)) 1.0)
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-boolean-mutation
+                                        {:genome genome}
+                                        (merge @push-argmap {:uniform-silence-mutation-rate rate}))))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_uniform_deletion
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (:float state)))
+             (not (empty? (:genome state))))
+      (let [rate (mod (first (:float state)) 1.0)
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-deletion
+                                        {:genome genome}
+                                        (merge @push-argmap {:uniform-deletion-rate rate}))))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_uniform_addition
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (:float state)))
+             (not (empty? (:genome state))))
+      (let [rate (mod (first (:float state)) 1.0)
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :genome)
+             (push-item (vec (take (int (/ (:max-points @push-argmap) 4))
+                                   (:genome (uniform-addition
+                                              {:genome genome}
+                                              (merge @push-argmap 
+                                                     {:uniform-addition-rate rate})))))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_alternation
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (rest (:float state))))
+             (not (empty? (rest (:genome state)))))
+      (let [rate (mod (first (:float state)) 1.0)
+            dev (#(if (pos? %) % (- %)) (second (:float state)))
+            genome1 (first (:genome state))
+            genome2 (second (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :float)
+             (pop-item :genome)
+             (pop-item :genome)
+             (push-item (vec (:genome (alternation
+                                        {:genome genome1}
+                                        {:genome genome2}
+                                        (merge @push-argmap
+                                               {:alternation-rate rate
+                                                :alignment-deviation dev}))))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_two_point_crossover
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (if (not (empty? (rest (:genome state))))
+      (let [genome1 (first (:genome state))
+            genome2 (second (:genome state))]
+        (->> (pop-item :genome state)
+             (pop-item :genome)
+             (push-item (vec (:genome (two-point-crossover
+                                        {:genome genome1}
+                                        {:genome genome2}
+                                        @push-argmap)))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_uniform_crossover
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (if (not (empty? (rest (:genome state))))
+      (let [genome1 (first (:genome state))
+            genome2 (second (:genome state))]
+        (->> (pop-item :genome state)
+             (pop-item :genome)
+             (push-item (vec (:genome (uniform-crossover
+                                        {:genome genome1}
+                                        {:genome genome2}
+                                        @push-argmap)))
+                        :genome)))
+      state)))
+
+;; @@

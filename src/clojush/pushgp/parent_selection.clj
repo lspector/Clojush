@@ -1,3 +1,6 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
 (ns clojush.pushgp.parent-selection
   (:use [clojush random globals util])
   (:require [clojure.set :as set]))
@@ -31,11 +34,22 @@
   "Retains one random individual to represent each error vector."
   [pop]
   (map lrand-nth (vals (group-by #(:errors %) pop))))
+
+(defn possibly-remove-individuals-with-empty-genomes
+  "When :autoconstuctive is truthy, and at least one individual in pop has a non-empty
+  genome, remove those with empty genomes."
+  [pop {:keys [autoconstructive]}]
+  (if autoconstructive
+    (let [with-non-empty-genomes (filter #(not (empty? (:genome %))) pop)]
+      (if (not (empty? with-non-empty-genomes))
+        with-non-empty-genomes
+        pop))
+    pop))
   
 (defn lexicase-selection
   "Returns an individual that does the best on the fitness cases when considered one at a
    time in random order.  If trivial-geography-radius is non-zero, selection is limited to parents within +/- r of location"
-  [pop location {:keys [trivial-geography-radius]}]
+  [pop location {:keys [trivial-geography-radius] :as argmap}]
   (let [lower (mod (- location trivial-geography-radius) (count pop))
         upper (mod (+ location trivial-geography-radius) (count pop))
         popvec (vec pop)
@@ -45,7 +59,9 @@
                    (subvec popvec lower (inc upper))
                    (into (subvec popvec lower (count pop)) 
                          (subvec popvec 0 (inc upper)))))]
-    (loop [survivors (retain-one-individual-per-error-vector subpop)
+    (loop [survivors (retain-one-individual-per-error-vector 
+                       (possibly-remove-individuals-with-empty-genomes
+                         subpop argmap))
            cases (lshuffle (range (count (:errors (first subpop)))))]
       (if (or (empty? cases)
               (empty? (rest survivors)))
@@ -55,6 +71,50 @@
           (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
                          survivors)
                  (rest cases)))))))
+
+(defn mad
+  "returns median absolute deviation (MAD)"
+  [x]
+  (let [; Get median of x
+        x-median (median x)
+        ; calculate absolute deviation from median
+        dev (map #(Math/abs (- % x-median))
+                 x)]
+    (median dev)))
+
+(defn epsilon-lexicase-selection
+    "Returns an individual that does within epsilon of the best on the fitness cases when considered one at a
+   time in random order.  If trivial-geography-radius is non-zero, selection is limited to parents within +/- r of location"
+  [pop location {:keys [trivial-geography-radius epsilon-lexicase-epsilon]}]
+  (let [lower (mod (- location trivial-geography-radius) (count pop))
+        upper (mod (+ location trivial-geography-radius) (count pop))
+        popvec (vec pop)
+        subpop (if (zero? trivial-geography-radius)
+                 pop
+                 (if (< lower upper)
+                   (subvec popvec lower (inc upper))
+                   (into (subvec popvec lower (count pop))
+                         (subvec popvec 0 (inc upper)))))]
+    (loop [survivors (retain-one-individual-per-error-vector subpop)
+           cases (lshuffle (range (count (:errors (first subpop)))))]
+      (if (or (empty? cases)
+              (empty? (rest survivors)))
+        (lrand-nth survivors)
+        (let [; If epsilon-lexicase-epsilon is set in the argmap, use it for epsilon.
+              ; Otherwise, use automatic epsilon selections. aka use MAD for epsilon.
+              epsilon (if epsilon-lexicase-epsilon
+                        epsilon-lexicase-epsilon
+                        (mad (map #(nth (:errors %)
+                                        (first cases))
+                                  survivors)))
+              min-err-for-case (apply min (map #(nth % (first cases))
+                                               (map #(:errors %) survivors)))]
+        (recur (filter #(<= (nth (:errors %)
+                                 (first cases))
+                            (+ min-err-for-case
+                               epsilon))
+                       survivors)
+               (rest cases)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; elitegroup lexicase selection
@@ -163,6 +223,7 @@
         selected (case parent-selection
                    :tournament (tournament-selection pop-with-meta-errors location argmap)
                    :lexicase (lexicase-selection pop-with-meta-errors location argmap)
+                   :epsilon-lexicase (epsilon-lexicase-selection pop-with-meta-errors location argmap)
                    :elitegroup-lexicase (elitegroup-lexicase-selection pop-with-meta-errors)
                    :leaky-lexicase (if (< (lrand) (:lexicase-leakage argmap))
                                      (uniform-selection pop-with-meta-errors)
@@ -176,3 +237,5 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
+
+;; @@

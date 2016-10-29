@@ -3,7 +3,7 @@
             [clj-random.core :as random]
             [clojure.repl :as repl])
   (:use [clojush args globals util pushstate random individual evaluate simplification translate]
-        [clojush.instructions boolean code common numbers random-instructions string char vectors 
+        [clojush.instructions boolean code common numbers random-instructions string char vectors
          tag zip return input-output genome]
         [clojush.pushgp breed parent-selection report]
         [clojush.experimental.decimation]))
@@ -52,13 +52,13 @@
   (let [random-seeds (loop [seeds '()]
                        (let [num-remaining (- population-size (count seeds))]
                          (if (pos? num-remaining)
-                           (let [new-seeds (repeatedly num-remaining #(random/lrand-bytes (:mersennetwister random/*seed-length*)))]                             
+                           (let [new-seeds (repeatedly num-remaining #(random/lrand-bytes (:mersennetwister random/*seed-length*)))]
                              (recur (concat seeds (filter (fn [candidate]
                                                             (not (some #(random/=byte-array % candidate)
                                                                        seeds))) new-seeds)))); only add seeds that we do not already have
                            seeds)))]
     {:random-seeds random-seeds
-     :rand-gens (vec (doall (for [k (range population-size)]                      
+     :rand-gens (vec (doall (for [k (range population-size)]
                               (random/make-mersennetwister-rng (nth random-seeds k)))))
      }))
 
@@ -82,8 +82,8 @@
                         trivial-geography-radius))]
     (dotimes [i population-size]
       ((if use-single-thread swap! send)
-           (nth child-agents i) 
-           breed 
+           (nth child-agents i)
+           breed
            i (nth rand-gens i) pop @push-argmap)))
   (when-not use-single-thread (apply await child-agents))) ;; SYNCHRONIZE
 
