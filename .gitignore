@@ -22,3 +22,5 @@ lib/
 doc/
 cov/*
 out
+.idea
+clojush.iml
