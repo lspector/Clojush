@@ -1,6 +1,4 @@
-;; gorilla-repl.fileformat = 1
 
-;; @@
 
 (ns clojush.instructions.genome  
   (:use [clojush pushstate globals args random]
@@ -422,7 +420,7 @@
             genome (first (:genome state))]
         (->> (pop-item :float state)
              (pop-item :genome)
-             (push-item (vec (:genome (uniform-boolean-mutation
+             (push-item (vec (:genome (uniform-silence-mutation
                                         {:genome genome}
                                         (merge @push-argmap {:uniform-silence-mutation-rate rate}))))
                         :genome)))
@@ -517,4 +515,3 @@
                         :genome)))
       state)))
 
-;; @@

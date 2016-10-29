@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: ordered:1.2.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/ordered/ordered/1.2.0/ordered-1.2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: dynapath:0.2.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/dynapath/dynapath/0.2.0/dynapath-0.2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

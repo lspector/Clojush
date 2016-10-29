@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: cider/cider-nrepl:0.10.2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/cider/cider-nrepl/0.10.2/cider-nrepl-0.10.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
