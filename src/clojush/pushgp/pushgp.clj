@@ -19,6 +19,15 @@
   (repl/pst except 10000)
   (System/exit 0))
 
+(defn strip-random-insertion-flags
+  "The :random-insertion flag is added to all elements of the
+   genome when generated. It is used to signal that an
+   instruction-map was generated randomly in the run (as opposed
+   to being mutated from a parent). The individuals in generation
+   0 are a special case and should not have this flag present."
+  [genome]
+  (map #(dissoc % :random-insertion) genome))
+
 (defn make-pop-agents
   "Makes the population of agents containing the initial random individuals in the population.
    Argument is a push argmap"
@@ -27,9 +36,10 @@
     :as argmap}]
   (let [population-agents (repeatedly population-size
                                       #(make-individual
-                                         :genome (random-plush-genome max-genome-size-in-initial-program
+                                        :genome (strip-random-insertion-flags
+                                                 (random-plush-genome max-genome-size-in-initial-program
                                                                       atom-generators
-                                                                      argmap)
+                                                                      argmap))
                                          :genetic-operators :random))]
     (mapv #(if use-single-thread
              (atom %)

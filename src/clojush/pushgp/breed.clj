@@ -42,7 +42,7 @@
     :parent parent
     :empty (make-individual :genome [] :genetic-operators :empty)
     :truncate (assoc child :genome (vec (take (/ max-points 4) (:genome child))))
-    :random (make-individual :genome (random-plush-genome max-genome-size-in-initial-program atom-generators true argmap)
+    :random (make-individual :genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
                              :genetic-operators :random)
     ))
 
