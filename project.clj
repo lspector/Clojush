@@ -1,4 +1,5 @@
-(defproject clojush "2.11.0-1-SNAPSHOT"
+
+(defproject clojush "2.11.0-1-SNAPSHOT" 
   :description "The Push programming language and the PushGP genetic programming
                 system implemented in Clojure.
                 See http://hampshire.edu/lspector/push.html"
@@ -52,3 +53,4 @@
   ;;"-XX:+UseG1GC"
   ;:jvm-opts ["-Xmx12g" "-Xms12g" "-XX:+UseParallelGC"]
   :main clojush.core)
+
