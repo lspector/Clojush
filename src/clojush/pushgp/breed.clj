@@ -92,7 +92,7 @@
 
 (defn update-instruction-map-uuids
   "Takes an individual and updates the UUIDs on every instruction-map in its
-   :geneome, except for the ones which are a random insertion."
+   :genome, except for the ones which are a random insertion."
   [individual]
   (update individual :genome
           (fn [genome]
