@@ -1,6 +1,4 @@
-;; gorilla-repl.fileformat = 1
 
-;; @@
 (ns clojush.pushgp.parent-selection
   (:use [clojush random globals util])
   (:require [clojure.set :as set]))
@@ -238,4 +236,3 @@
                                                                (inc sel-count)))))
     selected))
 
-;; @@
