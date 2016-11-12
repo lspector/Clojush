@@ -205,6 +205,10 @@
           ;; If :silent is used as an epigenetic-marker, this is the probability of random
           ;; instructions having :silent be true.
 
+          :track-instruction-maps false
+          ;; If true, each Plush instruction map will have a UUID attached to it. If the
+          ;; gene has a "parent gene", it will also have the UUID of its parent.
+ 
           ;;----------------------------------------
           ;; Arguments related to parent selection
           ;;----------------------------------------

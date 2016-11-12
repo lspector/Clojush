@@ -90,23 +90,41 @@
              rand-gen
              argmap))))
 
+(defn update-instruction-map-uuids
+  "Takes an individual and updates the UUIDs on every instruction-map in its
+   :genome, except for the ones which are a random insertion."
+  [individual]
+  (update individual :genome
+          (fn [genome]
+            (mapv (fn [instruction-map]
+                   (if (:random-insertion instruction-map)
+                     (dissoc instruction-map :random-insertion)
+                     (assoc instruction-map
+                            :parent-uuid (:uuid instruction-map)
+                            :uuid (java.util.UUID/randomUUID))))
+                 genome))))
+
 (defn perform-genetic-operator
   "Takes a single genetic operator keyword or a sequence of operator keywords,
    and performs them to create a new individual. Uses recursive helper function
    even with a single operator by putting that operator in a vector."
   [operator population location rand-gen 
-   {:keys [max-points] :as argmap}]
+   {:keys [max-points
+           track-instruction-maps] :as argmap}]
   (let [first-parent (select population location argmap)
         operator-vector (if (sequential? operator) operator (vector operator))
         child (perform-genetic-operator-list operator-vector
                                              (assoc first-parent :parent-uuids (vector (:uuid first-parent)))
                                              population location rand-gen argmap)]
-    (if (> (count (:genome child))
-           (/ max-points 4)) ; Check if too big
-      (revert-too-big-child first-parent child argmap)
-        (assoc child
-               :genetic-operators operator
-               ))))
+    (cond->
+        (assoc child :genetic-operators operator)
+
+      (> (count (:genome child))
+         (/ max-points 4))
+      (as-> c (revert-too-big-child first-parent c argmap))
+
+      track-instruction-maps
+      (update-instruction-map-uuids))))
 
 (defn breed
   "Returns an individual bred from the given population using the given parameters."
