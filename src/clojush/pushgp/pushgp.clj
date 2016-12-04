@@ -145,7 +145,7 @@
       (check-genetic-operator-probabilities-add-to-one @push-argmap)
       (timer @push-argmap :initialization)
       (println "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
-      (println "\nGenerating initial population...")
+      (println "\nGenerating initial population...") (flush)
       (let [pop-agents (make-pop-agents @push-argmap)
             child-agents (make-child-agents @push-argmap)
             {:keys [rand-gens random-seeds]} (make-rng @push-argmap)]
@@ -154,12 +154,12 @@
         ;(println)
         ;; Main loop
         (loop [generation 0]
-          (println "Processing generation:" generation)
+          (println "Processing generation:" generation) (flush)
           (population-translate-plush-to-push pop-agents @push-argmap)
           (timer @push-argmap :reproduction)
-          (print "Computing errors... ")
+          (print "Computing errors... ") (flush)
           (compute-errors pop-agents rand-gens @push-argmap)
-          (println "Done computing errors.")
+          (println "Done computing errors.") (flush)
           (timer @push-argmap :fitness)
           ;; calculate solution rates if necessary for historically-assessed hardness
           (calculate-hah-solution-rates pop-agents @push-argmap)
@@ -178,9 +178,9 @@
                                            (auto-simplify best (:error-function @push-argmap) (:final-report-simplifications @push-argmap) true 500)
                                            (flush)))
                   (= outcome :continue) (do (timer @push-argmap :report)
-                                          (println "\nProducing offspring...")
+                                          (println "\nProducing offspring...") (flush)
                                           (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
-                                          (println "Installing next generation...")
+                                          (println "Installing next generation...") (flush)
                                           (install-next-generation pop-agents child-agents @push-argmap)
                                           (recur (inc generation)))
                   :else  (final-report generation best @push-argmap))))))))
