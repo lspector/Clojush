@@ -306,7 +306,7 @@
 given by uniform-deletion-rate."
   [ind {:keys [uniform-deletion-rate maintain-ancestors]}]
   (let [new-genome (filter identity
-                           (map #(if (< (lrand) uniform-deletion-rate) % nil)
+                           (map #(if (< (lrand) uniform-deletion-rate) nil %)
                                 (:genome ind)))]
     (make-individual :genome new-genome
                      :history (:history ind)
