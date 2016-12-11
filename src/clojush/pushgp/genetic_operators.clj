@@ -1,6 +1,4 @@
-;; gorilla-repl.fileformat = 1
 
-;; @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
@@ -280,13 +278,13 @@
     (let [close-mutator (fn [instr-map]
                           (let [closes (get instr-map :close 0)]
                             (assoc instr-map :close
-                                   (if (< (lrand) uniform-close-mutation-rate)
-                                     (if (< (lrand) close-increment-rate) ;Rate at which to increase closes instead of decrease
-                                       (inc closes)
-                                       (if (<= closes 0)
-                                         0
-                                         (dec closes)))
-                                     closes))))
+                              (if (< (lrand) uniform-close-mutation-rate)
+                                (if (< (lrand) close-increment-rate) ;Rate at which to increase closes instead of decrease
+                                  (inc closes)
+                                  (if (<= closes 0)
+                                    0
+                                    (dec closes)))
+                                closes))))
           new-genome (map close-mutator (:genome ind))]
       (make-individual :genome new-genome
                        :history (:history ind)
@@ -599,4 +597,3 @@ be set globally or eliminated in the future."
       )))
 
 
-;; @@
