@@ -199,8 +199,8 @@
                                token)))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
-                          (constant-mutator token))
-                        token)
+                          (constant-mutator token)
+                          token))
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
