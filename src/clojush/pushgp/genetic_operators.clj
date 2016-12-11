@@ -220,7 +220,8 @@
   (let [string-tweak (fn [st]
                        (apply str (map (fn [c]
                                          (if (< (lrand) uniform-mutation-string-char-change-rate)
-                                           (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127))))
+                                           (lrand-nth (concat ["\n" "\t"] 
+                                                              (map (comp str char) (range 32 127))))
                                            c))
                                        st)))
         constant-mutator (fn [token]
@@ -230,8 +231,8 @@
                                token)))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
-                          (constant-mutator token))
-                        token)
+                          (constant-mutator token)
+                          token))
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
