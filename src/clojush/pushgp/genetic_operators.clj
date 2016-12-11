@@ -1,5 +1,6 @@
+;; gorilla-repl.fileformat = 1
 
-
+;; @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
@@ -34,7 +35,8 @@
   (let [instr (:instruction instr-map)
         tagparts (string/split (name instr) #"_")
         tag-num (read-string (last tagparts))
-        new-tag-num (mod (round (perturb-with-gaussian-noise uniform-mutation-tag-gaussian-standard-deviation tag-num))
+        new-tag-num (mod (round (perturb-with-gaussian-noise 
+                                  uniform-mutation-tag-gaussian-standard-deviation tag-num))
                          @global-tag-limit)
         new-instr (symbol (apply str (interpose  "_" (concat (butlast tagparts) (list (str new-tag-num))))))]
     (assoc instr-map :instruction new-instr)))
@@ -55,7 +57,8 @@
   (let [string-tweak (fn [st]
                        (apply str (map (fn [c]
                                          (if (< (lrand) uniform-mutation-string-char-change-rate)
-                                           (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127))))
+                                           (lrand-nth (concat ["\n" "\t"] 
+                                                              (map (comp str char) (range 32 127))))
                                            c))
                                        st)))
         instruction-mutator (fn [token]
@@ -69,11 +72,24 @@
                                (assoc token
                                       :instruction
                                       (cond
-                                        (float? const) (perturb-with-gaussian-noise uniform-mutation-float-gaussian-standard-deviation const)
-                                        (integer? const) (round (perturb-with-gaussian-noise uniform-mutation-int-gaussian-standard-deviation const))
-                                        (string? const) (string-tweak const)
-                                        (or (= const true) (= const false)) (lrand-nth [true false])
-                                        :else (:instruction (first (random-plush-genome 1 atom-generators argmap))))))))
+                                        ;; float
+                                        (float? const) 
+                                        (perturb-with-gaussian-noise 
+                                          uniform-mutation-float-gaussian-standard-deviation const)
+                                        ;; integer
+                                        (integer? const) 
+                                        (round (perturb-with-gaussian-noise 
+                                                 uniform-mutation-int-gaussian-standard-deviation const))
+                                        ;; string
+                                        (string? const) 
+                                        (string-tweak const)
+                                        ;; boolean
+                                        (or (= const true) (= const false)) 
+                                        ;; anything else
+                                        (lrand-nth [true false])
+                                        :else 
+                                        (:instruction 
+                                          (first (random-plush-genome 1 atom-generators argmap))))))))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
                           (if (< (lrand) uniform-mutation-constant-tweak-rate)
@@ -579,3 +595,5 @@ be set globally or eliminated in the future."
            (if variant false true)
       )))
 
+
+;; @@
