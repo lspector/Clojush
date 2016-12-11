@@ -118,8 +118,8 @@
                                 (:instruction (first (random-plush-genome 1 atom-generators argmap)))))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
-                          (instruction-mutator token))
-                        token)
+                          (instruction-mutator token)
+                          token))
         new-genome (map token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
