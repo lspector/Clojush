@@ -1,4 +1,5 @@
 
+
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
@@ -118,7 +119,7 @@
                         (if (< (lrand) uniform-mutation-rate)
                           (instruction-mutator token)
                           token))
-        new-genome (map token-mutator (:genome ind))]
+        new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
                      :ancestors (if maintain-ancestors
@@ -285,7 +286,7 @@
                                     0
                                     (dec closes)))
                                 closes))))
-          new-genome (map close-mutator (:genome ind))]
+          new-genome (mapv close-mutator (:genome ind))]
       (make-individual :genome new-genome
                        :history (:history ind)
                        :ancestors (if maintain-ancestors
@@ -308,7 +309,7 @@
                                     (if (< (lrand) uniform-silence-mutation-rate)
                                       (not silent)
                                       silent))))
-          new-genome (map silent-mutator (:genome ind))]
+          new-genome (mapv silent-mutator (:genome ind))]
       (make-individual :genome new-genome
                        :history (:history ind)
                        :ancestors (if maintain-ancestors
@@ -322,9 +323,9 @@
   "Returns the individual with each element of its genome possibly deleted, with probability
 given by uniform-deletion-rate."
   [ind {:keys [uniform-deletion-rate maintain-ancestors]}]
-  (let [new-genome (filter identity
-                           (map #(if (< (lrand) uniform-deletion-rate) nil %)
-                                (:genome ind)))]
+  (let [new-genome (vec (filter identity
+                                (map #(if (< (lrand) uniform-deletion-rate) nil %)
+                                     (:genome ind))))]
     (make-individual :genome new-genome
                      :history (:history ind)
                      :ancestors (if maintain-ancestors
@@ -393,9 +394,12 @@ given by uniform-deletion-rate."
         genome2 (:genome parent2)
         p1-points (sort (repeatedly 2 #(lrand-int (inc (count genome1)))))
         p2-points (sort (repeatedly 2 #(lrand-int (inc (count genome2)))))
-        new-genome (concat (take (first p1-points) genome1)
-                           (drop (first p2-points) (take (second p2-points) genome2))
-                           (drop (second p1-points) genome1))]
+        new-genome (vec (concat (take (first p1-points) 
+                                      genome1)
+                                (drop (first p2-points) 
+                                      (take (second p2-points) genome2))
+                                (drop (second p1-points) 
+                                      genome1)))]
     (make-individual :genome new-genome
                      :history (:history parent1)
                      :ancestors (if maintain-ancestors
@@ -421,13 +425,13 @@ given by uniform-deletion-rate."
           short-genome-lengthened (concat short-genome
                                           (repeat (- (count long-genome) (count short-genome))
                                                   'uniform-padding))
-          new-genome (remove-uniform-padding
-                       (map (fn [x1 x2]
-                              (if (< (lrand) 0.5)
-                                x1
-                                x2))
-                            short-genome-lengthened
-                            long-genome))]
+          new-genome (vec (remove-uniform-padding
+                            (map (fn [x1 x2]
+                                   (if (< (lrand) 0.5)
+                                     x1
+                                     x2))
+                                 short-genome-lengthened
+                                 long-genome)))]
       (make-individual :genome new-genome
                        :history (:history parent1)
                        :ancestors (if maintain-ancestors
@@ -595,5 +599,6 @@ be set globally or eliminated in the future."
            :is-random-replacement
            (if variant false true)
       )))
+
 
 
