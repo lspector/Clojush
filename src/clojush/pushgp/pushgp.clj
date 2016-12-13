@@ -1,3 +1,4 @@
+
 (ns clojush.pushgp.pushgp
   (:require [clojure.java.io :as io]
             [clj-random.core :as random]
@@ -26,7 +27,7 @@
    to being mutated from a parent). The individuals in generation
    0 are a special case and should not have this flag present."
   [genome]
-  (map #(dissoc % :random-insertion) genome))
+  (mapv #(dissoc % :random-insertion) genome))
 
 (defn make-pop-agents
   "Makes the population of agents containing the initial random individuals in the population.
@@ -184,3 +185,4 @@
                                           (install-next-generation pop-agents child-agents @push-argmap)
                                           (recur (inc generation)))
                   :else  (final-report generation best @push-argmap))))))))
+
