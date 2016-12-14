@@ -1,3 +1,6 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
 
 (ns clojush.args
   (:require [clj-random.core :as random])
@@ -178,6 +181,11 @@
           ;; Specifies the genome instructions to use for autoconstruction. The default value of
           ;; :all will use all genome instructions. See load-push-argmap in this file (args.clj)
           ;; for other options.
+          
+          :autoconstructive-improve-or-diversify nil
+          ;; If true, the during autoconstruction a child will be allowed to survive even if it
+          ;; fails the diversification test, if it has lower errors than both of its parents 
+          ;; on at least one case.
 
           :autoconstructive-integer-rand-enrichment 0
           ;; The number of extra instances of autoconstructive_integer_rand to include in
@@ -473,3 +481,5 @@
    (load-push-argmap argmap)
    (reset-globals)))
 
+
+;; @@
