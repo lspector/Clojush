@@ -16,7 +16,7 @@
                  [clj-random "0.1.7"]]
   :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
-            [org.clojars.benfb/lein-gorilla "0.4.0"]
+            [org.clojars.benfb/lein-gorilla "0.4.1"]
             [lein-cloverage "1.0.6"]]
   :codox {:source-uri "http://github.com/lspector/Clojush/blob/master/{filepath}#L{line}"
           :namespaces [#"^(?!clojush\.problems)"]

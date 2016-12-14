@@ -1,5 +1,4 @@
 
-
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
@@ -378,7 +377,7 @@ given by uniform-deletion-rate."
                                 (conj result-genome (nth (if use-s1 s1 s2) i))
                                 (dec iteration-budget)))))]
     (make-individual :genome new-genome
-                     :history (:history parent1)
+                     :history [(:history parent1)(:history parent2)]
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -401,7 +400,7 @@ given by uniform-deletion-rate."
                                 (drop (second p1-points) 
                                       genome1)))]
     (make-individual :genome new-genome
-                     :history (:history parent1)
+                     :history [(:history parent1)(:history parent2)]
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -433,7 +432,7 @@ given by uniform-deletion-rate."
                                  short-genome-lengthened
                                  long-genome)))]
       (make-individual :genome new-genome
-                       :history (:history parent1)
+                       :history [(:history parent1) (:history parent2)]
                        :ancestors (if maintain-ancestors
                                     (cons (:genome parent1) (:ancestors parent1))
                                     (:ancestors parent1))))))
@@ -592,13 +591,10 @@ be set globally or eliminated in the future."
     (assoc (make-individual :genome (if (or variant (diversifying? new-genome argmap))
                                       new-genome
                                       [])
-                            :history (:history parent1)
+                            :history [(:history parent1) (:history parent2)]
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
            :is-random-replacement
            (if variant false true)
       )))
-
-
-
