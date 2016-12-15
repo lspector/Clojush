@@ -631,7 +631,7 @@ be set globally or eliminated in the future."
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
            :is-random-replacement
-           (if variant false true)
+           (if use-child false true)
       )))
 
 ;; @@
