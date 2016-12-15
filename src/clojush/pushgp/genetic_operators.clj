@@ -1,3 +1,6 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
@@ -533,6 +536,25 @@ programs encoded by genomes g1 and g2."
     (and (> (reduce min diffs) 0)
          (apply distinct? diffs))))
 
+(defn three-gens-some-diff-diffs-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+        diff #(expressed-difference %1 %2 argmap)
+        c1 (make-child g)
+        c2 (make-child g)
+        gc1 (make-child c1)
+        gc2 (make-child c2)
+        c1-diff (diff g c1)
+        c2-diff (diff g c2)
+        gc1-diff (diff c1 gc1)
+        gc2-diff (diff c2 gc2)
+        diffs [c1-diff c2-diff gc1-diff gc2-diff]]
+    (and (> (reduce min diffs) 0)
+         (not= c1-diff c2-diff)
+         (not= c1-diff gc1-diff)
+         (not= c2-diff gc2-diff))))
+
 (defn size-and-instruction-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
@@ -563,6 +585,7 @@ programs encoded by genomes g1 and g2."
   ((case (:autoconstructive-diversification-test argmap)
      :gecco2016 gecco2016-diversifying?
      :three-gens-diff-diffs three-gens-diff-diffs-diversifying?
+     :three-gens-some-diff-diffs three-gens-some-diff-diffs-diversifying?
      :size-and-instruction size-and-instruction-diversifying?
      :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?)
     g
@@ -575,7 +598,8 @@ or by cloning. In either case if the child is not diversifying then a random
 genome is returned instead IF that is itself diversifying; if it isn't then an empty 
 genome is returned. The construct/clone ration is hardcoded here, but might
 be set globally or eliminated in the future."
-  [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program error-function]
+  [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program 
+                           error-function autoconstructive-improve-or-diversify]
                     :as argmap}]
   (let [construct-clone-ratio 1.0 ;; maybe make this a global parameter or eliminate
         parent1-genome (:genome parent1)
@@ -583,11 +607,23 @@ be set globally or eliminated in the future."
         child-genome (if (< (lrand) construct-clone-ratio)
                        (produce-child-genome-by-autoconstruction parent1-genome parent2-genome false argmap)
                        parent1-genome)
+        child-errors (if autoconstructive-improve-or-diversify
+                       (do
+                         (swap! evaluations-count inc)
+                         (error-function (translate-plush-genome-to-push-program 
+                                           {:genome child-genome} 
+                                           argmap)))
+                       nil)
         variant (diversifying? child-genome argmap)
-        new-genome (if variant
+        use-child (or variant
+                      (and autoconstructive-improve-or-diversify
+                           (some (fn [[child-error parent1-error parent2-error]]
+                                   (< child-error (min parent1-error parent2-error)))
+                                 (mapv vector child-errors (:errors parent1) (:errors parent2)))))
+        new-genome (if use-child
                      child-genome
                      (random-plush-genome max-genome-size-in-initial-program atom-generators argmap))]
-    (assoc (make-individual :genome (if (or variant (diversifying? new-genome argmap))
+    (assoc (make-individual :genome (if (or use-child (diversifying? new-genome argmap))
                                       new-genome
                                       [])
                             :history (:history parent1)
@@ -597,3 +633,5 @@ be set globally or eliminated in the future."
            :is-random-replacement
            (if variant false true)
       )))
+
+;; @@
