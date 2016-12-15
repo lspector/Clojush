@@ -135,7 +135,8 @@
     (let [prob (lrand)]
       (loop [vectored-go-probabilities (reductions #(assoc %2 1 (+ (second %1) (second %2)))
                                                    (vec genetic-operator-probabilities))]
-        (if (<= prob (second (first vectored-go-probabilities)))
+        (if (or (= 1 (count vectored-go-probabilities))
+                (<= prob (second (first vectored-go-probabilities))))
           (perform-genetic-operator (first (first vectored-go-probabilities)) population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
 
