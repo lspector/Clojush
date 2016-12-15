@@ -536,6 +536,25 @@ programs encoded by genomes g1 and g2."
     (and (> (reduce min diffs) 0)
          (apply distinct? diffs))))
 
+(defn three-gens-some-diff-diffs-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+        diff #(expressed-difference %1 %2 argmap)
+        c1 (make-child g)
+        c2 (make-child g)
+        gc1 (make-child c1)
+        gc2 (make-child c2)
+        c1-diff (diff g c1)
+        c2-diff (diff g c2)
+        gc1-diff (diff c1 gc1)
+        gc2-diff (diff c2 gc2)
+        diffs [c1-diff c2-diff gc1-diff gc2-diff]]
+    (and (> (reduce min diffs) 0)
+         (not= c1-diff c2-diff)
+         (not= c1-diff gc1-diff)
+         (not= c2-diff gc2-diff))))
+
 (defn size-and-instruction-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
@@ -566,6 +585,7 @@ programs encoded by genomes g1 and g2."
   ((case (:autoconstructive-diversification-test argmap)
      :gecco2016 gecco2016-diversifying?
      :three-gens-diff-diffs three-gens-diff-diffs-diversifying?
+     :three-gens-some-diff-diffs three-gens-some-diff-diffs-diversifying?
      :size-and-instruction size-and-instruction-diversifying?
      :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?)
     g
