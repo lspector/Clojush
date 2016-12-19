@@ -456,25 +456,32 @@
                                         genome_uniform_crossover)))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
-    (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) (fn [] (lrand))))
-    (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) (fn [] (lrand-int 100))))
+    (swap! push-argmap assoc 
+           :atom-generators (conj (:atom-generators @push-argmap) (fn [] (lrand))))
+    (swap! push-argmap assoc 
+           :atom-generators (conj (:atom-generators @push-argmap) (fn [] (lrand-int 100))))
     (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
-      (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_integer_rand)))
+      (swap! push-argmap assoc 
+             :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_integer_rand)))
     (if (neg? (:autoconstructive-integer-rand-enrichment @push-argmap))
       (swap! push-argmap assoc :atom-generators (remove #(= % 'autoconstructive_integer_rand)
                                                         (:atom-generators @push-argmap))))
     (dotimes [n (:autoconstructive-boolean-rand-enrichment @push-argmap)]
-      (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_boolean_rand)))
+      (swap! push-argmap assoc 
+             :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_boolean_rand)))
     (if (neg? (:autoconstructive-boolean-rand-enrichment @push-argmap))
-      (swap! push-argmap assoc :atom-generators (remove #(= % 'autoconstructive_boolean_rand)
-                                                        (:atom-generators @push-argmap))))
-    (swap! push-argmap assoc :replace-child-that-exceeds-size-limit-with :empty)))
+      (swap! push-argmap assoc 
+             :atom-generators (remove #(= % 'autoconstructive_boolean_rand)
+                                      (:atom-generators @push-argmap))))
+    (swap! push-argmap assoc 
+           :replace-child-that-exceeds-size-limit-with :empty)))
 
 (defn reset-globals
   "Resets all Clojush globals according to values in @push-argmap. If an argmap argument is provided then it is loaded
   into @push-argmap first."
   ([]
-   (doseq [[gname gatom] (filter (fn [[a _]] (.startsWith (name a) "global-")) (ns-publics 'clojush.globals))]
+   (doseq [[gname gatom] (filter (fn [[a _]] (.startsWith (name a) "global-")) 
+                                 (ns-publics 'clojush.globals))]
      (if (contains? @push-argmap (keyword (.substring (name gname) (count "global-"))))
        (reset! @gatom (get @push-argmap (keyword (.substring (str gname) (count "global-")))))
        (throw (Exception. (str "globals.clj definition " gname " has no matching argument in push-argmap. Only such definitions should use the prefix 'global-'."))))))
