@@ -592,15 +592,13 @@ programs encoded by genomes g1 and g2."
     g
     argmap))
 
-(defn autoconstruction
-  "Returns a genome for a child produced either by autoconstruction (executing parent1
-with both parents on top of the genome stack and also available via input instructions)
-or by cloning. In either case if the child is not diversifying then a random
-genome is returned instead IF that is itself diversifying; if it isn't then an empty 
-genome is returned. The construct/clone ration is hardcoded here, but might
-be set globally or eliminated in the future."
+(defn fotd-autoconstruction
+  "The current 'flavor of the day' version of autoconstruction, used by specifying
+  :autoconstructive-fotd true in the arguments to pushgp. Expect changes. Other
+  autoconstruction-related parameters may or may not have any effect when using the
+  fotd."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program 
-                           error-function autoconstructive-improve-or-diversify]
+                           error-function]
                     :as argmap}]
   (let [construct-clone-ratio 1.0 ;; maybe make this a global parameter or eliminate
         parent1-genome (:genome parent1)
@@ -632,6 +630,51 @@ be set globally or eliminated in the future."
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
-           :is-random-replacement
-           (if use-child false true)
-      )))
+      :is-random-replacement
+      (if use-child false true))))
+
+(defn autoconstruction
+  "Returns a genome for a child produced either by autoconstruction (executing parent1
+with both parents on top of the genome stack and also available via input instructions)
+or by cloning. In either case if the child is not diversifying then a random
+genome is returned instead IF that is itself diversifying; if it isn't then an empty 
+genome is returned. The construct/clone ration is hardcoded here, but might
+be set globally or eliminated in the future."
+  [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program 
+                           error-function autoconstructive-improve-or-diversify 
+                           autoconstructive-fotd]
+                    :as argmap}]
+  (if autoconstructive-fotd
+    (fotd-autoconstruction parent1 parent2 argmap)
+    (let [construct-clone-ratio 1.0 ;; maybe make this a global parameter or eliminate
+          parent1-genome (:genome parent1)
+          parent2-genome (:genome parent2)
+          child-genome (if (< (lrand) construct-clone-ratio)
+                         (produce-child-genome-by-autoconstruction 
+                           parent1-genome parent2-genome false argmap)
+                         parent1-genome)
+          child-errors (if autoconstructive-improve-or-diversify
+                         (do
+                           (swap! evaluations-count inc)
+                           (error-function (translate-plush-genome-to-push-program 
+                                             {:genome child-genome} 
+                                             argmap)))
+                         nil)
+          variant (diversifying? child-genome argmap)
+          use-child (or variant
+                        (and autoconstructive-improve-or-diversify
+                             (some (fn [[child-error parent1-error parent2-error]]
+                                     (< child-error (min parent1-error parent2-error)))
+                                   (mapv vector child-errors (:errors parent1) (:errors parent2)))))
+          new-genome (if use-child
+                       child-genome
+                       (random-plush-genome max-genome-size-in-initial-program atom-generators argmap))]
+      (assoc (make-individual :genome (if (or use-child (diversifying? new-genome argmap))
+                                        new-genome
+                                        [])
+                              :history (:history parent1)
+                              :ancestors (if maintain-ancestors
+                                           (cons (:genome parent1) (:ancestors parent1))
+                                           (:ancestors parent1)))
+        :is-random-replacement
+        (if use-child false true))))
