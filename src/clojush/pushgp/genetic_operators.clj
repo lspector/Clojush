@@ -1,6 +1,3 @@
-;; gorilla-repl.fileformat = 1
-
-;; @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
@@ -38,7 +35,8 @@
         new-tag-num (mod (round (perturb-with-gaussian-noise 
                                   uniform-mutation-tag-gaussian-standard-deviation tag-num))
                          @global-tag-limit)
-        new-instr (symbol (apply str (interpose  "_" (concat (butlast tagparts) (list (str new-tag-num))))))]
+        new-instr (symbol (apply str (interpose "_" (concat (butlast tagparts) 
+                                                            (list (str new-tag-num))))))]
     (assoc instr-map :instruction new-instr)))
 
 (defn uniform-mutation
@@ -64,7 +62,8 @@
         instruction-mutator (fn [token]
                               (assoc token
                                      :instruction
-                                     (:instruction (first (random-plush-genome 1 atom-generators argmap)))))
+                                     (:instruction 
+                                       (first (random-plush-genome 1 atom-generators argmap)))))
         constant-mutator (fn [token]
                            (let [const (:instruction token)]
                              (if (tag-instruction? const)
@@ -281,7 +280,8 @@
                           (let [closes (get instr-map :close 0)]
                             (assoc instr-map :close
                               (if (< (lrand) uniform-close-mutation-rate)
-                                (if (< (lrand) close-increment-rate) ;Rate at which to increase closes instead of decrease
+                                (if (< (lrand) close-increment-rate) 
+                                  ;Rate at which to increase closes instead of decrease
                                   (inc closes)
                                   (if (<= closes 0)
                                     0
@@ -370,7 +370,8 @@ given by uniform-deletion-rate."
                              (<= iteration-budget 0)) ;; looping too long
                        result-genome ;; Return
                        (if (< (lrand) alternation-rate)
-                         (recur (max 0 (+' i (Math/round (*' alignment-deviation (gaussian-noise-factor)))))
+                         (recur (max 0 (+' i (Math/round (*' alignment-deviation 
+                                                             (gaussian-noise-factor)))))
                                 (not use-s1)
                                 result-genome
                                 (dec iteration-budget))
@@ -605,7 +606,8 @@ be set globally or eliminated in the future."
         parent1-genome (:genome parent1)
         parent2-genome (:genome parent2)
         child-genome (if (< (lrand) construct-clone-ratio)
-                       (produce-child-genome-by-autoconstruction parent1-genome parent2-genome false argmap)
+                       (produce-child-genome-by-autoconstruction 
+                         parent1-genome parent2-genome false argmap)
                        parent1-genome)
         child-errors (if autoconstructive-improve-or-diversify
                        (do
@@ -633,5 +635,3 @@ be set globally or eliminated in the future."
            :is-random-replacement
            (if use-child false true)
       )))
-
-;; @@
