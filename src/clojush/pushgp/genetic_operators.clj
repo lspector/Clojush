@@ -1,3 +1,6 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
@@ -607,19 +610,22 @@ programs encoded by genomes g1 and g2."
                        (produce-child-genome-by-autoconstruction 
                          parent1-genome parent2-genome false argmap)
                        parent1-genome)
-        child-errors (if autoconstructive-improve-or-diversify
-                       (do
-                         (swap! evaluations-count inc)
-                         (error-function (translate-plush-genome-to-push-program 
-                                           {:genome child-genome} 
-                                           argmap)))
-                       nil)
-        variant (diversifying? child-genome argmap)
-        use-child (or variant
-                      (and autoconstructive-improve-or-diversify
-                           (some (fn [[child-error parent1-error parent2-error]]
-                                   (< child-error (min parent1-error parent2-error)))
-                                 (mapv vector child-errors (:errors parent1) (:errors parent2)))))
+        genome-error #(do (swap! evaluations-count inc)
+                        (error-function (translate-plush-genome-to-push-program 
+                                          {:genome %} 
+                                          argmap)))
+        ;child-errors (genome-error child-genome)
+        make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+        gc1-errors (genome-error (make-child child-genome))
+        gc2-errors (genome-error (make-child child-genome))
+        use-child (and 
+                    ;(not= child-errors (:errors parent1))
+                    ;(not= child-errors (:errors parent2))
+                    (not= gc1-errors gc2-errors)
+                    (not (some #{gc1-errors} [(:errors parent1) (:errors parent2)]))
+                    (not (some #{gc2-errors} [(:errors parent1) (:errors parent2)]))
+                    )
+
         new-genome (if use-child
                      child-genome
                      (random-plush-genome max-genome-size-in-initial-program atom-generators argmap))]
@@ -678,3 +684,5 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true))))
+
+;; @@
