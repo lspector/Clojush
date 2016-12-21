@@ -603,41 +603,58 @@ programs encoded by genomes g1 and g2."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program 
                            error-function]
                     :as argmap}]
-  (let [construct-clone-ratio 1.0 ;; maybe make this a global parameter or eliminate
-        parent1-genome (:genome parent1)
+  (let [parent1-genome (:genome parent1)
         parent2-genome (:genome parent2)
-        child-genome (if (< (lrand) construct-clone-ratio)
-                       (produce-child-genome-by-autoconstruction 
-                         parent1-genome parent2-genome false argmap)
-                       parent1-genome)
+        parental-errors? (fn [errors]
+                           (some #{errors} [(:errors parent1) (:errors parent2)]))
+        make-child-genome (fn [g1 g2] 
+                            (produce-child-genome-by-autoconstruction g1 g2 false argmap))
+        diff #(expressed-difference %1 %2 argmap)
         genome-error #(do (swap! evaluations-count inc)
                         (error-function (translate-plush-genome-to-push-program 
                                           {:genome %} 
                                           argmap)))
-        ;child-errors (genome-error child-genome)
-        make-child #(produce-child-genome-by-autoconstruction % % false argmap)
-        gc1-errors (genome-error (make-child child-genome))
-        gc2-errors (genome-error (make-child child-genome))
-        use-child (and 
-                    ;(not= child-errors (:errors parent1))
-                    ;(not= child-errors (:errors parent2))
-                    (not= gc1-errors gc2-errors)
-                    (not (some #{gc1-errors} [(:errors parent1) (:errors parent2)]))
-                    (not (some #{gc2-errors} [(:errors parent1) (:errors parent2)]))
-                    )
-
-        new-genome (if use-child
+        acceptable? (fn [g]
+                      (let [c1 (make-child-genome g g)
+                            c1-diff (diff g c1)]
+                        (if (zero? c1-diff)
+                          false
+                          (let [c1-errors (genome-error c1)]
+                            (if (parental-errors? c1-errors)
+                              false
+                              (let [c2 (make-child-genome g g)
+                                    c2-diff (diff g c2)]
+                                (if (or (zero? c2-diff)
+                                        (= c1-diff c2-diff))
+                                  false
+                                  (let [c2-errors (genome-error c2)]
+                                    (if (or (parental-errors? c2-errors)
+                                            (= c1-errors c2-errors))
+                                      false
+                                      (let [gc1-diff (diff c1 (make-child-genome c1 c1))]
+                                        (if (or (zero? gc1-diff)
+                                                (= c1-diff gc1-diff))
+                                          false
+                                          (let [gc2-diff (diff c2 (make-child-genome c2 c2))]
+                                            (if (or (zero? gc2-diff)
+                                                    (= c2-diff gc2-diff))
+                                              false
+                                              true)))))))))))))
+        child-genome (make-child-genome parent1-genome parent2-genome)
+        new-genome (if (acceptable? child-genome)
                      child-genome
-                     (random-plush-genome max-genome-size-in-initial-program atom-generators argmap))]
-    (assoc (make-individual :genome (if (or use-child (diversifying? new-genome argmap))
-                                      new-genome
-                                      [])
+                     (let [replacement (random-plush-genome max-genome-size-in-initial-program 
+                                                            atom-generators 
+                                                            argmap)]
+                       (if (acceptable? replacement)
+                         replacement
+                         [])))]
+    (assoc (make-individual :genome new-genome
                             :history (:history parent1)
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
-      :is-random-replacement
-      (if use-child false true))))
+      :is-random-replacement (not= child-genome new-genome))))
 
 (defn autoconstruction
   "Returns a genome for a child produced either by autoconstruction (executing parent1
@@ -684,5 +701,4 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
-
 ;; @@
