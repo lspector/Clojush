@@ -1,6 +1,3 @@
-;; gorilla-repl.fileformat = 1
-
-;; @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
@@ -584,6 +581,24 @@ programs encoded by genomes g1 and g2."
          (not (apply = (map instruction-set kids)))
          (not (apply = (map instruction-set grandkids))))))
 
+(defn safe-t-test ;; safely answers 1.0 if t-test would divide by zero
+  [xvec yvec]
+  (if (or (apply = xvec)
+          (apply = yvec))
+    1.0
+    (:p-value (t-test xvec :y yvec))))
+
+(defn diffmeans-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+        c1 (make-child g)
+        c2 (make-child g)]
+    (>= 0.05
+        (safe-t-test 
+          (repeatedly 5 #(expressed-difference c1 (make-child c1) argmap))
+          (repeatedly 5 #(expressed-difference c2 (make-child c2) argmap))))))
+
 (defn diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
@@ -592,7 +607,8 @@ programs encoded by genomes g1 and g2."
      :three-gens-diff-diffs three-gens-diff-diffs-diversifying?
      :three-gens-some-diff-diffs three-gens-some-diff-diffs-diversifying?
      :size-and-instruction size-and-instruction-diversifying?
-     :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?)
+     :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?
+     :diffmeans diffmeans-diversifying?)
     g
     argmap))
 
@@ -702,4 +718,3 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
-;; @@
