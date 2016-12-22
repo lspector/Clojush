@@ -1,4 +1,3 @@
-
 (defproject clojush "2.16.1-1-SNAPSHOT" 
   :description "The Push programming language and the PushGP genetic programming
                 system implemented in Clojure.
@@ -13,7 +12,8 @@
                  [local-file "0.1.0"]
                  [clojure-csv "2.0.1"]
                  [org.clojure/data.json "0.2.6"]
-                 [clj-random "0.1.7"]]
+                 [clj-random "0.1.7"]
+                 [incanter "1.9.1"]]
   :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
             [org.clojars.benfb/lein-gorilla "0.4.1"]
@@ -53,4 +53,3 @@
   ;;"-XX:+UseG1GC"
   ;:jvm-opts ["-Xmx12g" "-Xms12g" "-XX:+UseParallelGC"]
   :main clojush.core)
-
