@@ -591,13 +591,22 @@ programs encoded by genomes g1 and g2."
 (defn diffmeans-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+  (let [num-children 10
+        make-child #(produce-child-genome-by-autoconstruction % % false argmap)
         c1 (make-child g)
-        c2 (make-child g)]
-    (>= 0.05
-        (safe-t-test 
-          (repeatedly 5 #(expressed-difference c1 (make-child c1) argmap))
-          (repeatedly 5 #(expressed-difference c2 (make-child c2) argmap))))))
+        diffs1 (repeatedly num-children 
+                           #(expressed-difference c1 (make-child c1) argmap))]
+    (if (or (some #{0} diffs1)
+            (apply = diffs1))
+      false
+      (let [c2 (make-child g)
+            diffs2 (repeatedly num-children 
+                               #(expressed-difference c2 (make-child c2) argmap))]
+        (if (or (some #{0} diffs2)
+                (apply = diffs2)
+                (> (safe-t-test diffs1 diffs2) 0.01))
+          false
+          true)))))
 
 (defn diversifying?
   "Returns true iff genome g passes the diversification test."
