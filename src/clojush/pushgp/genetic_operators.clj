@@ -1,8 +1,8 @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
-        [clojure.math.numeric-tower]
-        [incanter [stats :only [t-test]]])
+        [clojure.math.numeric-tower])
+  (:import (org.apache.commons.math3.stat.inference TTest))
   (:require [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -586,7 +586,8 @@ programs encoded by genomes g1 and g2."
   (if (or (apply = xvec)
           (apply = yvec))
     1.0
-    (:p-value (t-test xvec :y yvec))))
+    (let [new-t (TTest.)]
+      (.tTest new-t (double-array xvec) (double-array yvec)))))
 
 (defn diffmeans-diversifying?
   "Returns true iff genome g passes the diversification test."
@@ -727,3 +728,4 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+

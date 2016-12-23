@@ -13,7 +13,8 @@
                  [clojure-csv "2.0.1"]
                  [org.clojure/data.json "0.2.6"]
                  [clj-random "0.1.7"]
-                 [incanter "1.9.1"]]
+                 ;; https://mvnrepository.com/artifact/org.apache.commons/commons-math3
+                 [org.apache.commons/commons-math3 "3.2"]]
   :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
             [org.clojars.benfb/lein-gorilla "0.4.1"]
