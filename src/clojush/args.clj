@@ -1,3 +1,6 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
 (ns clojush.args
   (:require [clj-random.core :as random])
   (:use [clojush globals random util pushstate]
@@ -182,6 +185,14 @@
           ;; If true, the during autoconstruction a child will be allowed to survive even if it
           ;; fails the diversification test, if it has lower errors than both of its parents 
           ;; on at least one case.
+          
+          :autoconstructive-diffmeans-test :t-test
+          ;; When using :autoconstructive-diversification-test :diffmeans-diversifying?, specifies
+          ;; which statistical test to use. See genetic-operators.clj.
+          
+          :autoconstructive-diffmeans-children 10
+          ;; When using :autoconstructive-diversification-test :diffmeans-diversifying?, specifies
+          ;; how many children of each child to generate and test. See genetic-operators.clj.
           
           :autoconstructive-fotd false
           ;; If true, autoconstruction will be performed using the 'flavor of the day' code in
@@ -488,3 +499,5 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
+;; @@

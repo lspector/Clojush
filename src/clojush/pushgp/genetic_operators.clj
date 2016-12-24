@@ -592,10 +592,19 @@ programs encoded by genomes g1 and g2."
     (let [new-t (TTest.)]
       (.tTest new-t (double-array xvec) (double-array yvec)))))
 
+(defn safe-wilcoxon-signed-rank-test 
+  [xvec yvec]
+  (let [n (min (count xvec) (count yvec))
+        W (WilcoxonSignedRankTest.)]
+    (.wilcoxonSignedRankTest W 
+                             (double-array (take n xvec)) 
+                             (double-array (take n yvec)) 
+                             false)))
+
 (defn diffmeans-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [num-children 10
+  (let [num-children (:autoconstructive-diffmeans-children argmap)
         make-child #(produce-child-genome-by-autoconstruction % % false argmap)
         c1 (make-child g)
         diffs1 (vec (repeatedly 
@@ -610,7 +619,12 @@ programs encoded by genomes g1 and g2."
                           #(expressed-difference c2 (make-child c2) argmap)))]
         (if (or (some #{0} diffs2)
                 (apply = diffs2)
-                (> (safe-t-test diffs1 diffs2) 0.01))
+                (> ((case (:autoconstructive-diffmeans-test argmap)
+                      :t-test safe-t-test
+                      :wilcoxon-signed-rank-test safe-wilcoxon-signed-rank-test)
+                    diffs1 
+                    diffs2)
+                   0.01))
           false
           true)))))
 
