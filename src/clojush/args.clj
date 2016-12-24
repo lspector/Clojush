@@ -1,6 +1,3 @@
-;; gorilla-repl.fileformat = 1
-
-;; @@
 (ns clojush.args
   (:require [clj-random.core :as random])
   (:use [clojush globals random util pushstate]
@@ -185,6 +182,10 @@
           ;; If true, the during autoconstruction a child will be allowed to survive even if it
           ;; fails the diversification test, if it has lower errors than both of its parents 
           ;; on at least one case.
+          
+          :autoconstructive-clone-probability 0.0
+          ;; Specifies the probability that a clone will be produced rather than the result of
+          ;; actual autoconstruction, when :autoconstructive is true.
           
           :autoconstructive-diffmeans-children 10
           ;; When using :autoconstructive-diversification-test :diffmeans-diversifying?, specifies
@@ -496,4 +497,3 @@
    (load-push-argmap argmap)
    (reset-globals)))
 
-;; @@

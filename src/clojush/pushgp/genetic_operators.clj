@@ -1,12 +1,8 @@
-;; gorilla-repl.fileformat = 1
-
-;; @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
         [clojure.math.numeric-tower])
   (:import (org.apache.commons.math3.stat.inference TTest))
-  (:import (org.apache.commons.math3.stat.inference WilcoxonSignedRankTest))
   (:require [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -699,14 +695,13 @@ genome is returned. The construct/clone ration is hardcoded here, but might
 be set globally or eliminated in the future."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program 
                            error-function autoconstructive-improve-or-diversify 
-                           autoconstructive-fotd]
+                           autoconstructive-fotd autoconstructive-clone-probability]
                     :as argmap}]
   (if autoconstructive-fotd
     (fotd-autoconstruction parent1 parent2 argmap)
-    (let [construct-clone-ratio 1.0 ;; maybe make this a global parameter or eliminate
-          parent1-genome (:genome parent1)
+    (let [parent1-genome (:genome parent1)
           parent2-genome (:genome parent2)
-          child-genome (if (< (lrand) construct-clone-ratio)
+          child-genome (if (> (lrand) autoconstructive-clone-probability)
                          (produce-child-genome-by-autoconstruction 
                            parent1-genome parent2-genome false argmap)
                          parent1-genome)
@@ -737,4 +732,3 @@ be set globally or eliminated in the future."
         (if use-child false true)))))
 
 
-;; @@
