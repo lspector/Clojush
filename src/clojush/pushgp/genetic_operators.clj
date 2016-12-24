@@ -1,3 +1,6 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
@@ -595,14 +598,16 @@ programs encoded by genomes g1 and g2."
   (let [num-children 10
         make-child #(produce-child-genome-by-autoconstruction % % false argmap)
         c1 (make-child g)
-        diffs1 (repeatedly num-children 
-                           #(expressed-difference c1 (make-child c1) argmap))]
+        diffs1 (vec (repeatedly 
+                      num-children 
+                      #(expressed-difference c1 (make-child c1) argmap)))]
     (if (or (some #{0} diffs1)
             (apply = diffs1))
       false
       (let [c2 (make-child g)
-            diffs2 (repeatedly num-children 
-                               #(expressed-difference c2 (make-child c2) argmap))]
+            diffs2 (vec (repeatedly 
+                          num-children 
+                          #(expressed-difference c2 (make-child c2) argmap)))]
         (if (or (some #{0} diffs2)
                 (apply = diffs2)
                 (> (safe-t-test diffs1 diffs2) 0.01))
@@ -729,3 +734,5 @@ be set globally or eliminated in the future."
         :is-random-replacement
         (if use-child false true)))))
 
+
+;; @@
