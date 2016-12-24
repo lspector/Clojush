@@ -6,6 +6,7 @@
         clojush.instructions.tag
         [clojure.math.numeric-tower])
   (:import (org.apache.commons.math3.stat.inference TTest))
+  (:import (org.apache.commons.math3.stat.inference WilcoxonSignedRankTest))
   (:require [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -592,15 +593,6 @@ programs encoded by genomes g1 and g2."
     (let [new-t (TTest.)]
       (.tTest new-t (double-array xvec) (double-array yvec)))))
 
-(defn safe-wilcoxon-signed-rank-test 
-  [xvec yvec]
-  (let [n (min (count xvec) (count yvec))
-        W (WilcoxonSignedRankTest.)]
-    (.wilcoxonSignedRankTest W 
-                             (double-array (take n xvec)) 
-                             (double-array (take n yvec)) 
-                             false)))
-
 (defn diffmeans-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
@@ -619,11 +611,7 @@ programs encoded by genomes g1 and g2."
                           #(expressed-difference c2 (make-child c2) argmap)))]
         (if (or (some #{0} diffs2)
                 (apply = diffs2)
-                (> ((case (:autoconstructive-diffmeans-test argmap)
-                      :t-test safe-t-test
-                      :wilcoxon-signed-rank-test safe-wilcoxon-signed-rank-test)
-                    diffs1 
-                    diffs2)
+                (> (safe-t-test diffs1 diffs2)
                    0.01))
           false
           true)))))

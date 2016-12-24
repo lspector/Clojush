@@ -186,10 +186,6 @@
           ;; fails the diversification test, if it has lower errors than both of its parents 
           ;; on at least one case.
           
-          :autoconstructive-diffmeans-test :t-test
-          ;; When using :autoconstructive-diversification-test :diffmeans-diversifying?, specifies
-          ;; which statistical test to use. See genetic-operators.clj.
-          
           :autoconstructive-diffmeans-children 10
           ;; When using :autoconstructive-diversification-test :diffmeans-diversifying?, specifies
           ;; how many children of each child to generate and test. See genetic-operators.clj.
