@@ -521,6 +521,16 @@ programs encoded by genomes g1 and g2."
     (and (> (reduce min diffs) 0) ;; diversification threshold set here
          (> (count (distinct diffs)) 1))))
 
+(defn no-clones-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (not= (translate-plush-genome-to-push-program 
+          {:genome g} 
+          argmap)
+        (translate-plush-genome-to-push-program 
+          {:genome (produce-child-genome-by-autoconstruction g g false argmap)} 
+          argmap)))
+
 (defn three-gens-diff-diffs-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
@@ -621,7 +631,8 @@ programs encoded by genomes g1 and g2."
      :three-gens-some-diff-diffs three-gens-some-diff-diffs-diversifying?
      :size-and-instruction size-and-instruction-diversifying?
      :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?
-     :diffmeans diffmeans-diversifying?)
+     :diffmeans diffmeans-diversifying?
+     :no-clones no-clones-diversifying?)
     g
     argmap))
 
@@ -730,5 +741,6 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
