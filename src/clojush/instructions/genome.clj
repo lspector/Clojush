@@ -534,3 +534,39 @@
                            (:instruction (nth genome index)))
                         :boolean)))
       state)))
+
+(define-registered
+  genome_close_eq
+  ^{:stack-types [:genome :integer :exec :boolean]}
+  (fn [state]
+    (if (and (not (empty? (:integer state)))
+             (not (empty? (:exec state)))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))]
+        (->> (pop-item :integer state)
+             (pop-item :exec state)
+             (pop-item :genome)
+             (push-item (= (top-item :exec state)
+                           (:close (nth genome index)))
+                        :boolean)))
+      state)))
+
+(define-registered
+  genome_silent_eq
+  ^{:stack-types [:genome :integer :exec :boolean]}
+  (fn [state]
+    (if (and (not (empty? (:integer state)))
+             (not (empty? (:exec state)))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))]
+        (->> (pop-item :integer state)
+             (pop-item :exec state)
+             (pop-item :genome)
+             (push-item (= (top-item :exec state)
+                           (:silent (nth genome index)))
+                        :boolean)))
+      state)))
