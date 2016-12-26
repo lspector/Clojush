@@ -528,7 +528,7 @@
       (let [genome (stack-ref :genome 0 state)
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
-             (pop-item :exec state)
+             (pop-item :exec)
              (pop-item :genome)
              (push-item (= (top-item :exec state)
                            (:instruction (nth genome index)))
@@ -546,7 +546,7 @@
       (let [genome (stack-ref :genome 0 state)
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
-             (pop-item :exec state)
+             (pop-item :exec)
              (pop-item :genome)
              (push-item (= (top-item :exec state)
                            (:close (nth genome index)))
@@ -564,9 +564,10 @@
       (let [genome (stack-ref :genome 0 state)
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
-             (pop-item :exec state)
+             (pop-item :exec)
              (pop-item :genome)
              (push-item (= (top-item :exec state)
                            (:silent (nth genome index)))
                         :boolean)))
       state)))
+
