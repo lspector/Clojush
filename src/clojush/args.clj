@@ -1,6 +1,7 @@
 (ns clojush.args
   (:require [clj-random.core :as random])
   (:use [clojush globals random util pushstate]
+        [clojush.instructions.tag]
         [clojush.pushgp report]))
 
 (def push-argmap
