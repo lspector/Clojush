@@ -1,6 +1,4 @@
-
-
-(ns clojush.instructions.genome  
+ (ns clojush.instructions.genome  
   (:use [clojush pushstate globals args random]
         clojush.instructions.common
         clojush.pushgp.genetic-operators))
@@ -72,10 +70,10 @@
              (push-item (assoc genome
                           index
                           (random-plush-instruction-map 
-                                    [(nth @global-atom-generators atom-gen)]
-                                    {:epigenetic-markers @global-epigenetic-markers
-                                     :close-parens-probabilities @global-close-parens-probabilities
-                                     :silent-instruction-probability @global-silent-instruction-probability}))
+                            [(nth @global-atom-generators atom-gen)]
+                            {:epigenetic-markers @global-epigenetic-markers
+                             :close-parens-probabilities @global-close-parens-probabilities
+                             :silent-instruction-probability @global-silent-instruction-probability}))
                         :genome)))
       state)))
 
@@ -272,13 +270,15 @@
   autoconstructive_integer_rand 
   ;; pushes a constant integer, but is replaced with integer_rand during 
   ;; nondetermistic autoconstruction
-  ^{:stack-types [:genome :integer]} (fn [state] (push-item 0 :integer state)))
+  ^{:stack-types [:genome :integer]} 
+  (fn [state] (push-item 0 :integer state)))
 
 (define-registered
   autoconstructive_boolean_rand 
   ;; pushes false, but is replaced with boolean_rand during 
   ;; nondetermistic autoconstruction
-  ^{:stack-types [:genome :boolean]} (fn [state] (push-item false :boolean state)))
+  ^{:stack-types [:genome :boolean]} 
+  (fn [state] (push-item false :boolean state)))
 
 (define-registered
   genome_uniform_instruction_mutation
@@ -350,8 +350,9 @@
              (pop-item :genome)
              (push-item (vec (:genome (uniform-tag-mutation
                                         {:genome genome}
-                                        (merge @push-argmap {:uniform-mutation-rate rate
-                                                             :uniform-mutation-tag-gaussian-standard-deviation stdev}))))
+                                        (merge @push-argmap 
+                                               {:uniform-mutation-rate rate
+                                                :uniform-mutation-tag-gaussian-standard-deviation stdev}))))
                         :genome)))
       state)))
 
@@ -369,8 +370,9 @@
              (pop-item :genome)
              (push-item (vec (:genome (uniform-string-mutation
                                         {:genome genome}
-                                        (merge @push-argmap {:uniform-mutation-rate rate1
-                                                             :uniform-mutation-string-char-change-rate rate2}))))
+                                        (merge @push-argmap 
+                                               {:uniform-mutation-rate rate1
+                                                :uniform-mutation-string-char-change-rate rate2}))))
                         :genome)))
       state)))
 
@@ -514,4 +516,3 @@
                                         @push-argmap)))
                         :genome)))
       state)))
-
