@@ -465,11 +465,23 @@
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     (swap! push-argmap assoc 
-           :atom-generators (conj (:atom-generators @push-argmap) (fn [] (lrand))))
+           :atom-generators (conj (:atom-generators @push-argmap) 
+                                  (fn [] (lrand))))
     (swap! push-argmap assoc 
-           :atom-generators (conj (:atom-generators @push-argmap) (fn [] (lrand-int 100))))
+           :atom-generators (conj (:atom-generators @push-argmap) 
+                                  (fn [] (lrand-int 100))))
     (swap! push-argmap assoc 
-           :atom-generators (conj (:atom-generators @push-argmap) (fn [] (lrand-nth [true false]))))
+           :atom-generators (conj (:atom-generators @push-argmap) 
+                                  (fn [] (lrand-nth [true false]))))
+    (swap! push-argmap assoc 
+           :atom-generators (conj (:atom-generators @push-argmap) 
+                                  (tag-instruction-erc [:integer :boolean :exec :float] 1000)))
+    (swap! push-argmap assoc 
+           :atom-generators (conj (:atom-generators @push-argmap) 
+                                  (untag-instruction-erc 1000)))
+    (swap! push-argmap assoc 
+           :atom-generators (conj (:atom-generators @push-argmap) 
+                                  (tagged-instruction-erc 1000)))
     (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
       (swap! push-argmap assoc 
              :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_integer_rand)))
@@ -498,5 +510,6 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
 
