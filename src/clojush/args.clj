@@ -468,6 +468,8 @@
            :atom-generators (conj (:atom-generators @push-argmap) (fn [] (lrand))))
     (swap! push-argmap assoc 
            :atom-generators (conj (:atom-generators @push-argmap) (fn [] (lrand-int 100))))
+    (swap! push-argmap assoc 
+           :atom-generators (conj (:atom-generators @push-argmap) (fn [] (lrand-nth [true false]))))
     (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
       (swap! push-argmap assoc 
              :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_integer_rand)))
@@ -496,4 +498,5 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
