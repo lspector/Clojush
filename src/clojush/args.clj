@@ -476,13 +476,13 @@
                                   (fn [] (lrand-nth [true false]))))
     (swap! push-argmap assoc 
            :atom-generators (conj (:atom-generators @push-argmap) 
-                                  (tag-instruction-erc [:integer :boolean :exec :float] 1000)))
+                                  (tag-instruction-erc [:integer :boolean :exec :float] 10000)))
     (swap! push-argmap assoc 
            :atom-generators (conj (:atom-generators @push-argmap) 
-                                  (untag-instruction-erc 1000)))
+                                  (untag-instruction-erc 10000)))
     (swap! push-argmap assoc 
            :atom-generators (conj (:atom-generators @push-argmap) 
-                                  (tagged-instruction-erc 1000)))
+                                  (tagged-instruction-erc 10000)))
     (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
       (swap! push-argmap assoc 
              :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_integer_rand)))
