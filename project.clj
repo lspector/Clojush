@@ -1,7 +1,6 @@
 (defproject clojush "2.16.5-1-SNAPSHOT" 
   :description "The Push programming language and the PushGP genetic programming
-                system implemented in Clojure.
-                See http://pushlanguage.com" 
+                system implemented in Clojure. See http://pushlanguage.com" 
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
