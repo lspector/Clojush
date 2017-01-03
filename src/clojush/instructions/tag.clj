@@ -255,25 +255,26 @@
                  (pop-item :integer state))
       state)))
 
-(define-registered
-  integer_tag_zip_instruction
-  ^{:stack-types [:integer :tag :exec :zip]}
-  (fn [state]
-    (if (not (empty? (:integer state)))
-      (push-item (symbol (str "tag_zip_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
-                                              @global-tag-limit)))
-                 :exec
-                 (pop-item :integer state))
-      state)))
+;(define-registered
+;  integer_tag_zip_instruction
+;  ^{:stack-types [:integer :tag :exec :zip]}
+;  (fn [state]
+;    (if (not (empty? (:integer state)))
+;      (push-item (symbol (str "tag_zip_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
+;                                              @global-tag-limit)))
+;                 :exec
+;                 (pop-item :integer state))
+;      state)))
 
-(define-registered
-  integer_tag_genome_instruction
-  ^{:stack-types [:integer :tag :exec :genome]}
-  (fn [state]
-    (if (not (empty? (:integer state)))
-      (push-item (symbol (str "tag_genome_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
-                                                 @global-tag-limit)))
-                 :exec
-                 (pop-item :integer state))
-      state)))
+;(define-registered
+;  integer_tag_genome_instruction
+;  ^{:stack-types [:integer :tag :exec :genome]}
+;  (fn [state]
+;    (if (not (empty? (:integer state)))
+;      (push-item (symbol (str "tag_genome_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
+;                                                 @global-tag-limit)))
+;                 :exec
+;                 (pop-item :integer state))
+;      state)))
+
 
