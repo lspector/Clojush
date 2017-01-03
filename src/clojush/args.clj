@@ -1,3 +1,6 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
 (ns clojush.args
   (:require [clj-random.core :as random])
   (:use [clojush globals random util pushstate]
@@ -403,8 +406,9 @@
     (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0})
     (swap! push-argmap assoc :epigenetic-markers [:close :silent])
     (doseq [instr (case (:autoconstructive-genome-instructions @push-argmap)
-                    :all (registered-for-stacks [:integer :boolean :exec :genome :float])
-                    :gene-oriented (concat (registered-for-stacks [:integer :boolean :exec :float])
+                    :all (registered-for-stacks [:integer :boolean :exec :genome :float :tag])
+                    :gene-oriented (concat (registered-for-stacks 
+                                             [:integer :boolean :exec :float :tag])
                                            '(genome_pop
                                               genome_dup
                                               genome_swap
@@ -433,7 +437,8 @@
                                               genome_parent2
                                               autoconstructive_integer_rand
                                               autoconstructive_boolean_rand))
-                    :uniform (concat (registered-for-stacks [:integer :boolean :exec :float])
+                    :uniform (concat (registered-for-stacks 
+                                       [:integer :boolean :exec :float :tag])
                                      '(genome_pop
                                         genome_dup
                                         genome_swap
@@ -514,3 +519,5 @@
 
 
 
+
+;; @@
