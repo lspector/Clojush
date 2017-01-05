@@ -1,4 +1,4 @@
- (ns clojush.instructions.genome  
+(ns clojush.instructions.genome  
   (:use [clojush pushstate globals args random]
         clojush.instructions.common
         clojush.pushgp.genetic-operators))
