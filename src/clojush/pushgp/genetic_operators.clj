@@ -1,3 +1,6 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
@@ -632,7 +635,8 @@ programs encoded by genomes g1 and g2."
      :size-and-instruction size-and-instruction-diversifying?
      :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?
      :diffmeans diffmeans-diversifying?
-     :no-clones no-clones-diversifying?)
+     :no-clones no-clones-diversifying?
+     :none (fn [genome argmap] true))
     g
     argmap))
 
@@ -744,3 +748,5 @@ be set globally or eliminated in the future."
 
 
 
+
+;; @@
