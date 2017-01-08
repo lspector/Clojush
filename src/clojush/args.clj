@@ -191,6 +191,9 @@
           ;; Specifies the probability that a clone will be produced rather than the result of
           ;; actual autoconstruction, when :autoconstructive is true.
           
+          :autoconstructive-entropy 0.0
+          ;; The rate for random gene deletions after autoconstruction.
+          
           :autoconstructive-diffmeans-children 10
           ;; When using :autoconstructive-diversification-test :diffmeans-diversifying?, specifies
           ;; how many children of each child to generate and test. See genetic-operators.clj.

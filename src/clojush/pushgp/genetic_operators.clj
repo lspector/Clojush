@@ -710,16 +710,22 @@ genome is returned. The construct/clone ration is hardcoded here, but might
 be set globally or eliminated in the future."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program 
                            error-function autoconstructive-improve-or-diversify 
-                           autoconstructive-fotd autoconstructive-clone-probability]
+                           autoconstructive-fotd autoconstructive-clone-probability
+                           autoconstructive-entropy]
                     :as argmap}]
   (if autoconstructive-fotd
     (fotd-autoconstruction parent1 parent2 argmap)
     (let [parent1-genome (:genome parent1)
           parent2-genome (:genome parent2)
-          child-genome (if (> (lrand) autoconstructive-clone-probability)
-                         (produce-child-genome-by-autoconstruction 
-                           parent1-genome parent2-genome false argmap)
-                         parent1-genome)
+          pre-entropy-child-genome (if (> (lrand) autoconstructive-clone-probability)
+                                     (produce-child-genome-by-autoconstruction 
+                                       parent1-genome parent2-genome false argmap)
+                                     parent1-genome)
+          child-genome (if (zero? autoconstructive-entropy)
+                         pre-entropy-child-genome
+                         (vec (filter identity
+                                      (map #(if (< (lrand) autoconstructive-entropy) nil %)
+                                           pre-entropy-child-genome))))
           child-errors (if autoconstructive-improve-or-diversify
                          (do
                            (swap! evaluations-count inc)
