@@ -1,6 +1,3 @@
-;; gorilla-repl.fileformat = 1
-
-;; @@
 (ns clojush.args
   (:require [clj-random.core :as random])
   (:use [clojush globals random util pushstate]
@@ -197,6 +194,10 @@
           :autoconstructive-diffmeans-children 10
           ;; When using :autoconstructive-diversification-test :diffmeans-diversifying?, specifies
           ;; how many children of each child to generate and test. See genetic-operators.clj.
+          
+          :autoconstructive-si-children 8
+          ;; When using a "size and instruction" diversification test, specifies how many
+          ;; children to generate and test. See genetic-operators.clj.
           
           :autoconstructive-fotd false
           ;; If true, autoconstruction will be performed using the 'flavor of the day' code in
@@ -523,4 +524,3 @@
 
 
 
-;; @@

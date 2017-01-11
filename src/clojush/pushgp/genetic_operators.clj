@@ -1,6 +1,3 @@
-;; gorilla-repl.fileformat = 1
-
-;; @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         clojush.instructions.tag
@@ -573,7 +570,8 @@ programs encoded by genomes g1 and g2."
 (defn size-and-instruction-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [kids (repeatedly 8 #(produce-child-genome-by-autoconstruction g g false argmap))
+  (let [kids (repeatedly (:autoconstructive-si-children argmap) 
+                         #(produce-child-genome-by-autoconstruction g g false argmap))
         instruction-set (fn [genome]
                           (hash-set (keys (frequencies (map :instruction genome)))))]
     (and (not (some #{g} kids))
@@ -586,7 +584,8 @@ programs encoded by genomes g1 and g2."
   (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
         instruction-set (fn [genome]
                           (hash-set (keys (frequencies (map :instruction genome)))))
-        kids (repeatedly 8 #(make-child g))
+        kids (repeatedly (:autoconstructive-si-children argmap) 
+                         #(make-child g))
         grandkids (map make-child kids)]
     (and (apply distinct? (concat kids grandkids [g]))
          (not (apply = (map count kids)))
@@ -755,4 +754,3 @@ be set globally or eliminated in the future."
 
 
 
-;; @@
