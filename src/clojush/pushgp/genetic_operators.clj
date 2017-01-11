@@ -570,28 +570,39 @@ programs encoded by genomes g1 and g2."
 (defn size-and-instruction-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [kids (repeatedly (:autoconstructive-si-children argmap) 
+  (let [numkids (:autoconstructive-si-children argmap)
+        kids (repeatedly numkids 
                          #(produce-child-genome-by-autoconstruction g g false argmap))
+        kid-counts (map count kids)
         instruction-set (fn [genome]
-                          (hash-set (keys (frequencies (map :instruction genome)))))]
-    (and (not (some #{g} kids))
-         (not (apply = (map count kids)))
-         (not (apply = (map instruction-set kids))))))
+                          (hash-set (keys (frequencies (map :instruction genome)))))
+        kid-sets (map instruction-set kids)]
+    (and (not (some #{(count g)} kid-counts))
+         (not (some #{(instruction-set g)} kid-sets))
+         (or (< numkids 2) (not (apply = kid-counts)))
+         (or (< numkids 2) (not (apply = kid-sets))))))
 
 (defn three-gens-size-and-instruction-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+  (let [numkids (:autoconstructive-si-children argmap)
+        make-child #(produce-child-genome-by-autoconstruction % % false argmap)
         instruction-set (fn [genome]
                           (hash-set (keys (frequencies (map :instruction genome)))))
-        kids (repeatedly (:autoconstructive-si-children argmap) 
-                         #(make-child g))
-        grandkids (map make-child kids)]
-    (and (apply distinct? (concat kids grandkids [g]))
-         (not (apply = (map count kids)))
-         (not (apply = (map count grandkids)))
-         (not (apply = (map instruction-set kids)))
-         (not (apply = (map instruction-set grandkids))))))
+        kids (repeatedly numkids #(make-child g))
+        kid-counts (map count kids)
+        kid-sets (map instruction-set kids)
+        grandkids (map make-child kids)
+        grandkid-counts (map count grandkids)
+        grandkid-sets (map instruction-set grandkids)]
+    (and (not (some #{(count g)} kid-counts))
+         (not (some #{(instruction-set g)} kid-sets))
+         (not (some #{(count g)} grandkid-counts))
+         (not (some #{(instruction-set g)} grandkid-sets))
+         (or (< numkids 2) (not (apply = (map count kids))))
+         (or (< numkids 2) (not (apply = (map count grandkids))))
+         (or (< numkids 2) (not (apply = (map instruction-set kids))))
+         (or (< numkids 2) (not (apply = (map instruction-set grandkids)))))))
 
 (defn safe-t-test ;; safely answers 1.0 if t-test would divide by zero
   [xvec yvec]
