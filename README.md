@@ -2,7 +2,6 @@ Clojush [![Travis branch](https://img.shields.io/travis/lspector/Clojush/master.
 =======
 
 
-
 Lee Spector (lspector@hampshire.edu), started 20100227
 [See version history](https://github.com/lspector/Clojush/commits/master).
 Older version history is in `old-version-history.txt`.
