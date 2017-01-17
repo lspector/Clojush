@@ -356,6 +356,9 @@
 
           :print-homology-data false
           ;; If true, prints the homology statistics.
+          
+          :exit-on-success true
+          ;; When true, will exit the run when there is an individual with a zero-error vector
 
           ;;----------------------------------------
           ;; Arguments related to printing JSON, EDN, or CSV logs

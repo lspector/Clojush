@@ -201,7 +201,7 @@
                               population)
         count-zero-by-case (map #(apply + %) (apply mapv vector pop-zero-by-case))]
         
-    (println "--- Lexicse Program with Most Elite Cases Statistics ---")
+    (println "--- Lexicase Program with Most Elite Cases Statistics ---")
     (println "Lexicase best genome:" (print-genome lex-best))
     (println "Lexicase best program:" (pr-str (not-lazy (:program lex-best))))
     (when (> report-simplifications 0)
@@ -219,7 +219,7 @@
     (when print-history (println "Lexicase best history:" (not-lazy (:history lex-best))))
     (println "Lexicase best size:" (count-points (:program lex-best)))
     (printf "Percent parens: %.3f\n" (double (/ (count-parens (:program lex-best)) (count-points (:program lex-best))))) ;Number of (open) parens / points
-    (println "--- Lexicse Program with Most Zero Cases Statistics ---")
+    (println "--- Lexicase Program with Most Zero Cases Statistics ---")
     (println "Zero cases best genome:" (print-genome most-zero-cases-best))
     (println "Zero cases best program:" (pr-str (not-lazy (:program most-zero-cases-best))))
     (when (> report-simplifications 0)
@@ -274,7 +274,7 @@
            problem-specific-report total-error-method
            parent-selection print-homology-data max-point-evaluations
            print-error-frequencies-by-case normalization autoconstructive
-           print-selection-counts
+           print-selection-counts exit-on-success
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
@@ -428,8 +428,9 @@
     (when print-json-logs (json-print population generation json-log-filename
                                       log-fitnesses-for-all-cases json-log-program-strings))
     (when print-edn-logs (edn-print population generation edn-log-filename edn-keys edn-additional-keys))
-    (cond (or (<= (:total-error best) error-threshold)
-              (:success best)) [:success best]
+    (cond (and exit-on-success
+               (or (<= (:total-error best) error-threshold)
+                   (:success best))) [:success best]
           (>= generation max-generations) [:failure best]
           (>= @point-evaluations-count max-point-evaluations) [:failure best]
           :else [:continue best])))
