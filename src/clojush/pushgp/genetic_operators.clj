@@ -341,9 +341,14 @@ given by uniform-deletion-rate."
   "Returns the individual with each element of its genome possibly preceded or followed by
   a new gene, with probability given by uniform-addition-rate."
   [ind {:keys [uniform-addition-rate maintain-ancestors atom-generators] :as argmap}]
-  (let [new-genome (vec (apply concat
-                               (map #(if (< (lrand) uniform-addition-rate)
-                                      (lshuffle [% (random-plush-instruction-map atom-generators argmap)])
+  (let [rate (if (number? uniform-addition-rate)
+               uniform-addition-rate
+               (lrand-nth uniform-addition-rate))
+        new-genome (vec (apply concat
+                               (map #(if (< (lrand) rate)
+                                      (lshuffle [% 
+                                                 (random-plush-instruction-map 
+                                                   atom-generators argmap)])
                                       [%])
                                     (:genome ind))))]
     (make-individual :genome new-genome
@@ -761,6 +766,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
