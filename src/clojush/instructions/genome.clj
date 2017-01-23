@@ -476,7 +476,7 @@
                                    (:genome (uniform-addition-and-deletion
                                               {:genome genome}
                                               (merge @push-argmap 
-                                                     {:uniform-addition-and-deletion rate rate})))))
+                                                     {:uniform-addition-and-deletion-rate rate})))))
                         :genome)))
       state)))
 
@@ -588,5 +588,6 @@
                            (:silent (nth genome index)))
                         :boolean)))
       state)))
+
 
 
