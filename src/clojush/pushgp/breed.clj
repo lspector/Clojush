@@ -22,6 +22,7 @@
    :uniform-silence-mutation {:fn uniform-silence-mutation :parents 1}
    :uniform-deletion {:fn uniform-deletion :parents 1}
    :uniform-addition {:fn uniform-addition :parents 1}
+   :uniform-addition-and-deletion {:fn uniform-addition-and-deletion :parents 1}
    :make-next-operator-revertable {:fn nil :parents 0}
    :autoconstruction {:fn autoconstruction :parents 2}
    })
@@ -139,4 +140,5 @@
                 (<= prob (second (first vectored-go-probabilities))))
           (perform-genetic-operator (first (first vectored-go-probabilities)) population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
+
 
