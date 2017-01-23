@@ -325,8 +325,11 @@
   "Returns the individual with each element of its genome possibly deleted, with probability
 given by uniform-deletion-rate."
   [ind {:keys [uniform-deletion-rate maintain-ancestors]}]
-  (let [new-genome (vec (filter identity
-                                (map #(if (< (lrand) uniform-deletion-rate) nil %)
+  (let [rate (if (number? uniform-deletion-rate)
+               uniform-deletion-rate
+               (lrand-nth uniform-deletion-rate))
+        new-genome (vec (filter identity
+                                (map #(if (< (lrand) rate) nil %)
                                      (:genome ind))))]
     (make-individual :genome new-genome
                      :history (:history ind)
