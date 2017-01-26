@@ -370,18 +370,19 @@ given by uniform-deletion-rate."
   uniform-addition-and-deletion-rate."
   [ind {:keys [uniform-addition-and-deletion-rate maintain-ancestors atom-generators] 
         :as argmap}]
-  (let [rate (if (number? uniform-addition-and-deletion-rate)
-               uniform-addition-and-deletion-rate
-               (lrand-nth uniform-addition-and-deletion-rate))
+  (let [addition-rate (if (number? uniform-addition-and-deletion-rate)
+                        uniform-addition-and-deletion-rate
+                        (lrand-nth uniform-addition-and-deletion-rate))
+        deletion-rate (/ 1 (+ (/ 1 addition-rate) 1))
         after-addition (vec (apply concat
-                                   (map #(if (< (lrand) rate)
+                                   (map #(if (< (lrand) addition-rate)
                                            (lshuffle [% 
                                                       (random-plush-instruction-map 
                                                         atom-generators argmap)])
                                            [%])
                                         (:genome ind))))
         new-genome (vec (filter identity
-                                (map #(if (< (lrand) rate) nil %)
+                                (map #(if (< (lrand) deletion-rate) nil %)
                                      after-addition)))]
     (make-individual :genome new-genome
                      :history (:history ind)
@@ -798,6 +799,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
