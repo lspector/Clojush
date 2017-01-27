@@ -41,7 +41,7 @@
                           (= cat :total-error) (:total-error ind)
                           (= cat :unsolved-cases) (count (filter #(> % error-threshold) (:errors ind)))
                           (= cat :rand) (lrand)
-                          (= cat :rand-bit (lrand-nth [0 1]))
+                          (= cat :rand-bit) (lrand-nth [0 1])
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
     (doall (map meta-error-fn meta-error-categories))))
 
