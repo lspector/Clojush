@@ -40,7 +40,8 @@
 ;                          (= cat :compressibility) 555 ;;TMH fix later
                           (= cat :total-error) (:total-error ind)
                           (= cat :unsolved-cases) (count (filter #(> % error-threshold) (:errors ind)))
-                          (= cat :random) (lrand)
+                          (= cat :rand) (lrand)
+                          (= cat :rand-bit (lrand-nth [0 1]))
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
     (doall (map meta-error-fn meta-error-categories))))
 
@@ -124,4 +125,5 @@
                            )
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
+
 
