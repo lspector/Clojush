@@ -62,7 +62,8 @@
                          subpop argmap))
            cases (lshuffle (range (count (:errors (first subpop)))))]
       (if (or (empty? cases)
-              (empty? (rest survivors)))
+              (empty? (rest survivors))
+              (< (lrand) (:lexicase-slippage argmap)))
         (lrand-nth survivors)
         (let [min-err-for-case (apply min (map #(nth % (first cases))
                                                (map #(:errors %) survivors)))]
@@ -235,4 +236,5 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
+
 

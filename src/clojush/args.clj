@@ -252,8 +252,14 @@
           ;; the value for epsilon. If nil, automatic epsilon lexicase selection will be used.
 
           :lexicase-leakage 0.1
-          ;; If using leaky lexicase selection, the percentage of selection events that will return
-          ;; random (tourny 1) individuals.
+          ;; If using leaky lexicase selection, the probability that a selection event will return
+          ;; a random (tourny 1) individual from the entire population (note: currently ignores 
+          ;; location, so doesn't play nice with trivial geography).
+          
+          :lexicase-slippage 0
+          ;; If using leaky lexicase selection, the probability that each step of the lexicase
+          ;; selection process will "slip" and return a random candidate from the current pool, rather
+          ;; than continuing to filter the pool.
 
           :tournament-size 7
           ;; If using tournament selection, the size of the tournaments.
@@ -528,6 +534,7 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
 
 
