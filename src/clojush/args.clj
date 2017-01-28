@@ -489,6 +489,8 @@
                                         genome_uniform_silence_mutation
                                         genome_uniform_deletion
                                         genome_uniform_addition
+                                        ;genome_uniform_addition_and_deletion
+                                        ;genome_uniform_combination_and_deletion
                                         genome_alternation
                                         genome_uniform_crossover)))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
@@ -539,6 +541,7 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
 
 
