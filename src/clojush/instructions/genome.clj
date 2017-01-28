@@ -481,6 +481,27 @@
       state)))
 
 (define-registered
+  genome_uniform_combination_and_deletion
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (:float state)))
+             (not (empty? (rest (:genome state)))))
+      (let [rate (mod (first (:float state)) 1.0)
+            genome1 (first (:genome state))
+            genome2 (second (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :genome)
+             (pop-item :genome)
+             (push-item (vec (take (int (/ (:max-points @push-argmap) 4))
+                                   (:genome (uniform-combination-and-deletion
+                                              {:genome genome1}
+                                              {:genome genome2}
+                                              (merge @push-argmap 
+                                                     {:uniform-combination-and-deletion-rate rate})))))
+                        :genome)))
+      state)))
+
+(define-registered
   genome_alternation
   ^{:stack-types [:genome :float]}
   (fn [state]
@@ -588,6 +609,7 @@
                            (:silent (nth genome index)))
                         :boolean)))
       state)))
+
 
 
 

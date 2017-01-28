@@ -92,6 +92,7 @@
                                            :uniform-deletion 0.0
                                            :uniform-addition 0.0
                                            :uniform-addition-and-deletion 0.0
+                                           :uniform-combination-and-deletion 0.0
                                            }
           ;; The map supplied to :genetic-operator-probabilities should contain genetic operators
           ;; that sum to 1.0. All available genetic operators are defined in clojush.pushgp.breed.
@@ -150,6 +151,10 @@
           :uniform-addition-and-deletion-rate 0.01
           ;; The probability, per gene, for additions in the first phase, and deletions in the second
           ;; phase, of uniform-addition-and-deletion.
+          
+          :uniform-combination-and-deletion-rate 0.01
+          ;; The probability, per gene, for combinations in the first phase, and deletions in 
+          ;; the second phase, of uniform-combination-and-deletion.
 
           :uniform-silence-mutation-rate 0.1
           ;; The probability of each :silent being switched during uniform silent mutation.
@@ -534,6 +539,7 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
 
 

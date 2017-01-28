@@ -391,6 +391,39 @@ given by uniform-deletion-rate."
                                   (:ancestors ind)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform combination and deletion
+
+(defn uniform-combination-and-deletion
+  "Returns parent1 after two passes of modification. In the first pass, each element 
+  of its genome may possibly be preceded or followed by the corresponding element from
+  parent 2's genome (which will wrap if it is too short). In the second pass, each
+  element of the genome may possibly be deleted. Probabilities are given by 
+  uniform-combination-and-deletion-rate."
+  [parent1 parent2 
+   {:keys [uniform-combination-and-deletion-rate maintain-ancestors atom-generators] 
+    :as argmap}]
+  (let [combination-rate (if (number? uniform-combination-and-deletion-rate)
+                        uniform-combination-and-deletion-rate
+                        (lrand-nth uniform-combination-and-deletion-rate))
+        deletion-rate (/ 1 (+ (/ 1 combination-rate) 1))
+        after-combination (vec 
+                            (apply concat
+                                   (map (fn [g1 g2]
+                                          (if (< (lrand) combination-rate)
+                                            (lshuffle [g1 g2])
+                                            [g1]))
+                                        (:genome parent1)
+                                        (cycle (:genome parent2)))))
+        new-genome (vec (filter identity
+                                (map #(if (< (lrand) deletion-rate) nil %)
+                                     after-combination)))]
+    (make-individual :genome new-genome
+                     :history (:history parent1)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome parent1) (:ancestors parent1))
+                                  (:ancestors parent1)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; alternation
 
 (defn alternation
@@ -799,6 +832,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
