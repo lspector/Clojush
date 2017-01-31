@@ -36,7 +36,7 @@ ssh ${fly_user}@fly.hampshire.edu /opt/pixar/tractor-blade-1.7.2/tractor-spool.p
   --svckey="linux" \
   --title="clojush-$number" \
   --jobcwd="${repodir}" \
-  --priority=10 \
+  --priority=1 \
   --range 1-${n} \
   -q \
   -c "bash -c \"export PATH=\$PATH:/usr/java/latest/bin  && /share/apps/bin/lein run $lein_command > >(tee $outputdir/RANGE.out) 2> >(tee $outputdir/RANGE.err >&2) \""
