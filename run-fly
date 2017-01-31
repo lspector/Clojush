@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+# refer to https://push-language.hampshire.edu/t/running-batch-experiments-with-hampshires-cluster/691 for documentation
+set -o errexit
+set -o errtrace
+set -o nounset
+set -o pipefail
+#
+
+n="$1"
+fly_user="$2"
+lein_command="${@:3}"
+number="$RANDOM"
+
+homedir="/home/${fly_user}"
+repodir="$homedir/Clojush"
+outputdir="$homedir/output/$number"
+
+rsync  \
+  --recursive \
+  --inplace \
+  --links \
+  --perms \
+  --times \
+  --delete \
+  --force \
+  --human-readable \
+  . "${fly_user}@fly.hampshire.edu:${repodir}"
+
+
+ssh ${fly_user}@fly.hampshire.edu "mkdir -p $outputdir"
+# using tee for stderr and stdout from here http://stackoverflow.com/a/692407/907060
+
+ssh ${fly_user}@fly.hampshire.edu /opt/pixar/tractor-blade-1.7.2/tractor-spool.py \
+  --engine=fly:8000  \
+  --svckey="linux" \
+  --title="clojush-$number" \
+  --jobcwd="${repodir}" \
+  --priority=10 \
+  --range 1-${n} \
+  -q \
+  -c "bash -c \"export PATH=\$PATH:/usr/java/latest/bin  && /share/apps/bin/lein run $lein_command > >(tee $outputdir/RANGE.out) 2> >(tee $outputdir/RANGE.err >&2) \""
+
+
+
+echo "Job started; Monitor status on http://fly.hampshire.edu:8000/tractor/tv/; Tailing output files (they might take a while to start), feel free to stop at anytime and re-run the following command:"
+set -o xtrace
+ssh ${fly_user}@fly.hampshire.edu "tail -F $outputdir/{1..$n}.{out,err}"
