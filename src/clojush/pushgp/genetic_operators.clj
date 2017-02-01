@@ -6,6 +6,18 @@
   (:require [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; local utilities
+
+(defn number
+  "If given a number, returns it. If given a collection, returns a member of the collection.
+  Intended for allowing arguments to genetic operators, such as mutation rates, to take
+  collections in addition to single values"
+  [number-or-numbers]
+  (if (number? number-or-numbers)
+    number-or-numbers
+    (lrand-nth number-or-numbers)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; reproduction
 
 (defn reproduction
@@ -832,6 +844,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
