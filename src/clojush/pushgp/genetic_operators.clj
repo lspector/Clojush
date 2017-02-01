@@ -65,7 +65,25 @@
                uniform-mutation-string-char-change-rate maintain-ancestors
                atom-generators]
         :as argmap}]
-  (let [string-tweak (fn [st]
+  (let [uniform-mutation-rate 
+        (number uniform-mutation-rate)
+        
+        uniform-mutation-constant-tweak-rate 
+        (number uniform-mutation-constant-tweak-rate)
+        
+        uniform-mutation-float-gaussian-standard-deviation 
+        (number uniform-mutation-float-gaussian-standard-deviation)
+        
+        uniform-mutation-int-gaussian-standard-deviation 
+        (number uniform-mutation-int-gaussian-standard-deviation)
+        
+        uniform-mutation-tag-gaussian-standard-deviation 
+        (number uniform-mutation-tag-gaussian-standard-deviation)
+        
+        uniform-mutation-string-char-change-rate 
+        (number uniform-mutation-string-char-change-rate)
+    
+        string-tweak (fn [st]
                        (apply str (map (fn [c]
                                          (if (< (lrand) uniform-mutation-string-char-change-rate)
                                            (lrand-nth (concat ["\n" "\t"] 
@@ -80,7 +98,8 @@
         constant-mutator (fn [token]
                            (let [const (:instruction token)]
                              (if (tag-instruction? const)
-                               (tag-gaussian-tweak token uniform-mutation-tag-gaussian-standard-deviation)
+                               (tag-gaussian-tweak token 
+                                                   uniform-mutation-tag-gaussian-standard-deviation)
                                (assoc token
                                       :instruction
                                       (cond
