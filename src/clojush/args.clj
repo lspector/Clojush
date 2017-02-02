@@ -301,6 +301,12 @@
           :print-selection-counts false
           ;; If true, keeps track of and prints the number of times each individual was selected
           ;; to be a parent
+          
+          :self-mate-avoidance-limit 0
+          ;; If non-zero, then when multiple parents are required for a genetic operator, an
+          ;; effort will be made to select parents not equal to the first parent. The value
+          ;; of this parameter is the number of re-selections that will be performed to try
+          ;; to find a different parent, before using the same parent if the limit is exceeded.
 
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
@@ -541,6 +547,7 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
 
 
