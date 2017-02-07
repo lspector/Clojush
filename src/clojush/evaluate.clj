@@ -42,6 +42,7 @@
                           (= cat :unsolved-cases) (count (filter #(> % error-threshold) (:errors ind)))
                           (= cat :rand) (lrand)
                           (= cat :rand-bit) (lrand-nth [0 1])
+                          (= cat :age) (:age ind)
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
     (doall (map meta-error-fn meta-error-categories))))
 
@@ -125,5 +126,6 @@
                            )
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
+
 
 
