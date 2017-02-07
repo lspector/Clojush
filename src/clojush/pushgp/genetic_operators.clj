@@ -130,6 +130,7 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
+                     :age (inc (:age ind))
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -155,6 +156,7 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
+                     :age (inc (:age ind))
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -189,6 +191,7 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
+                     :age (inc (:age ind))
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -224,6 +227,7 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
+                     :age (inc (:age ind))
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -256,6 +260,7 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
+                     :age (inc (:age ind))
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -294,6 +299,7 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
+                     :age (inc (:age ind))
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -320,6 +326,7 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
+                     :age (inc (:age ind))
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -352,6 +359,7 @@
           new-genome (mapv close-mutator (:genome ind))]
       (make-individual :genome new-genome
                        :history (:history ind)
+                       :age (inc (:age ind))
                        :ancestors (if maintain-ancestors
                                     (cons (:genome ind) (:ancestors ind))
                                     (:ancestors ind))))))
@@ -376,6 +384,7 @@
           new-genome (mapv silent-mutator (:genome ind))]
       (make-individual :genome new-genome
                        :history (:history ind)
+                       :age (inc (:age ind))
                        :ancestors (if maintain-ancestors
                                     (cons (:genome ind) (:ancestors ind))
                                     (:ancestors ind))))))
@@ -393,6 +402,7 @@ given by uniform-deletion-rate."
                                      (:genome ind))))]
     (make-individual :genome new-genome
                      :history (:history ind)
+                     :age (inc (:age ind))
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -414,6 +424,7 @@ given by uniform-deletion-rate."
                                     (:genome ind))))]
     (make-individual :genome new-genome
                      :history (:history ind)
+                     :age (inc (:age ind))
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -442,6 +453,7 @@ given by uniform-deletion-rate."
                                      after-addition)))]
     (make-individual :genome new-genome
                      :history (:history ind)
+                     :age (inc (:age ind))
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -473,6 +485,9 @@ given by uniform-deletion-rate."
                                      after-combination)))]
     (make-individual :genome new-genome
                      :history (:history parent1)
+                     :age ((:age-combining-function argmap) 
+                           (inc (:age parent1)) 
+                           (inc (:age parent2)))
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -509,6 +524,9 @@ given by uniform-deletion-rate."
                                 (dec iteration-budget)))))]
     (make-individual :genome new-genome
                      :history (:history parent1)
+                     :age ((:age-combining-function argmap) 
+                           (inc (:age parent1)) 
+                           (inc (:age parent2)))
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -532,6 +550,9 @@ given by uniform-deletion-rate."
                                       genome1)))]
     (make-individual :genome new-genome
                      :history (:history parent1)
+                     :age ((:age-combining-function argmap) 
+                           (inc (:age parent1)) 
+                           (inc (:age parent2)))
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -564,6 +585,9 @@ given by uniform-deletion-rate."
                                  long-genome)))]
       (make-individual :genome new-genome
                        :history (:history parent1)
+                       :age ((:age-combining-function argmap) 
+                             (inc (:age parent1)) 
+                             (inc (:age parent2)))
                        :ancestors (if maintain-ancestors
                                     (cons (:genome parent1) (:ancestors parent1))
                                     (:ancestors parent1))))))
@@ -833,6 +857,9 @@ programs encoded by genomes g1 and g2."
                          [])))]
     (assoc (make-individual :genome new-genome
                             :history (:history parent1)
+                            :age ((:age-combining-function argmap) 
+                                  (inc (:age parent1)) 
+                                  (inc (:age parent2)))
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
@@ -883,11 +910,15 @@ be set globally or eliminated in the future."
                                         new-genome
                                         [])
                               :history (:history parent1)
+                              :age ((:age-combining-function argmap) 
+                                    (inc (:age parent1)) 
+                                    (inc (:age parent2)))
                               :ancestors (if maintain-ancestors
                                            (cons (:genome parent1) (:ancestors parent1))
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
