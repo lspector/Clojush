@@ -93,6 +93,7 @@
                                            :uniform-addition 0.0
                                            :uniform-addition-and-deletion 0.0
                                            :uniform-combination-and-deletion 0.0
+                                           :genesis 0.0
                                            }
           ;; The map supplied to :genetic-operator-probabilities should contain genetic operators
           ;; that sum to 1.0. All available genetic operators are defined in clojush.pushgp.breed.
@@ -499,8 +500,9 @@
                                         genome_uniform_silence_mutation
                                         genome_uniform_deletion
                                         genome_uniform_addition
-                                        ;genome_uniform_addition_and_deletion
-                                        ;genome_uniform_combination_and_deletion
+                                        genome_uniform_addition_and_deletion
+                                        genome_uniform_combination_and_deletion
+                                        genome_genesis
                                         genome_alternation
                                         genome_uniform_crossover)))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
@@ -551,6 +553,7 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
 
 

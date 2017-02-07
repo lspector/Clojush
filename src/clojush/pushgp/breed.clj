@@ -23,6 +23,7 @@
    :uniform-addition {:fn uniform-addition :parents 1}
    :uniform-addition-and-deletion {:fn uniform-addition-and-deletion :parents 1}
    :uniform-combination-and-deletion {:fn uniform-combination-and-deletion :parents 2}
+   :genesis {:fn genesis :parents 1} ;; the parent will be ignored
    :make-next-operator-revertable {:fn nil :parents 0}
    :autoconstruction {:fn autoconstruction :parents 2}
    })
@@ -149,6 +150,7 @@
                 (<= prob (second (first vectored-go-probabilities))))
           (perform-genetic-operator (first (first vectored-go-probabilities)) population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
+
 
 
 

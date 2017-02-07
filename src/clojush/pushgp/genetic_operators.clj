@@ -26,6 +26,22 @@
   ind)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; genesis
+
+(defn genesis
+  "Ignores the provided parent and returns a new, random individual, with age 0."
+  [ind {:keys [maintain-ancestors max-genome-size-in-initial-program atom-generators]
+        :as argmap}]
+  (make-individual :genome (random-plush-genome max-genome-size-in-initial-program 
+                                                atom-generators 
+                                                argmap)
+                   :history (:history ind)
+                   :age 0
+                   :ancestors (if maintain-ancestors
+                                (cons (:genome ind) (:ancestors ind))
+                                (:ancestors ind))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; uniform mutation
 
 (defn gaussian-noise-factor
@@ -918,6 +934,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 

@@ -281,6 +281,14 @@
   (fn [state] (push-item false :boolean state)))
 
 (define-registered
+  genome_genesis
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (push-item (vec (:genome (genesis _ @push-argmap)))
+               :genome
+               state)))
+
+(define-registered
   genome_uniform_instruction_mutation
   ^{:stack-types [:genome :float]}
   (fn [state]
@@ -609,6 +617,7 @@
                            (:silent (nth genome index)))
                         :boolean)))
       state)))
+
 
 
 
