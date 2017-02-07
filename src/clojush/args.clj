@@ -223,6 +223,10 @@
           ;; The number of extra instances of autoconstructive_boolean_rand to include in
           ;; :atom-generators for autoconstruction. If negative then autoconstructive_boolean_rand
           ;; will not be in :atom-generators at all.
+          
+          :age-combining-function max
+          ;; For genetic operators that involve multiple parents, the function used to combine
+          ;; the incremented ages of the parents to produce the age of the child.
 
           ;;----------------------------------------
           ;; Epignenetics
@@ -547,6 +551,7 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
 
 
