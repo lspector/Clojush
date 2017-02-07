@@ -284,7 +284,7 @@
   genome_genesis
   ^{:stack-types [:genome]}
   (fn [state]
-    (push-item (vec (:genome (genesis _ @push-argmap)))
+    (push-item (vec (:genome (genesis :no-parent @push-argmap)))
                :genome
                state)))
 
@@ -617,6 +617,7 @@
                            (:silent (nth genome index)))
                         :boolean)))
       state)))
+
 
 
 
