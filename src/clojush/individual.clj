@@ -5,9 +5,9 @@
 ;; Populations are vectors of agents with individuals as their states (along with error and
 ;; history information).
 
-(defrecord individual [genome program errors total-error normalized-error weighted-error meta-errors history ancestors uuid parent-uuids genetic-operators])
+(defrecord individual [genome program errors total-error normalized-error weighted-error meta-errors history ancestors uuid parent-uuids genetic-operators age])
 
-(defn make-individual [& {:keys [genome program errors total-error normalized-error weighted-error meta-errors history ancestors uuid parent-uuids genetic-operators]
+(defn make-individual [& {:keys [genome program errors total-error normalized-error weighted-error meta-errors history ancestors uuid parent-uuids genetic-operators age]
                           :or {genome nil
                                program nil
                                errors nil
@@ -35,4 +35,5 @@
   (cons 'individual.
         (let [k '(:genome :program :errors :total-error :normalized-error :weighted-error :meta-errors :history :ancestors :uuid :parent-uuids :genetic-operators :age)]
           (interleave k  (map #(printable (get i %)) k)))))
+
 
