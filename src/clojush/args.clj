@@ -225,7 +225,7 @@
           ;; :atom-generators for autoconstruction. If negative then autoconstructive_boolean_rand
           ;; will not be in :atom-generators at all.
           
-          :age-combining-function max
+          :age-combining-function average
           ;; For genetic operators that involve multiple parents, the function used to combine
           ;; the incremented ages of the parents to produce the age of the child.
 
@@ -553,6 +553,7 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
 
 
