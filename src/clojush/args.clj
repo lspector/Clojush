@@ -1,3 +1,6 @@
+;; gorilla-repl.fileformat = 1
+
+;; @@
 (ns clojush.args
   (:require [clj-random.core :as random])
   (:use [clojush globals random util pushstate]
@@ -225,7 +228,7 @@
           ;; :atom-generators for autoconstruction. If negative then autoconstructive_boolean_rand
           ;; will not be in :atom-generators at all.
           
-          :age-combining-function average
+          :age-combining-function :average
           ;; For genetic operators that involve multiple parents, the function used to combine
           ;; the incremented ages of the parents to produce the age of the child.
 
@@ -565,3 +568,5 @@
 
 
 
+
+;; @@
