@@ -9,6 +9,7 @@ set -o pipefail
 
 n="$1"
 fly_user="$2"
+label="$3"
 number="$RANDOM"
 
 # from http://stackoverflow.com/a/3104922/907060
@@ -16,12 +17,12 @@ function quote_args {
   printf '"%s" ' "$@"; echo "";
 }
 # quote each arg so it is quoted in SSH
-lein_command=$(quote_args "${@:3}")
+lein_command=$(quote_args "${@:4}")
 
 
 homedir="/home/${fly_user}"
 repodir="$homedir/Clojush"
-outputdir="$homedir/output/$number"
+outputdir="$homedir/output/$label-$number"
 
 rsync  \
   --recursive \
@@ -37,18 +38,17 @@ rsync  \
 
 ssh ${fly_user}@fly.hampshire.edu "mkdir -p $outputdir"
 
-# using tee for stderr and stdout from here http://stackoverflow.com/a/692407/907060
 ssh ${fly_user}@fly.hampshire.edu /opt/pixar/tractor-blade-1.7.2/tractor-spool.py \
   --engine=fly:8000  \
   --svckey="linux" \
-  --title="clojush-$number" \
+  --title="$label-$number" \
   --jobcwd="${repodir}" \
   --priority=1 \
   --range 1-${n} \
-  -c "bash -c 'env JAVA_CMD=/usr/java/latest/bin/java /share/apps/bin/lein run $lein_command > >(tee $outputdir/RANGE.out) 2> >(tee $outputdir/RANGE.err >&2)'"
+  -c "bash -c 'env JAVA_CMD=/usr/java/latest/bin/java /share/apps/bin/lein run $lein_command > $outputdir/RANGE'"
 
 
-echo "Job ID: ${number}"
+echo "Job ID: $label-${number}"
 
-echo "Monitor status on http://fly.hampshire.edu:8000/tractor/tv/; Run the following to tail all outputs:"
-echo "ssh ${fly_user}@fly.hampshire.edu \"tail -F $outputdir/{1..$n}.{out,err}\""
+echo "Monitor status on http://fly.hampshire.edu:8000/tractor/tv/; Run the following to tail all the outputs:"
+echo "ssh ${fly_user}@fly.hampshire.edu \"tail -F $outputdir/{1..$n}\""
