@@ -45,10 +45,10 @@ ssh ${fly_user}@fly.hampshire.edu /opt/pixar/tractor-blade-1.7.2/tractor-spool.p
   --jobcwd="${repodir}" \
   --priority=1 \
   --range 1-${n} \
-  -c "bash -c 'env JAVA_CMD=/usr/java/latest/bin/java /share/apps/bin/lein run $lein_command > $outputdir/RANGE'"
+  -c "bash -c 'env JAVA_CMD=/usr/java/latest/bin/java /share/apps/bin/lein run $lein_command >  $outputdir/RANGE.out 2> $outputdir/RANGE.err'"
 
 
-echo "Job ID: $label-${number}"
+echo "Job ID: ${number}"
 
-echo "Monitor status on http://fly.hampshire.edu:8000/tractor/tv/; Run the following to tail all the outputs:"
-echo "ssh ${fly_user}@fly.hampshire.edu \"tail -F $outputdir/{1..$n}\""
+echo "Monitor status on http://fly.hampshire.edu:8000/tractor/tv/; Run the following to tail all outputs:"
+echo "ssh ${fly_user}@fly.hampshire.edu \"tail -F $outputdir/{1..$n}.{out,err}\""
