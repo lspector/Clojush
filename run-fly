@@ -40,7 +40,7 @@ ssh ${fly_user}@fly.hampshire.edu "mkdir -p $outputdir"
 
 ssh ${fly_user}@fly.hampshire.edu /opt/pixar/tractor-blade-1.7.2/tractor-spool.py \
   --engine=fly:8000  \
-  --svckey="linux" \
+  --svckey="tom" \
   --title="$label-$number" \
   --jobcwd="${repodir}" \
   --priority=1 \
