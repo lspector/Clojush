@@ -77,7 +77,7 @@
   (let [; Get median of x
         x-median (median x)
         ; calculate absolute deviation from median
-        dev (map #(Math/abs (- % x-median))
+        dev (map #(Math/abs (float (- % x-median)))
                  x)]
     (median dev)))
 
@@ -236,5 +236,6 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
+
 
 
