@@ -90,7 +90,9 @@
   (when (not epsilon-lexicase-epsilon)
     (let [pop (map deref pop-agents)
           test-case-errors (apply map list (map :errors pop))
-          epsilons (map mad test-case-errors)]
+          meta-case-errors (apply map list (map :meta-errors pop))
+          all-errors (concat test-case-errors meta-case-errors)
+          epsilons (map mad all-errors)]
       (println "Epsilons for epsilon lexicase:" epsilons)
       (reset! epsilons-for-epsilon-lexicase epsilons))))
 
