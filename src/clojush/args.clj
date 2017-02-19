@@ -1,6 +1,3 @@
-;; gorilla-repl.fileformat = 1
-
-;; @@
 (ns clojush.args
   (:require [clj-random.core :as random])
   (:use [clojush globals random util pushstate]
@@ -556,17 +553,3 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
-
-
-
-
-
-
-
-
-
-
-
-
-
-;; @@
