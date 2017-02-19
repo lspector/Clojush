@@ -70,6 +70,9 @@
                          survivors)
                  (rest cases)))))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; epsilon lexicase selection
+
 (defn mad
   "returns median absolute deviation (MAD)"
   [x]
@@ -80,8 +83,19 @@
                  x)]
     (median dev)))
 
+(defn calculate-epsilons-for-epsilon-lexicase
+  "Calculates the epsilon values for epsilon lexicase selection. Only runs once
+   per generation. "
+  [pop-agents {:keys [epsilon-lexicase-epsilon]}]
+  (when (not epsilon-lexicase-epsilon)
+    (let [pop (map deref pop-agents)
+          test-case-errors (apply map list (map :errors pop))
+          epsilons (map mad test-case-errors)]
+      (println "Epsilons for epsilon lexicase:" epsilons)
+      (reset! epsilons-for-epsilon-lexicase epsilons))))
+
 (defn epsilon-lexicase-selection
-    "Returns an individual that does within epsilon of the best on the fitness cases when considered one at a
+  "Returns an individual that does within epsilon of the best on the fitness cases when considered one at a
    time in random order.  If trivial-geography-radius is non-zero, selection is limited to parents within +/- r of location"
   [pop location {:keys [trivial-geography-radius epsilon-lexicase-epsilon]}]
   (let [lower (mod (- location trivial-geography-radius) (count pop))
@@ -99,12 +113,10 @@
               (empty? (rest survivors)))
         (lrand-nth survivors)
         (let [; If epsilon-lexicase-epsilon is set in the argmap, use it for epsilon.
-              ; Otherwise, use automatic epsilon selections. aka use MAD for epsilon.
+              ; Otherwise, use automatic epsilon selections, which are calculated once per generation.
               epsilon (if epsilon-lexicase-epsilon
                         epsilon-lexicase-epsilon
-                        (mad (map #(nth (:errors %)
-                                        (first cases))
-                                  survivors)))
+                        (nth @epsilons-for-epsilon-lexicase (first cases)))
               min-err-for-case (apply min (map #(nth % (first cases))
                                                (map #(:errors %) survivors)))]
         (recur (filter #(<= (nth (:errors %)

@@ -169,6 +169,9 @@
           ;; calculate implicit fitness sharing fitness for population
           (when (= (:total-error-method @push-argmap) :ifs)
             (calculate-implicit-fitness-sharing pop-agents @push-argmap))
+          ;; calculate epsilons for epsilon lexicase selection
+          (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
+            (calculate-epsilons-for-epsilon-lexicase pop-agents @push-argmap))
           (timer @push-argmap :other)
           ;; report and check for success
           (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
