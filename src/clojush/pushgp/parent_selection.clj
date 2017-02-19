@@ -1,4 +1,3 @@
-
 (ns clojush.pushgp.parent-selection
   (:use [clojush random globals util])
   (:require [clojure.set :as set]))
@@ -236,6 +235,3 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
-
-
-

@@ -1,4 +1,3 @@
-
 (ns clojush.pushgp.pushgp
   (:require [clojure.java.io :as io]
             [clj-random.core :as random]
@@ -185,4 +184,3 @@
                                           (install-next-generation pop-agents child-agents @push-argmap)
                                           (recur (inc generation)))
                   :else  (final-report generation best @push-argmap))))))))
-
