@@ -255,6 +255,7 @@
 
           :parent-selection :lexicase
           ;; The parent selection method. Options include :tournament, :lexicase, :epsilon-lexicase,
+          ;; :static-epsilon-lexicase, :super-dynamic-epsilon-lexicase,
           ;; :elitegroup-lexicase, :uniform :leaky-lexicase
 
           :epsilon-lexicase-epsilon nil
