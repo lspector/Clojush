@@ -172,6 +172,8 @@
           ;; calculate epsilons for epsilon lexicase selection
           (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
             (calculate-epsilons-for-epsilon-lexicase pop-agents @push-argmap))
+          (when (= (:parent-selection @push-argmap) :static-epsilon-lexicase)
+            (calculate-fitness-for-static-epsilon-lexicase pop-agents @push-argmap))
           (timer @push-argmap :other)
           ;; report and check for success
           (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
