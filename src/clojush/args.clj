@@ -312,6 +312,10 @@
           ;; effort will be made to select parents not equal to the first parent. The value
           ;; of this parameter is the number of re-selections that will be performed to try
           ;; to find a different parent, before using the same parent if the limit is exceeded.
+          
+          :lexicase-youth-segregation false
+          ;; If true, each lexicase selection event will consider only individuals either <= or
+          ;; >= an age chosen randomly from those present in the population.
 
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
@@ -553,3 +557,4 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+

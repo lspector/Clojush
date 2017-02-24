@@ -14,7 +14,8 @@
             (nth pop
                  (if (zero? trivial-geography-radius)
                    (lrand-int (count pop))
-                   (mod (+ location (- (lrand-int (+ 1 (* trivial-geography-radius 2))) trivial-geography-radius))
+                   (mod (+ location (- (lrand-int (+ 1 (* trivial-geography-radius 2))) 
+                                       trivial-geography-radius))
                         (count pop))))))
         err-fn (case total-error-method
                  :sum :total-error
@@ -42,20 +43,34 @@
         with-non-empty-genomes
         pop))
     pop))
+
+(defn possibly-just-young-or-old
+  "If lexicase-youth-segregation is truthy, returns the elements of pop either <= 
+  or >= an age chosen randomly from those present in pop. Otherwise, just returns pop."
+  [pop {:keys [lexicase-youth-segregation]}]
+  (if lexicase-youth-segregation
+    (let [age-limit (lrand-nth (distinct (map :age pop)))
+          criterion (lrand-nth [<= >=])]
+      (filter (fn [ind] (criterion (:age ind) age-limit))
+              pop))
+    pop))
   
 (defn lexicase-selection
   "Returns an individual that does the best on the fitness cases when considered one at a
-   time in random order.  If trivial-geography-radius is non-zero, selection is limited to parents within +/- r of location"
+  time in random order.  If trivial-geography-radius is non-zero, selection is limited to 
+  parents within +/- r of location"
   [pop location {:keys [trivial-geography-radius] :as argmap}]
   (let [lower (mod (- location trivial-geography-radius) (count pop))
         upper (mod (+ location trivial-geography-radius) (count pop))
         popvec (vec pop)
-        subpop (if (zero? trivial-geography-radius) 
-                 pop
-                 (if (< lower upper)
-                   (subvec popvec lower (inc upper))
-                   (into (subvec popvec lower (count pop)) 
-                         (subvec popvec 0 (inc upper)))))]
+        subpop (possibly-just-young-or-old
+                 (if (zero? trivial-geography-radius) 
+                   pop
+                   (if (< lower upper)
+                     (subvec popvec lower (inc upper))
+                     (into (subvec popvec lower (count pop)) 
+                           (subvec popvec 0 (inc upper)))))
+                 argmap)]
     (loop [survivors (retain-one-individual-per-error-vector 
                        (possibly-remove-individuals-with-empty-genomes
                          subpop argmap))
@@ -97,8 +112,9 @@
       (reset! epsilons-for-epsilon-lexicase epsilons))))
 
 (defn epsilon-lexicase-selection
-  "Returns an individual that does within epsilon of the best on the fitness cases when considered one at a
-   time in random order.  If trivial-geography-radius is non-zero, selection is limited to parents within +/- r of location"
+  "Returns an individual that does within epsilon of the best on the fitness cases when 
+  considered one at a time in random order.  If trivial-geography-radius is non-zero, 
+  selection is limited to parents within +/- r of location"
   [pop location {:keys [trivial-geography-radius epsilon-lexicase-epsilon]}]
   (let [lower (mod (- location trivial-geography-radius) (count pop))
         upper (mod (+ location trivial-geography-radius) (count pop))
@@ -249,3 +265,4 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
+
