@@ -50,7 +50,7 @@
   [pop {:keys [lexicase-youth-segregation]}]
   (if lexicase-youth-segregation
     (let [age-limit (lrand-nth (distinct (map :age pop)))
-          criterion (lrand-nth [<= <= >=])]
+          criterion (lrand-nth [<= >= >=])]
       (filter (fn [ind] (criterion (:age ind) age-limit))
               pop))
     pop))
