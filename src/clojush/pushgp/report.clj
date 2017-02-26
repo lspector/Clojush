@@ -408,6 +408,11 @@
              (*' 1.0 (mean (map count-points (map :program sorted)))))
     (printf "Average percent parens in population: %.3f\n" 
             (mean (map #(double (/ (count-parens (:program %)) (count-points (:program %)))) sorted)))
+    (let [ages (map :age population)]
+      (println "Average age in population:"
+               (* 1.0 (mean ages)))
+      (println "Median age in population:"
+               (median ages)))
     (println "--- Population Diversity Statistics ---")
     (let [genome-frequency-map (frequencies (map :genome population))]
       (println "Min copy number of one Plush genome:" (apply min (vals genome-frequency-map)))
