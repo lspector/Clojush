@@ -44,16 +44,16 @@
         pop))
     pop))
 
-(defn possibly-just-young-or-old
-  "If lexicase-youth-segregation is truthy, returns the elements of pop either <= 
-  or >= an age chosen randomly from those present in pop. Otherwise, just returns pop."
-  [pop {:keys [lexicase-youth-segregation]}]
-  (if lexicase-youth-segregation
-    (let [age-limit (lrand-nth (distinct (map :age pop)))
-          criterion (lrand-nth [<= >= >=])]
-      (filter (fn [ind] (criterion (:age ind) age-limit))
-              pop))
-    pop))
+(defn possibly-just-young
+  "If lexicase-youth-bias is > 0, then with that probability returns the elements of 
+  pop <= an age chosen randomly from those present in pop. Otherwise, just returns pop."
+  [pop {:keys [lexicase-youth-bias]}]
+  (if (or (zero? lexicase-youth-bias)
+          (> (lrand) lexicase-youth-bias))
+    pop
+    (let [age-limit (lrand-nth (distinct (map :age pop)))]
+      (filter (fn [ind] (<= (:age ind) age-limit))
+              pop))))
   
 (defn lexicase-selection
   "Returns an individual that does the best on the fitness cases when considered one at a
@@ -63,7 +63,7 @@
   (let [lower (mod (- location trivial-geography-radius) (count pop))
         upper (mod (+ location trivial-geography-radius) (count pop))
         popvec (vec pop)
-        subpop (possibly-just-young-or-old
+        subpop (possibly-just-young
                  (if (zero? trivial-geography-radius) 
                    pop
                    (if (< lower upper)
