@@ -1,7 +1,6 @@
 (ns clojush.globals)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;   globals
 ;; The values of the names defined here tend to remain constant over all runs. 
 ;; Those not starting with "global-" are used in a variety of places and therefore
 ;; it is easiest to keep them global. The names starting with "global-"
