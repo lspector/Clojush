@@ -82,6 +82,9 @@
 (def selection-counts (atom {})) 
 ;; Used to store the number of selections for each individual, indexed by UUIDs
 
+(def min-age (atom 0))
+(def max-age (atom 0))
+;; Used for lexicase-youth-bias
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The globals below may be reset by arguments to pushgp

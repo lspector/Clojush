@@ -92,7 +92,10 @@
               (decimate (vec (doall (map deref pop-agents)))
                         (int (* decimation-ratio population-size))
                         decimation-tournament-size
-                        trivial-geography-radius))]
+                        trivial-geography-radius))
+        ages (map :age pop)]
+    (reset! min-age (apply min ages))
+    (reset! max-age (apply max ages))
     (dotimes [i population-size]
       ((if use-single-thread swap! send)
            (nth child-agents i)

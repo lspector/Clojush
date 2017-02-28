@@ -412,7 +412,7 @@
       (println "Average age in population:"
                (* 1.0 (mean ages)))
       (println "Median age in population:"
-               (median ages)))
+               (* 1.0 (median ages))))
     (println "--- Population Diversity Statistics ---")
     (let [genome-frequency-map (frequencies (map :genome population))]
       (println "Min copy number of one Plush genome:" (apply min (vals genome-frequency-map)))
@@ -560,4 +560,5 @@
     (println "\n;;******************************")
     (println ";; Problem-Specific Report of Simplified Solution")
     (problem-specific-report simplified-best [] generation error-function report-simplifications)))
+
 

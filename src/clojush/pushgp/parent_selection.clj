@@ -44,14 +44,22 @@
         pop))
     pop))
 
-(defn possibly-just-young
-  "If lexicase-youth-bias is > 0, then with that probability returns the elements of 
-  pop <= an age chosen randomly from those present in pop. Otherwise, just returns pop."
+(defn youth-bias
+  "If lexicase-youth-bias is falsy, returns pop. Otherwise, lexicase-youth-bias should 
+  be a vector of [pmin pmax] with pmin and pmax both being between 0 and 1 (inclusive)
+  with pmin + mpax <= 1.0. Then, with probability pmin, returns individuals in pop
+  with age @min-age; with probability pmax, returns all of pop; with probability 
+  (- 1.0 pmin pmax), selects an age cutoff uniformly from the range of ages (including 
+  the @min-age but not @max-age), and returns individuals with the cutoff age or lower."
   [pop {:keys [lexicase-youth-bias]}]
-  (if (or (zero? lexicase-youth-bias)
-          (> (lrand) lexicase-youth-bias))
+  (if (not lexicase-youth-bias)
     pop
-    (let [age-limit (lrand-nth (distinct (map :age pop)))]
+    (let [rand-val (lrand)
+          age-limit (if (<= rand-val (first lexicase-youth-bias))
+                      @min-age
+                      (if (<= rand-val (apply + lexicase-youth-bias))
+                        @max-age
+                        (+ @min-age (* (lrand) (- @max-age @min-age)))))]
       (filter (fn [ind] (<= (:age ind) age-limit))
               pop))))
   
@@ -63,7 +71,7 @@
   (let [lower (mod (- location trivial-geography-radius) (count pop))
         upper (mod (+ location trivial-geography-radius) (count pop))
         popvec (vec pop)
-        subpop (possibly-just-young
+        subpop (youth-bias
                  (if (zero? trivial-geography-radius) 
                    pop
                    (if (< lower upper)
@@ -265,5 +273,6 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
+
 
 
