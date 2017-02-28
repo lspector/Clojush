@@ -2,19 +2,18 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;   globals
-;; The values def'ed here tend to remain constant over all runs. The atoms
-;; not starting with "global-" are used in a variety of places and therefore
-;; it is easiest to keep them global. The atoms starting with "global-"
-;; may change depending on arguments to pushgp.
-;;
-;; Most of the values and atoms in this file are those that are used by Push
-;; instructions; all others, with few exceptions, should be defined in push-argmap
-;; in args.clj and should be passed to whatever functions use them as arguments.
+;; The values of the names defined here tend to remain constant over all runs. 
+;; Those not starting with "global-" are used in a variety of places and therefore
+;; it is easiest to keep them global. The names starting with "global-"
+;; are bound to atoms for which values may be set by arguments to pushgp;
+;; see the definition of push-argmap in args.clj for more information on these.
+
 
 (def push-types '(:exec :code :integer :float :boolean :char :string :zip
-                        :vector_integer :vector_float :vector_boolean :vector_string
-                        :input :output :auxiliary :tag :return :environment :genome))
+                  :vector_integer :vector_float :vector_boolean :vector_string
+                  :input :output :auxiliary :tag :return :environment :genome))
 ;; The list of stacks used by the Push interpreter
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Used by instructions to keep computed values within limits or when using random 
