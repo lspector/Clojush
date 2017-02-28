@@ -313,10 +313,15 @@
           ;; of this parameter is the number of re-selections that will be performed to try
           ;; to find a different parent, before using the same parent if the limit is exceeded.
           
-          :lexicase-youth-bias 0
-          ;; If non-zero, then with this probability each lexicase selection event will consider
-          ;; only individuals either an age chosen randomly from those present in the population.
-          ;; NOTE: not compatible with trivial geography.
+          :lexicase-youth-bias true
+          ;; If truthy, then with probability equal to the ratio of the population average age
+          ;; to the population maximum age, each lexicase selection event will consider
+          ;; only individuals younger than an age chosen randomly from those present in the
+          ;; population.
+          ;; NOTE: This doesn't really have anything to do with the lexicase selection algorithm
+          ;; per se, but is called "lexiase-youth-bias" because it is currentlu only implemented 
+          ;; for lexicase selection.
+          ;; NOTE: Not compatible with trivial geography.
 
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
@@ -558,5 +563,6 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
 
