@@ -409,6 +409,10 @@
     (printf "Average percent parens in population: %.3f\n" 
             (mean (map #(double (/ (count-parens (:program %)) (count-points (:program %)))) sorted)))
     (let [ages (map :age population)]
+      (println "Minimum age in population:"
+               (* 1.0 (apply min ages)))
+      (println "Maximum age in population:"
+               (* 1.0 (apply max ages)))
       (println "Average age in population:"
                (* 1.0 (mean ages)))
       (println "Median age in population:"
