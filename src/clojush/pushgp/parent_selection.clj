@@ -62,7 +62,7 @@
                         (+ @min-age (* (lrand) (- @max-age @min-age)))))]
       (filter (fn [ind] (<= (:age ind) age-limit))
               pop))))
-  
+
 (defn lexicase-selection
   "Returns an individual that does the best on the fitness cases when considered one at a
   time in random order.  If trivial-geography-radius is non-zero, selection is limited to 
