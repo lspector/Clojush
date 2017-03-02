@@ -465,7 +465,9 @@ given by uniform-deletion-rate."
   [ind {:keys [uniform-addition-and-deletion-rate maintain-ancestors atom-generators] 
         :as argmap}]
   (let [addition-rate (number uniform-addition-and-deletion-rate)
-        deletion-rate (/ 1 (+ (/ 1 addition-rate) 1))
+        deletion-rate (if (zero? addition-rate)
+                        0
+                        (/ 1 (+ (/ 1 addition-rate) 1)))
         after-addition (vec (apply concat
                                    (map #(if (< (lrand) addition-rate)
                                            (lshuffle [% 
@@ -496,7 +498,9 @@ given by uniform-deletion-rate."
    {:keys [uniform-combination-and-deletion-rate maintain-ancestors atom-generators] 
     :as argmap}]
   (let [combination-rate (number uniform-combination-and-deletion-rate)
-        deletion-rate (/ 1 (+ (/ 1 combination-rate) 1))
+        deletion-rate (if (zero? combination-rate)
+                        0
+                        (/ 1 (+ (/ 1 combination-rate) 1)))
         after-combination (vec 
                             (apply concat
                                    (map (fn [g1 g2]
@@ -943,6 +947,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
