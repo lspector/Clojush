@@ -21,8 +21,11 @@ lein_command=$(quote_args "${@:4}")
 
 
 homedir="/home/${fly_user}"
-repodir="$homedir/Clojush"
-outputdir="$homedir/output/$label-$number"
+rundir="$homedir/runs/$label-$number"
+repodir="$rundir/Clojush"
+outputdir="$rundir/output"
+
+ssh ${fly_user}@fly.hampshire.edu "mkdir -p $rundir"
 
 rsync  \
   --recursive \
@@ -32,6 +35,7 @@ rsync  \
   --times \
   --delete \
   --force \
+  --exclude='.git/' \
   --human-readable \
   . "${fly_user}@fly.hampshire.edu:${repodir}"
 
