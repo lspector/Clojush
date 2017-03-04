@@ -21,8 +21,11 @@ lein_command=$(quote_args "${@:4}")
 
 
 homedir="/home/${fly_user}"
-repodir="$homedir/Clojush"
-outputdir="$homedir/output/$label-$number"
+rundir="$homedir/runs/$label-$number"
+repodir="$rundir/Clojush"
+outputdir="$rundir/output"
+
+ssh ${fly_user}@fly.hampshire.edu "mkdir -p $rundir"
 
 rsync  \
   --recursive \
@@ -50,5 +53,6 @@ ssh ${fly_user}@fly.hampshire.edu /opt/pixar/tractor-blade-1.7.2/tractor-spool.p
 
 echo "Job ID: ${number}"
 
-echo "Monitor status on http://fly.hampshire.edu:8000/tractor/tv/; Run the following to tail all outputs:"
+echo "Monitor status on http://fly.hampshire.edu:8000/tractor/tv/"
+echo "Once the job has been started, you can monitor the outputs with:"
 echo "ssh ${fly_user}@fly.hampshire.edu \"tail -F $outputdir/{1..$n}.{out,err}\""
