@@ -10,6 +10,7 @@ set -o pipefail
 n="$1"
 fly_user="$2"
 label="$3"
+tag="$4"
 number="$RANDOM"
 
 # from http://stackoverflow.com/a/3104922/907060
@@ -17,7 +18,7 @@ function quote_args {
   printf '"%s" ' "$@"; echo "";
 }
 # quote each arg so it is quoted in SSH
-lein_command=$(quote_args "${@:4}")
+lein_command=$(quote_args "${@:5}")
 
 
 homedir="/home/${fly_user}"
@@ -43,7 +44,7 @@ ssh ${fly_user}@fly.hampshire.edu "mkdir -p $outputdir"
 
 ssh ${fly_user}@fly.hampshire.edu /opt/pixar/tractor-blade-1.7.2/tractor-spool.py \
   --engine=fly:8000  \
-  --svckey="tom" \
+  --svckey="${tag}" \
   --title="$label-$number" \
   --jobcwd="${repodir}" \
   --priority=1 \
