@@ -62,10 +62,13 @@
   (let [random-seeds (loop [seeds '()]
                        (let [num-remaining (- population-size (count seeds))]
                          (if (pos? num-remaining)
-                           (let [new-seeds (repeatedly num-remaining #(random/lrand-bytes (:mersennetwister random/*seed-length*)))]
-                             (recur (concat seeds (filter (fn [candidate]
-                                                            (not (some #(random/=byte-array % candidate)
-                                                                       seeds))) new-seeds)))); only add seeds that we do not already have
+                           (let [new-seeds (repeatedly num-remaining 
+                                                       #(random/lrand-bytes 
+                                                          (:mersennetwister random/*seed-length*)))]
+                             (recur (concat seeds (filter ; only add seeds that we do not already have
+                                                    (fn [candidate]
+                                                      (not (some #(random/=byte-array % candidate)
+                                                                 seeds))) new-seeds))))
                            seeds)))]
     {:random-seeds random-seeds
      :rand-gens (vec (doall (for [k (range population-size)]
@@ -89,7 +92,10 @@
               (decimate (vec (doall (map deref pop-agents)))
                         (int (* decimation-ratio population-size))
                         decimation-tournament-size
-                        trivial-geography-radius))]
+                        trivial-geography-radius))
+        ages (map :age pop)]
+    (reset! min-age (apply min ages))
+    (reset! max-age (apply max ages))
     (dotimes [i population-size]
       ((if use-single-thread swap! send)
            (nth child-agents i)
@@ -178,12 +184,20 @@
                                                              generation @push-argmap)]
             (cond (= outcome :failure) (do (printf "\nFAILURE\n")
                                          (if (:return-simplified-on-failure @push-argmap)
-                                           (auto-simplify best (:error-function @push-argmap) (:final-report-simplifications @push-argmap) true 500)
+                                           (auto-simplify best 
+                                                          (:error-function @push-argmap) 
+                                                          (:final-report-simplifications @push-argmap) 
+                                                          true 
+                                                          500)
                                            (flush)))
                   (= outcome :continue) (do (timer @push-argmap :report)
                                           (println "\nProducing offspring...") (flush)
-                                          (produce-new-offspring pop-agents child-agents rand-gens @push-argmap)
+                                          (produce-new-offspring pop-agents 
+                                                                 child-agents 
+                                                                 rand-gens 
+                                                                 @push-argmap)
                                           (println "Installing next generation...") (flush)
                                           (install-next-generation pop-agents child-agents @push-argmap)
                                           (recur (inc generation)))
                   :else  (final-report generation best @push-argmap))))))))
+

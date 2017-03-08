@@ -312,6 +312,23 @@
           ;; effort will be made to select parents not equal to the first parent. The value
           ;; of this parameter is the number of re-selections that will be performed to try
           ;; to find a different parent, before using the same parent if the limit is exceeded.
+          
+          :lexicase-youth-bias false
+          ;; If truthy, should be a vector of [pmin pmax]. In this case, then with probability
+          ;; pmin, lexicase selection will consider only individuals with the minimum age in
+          ;; the population; with probability pmax, all individuals will be considered; with
+          ;; probability (- 1.0 pmin pmax) an age cutoff will be selected uniformly from 
+          ;; those present in the population, and only individuals with the cutoff age or 
+          ;; lower will be considered.
+          ;; 
+          ;; NOTE: This doesn't really have anything to do with the lexicase selection algorithm
+          ;; per se, but is called "lexiase-youth-bias" because it is currently implemented only
+          ;; for lexicase selection.
+          ;;
+          ;; NOTE: Not compatible with trivial geography.
+          ;;
+          ;; NOTE: It doesn't make any sense to use this unless you have multiple ages in the
+          ;; population, as you migh have, for example, from using the genesis operator.
 
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
@@ -553,3 +570,7 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
+
+
+
