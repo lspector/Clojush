@@ -47,10 +47,10 @@
 (defn youth-bias
   "If lexicase-youth-bias is falsy, returns pop. Otherwise, lexicase-youth-bias should 
   be a vector of [pmin pmax] with pmin and pmax both being between 0 and 1 (inclusive)
-  with pmin + mpax <= 1.0. Then, with probability pmin, returns individuals in pop
+  with pmin + pmax <= 1.0. Then, with probability pmin, returns individuals in pop
   with age @min-age; with probability pmax, returns all of pop; with probability 
-  (- 1.0 pmin pmax), selects an age cutoff uniformly from the range of ages (including 
-  the @min-age but not @max-age), and returns individuals with the cutoff age or lower."
+  (- 1.0 pmin pmax), selects an age cutoff uniformly from those present in the population
+  and returns individuals with the cutoff age or lower."
   [pop {:keys [lexicase-youth-bias]}]
   (if (not lexicase-youth-bias)
     pop
@@ -59,7 +59,7 @@
                       @min-age
                       (if (<= rand-val (apply + lexicase-youth-bias))
                         @max-age
-                        (+ @min-age (* (lrand) (- @max-age @min-age)))))]
+                        (lrand-nth (distinct (map :age pop)))))]
       (filter (fn [ind] (<= (:age ind) age-limit))
               pop))))
 
@@ -273,6 +273,7 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
+
 
 
 

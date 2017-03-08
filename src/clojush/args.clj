@@ -318,8 +318,8 @@
           ;; pmin, lexicase selection will consider only individuals with the minimum age in
           ;; the population; with probability pmax, all individuals will be considered; with
           ;; probability (- 1.0 pmin pmax) an age cutoff will be selected uniformly from 
-          ;; the range of ages present in the population (including the minimum but not the
-          ;; maximum), and only individuals with the cutoff age or lower will be considered.
+          ;; those present in the population, and only individuals with the cutoff age or 
+          ;; lower will be considered.
           ;; 
           ;; NOTE: This doesn't really have anything to do with the lexicase selection algorithm
           ;; per se, but is called "lexiase-youth-bias" because it is currently implemented only
@@ -570,6 +570,7 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
 
 
