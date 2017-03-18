@@ -939,14 +939,17 @@ be set globally or eliminated in the future."
                                         new-genome
                                         [])
                               :history (:history parent1)
-                              :age ((age-combining-function argmap) 
-                                    (inc (:age parent1)) 
-                                    (inc (:age parent2)))
+                              :age (if use-child
+                                     ((age-combining-function argmap) 
+                                      (inc (:age parent1)) 
+                                      (inc (:age parent2)))
+                                     0)
                               :ancestors (if maintain-ancestors
                                            (cons (:genome parent1) (:ancestors parent1))
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
