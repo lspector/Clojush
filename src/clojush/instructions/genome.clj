@@ -44,13 +44,15 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (assoc genome 
-                          index
-                          (random-plush-instruction-map 
-                            @global-atom-generators
-                            {:epigenetic-markers @global-epigenetic-markers
-                             :close-parens-probabilities @global-close-parens-probabilities
-                             :silent-instruction-probability @global-silent-instruction-probability}))
+             (push-item (if (:autoconstructing state)
+                          (assoc genome 
+                            index
+                            (random-plush-instruction-map 
+                              @global-atom-generators
+                              {:epigenetic-markers @global-epigenetic-markers
+                               :close-parens-probabilities @global-close-parens-probabilities
+                               :silent-instruction-probability @global-silent-instruction-probability}))
+                          genome)
                         :genome)))
       state)))
 
@@ -650,3 +652,4 @@
                            (:silent (nth genome index)))
                         :boolean)))
       state)))
+

@@ -643,8 +643,7 @@ is false replaces autoconstructive_<type>_rand with <type>_rand."
               (if deterministic?
                 (if (some #{(:instruction instruction-map)}
                            '(boolean_rand integer_rand float_rand code_rand
-                                          string_rand char_rand 
-                                          genome_gene_randomize))
+                                          string_rand char_rand))
                   (assoc instruction-map :instruction 'code_noop)
                   instruction-map)
                 (if (= (:instruction instruction-map) 'autoconstructive_integer_rand)
@@ -950,6 +949,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
