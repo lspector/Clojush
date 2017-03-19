@@ -667,10 +667,11 @@ the resulting top genome."
                                             deterministic?)}
                                  argmap)
                                (-> (->> (make-push-state)
-                                     (push-item parent2-genome :genome)
-                                     (push-item parent1-genome :genome))
-                                 (assoc :parent1-genome parent1-genome)
-                                 (assoc :parent2-genome parent2-genome))))]
+                                        (push-item parent2-genome :genome)
+                                        (push-item parent1-genome :genome))
+                                   (assoc :parent1-genome parent1-genome)
+                                   (assoc :parent2-genome parent2-genome)
+                                   (assoc :autoconstructing true))))]
     (if (or (seq? run-result) (vector? run-result))
       (vec run-result)
       [])))
@@ -949,6 +950,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
