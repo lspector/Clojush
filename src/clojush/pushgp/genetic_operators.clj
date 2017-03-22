@@ -19,12 +19,19 @@
 
 (defn age-combining-function
   "Returns the actual age combining function specified by the :age-combining-function
-  in the argmap."
+  in the argmap. The function will take three arguments: the two parents, and the
+  genome of the child."
   [argmap]
   (case (:age-combining-function argmap)
-    :max max
-    :min min
-    :average average))
+    :max (fn [p1 p2 g] 
+           (max (inc (:age p1)) 
+                (inc (:age p2))))
+    :min (fn [p1 p2 g] 
+           (min (inc (:age p1)) 
+                (inc (:age p2))))
+    :average (fn [p1 p2 g] 
+               (average (inc (:age p1)) 
+                        (inc (:age p2))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; reproduction
@@ -514,9 +521,7 @@ given by uniform-deletion-rate."
                                      after-combination)))]
     (make-individual :genome new-genome
                      :history (:history parent1)
-                     :age ((age-combining-function argmap) 
-                           (inc (:age parent1)) 
-                           (inc (:age parent2)))
+                     :age ((age-combining-function argmap) parent1 parent2 new-genome)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -553,9 +558,7 @@ given by uniform-deletion-rate."
                                 (dec iteration-budget)))))]
     (make-individual :genome new-genome
                      :history (:history parent1)
-                     :age ((age-combining-function argmap) 
-                           (inc (:age parent1)) 
-                           (inc (:age parent2)))
+                     :age ((age-combining-function argmap) parent1 parent2 new-genome)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -579,9 +582,7 @@ given by uniform-deletion-rate."
                                       genome1)))]
     (make-individual :genome new-genome
                      :history (:history parent1)
-                     :age ((age-combining-function argmap) 
-                           (inc (:age parent1)) 
-                           (inc (:age parent2)))
+                     :age ((age-combining-function argmap) parent1 parent2 new-genome)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -614,9 +615,7 @@ given by uniform-deletion-rate."
                                  long-genome)))]
       (make-individual :genome new-genome
                        :history (:history parent1)
-                       :age ((age-combining-function argmap) 
-                             (inc (:age parent1)) 
-                             (inc (:age parent2)))
+                       :age ((age-combining-function argmap) parent1 parent2 new-genome)
                        :ancestors (if maintain-ancestors
                                     (cons (:genome parent1) (:ancestors parent1))
                                     (:ancestors parent1))))))
@@ -886,9 +885,7 @@ programs encoded by genomes g1 and g2."
                          [])))]
     (assoc (make-individual :genome new-genome
                             :history (:history parent1)
-                            :age ((age-combining-function argmap) 
-                                  (inc (:age parent1)) 
-                                  (inc (:age parent2)))
+                            :age ((age-combining-function argmap) parent1 parent2 new-genome)
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
@@ -940,28 +937,11 @@ be set globally or eliminated in the future."
                                         [])
                               :history (:history parent1)
                               :age (if use-child
-                                     ((age-combining-function argmap) 
-                                      (inc (:age parent1)) 
-                                      (inc (:age parent2)))
+                                     ((age-combining-function argmap) parent1 parent2 new-genome)
                                      0)
                               :ancestors (if maintain-ancestors
                                            (cons (:genome parent1) (:ancestors parent1))
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
