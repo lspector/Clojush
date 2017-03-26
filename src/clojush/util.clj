@@ -350,9 +350,11 @@
   [sequence1 sequence2]
   "Returns a number between 0 and 1, indicating how similar the sequences are as a normalized,
   inverted Levenshtein distance, it 1 indicating identity and 0 indicating no similarity."
-  (let [dist (levenshtein-distance sequence1 sequence2)
-        max-dist (max (count sequence1) (count sequence2))]
-    (/ (- max-dist dist) max-dist)))
+  (if (and (empty? sequence1) (empty? sequence2))
+    1
+    (let [dist (levenshtein-distance sequence1 sequence2)
+          max-dist (max (count sequence1) (count sequence2))]
+      (/ (- max-dist dist) max-dist))))
 
 ;;;;;;;;;;;;;;:::::;;;;;;;;;;;;;;
 ;; Simple Statistic Functions
