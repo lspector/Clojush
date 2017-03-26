@@ -346,7 +346,7 @@
               (range (inc (count b)))
               a))))
 
-(defn similarity
+(defn sequence-similarity
   [sequence1 sequence2]
   "Returns a number between 0 and 1, indicating how similar the sequences are as a normalized,
   inverted Levenshtein distance, it 1 indicating identity and 0 indicating no similarity."
