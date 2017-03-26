@@ -17,6 +17,8 @@
     number-or-numbers
     (lrand-nth number-or-numbers)))
 
+(declare produce-child-genome-by-autoconstruction) ;; forward declaration for :consistency
+
 (defn age-combining-function
   "Returns the actual age combining function specified by the :age-combining-function
   in the argmap. The function will take three arguments: the two parents, and the
@@ -46,7 +48,12 @@
     :first (fn [p1 p2 g]
              (inc (:age p1)))
     :fidelity (fn [p1 p2 g]
-                (sequence-similarity g (:genome p1)))))
+                (sequence-similarity g (:genome p1)))
+    :consistency (fn [p1 p2 g]
+                   (let [child (produce-child-genome-by-autoconstruction g g false argmap)
+                         
+                         ]))
+    ))
 
 ;; test effects of :proportionate with expressions like this:
 ;(float ((age-combining-function {:age-combining-function :proportionate})
@@ -677,23 +684,26 @@ is false replaces autoconstructive_<type>_rand with <type>_rand."
   "Runs the program expressed by parent1-genome with both parent genomes
 on the genome stack and also available via input instructions, and returns
 the resulting top genome."
-  [parent1-genome parent2-genome deterministic? argmap]
-  (let [run-result (top-item :genome
-                             (run-push
-                               (translate-plush-genome-to-push-program
-                                 {:genome (process-genome-for-autoconstruction
-                                            parent1-genome
-                                            deterministic?)}
-                                 argmap)
-                               (-> (->> (make-push-state)
-                                        (push-item parent2-genome :genome)
-                                        (push-item parent1-genome :genome))
-                                   (assoc :parent1-genome parent1-genome)
-                                   (assoc :parent2-genome parent2-genome)
-                                   (assoc :autoconstructing true))))]
-    (if (or (seq? run-result) (vector? run-result))
-      (vec run-result)
-      [])))
+  ([parent1-genome parent2-genome deterministic? argmap]
+   (produce-child-genome-by-autoconstruction 
+     parent1-genome parent1-genome parent2-genome deterministic? argmap))
+  ([genome-to-run parent1-genome parent2-genome deterministic? argmap]
+   (let [run-result (top-item :genome
+                              (run-push
+                                (translate-plush-genome-to-push-program
+                                  {:genome (process-genome-for-autoconstruction
+                                             genome-to-run
+                                             deterministic?)}
+                                  argmap)
+                                (-> (->> (make-push-state)
+                                         (push-item parent2-genome :genome)
+                                         (push-item parent1-genome :genome))
+                                    (assoc :parent1-genome parent1-genome)
+                                    (assoc :parent2-genome parent2-genome)
+                                    (assoc :autoconstructing true))))]
+     (if (or (seq? run-result) (vector? run-result))
+       (vec run-result)
+       []))))
 
 (defn expressed-program-sequence-from-genome
   "Returns an open-close sequenc for the program produced by expressing
@@ -965,3 +975,4 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
