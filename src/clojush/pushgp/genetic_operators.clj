@@ -965,7 +965,3 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
-
-
-
-
