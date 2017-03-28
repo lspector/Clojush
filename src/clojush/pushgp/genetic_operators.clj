@@ -49,6 +49,8 @@
              (inc (:age p1)))
     :fidelity (fn [p1 p2 g]
                 (sequence-similarity g (:genome p1)))
+    :infidelity (fn [p1 p2 g]
+                  (- 1 (sequence-similarity g (:genome p1))))
     :consistency (fn [p1 p2 g]
                    ;; don't compute when calling op via genome instruction
                    (if (or (neg? (:age p1))
@@ -56,11 +58,22 @@
                      -1
                      (- 1
                         (#(- (max %1 %2) (min %1 %2))
-                          (sequence-similarity p1 g)
+                          (sequence-similarity (:genome p1) g)
                           (sequence-similarity 
-                            p1 
+                            (:genome p1) 
                             (produce-child-genome-by-autoconstruction 
-                              g (:genome p1) (:genome p2) false argmap))))))))
+                              g (:genome p1) (:genome p2) false argmap))))))
+    :inconsistency (fn [p1 p2 g]
+                     ;; don't compute when calling op via genome instruction
+                     (if (or (neg? (:age p1))
+                             (neg? (:age p2)))
+                       -1
+                       (#(- (max %1 %2) (min %1 %2))
+                         (sequence-similarity (:genome p1) g)
+                         (sequence-similarity 
+                           (:genome p1) 
+                           (produce-child-genome-by-autoconstruction 
+                             g (:genome p1) (:genome p2) false argmap)))))))
 
 ;; test effects of :proportionate with expressions like this:
 ;(float ((age-combining-function {:age-combining-function :proportionate})
@@ -982,4 +995,5 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
