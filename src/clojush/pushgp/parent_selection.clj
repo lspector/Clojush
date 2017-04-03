@@ -55,13 +55,15 @@
   (if (not lexicase-youth-bias)
     pop
     (let [rand-val (lrand)
+          non-empties (filter #(not (empty? (:genome %))) pop)
+          candidates (if (empty? non-empties) pop non-empties)
           age-limit (if (<= rand-val (first lexicase-youth-bias))
                       @min-age
                       (if (<= rand-val (apply + lexicase-youth-bias))
                         @max-age
-                        (lrand-nth (distinct (map :age pop)))))]
+                        (lrand-nth (distinct (map :age candidates)))))]
       (filter (fn [ind] (<= (:age ind) age-limit))
-              pop))))
+              candidates))))
 
 (defn lexicase-selection
   "Returns an individual that does the best on the fitness cases when considered one at a
@@ -273,6 +275,7 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
+
 
 
 
