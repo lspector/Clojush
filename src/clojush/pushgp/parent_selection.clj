@@ -7,10 +7,10 @@
 (defn tournament-selection
   "Returns an individual that does the best out of a tournament."
   [pop location {:keys [tournament-size total-error-method]}]
-  (let [tournament-set 
-        (doall
-          (for [_ (range tournament-size)]
-            (lrand-nth pop)))
+  (let [subpop (age-mediate pop argmap)
+        tournament-set (doall
+                         (for [_ (range tournament-size)]
+                           (lrand-nth subpop)))
         err-fn (case total-error-method
                  :sum :total-error
                  (:hah :rmse :ifs) :weighted-error
@@ -165,7 +165,10 @@
 (defn elitegroup-lexicase-selection
   "Returns an individual produced by elitegroup lexicase selection."
   [pop]
-  (loop [survivors (retain-one-individual-per-error-vector pop)
+  (loop [survivors (retain-one-individual-per-error-vector 
+                     (possibly-remove-individuals-with-empty-genomes
+                       (age-mediate pop argmap) 
+                       argmap))
          cases (lshuffle (map lrand-nth @elitegroups))]
     (if (or (empty? cases)
             (empty? (rest survivors)))
@@ -223,7 +226,7 @@
 (defn uniform-selection
   "Returns an individual uniformly at random."
   [pop]
-  (lrand-nth pop))
+  (lrand-nth (age-mediate pop argmap)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; parent selection
@@ -251,10 +254,4 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
-
-
-
-
-
-
 
