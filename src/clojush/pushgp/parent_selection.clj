@@ -3,24 +3,7 @@
   (:require [clojure.set :as set]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; tournament selection
-(defn tournament-selection
-  "Returns an individual that does the best out of a tournament."
-  [pop location {:keys [tournament-size total-error-method]}]
-  (let [subpop (age-mediate pop argmap)
-        tournament-set (doall
-                         (for [_ (range tournament-size)]
-                           (lrand-nth subpop)))
-        err-fn (case total-error-method
-                 :sum :total-error
-                 (:hah :rmse :ifs) :weighted-error
-                 (throw (Exception. (str "Unrecognized argument for total-error-method: "
-                                         total-error-method))))]
-    (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
-            tournament-set)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; lexicase selection
+;; parent selection utilities
 
 (defn retain-one-individual-per-error-vector
   "Retains one random individual to represent each error vector."
@@ -59,15 +42,36 @@
       (filter (fn [ind] (<= (:age ind) age-limit))
               candidates))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; tournament selection
+
+(defn tournament-selection
+  "Returns an individual that does the best out of a tournament."
+  [pop {:keys [tournament-size total-error-method] :as argmap}]
+  (let [subpop (age-mediate pop argmap)
+        tournament-set (doall
+                         (for [_ (range tournament-size)]
+                           (lrand-nth subpop)))
+        err-fn (case total-error-method
+                 :sum :total-error
+                 (:hah :rmse :ifs) :weighted-error
+                 (throw (Exception. (str "Unrecognized argument for total-error-method: "
+                                         total-error-method))))]
+    (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
+            tournament-set)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; lexicase selection
+
 (defn lexicase-selection
   "Returns an individual that does the best on the fitness cases when considered one at a
   time in random order."
-  [pop location argmap]
+  [pop argmap]
   (loop [survivors (retain-one-individual-per-error-vector 
                      (possibly-remove-individuals-with-empty-genomes
                        (age-mediate pop argmap) 
                        argmap))
-         cases (lshuffle (range (count (:errors (first subpop)))))]
+         cases (lshuffle (range (count (:errors (first pop)))))]
     (if (or (empty? cases)
             (empty? (rest survivors))
             (< (lrand) (:lexicase-slippage argmap)))
@@ -107,12 +111,12 @@
 (defn epsilon-lexicase-selection
   "Returns an individual that does within epsilon of the best on the fitness cases when 
   considered one at a time in random order."
-  [pop location {:keys [epsilon-lexicase-epsilon]}]
+  [pop {:keys [epsilon-lexicase-epsilon] :as argmap}]
   (loop [survivors (retain-one-individual-per-error-vector 
                      (possibly-remove-individuals-with-empty-genomes
                        (age-mediate pop argmap) 
                        argmap))
-         cases (lshuffle (range (count (:errors (first subpop)))))]
+         cases (lshuffle (range (count (:errors (first pop)))))]
     (if (or (empty? cases)
             (empty? (rest survivors)))
       (lrand-nth survivors)
@@ -164,7 +168,7 @@
 
 (defn elitegroup-lexicase-selection
   "Returns an individual produced by elitegroup lexicase selection."
-  [pop]
+  [pop argmap]
   (loop [survivors (retain-one-individual-per-error-vector 
                      (possibly-remove-individuals-with-empty-genomes
                        (age-mediate pop argmap) 
@@ -225,7 +229,7 @@
 
 (defn uniform-selection
   "Returns an individual uniformly at random."
-  [pop]
+  [pop argmap]
   (lrand-nth (age-mediate pop argmap)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -233,18 +237,18 @@
 
 (defn select
   "Returns a selected parent."
-  [pop location {:keys [parent-selection print-selection-counts]
-                 :as argmap}]
+  [pop {:keys [parent-selection print-selection-counts]
+        :as argmap}]
   (let [pop-with-meta-errors (map (fn [ind] (update-in ind [:errors] concat (:meta-errors ind)))
                                   pop)
         selected (case parent-selection
-                   :tournament (tournament-selection pop-with-meta-errors location argmap)
-                   :lexicase (lexicase-selection pop-with-meta-errors location argmap)
-                   :epsilon-lexicase (epsilon-lexicase-selection pop-with-meta-errors location argmap)
-                   :elitegroup-lexicase (elitegroup-lexicase-selection pop-with-meta-errors)
+                   :tournament (tournament-selection pop-with-meta-errors argmap)
+                   :lexicase (lexicase-selection pop-with-meta-errors argmap)
+                   :epsilon-lexicase (epsilon-lexicase-selection pop-with-meta-errors argmap)
+                   :elitegroup-lexicase (elitegroup-lexicase-selection pop-with-meta-errors argmap)
                    :leaky-lexicase (if (< (lrand) (:lexicase-leakage argmap))
-                                     (uniform-selection pop-with-meta-errors)
-                                     (lexicase-selection pop-with-meta-errors location argmap))
+                                     (uniform-selection pop-with-meta-errors argmap)
+                                     (lexicase-selection pop-with-meta-errors argmap))
                    :uniform (uniform-selection pop-with-meta-errors)
                    (throw (Exception. (str "Unrecognized argument for parent-selection: "
                                            parent-selection))))]
