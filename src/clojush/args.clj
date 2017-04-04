@@ -224,10 +224,6 @@
           ;; The number of extra instances of autoconstructive_boolean_rand to include in
           ;; :atom-generators for autoconstruction. If negative then autoconstructive_boolean_rand
           ;; will not be in :atom-generators at all.
-          
-          :age-combining-function :average
-          ;; For genetic operators that involve multiple parents, the function used to combine
-          ;; the incremented ages of the parents to produce the age of the child.
 
           ;;----------------------------------------
           ;; Epignenetics
@@ -317,7 +313,12 @@
           ;; lower will be considered.
           ;;
           ;; NOTE: It doesn't make any sense to use this unless you have multiple ages in the
-          ;; population, as you migh have, for example, from using the genesis operator.
+          ;; population, as you migh have, for example, from using the genesis operator or
+          ;; autoconstruction.
+          
+          :age-combining-function :average
+          ;; For genetic operators that involve multiple parents, the function used to combine
+          ;; the incremented ages of the parents to produce the age of the child.
 
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
@@ -559,6 +560,7 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
 
 
