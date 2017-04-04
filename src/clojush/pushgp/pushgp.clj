@@ -85,14 +85,12 @@
 
 (defn produce-new-offspring
   [pop-agents child-agents rand-gens
-   {:keys [decimation-ratio population-size decimation-tournament-size
-           trivial-geography-radius use-single-thread ]}]
+   {:keys [decimation-ratio population-size decimation-tournament-size use-single-thread ]}]
   (let [pop (if (>= decimation-ratio 1)
               (vec (doall (map deref pop-agents)))
               (decimate (vec (doall (map deref pop-agents)))
                         (int (* decimation-ratio population-size))
-                        decimation-tournament-size
-                        trivial-geography-radius))
+                        decimation-tournament-size))
         ages (map :age pop)]
     (reset! min-age (apply min ages))
     (reset! max-age (apply max ages))
@@ -200,4 +198,5 @@
                                           (install-next-generation pop-agents child-agents @push-argmap)
                                           (recur (inc generation)))
                   :else  (final-report generation best @push-argmap))))))))
+
 

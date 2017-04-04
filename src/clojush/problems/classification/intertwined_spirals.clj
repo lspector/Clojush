@@ -117,8 +117,7 @@
                {:classification classification})))
 
 (def argmap
-  {:trivial-geography-radius 17,
-   :population-size 1000,
+  {:population-size 1000,
    :error-function spiral-error,
    :atom-generators (:basic spiral-instructions)
    :tag-limit 100
@@ -127,3 +126,4 @@
                                     :alternation 0.45
                                     :uniform-mutation 0.45}
    })
+

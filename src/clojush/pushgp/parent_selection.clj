@@ -6,17 +6,11 @@
 ;; tournament selection
 (defn tournament-selection
   "Returns an individual that does the best out of a tournament."
-  [pop location {:keys [tournament-size trivial-geography-radius
-                        total-error-method]}]
+  [pop location {:keys [tournament-size total-error-method]}]
   (let [tournament-set 
         (doall
           (for [_ (range tournament-size)]
-            (nth pop
-                 (if (zero? trivial-geography-radius)
-                   (lrand-int (count pop))
-                   (mod (+ location (- (lrand-int (+ 1 (* trivial-geography-radius 2))) 
-                                       trivial-geography-radius))
-                        (count pop))))))
+            (lrand-nth pop)))
         err-fn (case total-error-method
                  :sum :total-error
                  (:hah :rmse :ifs) :weighted-error
@@ -67,33 +61,22 @@
 
 (defn lexicase-selection
   "Returns an individual that does the best on the fitness cases when considered one at a
-  time in random order.  If trivial-geography-radius is non-zero, selection is limited to 
-  parents within +/- r of location"
-  [pop location {:keys [trivial-geography-radius] :as argmap}]
-  (let [lower (mod (- location trivial-geography-radius) (count pop))
-        upper (mod (+ location trivial-geography-radius) (count pop))
-        popvec (vec pop)
-        subpop (youth-bias
-                 (if (zero? trivial-geography-radius) 
-                   pop
-                   (if (< lower upper)
-                     (subvec popvec lower (inc upper))
-                     (into (subvec popvec lower (count pop)) 
-                           (subvec popvec 0 (inc upper)))))
-                 argmap)]
-    (loop [survivors (retain-one-individual-per-error-vector 
-                       (possibly-remove-individuals-with-empty-genomes
-                         subpop argmap))
-           cases (lshuffle (range (count (:errors (first subpop)))))]
-      (if (or (empty? cases)
-              (empty? (rest survivors))
-              (< (lrand) (:lexicase-slippage argmap)))
-        (lrand-nth survivors)
-        (let [min-err-for-case (apply min (map #(nth % (first cases))
-                                               (map #(:errors %) survivors)))]
-          (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
-                         survivors)
-                 (rest cases)))))))
+  time in random order."
+  [pop location argmap]
+  (loop [survivors (retain-one-individual-per-error-vector 
+                     (possibly-remove-individuals-with-empty-genomes
+                       (youth-bias pop argmap) 
+                       argmap))
+         cases (lshuffle (range (count (:errors (first subpop)))))]
+    (if (or (empty? cases)
+            (empty? (rest survivors))
+            (< (lrand) (:lexicase-slippage argmap)))
+      (lrand-nth survivors)
+      (let [min-err-for-case (apply min (map #(nth % (first cases))
+                                             (map #(:errors %) survivors)))]
+        (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
+                       survivors)
+               (rest cases))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; epsilon lexicase selection
@@ -123,36 +106,29 @@
 
 (defn epsilon-lexicase-selection
   "Returns an individual that does within epsilon of the best on the fitness cases when 
-  considered one at a time in random order.  If trivial-geography-radius is non-zero, 
-  selection is limited to parents within +/- r of location"
-  [pop location {:keys [trivial-geography-radius epsilon-lexicase-epsilon]}]
-  (let [lower (mod (- location trivial-geography-radius) (count pop))
-        upper (mod (+ location trivial-geography-radius) (count pop))
-        popvec (vec pop)
-        subpop (if (zero? trivial-geography-radius)
-                 pop
-                 (if (< lower upper)
-                   (subvec popvec lower (inc upper))
-                   (into (subvec popvec lower (count pop))
-                         (subvec popvec 0 (inc upper)))))]
-    (loop [survivors (retain-one-individual-per-error-vector subpop)
-           cases (lshuffle (range (count (:errors (first subpop)))))]
-      (if (or (empty? cases)
-              (empty? (rest survivors)))
-        (lrand-nth survivors)
-        (let [; If epsilon-lexicase-epsilon is set in the argmap, use it for epsilon.
-              ; Otherwise, use automatic epsilon selections, which are calculated once per generation.
-              epsilon (if epsilon-lexicase-epsilon
-                        epsilon-lexicase-epsilon
-                        (nth @epsilons-for-epsilon-lexicase (first cases)))
-              min-err-for-case (apply min (map #(nth % (first cases))
-                                               (map #(:errors %) survivors)))]
+  considered one at a time in random order."
+  [pop location {:keys [epsilon-lexicase-epsilon]}]
+  (loop [survivors (retain-one-individual-per-error-vector 
+                     (possibly-remove-individuals-with-empty-genomes
+                       (youth-bias pop argmap) 
+                       argmap))
+         cases (lshuffle (range (count (:errors (first subpop)))))]
+    (if (or (empty? cases)
+            (empty? (rest survivors)))
+      (lrand-nth survivors)
+      (let [; If epsilon-lexicase-epsilon is set in the argmap, use it for epsilon.
+            ; Otherwise, use automatic epsilon selections, which are calculated once per generation.
+             epsilon (if epsilon-lexicase-epsilon
+                       epsilon-lexicase-epsilon
+                       (nth @epsilons-for-epsilon-lexicase (first cases)))
+             min-err-for-case (apply min (map #(nth % (first cases))
+                                              (map #(:errors %) survivors)))]
         (recur (filter #(<= (nth (:errors %)
                                  (first cases))
                             (+ min-err-for-case
                                epsilon))
                        survivors)
-               (rest cases)))))))
+               (rest cases))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; elitegroup lexicase selection
@@ -275,6 +251,7 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
+
 
 
 

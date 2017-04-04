@@ -263,8 +263,7 @@
 
           :lexicase-leakage 0.1
           ;; If using leaky lexicase selection, the probability that a selection event will return
-          ;; a random (tourny 1) individual from the entire population (note: currently ignores 
-          ;; location, so doesn't play nice with trivial geography).
+          ;; a random (tourny 1) individual from the entire population.
           
           :lexicase-slippage 0
           ;; If using lexicase or leaky lexicase selection, the probability that each step of the
@@ -290,10 +289,6 @@
           :meta-error-categories []
           ;; A vector containing meta-error categories that can be used for parent selection, but
           ;; do not affect total error. See clojush.evaluate for options.
-
-          :trivial-geography-radius 0
-          ;; If non-zero, this is used as the radius from which to select individuals for
-          ;; tournament or lexicase selection.
 
           :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population
           ;; size that is retained before breeding. If 0 < decimation-ratio < 1, decimation
@@ -324,8 +319,6 @@
           ;; NOTE: This doesn't really have anything to do with the lexicase selection algorithm
           ;; per se, but is called "lexiase-youth-bias" because it is currently implemented only
           ;; for lexicase selection.
-          ;;
-          ;; NOTE: Not compatible with trivial geography.
           ;;
           ;; NOTE: It doesn't make any sense to use this unless you have multiple ages in the
           ;; population, as you migh have, for example, from using the genesis operator.
@@ -570,6 +563,7 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
 
 
