@@ -38,22 +38,22 @@
         pop))
     pop))
 
-(defn youth-bias
-  "If lexicase-youth-bias is falsy, returns pop. Otherwise, lexicase-youth-bias should 
-  be a vector of [pmin pmax] with pmin and pmax both being between 0 and 1 (inclusive)
-  with pmin + pmax <= 1.0. Then, with probability pmin, returns individuals in pop
-  with age @min-age; with probability pmax, returns all of pop; with probability 
-  (- 1.0 pmin pmax), selects an age cutoff uniformly from those present in the population
-  and returns individuals with the cutoff age or lower."
-  [pop {:keys [lexicase-youth-bias]}]
-  (if (not lexicase-youth-bias)
+(defn age-mediate
+  "If age-mediated-parent-selection is falsy, returns pop. Otherwise, 
+  age-mediated-parent-selection should be a vector of [pmin pmax] with pmin and pmax both 
+  being between 0 and 1 (inclusive) with pmin + pmax <= 1.0. Then, with probability pmin,
+  returns individuals in pop with age @min-age; with probability pmax, returns all of pop;
+  with probability (- 1.0 pmin pmax), selects an age cutoff uniformly from those present
+  in the population and returns individuals with the cutoff age or lower."
+  [pop {:keys [age-mediated-parent-selection]}]
+  (if (not age-mediated-parent-selection)
     pop
     (let [rand-val (lrand)
           non-empties (filter #(not (empty? (:genome %))) pop)
           candidates (if (empty? non-empties) pop non-empties)
-          age-limit (if (<= rand-val (first lexicase-youth-bias))
+          age-limit (if (<= rand-val (first age-mediated-parent-selection))
                       @min-age
-                      (if (<= rand-val (apply + lexicase-youth-bias))
+                      (if (<= rand-val (apply + age-mediated-parent-selection))
                         @max-age
                         (lrand-nth (distinct (map :age candidates)))))]
       (filter (fn [ind] (<= (:age ind) age-limit))
@@ -65,7 +65,7 @@
   [pop location argmap]
   (loop [survivors (retain-one-individual-per-error-vector 
                      (possibly-remove-individuals-with-empty-genomes
-                       (youth-bias pop argmap) 
+                       (age-mediate pop argmap) 
                        argmap))
          cases (lshuffle (range (count (:errors (first subpop)))))]
     (if (or (empty? cases)
@@ -110,7 +110,7 @@
   [pop location {:keys [epsilon-lexicase-epsilon]}]
   (loop [survivors (retain-one-individual-per-error-vector 
                      (possibly-remove-individuals-with-empty-genomes
-                       (youth-bias pop argmap) 
+                       (age-mediate pop argmap) 
                        argmap))
          cases (lshuffle (range (count (:errors (first subpop)))))]
     (if (or (empty? cases)
@@ -251,6 +251,7 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
+
 
 
 

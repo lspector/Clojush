@@ -84,7 +84,7 @@
 
 (def min-age (atom 0))
 (def max-age (atom 0))
-;; Used for lexicase-youth-bias
+;; Used for age-mediated-parent-selection
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The globals below may be reset by arguments to pushgp
@@ -144,4 +144,5 @@
 
 (def global-print-behavioral-diversity (atom false)) 
 ;; When true, reports will print the behavioral diversity of the population
+
 
