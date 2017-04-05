@@ -308,7 +308,7 @@
           ;; If truthy, should be a vector of [pmin pmax]. In this case, then with probability
           ;; pmin, parent selection will consider only individuals with the minimum age in
           ;; the population; with probability pmax, all individuals will be considered; with
-          ;; probability (- 1.0 pmin pmax) an age cutoff will be selected uniformly from 
+          ;; probability (- 1.0 pmin pmax) an age cutoff will be chosen uniformly from 
           ;; those present in the population, and only individuals with the cutoff age or 
           ;; lower will be considered.
           ;;
@@ -319,6 +319,13 @@
           :age-combining-function :average
           ;; For genetic operators that involve multiple parents, the function used to combine
           ;; the incremented ages of the parents to produce the age of the child.
+          
+          :random-screen false
+          ;; If truthy, should be a map with values for :criterion and :probability. In this
+          ;; case, then with probability :probability, each parent selection event will 
+          ;; consider only individuals with :grain-size equal to or less than a :grain-size 
+          ;; chosen randomly from those present in the population. The :criterion determines
+          ;; how :grain-size is computed for an individual when it is created.
 
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
@@ -560,6 +567,7 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
 
 

@@ -304,7 +304,7 @@
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
                           (vec (:genome (uniform-instruction-mutation
-                                          {:genome genome :age -1}
+                                          {:genome genome :dummy true :age -1}
                                           (merge @push-argmap {:uniform-mutation-rate rate}))))
                           genome)
                         :genome)))
@@ -324,7 +324,7 @@
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
                           (vec (:genome (uniform-integer-mutation
-                                          {:genome genome :age -1}
+                                          {:genome genome :dummy true :age -1}
                                           (merge @push-argmap
                                                  {:uniform-mutation-constant-tweak-rate rate
                                                   :uniform-mutation-int-gaussian-standard-deviation stdev}))))
@@ -347,7 +347,7 @@
              (push-item (if (:autoconstructing state)
                           (vec (:genome 
                                  (uniform-float-mutation
-                                   {:genome genome :age -1}
+                                   {:genome genome :dummy true :age -1}
                                    (merge @push-argmap
                                           {:uniform-mutation-constant-tweak-rate rate
                                            :uniform-mutation-float-gaussian-standard-deviation stdev}))))
@@ -369,7 +369,7 @@
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
                           (vec (:genome (uniform-tag-mutation
-                                          {:genome genome :age -1}
+                                          {:genome genome :dummy true :age -1}
                                           (merge @push-argmap 
                                                  {:uniform-mutation-rate rate
                                                   :uniform-mutation-tag-gaussian-standard-deviation stdev}))))
@@ -391,7 +391,7 @@
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
                           (vec (:genome (uniform-string-mutation
-                                          {:genome genome :age -1}
+                                          {:genome genome :dummy true :age -1}
                                           (merge @push-argmap 
                                                  {:uniform-mutation-rate rate1
                                                   :uniform-mutation-string-char-change-rate rate2}))))
@@ -411,7 +411,7 @@
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
                           (vec (:genome (uniform-boolean-mutation
-                                          {:genome genome :age -1}
+                                          {:genome genome :dummy true :age -1}
                                           (merge @push-argmap {:uniform-mutation-rate rate}))))
                           genome)
                         :genome)))
@@ -431,7 +431,7 @@
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
                           (vec (:genome (uniform-close-mutation
-                                          {:genome genome :age -1}
+                                          {:genome genome :dummy true :age -1}
                                           (merge @push-argmap
                                                  {:uniform-close-mutation-rate rate1
                                                   :close-increment-rate rate2}))))
@@ -451,7 +451,7 @@
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
                           (vec (:genome (uniform-silence-mutation
-                                          {:genome genome :age -1}
+                                          {:genome genome :dummy true :age -1}
                                           (merge @push-argmap {:uniform-silence-mutation-rate rate}))))
                           genome)
                         :genome)))
@@ -469,7 +469,7 @@
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
                           (vec (:genome (uniform-deletion
-                                          {:genome genome :age -1}
+                                          {:genome genome :dummy true :age -1}
                                           (merge @push-argmap {:uniform-deletion-rate rate}))))
                           genome)
                         :genome)))
@@ -488,7 +488,7 @@
              (push-item (if (:autoconstructing state)
                           (vec (take (int (/ (:max-points @push-argmap) 4))
                                      (:genome (uniform-addition
-                                                {:genome genome :age -1}
+                                                {:genome genome :dummy true :age -1}
                                                 (merge @push-argmap 
                                                        {:uniform-addition-rate rate})))))
                           genome)
@@ -508,7 +508,7 @@
              (push-item (if (:autoconstructing state)
                           (vec (take (int (/ (:max-points @push-argmap) 4))
                                      (:genome (uniform-addition-and-deletion
-                                                {:genome genome :age -1}
+                                                {:genome genome :dummy true :age -1}
                                                 (merge @push-argmap 
                                                        {:uniform-addition-and-deletion-rate rate})))))
                           genome)
@@ -530,8 +530,8 @@
              (push-item (if (:autoconstructing state)
                           (vec (take (int (/ (:max-points @push-argmap) 4))
                                      (:genome (uniform-combination-and-deletion
-                                                {:genome genome1 :age -1}
-                                                {:genome genome2 :age -1}
+                                                {:genome genome1 :dummy true :age -1}
+                                                {:genome genome2 :dummy true :age -1}
                                                 (merge @push-argmap 
                                                        {:uniform-combination-and-deletion-rate rate})))))
                           genome1)
@@ -554,8 +554,8 @@
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
                           (vec (:genome (alternation
-                                          {:genome genome1 :age -1}
-                                          {:genome genome2 :age -1}
+                                          {:genome genome1 :dummy true :age -1}
+                                          {:genome genome2 :dummy true :age -1}
                                           (merge @push-argmap
                                                  {:alternation-rate rate
                                                   :alignment-deviation dev}))))
@@ -574,8 +574,8 @@
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
                           (vec (:genome (two-point-crossover
-                                          {:genome genome1 :age -1}
-                                          {:genome genome2 :age -1}
+                                          {:genome genome1 :dummy true :age -1}
+                                          {:genome genome2 :dummy true :age -1}
                                           @push-argmap)))
                           genome1)
                         :genome)))
@@ -592,8 +592,8 @@
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
                           (vec (:genome (uniform-crossover
-                                          {:genome genome1 :age -1}
-                                          {:genome genome2 :age -1}
+                                          {:genome genome1 :dummy true :age -1}
+                                          {:genome genome2 :dummy true :age -1}
                                           @push-argmap)))
                           genome1)
                         :genome)))
@@ -652,5 +652,6 @@
                            (:silent (nth genome index)))
                         :boolean)))
       state)))
+
 
 

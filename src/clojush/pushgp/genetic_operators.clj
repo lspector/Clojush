@@ -81,6 +81,49 @@
 ;        {:genome [1 2 3 4] :age 200}
 ;        [1 2 3]))
 
+(defn compute-grain-size
+  "Returns the grain size for the individual with the provided genome, as
+  produced by the provided parents, according to the :random-screen settings
+  in argmap. Grain sizes should range from 0 to 1. Individuals with smaller
+  grain sizes will survive screens of a wider range of sizes."
+  ([genome {:keys [random-screen] :as argmap}]
+   (compute-grain-size genome 
+                       {:genome [] :dummy true :age -1} 
+                       {:genome [] :dummy true :age -1} 
+                       argmap))
+  ([genome parent1 {:keys [random-screen] :as argmap}]
+   (compute-grain-size genome parent1 {:genome [] :dummy true :age -1} argmap))
+  ([genome parent1 parent2 {:keys [random-screen] :as argmap}]
+   (if (not random-screen)
+     1
+     (case (:criterion random-screen)
+       ;
+       :genetic-similarity-to-parent
+       (sequence-similarity genome (:genome parent1))
+       ;
+       :genetic-difference-from-parent
+       (- 1 (sequence-similarity genome (:genome parent1)))
+       ;
+       :reproductive-similarity-to-parent
+       (if (:dummy parent1)
+         1
+         (- 1 (#(- (max %1 %2) (min %1 %2))
+                (sequence-similarity (:genome parent1) genome)
+                (sequence-similarity 
+                  (:genome parent1) 
+                  (produce-child-genome-by-autoconstruction 
+                    genome (:genome parent1) (:genome parent2) false argmap)))))
+       ;
+       :reproductive-difference-from-parent
+       (if (:dummy parent1)
+         1
+         (#(- (max %1 %2) (min %1 %2))
+           (sequence-similarity (:genome parent1) genome)
+           (sequence-similarity 
+             (:genome parent1) 
+             (produce-child-genome-by-autoconstruction 
+               genome (:genome parent1) (:genome parent2) false argmap))))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; reproduction
 
@@ -96,14 +139,16 @@
   "Ignores the provided parent and returns a new, random individual, with age 0."
   [ind {:keys [maintain-ancestors max-genome-size-in-initial-program atom-generators]
         :as argmap}]
-  (make-individual :genome (random-plush-genome max-genome-size-in-initial-program 
-                                                atom-generators 
-                                                argmap)
-                   :history (:history ind)
-                   :age 0
-                   :ancestors (if maintain-ancestors
-                                (cons (:genome ind) (:ancestors ind))
-                                (:ancestors ind))))
+  (let [genome (random-plush-genome max-genome-size-in-initial-program 
+                                    atom-generators 
+                                    argmap)]
+    (make-individual :genome genome
+                     :history (:history ind)
+                     :age 0
+                     :grain-size (compute-grain-size genome argmap)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; uniform mutation
@@ -211,6 +256,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -237,6 +283,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -272,6 +319,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -308,6 +356,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -341,6 +390,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -380,6 +430,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -407,6 +458,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -420,7 +472,8 @@
    and those that are changed have a close-increment-rate chance of being
    incremented, and are otherwise decremented."
   [ind {:keys [uniform-close-mutation-rate close-increment-rate
-               epigenetic-markers maintain-ancestors]}]
+               epigenetic-markers maintain-ancestors]
+        :as argmap}]
   (if (not (some #{:close} epigenetic-markers))
     ind
     (let [uniform-close-mutation-rate (number uniform-close-mutation-rate)
@@ -440,6 +493,7 @@
       (make-individual :genome new-genome
                        :history (:history ind)
                        :age (inc (:age ind))
+                       :grain-size (compute-grain-size new-genome ind argmap)
                        :ancestors (if maintain-ancestors
                                     (cons (:genome ind) (:ancestors ind))
                                     (:ancestors ind))))))
@@ -451,7 +505,8 @@
   "Uniformly mutates the :silent's in the individual's instruction maps. Each
    :silent will have a uniform-silence-mutation-rate probability of being switched."
   [ind {:keys [uniform-silence-mutation-rate
-               epigenetic-markers maintain-ancestors]}]
+               epigenetic-markers maintain-ancestors]
+        :as argmap}]
   (if (not (some #{:silent} epigenetic-markers))
     ind
     (let [uniform-silence-mutation-rate (number uniform-silence-mutation-rate)
@@ -465,6 +520,7 @@
       (make-individual :genome new-genome
                        :history (:history ind)
                        :age (inc (:age ind))
+                       :grain-size (compute-grain-size new-genome ind argmap)
                        :ancestors (if maintain-ancestors
                                     (cons (:genome ind) (:ancestors ind))
                                     (:ancestors ind))))))
@@ -475,7 +531,7 @@
 (defn uniform-deletion
   "Returns the individual with each element of its genome possibly deleted, with probability
 given by uniform-deletion-rate."
-  [ind {:keys [uniform-deletion-rate maintain-ancestors]}]
+  [ind {:keys [uniform-deletion-rate maintain-ancestors] :as argmap}]
   (let [rate (number uniform-deletion-rate)
         new-genome (vec (filter identity
                                 (map #(if (< (lrand) rate) nil %)
@@ -483,6 +539,7 @@ given by uniform-deletion-rate."
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -505,6 +562,7 @@ given by uniform-deletion-rate."
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -536,6 +594,7 @@ given by uniform-deletion-rate."
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -570,6 +629,7 @@ given by uniform-deletion-rate."
     (make-individual :genome new-genome
                      :history (:history parent1)
                      :age ((age-combining-function argmap) parent1 parent2 new-genome)
+                     :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -607,6 +667,7 @@ given by uniform-deletion-rate."
     (make-individual :genome new-genome
                      :history (:history parent1)
                      :age ((age-combining-function argmap) parent1 parent2 new-genome)
+                     :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -631,6 +692,7 @@ given by uniform-deletion-rate."
     (make-individual :genome new-genome
                      :history (:history parent1)
                      :age ((age-combining-function argmap) parent1 parent2 new-genome)
+                     :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -664,6 +726,7 @@ given by uniform-deletion-rate."
       (make-individual :genome new-genome
                        :history (:history parent1)
                        :age ((age-combining-function argmap) parent1 parent2 new-genome)
+                       :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                        :ancestors (if maintain-ancestors
                                     (cons (:genome parent1) (:ancestors parent1))
                                     (:ancestors parent1))))))
@@ -937,6 +1000,7 @@ programs encoded by genomes g1 and g2."
     (assoc (make-individual :genome new-genome
                             :history (:history parent1)
                             :age ((age-combining-function argmap) parent1 parent2 new-genome)
+                            :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
@@ -990,10 +1054,14 @@ be set globally or eliminated in the future."
                               :age (if use-child
                                      ((age-combining-function argmap) parent1 parent2 new-genome)
                                      0)
+                              :grain-size (if use-child
+                                            (compute-grain-size new-genome parent1 parent2 argmap)
+                                            1)
                               :ancestors (if maintain-ancestors
                                            (cons (:genome parent1) (:ancestors parent1))
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 

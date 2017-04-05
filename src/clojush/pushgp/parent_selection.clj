@@ -10,7 +10,7 @@
   [pop]
   (map lrand-nth (vals (group-by #(:errors %) pop))))
 
-(defn possibly-remove-individuals-with-empty-genomes
+(defn nonempties-when-autoconstructing
   "When :autoconstuctive is truthy, and at least one individual in pop has a non-empty
   genome, remove those with empty genomes."
   [pop {:keys [autoconstructive]}]
@@ -32,15 +32,27 @@
   (if (not age-mediated-parent-selection)
     pop
     (let [rand-val (lrand)
-          non-empties (filter #(not (empty? (:genome %))) pop)
-          candidates (if (empty? non-empties) pop non-empties)
           age-limit (if (<= rand-val (first age-mediated-parent-selection))
                       @min-age
                       (if (<= rand-val (apply + age-mediated-parent-selection))
                         @max-age
-                        (lrand-nth (distinct (map :age candidates)))))]
+                        (lrand-nth (distinct (map :age pop)))))]
       (filter (fn [ind] (<= (:age ind) age-limit))
-              candidates))))
+              pop))))
+
+(defn screen
+  "If random-screen is falsy, returns pop. Otherwise, random-screen should be a map with
+  values for :criterion and :probability. Then, with probability (- 1 :probability), again
+  returns pop. Otherwise, a value is chosen randomly from the :grain-size values of
+  the individuals in pop, and returns the individuals with that :grain-size or smaller."
+  [pop {:keys [random-screen]}]
+  (if (not random-screen)
+    pop
+    (if (> (lrand) (:probability random-screen))
+      pop
+      (let [grain-size-limit (lrand-nth (distinct (map :grain-size pop)))]
+        (filter (fn [ind] (<= (:grain-size ind) grain-size-limit))
+                pop)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; tournament selection
@@ -48,7 +60,10 @@
 (defn tournament-selection
   "Returns an individual that does the best out of a tournament."
   [pop {:keys [tournament-size total-error-method] :as argmap}]
-  (let [subpop (age-mediate pop argmap)
+  (let [subpop (-> pop
+                   (nonempties-when-autoconstructing argmap)
+                   (screen argmap)
+                   (age-mediate argmap))
         tournament-set (doall
                          (for [_ (range tournament-size)]
                            (lrand-nth subpop)))
@@ -67,10 +82,11 @@
   "Returns an individual that does the best on the fitness cases when considered one at a
   time in random order."
   [pop argmap]
-  (loop [survivors (retain-one-individual-per-error-vector 
-                     (possibly-remove-individuals-with-empty-genomes
-                       (age-mediate pop argmap) 
-                       argmap))
+  (loop [survivors (-> pop
+                       (nonempties-when-autoconstructing argmap)
+                       (screen argmap)
+                       (age-mediate argmap)
+                       (retain-one-individual-per-error-vector))
          cases (lshuffle (range (count (:errors (first pop)))))]
     (if (or (empty? cases)
             (empty? (rest survivors))
@@ -112,10 +128,11 @@
   "Returns an individual that does within epsilon of the best on the fitness cases when 
   considered one at a time in random order."
   [pop {:keys [epsilon-lexicase-epsilon] :as argmap}]
-  (loop [survivors (retain-one-individual-per-error-vector 
-                     (possibly-remove-individuals-with-empty-genomes
-                       (age-mediate pop argmap) 
-                       argmap))
+  (loop [survivors (-> pop
+                       (nonempties-when-autoconstructing argmap)
+                       (screen argmap)
+                       (age-mediate argmap)
+                       (retain-one-individual-per-error-vector))
          cases (lshuffle (range (count (:errors (first pop)))))]
     (if (or (empty? cases)
             (empty? (rest survivors)))
@@ -169,10 +186,11 @@
 (defn elitegroup-lexicase-selection
   "Returns an individual produced by elitegroup lexicase selection."
   [pop argmap]
-  (loop [survivors (retain-one-individual-per-error-vector 
-                     (possibly-remove-individuals-with-empty-genomes
-                       (age-mediate pop argmap) 
-                       argmap))
+  (loop [survivors (-> pop
+                       (nonempties-when-autoconstructing argmap)
+                       (screen argmap)
+                       (age-mediate argmap)
+                       (retain-one-individual-per-error-vector))
          cases (lshuffle (map lrand-nth @elitegroups))]
     (if (or (empty? cases)
             (empty? (rest survivors)))
@@ -230,7 +248,11 @@
 (defn uniform-selection
   "Returns an individual uniformly at random."
   [pop argmap]
-  (lrand-nth (age-mediate pop argmap)))
+  (-> pop
+      (nonempties-when-autoconstructing argmap)
+      (screen argmap)
+      (age-mediate argmap)
+      (lrand-nth)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; parent selection

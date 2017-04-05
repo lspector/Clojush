@@ -36,10 +36,11 @@
     :as argmap}]
   (let [population-agents (repeatedly population-size
                                       #(make-individual
-                                        :genome (strip-random-insertion-flags
-                                                 (random-plush-genome max-genome-size-in-initial-program
-                                                                      atom-generators
-                                                                      argmap))
+                                         :genome (strip-random-insertion-flags
+                                                   (random-plush-genome 
+                                                     max-genome-size-in-initial-program
+                                                     atom-generators
+                                                     argmap))
                                          :genetic-operators :random))]
     (mapv #(if use-single-thread
              (atom %)
@@ -198,5 +199,6 @@
                                           (install-next-generation pop-agents child-agents @push-argmap)
                                           (recur (inc generation)))
                   :else  (final-report generation best @push-argmap))))))))
+
 
 
