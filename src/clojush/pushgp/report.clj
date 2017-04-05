@@ -417,6 +417,15 @@
                (* 1.0 (mean ages)))
       (println "Median age in population:"
                (* 1.0 (median ages))))
+    (let [grain-sizes (map :grain-size population)]
+      (println "Minimum grain-size in population:"
+               (* 1.0 (apply min grain-sizes)))
+      (println "Maximum grain-size in population:"
+               (* 1.0 (apply max grain-sizes)))
+      (println "Average grain-size in population:"
+               (* 1.0 (mean grain-sizes)))
+      (println "Median grain-size in population:"
+               (* 1.0 (median grain-sizes))))
     (println "--- Population Diversity Statistics ---")
     (let [genome-frequency-map (frequencies (map :genome population))]
       (println "Min copy number of one Plush genome:" (apply min (vals genome-frequency-map)))
