@@ -904,6 +904,16 @@ programs encoded by genomes g1 and g2."
           false
           true)))))
 
+
+(defn minimal-reproductive-difference-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [child1 (produce-child-genome-by-autoconstruction g g false argmap)
+        child2 (produce-child-genome-by-autoconstruction child1 g g false argmap)]
+    (not= (sequence-similarity g child1)
+          (sequence-similarity g child2))))
+
+
 (defn diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
@@ -914,6 +924,7 @@ programs encoded by genomes g1 and g2."
      :size-and-instruction size-and-instruction-diversifying?
      :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?
      :diffmeans diffmeans-diversifying?
+     :minimal-reproductive-difference minimal-reproductive-difference-diversifying?
      :no-clones no-clones-diversifying?
      :none (fn [genome argmap] true))
     g
@@ -1038,3 +1049,4 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
