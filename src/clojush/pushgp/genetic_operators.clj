@@ -92,7 +92,10 @@
                        {:genome [] :dummy true :age -1} 
                        argmap))
   ([genome parent1 {:keys [random-screen] :as argmap}]
-   (compute-grain-size genome parent1 {:genome [] :dummy true :age -1} argmap))
+   (compute-grain-size genome 
+                       parent1 
+                       {:genome [] :dummy true :age -1} 
+                       argmap))
   ([genome parent1 parent2 {:keys [random-screen] :as argmap}]
    (if (not random-screen)
      1
@@ -1056,12 +1059,9 @@ be set globally or eliminated in the future."
                                      0)
                               :grain-size (if use-child
                                             (compute-grain-size new-genome parent1 parent2 argmap)
-                                            1)
+                                            (compute-grain-size new-genome argmap))
                               :ancestors (if maintain-ancestors
                                            (cons (:genome parent1) (:ancestors parent1))
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
-
-
-
