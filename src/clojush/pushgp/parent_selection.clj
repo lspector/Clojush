@@ -62,8 +62,8 @@
   [pop {:keys [tournament-size total-error-method] :as argmap}]
   (let [subpop (-> pop
                    (nonempties-when-autoconstructing argmap)
-                   (screen argmap)
-                   (age-mediate argmap))
+                   (age-mediate argmap)
+                   (screen argmap))
         tournament-set (doall
                          (for [_ (range tournament-size)]
                            (lrand-nth subpop)))
@@ -84,8 +84,8 @@
   [pop argmap]
   (loop [survivors (-> pop
                        (nonempties-when-autoconstructing argmap)
-                       (screen argmap)
                        (age-mediate argmap)
+                       (screen argmap)
                        (retain-one-individual-per-error-vector))
          cases (lshuffle (range (count (:errors (first pop)))))]
     (if (or (empty? cases)
@@ -130,8 +130,8 @@
   [pop {:keys [epsilon-lexicase-epsilon] :as argmap}]
   (loop [survivors (-> pop
                        (nonempties-when-autoconstructing argmap)
-                       (screen argmap)
                        (age-mediate argmap)
+                       (screen argmap)
                        (retain-one-individual-per-error-vector))
          cases (lshuffle (range (count (:errors (first pop)))))]
     (if (or (empty? cases)
@@ -188,8 +188,8 @@
   [pop argmap]
   (loop [survivors (-> pop
                        (nonempties-when-autoconstructing argmap)
-                       (screen argmap)
                        (age-mediate argmap)
+                       (screen argmap)
                        (retain-one-individual-per-error-vector))
          cases (lshuffle (map lrand-nth @elitegroups))]
     (if (or (empty? cases)
@@ -250,8 +250,8 @@
   [pop argmap]
   (-> pop
       (nonempties-when-autoconstructing argmap)
-      (screen argmap)
       (age-mediate argmap)
+      (screen argmap)
       (lrand-nth)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -280,4 +280,3 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
-
