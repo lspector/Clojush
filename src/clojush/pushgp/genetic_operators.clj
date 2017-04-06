@@ -98,7 +98,20 @@
            (sequence-similarity 
              (:genome parent1) 
              (produce-child-genome-by-autoconstruction 
-               genome (:genome parent1) (:genome parent2) false argmap))))))))
+               genome (:genome parent1) (:genome parent2) false argmap))))
+       ;
+       :nonzero-reproductive-difference-from-parent
+       (if (:dummy parent1)
+         1
+         (let [diff (#(- (max %1 %2) (min %1 %2))
+                      (sequence-similarity (:genome parent1) genome)
+                      (sequence-similarity 
+                        (:genome parent1) 
+                        (produce-child-genome-by-autoconstruction 
+                          genome (:genome parent1) (:genome parent2) false argmap)))]
+           (if (zero? diff)
+             1
+             diff)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; reproduction
