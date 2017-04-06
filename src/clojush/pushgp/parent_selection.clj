@@ -51,7 +51,11 @@
     (if (> (lrand) (:probability random-screen))
       pop
       (let [grain-size-limit (lrand-nth (distinct (map :grain-size pop)))]
-        (filter (fn [ind] (<= (:grain-size ind) grain-size-limit))
+        (filter (fn [ind] ((if (:reversible random-screen)
+                             (lrand-nth [<= >=])
+                             <=)
+                           (:grain-size ind) 
+                           grain-size-limit))
                 pop)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -280,3 +284,4 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
+
