@@ -930,9 +930,12 @@ programs encoded by genomes g1 and g2."
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   (let [child1 (produce-child-genome-by-autoconstruction g g false argmap)
-        child2 (produce-child-genome-by-autoconstruction child1 g g false argmap)]
-    (not= (sequence-similarity g child1)
-          (sequence-similarity g child2))))
+        child2 (produce-child-genome-by-autoconstruction child1 g g false argmap)
+        c1-diff (sequence-similarity g child1)
+        c2-diff (sequence-similarity g child2)]
+    (and (not (zero? c1-diff))
+         (not (zero? c2-diff))
+         (not= c1-diff c2-diff))))
 
 
 (defn diversifying?
