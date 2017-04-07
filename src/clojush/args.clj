@@ -251,7 +251,7 @@
 
           :parent-selection :lexicase
           ;; The parent selection method. Options include :tournament, :lexicase, :epsilon-lexicase,
-          ;; :elitegroup-lexicase, :uniform :leaky-lexicase
+          ;; :elitegroup-lexicase, :uniform, :leaky-lexicase, random-threshold-lexicase
 
           :epsilon-lexicase-epsilon nil
           ;; When parent-selection is :epsilon-lexicase,
@@ -571,12 +571,4 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
-
-
-
-
-
-
-
-
 

@@ -206,6 +206,30 @@
                (rest cases))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; random threshold lexicase selection
+
+(defn random-threshold-lexicase-selection
+  "Returns an individual that meets or improves upon an error threshold on the fitness 
+  cases when considered one at a time in random order. The threshold is chosen randomly
+  from those present in the population."
+  [pop argmap]
+  (loop [survivors (-> pop
+                       (nonempties-when-autoconstructing argmap)
+                       (age-mediate argmap)
+                       (screen argmap)
+                       (retain-one-individual-per-error-vector))
+         cases (lshuffle (range (count (:errors (first pop)))))]
+    (if (or (empty? cases)
+            (empty? (rest survivors))
+            (< (lrand) (:lexicase-slippage argmap)))
+      (lrand-nth survivors)
+      (let [threshold (lrand-nth (distinct (map #(nth % (first cases))
+                                                (map #(:errors %) survivors))))]
+        (recur (filter #(<= (nth (:errors %) (first cases)) threshold)
+                       survivors)
+               (rest cases))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; implicit fitness sharing
 
 (defn assign-ifs-error-to-individual
@@ -272,6 +296,8 @@
                    :lexicase (lexicase-selection pop-with-meta-errors argmap)
                    :epsilon-lexicase (epsilon-lexicase-selection pop-with-meta-errors argmap)
                    :elitegroup-lexicase (elitegroup-lexicase-selection pop-with-meta-errors argmap)
+                   :random-threshold-lexicase (random-threshold-lexicase-selection
+                                                pop-with-meta-errors argmap)
                    :leaky-lexicase (if (< (lrand) (:lexicase-leakage argmap))
                                      (uniform-selection pop-with-meta-errors argmap)
                                      (lexicase-selection pop-with-meta-errors argmap))
