@@ -44,7 +44,9 @@
     :parent parent
     :empty (make-individual :genome [] :genetic-operators :empty)
     :truncate (assoc child :genome (vec (take (/ max-points 4) (:genome child))))
-    :random (make-individual :genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
+    :random (make-individual :genome (random-plush-genome max-genome-size-in-initial-program 
+                                                          atom-generators 
+                                                          argmap)
                              :genetic-operators :random)
     ))
 
@@ -57,8 +59,9 @@
     (if (>= (lrand) parent-reversion-probability)
       evaluated-child
       (let [child-errors (:errors evaluated-child)
-            evaluated-parent (evaluate-individual (assoc parent :program (translate-plush-genome-to-push-program parent argmap))
-                                                  error-function rand-gen argmap)
+            evaluated-parent (evaluate-individual 
+                               (assoc parent :program (translate-plush-genome-to-push-program parent argmap))
+                               error-function rand-gen argmap)
             parent-errors (:errors evaluated-parent)]
         (if (reduce #(and %1 %2)
                     (map <= child-errors parent-errors))
@@ -125,8 +128,12 @@
   (let [first-parent (select population argmap)
         operator-vector (if (sequential? operator) operator (vector operator))
         child (perform-genetic-operator-list operator-vector
-                                             (assoc first-parent :parent-uuids (vector (:uuid first-parent)))
-                                             population location rand-gen argmap)]
+                                             (assoc first-parent 
+                                               :parent-uuids (vector (:uuid first-parent)))
+                                             population 
+                                             location 
+                                             rand-gen 
+                                             argmap)]
     (cond->
         (assoc child :genetic-operators operator)
 
@@ -148,7 +155,6 @@
                                                    (vec genetic-operator-probabilities))]
         (if (or (= 1 (count vectored-go-probabilities))
                 (<= prob (second (first vectored-go-probabilities))))
-          (perform-genetic-operator (first (first vectored-go-probabilities)) population location rand-gen argmap)
+          (perform-genetic-operator (first (first vectored-go-probabilities)) 
+                                    population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
-
-
