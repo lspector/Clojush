@@ -131,7 +131,8 @@
       (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
         (calculate-epsilons-for-epsilon-lexicase (concat pop-agents child-agents) @push-argmap))
       (timer @push-argmap :other)
-      (let [selected (loop [candidates (concat (map deref pop-agents)
+      (let [selected (loop [candidates (concat (map #(assoc % :age (inc (:age %)))
+                                                    (map deref pop-agents))
                                                (map deref child-agents))
                             winners []]
                        (if (= (count winners) population-size)
