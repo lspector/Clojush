@@ -96,7 +96,7 @@
 (defn produce-new-offspring
   [pop-agents child-agents rand-gens
    {:keys [decimation-ratio population-size decimation-tournament-size use-single-thread 
-           survival-mode]
+           survival-mode autoconstructive]
     :as argmap}]
   (let [pop (if (>= decimation-ratio 1)
               (vec (doall (map deref pop-agents)))
@@ -131,16 +131,35 @@
       (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
         (calculate-epsilons-for-epsilon-lexicase (concat pop-agents child-agents) @push-argmap))
       (timer @push-argmap :other)
-      (let [selected (loop [candidates (concat (map #(assoc % :age (inc (:age %)))
-                                                    (map deref pop-agents))
-                                               (map deref child-agents))
-                            winners []]
-                       (if (= (count winners) population-size)
-                         winners
-                         (let [winner (select candidates 
-                                              (assoc argmap :post-variation true))]
-                           (recur (remove-one winner candidates)
-                                  (conj winners winner)))))]
+      (let [selected (if autoconstructive
+                       (concat
+                         (loop [candidates (map #(assoc % :age (inc (:age %)))
+                                                (map deref pop-agents))
+                                winners []]
+                           (if (= (count winners) (/ population-size 2))
+                             winners
+                             (let [winner (select candidates
+                                                  (assoc argmap :post-variation true))]
+                               (recur (remove-one winner candidates)
+                                      (conj winners winner)))))
+                         (loop [candidates (concat (map deref child-agents))
+                                winners []]
+                           (if (= (count winners) (- population-size (/ population-size 2)))
+                             winners
+                             (let [winner (select candidates
+                                                  (assoc argmap :post-variation true))]
+                               (recur (remove-one winner candidates)
+                                      (conj winners winner))))))
+                       (loop [candidates (concat (map #(assoc % :age (inc (:age %)))
+                                                      (map deref pop-agents))
+                                                 (map deref child-agents))
+                              winners []]
+                         (if (= (count winners) population-size)
+                           winners
+                           (let [winner (select candidates
+                                                (assoc argmap :post-variation true))]
+                             (recur (remove-one winner candidates)
+                                    (conj winners winner))))))]
         (dotimes [i population-size]
           ((if use-single-thread swap! send)
            (nth child-agents i)
