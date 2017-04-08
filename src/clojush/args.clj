@@ -68,9 +68,9 @@
           ;; functions.
           
           :survival-mode false
-          ;; When true, parent selection will be random, and the specified parent-selection methods
+          ;; When true, parent selection will be random, and the specified parent-selection method
           ;; will be used instead to select the next generation from the concatenation of the
-          ;; results of the parent population and the results of the genetic operators.
+          ;; parent population and the results of the genetic operators.
 
           ;;----------------------------------------
           ;; Genetic operator probabilities
