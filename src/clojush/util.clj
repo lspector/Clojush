@@ -80,6 +80,12 @@
     (let [factor (math/expt 10 n)]
       (double (/ (math/round (* f factor)) factor)))))
 
+(defn remove-one
+  "Returns sequence s without the first instance of item."
+  [item s]
+  (let [[without-item with-item] (split-with #(not (= item %)) s)]
+    (concat without-item (rest with-item))))
+
 (defn count-parens
   "Returns the number of paren pairs in tree"
   [tree]
@@ -385,4 +391,5 @@
             bottom-val (nth sorted bottom)
             top-val (nth sorted halfway)]
            (mean [bottom-val top-val])))))
+
 
