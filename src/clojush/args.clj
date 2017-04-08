@@ -66,6 +66,11 @@
           :pass-individual-to-error-function false
           ;; When true, entire individuals (rather than just programs) are passed to error
           ;; functions.
+          
+          :survival-mode false
+          ;; When true, parent selection will be random, and the specified parent-selection methods
+          ;; will be used instead to select the next generation from the concatenation of the
+          ;; results of the parent population and the results of the genetic operators.
 
           ;;----------------------------------------
           ;; Genetic operator probabilities
@@ -571,4 +576,5 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 

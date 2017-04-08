@@ -84,9 +84,20 @@
               rand-gens))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
 
+(defn timer
+  "Used to track the time used by different parts of evolution."
+  [{:keys [print-timings]} step]
+  (when print-timings
+    (let [start-time @timer-atom
+          current-time-for-step (get @timing-map step)]
+      (reset! timer-atom (System/currentTimeMillis))
+      (swap! timing-map assoc step (+ current-time-for-step (- @timer-atom start-time))))))
+
 (defn produce-new-offspring
   [pop-agents child-agents rand-gens
-   {:keys [decimation-ratio population-size decimation-tournament-size use-single-thread ]}]
+   {:keys [decimation-ratio population-size decimation-tournament-size use-single-thread 
+           survival-mode]
+    :as argmap}]
   (let [pop (if (>= decimation-ratio 1)
               (vec (doall (map deref pop-agents)))
               (decimate (vec (doall (map deref pop-agents)))
@@ -99,8 +110,41 @@
       ((if use-single-thread swap! send)
            (nth child-agents i)
            breed
-           i (nth rand-gens i) pop @push-argmap)))
-  (when-not use-single-thread (apply await child-agents))) ;; SYNCHRONIZE
+           i (nth rand-gens i) pop argmap))
+    (when-not use-single-thread (apply await child-agents)) ;; SYNCHRONIZE
+    (when survival-mode
+      (population-translate-plush-to-push child-agents @push-argmap)
+      (timer @push-argmap :reproduction)
+      (print "Computing errors... ") (flush)
+      (compute-errors child-agents rand-gens @push-argmap)
+      (println "Done computing errors.") (flush)
+      (timer @push-argmap :fitness)
+      ;; calculate solution rates if necessary for historically-assessed hardness
+      (calculate-hah-solution-rates (concat pop-agents child-agents) @push-argmap)
+      ;; create global structure to support elite group lexicase selection
+      (when (= (:parent-selection @push-argmap) :elitegroup-lexicase)
+        (build-elitegroups (concat pop-agents child-agents)))
+      ;; calculate implicit fitness sharing fitness for population
+      (when (= (:total-error-method @push-argmap) :ifs)
+        (calculate-implicit-fitness-sharing (concat pop-agents child-agents) @push-argmap))
+      ;; calculate epsilons for epsilon lexicase selection
+      (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
+        (calculate-epsilons-for-epsilon-lexicase (concat pop-agents child-agents) @push-argmap))
+      (timer @push-argmap :other)
+      (let [selected (loop [candidates (concat (map deref pop-agents)
+                                               (map deref child-agents))
+                            winners []]
+                       (if (= (count winners) population-size)
+                         winners
+                         (let [winner (select candidates 
+                                              (assoc argmap :post-variation true))]
+                           (recur (remove-one winner candidates)
+                                  (conj winners winner)))))]
+        (dotimes [i population-size]
+          ((if use-single-thread swap! send)
+           (nth child-agents i)
+           (fn [agt vals] (nth vals i))
+           selected))))))
 
 (defn install-next-generation
   [pop-agents child-agents {:keys [population-size use-single-thread]}]
@@ -127,15 +171,6 @@
                                          \,
                                          \newline)))))
 
-(defn timer
-  "Used to track the time used by different parts of evolution."
-  [{:keys [print-timings]} step]
-  (when print-timings
-    (let [start-time @timer-atom
-          current-time-for-step (get @timing-map step)]
-      (reset! timer-atom (System/currentTimeMillis))
-      (swap! timing-map assoc step (+ current-time-for-step (- @timer-atom start-time))))))
-
 (defn pushgp
   "The top-level routine of pushgp."
   ([] (pushgp '()))
@@ -158,47 +193,77 @@
         ;(doseq [seed random-seeds] (print " " seed))
         ;(println)
         ;; Main loop
-        (loop [generation 0]
-          (println "Processing generation:" generation) (flush)
-          (population-translate-plush-to-push pop-agents @push-argmap)
-          (timer @push-argmap :reproduction)
-          (print "Computing errors... ") (flush)
-          (compute-errors pop-agents rand-gens @push-argmap)
-          (println "Done computing errors.") (flush)
-          (timer @push-argmap :fitness)
-          ;; calculate solution rates if necessary for historically-assessed hardness
-          (calculate-hah-solution-rates pop-agents @push-argmap)
-          ;; create global structure to support elite group lexicase selection
-          (when (= (:parent-selection @push-argmap) :elitegroup-lexicase)
-            (build-elitegroups pop-agents))
-          ;; calculate implicit fitness sharing fitness for population
-          (when (= (:total-error-method @push-argmap) :ifs)
-            (calculate-implicit-fitness-sharing pop-agents @push-argmap))
-          ;; calculate epsilons for epsilon lexicase selection
-          (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
-            (calculate-epsilons-for-epsilon-lexicase pop-agents @push-argmap))
-          (timer @push-argmap :other)
-          ;; report and check for success
-          (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
-                                                             generation @push-argmap)]
-            (cond (= outcome :failure) (do (printf "\nFAILURE\n")
-                                         (if (:return-simplified-on-failure @push-argmap)
-                                           (auto-simplify best 
-                                                          (:error-function @push-argmap) 
-                                                          (:final-report-simplifications @push-argmap) 
-                                                          true 
-                                                          500)
-                                           (flush)))
-                  (= outcome :continue) (do (timer @push-argmap :report)
-                                          (println "\nProducing offspring...") (flush)
-                                          (produce-new-offspring pop-agents 
-                                                                 child-agents 
-                                                                 rand-gens 
-                                                                 @push-argmap)
-                                          (println "Installing next generation...") (flush)
-                                          (install-next-generation pop-agents child-agents @push-argmap)
-                                          (recur (inc generation)))
-                  :else  (final-report generation best @push-argmap))))))))
+        (if (:survival-mode @push-argmap)
+          (do (population-translate-plush-to-push pop-agents @push-argmap)
+            (print "Computing errors... ") (flush)
+            (compute-errors pop-agents rand-gens @push-argmap)
+            (println "Done computing errors.") (flush)
+            (loop [generation 0]
+              (println "Processing generation:" generation) (flush)
+              ;; report and check for success
+              (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
+                                                                 generation @push-argmap)]
+                (cond (= outcome :failure) (do (printf "\nFAILURE\n")
+                                             (if (:return-simplified-on-failure @push-argmap)
+                                               (auto-simplify best 
+                                                              (:error-function @push-argmap) 
+                                                              (:final-report-simplifications @push-argmap) 
+                                                              true 
+                                                              500)
+                                               (flush)))
+                      (= outcome :continue) (do (timer @push-argmap :report)
+                                              (println "\nProducing offspring...") (flush)
+                                              (produce-new-offspring pop-agents 
+                                                                     child-agents 
+                                                                     rand-gens 
+                                                                     @push-argmap)
+                                              (println "Installing next generation...") (flush)
+                                              (install-next-generation pop-agents child-agents @push-argmap)
+                                              (recur (inc generation)))
+                      :else  (final-report generation best @push-argmap)))))
+          ;; not survival-mode
+          (loop [generation 0]
+            (println "Processing generation:" generation) (flush)
+            (population-translate-plush-to-push pop-agents @push-argmap)
+            (timer @push-argmap :reproduction)
+            (print "Computing errors... ") (flush)
+            (compute-errors pop-agents rand-gens @push-argmap)
+            (println "Done computing errors.") (flush)
+            (timer @push-argmap :fitness)
+            ;; calculate solution rates if necessary for historically-assessed hardness
+            (calculate-hah-solution-rates pop-agents @push-argmap)
+            ;; create global structure to support elite group lexicase selection
+            (when (= (:parent-selection @push-argmap) :elitegroup-lexicase)
+              (build-elitegroups pop-agents))
+            ;; calculate implicit fitness sharing fitness for population
+            (when (= (:total-error-method @push-argmap) :ifs)
+              (calculate-implicit-fitness-sharing pop-agents @push-argmap))
+            ;; calculate epsilons for epsilon lexicase selection
+            (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
+              (calculate-epsilons-for-epsilon-lexicase pop-agents @push-argmap))
+            (timer @push-argmap :other)
+            ;; report and check for success
+            (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
+                                                               generation @push-argmap)]
+              (cond (= outcome :failure) (do (printf "\nFAILURE\n")
+                                           (if (:return-simplified-on-failure @push-argmap)
+                                             (auto-simplify best 
+                                                            (:error-function @push-argmap) 
+                                                            (:final-report-simplifications @push-argmap) 
+                                                            true 
+                                                            500)
+                                             (flush)))
+                    (= outcome :continue) (do (timer @push-argmap :report)
+                                            (println "\nProducing offspring...") (flush)
+                                            (produce-new-offspring pop-agents 
+                                                                   child-agents 
+                                                                   rand-gens 
+                                                                   @push-argmap)
+                                            (println "Installing next generation...") (flush)
+                                            (install-next-generation pop-agents child-agents @push-argmap)
+                                            (recur (inc generation)))
+                    :else  (final-report generation best @push-argmap)))))))))
+
 
 
 

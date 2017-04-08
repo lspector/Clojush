@@ -54,7 +54,8 @@
   "Evaluates child and parent, returning the child if it is at least as good as
    the parent on every test case."
   [child parent rand-gen {:keys [error-function parent-reversion-probability] :as argmap}]
-  (let [evaluated-child (evaluate-individual (assoc child :program (translate-plush-genome-to-push-program child argmap))
+  (let [evaluated-child (evaluate-individual (assoc child 
+                                               :program (translate-plush-genome-to-push-program child argmap))
                                              error-function rand-gen argmap)]
     (if (>= (lrand) parent-reversion-probability)
       evaluated-child
@@ -158,3 +159,4 @@
           (perform-genetic-operator (first (first vectored-go-probabilities)) 
                                     population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
+

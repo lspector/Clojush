@@ -287,23 +287,26 @@
 
 (defn select
   "Returns a selected parent."
-  [pop {:keys [parent-selection print-selection-counts]
+  [pop {:keys [parent-selection print-selection-counts survival-mode post-variation]
         :as argmap}]
   (let [pop-with-meta-errors (map (fn [ind] (update-in ind [:errors] concat (:meta-errors ind)))
                                   pop)
-        selected (case parent-selection
-                   :tournament (tournament-selection pop-with-meta-errors argmap)
-                   :lexicase (lexicase-selection pop-with-meta-errors argmap)
-                   :epsilon-lexicase (epsilon-lexicase-selection pop-with-meta-errors argmap)
-                   :elitegroup-lexicase (elitegroup-lexicase-selection pop-with-meta-errors argmap)
-                   :random-threshold-lexicase (random-threshold-lexicase-selection
-                                                pop-with-meta-errors argmap)
-                   :leaky-lexicase (if (< (lrand) (:lexicase-leakage argmap))
-                                     (uniform-selection pop-with-meta-errors argmap)
-                                     (lexicase-selection pop-with-meta-errors argmap))
-                   :uniform (uniform-selection pop-with-meta-errors)
-                   (throw (Exception. (str "Unrecognized argument for parent-selection: "
-                                           parent-selection))))]
+        selected (if (or (not survival-mode)
+                         post-variation)
+                   (case parent-selection
+                     :tournament (tournament-selection pop-with-meta-errors argmap)
+                     :lexicase (lexicase-selection pop-with-meta-errors argmap)
+                     :epsilon-lexicase (epsilon-lexicase-selection pop-with-meta-errors argmap)
+                     :elitegroup-lexicase (elitegroup-lexicase-selection pop-with-meta-errors argmap)
+                     :random-threshold-lexicase (random-threshold-lexicase-selection
+                                                  pop-with-meta-errors argmap)
+                     :leaky-lexicase (if (< (lrand) (:lexicase-leakage argmap))
+                                       (uniform-selection pop-with-meta-errors argmap)
+                                       (lexicase-selection pop-with-meta-errors argmap))
+                     :uniform (uniform-selection pop-with-meta-errors argmap)
+                     (throw (Exception. (str "Unrecognized argument for parent-selection: "
+                                             parent-selection))))
+                   (uniform-selection pop-with-meta-errors argmap))]
     (when print-selection-counts
       (swap! selection-counts update-in [(:uuid selected)] (fn [sel-count]
                                                              (if (nil? sel-count)
