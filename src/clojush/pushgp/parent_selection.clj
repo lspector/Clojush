@@ -31,14 +31,15 @@
   [pop {:keys [age-mediated-parent-selection]}]
   (if (not age-mediated-parent-selection)
     pop
-    (let [rand-val (lrand)
-          age-limit (if (<= rand-val (first age-mediated-parent-selection))
-                      @min-age
-                      (if (<= rand-val (apply + age-mediated-parent-selection))
-                        @max-age
-                        (lrand-nth (distinct (map :age pop)))))]
-      (filter (fn [ind] (<= (:age ind) age-limit))
-              pop))))
+    (let [rand-val (lrand)]
+      (if (<= rand-val (first age-mediated-parent-selection))
+        (let [min-age (reduce min (map :age pop))]
+          (filter #(= (:age %) min-age) pop))
+        (if (<= rand-val (apply + age-mediated-parent-selection))
+          pop
+          (let [age-limit (lrand-nth (distinct (map :age pop)))]
+            (filter (fn [ind] (<= (:age ind) age-limit))
+                    pop)))))))
 
 (defn screen
   "If random-screen is falsy, returns pop. Otherwise, random-screen should be a map with
@@ -310,4 +311,5 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
+
 
