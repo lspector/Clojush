@@ -46,7 +46,20 @@
                                  (- (inc (:age p2))
                                     (inc (:age p1)))))))))
     :first (fn [p1 p2 g]
-             (inc (:age p1)))))
+             (inc (:age p1)))
+    :progressive (fn [p1 p2 g]
+                   (if (= (:age p1) (:age p2))
+                     (inc (:age p1))
+                     (if (= (:genome p1) (:genome p2))
+                       (/ (+ (inc (:age p1)) (inc (:age p2))) 2)
+                       (if (> (:age p2) (:age p1))
+                         (inc (:age p1))
+                         (let [p1-dist (levenshtein-distance g (:genome p1))
+                               p2-dist (levenshtein-distance g (:genome p2))]
+                           (+ (inc (:age p1))
+                              (* (/ p1-dist (+ p1-dist p2-dist))
+                                 (- (inc (:age p2))
+                                    (inc (:age p1))))))))))))
 
 ;; test effects of :proportionate with expressions like this:
 ;(float ((age-combining-function {:age-combining-function :proportionate})
@@ -1074,5 +1087,6 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
