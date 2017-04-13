@@ -59,7 +59,18 @@
                            (+ (inc (:age p1))
                               (* (/ p1-dist (+ p1-dist p2-dist))
                                  (- (inc (:age p2))
-                                    (inc (:age p1))))))))))))
+                                    (inc (:age p1))))))))))
+    :ultra-progressive (fn [p1 p2 g]
+                         (if (= (:age p1) (:age p2))
+                           (inc (:age p1))
+                           (if (= (:genome p1) (:genome p2))
+                             (/ (+ (inc (:age p1)) (inc (:age p2))) 2)
+                             (let [p1-dist (levenshtein-distance g (:genome p1))
+                                   p2-dist (levenshtein-distance g (:genome p2))]
+                               (+ (inc (min (:age p1) (:age p2)))
+                                  (* (Math/abs (float (- (:age p1) (:age p2))))
+                                     (/ (Math/abs (float (- p1-dist p2-dist)))
+                                        (+ p1-dist p2-dist))))))))))
 
 ;; test effects of :proportionate with expressions like this:
 ;(float ((age-combining-function {:age-combining-function :proportionate})
