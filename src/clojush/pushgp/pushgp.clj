@@ -5,7 +5,9 @@
   (:use [clojush args globals util pushstate random individual evaluate simplification translate]
         [clojush.instructions boolean code common numbers random-instructions string char vectors
          tag zip return input-output genome]
-        [clojush.pushgp breed parent-selection report]
+        [clojush.pushgp breed report]
+        [clojush.pushgp.selection 
+         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing]
         [clojush.experimental.decimation]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -170,7 +172,7 @@
           (calculate-hah-solution-rates pop-agents @push-argmap)
           ;; create global structure to support elite group lexicase selection
           (when (= (:parent-selection @push-argmap) :elitegroup-lexicase)
-            (build-elitegroups pop-agents))
+            (build-elitegroups pop-agents @push-argmap))
           ;; calculate implicit fitness sharing fitness for population
           (when (= (:total-error-method @push-argmap) :ifs)
             (calculate-implicit-fitness-sharing pop-agents @push-argmap))
@@ -199,6 +201,8 @@
                                           (install-next-generation pop-agents child-agents @push-argmap)
                                           (recur (inc generation)))
                   :else  (final-report generation best @push-argmap))))))))
+
+
 
 
 

@@ -1,6 +1,7 @@
 (ns clojush.pushgp.breed
   (:use [clojush globals random simplification individual evaluate translate]
-        [clojush.pushgp parent-selection genetic-operators])
+        [clojush.pushgp genetic-operators]
+        [clojush.pushgp.selection selection])
   (:require [clj-random.core :as random]))
 
 ; A map of genetic operator keywords to maps containing the genetic operator
@@ -150,5 +151,6 @@
                 (<= prob (second (first vectored-go-probabilities))))
           (perform-genetic-operator (first (first vectored-go-probabilities)) population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
+
 
 
