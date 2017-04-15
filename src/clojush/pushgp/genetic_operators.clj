@@ -966,14 +966,42 @@ programs encoded by genomes g1 and g2."
   [g argmap]
   (let [mate (vec (repeat (count g) {:instruction :from-mate}))
         c1 (produce-child-genome-by-autoconstruction g mate false argmap)
-        c1-from-mate (count (filter #(= (:instruction %) :from-mate) c1))]
-    (if (> c1-from-mate 0)
+        c1-from-mate-count (count (filter #(= (:instruction %) :from-mate) c1))]
+    (if (> c1-from-mate-count 0)
       (let [c2 (produce-child-genome-by-autoconstruction g mate false argmap)
-            c2-from-mate (count (filter #(= (:instruction %) :from-mate) c2))]
-        (and (> c2-from-mate 0)
-             (not= c1-from-mate c2-from-mate)))
+            c2-from-mate-count (count (filter #(= (:instruction %) :from-mate) c2))]
+        (and (> c2-from-mate-count 0)
+             (not= c1-from-mate-count c2-from-mate-count)))
       false)))
-    
+
+(defn si-and-mate-use-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [mate (vec (repeat (count g) {:instruction :from-mate}))
+        c1 (produce-child-genome-by-autoconstruction g mate false argmap)
+        c1-from-mate-count (count (filter #(= (:instruction %) :from-mate) c1))]
+    (if (> c1-from-mate-count 0)
+      (let [c1-not-from-mate (filter #(not= (:instruction %) :from-mate) c1)
+            c1-not-from-mate-count (count c1-not-from-mate)
+            g-count (count g)
+            c1-instructions (set (distinct (map :instruction c1-not-from-mate)))
+            g-instructions (set (distinct (map :instruction g)))]
+        (if (and (not= c1-instructions g-instructions)
+                 (not= c1-not-from-mate-count g-count))
+          (let [c2 (produce-child-genome-by-autoconstruction g mate false argmap)
+                c2-from-mate-count (count (filter #(= (:instruction %) :from-mate) c2))]
+            (if (and (> c2-from-mate-count 0)
+                     (not= c1-from-mate-count c2-from-mate-count))
+              (let [c2-not-from-mate (filter #(not= (:instruction %) :from-mate) c2)
+                    c2-not-from-mate-count (count c2-not-from-mate)
+                    c2-instructions (set (distinct (map :instruction c2-not-from-mate)))]
+                (and (not= c2-instructions g-instructions)
+                     (not= c2-instructions c1-instructions)
+                     (not= c2-not-from-mate-count g-count)
+                     (not= c2-not-from-mate-count c1-not-from-mate-count)))
+              false))
+          false))
+      false)))
 
 (defn diversifying?
   "Returns true iff genome g passes the diversification test."
@@ -988,6 +1016,7 @@ programs encoded by genomes g1 and g2."
      :diffmeans diffmeans-diversifying?
      :minimal-reproductive-difference minimal-reproductive-difference-diversifying?
      :use-mate-differently use-mate-differently-diversifying?
+     :si-and-mate-use si-and-mate-use-diversifying?
      :no-clones no-clones-diversifying?
      :none (fn [genome argmap] true))
     g
@@ -1093,10 +1122,14 @@ be set globally or eliminated in the future."
                         (and autoconstructive-improve-or-diversify
                              (some (fn [[child-error parent1-error parent2-error]]
                                      (< child-error (min parent1-error parent2-error)))
-                                   (mapv vector child-errors (:errors parent1) (:errors parent2)))))
+                                   (mapv vector 
+                                         child-errors 
+                                         (:errors parent1) 
+                                         (:errors parent2)))))
           new-genome (if use-child
                        child-genome
-                       (random-plush-genome max-genome-size-in-initial-program atom-generators argmap))]
+                       (random-plush-genome 
+                         max-genome-size-in-initial-program atom-generators argmap))]
       (assoc (make-individual :genome (if (or use-child (diversifying? new-genome argmap))
                                         new-genome
                                         [])
@@ -1112,7 +1145,5 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
-
-
 
 
