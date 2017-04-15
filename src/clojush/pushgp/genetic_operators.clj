@@ -964,7 +964,7 @@ programs encoded by genomes g1 and g2."
 (defn use-mate-differently-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [mate (vec (repeat (count g) {:instruction :from-mate}))
+  (let [mate (vec (repeat (count g) {:instruction :from-mate :close 0}))
         c1 (produce-child-genome-by-autoconstruction g mate false argmap)
         c1-from-mate-count (count (filter #(= (:instruction %) :from-mate) c1))]
     (if (> c1-from-mate-count 0)
@@ -977,7 +977,7 @@ programs encoded by genomes g1 and g2."
 (defn si-and-mate-use-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [mate (vec (repeat (count g) {:instruction :from-mate}))
+  (let [mate (vec (repeat (count g) {:instruction :from-mate :close 0}))
         c1 (produce-child-genome-by-autoconstruction g mate false argmap)
         c1-from-mate-count (count (filter #(= (:instruction %) :from-mate) c1))]
     (if (> c1-from-mate-count 0)
@@ -1145,5 +1145,6 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
