@@ -282,7 +282,8 @@
         instruction-mutator (fn [token]
                               (assoc token
                                 :instruction
-                                (:instruction (first (random-plush-genome 1 atom-generators argmap)))))
+                                (:instruction 
+                                  (first (random-plush-genome 1 atom-generators argmap)))))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
                           (instruction-mutator token)
@@ -302,7 +303,8 @@
 (defn uniform-integer-mutation
   "Uniformly mutates individual. For each integer in the genome, there is
    uniform-mutation-constant-tweak-rate probability of being mutated."
-  [ind {:keys [uniform-mutation-constant-tweak-rate uniform-mutation-int-gaussian-standard-deviation
+  [ind {:keys [uniform-mutation-constant-tweak-rate 
+               uniform-mutation-int-gaussian-standard-deviation
                maintain-ancestors atom-generators]
         :as argmap}]
   (let [uniform-mutation-constant-tweak-rate 
@@ -317,7 +319,8 @@
                                (assoc token
                                  :instruction
                                  (round (perturb-with-gaussian-noise 
-                                          uniform-mutation-int-gaussian-standard-deviation const)))
+                                          uniform-mutation-int-gaussian-standard-deviation 
+                                          const)))
                                token)))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-constant-tweak-rate)
@@ -748,12 +751,13 @@ given by uniform-deletion-rate."
   "Replaces input instructions with noops and  autoconstructive_<type>_rand
   with <type>_rand."
   [genome]
-  (let [input-instruction? (fn [instruction]
-                             (and (symbol? instruction)
-                                  (or (re-seq #"in\d+" (name instruction)) ;; from input-output
-                                      (re-seq #"in_dm" (name instruction)) ;; from digital-multiplier
-                                      (some #{instruction}
-                                            '(a0 a1 a2 d0 d1 d2 d3 d4 d5 d6 d7)))))] ;; from mux problems
+  (let [input-instruction? 
+        (fn [instruction]
+          (and (symbol? instruction)
+               (or (re-seq #"in\d+" (name instruction)) ;; from input-output
+                   (re-seq #"in_dm" (name instruction)) ;; from digital-multiplier
+                   (some #{instruction}
+                         '(a0 a1 a2 d0 d1 d2 d3 d4 d5 d6 d7)))))] ;; from mux problems
     (mapv (fn [instruction-map]
             (if (input-instruction? (:instruction instruction-map))
               (assoc instruction-map :instruction 'code_noop)
@@ -1120,9 +1124,10 @@ be set globally or eliminated in the future."
                                              {:genome child-genome} 
                                              argmap)))
                          nil)
-          variant (diversifying? child-genome (-> argmap
-                                                  (assoc :parent1-genome parent1-genome)
-                                                  (assoc :parent2-genome parent2-genome)))
+          variant (diversifying? child-genome 
+                                 (-> argmap
+                                     (assoc :parent1-genome parent1-genome)
+                                     (assoc :parent2-genome parent2-genome)))
           use-child (or variant
                         (and autoconstructive-improve-or-diversify
                              (some (fn [[child-error parent1-error parent2-error]]
@@ -1150,7 +1155,4 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
-
-
-
 
