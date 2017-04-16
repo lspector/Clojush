@@ -1019,7 +1019,7 @@ programs encoded by genomes g1 and g2."
     argmap))
 
 (defn fotd-autoconstruction
-  "The current 'flavor of the day' version of autoconstruction, used by specifying
+  "A historical 'flavor of the day' version of autoconstruction, used by specifying
   :autoconstructive-fotd true in the arguments to pushgp. Expect changes. Other
   autoconstruction-related parameters may or may not have any effect when using the
   fotd."
