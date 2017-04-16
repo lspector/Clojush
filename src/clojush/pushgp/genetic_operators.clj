@@ -824,6 +824,12 @@ programs encoded by genomes g1 and g2."
           {:genome (produce-child-genome-by-autoconstruction g g argmap)} 
           argmap)))
 
+(defn not-a-clone-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g {:keys [parent1-genome parent2-genome]}]
+  (and (not= g parent1-genome)
+       (not= g parent2-genome)))
+
 (defn three-gens-diff-diffs-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
@@ -1014,6 +1020,7 @@ programs encoded by genomes g1 and g2."
      :use-mate-differently use-mate-differently-diversifying?
      :si-and-mate-use si-and-mate-use-diversifying?
      :no-clones no-clones-diversifying?
+     :not-a-clone not-a-clone-diversifying?
      :none (fn [genome argmap] true))
     g
     argmap))
@@ -1113,7 +1120,9 @@ be set globally or eliminated in the future."
                                              {:genome child-genome} 
                                              argmap)))
                          nil)
-          variant (diversifying? child-genome argmap)
+          variant (diversifying? child-genome (-> argmap
+                                                  (assoc :parent1-genome parent1-genome)
+                                                  (assoc :parent2-genome parent2-genome)))
           use-child (or variant
                         (and autoconstructive-improve-or-diversify
                              (some (fn [[child-error parent1-error parent2-error]]
