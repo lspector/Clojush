@@ -99,12 +99,16 @@
      (case (:criterion random-screen)
        ;
        :genetic-similarity-to-parent
-       (max (sequence-similarity genome (:genome parent1))
-            (sequence-similarity genome (:genome parent2)))
+       (if (some empty? [genome (:genome parent1) (:genome parent2)])
+         1
+         (max (sequence-similarity genome (:genome parent1))
+              (sequence-similarity genome (:genome parent2))))
        ;
        :genetic-difference-from-parent
-       (- 1 (max (sequence-similarity genome (:genome parent1))
-                 (sequence-similarity genome (:genome parent2))))
+       (if (some empty? [genome (:genome parent1) (:genome parent2)])
+         1
+         (- 1 (max (sequence-similarity genome (:genome parent1))
+                   (sequence-similarity genome (:genome parent2)))))
        ;
        :reproductive-similarity-to-parent
        (if (:dummy parent1)
