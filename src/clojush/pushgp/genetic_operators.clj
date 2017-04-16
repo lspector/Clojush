@@ -119,7 +119,6 @@
              genome
              (:genome parent1)
              (:genome parent2)
-             false
              argmap)))
        ;
        :reproductive-difference-from-parent
@@ -131,7 +130,6 @@
                   genome
                   (:genome parent1)
                   (:genome parent2)
-                  false
                   argmap))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -747,10 +745,9 @@ given by uniform-deletion-rate."
 ;; NOTE: EXPERIMENTAL!
 
 (defn process-genome-for-autoconstruction
-  "Replaces input instructions with noops and, if deterministic? is true then
-replaces non-autoconstructive rand instructions with noops, while if deterministic? 
-is false replaces autoconstructive_<type>_rand with <type>_rand."
-  [genome deterministic?]
+  "Replaces input instructions with noops and  autoconstructive_<type>_rand
+  with <type>_rand."
+  [genome]
   (let [input-instruction? (fn [instruction]
                              (and (symbol? instruction)
                                   (or (re-seq #"in\d+" (name instruction)) ;; from input-output
@@ -760,33 +757,26 @@ is false replaces autoconstructive_<type>_rand with <type>_rand."
     (mapv (fn [instruction-map]
             (if (input-instruction? (:instruction instruction-map))
               (assoc instruction-map :instruction 'code_noop)
-              (if deterministic?
-                (if (some #{(:instruction instruction-map)}
-                           '(boolean_rand integer_rand float_rand code_rand
-                                          string_rand char_rand))
-                  (assoc instruction-map :instruction 'code_noop)
-                  instruction-map)
-                (if (= (:instruction instruction-map) 'autoconstructive_integer_rand)
-                  (assoc instruction-map :instruction 'integer_rand)
-                  (if (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
-                    (assoc instruction-map :instruction 'boolean_rand)
-                    instruction-map)))))
+              (if (= (:instruction instruction-map) 'autoconstructive_integer_rand)
+                (assoc instruction-map :instruction 'integer_rand)
+                (if (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
+                  (assoc instruction-map :instruction 'boolean_rand)
+                  instruction-map))))
          genome)))
 
 (defn produce-child-genome-by-autoconstruction
   "Runs the program expressed by parent1-genome with both parent genomes
 on the genome stack and also available via input instructions, and returns
 the resulting top genome."
-  ([parent1-genome parent2-genome deterministic? argmap]
+  ([parent1-genome parent2-genome argmap]
    (produce-child-genome-by-autoconstruction 
-     parent1-genome parent1-genome parent2-genome deterministic? argmap))
-  ([genome-to-run parent1-genome parent2-genome deterministic? argmap]
+     parent1-genome parent1-genome parent2-genome argmap))
+  ([genome-to-run parent1-genome parent2-genome argmap]
    (let [run-result (top-item :genome
                               (run-push
                                 (translate-plush-genome-to-push-program
-                                  {:genome (process-genome-for-autoconstruction
-                                             genome-to-run
-                                             deterministic?)}
+                                  {:genome
+                                   (process-genome-for-autoconstruction genome-to-run)}
                                   argmap)
                                 (-> (->> (make-push-state)
                                          (push-item parent2-genome :genome)
@@ -818,7 +808,7 @@ programs encoded by genomes g1 and g2."
   [g argmap]
   (let [delta #(expressed-difference 
                  g
-                 (produce-child-genome-by-autoconstruction g g false argmap)
+                 (produce-child-genome-by-autoconstruction g g argmap)
                  argmap)
         diffs (repeatedly 2 delta)]
     (and (> (reduce min diffs) 0) ;; diversification threshold set here
@@ -831,13 +821,13 @@ programs encoded by genomes g1 and g2."
           {:genome g} 
           argmap)
         (translate-plush-genome-to-push-program 
-          {:genome (produce-child-genome-by-autoconstruction g g false argmap)} 
+          {:genome (produce-child-genome-by-autoconstruction g g argmap)} 
           argmap)))
 
 (defn three-gens-diff-diffs-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+  (let [make-child #(produce-child-genome-by-autoconstruction % % argmap)
         diff #(expressed-difference %1 %2 argmap)
         c1 (make-child g)
         c2 (make-child g)
@@ -854,7 +844,7 @@ programs encoded by genomes g1 and g2."
 (defn three-gens-same-inputs-diff-diffs-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [make-child #(produce-child-genome-by-autoconstruction % g g false argmap)
+  (let [make-child #(produce-child-genome-by-autoconstruction % g g argmap)
         diff #(expressed-difference %1 %2 argmap)
         c1 (make-child g)
         c2 (make-child g)
@@ -871,7 +861,7 @@ programs encoded by genomes g1 and g2."
 (defn three-gens-some-diff-diffs-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+  (let [make-child #(produce-child-genome-by-autoconstruction % % argmap)
         diff #(expressed-difference %1 %2 argmap)
         c1 (make-child g)
         c2 (make-child g)
@@ -892,7 +882,7 @@ programs encoded by genomes g1 and g2."
   [g argmap]
   (let [numkids (:autoconstructive-si-children argmap)
         kids (repeatedly numkids 
-                         #(produce-child-genome-by-autoconstruction g g false argmap))
+                         #(produce-child-genome-by-autoconstruction g g argmap))
         kid-counts (map count kids)
         instruction-set (fn [genome]
                           (hash-set (keys (frequencies (map :instruction genome)))))
@@ -906,7 +896,7 @@ programs encoded by genomes g1 and g2."
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   (let [numkids (:autoconstructive-si-children argmap)
-        make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+        make-child #(produce-child-genome-by-autoconstruction % % argmap)
         instruction-set (fn [genome]
                           (hash-set (keys (frequencies (map :instruction genome)))))
         kids (repeatedly numkids #(make-child g))
@@ -936,7 +926,7 @@ programs encoded by genomes g1 and g2."
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   (let [num-children (:autoconstructive-diffmeans-children argmap)
-        make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+        make-child #(produce-child-genome-by-autoconstruction % % argmap)
         c1 (make-child g)
         diffs1 (vec (repeatedly 
                       num-children 
@@ -959,8 +949,8 @@ programs encoded by genomes g1 and g2."
 (defn minimal-reproductive-difference-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [child1 (produce-child-genome-by-autoconstruction g g false argmap)
-        child2 (produce-child-genome-by-autoconstruction child1 g g false argmap)
+  (let [child1 (produce-child-genome-by-autoconstruction g g argmap)
+        child2 (produce-child-genome-by-autoconstruction child1 g g argmap)
         c1-diff (sequence-similarity g child1)
         c2-diff (sequence-similarity g child2)]
     (and (not (zero? c1-diff))
@@ -971,10 +961,10 @@ programs encoded by genomes g1 and g2."
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   (let [mate (vec (repeat (count g) {:instruction :from-mate :close 0}))
-        c1 (produce-child-genome-by-autoconstruction g mate false argmap)
+        c1 (produce-child-genome-by-autoconstruction g mate argmap)
         c1-from-mate-count (count (filter #(= (:instruction %) :from-mate) c1))]
     (if (> c1-from-mate-count 0)
-      (let [c2 (produce-child-genome-by-autoconstruction g mate false argmap)
+      (let [c2 (produce-child-genome-by-autoconstruction g mate argmap)
             c2-from-mate-count (count (filter #(= (:instruction %) :from-mate) c2))]
         (and (> c2-from-mate-count 0)
              (not= c1-from-mate-count c2-from-mate-count)))
@@ -984,7 +974,7 @@ programs encoded by genomes g1 and g2."
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   (let [mate (vec (repeat (count g) {:instruction :from-mate :close 0}))
-        c1 (produce-child-genome-by-autoconstruction g mate false argmap)
+        c1 (produce-child-genome-by-autoconstruction g mate argmap)
         c1-from-mate-count (count (filter #(= (:instruction %) :from-mate) c1))]
     (if (> c1-from-mate-count 0)
       (let [c1-not-from-mate (filter #(not= (:instruction %) :from-mate) c1)
@@ -994,7 +984,7 @@ programs encoded by genomes g1 and g2."
             g-instructions (set (distinct (map :instruction g)))]
         (if (and (not= c1-instructions g-instructions)
                  (not= c1-not-from-mate-count g-count))
-          (let [c2 (produce-child-genome-by-autoconstruction g mate false argmap)
+          (let [c2 (produce-child-genome-by-autoconstruction g mate argmap)
                 c2-from-mate-count (count (filter #(= (:instruction %) :from-mate) c2))]
             (if (and (> c2-from-mate-count 0)
                      (not= c1-from-mate-count c2-from-mate-count))
@@ -1041,7 +1031,7 @@ programs encoded by genomes g1 and g2."
         parental-errors? (fn [errors]
                            (some #{errors} [(:errors parent1) (:errors parent2)]))
         make-child-genome (fn [g1 g2] 
-                            (produce-child-genome-by-autoconstruction g1 g2 false argmap))
+                            (produce-child-genome-by-autoconstruction g1 g2 argmap))
         diff #(expressed-difference %1 %2 argmap)
         genome-error #(do (swap! evaluations-count inc)
                         (error-function (translate-plush-genome-to-push-program 
@@ -1109,7 +1099,7 @@ be set globally or eliminated in the future."
           parent2-genome (:genome parent2)
           pre-entropy-child-genome (if (> (lrand) autoconstructive-clone-probability)
                                      (produce-child-genome-by-autoconstruction 
-                                       parent1-genome parent2-genome false argmap)
+                                       parent1-genome parent2-genome argmap)
                                      parent1-genome)
           child-genome (if (zero? autoconstructive-entropy)
                          pre-entropy-child-genome
@@ -1151,6 +1141,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
