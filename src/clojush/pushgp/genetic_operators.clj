@@ -834,6 +834,12 @@ programs encoded by genomes g1 and g2."
   (and (not= g parent1-genome)
        (not= g parent2-genome)))
 
+(defn minimum-genetic-difference-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g {:keys [parent1-genome parent2-genome]}]
+  (and (<= (sequence-similarity g parent1-genome) 0.9)
+       (<= (sequence-similarity g parent2-genome) 0.9)))
+
 (defn three-gens-diff-diffs-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
@@ -1025,6 +1031,7 @@ programs encoded by genomes g1 and g2."
      :si-and-mate-use si-and-mate-use-diversifying?
      :no-clones no-clones-diversifying?
      :not-a-clone not-a-clone-diversifying?
+     :minimum-genetic-difference minimum-genetic-difference-diversifying?
      :none (fn [genome argmap] true))
     g
     argmap))
@@ -1155,4 +1162,5 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
