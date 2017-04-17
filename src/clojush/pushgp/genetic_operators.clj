@@ -818,7 +818,7 @@ programs encoded by genomes g1 and g2."
     (and (> (reduce min diffs) 0) ;; diversification threshold set here
          (> (count (distinct diffs)) 1))))
 
-(defn no-clones-diversifying?
+(defn doesnt-clone-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   (not= (translate-plush-genome-to-push-program 
@@ -1033,7 +1033,7 @@ programs encoded by genomes g1 and g2."
      :minimal-reproductive-difference minimal-reproductive-difference-diversifying?
      :use-mate-differently use-mate-differently-diversifying?
      :si-and-mate-use si-and-mate-use-diversifying?
-     :no-clones no-clones-diversifying?
+     :doesnt-clone doesnt-clone-diversifying?
      :not-a-clone not-a-clone-diversifying?
      :minimum-genetic-difference minimum-genetic-difference-diversifying?
      :none (fn [genome argmap] true))
