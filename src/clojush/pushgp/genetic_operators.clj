@@ -94,36 +94,31 @@
                        {:genome [] :dummy true :age -1} 
                        argmap))
   ([genome parent1 parent2 {:keys [random-screen] :as argmap}]
-   (if (not random-screen)
+   (if (or (not random-screen)
+           (empty? genome))
      1
-     (case (:criterion random-screen)
-       ;
-       :genetic-similarity-to-parent
-       (if (some empty? [genome (:genome parent1) (:genome parent2)])
-         1
+     (if (some :dummy [parent1 parent2])
+       0
+       (case (:criterion random-screen)
+         ;
+         :genetic-similarity-to-parent
          (max (sequence-similarity genome (:genome parent1))
-              (sequence-similarity genome (:genome parent2))))
-       ;
-       :genetic-difference-from-parent
-       (if (some empty? [genome (:genome parent1) (:genome parent2)])
-         1
+              (sequence-similarity genome (:genome parent2)))
+         ;
+         :genetic-difference-from-parent
          (- 1 (max (sequence-similarity genome (:genome parent1))
-                   (sequence-similarity genome (:genome parent2)))))
-       ;
-       :reproductive-similarity-to-parent
-       (if (:dummy parent1)
-         1
+                   (sequence-similarity genome (:genome parent2))))
+         ;
+         :reproductive-similarity-to-parent
          (sequence-similarity 
            genome
            (produce-child-genome-by-autoconstruction
              genome
              (:genome parent1)
              (:genome parent2)
-             argmap)))
-       ;
-       :reproductive-difference-from-parent
-       (if (:dummy parent1)
-         1
+             argmap))
+         ;
+         :reproductive-difference-from-parent
          (- 1 (sequence-similarity 
                 genome
                 (produce-child-genome-by-autoconstruction
