@@ -830,9 +830,13 @@ programs encoded by genomes g1 and g2."
 
 (defn not-a-clone-diversifying?
   "Returns true iff genome g passes the diversification test."
-  [g {:keys [parent1-genome parent2-genome]}]
-  (and (not= g parent1-genome)
-       (not= g parent2-genome)))
+  [g {:keys [parent1-genome parent2-genome] :as argmap}]
+  (let [express #(translate-plush-genome-to-push-program {:genome %} argmap)
+        pgm (express g)
+        parent1-pgm (express parent1-genome)
+        parent2-pgm (express parent2-genome)]
+    (and (not= pgm parent1-pgm)
+         (not= pgm parent2-pgm))))
 
 (defn minimum-genetic-difference-diversifying?
   "Returns true iff genome g passes the diversification test."
