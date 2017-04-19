@@ -31,7 +31,7 @@
    :autoconstructive true
    :report-simplifications 0
    :pass-individual-to-error-function true
-   :max-points 500
+   :max-points 1000
    :evalpush-limit 1000})
 
 
