@@ -70,7 +70,11 @@
                          (+ (inc (min (:age p1) (:age p2)))
                             (* (Math/abs (float (- (:age p1) (:age p2))))
                             	         (/ (Math/abs (float (- p1-dist p2-dist)))
-                                            (+ p1-dist p2-dist))))))))))
+                                            (+ p1-dist p2-dist))))))))
+    :first-reuse (fn [p1 p2 g]
+                   (+ (:age p1)
+                      (max (sequence-similarity g (:genome p1))
+                           (sequence-similarity g (:genome p2)))))))
 
 ;; test effects of :proportionate with expressions like this:
 ;(float ((age-combining-function {:age-combining-function :proportionate})
@@ -1161,5 +1165,6 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
