@@ -256,6 +256,12 @@
           :epsilon-lexicase-epsilon nil
           ;; When parent-selection is :epsilon-lexicase,
           ;; the value for epsilon. If nil, automatic epsilon lexicase selection will be used.
+          
+          :epsilon-lexicase-random-threshold nil
+          ;; When falsy, epsilon lexicase selection will act as described in the literature.
+          ;; When truthy, epsilon lexicase selection will, at each step of filtering, use a threshold
+          ;; that is chosen randomly from the subset of the errors for the current case present n the
+          ;; population that are less than or equal to the normal epsilon lexicase threshold.
 
           :lexicase-leakage 0.1
           ;; If using leaky lexicase selection, the probability that a selection event will return
@@ -571,4 +577,5 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
