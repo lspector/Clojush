@@ -27,7 +27,7 @@
 (defn epsilon-lexicase-selection
   "Returns an individual that does within epsilon of the best on the fitness cases when 
   considered one at a time in random order."
-  [pop {:keys [epsilon-lexicase-epsilon] :as argmap}]
+  [pop {:keys [epsilon-lexicase-epsilon epsilon-lexicase-probability] :as argmap}]
   (loop [survivors pop
          cases (lshuffle (range (count (:errors (first pop)))))]
     (if (or (empty? cases)
@@ -35,9 +35,11 @@
       (lrand-nth survivors)
       (let [; If epsilon-lexicase-epsilon is set in the argmap, use it for epsilon.
              ; Otherwise, use automatic epsilon selections, which are calculated once per generation.
-             epsilon (if epsilon-lexicase-epsilon
-                       epsilon-lexicase-epsilon
-                       (nth @epsilons-for-epsilon-lexicase (first cases)))
+             epsilon (if (<= (lrand) epsilon-lexicase-probability)
+                       (if epsilon-lexicase-epsilon
+                         epsilon-lexicase-epsilon
+                         (nth @epsilons-for-epsilon-lexicase (first cases)))
+                       0)
              min-err-for-case (apply min (map #(nth % (first cases))
                                               (map :errors survivors)))]
         (recur (filter #(<= (nth (:errors %)
@@ -46,4 +48,5 @@
                                epsilon))
                        survivors)
                (rest cases))))))
+
 

@@ -257,6 +257,11 @@
           ;; When parent-selection is :epsilon-lexicase,
           ;; the value for epsilon. If nil, automatic epsilon lexicase selection will be used.
 
+          :epsilon-lexicase-probability 1
+          ;; The probability that each filtering step in epsilon lexicase selection will allow
+          ;; candidates with errors within epsilon of the best to survive, rather than just
+          ;; the best.
+
           :lexicase-leakage 0.1
           ;; If using leaky lexicase selection, the probability that a selection event will return
           ;; a random (tourny 1) individual from the entire population.
@@ -571,4 +576,5 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
