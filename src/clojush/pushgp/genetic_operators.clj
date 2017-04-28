@@ -102,7 +102,10 @@
            (empty? genome))
      1
      (if (some :dummy [parent1 parent2])
-       1
+       (if (some #{(:criterion random-screen)} 
+                 #{:non-zero-genetic-similarity-to-parent})
+         1
+         0)
        (case (:criterion random-screen)
          ;
          :genetic-similarity-to-parent
