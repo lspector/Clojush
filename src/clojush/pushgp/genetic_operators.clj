@@ -108,6 +108,12 @@
          :genetic-similarity-to-parent
          (max (sequence-similarity genome (:genome parent1))
               (sequence-similarity genome (:genome parent2)))
+         :non-zero-genetic-similarity-to-parent
+         (let [raw-similarity (max (sequence-similarity genome (:genome parent1))
+                                   (sequence-similarity genome (:genome parent2)))]
+           (if (zero? raw-similarity)
+             1
+             raw-similarity))
          ;
          :genetic-difference-from-parent
          (- 1 (max (sequence-similarity genome (:genome parent1))
@@ -1165,6 +1171,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
