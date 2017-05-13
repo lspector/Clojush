@@ -1,6 +1,6 @@
 ;; given some number number n, return the nth prime
 
-(ns clojush.problems.software.nth-prime
+(ns clojush.problems.integer-regression.nth-prime
   (:require [clojush.pushstate :refer [push-item make-push-state top-item registered-for-stacks]]
             [clojush.instructions.tag :refer [tag-instruction-erc tagged-instruction-erc]]
             [clojush.interpreter :refer [run-push]]
@@ -30,7 +30,7 @@
 ;; the right integer on the stack gives 0 error
 (assert (= 0 (single-error-function 2 0)))
 
-(defn error-function [program]
+(defn nth-prime-error-function [program]
   (map (partial single-error-function program) (range 20)))
 
 
@@ -38,16 +38,22 @@
     (concat
       (list
         0
-        []
 
-        (tag-instruction-erc [:integer :boolean :vector_integer :exec] 1000)
+        (tag-instruction-erc [:integer :boolean :exec] 1000)
         (tagged-instruction-erc 1000)
         'in1)
-      (registered-for-stacks [:integer :boolean :vector_integer :exec])))
+      (registered-for-stacks [:integer :boolean :exec])))
 
 
 ; Define the argmap
 (def argmap
-  {:error-function error-function
-   :atom-generators atom-generators})
-   
+  {:error-function nth-prime-error-function
+   :atom-generators atom-generators
+   :max-points 2000
+   :evalpush-limit 2000
+   :max-genome-size-in-initial-program 100
+   :genetic-operator-probabilities
+    {:alternation 0.2
+     :uniform-mutation 0.2
+     :uniform-close-mutation 0.1
+     [:alternation :uniform-mutation] 0.5}})
