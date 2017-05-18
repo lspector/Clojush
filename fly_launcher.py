@@ -34,7 +34,7 @@ service_tag = "tom"
 if output_directory[-1] != "/":
     output_directory += "/"
 if os.path.isdir(output_directory):
-    raise RuntimeError, "Output directory already exists"
+    raise RuntimeError("Output directory already exists")
 
 os.mkdir(output_directory)
 
