@@ -27,6 +27,8 @@
         lines (csv/parse-csv f :delimiter \tab)]
     (mapv #(mapv read-string %) lines)))
 
+(def training-proportion 0.1) ;; note should be 0.5 to accord with prior GAMETES experiments
+
 (defn define-fitness-cases
   "Returns a map with two keys: train and test. Train maps to a
    random 50% of the fitness cases and test maps to the remainder.
@@ -42,7 +44,7 @@
                                                {:inputs (inputs row)
                                                 :target (target row)})
                                              (rest raw-data)))
-        train-num (int (* 0.5 (count fitness-cases-shuffled)))]
+        train-num (int (* penn-training-proportion (count fitness-cases-shuffled)))]
     {:train (subvec fitness-cases-shuffled 0 train-num)
      :test (subvec fitness-cases-shuffled train-num)}))
 
