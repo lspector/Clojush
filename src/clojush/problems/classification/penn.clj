@@ -80,7 +80,7 @@
     (printf  "\nTest mean: %.4f"
             (float (/ (apply + best-test-errors)
                       (count best-test-errors))))(flush)
-    (printf "\nTest RMSE: %.4f" (rmse best-test-errors))(flush)
+    (printf "\nTest RMSE: %.4f" (float (rmse best-test-errors)))(flush)
     (printf "\n\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n")(flush)
     ))
 
@@ -92,12 +92,12 @@
 
 (def penn-atom-generators
   (concat (distinct (mapv :target (:train penn-fitness-cases))) ;; classes, for output
-          (list (tag-instruction-erc [:exec :integer :boolean :string] 1000)
-                (tagged-instruction-erc 1000))
+          ;(list (tag-instruction-erc [:exec :integer :boolean :string] 1000)
+          ;      (tagged-instruction-erc 1000))
           (for [n (map inc 
                        (range (count (:inputs (first (:train penn-fitness-cases))))))]
             (symbol (str "in" n)))
-          (registered-for-stacks [:exec :integer :boolean :string])))
+          (registered-for-stacks [:exec :integer :boolean])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Main call
@@ -125,4 +125,5 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    })
+
 
