@@ -44,15 +44,15 @@
                  (vec (concat (take target-column row) 
                               (drop (inc target-column) row))))
         target (fn [row] (str (nth row target-column))) ;; target classes are strings
-        fitness-cases-shuffled (shuffle (mapv (fn [row]
-                                                {:inputs (inputs row)
-                                                 :target (target row)})
-                                              (rest raw-data)))
+        fitness-cases-shuffled (lshuffle (mapv (fn [row]
+                                                 {:inputs (inputs row)
+                                                  :target (target row)})
+                                               (rest raw-data)))
         train-num (int (* 0.5 (count fitness-cases-shuffled)))
         all-training-cases (subvec fitness-cases-shuffled 0 train-num)
         all-testing-cases (subvec fitness-cases-shuffled train-num)]
     {:all-train all-training-cases
-     :train (vec (take (int (* training-proportion train-num)) (shuffle all-training-cases)))
+     :train (vec (take (int (* training-proportion train-num)) (lshuffle all-training-cases)))
      :test all-testing-cases}))
 
 ;; Define the fitness cases once per run, so that train and test
@@ -96,7 +96,7 @@
       (println "Resampling training cases...")
       (swap! penn-fitness-cases 
              #(assoc % :train (vec (take (count (:train %))
-                                         (shuffle (:all-train %))))))
+                                         (lshuffle (:all-train %))))))
       (println "New training cases:")
       (println (:train @penn-fitness-cases)))
     ))
@@ -110,7 +110,9 @@
 (def penn-atom-generators
   (vec (concat (distinct (mapv :target (:all-train @penn-fitness-cases))) ;; classes, for output
                (list (tag-instruction-erc [:exec :integer :float :boolean :string] 1000)
-                     (tagged-instruction-erc 1000))
+                     (tagged-instruction-erc 1000)
+                     (fn [] (lrand-int 1000))
+                     (fn [] (lrand 1)))
                (for [n (map inc 
                             (range (count (:inputs (first (:train @penn-fitness-cases))))))]
                  (symbol (str "in" n)))
