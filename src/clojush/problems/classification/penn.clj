@@ -22,12 +22,15 @@
 
 (defn read-data []
   "Reads data into a sequence of sequences."
-  (let [f (slurp* (str "src/clojush/problems/classification/data/"
-                       "GAMETES_Epistasis_2-Way_20atts_0.4H_EDM-1_1.txt")) ;; todo: allow command-line arg
+  (let [f (slurp* (str "src/clojush/problems/classification/data/"  ;; todo?: allow command-line arg
+                       ;"GAMETES_Epistasis_2-Way_20atts_0.4H_EDM-1_1.txt"
+                       "a_5000s_2000her_0.1__maf_0.2_EDM-1_01.txt"
+                       ))
         lines (csv/parse-csv f :delimiter \tab)]
+    (println "Total number of data lines:" (count lines))
     (mapv #(mapv read-string %) lines)))
 
-(def training-proportion 0.1) ;; note should be 0.5 to accord with prior GAMETES experiments
+(def training-proportion 0.5) ;; proportion of training cases to use each generation
 
 (defn define-fitness-cases
   "Returns a map with two keys: train and test. Train maps to a
@@ -35,7 +38,8 @@
    These sets are different each time this is called."
   []
   (let [raw-data (read-data)
-        target-column (.indexOf (first raw-data) 'class)
+        target-column (.indexOf (mapv clojure.string/upper-case (mapv name (first raw-data)))
+                                "CLASS")
         inputs (fn [row] 
                  (concat (take target-column row) 
                          (drop (inc target-column) row)))
@@ -44,19 +48,22 @@
                                                {:inputs (inputs row)
                                                 :target (target row)})
                                              (rest raw-data)))
-        train-num (int (* penn-training-proportion (count fitness-cases-shuffled)))]
-    {:train (subvec fitness-cases-shuffled 0 train-num)
-     :test (subvec fitness-cases-shuffled train-num)}))
+        train-num (int (* 0.5 (count fitness-cases-shuffled)))
+        all-training-cases (subvec fitness-cases-shuffled 0 train-num)
+        all-testing-cases (subvec fitness-cases-shuffled train-num)]
+    {:all-train all-training-cases
+     :train (vec (take (int (* training-proportion train-num)) (shuffle all-training-cases)))
+     :test all-testing-cases}))
 
 ;; Define the fitness cases once per run, so that train and test
 ;; subsets stay the same throughout a run.
-(def penn-fitness-cases (define-fitness-cases))
+(def penn-fitness-cases (atom (define-fitness-cases)))
 
 (defn penn-error-function
   "Error function for the penn problem."
   [fitness-set program]
   (doall
-    (for [fitness-case (get penn-fitness-cases fitness-set)]
+    (for [fitness-case (get @penn-fitness-cases fitness-set)]
       (let [inputs (:inputs fitness-case)
             target (:target fitness-case)
             state (run-push program
@@ -84,20 +91,27 @@
                       (count best-test-errors))))(flush)
     (printf "\nTest RMSE: %.4f" (float (rmse best-test-errors)))(flush)
     (printf "\n\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n")(flush)
+    (when (< training-proportion 1)
+      (println "Resampling training cases...")
+      (swap! penn-fitness-cases 
+             #(assoc % :train (vec (take (count (:train %))
+                                         (shuffle (:all-train %))))))
+      (println "New training cases:")
+      (println (:train @penn-fitness-cases)))
     ))
 
 (defn penn-initial-report
   [argmap]
   (println "Train and test cases:")
-  (println penn-fitness-cases)
+  (println @penn-fitness-cases)
   (println ";;******************************"))
 
 (def penn-atom-generators
-  (concat (distinct (mapv :target (:train penn-fitness-cases))) ;; classes, for output
+  (concat (distinct (mapv :target (:all-train @penn-fitness-cases))) ;; classes, for output
           ;(list (tag-instruction-erc [:exec :integer :boolean :string] 1000)
           ;      (tagged-instruction-erc 1000))
           (for [n (map inc 
-                       (range (count (:inputs (first (:train penn-fitness-cases))))))]
+                       (range (count (:inputs (first (:train @penn-fitness-cases))))))]
             (symbol (str "in" n)))
           (registered-for-stacks [:exec :integer :boolean])))
 
