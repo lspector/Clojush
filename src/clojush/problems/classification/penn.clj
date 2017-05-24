@@ -30,7 +30,7 @@
     (println "Total number of data lines:" (count lines))
     (mapv #(mapv read-string %) lines)))
 
-(def training-proportion 0.5) ;; proportion of training cases to use each generation
+(def training-proportion 0.1) ;; proportion of training cases to use each generation
 
 (defn define-fitness-cases
   "Returns a map with two keys: train and test. Train maps to a
@@ -109,12 +109,12 @@
 
 (def penn-atom-generators
   (vec (concat (distinct (mapv :target (:all-train @penn-fitness-cases))) ;; classes, for output
-               ;(list (tag-instruction-erc [:exec :integer :boolean :string] 1000)
-               ;      (tagged-instruction-erc 1000))
+               (list (tag-instruction-erc [:exec :integer :float :boolean :string] 1000)
+                     (tagged-instruction-erc 1000))
                (for [n (map inc 
                             (range (count (:inputs (first (:train @penn-fitness-cases))))))]
                  (symbol (str "in" n)))
-               (registered-for-stacks [:exec :integer :boolean]))))
+               (registered-for-stacks [:exec :integer :float :boolean :string]))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Main call
@@ -128,10 +128,11 @@
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
-   :genetic-operator-probabilities {:alternation 0.2
-                                    :uniform-mutation 0.2
+   :genetic-operator-probabilities {:alternation 0.4 ;*** 0.2
+                                    :uniform-mutation 0.4 ;*** 0.2
                                     :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
+                                    ;*** [:alternation :uniform-mutation] 0.4
+                                    :genesis 0.1 ;***
                                     }
    :alternation-rate 0.01
    :alignment-deviation 10
@@ -141,6 +142,8 @@
    ;:print-behavioral-diversity true ;; requires maintaining @population-behaviors 
    :report-simplifications 0
    :final-report-simplifications 5000
+   :age-mediated-parent-selection [0.05 0.5] ;***
+   :age-combining-function :proportionate ;***
    })
 
 
