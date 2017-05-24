@@ -67,14 +67,15 @@
       (let [inputs (:inputs fitness-case)
             target (:target fitness-case)
             state (run-push program
-                            (loop [to-push (reverse inputs)
+                            #_(loop [to-push (reverse inputs)
                                    with-inputs (make-push-state)]
                               (if (empty? to-push)
                                 with-inputs
                                 (recur (rest to-push)
                                        (push-item (first to-push)
                                                   :input
-                                                  with-inputs)))))
+                                                  with-inputs))))
+                            (assoc (make-push-state) :input inputs))
             top-string (top-item :string state)]
         (if (string? top-string)
           (if (= top-string target) 0 1)
