@@ -30,7 +30,7 @@
     (println "Total number of data lines:" (count lines))
     (mapv #(mapv read-string %) lines)))
 
-(def training-proportion 0.1) ;; proportion of training cases to use each generation
+(def training-proportion 0.5) ;; proportion of training cases to use each generation
 
 (defn define-fitness-cases
   "Returns a map with two keys: train and test. Train maps to a
