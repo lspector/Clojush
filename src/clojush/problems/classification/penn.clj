@@ -30,7 +30,7 @@
     (println "Total number of data lines:" (count lines))
     (mapv #(mapv read-string %) lines)))
 
-(def training-proportion 0.5) ;; proportion of training cases to use each generation
+(def training-proportion 0.1) ;; proportion of training cases to use each generation
 
 (defn define-fitness-cases
   "Returns a map with two keys: train and test. Train maps to a
@@ -41,13 +41,13 @@
         target-column (.indexOf (mapv clojure.string/upper-case (mapv name (first raw-data)))
                                 "CLASS")
         inputs (fn [row] 
-                 (concat (take target-column row) 
-                         (drop (inc target-column) row)))
+                 (vec (concat (take target-column row) 
+                              (drop (inc target-column) row))))
         target (fn [row] (str (nth row target-column))) ;; target classes are strings
-        fitness-cases-shuffled (shuffle (map (fn [row]
-                                               {:inputs (inputs row)
-                                                :target (target row)})
-                                             (rest raw-data)))
+        fitness-cases-shuffled (shuffle (mapv (fn [row]
+                                                {:inputs (inputs row)
+                                                 :target (target row)})
+                                              (rest raw-data)))
         train-num (int (* 0.5 (count fitness-cases-shuffled)))
         all-training-cases (subvec fitness-cases-shuffled 0 train-num)
         all-testing-cases (subvec fitness-cases-shuffled train-num)]
@@ -107,13 +107,13 @@
   (println ";;******************************"))
 
 (def penn-atom-generators
-  (concat (distinct (mapv :target (:all-train @penn-fitness-cases))) ;; classes, for output
-          ;(list (tag-instruction-erc [:exec :integer :boolean :string] 1000)
-          ;      (tagged-instruction-erc 1000))
-          (for [n (map inc 
-                       (range (count (:inputs (first (:train @penn-fitness-cases))))))]
-            (symbol (str "in" n)))
-          (registered-for-stacks [:exec :integer :boolean])))
+  (vec (concat (distinct (mapv :target (:all-train @penn-fitness-cases))) ;; classes, for output
+               ;(list (tag-instruction-erc [:exec :integer :boolean :string] 1000)
+               ;      (tagged-instruction-erc 1000))
+               (for [n (map inc 
+                            (range (count (:inputs (first (:train @penn-fitness-cases))))))]
+                 (symbol (str "in" n)))
+               (registered-for-stacks [:exec :integer :boolean]))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Main call
