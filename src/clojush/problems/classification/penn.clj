@@ -30,7 +30,7 @@
     (println "Total number of data lines:" (count lines))
     (mapv #(mapv read-string %) lines)))
 
-(def training-proportion 0.1) ;; proportion of training cases to use each generation
+(def training-proportion 0.5) ;; proportion of training cases to use each generation
 
 (defn define-fitness-cases
   "Returns a map with two keys: train and test. Train maps to a
@@ -145,7 +145,11 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :age-mediated-parent-selection [0.05 0.5] ;***
-   :age-combining-function :proportionate ;***
+   :age-combining-function :first-reuse ;***
+   :autoconstructive true
+   :autoconstructive-genome-instructions :uniform
+   :autoconstructive-diversification-test :three-gens-size-and-instruction
+   :autoconstructive-si-children 2
+   :autoconstructive-entropy 0.1
    })
-
 
