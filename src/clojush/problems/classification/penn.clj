@@ -130,12 +130,16 @@
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
-   :genetic-operator-probabilities {:alternation 0.4 ;*** 0.2
-                                    :uniform-mutation 0.4 ;*** 0.2
-                                    :uniform-close-mutation 0.1
-                                    ;*** [:alternation :uniform-mutation] 0.4
-                                    :genesis 0.1 ;***
-                                    }
+   ;:genetic-operator-probabilities {:alternation 0.4 ;*** 0.2
+   ;                                 :uniform-mutation 0.4 ;*** 0.2
+   ;                                 :uniform-close-mutation 0.1
+   ;                                 ;*** [:alternation :uniform-mutation] 0.4
+   ;                                 :genesis 0.1 ;***
+   ;                                 }
+   :genetic-operator-probabilities {:uniform-addition-and-deletion 0.5
+                                    :uniform-combination-and-deletion 0.5}
+   :uniform-addition-and-deletion-rate [1 1/2 1/4 1/8 1/16 1/32 1/64 1/128]
+   :uniform-combination-and-deletion-rate [1 1/2 1/4 1/8 1/16 1/32 1/64 1/128]
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
@@ -144,12 +148,13 @@
    ;:print-behavioral-diversity true ;; requires maintaining @population-behaviors 
    :report-simplifications 0
    :final-report-simplifications 5000
-   :age-mediated-parent-selection [0.05 0.5] ;***
-   :age-combining-function :first-reuse ;***
-   :autoconstructive true
-   :autoconstructive-genome-instructions :uniform
-   :autoconstructive-diversification-test :three-gens-size-and-instruction
-   :autoconstructive-si-children 2
-   :autoconstructive-entropy 0.1
+   :age-mediated-parent-selection [0.05 0.5]
+   :age-combining-function :proportionate 
+   ;:age-combining-function :first-reuse 
+   ;:autoconstructive true
+   ;:autoconstructive-genome-instructions :uniform
+   ;:autoconstructive-diversification-test :three-gens-size-and-instruction
+   ;:autoconstructive-si-children 2
+   ;:autoconstructive-entropy 0.1
    })
 
