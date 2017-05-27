@@ -24,13 +24,16 @@
   "Reads data into a sequence of sequences."
   (let [f (slurp* (str "src/clojush/problems/classification/data/"  ;; todo?: allow command-line arg
                        ;"GAMETES_Epistasis_2-Way_20atts_0.4H_EDM-1_1.txt"
-                       "a_5000s_2000her_0.1__maf_0.2_EDM-1_01.txt"
+                       ;"a_5000s_2000her_0.1__maf_0.2_EDM-1_01.txt"
+                       ;"xor_2_a_20s_1600_EDM-1_01.txt"
+                       ;"xor_3_a_20s_1600_EDM-1_01.txt"
+                       "xor_4_a_20s_1600_EDM-1_01.txt"
                        ))
         lines (csv/parse-csv f :delimiter \tab)]
     (println "Total number of data lines:" (count lines))
     (mapv #(mapv read-string %) lines)))
 
-(def training-proportion 0.2) ;; proportion of training cases to use each generation
+(def training-proportion 0.5) ;; proportion of training cases to use each generation
 
 (def resampling false)
 
@@ -123,7 +126,10 @@
                     (for [n (map inc 
                                  (range (count (:inputs (first (:train @penn-fitness-cases))))))]
                       (symbol (str "in" n)))
-                    (registered-for-stacks [:exec :integer :float :boolean :string])))
+                    (concat (registered-for-stacks [:exec :integer :float :boolean])
+                            '(string_pop string_dup string_dup_times string_dup_items
+                                         string_swap string_rot string_flush string_eq string_stackdepth
+                                         string_yank string_yankdup string_shove string_empty))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Main call
