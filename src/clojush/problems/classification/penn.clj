@@ -81,10 +81,17 @@
                                                   :input
                                                   with-inputs))))
                             (assoc (make-push-state) :input inputs))
-            top-string (top-item :string state)]
-        (if (string? top-string)
-          (if (= top-string target) 0 1)
-          10000)))))
+        ;    top-string (top-item :string state)]
+        ;(if (string? top-string)
+        ;  (if (= top-string target) 0 1)
+        ;  10000)))))
+            [most second-most] (take 2 (reverse (sort-by val (frequencies (:string state)))))
+            answer (if (or (not most)
+                           (= (second most) (second second-most)))
+                     nil
+                     (first most))]
+        (if (= answer target) 0 1)))))
+            
 
 (defn penn-report
   "Customized generational report."
@@ -143,17 +150,17 @@
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
-   ;:genetic-operator-probabilities {:alternation 0.4 ;*** 0.2
-   ;                                 :uniform-mutation 0.4 ;*** 0.2
-   ;                                 :uniform-close-mutation 0.1
-   ;                                 ;*** [:alternation :uniform-mutation] 0.4
-   ;                                 :genesis 0.1 ;***
-   ;                                 }
+   :genetic-operator-probabilities {:alternation 0.2
+                                    :uniform-mutation 0.2
+                                    :uniform-close-mutation 0.1
+                                    [:alternation :uniform-mutation] 0.5
+                                    ;:genesis 0.1 ;***
+                                    }
    ;:genetic-operator-probabilities {:uniform-addition-and-deletion 0.45
    ;                                 :uniform-combination-and-deletion 0.45
    ;                                 :genesis 0.1}
-   :genetic-operator-probabilities {:uniform-addition-and-deletion 0.9
-                                    :uniform-combination-and-deletion 0.1}
+   ;:genetic-operator-probabilities {:uniform-addition-and-deletion 0.9
+   ;                                 :uniform-combination-and-deletion 0.1}
    :uniform-addition-and-deletion-rate [0.1 0.01] ;[1/16 1/32 1/64 1/128]
    :uniform-combination-and-deletion-rate 1 ;[1 1/2 1/4 1/8]
    :alternation-rate 0.01
