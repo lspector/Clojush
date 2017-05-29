@@ -132,13 +132,17 @@
                             (list (tag-instruction-erc [:exec :integer :boolean :string] 1000)
                                   (tagged-instruction-erc 1000)
                                   (fn [] (lrand-int 1000))))
-                    (for [n (map inc 
+                    (for [n (map inc ;; inputs
                                  (range (count (:inputs (first (:train @penn-fitness-cases))))))]
                       (symbol (str "in" n)))
                     (concat (registered-for-stacks [:exec :integer :boolean :parentheses])
-                            '(string_pop string_dup string_dup_times string_dup_items
+                            '(string_pop string_dup string_dup_times string_dup_items ;; just stack ops for strings, for outputs
                                          string_swap string_rot string_flush string_eq string_stackdepth
-                                         string_yank string_yankdup string_shove string_empty))))
+                                         string_yank string_yankdup string_shove string_empty))
+                    (map first ;; more of anything that usese booleans
+                         (filter (fn [[instr instr-fn]]
+                                   (some #{boolean} (:stack-types (meta instr-fn))))
+                                 @instruction-table))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Main call
@@ -152,17 +156,17 @@
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
-   :genetic-operator-probabilities {:alternation 0.2
-                                    :uniform-mutation 0.2
-                                    :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    ;:genesis 0.1 ;***
-                                    }
+   ;:genetic-operator-probabilities {:alternation 0.2
+   ;                                 :uniform-mutation 0.2
+   ;                                 :uniform-close-mutation 0.1
+   ;                                 [:alternation :uniform-mutation] 0.5
+   ;                                 ;:genesis 0.1 ;***
+   ;                                 }
    ;:genetic-operator-probabilities {:uniform-addition-and-deletion 0.45
    ;                                 :uniform-combination-and-deletion 0.45
    ;                                 :genesis 0.1}
-   ;:genetic-operator-probabilities {:uniform-addition-and-deletion 0.9
-   ;                                 :uniform-combination-and-deletion 0.1}
+   :genetic-operator-probabilities {:uniform-addition-and-deletion 0.9
+                                    :uniform-combination-and-deletion 0.1}
    :uniform-addition-and-deletion-rate [0.1 0.01] ;[1/16 1/32 1/64 1/128]
    :uniform-combination-and-deletion-rate 1 ;[1 1/2 1/4 1/8]
    :alternation-rate 0.01
