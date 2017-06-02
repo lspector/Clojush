@@ -160,6 +160,8 @@
     (println "Outputs of best individual on training cases:")
     (error-function best-program :train true)
     (println ";;******************************")
+    ;; return best individual with tests errors added so that those are recorded
+    (assoc best :test-errors best-test-errors)
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
        ;; set. Would need a third category of data cases, or a defined split of training cases.

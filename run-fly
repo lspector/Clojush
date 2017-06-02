@@ -25,7 +25,6 @@ homedir="/home/${fly_user}"
 rundir="$homedir/runs/$label-$number"
 repodir="$rundir/Clojush"
 outputdir="$rundir/output"
-
 ssh ${fly_user}@fly.hampshire.edu "mkdir -p $rundir"
 
 rsync  \
@@ -49,7 +48,7 @@ ssh ${fly_user}@fly.hampshire.edu /opt/pixar/tractor-blade-1.7.2/tractor-spool.p
   --jobcwd="${repodir}" \
   --priority=1 \
   --range 1-${n} \
-  -c "bash -c 'env JAVA_CMD=/usr/java/latest/bin/java /share/apps/bin/lein run $lein_command >  $outputdir/RANGE.out 2> $outputdir/RANGE.err'"
+  -c "bash -c 'env JAVA_CMD=/usr/java/latest/bin/java /share/apps/bin/lein run $lein_command :label $label >  $outputdir/RANGE.out 2> $outputdir/RANGE.err'"
 
 
 echo "Job ID: ${number}"

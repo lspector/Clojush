@@ -1,7 +1,8 @@
 (ns clojush.pushgp.pushgp
   (:require [clojure.java.io :as io]
             [clj-random.core :as random]
-            [clojure.repl :as repl])
+            [clojure.repl :as repl]
+            [clojush.pushgp.record :as r])
   (:use [clojush args globals util pushstate random individual evaluate simplification translate]
         [clojush.instructions boolean code common numbers random-instructions string char vectors
          tag zip return input-output genome]
@@ -144,13 +145,18 @@
   ([args]
     (reset! timer-atom (System/currentTimeMillis))
     (load-push-argmap args)
+    (when (some? (:record-host @push-argmap))
+      (r/host! (str (:record-host @push-argmap))))
     (random/with-rng (random/make-mersennetwister-rng (:random-seed @push-argmap))
       ;; set globals from parameters
       (reset-globals)
       (initial-report @push-argmap) ;; Print the inital report
-      (print-params @push-argmap)
+      (r/uuid! (:run-uuid @push-argmap))
+      (print-params (r/config-data! [:argmap] (dissoc @push-argmap :run-uuid)))
       (check-genetic-operator-probabilities-add-to-one @push-argmap)
       (timer @push-argmap :initialization)
+      (when (:print-timings @push-argmap)
+        (r/config-data! [:initialization-ms] (:initialization @timer-atom)))
       (println "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
       (println "\nGenerating initial population...") (flush)
       (let [pop-agents (make-pop-agents @push-argmap)
@@ -161,6 +167,7 @@
         ;(println)
         ;; Main loop
         (loop [generation 0]
+          (r/new-generation! generation)
           (println "Processing generation:" generation) (flush)
           (population-translate-plush-to-push pop-agents @push-argmap)
           (timer @push-argmap :reproduction)
@@ -183,6 +190,8 @@
           ;; report and check for success
           (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
                                                              generation @push-argmap)]
+            (r/generation-data! [:outcome] outcome)
+            (r/end-generation!)
             (cond (= outcome :failure) (do (printf "\nFAILURE\n")
                                          (if (:return-simplified-on-failure @push-argmap)
                                            (auto-simplify best 
