@@ -25,17 +25,17 @@
   (let [f (slurp* (str "src/clojush/problems/classification/data/"  ;; todo?: allow command-line arg
                        ;"GAMETES_Epistasis_2-Way_20atts_0.4H_EDM-1_1.txt"
                        ;"a_5000s_2000her_0.1__maf_0.2_EDM-1_01.txt"
-                       ;"xor_2_a_20s_1600_EDM-1_01.txt"
-                       "xor_3_a_20s_1600_EDM-1_01.txt"
+                       "xor_2_a_20s_1600_EDM-1_01.txt"
+                       ;"xor_3_a_20s_1600_EDM-1_01.txt"
                        ;"xor_4_a_20s_1600_EDM-1_01.txt"
                        ))
         lines (csv/parse-csv f :delimiter \tab)]
     (println "Total number of data lines:" (count lines))
     (mapv #(mapv read-string %) lines)))
 
-(def training-proportion 0.2) ;; proportion of training cases to use each generation
+(def training-proportion 0.1) ;; proportion of training cases to use each generation
 
-(def resampling false)
+(def resampling true)
 
 (defn define-fitness-cases
   "Returns a map with two keys: train and test. Train maps to a
@@ -155,19 +155,23 @@
    :evalpush-limit 1600
    :population-size 1000
    :max-generations 300
-   :parent-selection :lexicase
-   :genetic-operator-probabilities {:alternation 0.2
-                                    :uniform-mutation 0.2
-                                    :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    ;:genesis 0.1 ;***
-                                    }
+   ;:parent-selection :lexicase
+   :parent-selection :leaky-lexicase ;:lexicase
+   :lexicase-leakage 0.5
+   ;:genetic-operator-probabilities {:alternation 0.2
+   ;                                 :uniform-mutation 0.2
+   ;                                 :uniform-close-mutation 0.1
+   ;                                 [:alternation :uniform-mutation] 0.5
+   ;                                 ;:genesis 0.1 ;***
+   ;                                 }
    ;:genetic-operator-probabilities {:uniform-addition-and-deletion 0.45
    ;                                 :uniform-combination-and-deletion 0.45
    ;                                 :genesis 0.1}
    ;:genetic-operator-probabilities {:uniform-addition-and-deletion 0.9
    ;                                 :uniform-combination-and-deletion 0.1}
-   :uniform-addition-and-deletion-rate [0.1 0.01] ;[1/16 1/32 1/64 1/128]
+   :genetic-operator-probabilities {:uniform-addition-and-deletion 0.5
+                                    :alternation 0.5}
+   :uniform-addition-and-deletion-rate [0.01 0.1]
    :uniform-combination-and-deletion-rate 1 ;[1 1/2 1/4 1/8]
    :alternation-rate [0.01 0.1]
    :alignment-deviation [1 10 100]
@@ -178,6 +182,7 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    ;:age-mediated-parent-selection [0.05 0.5]
+   ;:age-combining-function :max
    ;:age-combining-function :proportionate 
    ;:age-combining-function :first-reuse 
    ;:autoconstructive true
