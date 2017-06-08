@@ -25,3 +25,5 @@ out
 .idea
 clojush.iml
 .gorilla-port
+/clojush/
+.ipynb_checkpoints/
