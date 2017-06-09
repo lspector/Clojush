@@ -411,7 +411,7 @@
           ;; When true, will exit the run when there is an individual with a zero-error vector
 
           ;;----------------------------------------
-          ;; Arguments related to printing JSON, EDN, or CSV logs
+          ;; Arguments related to printing JSON, EDN, CSV, and remote recording
           ;;----------------------------------------
 
           :print-csv-logs false
@@ -450,6 +450,14 @@
 
           :json-log-program-strings false
           ;; If true, JSON logs will include program strings for each individual.
+
+          :record-host nil
+          ;; Should be in the format "<hostname>:<port>"
+          ;; If set, will send logs of each run to a server running on this
+          ;; host
+          :label nil
+          ;; If set, will send this in the configuration of the run, to the
+          ;; external record
           )))
 
 (defn load-push-argmap
@@ -576,5 +584,4 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
-
 
