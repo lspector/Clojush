@@ -98,8 +98,8 @@
    (replace-space-error-function program :train))
   ([program data-cases] ;; data-cases should be :train or :test
    (replace-space-error-function program data-cases false))
-  ([program data-cases print-outputs]
-   (let [behavior (atom '())
+  ([program data-cases print-outputs] ;REF can get rid of print-outputs argument if don't do printing in the error function
+   (let [behavior (atom '()) ;REF remove
          errors (flatten
                  (doall
                   (for [[input [correct-output correct-int]] (case data-cases
@@ -112,21 +112,21 @@
                                                      (push-item "" :output)))
                           printed-result (stack-ref :output 0 final-state)
                           int-result (stack-ref :integer 0 final-state)]
-                      (when print-outputs
+                      (when print-outputs ;REF could be moved to report if behavior function attaches behaviors to individuals
                         (println (format "\n| Correct output: %s\n| Program output: %s" (pr-str correct-output) (pr-str printed-result)))
                         (println (format "| Correct integer: %2d | Program integer: %s" correct-int (str int-result))))
                                         ; Record the behavior
-                      (when @global-print-behavioral-diversity
+                      (when @global-print-behavioral-diversity ;REF can move outside when using behavior function
                         (swap! behavior conj [printed-result int-result]))
                                         ; Error is Levenshtein distance for printed string and
                                         ; integer distance for returned integer
-                      (vector
+                      (vector ;REF This part will be in the error function
                        (levenshtein-distance correct-output printed-result)
                        (if (number? int-result)
                          (abs (- int-result correct-int)) ;distance from correct integer
                          1000)        ;penalty for no return value
                        )))))]
-     (when @global-print-behavioral-diversity
+     (when @global-print-behavioral-diversity ;REF can remove when have behavior function. Also, can remove complex logic for making sure we don't track the wrong behaviors in the report function
        (swap! population-behaviors conj @behavior))
      errors)))
 
@@ -143,7 +143,7 @@
   "Custom generational report."
   [best population generation error-function report-simplifications]
   (let [best-program (not-lazy (:program best))
-        best-test-errors (error-function best-program :test)
+        best-test-errors (error-function best-program :test) ;REF will need to replace
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
     (printf ";; -*- Replace Space With Newline problem report - generation %s\n" generation)(flush)
@@ -156,7 +156,7 @@
         (println (format "Test Case  %3d | Error: %s" i (str error)))))
     (println ";;------------------------------")
     (println "Outputs of best individual on training cases:")
-    (error-function best-program :train true)
+    (error-function best-program :train true) ;REF will need to replace
     (println ";;******************************")
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
