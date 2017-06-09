@@ -476,10 +476,10 @@
                (float (/ (count frequency-map) (count population))))))
     (println "Total error diversity:\t\t\t\t" 
         (r/generation-data! [:population-report :percent-total-error-unique]
-             (float (/ (count (frequencies (map :total-error population))) (count population)))))
+             (float (/ (count (distinct (map :total-error population))) (count population)))))
     (println "Error (vector) diversity:\t\t\t" 
         (r/generation-data! [:population-report :percent-errors-unique]
-             (float (/ (count (frequencies (map :errors population))) (count population)))))
+             (float (/ (count (distinct (map :errors population))) (count population)))))
     (when @global-print-behavioral-diversity
       (swap! population-behaviors 
              #(take-last population-size %)) ; Only use behaviors during evaluation, not those during simplification
