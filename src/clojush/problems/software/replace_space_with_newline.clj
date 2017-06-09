@@ -93,11 +93,60 @@
 (def replace-space-train-and-test-cases
   (get-replace-space-train-and-test replace-space-data-domains))
 
+(defn replace-space-evaluate-program-for-behaviors
+  "Evaluates the program on the given list of cases.
+   Returns the behaviors, a list of the outputs of the program on the inputs."
+  [program cases]
+  (flatten
+   (doall
+    (for [[input output] cases]
+      (let [final-state (run-push program
+                                  (->> (make-push-state)
+                                       (push-item input :input)
+                                       (push-item "" :output)))
+            printed-result (stack-ref :output 0 final-state)
+            int-result (stack-ref :integer 0 final-state)]
+        (vector printed-result int-result))))))
+
+(defn replace-space-errors-from-behaviors
+  "Takes a list of behaviors across the list of cases and finds the error
+   for each of those behaviors, returning an error vector."
+  [behaviors cases]
+  (let [behavior-pairs (partition 2 behaviors)
+        output-pairs (map second cases)]
+    (flatten
+     (map (fn [[printed-result int-result] [correct-printed-output correct-int]]
+            (vector
+             (levenshtein-distance correct-printed-output printed-result)
+             (if (number? int-result)
+               (abs (- int-result correct-int)) ;distance from correct integer
+               1000)                  ;penalty for no return value
+             ))
+          behavior-pairs
+          output-pairs))))
+
 (defn replace-space-error-function
+  "The error function for Replace Space With Newline. Takes an individual as input,
+   and returns that individual with :errors and :behaviors set."
+  ([individual]
+   (replace-space-error-function individual :train))
+  ([individual data-cases]
+   (let [cases (case data-cases
+                 :train (first replace-space-train-and-test-cases)
+                 :test (second replace-space-train-and-test-cases)
+                 [])
+         behaviors (replace-space-evaluate-program-for-behaviors (:program individual)
+                                                                 cases)
+         errors (replace-space-errors-from-behaviors behaviors cases)]
+     (cond
+       (= data-cases :train) (assoc individual :behaviors behaviors :errors errors)
+       (= data-cases :test) (assoc individual :test-errors errors)))))
+
+(defn replace-space-error-function-OLD
   ([program]
-   (replace-space-error-function program :train))
+   (replace-space-error-function-OLD program :train))
   ([program data-cases] ;; data-cases should be :train or :test
-   (replace-space-error-function program data-cases false))
+   (replace-space-error-function-OLD program data-cases false))
   ([program data-cases print-outputs] ;REF can get rid of print-outputs argument if don't do printing in the error function
    (let [behavior (atom '()) ;REF remove
          errors (flatten
