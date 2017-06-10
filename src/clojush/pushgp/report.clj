@@ -48,12 +48,10 @@
 (defn behavioral-diversity
   "Returns the behavioral diversity of the population, as described by David
    Jackson in 'Promoting phenotypic diversity in genetic programming'. It is
-   the percent of distinct behavior vectors in the population. Since finite
-   algebras has binary test cases, error vectors are equivalent to behavior
-   vectors."
-  []
-  (float (/ (count (distinct @population-behaviors))
-            (count @population-behaviors))))
+   the percent of distinct behavior vectors in the population."
+  [population]
+  (float (/ (count (distinct (map :behaviors population)))
+            (count population))))
 
 (defn sample-population-edit-distance
   "Returns a sample of Levenshtein distances between programs in the population,
@@ -480,11 +478,8 @@
     (println "Error (vector) diversity:\t\t\t" 
         (r/generation-data! [:population-report :percent-errors-unique]
              (float (/ (count (distinct (map :errors population))) (count population)))))
-    (when @global-print-behavioral-diversity
-      (swap! population-behaviors 
-             #(take-last population-size %)) ; Only use behaviors during evaluation, not those during simplification
-      (println "Behavioral diversity:\t\t\t\t" (behavioral-diversity))
-      (reset! population-behaviors ()))
+    (when (not (nil? (:behaviors (first population))))
+      (println "Behavioral diversity:\t\t\t\t" (behavioral-diversity population)))
     (when print-homology-data
       (let [num-samples 1000
             sample-1 (sample-population-edit-distance population num-samples)
