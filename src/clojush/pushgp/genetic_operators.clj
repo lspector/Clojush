@@ -1062,11 +1062,13 @@ programs encoded by genomes g1 and g2."
                            (some #{errors} [(:errors parent1) (:errors parent2)]))
         make-child-genome (fn [g1 g2] 
                             (produce-child-genome-by-autoconstruction g1 g2 argmap))
-        diff #(expressed-difference %1 %2 argmap)
+        diff #(expressed-difference %1 %2 argmap) ;(assoc i :program (translate-plush-genome-to-push-program i argmap))
         genome-error #(do (swap! evaluations-count inc)
-                        (error-function (translate-plush-genome-to-push-program 
-                                          {:genome %} 
-                                          argmap)))
+                          (:errors (error-function
+                                    {:genome %
+                                     :program (translate-plush-genome-to-push-program
+                                               {:genome %}
+                                               argmap)})))
         acceptable? (fn [g]
                       (let [c1 (make-child-genome g g)
                             c1-diff (diff g c1)]
@@ -1139,9 +1141,11 @@ be set globally or eliminated in the future."
           child-errors (if autoconstructive-improve-or-diversify
                          (do
                            (swap! evaluations-count inc)
-                           (error-function (translate-plush-genome-to-push-program 
-                                             {:genome child-genome} 
-                                             argmap)))
+                           (:errors (error-function
+                                     {:genome child-genome
+                                      :program (translate-plush-genome-to-push-program
+                                                {:genome child-genome}
+                                                argmap)})))
                          nil)
           variant (diversifying? child-genome 
                                  (-> argmap

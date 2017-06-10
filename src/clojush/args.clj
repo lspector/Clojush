@@ -63,10 +63,6 @@
           ;; When true, children produced through direct reproduction will not be re-evaluated but
           ;; will have the error vector of their parent.
 
-          :pass-individual-to-error-function false ;REF likely remove
-          ;; When true, entire individuals (rather than just programs) are passed to error
-          ;; functions.
-
           ;;----------------------------------------
           ;; Genetic operator probabilities
           ;;----------------------------------------
