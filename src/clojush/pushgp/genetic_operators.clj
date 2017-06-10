@@ -1062,7 +1062,7 @@ programs encoded by genomes g1 and g2."
                            (some #{errors} [(:errors parent1) (:errors parent2)]))
         make-child-genome (fn [g1 g2] 
                             (produce-child-genome-by-autoconstruction g1 g2 argmap))
-        diff #(expressed-difference %1 %2 argmap) ;(assoc i :program (translate-plush-genome-to-push-program i argmap))
+        diff #(expressed-difference %1 %2 argmap)
         genome-error #(do (swap! evaluations-count inc)
                           (:errors (error-function
                                     {:genome %
