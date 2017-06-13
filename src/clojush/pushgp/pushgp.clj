@@ -186,6 +186,10 @@
           ;; calculate epsilons for epsilon lexicase selection
           (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
             (calculate-epsilons-for-epsilon-lexicase pop-agents @push-argmap))
+          ;; calculate novelty when necessary
+          (when (or (= (:parent-selection @push-argmap))
+                    (some #{:novelty} (:meta-error-categories @push-argmap)))
+            (calculate-novelty pop-agents @push-argmap)) ;REF haven't defined yet
           (timer @push-argmap :other)
           ;; report and check for success
           (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
