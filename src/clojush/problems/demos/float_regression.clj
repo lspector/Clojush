@@ -45,6 +45,6 @@
    :epigenetic-markers []
    :genetic-operator-probabilities {:alternation 0.8
                                     :uniform-mutation 0.2}
-   :parent-selection :tournament
+   :parent-selection :epsilon-lexicase
    :tournament-size 3
    })

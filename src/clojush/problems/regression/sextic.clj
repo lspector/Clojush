@@ -42,7 +42,7 @@
                         'in1))
    :population-size 1000
    :epigenetic-markers []
-   :parent-selection :tournament
+   :parent-selection :epsilon-lexicase
    :genetic-operator-probabilities {:alternation 0.5
                                     :uniform-mutation 0.5}
    :uniform-mutation-rate 0.1
