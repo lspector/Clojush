@@ -5,7 +5,7 @@
         [clojush.random]
         [clojure.math.numeric-tower]))
 
-; New GP problem: Take the input string, remove the last 2 characters, and then concat this result with itself.
+; Problem: Take the input string, remove the last 2 characters, and then concat this result with itself.
 ; The fitness will be the number of non-matching characters in the resulting string. For example,
 ; desired result of "abcde" would be "abcabc", and a string of "abcabcrrr" would have an error of 3, for
 ; 3 too many characters, and the string "aaaaaa" would have error of 4, since it gets 2 of the characters right.
@@ -51,19 +51,21 @@
 
 ; Define the arguments
 (def argmap
- {:error-function (fn [program]
-                          (doall
+ {:error-function (fn [individual]
+                    (assoc individual
+                           :errors
+                           (doall
                             (for [input '("abcde"
-                                           ""
-                                           "E"
-                                           "Hi"
-                                           "Tom"
-                                           "leprechaun"
-                                           "zoomzoomzoom"
-                                           "qwertyuiopasd"
-                                           "GallopTrotCanter"
-                                           "Quinona")]
-                              (let [final-state (run-push program 
+                                          ""
+                                          "E"
+                                          "Hi"
+                                          "Tom"
+                                          "leprechaun"
+                                          "zoomzoomzoom"
+                                          "qwertyuiopasd"
+                                          "GallopTrotCanter"
+                                          "Quinoa")]
+                              (let [final-state (run-push (:program individual)
                                                           (push-item input :input 
                                                                      (push-item input :string 
                                                                                 (make-push-state))))
@@ -73,28 +75,28 @@
                                 (if (not (string? top-string))
                                   1000
                                   (+ (string-difference top-string desired-output)
-                                     (string-char-counts-difference top-string desired-output)))))))
-        :atom-generators (list 'in1
-                               'string_length
-                               'string_take
-                               'string_concat
-                               'string_stackdepth
-                               'string_swap
-                               'string_dup
-                               'integer_add
-                               'integer_sub
-                               'integer_dup
-                               'integer_swap
-                               'integer_stackdepth
-                               (fn [] (lrand-int 10))
-                               (fn [] (apply str (repeatedly (+ 1 (lrand-int 9))
-                                                             #(lrand-nth (str "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                                                              "abcdefghijklmnopqrstuvwxyz"
-                                                                              "0123456789"))))))
-        :population-size 500
-        :max-generations 200
-        :epigenetic-markers []
-        :genetic-operator-probabilities {:alternation 0.5
-                                         :uniform-mutation 0.5}
-        :uniform-mutation-constant-tweak-rate 0.8
-        })
+                                     (string-char-counts-difference top-string desired-output))))))))
+  :atom-generators (list 'in1
+                         'string_length
+                         'string_take
+                         'string_concat
+                         'string_stackdepth
+                         'string_swap
+                         'string_dup
+                         'integer_add
+                         'integer_sub
+                         'integer_dup
+                         'integer_swap
+                         'integer_stackdepth
+                         (fn [] (lrand-int 10))
+                         (fn [] (apply str (repeatedly (+ 1 (lrand-int 9))
+                                                       #(lrand-nth (str "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                                                        "abcdefghijklmnopqrstuvwxyz"
+                                                                        "0123456789"))))))
+  :population-size 500
+  :max-generations 200
+  :epigenetic-markers []
+  :genetic-operator-probabilities {:alternation 0.5
+                                   :uniform-mutation 0.5}
+  :uniform-mutation-constant-tweak-rate 0.8
+  })
