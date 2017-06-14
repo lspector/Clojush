@@ -203,7 +203,6 @@
    :uniform-mutation-rate 0.01
    :problem-specific-report replace-space-with-newline-report
    :problem-specific-initial-report replace-space-with-newline-initial-report
-   :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000
