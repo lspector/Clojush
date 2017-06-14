@@ -46,6 +46,7 @@
                           (= cat :rand) (lrand)
                           (= cat :rand-bit) (lrand-nth [0 1])
                           (= cat :age) (:age ind)
+                          (= cat :novelty) 5 ;REF fix later, get novelty from ind
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
     (doall (map meta-error-fn meta-error-categories))))
 

@@ -8,7 +8,7 @@
          tag zip return input-output genome]
         [clojush.pushgp breed report]
         [clojush.pushgp.selection 
-         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing]
+         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty]
         [clojush.experimental.decimation]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -166,7 +166,8 @@
         ;(doseq [seed random-seeds] (print " " seed))
         ;(println)
         ;; Main loop
-        (loop [generation 0]
+        (loop [generation 0
+               novelty-archive '()]
           (r/new-generation! generation)
           (println "Processing generation:" generation) (flush)
           (population-translate-plush-to-push pop-agents @push-argmap)
@@ -189,7 +190,7 @@
           ;; calculate novelty when necessary
           (when (or (= (:parent-selection @push-argmap))
                     (some #{:novelty} (:meta-error-categories @push-argmap)))
-            (calculate-novelty pop-agents @push-argmap)) ;REF haven't defined yet
+            (calculate-novelty pop-agents novelty-archive @push-argmap)) ;REF haven't defined yet
           (timer @push-argmap :other)
           ;; report and check for success
           (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
@@ -212,7 +213,11 @@
                                                                  @push-argmap)
                                           (println "Installing next generation...") (flush)
                                           (install-next-generation pop-agents child-agents @push-argmap)
-                                          (recur (inc generation)))
+                                          (recur (inc generation)
+                                                 (concat novelty-archive
+                                                         (select-individuals-for-novelty-archive
+                                                          (map deref pop-agents)
+                                                          @push-argmap)))) ;REF haven't defined yet
                   :else  (final-report generation best @push-argmap))))))))
 
 

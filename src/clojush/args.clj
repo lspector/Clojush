@@ -332,6 +332,11 @@
           ;; to consider only individuals with :grain-size equal to or GREATER than the
           ;; chosen :grain-size.
 
+          :individuals-for-novelty-archive-per-generation 0
+          ;; The number of individuals to add to the novelty archive per generation, if
+          ;; using novelty search for parent selection or novelty as a meta-error. Default
+          ;; of 0 means archive won't be maintained.
+
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
           ;;----------------------------------------
