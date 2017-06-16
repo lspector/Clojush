@@ -188,9 +188,9 @@
           (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
             (calculate-epsilons-for-epsilon-lexicase pop-agents @push-argmap))
           ;; calculate novelty when necessary
-          (when (or (= (:parent-selection @push-argmap))
+          (when (or (= (:parent-selection @push-argmap) :novelty-search)
                     (some #{:novelty} (:meta-error-categories @push-argmap)))
-            (calculate-novelty pop-agents novelty-archive @push-argmap)) ;REF haven't defined yet
+            (calculate-novelty pop-agents novelty-archive @push-argmap))
           (timer @push-argmap :other)
           ;; report and check for success
           (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
@@ -217,7 +217,7 @@
                                                  (concat novelty-archive
                                                          (select-individuals-for-novelty-archive
                                                           (map deref pop-agents)
-                                                          @push-argmap)))) ;REF haven't defined yet
+                                                          @push-argmap))))
                   :else  (final-report generation best @push-argmap))))))))
 
 
