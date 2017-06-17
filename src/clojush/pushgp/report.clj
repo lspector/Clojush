@@ -378,6 +378,8 @@
       :rmse (println "RMS-error:" (:weighted-error best))
       :ifs (println "IFS-error:" (:weighted-error best))
       nil)
+    (when (= parent-selection :novelty-search)
+      (println "Novelty: " (float (:novelty best))))
     (when print-history (println "History:" (not-lazy (:history best))))
     (println "Genome size:" (r/generation-data! [:best :genome-size] (count (:genome best))))
     (println "Size:" (r/generation-data! [:best :program-size] (count-points (:program best))))
