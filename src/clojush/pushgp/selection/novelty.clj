@@ -16,24 +16,26 @@
    Note that there is no limit on behavior differences, which will only be limited
    by their max bounds based on things like maximum integer size."
   [behavior1 behavior2 {:keys [novelty-distance-metric] :as argmap}]
-  (let [behavior-differences (map (fn [b1 b2]
-                                    (cond
-                                      ; Handles equal behaviors, including if both are :no-stack-item
-                                      (= b1 b2) 0
-                                      ; If one has :no-stack-item and the other does not, give max difference
-                                      (or (= b1 :no-stack-item)
-                                          (= b2 :no-stack-item)) max-number-magnitude
-                                      :else (case (recognize-literal b1)
-                                              :string (levenshtein-distance b1 b2)
-                                              (:integer :float) (math/abs (-' b1 b2))
-                                              (:boolean :char) (if (= b1 b2) 0 1)
-                                              (throw (Exception. (str "Unrecognized behavior type in novelty distance for: " b1))))))
-                                  behavior1
-                                  behavior2)]
-    (case novelty-distance-metric
-      :hamming (apply +' (map #(if (zero? %) 0 1) behavior-differences))
-      :manhattan (apply +' behavior-differences)
-      :euclidean (math/sqrt (apply +' (map #(*' % %) behavior-differences))))))
+  (if (= novelty-distance-metric :hamming) ; This is hear, instead of below, for speed reasons
+    (apply + (map #(if (= %1 %2) 0 1)
+                  behavior1 behavior2))
+    (let [behavior-differences (map (fn [b1 b2]
+                                      (cond
+                                        ; Handles equal behaviors, including if both are :no-stack-item
+                                        (= b1 b2) 0
+                                        ; If one has :no-stack-item and the other does not, give max difference
+                                        (or (= b1 :no-stack-item)
+                                            (= b2 :no-stack-item)) max-number-magnitude
+                                        :else (case (recognize-literal b1)
+                                                :string (levenshtein-distance b1 b2)
+                                                (:integer :float) (math/abs (-' b1 b2))
+                                                (:boolean :char) (if (= b1 b2) 0 1)
+                                                (throw (Exception. (str "Unrecognized behavior type in novelty distance for: " b1))))))
+                                    behavior1
+                                    behavior2)]
+      (case novelty-distance-metric
+        :manhattan (apply +' behavior-differences)
+        :euclidean (math/sqrt (apply +' (map #(*' % %) behavior-differences)))))))
 
 (defn calculate-behavior-distance-map
   "Calculates a map storing the distances between any two behaviors, of the form:
@@ -108,13 +110,8 @@
                   % assign-novelty-to-individual behavior-sparseness argmap)
                 pop-agents)))
   (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
-  ;; (println "^^^^^^^^^^ Novelty Archive below ^^^^^^^^^^^^^")
-  ;; (doseq [ind pop-agents]
-  ;;   (println (:novelty (deref ind))))
-  ;; (doseq [a novelty-archive]
-  ;;   (println (:uuid a)))
-  ;; (println "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
-  (println "Done calculating novelty."))
+  (println "Done calculating novelty.")
+  (println "\nNovelty Numbers:" (sort > (map #(float (:novelty (deref %))) pop-agents))))
 
 (defn novelty-tournament-selection
   "Returns an individual that does the best out of a tournament based on novelty."
