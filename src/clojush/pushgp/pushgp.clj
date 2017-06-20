@@ -205,7 +205,11 @@
                                                           true 
                                                           500)
                                            (flush)))
-                  (= outcome :continue) (do (timer @push-argmap :report)
+                  (= outcome :continue) (let [next-novelty-archive (concat novelty-archive
+                                                                           (select-individuals-for-novelty-archive
+                                                                            (map deref pop-agents)
+                                                                            @push-argmap))]
+                                          (timer @push-argmap :report)
                                           (println "\nProducing offspring...") (flush)
                                           (produce-new-offspring pop-agents 
                                                                  child-agents 
@@ -214,10 +218,7 @@
                                           (println "Installing next generation...") (flush)
                                           (install-next-generation pop-agents child-agents @push-argmap)
                                           (recur (inc generation)
-                                                 (concat novelty-archive
-                                                         (select-individuals-for-novelty-archive
-                                                          (map deref pop-agents)
-                                                          @push-argmap))))
+                                                 next-novelty-archive))
                   :else  (final-report generation best @push-argmap))))))))
 
 

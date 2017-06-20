@@ -85,7 +85,7 @@
   "Calculates the novelty of the individual based on the behaviors in the population
    and in the novelty-archive. Returns the individual with the :novelty key set, and
    if :novelty is a meta-error-category, also sets that."
-  [individual behavior-sparseness {:keys [meta-error-categories]}]
+  [individual behavior-sparseness]
   (let [novelty (get behavior-sparseness (:behaviors individual))]
     (assoc individual
            :novelty novelty
@@ -107,7 +107,7 @@
                                                            behavior-distance-map
                                                            argmap)]
     (dorun (map #((if use-single-thread swap! send)
-                  % assign-novelty-to-individual behavior-sparseness argmap)
+                  % assign-novelty-to-individual behavior-sparseness)
                 pop-agents)))
   (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
   (println "Done calculating novelty.")
