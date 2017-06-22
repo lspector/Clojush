@@ -269,6 +269,18 @@
     (push-item (vec (:parent2-genome state)) :genome state)))
 
 (define-registered
+  genome_parents
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (push-item (let [p1 (:parent1-genome state)
+                     p2 (:parent2-genome state)
+                     [shorter longer] (if (< (count p1) (count p2))
+                                        [p1 p2]
+                                        [p2 p1])]
+                 (vec (interleave (cycle shorter) longer)))
+               :genome state)))
+
+(define-registered
   autoconstructive_integer_rand 
   ;; pushes a constant integer, but is replaced with integer_rand during 
   ;; nondetermistic autoconstruction
@@ -652,6 +664,7 @@
                            (:silent (nth genome index)))
                         :boolean)))
       state)))
+
 
 
 
