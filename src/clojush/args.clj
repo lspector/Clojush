@@ -460,82 +460,125 @@
           ;; external record
           )))
 
+(defn gene-oriented-instructions
+  []
+  (concat (registered-for-stacks 
+            [:integer :boolean :exec :float :tag])
+          '(genome_pop
+             genome_dup
+             genome_swap
+             genome_rot
+             genome_flush
+             genome_eq
+             genome_stackdepth
+             genome_yank
+             genome_yankdup
+             genome_shove
+             genome_empty
+             genome_gene_dup
+             genome_gene_randomize
+             genome_gene_replace
+             genome_gene_delete
+             genome_rotate
+             genome_gene_copy
+             genome_gene_copy_range
+             genome_toggle_silent
+             genome_silence
+             genome_unsilence
+             genome_close_inc
+             genome_close_dec
+             genome_new
+             genome_parent1
+             genome_parent2
+             autoconstructive_integer_rand
+             autoconstructive_boolean_rand)))
+
+(defn uniform-instructions
+  []
+  (concat (registered-for-stacks 
+            [:integer :boolean :exec :float :tag])
+          '(genome_pop
+             genome_dup
+             genome_swap
+             genome_rot
+             genome_flush
+             genome_eq
+             genome_stackdepth
+             genome_yank
+             genome_yankdup
+             genome_shove
+             genome_empty
+             genome_rotate
+             genome_new
+             genome_parent1
+             genome_parent2
+             autoconstructive_integer_rand
+             autoconstructive_boolean_rand
+             genome_uniform_instruction_mutation
+             genome_uniform_integer_mutation
+             genome_uniform_float_mutation
+             genome_uniform_tag_mutation
+             genome_uniform_string_mutation
+             genome_uniform_boolean_mutation
+             genome_uniform_close_mutation
+             genome_uniform_silence_mutation
+             genome_uniform_deletion
+             genome_uniform_addition
+             genome_uniform_addition_and_deletion
+             genome_uniform_combination_and_deletion
+             genome_genesis
+             genome_alternation
+             genome_uniform_crossover))))
+
+(defn interleaved-instructions
+  []
+  (concat (registered-for-stacks 
+            [:integer :boolean :exec :float :tag])
+          '(genome_pop
+             genome_dup
+             genome_swap
+             genome_rot
+             genome_flush
+             genome_eq
+             genome_stackdepth
+             genome_yank
+             genome_yankdup
+             genome_shove
+             genome_empty
+             genome_gene_dup
+             genome_gene_randomize
+             genome_gene_replace
+             genome_gene_delete
+             genome_rotate
+             genome_gene_copy
+             genome_gene_copy_range
+             genome_toggle_silent
+             genome_silence
+             genome_unsilence
+             genome_close_inc
+             genome_close_dec
+             genome_new
+             genome_parents
+             autoconstructive_integer_rand
+             autoconstructive_boolean_rand)))
+
 (defn load-push-argmap
   [argmap]
+  ;; Validate arguments and install values
   (doseq [[argkey argval] argmap]
-    (assert (contains? @push-argmap argkey) (str "Argument key " argkey " is not a recognized argument to pushgp."))
+    (assert (contains? @push-argmap argkey) 
+            (str "Argument key " argkey " is not a recognized argument to pushgp."))
     (swap! push-argmap assoc argkey argval))
   (swap! push-argmap assoc :run-uuid (java.util.UUID/randomUUID))
-  ;; Augmentation for autoconstruction
+  ;; Augment various values for autoconstruction
   (when (:autoconstructive @push-argmap)
     (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0})
     (swap! push-argmap assoc :epigenetic-markers [:close :silent])
     (doseq [instr (case (:autoconstructive-genome-instructions @push-argmap)
                     :all (registered-for-stacks [:integer :boolean :exec :genome :float :tag])
-                    :gene-oriented (concat (registered-for-stacks 
-                                             [:integer :boolean :exec :float :tag])
-                                           '(genome_pop
-                                              genome_dup
-                                              genome_swap
-                                              genome_rot
-                                              genome_flush
-                                              genome_eq
-                                              genome_stackdepth
-                                              genome_yank
-                                              genome_yankdup
-                                              genome_shove
-                                              genome_empty
-                                              genome_gene_dup
-                                              genome_gene_randomize
-                                              genome_gene_replace
-                                              genome_gene_delete
-                                              genome_rotate
-                                              genome_gene_copy
-                                              genome_gene_copy_range
-                                              genome_toggle_silent
-                                              genome_silence
-                                              genome_unsilence
-                                              genome_close_inc
-                                              genome_close_dec
-                                              genome_new
-                                              genome_parent1
-                                              genome_parent2
-                                              autoconstructive_integer_rand
-                                              autoconstructive_boolean_rand))
-                    :uniform (concat (registered-for-stacks 
-                                       [:integer :boolean :exec :float :tag])
-                                     '(genome_pop
-                                        genome_dup
-                                        genome_swap
-                                        genome_rot
-                                        genome_flush
-                                        genome_eq
-                                        genome_stackdepth
-                                        genome_yank
-                                        genome_yankdup
-                                        genome_shove
-                                        genome_empty
-                                        genome_rotate
-                                        genome_new
-                                        genome_parent1
-                                        genome_parent2
-                                        autoconstructive_integer_rand
-                                        autoconstructive_boolean_rand
-                                        genome_uniform_instruction_mutation
-                                        genome_uniform_integer_mutation
-                                        genome_uniform_float_mutation
-                                        genome_uniform_tag_mutation
-                                        genome_uniform_string_mutation
-                                        genome_uniform_boolean_mutation
-                                        genome_uniform_close_mutation
-                                        genome_uniform_silence_mutation
-                                        genome_uniform_deletion
-                                        genome_uniform_addition
-                                        genome_uniform_addition_and_deletion
-                                        genome_uniform_combination_and_deletion
-                                        genome_genesis
-                                        genome_alternation
-                                        genome_uniform_crossover)))]
+                    :gene-oriented (gene-oriented-instructions)
+                    :uniform (uniform-instructions)
+                    :interleaved (interleaved-instructions))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     (swap! push-argmap assoc 
@@ -584,4 +627,5 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
