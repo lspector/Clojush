@@ -528,7 +528,7 @@
              genome_uniform_combination_and_deletion
              genome_genesis
              genome_alternation
-             genome_uniform_crossover))))
+             genome_uniform_crossover)))
 
 (defn interleaved-instructions
   []
