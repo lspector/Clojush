@@ -790,9 +790,12 @@ the resulting top genome."
                                   {:genome
                                    (process-genome-for-autoconstruction genome-to-run)}
                                   argmap)
-                                (-> (->> (make-push-state)
-                                         (push-item parent2-genome :genome)
-                                         (push-item parent1-genome :genome))
+                                (-> (if (= (:autoconstructive-genome-instructions argmap)
+                                           :interleaved)
+                                      (make-push-state)
+                                      (->> (make-push-state)
+                                           (push-item parent2-genome :genome)
+                                           (push-item parent1-genome :genome)))
                                     (assoc :parent1-genome parent1-genome)
                                     (assoc :parent2-genome parent2-genome)
                                     (assoc :autoconstructing true))))]
@@ -1174,6 +1177,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
