@@ -370,7 +370,7 @@
     (let [mean (r/generation-data! [:best :mean-error] (float (/ (:total-error best)
                                                                  (count (:errors best)))))]
 
-      (println "Mean:") mean)
+      (println "Mean:" mean))
     (when (not= normalization :none)
       (println "Normalized error:" (:normalized-error best)))
     (case total-error-method
