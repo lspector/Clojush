@@ -307,7 +307,9 @@
            print-edn-logs edn-keys edn-log-filename edn-additional-keys]
            
     :as argmap}]
-  (r/generation-data! [:population] population)
+  (r/generation-data! [:population]
+    (map #(dissoc % :program) population))
+
   (println)
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
   (println ";; -*- Report at generation" generation)
@@ -352,7 +354,7 @@
           (lexicase-report population argmap))
     (when (= total-error-method :ifs) (implicit-fitness-sharing-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
-    (r/generation-data! [:best :individual] best)
+    (r/generation-data! [:best :individual] (dissoc best :program))
     (println "Best genome:" (print-genome best))
     (println "Best program:" (pr-str (not-lazy (:program best))))
     (when (> report-simplifications 0)
