@@ -277,7 +277,12 @@
                      [shorter longer] (if (< (count p1) (count p2))
                                         [p1 p2]
                                         [p2 p1])]
-                 (vec (interleave (cycle shorter) longer)))
+                 (vec (interleave (cycle shorter) longer))
+                 ;(vec (apply concat (map (fn [g1 g2]
+                 ;                          (lshuffle [g1 g2]))
+                 ;                        p1
+                 ;                        p2)))
+                 )
                :genome state)))
 
 (define-registered

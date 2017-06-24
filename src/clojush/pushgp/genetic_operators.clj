@@ -122,6 +122,13 @@
          (- 1 (max (sequence-similarity genome (:genome parent1))
                    (sequence-similarity genome (:genome parent2))))
          ;
+         :genetic-purity
+         (if (or (= (:genome parent1) (:genome parent2))
+                 (some #{genome} [(:genome parent1) (:genome parent2)]))
+           1
+           (- 1 (min (sequence-similarity genome (:genome parent1))
+                     (sequence-similarity genome (:genome parent2)))))
+         ;
          :reproductive-similarity-to-parent
          (sequence-similarity 
            genome
@@ -1030,6 +1037,18 @@ programs encoded by genomes g1 and g2."
           false))
       false)))
 
+(defn geometric-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g {:keys [parent1-genome parent2-genome]}]
+  (if (= parent1-genome parent2-genome)
+    (not (= g parent1-genome))
+    (if (or (= g parent1-genome)
+            (= g parent2-genome))
+      false
+      (let [parental-similarity (sequence-similarity parent1-genome parent2-genome)]
+        (and (> (sequence-similarity g parent1-genome) parental-similarity)
+             (> (sequence-similarity g parent2-genome) parental-similarity))))))
+
 (defn diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
@@ -1047,6 +1066,7 @@ programs encoded by genomes g1 and g2."
      :doesnt-clone doesnt-clone-diversifying?
      :not-a-clone not-a-clone-diversifying?
      :minimum-genetic-difference minimum-genetic-difference-diversifying?
+     :geometric geometric-diversifying?
      :none (fn [genome argmap] true))
     g
     argmap))
