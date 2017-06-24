@@ -57,7 +57,7 @@
     (println "Trying to record data to external server...")
     (try
       (do
-        (cheshire.core/generate-stream data @writer)        
+        (cheshire.core/generate-stream data @writer)
         (.newLine @writer)
         (.flush @writer))
       (catch java.net.SocketException _
