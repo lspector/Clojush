@@ -896,6 +896,25 @@ programs encoded by genomes g1 and g2."
     (and (> (reduce min diffs) 0)
          (apply distinct? diffs))))
 
+(defn not-a-clone-three-gens-same-inputs-diff-diffs-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (and (not-a-clone-diversifying? g argmap)
+       (let [make-child #(produce-child-genome-by-autoconstruction % g g argmap)
+             diff #(expressed-difference %1 %2 argmap)
+             c1 (make-child g)
+             c2 (make-child g)
+             gc1 (make-child c1)
+             gc2 (make-child c2)
+             c1-diff (diff g c1)
+             c2-diff (diff g c2)
+             gc1-diff (diff c1 gc1)
+             gc2-diff (diff c2 gc2)
+             diffs [c1-diff c2-diff gc1-diff gc2-diff]]
+         (and (> (reduce min diffs) 0)
+              (apply distinct? diffs)))))
+
+
 (defn three-gens-some-diff-diffs-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
@@ -1067,6 +1086,7 @@ programs encoded by genomes g1 and g2."
      :not-a-clone not-a-clone-diversifying?
      :minimum-genetic-difference minimum-genetic-difference-diversifying?
      :geometric geometric-diversifying?
+     :not-a-clone-three-gens-same-inputs-diff-diffs not-a-clone-three-gens-same-inputs-diff-diffs-diversifying?
      :none (fn [genome argmap] true))
     g
     argmap))
@@ -1197,6 +1217,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
