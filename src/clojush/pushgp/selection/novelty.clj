@@ -86,10 +86,11 @@
    and in the novelty-archive. Returns the individual with the :novelty key set, and
    if :novelty is a meta-error-category, also sets that."
   [individual behavior-sparseness]
-  (let [novelty (get behavior-sparseness (:behaviors individual))]
+  (let [novelty (get behavior-sparseness (:behaviors individual))
+        novelty-inverse (/ 1 (inc novelty))]
     (assoc individual
            :novelty novelty
-           :meta-errors (replace {:novelty novelty} (:meta-errors individual)))))
+           :meta-errors (replace {:novelty novelty-inverse} (:meta-errors individual)))))
 
 (defn calculate-novelty
   "Calculates novelty for each individual in the population with respect to the
