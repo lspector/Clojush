@@ -45,16 +45,19 @@
 
 (defn rp [prog state] (run-push prog state true))
 
-(defn valiant-fitness [program]
-  (doall (for [c (range numcases)]
-           (let [[inputs answer] (nth cases c)
-                 output (->> (make-push-state)
-                             (push-item inputs :auxiliary)
-                             (run-push program)
-                             ;(rp program)
-                             (top-item :boolean))]
-             ;(println "output" output "answer" answer)
-             (if (= output answer) 0 1)))))
+(defn valiant-fitness
+  [individual]
+  (assoc individual
+         :errors
+         (doall (for [c (range numcases)]
+                  (let [[inputs answer] (nth cases c)
+                        output (->> (make-push-state)
+                                    (push-item inputs :auxiliary)
+                                    (run-push (:program individual))
+                                        ;(rp (:program individual))
+                                    (top-item :boolean))]
+                                        ;(println "output" output "answer" answer)
+                    (if (= output answer) 0 1))))))
 
 ;input-indices
 

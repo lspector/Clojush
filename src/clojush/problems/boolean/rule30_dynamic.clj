@@ -68,13 +68,16 @@
                                  (make-push-state)))))
 
 (def argmap
-  {:error-function (fn [program]
-                     (doall
-                       (for [[input output] @rule30-data-this-generation]
-                         (if (= (rule30-program-output program input)
-                                output)
-                           0
-                           1))))
+  {:error-function (fn [individual]
+                     (assoc individual
+                            :errors
+                            (doall
+                             (for [[input output] @rule30-data-this-generation]
+                               (if (= (rule30-program-output (:program individual)
+                                                             input)
+                                      output)
+                                 0
+                                 1)))))
    :atom-generators (concat (list (fn [] (- (lrand-int 5) 2))
                                   ;(tag-instruction-erc [:exec :integer :boolean] 1000)
                                   ;(tagged-instruction-erc 1000)
@@ -115,9 +118,3 @@
                    output)
               0
               1))))
-
-
-
-
-
-
