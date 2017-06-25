@@ -356,6 +356,14 @@
           max-dist (max (count sequence1) (count sequence2))]
       (/ (- max-dist dist) max-dist))))
 
+;;;;;;;
+;; Hamming Distance
+(defn hamming-distance
+  "Calculates the Hamming distance between two sequences, including strings"
+  [seq1 seq2]
+  (apply + (map #(if (= %1 %2) 0 1)
+                  seq1 seq2)))
+
 ;;;;;;;;;;;;;;:::::;;;;;;;;;;;;;;
 ;; Simple Statistic Functions
 ;; From: https://github.com/clojure-cookbook/clojure-cookbook/blob/master/01_primitive-data/1-20_simple-statistics.asciidoc

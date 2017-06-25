@@ -9,16 +9,15 @@
   (take (:individuals-for-novelty-archive-per-generation argmap)
         (lshuffle population)))
 
-(defn behavioral-distance ;REF Note: will have to add something for other output types, such as vectors of different types of things
+(defn behavioral-distance
   "Takes two behavior vectors and finds the distance between them. Differences in
    vectors are based on the data type(s) they contain. Distance metric is based on
    the arg :novelty-distance-metric.
    Note that there is no limit on behavior differences, which will only be limited
    by their max bounds based on things like maximum integer size."
   [behavior1 behavior2 {:keys [novelty-distance-metric] :as argmap}]
-  (if (= novelty-distance-metric :hamming) ; This is hear, instead of below, for speed reasons
-    (apply + (map #(if (= %1 %2) 0 1)
-                  behavior1 behavior2))
+  (if (= novelty-distance-metric :hamming) ; This is here, instead of below, for speed reasons
+    (hamming-distance behavior1 behavior2)
     (let [behavior-differences (map (fn [b1 b2]
                                       (cond
                                         ; Handles equal behaviors, including if both are :no-stack-item
@@ -26,10 +25,13 @@
                                         ; If one has :no-stack-item and the other does not, give max difference
                                         (or (= b1 :no-stack-item)
                                             (= b2 :no-stack-item)) max-number-magnitude
+                                        (or (= b1 [])
+                                            (= b2 [])) (count (concat b1 b2))
                                         :else (case (recognize-literal b1)
                                                 :string (levenshtein-distance b1 b2)
                                                 (:integer :float) (math/abs (-' b1 b2))
                                                 (:boolean :char) (if (= b1 b2) 0 1)
+                                                (:vector_integer :vector_float :vector_string :vector_boolean) (hamming-distance b1 b2)
                                                 (throw (Exception. (str "Unrecognized behavior type in novelty distance for: " b1))))))
                                     behavior1
                                     behavior2)]
