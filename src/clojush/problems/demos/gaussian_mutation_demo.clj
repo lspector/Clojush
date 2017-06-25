@@ -20,21 +20,23 @@
 ;; mutation.
 
 (def argmap
-  {:error-function (fn [program]
-                     (doall
-                       (for [input (range -1.0 1.0 0.1)]
-                         (let [state (run-push program 
-                                               (push-item input :input 
-                                                          (push-item input :float
-                                                                     (make-push-state))))
-                               top-float (top-item :float state)
-                               invalid-output (or (not (number? top-float))
-                                                  (= (:termination state) :abnormal))]
-                           (if invalid-output
-                             1000
-                             (abs (- top-float
-                                     (+ (* 1.23 input input)
-                                        0.73))))))))
+  {:error-function (fn [individual]
+                     (assoc individual
+                            :errors
+                            (doall
+                             (for [input (range -1.0 1.0 0.1)]
+                               (let [state (run-push (:program individual)
+                                                     (push-item input :input 
+                                                                (push-item input :float
+                                                                           (make-push-state))))
+                                     top-float (top-item :float state)
+                                     invalid-output (or (not (number? top-float))
+                                                        (= (:termination state) :abnormal))]
+                                 (if invalid-output
+                                   1000
+                                   (abs (- top-float
+                                           (+ (* 1.23 input input)
+                                              0.73)))))))))
    :atom-generators (concat 
                       '(float_div float_mult float_sub float_add
                                   float_rot float_swap float_dup float_pop)

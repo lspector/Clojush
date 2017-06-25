@@ -34,31 +34,33 @@
 ;; trivial geography chapter) with minimal integer instructions and an 
 ;; input instruction that uses the default input stack
 
-;(def argmap
-;  {:error-function (fn [program]
-;                     (doall
-;                       (for [input (range 10)]
-;                         (let [state (->> (make-push-state)
-;                                       (push-item input :integer)
-;                                       (push-item input :input)
-;                                       (run-push program))
-;                               top-int (top-item :integer state)]
-;                           (if (number? top-int)
-;                             (abs (- top-int 
-;                                     (- (* input input input) 
-;                                        (* 2 input input)
-;                                        input)))
-;                             1000)))))
-;   :atom-generators (list (fn [] (lrand-int 10))
-;                          'in1
-;                          'integer_div
-;                          'integer_mult
-;                          'integer_add
-;                          'integer_sub)
-;   :parent-selection :tournament
-;   :genetic-operator-probabilities {:alternation 0.5
-;                                     :uniform-mutation 0.5}
-;   })
+;; (def argmap
+;;   {:error-function (fn [individual]
+;;                      (assoc individual
+;;                             :errors
+;;                             (doall
+;;                              (for [input (range 10)]
+;;                                (let [state (->> (make-push-state)
+;;                                                 (push-item input :integer)
+;;                                                 (push-item input :input)
+;;                                                 (run-push (:program individual)))
+;;                                      top-int (top-item :integer state)]
+;;                                  (if (number? top-int)
+;;                                    (abs (- top-int 
+;;                                            (- (* input input input) 
+;;                                               (* 2 input input)
+;;                                               input)))
+;;                                    1000))))))
+;;    :atom-generators (list (fn [] (lrand-int 10))
+;;                           'in1
+;;                           'integer_div
+;;                           'integer_mult
+;;                           'integer_add
+;;                           'integer_sub)
+;;    :parent-selection :tournament
+;;    :genetic-operator-probabilities {:alternation 0.5
+;;                                     :uniform-mutation 0.5}
+;;    })
 
 ;(pushgp argmap)
 
@@ -67,26 +69,28 @@
 ;; whether or not the input is an odd number. There are many ways to compute this
 ;; and PushGP sometimes finds unusual methods.
 
-;(def argmap
-;  {:use-single-thread true
-;   :error-function (fn [program]
-;                     (doall
-;                       (for [input (range 10)]
-;                         (let [state (run-push program
-;                                               (push-item input :input
-;                                                          (push-item input :integer
-;                                                                     (make-push-state))))
-;                               top-bool (top-item :boolean state)]
-;                           (if (not (= top-bool :no-stack-item))
-;                             (if (= top-bool (odd? input)) 0 1)
-;                             1000)))))
-;   :atom-generators (concat (registered-nonrandom)
-;                            (list (fn [] (lrand-int 100))
-;                                  'in1))
-;   :parent-selection :tournament
-;   :genetic-operator-probabilities {:alternation 0.5
-;                                     :uniform-mutation 0.5}
-;   })
+;; (def argmap
+;;  {:use-single-thread true
+;;   :error-function (fn [individual]
+;;                     (assoc individual
+;;                            :errors
+;;                            (doall
+;;                             (for [input (range 10)]
+;;                               (let [state (run-push (:program individual)
+;;                                                     (push-item input :input
+;;                                                                (push-item input :integer
+;;                                                                           (make-push-state))))
+;;                                     top-bool (top-item :boolean state)]
+;;                                 (if (not (= top-bool :no-stack-item))
+;;                                   (if (= top-bool (odd? input)) 0 1)
+;;                                   1000))))))
+;;   :atom-generators (concat (registered-nonrandom)
+;;                            (list (fn [] (lrand-int 100))
+;;                                  'in1))
+;;   :parent-selection :tournament
+;;   :genetic-operator-probabilities {:alternation 0.5
+;;                                     :uniform-mutation 0.5}
+;;   })
 
 ;(pushgp argmap)
 
@@ -95,25 +99,27 @@
 ;; specific stacks -- namely the integer, boolean, code, and exec stacks. This
 ;; method is useful if you want to use instructions from some stacks but not others.
 
-;(def argmap
-;  {:use-single-thread true
-;   :error-function (fn [program]
-;                     (doall
-;                       (for [input (range 10)]
-;                         (let [state (run-push program
-;                                               (push-item input :input
-;                                                          (push-item input :integer
-;                                                                     (make-push-state))))
-;                               top-bool (top-item :boolean state)]
-;                           (if (not (= top-bool :no-stack-item))
-;                             (if (= top-bool (odd? input)) 0 1)
-;                             1000)))))
-;   :atom-generators (concat (registered-for-stacks [:integer :boolean :code :exec])
-;                            (list (fn [] (lrand-int 100))
-;                                  'in1))
-;   :parent-selection :tournament
-;   :genetic-operator-probabilities {:alternation 0.5
-;                                    :uniform-mutation 0.5}
-;   })
+;; (def argmap
+;;  {:use-single-thread true
+;;   :error-function (fn [individual]
+;;                     (assoc individual
+;;                            :errors
+;;                            (doall
+;;                             (for [input (range 10)]
+;;                               (let [state (run-push (:program individual)
+;;                                                     (push-item input :input
+;;                                                                (push-item input :integer
+;;                                                                           (make-push-state))))
+;;                                     top-bool (top-item :boolean state)]
+;;                                 (if (not (= top-bool :no-stack-item))
+;;                                   (if (= top-bool (odd? input)) 0 1)
+;;                                   1000))))))
+;;   :atom-generators (concat (registered-for-stacks [:integer :boolean :code :exec])
+;;                            (list (fn [] (lrand-int 100))
+;;                                  'in1))
+;;   :parent-selection :tournament
+;;   :genetic-operator-probabilities {:alternation 0.5
+;;                                    :uniform-mutation 0.5}
+;;   })
 
 ;(pushgp argmap)

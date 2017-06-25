@@ -18,21 +18,22 @@
 ;; outputs of an evolved solution to get the actual outputs.
 
 (defn sextic-scaled-error-function
-  ([program]
-    (sextic-scaled-error-function program false))
-  ([program print-scaling-info]
+  ([individual]
+    (sextic-scaled-error-function individual false))
+  ([individual print-scaling-info]
     (let [inputs (range -1.0 1.0 0.1)
           outputs (doall (map #(top-item :float 
-                                         (run-push program
+                                         (run-push (:program individual)
                                                    (push-item % :input
                                                               (push-item % :float
                                                                          (make-push-state)))))
                               inputs))
-          targets (doall (map #(- (* % % % % % %) (* 2 % % % %) (* % %)) inputs))]
+          targets (doall (map #(- (* % % % % % %) (* 2 % % % %) (* % %)) inputs))
+          errors (scaled-errors outputs targets 1000000 print-scaling-info)]
       (when print-scaling-info
         (println "outputs" (into [] outputs))
         (println "targets" (into [] targets)))
-      (scaled-errors outputs targets 1000000 print-scaling-info))))
+      (assoc individual :errors errors :behaviors outputs))))
 
 (def argmap
   {:error-function sextic-scaled-error-function
