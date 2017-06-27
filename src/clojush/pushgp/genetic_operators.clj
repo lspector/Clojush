@@ -102,8 +102,11 @@
            (empty? genome))
      1
      (if (some :dummy [parent1 parent2])
-       (if (some #{(:criterion random-screen)} 
-                 #{:non-zero-genetic-similarity-to-parent})
+       (if (or (= (:criterion random-screen)
+                  :genetic-purity)
+               ;; not really sure about the following!
+               (some #{(:criterion random-screen)} 
+                 #{:non-zero-genetic-similarity-to-parent}))
          1
          0)
        (case (:criterion random-screen)
@@ -1217,6 +1220,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
