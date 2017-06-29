@@ -18,16 +18,18 @@
 (defn order-fitness
   "Returns a fitness function for the order problem for specified
 depth and number of nodes."
-  [program]
-  (loop [f (distinct (filter number? (flatten program)))
-         P '()]
-    (if (empty? f)
-      (let [sp (set P)]
-        (map #(if (contains? sp %) 0 1) (range 1 (inc @global-problem-size))))
-      (if (zero? (count (filter #(= (abs (first f))
-                                    (abs %)) P)))
-        (recur (rest f) (cons (first f) P))
-        (recur (rest f) P)))))
+  [individual]
+  (assoc individual
+         :errors
+         (loop [f (distinct (filter number? (flatten (:program individual))))
+                P '()]
+           (if (empty? f)
+             (let [sp (set P)]
+               (map #(if (contains? sp %) 0 1) (range 1 (inc @global-problem-size))))
+             (if (zero? (count (filter #(= (abs (first f))
+                                           (abs %)) P)))
+               (recur (rest f) (cons (first f) P))
+               (recur (rest f) P))))))
 
 (defn make-order-instructions
   "Make the order instructions for a given problem size."
