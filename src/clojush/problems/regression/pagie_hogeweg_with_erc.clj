@@ -30,19 +30,21 @@
   (fn [state] (push-item (stack-ref :auxiliary 1 state) :float state)))
 
 (defn error-function
-  [num-samples program]
-  (doall
-    (for [row (if (== (count data) num-samples)
-                data
-                (take num-samples (shuffle data)))]
-      (let [state (run-push program 
-                            (assoc (make-push-state)
-                                   :auxiliary
-                                   (butlast row)))
-            top-float (top-item :float state)]
-        (if (number? top-float)
-          (math/abs (- top-float (last row)))
-          1000)))))
+  [num-samples individual]
+  (assoc individual
+         :errors
+         (doall
+          (for [row (if (== (count data) num-samples)
+                      data
+                      (take num-samples (shuffle data)))]
+            (let [state (run-push (:program individual)
+                                  (assoc (make-push-state)
+                                         :auxiliary
+                                         (butlast row)))
+                  top-float (top-item :float state)]
+              (if (number? top-float)
+                (math/abs (- top-float (last row)))
+                1000))))))
 
 (defn hit-error-function
   "Error function based on Koza's hit criteria."
@@ -71,7 +73,7 @@
     ))
 
 (defn problem-specific-report [best population generation sampled-error-function report-simplifications] 
-  (let [errors (error-function (count data) (:program best))
+  (let [errors (:errors (error-function (count data) best))
         hit-errors (hit-error-function (count data) (:program best))
         total-error (apply + errors)
         hit-total-error (apply + hit-errors)]

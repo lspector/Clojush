@@ -249,17 +249,19 @@
   (fn [state] (push-item (stack-ref :auxiliary 4 state) :float state)))
 
 (def argmap
-  {:error-function (fn [program]
-                     (doall
-                       (for [row data]
-                         (let [state (run-push program 
-                                               (assoc (make-push-state)
-                                                      :auxiliary
-                                                      (take 5 row)))
-                               top-float (top-item :float state)]
-                           (if (number? top-float)
-                             (expt (- top-float (nth row 5)) 2)
-                             1000)))))
+  {:error-function (fn [individual]
+                     (assoc individual
+                            :errors
+                            (doall
+                             (for [row data]
+                               (let [state (run-push (:program individual) 
+                                                     (assoc (make-push-state)
+                                                            :auxiliary
+                                                            (take 5 row)))
+                                     top-float (top-item :float state)]
+                                 (if (number? top-float)
+                                   (expt (- top-float (nth row 5)) 2)
+                                   1000))))))
    :atom-generators (list 
                       ;(fn [] (- (* (lrand) 100) 50))
                       (fn [] (- (lrand) 0.5))

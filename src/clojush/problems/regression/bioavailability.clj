@@ -94,25 +94,26 @@
 
 (defn bioavailability-error-function
   "Error function for the bioavailability problem."
-  [fitness-set program]
-    (doall
-      (for [fitness-case (get bioavailability-fitness-cases fitness-set)]
-        (let [input (butlast fitness-case)
-              output (last fitness-case)
-              state (run-push program
-                              (assoc (make-push-state)
-                                     :auxiliary
-                                     input))
-              top-float (top-item :float state)]
-          (if (number? top-float)
-            (abs (- output top-float))
-            10000.0)))))
+  [fitness-set individual]
+  (assoc individual
+         (if (= fitness-set :train) :errors :test-errors)
+         (doall
+          (for [fitness-case (get bioavailability-fitness-cases fitness-set)]
+            (let [input (butlast fitness-case)
+                  output (last fitness-case)
+                  state (run-push (:program individual)
+                                  (assoc (make-push-state)
+                                         :auxiliary
+                                         input))
+                  top-float (top-item :float state)]
+              (if (number? top-float)
+                (abs (- output top-float))
+                10000.0))))))
 
 (defn bioavailability-report
   "Customize generational report."
   [best population generation error-function report-simplifications]
-  (let [best-program (not-lazy (:program best))
-        best-test-errors (bioavailability-error-function :test best-program)]
+  (let [best-test-errors (:errors (bioavailability-error-function :test best))]
     (printf ";; -*- Bioavailability problem report generation %s" generation)(flush)
     (printf  "\nTest mean: %.4f"
             (float (/ (apply + best-test-errors)
