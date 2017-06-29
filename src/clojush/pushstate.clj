@@ -60,7 +60,7 @@
   "Returns a copy of the state with the value pushed on the named stack. This is a utility,
    not for use in Push programs."
   [value type state]
-  (assoc state type (cons value (type state))))
+  (update state type conj value))
 
 (defn top-item
   "Returns the top item of the type stack in state. Returns :no-stack-item if called on
@@ -93,7 +93,7 @@
   "Returns a copy of the state with the specified stack popped. This is a utility,
    not for use as an instruction in Push programs."
   [type state]
-  (assoc state type (rest (type state))))
+  (update state stack rest))
 
 (defn end-environment
   "Ends the current environment by popping the :environment stack and replacing

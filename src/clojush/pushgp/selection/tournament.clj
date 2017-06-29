@@ -11,5 +11,4 @@
                  (:hah :rmse :ifs) :weighted-error
                  (throw (Exception. (str "Unrecognized argument for total-error-method: "
                                          total-error-method))))]
-    (reduce (fn [i1 i2] (if (< (err-fn i1) (err-fn i2)) i1 i2))
-            tournament-set)))
+    (apply min-key err-fn tournament-set)))
