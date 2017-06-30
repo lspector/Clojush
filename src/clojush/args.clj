@@ -63,10 +63,6 @@
           ;; When true, children produced through direct reproduction will not be re-evaluated but
           ;; will have the error vector of their parent.
 
-          :pass-individual-to-error-function false
-          ;; When true, entire individuals (rather than just programs) are passed to error
-          ;; functions.
-
           ;;----------------------------------------
           ;; Genetic operator probabilities
           ;;----------------------------------------
@@ -251,7 +247,8 @@
 
           :parent-selection :lexicase
           ;; The parent selection method. Options include :tournament, :lexicase, :epsilon-lexicase,
-          ;; :elitegroup-lexicase, :uniform, :leaky-lexicase, random-threshold-lexicase
+          ;; :elitegroup-lexicase, :uniform, :leaky-lexicase, :random-threshold-lexicase,
+          ;; :novelty-search
 
           :epsilon-lexicase-epsilon nil
           ;; When parent-selection is :epsilon-lexicase,
@@ -336,6 +333,21 @@
           ;; to consider only individuals with :grain-size equal to or GREATER than the
           ;; chosen :grain-size.
 
+          :novelty-distance-metric :euclidean
+          ;; When using novelty, the distance metric between two behavior vectors
+          ;; Options: :manhattan, :euclidean
+
+          :individuals-for-novelty-archive-per-generation 0
+          ;; The number of individuals to add to the novelty archive per generation, if
+          ;; using novelty search for parent selection or novelty as a meta-error. Default
+          ;; of 0 means archive won't be maintained. Novelty GP paper uses one individual
+          ;; every-other generation for 1000 generations; as such, a value of 1 seems like
+          ;; a reasonable place to start.
+
+          :novelty-number-of-neighbors-k 25
+          ;; The number of neighbors to consider when calculating the sparseness with
+          ;; regard to the nearest neighbors. Paper claims it is "robust to modest variation."
+
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
           ;;----------------------------------------
@@ -398,11 +410,6 @@
           :print-ancestors-of-solution false
           ;; If true, final report prints the ancestors of the solution. Requires
           ;; :maintain-ancestors to be true.
-
-          :print-behavioral-diversity false
-          ;; If true, prints the behavioral diversity of the population each generation.
-          ;; Note: The error function for the problem must support behavioral diversity.
-          ;; For an example, see wc.clj
 
           :print-homology-data false
           ;; If true, prints the homology statistics.

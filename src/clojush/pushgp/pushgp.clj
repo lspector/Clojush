@@ -8,7 +8,7 @@
          tag zip return input-output genome]
         [clojush.pushgp breed report]
         [clojush.pushgp.selection 
-         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing]
+         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty]
         [clojush.experimental.decimation]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -166,7 +166,8 @@
         ;(doseq [seed random-seeds] (print " " seed))
         ;(println)
         ;; Main loop
-        (loop [generation 0]
+        (loop [generation 0
+               novelty-archive '()]
           (r/new-generation! generation)
           (println "Processing generation:" generation) (flush)
           (population-translate-plush-to-push pop-agents @push-argmap)
@@ -186,6 +187,10 @@
           ;; calculate epsilons for epsilon lexicase selection
           (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
             (calculate-epsilons-for-epsilon-lexicase pop-agents @push-argmap))
+          ;; calculate novelty when necessary
+          (when (or (= (:parent-selection @push-argmap) :novelty-search)
+                    (some #{:novelty} (:meta-error-categories @push-argmap)))
+            (calculate-novelty pop-agents novelty-archive @push-argmap))
           (timer @push-argmap :other)
           ;; report and check for success
           (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
@@ -200,7 +205,11 @@
                                                           true 
                                                           500)
                                            (flush)))
-                  (= outcome :continue) (do (timer @push-argmap :report)
+                  (= outcome :continue) (let [next-novelty-archive (concat novelty-archive
+                                                                           (select-individuals-for-novelty-archive
+                                                                            (map deref pop-agents)
+                                                                            @push-argmap))]
+                                          (timer @push-argmap :report)
                                           (println "\nProducing offspring...") (flush)
                                           (produce-new-offspring pop-agents 
                                                                  child-agents 
@@ -208,7 +217,8 @@
                                                                  @push-argmap)
                                           (println "Installing next generation...") (flush)
                                           (install-next-generation pop-agents child-agents @push-argmap)
-                                          (recur (inc generation)))
+                                          (recur (inc generation)
+                                                 next-novelty-archive))
                   :else  (final-report generation best @push-argmap))))))))
 
 

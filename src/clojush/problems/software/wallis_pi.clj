@@ -72,11 +72,11 @@
 (defn make-wallis-pi-error-function-from-cases
   [train-cases test-cases]
   (fn the-actual-wallis-pi-error-function
-    ([program]
-      (the-actual-wallis-pi-error-function program :train))
-    ([program data-cases] ;; data-cases should be :train or :test
-                          (the-actual-wallis-pi-error-function program data-cases false))
-    ([program data-cases print-outputs]
+    ([individual]
+      (the-actual-wallis-pi-error-function individual :train))
+    ([individual data-cases] ;; data-cases should be :train or :test
+     (the-actual-wallis-pi-error-function individual data-cases false))
+    ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (flatten
                      (doall
@@ -84,7 +84,7 @@
                                                        :train train-cases
                                                        :test test-cases
                                                        [])]
-                         (let [final-state (run-push program
+                         (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item input1 :input)))
                                result (round-to-n-decimal-places
@@ -96,8 +96,7 @@
                                              (str result))]
                                (println (format "Correct output: %.5f | Program output: %s" correct-output res-str))))
                            ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
+                           (swap! behavior conj result)
                            ; Outputs rounded to 5 decimal places
                            (vector
                              ; Error 1: float absolute error
@@ -107,9 +106,9 @@
                              ; Error 2: Levenshtein distance of strings
                              (levenshtein-distance (str correct-output) (str result))
                              )))))]
-        (when @global-print-behavioral-diversity
-          (swap! population-behaviors conj @behavior))
-        errors))))
+        (if (= data-cases :train)
+          (assoc individual :behaviors @behavior :errors errors)
+          (assoc individual :test-errors errors))))))
 
 (defn get-wallis-pi-train-and-test
   "Returns the train and test cases."
@@ -133,8 +132,7 @@
 (defn wallis-pi-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
-  (let [best-program (not-lazy (:program best))
-        best-test-errors (error-function best-program :test)
+  (let [best-test-errors (:test-errors (error-function best :test))
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
     (printf ";; -*- Wallis Pi problem report - generation %s\n" generation)(flush)
@@ -147,7 +145,7 @@
         (println (format "Test Case  %3d | Error: %s" i (str error)))))
     (println ";;------------------------------")
     (println "Outputs of best individual on training cases:")
-    (error-function best-program :train true)
+    (error-function best :train true)
     (println ";;******************************")
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
@@ -176,7 +174,6 @@
    :uniform-mutation-constant-tweak-rate 0.9
    :problem-specific-report wallis-pi-report
    :problem-specific-initial-report wallis-pi-initial-report
-   :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
    :error-threshold 0.001

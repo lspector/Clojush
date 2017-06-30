@@ -18,24 +18,26 @@
 ;; (Hence the name tg8.)
 
 (def argmap
-  {:error-function (fn [program]
-                     (doall
-                       (for [input (range 10)]
-                         (let [state (run-push program 
-                                               (push-item input :input 
-                                                          (push-item input :integer
-                                                                     (make-push-state))))
-                               top-int (top-item :integer state)
-                               invalid-output (or (not (number? top-int))
-                                                  (= (:termination state) :abnormal))]
-                           (if invalid-output
-                             10000000
-                             (abs (- top-int
-                                     (+ (* 5 input input input input input input)
-                                        (* -2 input input input input input)
-                                        (* -5 input input input)
-                                        (* 3 input input)
-                                        5))))))))
+  {:error-function (fn [individual]
+                     (assoc individual
+                            :errors
+                            (doall
+                             (for [input (range 10)]
+                               (let [state (run-push (:program individual) 
+                                                     (push-item input :input 
+                                                                (push-item input :integer
+                                                                           (make-push-state))))
+                                     top-int (top-item :integer state)
+                                     invalid-output (or (not (number? top-int))
+                                                        (= (:termination state) :abnormal))]
+                                 (if invalid-output
+                                   10000000
+                                   (abs (- top-int
+                                           (+ (* 5 input input input input input input)
+                                              (* -2 input input input input input)
+                                              (* -5 input input input)
+                                              (* 3 input input)
+                                              5)))))))))
    :atom-generators (concat 
                       '(integer_add integer_sub integer_mult integer_div)
                       (list 

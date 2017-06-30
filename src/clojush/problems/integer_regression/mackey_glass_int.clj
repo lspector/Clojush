@@ -63,17 +63,19 @@
   (fn [state] (push-item (stack-ref :auxiliary 0 state) :integer state)))
 
 (defn error-function
-  [num-samples program]
-  (doall
-    (for [row (take num-samples (shuffle data))]
-      (let [state (run-push program 
-                            (assoc (make-push-state)
-                                   :auxiliary
-                                   (butlast row)))
-            top-integer (top-item :integer state)]
-        (if (number? top-integer)
-          (math/expt (- top-integer (last row)) 2)
-          1000)))))
+  [num-samples individual]
+  (assoc individual
+         :errors
+         (doall
+          (for [row (take num-samples (shuffle data))]
+            (let [state (run-push (:program individual) 
+                                  (assoc (make-push-state)
+                                         :auxiliary
+                                         (butlast row)))
+                  top-integer (top-item :integer state)]
+              (if (number? top-integer)
+                (math/expt (- top-integer (last row)) 2)
+                1000))))))
 
 (def atom-generators
   (list 
@@ -87,7 +89,7 @@
 
 (defn problem-specific-report 
   [best population generation sampled-error-function report-simplifications] 
-  (let [errors (error-function (count data) (:program best))
+  (let [errors (:errors (error-function (count data) best))
         total-error (apply + errors)]
     #_(println "Best's errors on full data set:" errors)
     (println "Best's total-error on full data set:" total-error)))

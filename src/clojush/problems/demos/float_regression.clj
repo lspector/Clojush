@@ -24,17 +24,18 @@
         input)]))
 
 (def argmap
-  {:error-function (fn [program]
-                     (doall
-                       (for [[input target] fitness-cases]
-                         (let [state (run-push program 
-                                               (push-item input :input 
-                                                          (push-item input :float 
-                                                                     (make-push-state))))
-                               top-float (top-item :float state)]
-                           (if (number? top-float)
-                             (Math/abs (- top-float target))
-                             1000)))))
+  {:error-function (fn [individual]
+                     (assoc individual :errors
+                            (doall
+                             (for [[input target] fitness-cases]
+                               (let [state (run-push (:program individual)
+                                                     (push-item input :input 
+                                                                (push-item input :float 
+                                                                           (make-push-state))))
+                                     top-float (top-item :float state)]
+                                 (if (number? top-float)
+                                   (Math/abs (- top-float target))
+                                   1000))))))
    :atom-generators (list (fn [] (lrand 10))
                           'in1
                           'float_div
@@ -44,6 +45,6 @@
    :epigenetic-markers []
    :genetic-operator-probabilities {:alternation 0.8
                                     :uniform-mutation 0.2}
-   :parent-selection :tournament
+   :parent-selection :epsilon-lexicase
    :tournament-size 3
    })

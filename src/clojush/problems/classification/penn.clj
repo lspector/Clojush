@@ -115,18 +115,20 @@
 
 (defn penn-error-function
   "Error function for the penn problem."
-  [fitness-set program]
-  (doall
-    (for [fitness-case (get @penn-fitness-cases fitness-set)]
-      (let [inputs (:inputs fitness-case)
-            target (:target fitness-case)
-            push-state (run-push program (assoc (make-push-state) :input inputs))
-            [most second-most] (take 2 (reverse (sort-by val (frequencies (:string push-state)))))
-            answer (if (or (not most)
-                           (= (second most) (second second-most)))
-                     nil
-                     (first most))]
-        (if (= answer target) 0 1)))))
+  [fitness-set individual]
+  (assoc individual
+         :errors
+         (doall
+          (for [fitness-case (get @penn-fitness-cases fitness-set)]
+            (let [inputs (:inputs fitness-case)
+                  target (:target fitness-case)
+                  push-state (run-push (:program individual) (assoc (make-push-state) :input inputs))
+                  [most second-most] (take 2 (reverse (sort-by val (frequencies (:string push-state)))))
+                  answer (if (or (not most)
+                                 (= (second most) (second second-most)))
+                           nil
+                           (first most))]
+              (if (= answer target) 0 1))))))
             
 (defn rmse
   "Returns the root of the mean square error for use in error reporting."
@@ -139,7 +141,7 @@
   the training cases if appropriate."
   [best population generation error-function report-simplifications]
   (let [best-program (not-lazy (:program best))
-        best-test-errors (penn-error-function :test best-program)]
+        best-test-errors (:errors (penn-error-function :test {:program best-program}))]
     (printf ";; -*- Penn problem report generation %s" generation)(flush)
     (printf  "\nTest mean: %.4f"
             (float (/ (apply + best-test-errors)

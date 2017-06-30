@@ -30,8 +30,11 @@
 ;; the right integer on the stack gives 0 error
 (assert (= 0 (single-error-function 2 0)))
 
-(defn nth-prime-error-function [program]
-  (map (partial single-error-function program) (range 20)))
+(defn nth-prime-error-function [individual]
+  (assoc individual
+         :errors
+         (map (partial single-error-function (:program individual))
+              (range 20))))
 
 
 (def atom-generators

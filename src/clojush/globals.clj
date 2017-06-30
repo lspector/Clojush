@@ -76,9 +76,6 @@
 (def epsilons-for-epsilon-lexicase (atom ())) 
 ;; Used in epsilon lexicase. Only calculated once per population
 
-(def population-behaviors (atom ())) 
-;; Used to store the behaviors of the population for use in tracking behavioral diversity
-
 (def selection-counts (atom {})) 
 ;; Used to store the number of selections for each individual, indexed by UUIDs
 
@@ -141,8 +138,3 @@
 
 (def global-parent-selection (atom :lexicase)) 
 ;; The type of parent selection used
-
-(def global-print-behavioral-diversity (atom false)) 
-;; When true, reports will print the behavioral diversity of the population
-
-

@@ -55,11 +55,11 @@
 (defn make-number-io-error-function-from-cases
   [train-cases test-cases]
   (fn the-actual-num-io-error-function
-    ([program]
-      (the-actual-num-io-error-function program :train))
-    ([program data-cases] ;; data-cases should be :train or :test
-                          (the-actual-num-io-error-function program data-cases false))
-    ([program data-cases print-outputs]
+    ([individual]
+      (the-actual-num-io-error-function individual :train))
+    ([individual data-cases] ;; data-cases should be :train or :test
+     (the-actual-num-io-error-function individual data-cases false))
+    ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (flatten
                      (doall
@@ -67,7 +67,7 @@
                                                              :train train-cases
                                                              :test test-cases
                                                              [])]
-                         (let [final-state (run-push program
+                         (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item in-int :input)
                                                        (push-item in-float :input)
@@ -76,8 +76,7 @@
                            (when print-outputs
                              (println (format "Correct output: %-14s | Program output: %-14s" (pr-str (round-to-n-decimal-places out-float 10)) printed-result)))
                            ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj printed-result))
+                           (swap! behavior conj printed-result)
                            ; Each test case results in two error values:
                            ;   1. Numeric difference between correct output and the printed
                            ;      output read into a float, rounded to 4 decimal places;
@@ -88,9 +87,9 @@
                                        (catch Exception e 1000.0))
                                      4)
                                    (levenshtein-distance printed-result (pr-str (round-to-n-decimal-places out-float 10))))))))]
-        (when @global-print-behavioral-diversity
-          (swap! population-behaviors conj @behavior))
-        errors))))
+        (if (= data-cases :train)
+          (assoc individual :behaviors @behavior :errors errors)
+          (assoc individual :test-errors errors))))))
 
 (defn get-number-io-train-and-test
   "Returns the train and test cases."
@@ -114,8 +113,7 @@
 (defn num-io-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
-  (let [best-program (not-lazy (:program best))
-        best-test-errors (error-function best-program :test)
+  (let [best-test-errors (:test-errors (error-function best :test))
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
     (printf ";; -*- Number IO problem report - generation %s\n" generation)(flush)
@@ -128,7 +126,7 @@
         (println (format "Test Case  %3d | Numeric Error: %19.14f | Levenshtein Distance: %d" i (float num-error) lev-dist))))
     (println ";;------------------------------")
     (println "Outputs of best individual on training cases:")
-    (error-function best-program :train true)
+    (error-function best :train true)
     (println ";;******************************")
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
@@ -156,7 +154,6 @@
    :uniform-mutation-rate 0.01
    :problem-specific-report num-io-report
    :problem-specific-initial-report number-io-initial-report
-   :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000

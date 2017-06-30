@@ -16,23 +16,25 @@
 ;; It also uses squared errors in the error function and a non-zero error threshold.
 
 (def argmap
-  {:error-function (fn [program]
-                     (doall
-                       (for [input (range -1.0 1.0 0.1)]
-                         (let [state (run-push program 
-                                               (push-item input :input 
-                                                          (push-item input :float
-                                                                     (make-push-state))))
-                               top-float (top-item :float state)
-                               invalid-output (or (not (number? top-float))
-                                                  (= (:termination state) :abnormal))]
-                           (if invalid-output
-                             1000
-                             (expt (- top-float
-                                      (+ (* input input input input input input)
-                                         (- (* 2 input input input input))
-                                         (* input input)))
-                                   2))))))
+  {:error-function (fn [individual]
+                     (assoc individual
+                            :errors
+                            (doall
+                             (for [input (range -1.0 1.0 0.1)]
+                               (let [state (run-push (:program individual) 
+                                                     (push-item input :input 
+                                                                (push-item input :float
+                                                                           (make-push-state))))
+                                     top-float (top-item :float state)
+                                     invalid-output (or (not (number? top-float))
+                                                        (= (:termination state) :abnormal))]
+                                 (if invalid-output
+                                   1000
+                                   (expt (- top-float
+                                            (+ (* input input input input input input)
+                                               (- (* 2 input input input input))
+                                               (* input input)))
+                                         2)))))))
    :error-threshold 0.01
    :atom-generators (concat 
                       '(float_div float_mult float_sub float_add
@@ -42,7 +44,7 @@
                         'in1))
    :population-size 1000
    :epigenetic-markers []
-   :parent-selection :tournament
+   :parent-selection :epsilon-lexicase
    :genetic-operator-probabilities {:alternation 0.5
                                     :uniform-mutation 0.5}
    :uniform-mutation-rate 0.1

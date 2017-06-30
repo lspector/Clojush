@@ -27,20 +27,22 @@
           (/ 10.0))]))
 
 (def argmap
-  {:error-function (fn [program]
-                     (doall
-                       (for [[[x1 x2 x3 x4 x5] y] uball5d-training-cases]
-                         (let [result (->> (run-push program 
-                                                     (->> (make-push-state)
-                                                          (push-item x1 :input)
-                                                          (push-item x2 :input)
-                                                          (push-item x3 :input)
-                                                          (push-item x4 :input)
-                                                          (push-item x5 :input)))
-                                           (top-item :float))]
-                           (if (number? result)
-                             (Math/abs (- result y))
-                             1000000)))))
+  {:error-function (fn [individual]
+                     (assoc individual
+                            :errors
+                            (doall
+                             (for [[[x1 x2 x3 x4 x5] y] uball5d-training-cases]
+                               (let [result (->> (run-push (:program individual)
+                                                           (->> (make-push-state)
+                                                                (push-item x1 :input)
+                                                                (push-item x2 :input)
+                                                                (push-item x3 :input)
+                                                                (push-item x4 :input)
+                                                                (push-item x5 :input)))
+                                                 (top-item :float))]
+                                 (if (number? result)
+                                   (Math/abs (- result y))
+                                   1000000))))))
    :atom-generators (conj '[float_div float_mult float_sub float_add
                             float_rot float_swap float_dup float_pop
                             in1 in2 in3 in4 in5]

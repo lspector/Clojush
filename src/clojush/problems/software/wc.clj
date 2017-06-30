@@ -134,7 +134,7 @@
     'string_rot
     'string_parse_to_chars
     ;'string_rand
-    'string_contained
+    'string_contains
     'string_reverse
     'string_yank
     'string_swap
@@ -272,9 +272,9 @@
         (prn string)
         (println "--------------------")))
     (fn the-actual-wc-error-function
-      ([program]
-        (the-actual-wc-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
+      ([individual]
+        (the-actual-wc-error-function individual :train))
+      ([individual data-cases] ;; data-cases should be :train or :test
         (let [behavior (atom '())
               errors (flatten
                        (doall
@@ -282,7 +282,7 @@
                                                                     :train train-cases
                                                                     :test test-cases
                                                                     [])]
-                           (let [final-state (run-push program
+                           (let [final-state (run-push (:program individual)
                                                        (->> (make-push-state)
                                                          (push-item nil :auxiliary)
                                                          (push-item nil :auxiliary)
@@ -293,8 +293,7 @@
                                  result-word (stack-ref :auxiliary 3 final-state)
                                  result-line (stack-ref :auxiliary 4 final-state)]
                              ; Record the behavior
-                             (when @global-print-behavioral-diversity
-                               (swap! behavior concat [result-char result-word result-line]))
+                             (swap! behavior concat [result-char result-word result-line])
                              ; The error is the integer difference between the desired output
                              ; and the result output for each of char-count, word-count, and
                              ; line-count. Because of this, each test case results in 3
@@ -309,15 +308,14 @@
                                      (if (number? result-line)
                                        (abs (- result-line out-line))
                                        100000))))))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors)))))
+          (if (= data-cases :train)
+            (assoc individual :errors errors :behaviors @behavior)
+            (assoc individual :test-errors errors)))))))
 
 (defn wc-report
   "Customize generational report."
   [best population generation error-function report-simplifications]
-  (let [best-program (not-lazy (:program best))
-        best-test-errors (error-function best-program :test)
+  (let [best-test-errors (:test-errors (error-function best :test))
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
     (printf ";; -*- WC problem report generation %s\n" generation)(flush)
@@ -349,7 +347,6 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report wc-report
-   :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 100000

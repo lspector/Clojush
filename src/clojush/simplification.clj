@@ -74,7 +74,7 @@
                                        (dec how-many))))
                             ;; remove single paren pair
                             (remove-paren-pair program))
-              new-errors (error-function new-program)
+              new-errors (:errors (error-function {:program new-program}))
               new-total-errors (compute-total-error new-errors)] ;simplification bases its decision on raw error; HAH-error could also be used here
           (if (= new-errors errors) ; only keep the simplified program if its error vector is the same as the original program's error vector
             (recur (inc step) new-program new-errors new-total-errors)
@@ -82,7 +82,7 @@
 
 (defn auto-simplify-from-program
   [p error-function steps print? progress-interval]
-  (let [errs (error-function p)]
+  (let [errs (:errors (error-function {:program p}))]
     (auto-simplify (make-individual :program p
                                     :errors errs
                                     :total-error (reduce + errs)
@@ -191,7 +191,7 @@
                                                              {:max-points (* 10 (count genome))}))
            errors (if (:errors ind)
                     (:errors ind)
-                    (error-function program))]
+                    (:errors (error-function ind)))]
       (when (and (not (zero? print-progress-interval))
                  (or (>= step steps)
                      (zero? (mod step print-progress-interval))))
@@ -207,7 +207,7 @@
         (let [new-genome (apply-simplification-step-to-genome genome simplification-step-probabilities)
               new-program (translate-plush-genome-to-push-program (assoc ind :genome new-genome)
                                                                   {:max-points (* 10 (count genome))})
-              new-errors (error-function new-program)]
+              new-errors (:errors (error-function {:program new-program}))]
           (if (and (= new-errors errors)
                    (<= (count-points new-program) (count-points program)))
             (recur (inc step) new-genome new-program new-errors)

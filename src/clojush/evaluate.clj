@@ -46,6 +46,7 @@
                           (= cat :rand) (lrand)
                           (= cat :rand-bit) (lrand-nth [0 1])
                           (= cat :age) (:age ind)
+                          (= cat :novelty) :novelty ; Keyword will be replaced later, since needs entire population to compute novelty
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
     (doall (map meta-error-fn meta-error-categories))))
 
@@ -94,20 +95,21 @@
                           :normalization :none
                           :max-error 1000}))
   ([i error-function rand-gen
-    {:keys [reuse-errors print-history total-error-method normalization max-error pass-individual-to-error-function]
+    {:keys [reuse-errors print-history total-error-method normalization max-error]
      :as argmap}]
     (random/with-rng rand-gen
       (let [p (:program i)
-            raw-errors (if (or (not reuse-errors) (nil? (:errors i)) (nil? (:total-error i)))
-                         (if pass-individual-to-error-function
-                           (error-function i)
-                           (error-function p)))
+            evaluated-i (if (or (not reuse-errors)
+                                (nil? (:errors i))
+                                (nil? (:total-error i)))
+                         (error-function i)
+                         i)
+            raw-errors (:errors evaluated-i)
             e (vec (if (and reuse-errors (not (nil? (:errors i))))
                      (:errors i)
                      (do
                        (swap! evaluations-count inc)
-                       (normalize-errors raw-errors normalization max-error)
-                       )))
+                       (normalize-errors raw-errors normalization max-error))))
             te (if (and reuse-errors (not (nil? (:total-error i))))
                  (:total-error i)
                  (compute-total-error raw-errors))
@@ -120,16 +122,11 @@
                  :hah (compute-hah-error e)
                  :rmse (compute-root-mean-square-error e)
                  nil)
-            new-ind (assoc i ; Assign errors and history to i
+            new-ind (assoc evaluated-i ; Assign errors and history to i
                            :errors e
                            :total-error te
                            :weighted-error we
                            :normalized-error ne
-                           :history (if print-history (cons te (:history i)) (:history i))
-                           )
+                           :history (if print-history (cons te (:history i)) (:history i)))
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
-
-
-
-

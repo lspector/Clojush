@@ -94,38 +94,6 @@
                 (= (first %) (vec (reverse (second %)))))
        inputs))
 
-(defn make-mirror-image-error-function-from-cases
-  [train-cases test-cases]
-  (fn the-actual-mirror-image-error-function
-    ([program]
-      (the-actual-mirror-image-error-function program :train))
-    ([program data-cases] ;; data-cases should be :train or :test
-                          (the-actual-mirror-image-error-function program data-cases false))
-    ([program data-cases print-outputs]
-      (let [behavior (atom '())
-            errors (doall
-                     (for [[[input1 input2] correct-output] (case data-cases
-                                                              :train train-cases
-                                                              :test test-cases
-                                                              [])]
-                       (let [final-state (run-push program
-                                                   (->> (make-push-state)
-                                                     (push-item input2 :input)
-                                                     (push-item input1 :input)))
-                             result (top-item :boolean final-state)]
-                         (when print-outputs
-                           (println (format "Correct output: %5b | Program output: %s" correct-output (str result))))
-                         ; Record the behavior
-                         (when @global-print-behavioral-diversity
-                           (swap! behavior conj result))
-                         ; Error is boolean error
-                         (if (= result correct-output)
-                           0
-                           1))))]
-        (when @global-print-behavioral-diversity
-          (swap! population-behaviors conj @behavior))
-        errors))))
-
 (defn get-mirror-image-train-and-test
   "Returns the train and test cases."
   [data-domains]
@@ -135,6 +103,46 @@
 ; Define train and test cases
 (def mirror-image-train-and-test-cases
   (get-mirror-image-train-and-test mirror-image-data-domains))
+
+(defn mirror-image-evaluate-program-for-behaviors
+  "Evaluates the program on the given list of cases.
+   Returns the behaviors, a list of the outputs of the program on the inputs."
+  [program cases]
+  (doall
+   (for [[[input1 input2] output] cases]
+     (let [final-state (run-push program
+                                 (->> (make-push-state)
+                                      (push-item input2 :input)
+                                      (push-item input1 :input)))]
+       (top-item :boolean final-state)))))
+
+(defn mirror-image-errors-from-behaviors
+  "Takes a list of behaviors across the list of cases and finds the error
+   for each of those behaviors, returning an error vector."
+  [behaviors cases]
+  (map (fn [result correct-output]
+         (if (= result correct-output)
+           0
+           1))
+       behaviors
+       (map second cases)))
+
+(defn mirror-image-error-function
+  "The error function. Takes an individual as input,
+   and returns that individual with :errors and :behaviors set."
+  ([individual]
+   (mirror-image-error-function individual :train))
+  ([individual data-cases] ;; data-cases should be :train or :test
+   (let [cases (case data-cases
+                 :train (first mirror-image-train-and-test-cases)
+                 :test (second mirror-image-train-and-test-cases)
+                 [])
+         behaviors (mirror-image-evaluate-program-for-behaviors (:program individual)
+                                                                 cases)
+         errors (mirror-image-errors-from-behaviors behaviors cases)]
+     (cond
+       (= data-cases :train) (assoc individual :behaviors behaviors :errors errors)
+       (= data-cases :test) (assoc individual :test-errors errors)))))
 
 (defn mirror-image-initial-report
   [argmap]
@@ -148,8 +156,8 @@
 (defn mirror-image-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
-  (let [best-program (not-lazy (:program best))
-        best-test-errors (error-function best-program :test)
+  (let [best-with-test (error-function best :test)
+        best-test-errors (:test-errors best-with-test)
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
     (printf ";; -*- Mirror Image problem report - generation %s\n" generation)(flush)
@@ -162,7 +170,10 @@
         (println (format "Test Case  %3d | Error: %s" i (str error)))))
     (println ";;------------------------------")
     (println "Outputs of best individual on training cases:")
-    (error-function best-program :train true)
+    (doseq [[correct-output result] (map vector
+                                         (map second (first mirror-image-train-and-test-cases))
+                                         (:behaviors best))]
+      (println (format "Correct output: %5b | Program output: %s" correct-output (str result))))
     (println ";;******************************")
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
@@ -171,8 +182,7 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-mirror-image-error-function-from-cases (first mirror-image-train-and-test-cases)
-                                                                (second mirror-image-train-and-test-cases))
+  {:error-function mirror-image-error-function
    :atom-generators mirror-image-atom-generators
    :max-points 1200
    :max-genome-size-in-initial-program 150
@@ -190,7 +200,6 @@
    :uniform-mutation-rate 0.01
    :problem-specific-report mirror-image-report
    :problem-specific-initial-report mirror-image-initial-report
-   :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 1
