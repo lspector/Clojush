@@ -1,6 +1,7 @@
 (ns clojush.pushgp.breed
   (:use [clojush globals random simplification individual evaluate translate]
-        [clojush.pushgp parent-selection genetic-operators])
+        [clojush.pushgp genetic-operators]
+        [clojush.pushgp.selection selection])
   (:require [clj-random.core :as random]))
 
 ; A map of genetic operator keywords to maps containing the genetic operator
@@ -82,11 +83,11 @@
                           (dec num-parents) 
                           (fn []
                             (loop [re-selections 0
-                                   other (select population location argmap)]
+                                   other (select population argmap)]
                               (if (and (= other first-parent)
                                        (< re-selections (:self-mate-avoidance-limit argmap)))
                                 (recur (inc re-selections)
-                                       (select population location argmap))
+                                       (select population argmap))
                                 other))))
           op-fn (:fn (get genetic-operators operator))
           child (assoc (apply op-fn (concat (vector first-parent) other-parents (vector argmap)))
@@ -122,7 +123,7 @@
   [operator population location rand-gen 
    {:keys [max-points
            track-instruction-maps] :as argmap}]
-  (let [first-parent (select population location argmap)
+  (let [first-parent (select population argmap)
         operator-vector (if (sequential? operator) operator (vector operator))
         child (perform-genetic-operator-list operator-vector
                                              (assoc first-parent :parent-uuids (vector (:uuid first-parent)))
@@ -150,3 +151,6 @@
                 (<= prob (second (first vectored-go-probabilities))))
           (perform-genetic-operator (first (first vectored-go-probabilities)) population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
+
+
+

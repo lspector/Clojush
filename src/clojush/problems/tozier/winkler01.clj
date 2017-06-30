@@ -39,21 +39,23 @@
 (defn winkler-error-function-01
   "Returns the proportion of digits in the product of input * output that are not 0 or 1."
   [number-test-cases]
-  (fn [program]
-    (doall
-      (for [input (range 1 number-test-cases)]
-        (let [final-state (run-push program
-          (push-item input :input
-              (make-push-state)))
-             result-output (top-item :integer final-state)]
-          (when false (println  ;; change to true to print every result (which is awful)
-            (if (and (number? result-output) (pos? result-output))
-            (* input result-output)
-            "N/A")))
-          (if (and (number? result-output) (pos? result-output))
-            (proportion-not-01 (* input result-output))
-            100)
-          )))))
+  (fn [individual]
+    (assoc individual
+           :errors
+           (doall
+            (for [input (range 1 number-test-cases)]
+              (let [final-state (run-push (:program individual)
+                                          (push-item input :input
+                                                     (make-push-state)))
+                    result-output (top-item :integer final-state)]
+                (when false (println  ;; change to true to print every result (which is awful)
+                             (if (and (number? result-output) (pos? result-output))
+                               (* input result-output)
+                               "N/A")))
+                (if (and (number? result-output) (pos? result-output))
+                  (proportion-not-01 (* input result-output))
+                  100)
+                ))))))
 
 
 ;; "obvious" second attempt at an error function;
@@ -61,21 +63,23 @@
 (defn winkler-error-function-02
   "Returns the proportion of digits in the product of input * output that are not 0 or 1, after trimming trailing zeros."
   [number-test-cases]
-  (fn [program]
-    (doall
-      (for [input (range 1 number-test-cases)]
-        (let [final-state (run-push program
-          (push-item input :input
-              (make-push-state)))
-             result-output (top-item :integer final-state)]
-          (when false (println  ;; change to true to print every result (which is awful)
-            (if (and (number? result-output) (pos? result-output))
-            (* input result-output)
-            "N/A")))
-          (if (and (number? result-output) (pos? result-output))
-            (proportion-not-01 (kill-trailing-zeros (* input result-output)))
-            100)
-          )))))
+  (fn [individual]
+    (assoc individual
+           :errors
+           (doall
+            (for [input (range 1 number-test-cases)]
+              (let [final-state (run-push (:program individual)
+                                          (push-item input :input
+                                                     (make-push-state)))
+                    result-output (top-item :integer final-state)]
+                (when false (println  ;; change to true to print every result (which is awful)
+                             (if (and (number? result-output) (pos? result-output))
+                               (* input result-output)
+                               "N/A")))
+                (if (and (number? result-output) (pos? result-output))
+                  (proportion-not-01 (kill-trailing-zeros (* input result-output)))
+                  100)
+                ))))))
 
 
 ;; trying to give it some raw materials it might want to use

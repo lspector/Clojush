@@ -15,17 +15,19 @@
 
 (def argmap
   {:use-single-thread true
-   :error-function (fn [program]
-                     (doall
-                       (for [input (range 10)]
-                         (let [state (run-push program
-                                               (push-item input :input
-                                                          (push-item input :integer
-                                                                     (make-push-state))))
-                               top-bool (top-item :boolean state)]
-                           (if (not (= top-bool :no-stack-item))
-                             (if (= top-bool (odd? input)) 0 1)
-                             1000)))))
+   :error-function (fn [individual]
+                     (assoc individual
+                            :errors
+                            (doall
+                             (for [input (range 10)]
+                               (let [state (run-push (:program individual)
+                                                     (push-item input :input
+                                                                (push-item input :integer
+                                                                           (make-push-state))))
+                                     top-bool (top-item :boolean state)]
+                                 (if (not (= top-bool :no-stack-item))
+                                   (if (= top-bool (odd? input)) 0 1)
+                                   1000))))))
    :atom-generators (concat (registered-for-stacks [:integer :boolean :code :exec])
                             (list (fn [] (lrand-int 100))
                                   'in1))

@@ -78,18 +78,18 @@
 (defn make-vectors-summed-error-function-from-cases
   [train-cases test-cases]
   (fn the-actual-vectors-summed-error-function
-    ([program]
-      (the-actual-vectors-summed-error-function program :train))
-    ([program data-cases] ;; data-cases should be :train or :test
-                          (the-actual-vectors-summed-error-function program data-cases false))
-    ([program data-cases print-outputs]
+    ([individual]
+      (the-actual-vectors-summed-error-function individual :train))
+    ([individual data-cases] ;; data-cases should be :train or :test
+     (the-actual-vectors-summed-error-function individual data-cases false))
+    ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
                      (for [[[input1 input2] correct-output] (case data-cases
                                                               :train train-cases
                                                               :test test-cases
                                                               [])]
-                       (let [final-state (run-push program
+                       (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input2 :input)
                                                      (push-item input1 :input)))
@@ -97,8 +97,7 @@
                          (when print-outputs
                            (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
                          ; Record the behavior
-                         (when @global-print-behavioral-diversity
-                           (swap! behavior conj result))
+                         (swap! behavior conj result)
                          ; Error is integer error at each position in the vectors, with additional penalties for incorrect size vector
                          (if (vector? result)
                            (+' (apply +' (map (fn [cor res]
@@ -108,9 +107,9 @@
                                (*' 10000 (abs (- (count correct-output) (count result))))) ; penalty of 10000 times difference in sizes of vectors
                            1000000000) ; penalty for no return value
                          )))]
-        (when @global-print-behavioral-diversity
-          (swap! population-behaviors conj @behavior))
-        errors))))
+        (if (= data-cases :train)
+          (assoc individual :behaviors @behavior :errors errors)
+          (assoc individual :test-errors errors))))))
 
 (defn get-vectors-summed-train-and-test
   "Returns the train and test cases."
@@ -134,8 +133,7 @@
 (defn vectors-summed-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
-  (let [best-program (not-lazy (:program best))
-        best-test-errors (error-function best-program :test)
+  (let [best-test-errors (:test-errors (error-function best :test))
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
     (printf ";; -*- Vectors Summed problem report - generation %s\n" generation)(flush)
@@ -148,7 +146,7 @@
         (println (format "Test Case  %3d | Error: %s" i (str error)))))
     (println ";;------------------------------")
     (println "Outputs of best individual on training cases:")
-    (error-function best-program :train true)
+    (error-function best :train true)
     (println ";;******************************")
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
@@ -176,7 +174,6 @@
    :uniform-mutation-rate 0.01
    :problem-specific-report vectors-summed-report
    :problem-specific-initial-report vectors-summed-initial-report
-   :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 1000000000

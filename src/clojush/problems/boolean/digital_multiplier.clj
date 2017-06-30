@@ -1,6 +1,6 @@
 ;; digital-multiplier.clj
 ;; an example problem for clojush, a Push/PushGP system written in Clojure
-;; Tom Helmuth, thelmuth@cs.umass.edu
+;; Tom Helmuth
 ;;
 ;; This is code for the digital multiplier problem, as defined in:
 ;;    Walker, J.A.; Miller, J.F., "The Automatic Acquisition, Evolution and
@@ -94,28 +94,30 @@
 ;; a program and returns its error vector.
 (defn dm-error-function
   "Defines the error function of num-bits binary multiplier."
-  [num-bits-n test-cases program]
-  (doall
-    (for [[input output] test-cases]
-      (let [initial-output-vector (vec (repeat (* 2 num-bits-n) nil))
-            final-state (run-push program
-                                  (push-item initial-output-vector
-                                             :auxiliary 
-                                             (push-item input
-                                                        :auxiliary
-                                                        (make-push-state))))
-            result-output (top-item :auxiliary final-state)]
-        ; For each bit, correct contributes 0 to error, incorrect
-        ; contributes 1 to error, and nil (i.e. that bit was never
-        ; output) contributes 1 to error (but, it could have a
-        ; larger penalty if desired).
-        (apply + (map (fn [expected-bit out-bit]
-                        (cond
-                          (nil? out-bit) 1
-                          (= expected-bit out-bit) 0
-                          :else 1))
-                      output
-                      result-output))))))
+  [num-bits-n test-cases individual]
+  (assoc individual
+         :errors
+         (doall
+          (for [[input output] test-cases]
+            (let [initial-output-vector (vec (repeat (* 2 num-bits-n) nil))
+                  final-state (run-push (:program individual)
+                                        (push-item initial-output-vector
+                                                   :auxiliary 
+                                                   (push-item input
+                                                              :auxiliary
+                                                              (make-push-state))))
+                  result-output (top-item :auxiliary final-state)]
+                  ; For each bit, correct contributes 0 to error, incorrect
+                  ; contributes 1 to error, and nil (i.e. that bit was never
+                  ; output) contributes 1 to error (but, it could have a
+                  ; larger penalty if desired).
+              (apply + (map (fn [expected-bit out-bit]
+                              (cond
+                                (nil? out-bit) 1
+                                (= expected-bit out-bit) 0
+                                :else 1))
+                            output
+                            result-output)))))))
 
 ;; Define argmap for pushgp
 (defn define-digital-multiplier

@@ -4,7 +4,7 @@
 (defn decimate
   "Returns the subset of the provided population remaining after sufficiently many
    elimination tournaments to reach the provided target-size."
-  [population target-size tournament-size radius]
+  [population target-size tournament-size]
   (let [popsize (count population)]
     (if (<= popsize target-size)
       population
@@ -13,10 +13,7 @@
                      (cons first-location
                            (doall
                              (for [_ (range (dec tournament-size))]
-                               (if (zero? radius)
-                                 (lrand-int popsize)
-                                 (mod (+ first-location (- (lrand-int (+ 1 (* radius 2))) radius))
-                                      popsize))))))
+                               (lrand-int popsize)))))
                    victim-index
                    (reduce (fn [i1 i2] 
                              (if (> (:total-error (nth population i1))
@@ -26,4 +23,5 @@
                            tournament-index-set)]
                (vec (concat (subvec population 0 victim-index)
                             (subvec population (inc victim-index)))))
-             target-size tournament-size radius))))
+             target-size tournament-size))))
+

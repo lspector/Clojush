@@ -346,6 +346,24 @@
               (range (inc (count b)))
               a))))
 
+(defn sequence-similarity
+  [sequence1 sequence2]
+  "Returns a number between 0 and 1, indicating how similar the sequences are as a normalized,
+  inverted Levenshtein distance, it 1 indicating identity and 0 indicating no similarity."
+  (if (and (empty? sequence1) (empty? sequence2))
+    1
+    (let [dist (levenshtein-distance sequence1 sequence2)
+          max-dist (max (count sequence1) (count sequence2))]
+      (/ (- max-dist dist) max-dist))))
+
+;;;;;;;
+;; Hamming Distance
+(defn hamming-distance
+  "Calculates the Hamming distance between two sequences, including strings"
+  [seq1 seq2]
+  (apply + (map #(if (= %1 %2) 0 1)
+                  seq1 seq2)))
+
 ;;;;;;;;;;;;;;:::::;;;;;;;;;;;;;;
 ;; Simple Statistic Functions
 ;; From: https://github.com/clojure-cookbook/clojure-cookbook/blob/master/01_primitive-data/1-20_simple-statistics.asciidoc
@@ -375,5 +393,4 @@
             bottom-val (nth sorted bottom)
             top-val (nth sorted halfway)]
            (mean [bottom-val top-val])))))
-
 

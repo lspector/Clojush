@@ -1,0 +1,5 @@
+#!/bin/bash
+for i in {1..20}
+do
+lein run clojush.problems.boolean.mux-6 :genetic-operator-probabilities "{:alternation 0.45 :uniform-mutation 0.45 :genesis 0.1}" :age-mediated-parent-selection "[0.05 0.5]" :age-combining-function :proportionate :report-simplifications 0
+done

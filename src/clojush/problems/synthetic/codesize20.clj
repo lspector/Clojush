@@ -22,11 +22,13 @@
    is empty then this returns a sequence containing a penalty value. Otherwise it 
    returns a sequence containing the difference between 20 and the number of points
    in the code produced by a query for tag 0 ." 
-  [program]
-  (let [pushstate (run-push program (make-push-state))]
-    (if (empty? (:tag pushstate)) 
-      (list 1000000 0)
-      (list (math/abs (- (count-points (second (closest-association 0 pushstate))) 20)) 0))))
+  [individual]
+  (assoc individual
+         :errors
+         (let [pushstate (run-push (:program individual) (make-push-state))]
+           (if (empty? (:tag pushstate)) 
+             (list 1000000 0)
+             (list (math/abs (- (count-points (second (closest-association 0 pushstate))) 20)) 0)))))
 
 ;; actual run
 

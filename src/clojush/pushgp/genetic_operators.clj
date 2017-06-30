@@ -17,14 +17,128 @@
     number-or-numbers
     (lrand-nth number-or-numbers)))
 
+(declare produce-child-genome-by-autoconstruction) ;; forward declaration for :consistency
+
 (defn age-combining-function
   "Returns the actual age combining function specified by the :age-combining-function
-  in the argmap."
+  in the argmap. The function will take three arguments: the two parents, and the
+  genome of the child."
   [argmap]
   (case (:age-combining-function argmap)
-    :max max
-    :min min
-    :average average))
+    :max (fn [p1 p2 g] 
+           (max (inc (:age p1)) 
+                (inc (:age p2))))
+    :min (fn [p1 p2 g] 
+           (min (inc (:age p1)) 
+                (inc (:age p2))))
+    :average (fn [p1 p2 g] 
+               (average (inc (:age p1)) 
+                        (inc (:age p2))))
+    :proportionate (fn [p1 p2 g]
+                     (if (= (:age p1) (:age p2))
+                       (inc (:age p1))
+                       (if (= (:genome p1) (:genome p2))
+                         (/ (+ (inc (:age p1)) (inc (:age p2))) 2)
+                         (let [p1-dist (levenshtein-distance g (:genome p1))
+                               p2-dist (levenshtein-distance g (:genome p2))]
+                           (+ (inc (:age p1))
+                              (* (/ p1-dist (+ p1-dist p2-dist))
+                                 (- (inc (:age p2))
+                                    (inc (:age p1)))))))))
+    :first (fn [p1 p2 g]
+             (inc (:age p1)))
+    :half-progressive (fn [p1 p2 g]
+                        (if (= (:age p1) (:age p2))
+                          (inc (:age p1))
+                          (if (= (:genome p1) (:genome p2))
+                            (/ (+ (inc (:age p1)) (inc (:age p2))) 2)
+                            (if (> (:age p2) (:age p1))
+                              (inc (:age p1))
+                              (let [p1-dist (levenshtein-distance g (:genome p1))
+                                    p2-dist (levenshtein-distance g (:genome p2))]
+                                (+ (inc (:age p1))
+                                   (* (/ p1-dist (+ p1-dist p2-dist))
+                                      (- (inc (:age p2))
+                                         (inc (:age p1))))))))))
+    :progressive (fn [p1 p2 g]
+                   (if (= (:age p1) (:age p2))
+                     (inc (:age p1))
+                     (if (= (:genome p1) (:genome p2))
+                       (/ (+ (inc (:age p1)) (inc (:age p2))) 2)
+                       (let [p1-dist (levenshtein-distance g (:genome p1))
+                             p2-dist (levenshtein-distance g (:genome p2))]
+                         (+ (inc (min (:age p1) (:age p2)))
+                            (* (Math/abs (float (- (:age p1) (:age p2))))
+                            	         (/ (Math/abs (float (- p1-dist p2-dist)))
+                                            (+ p1-dist p2-dist))))))))
+    :first-reuse (fn [p1 p2 g]
+                   (+ (:age p1)
+                      (max (sequence-similarity g (:genome p1))
+                           (sequence-similarity g (:genome p2)))))))
+
+;; test effects of :proportionate with expressions like this:
+;(float ((age-combining-function {:age-combining-function :proportionate})
+;        {:genome [1 2 3 4 5 6 7] :age 100}
+;        {:genome [1 2 3 4] :age 200}
+;        [1 2 3]))
+
+(defn compute-grain-size
+  "Returns the grain size for the individual with the provided genome, as
+  produced by the provided parents, according to the :random-screen settings
+  in argmap. Grain sizes should range from 0 to 1. Individuals with smaller
+  grain sizes will survive screens of a wider range of sizes."
+  ([genome {:keys [random-screen] :as argmap}]
+   (compute-grain-size genome 
+                       {:genome [] :dummy true :age -1} 
+                       {:genome [] :dummy true :age -1} 
+                       argmap))
+  ([genome parent1 {:keys [random-screen] :as argmap}]
+   (compute-grain-size genome 
+                       parent1 
+                       {:genome [] :dummy true :age -1} 
+                       argmap))
+  ([genome parent1 parent2 {:keys [random-screen] :as argmap}]
+   (if (or (not random-screen)
+           (empty? genome))
+     1
+     (if (some :dummy [parent1 parent2])
+       (if (some #{(:criterion random-screen)} 
+                 #{:non-zero-genetic-similarity-to-parent})
+         1
+         0)
+       (case (:criterion random-screen)
+         ;
+         :genetic-similarity-to-parent
+         (max (sequence-similarity genome (:genome parent1))
+              (sequence-similarity genome (:genome parent2)))
+         :non-zero-genetic-similarity-to-parent
+         (let [raw-similarity (max (sequence-similarity genome (:genome parent1))
+                                   (sequence-similarity genome (:genome parent2)))]
+           (if (zero? raw-similarity)
+             1
+             raw-similarity))
+         ;
+         :genetic-difference-from-parent
+         (- 1 (max (sequence-similarity genome (:genome parent1))
+                   (sequence-similarity genome (:genome parent2))))
+         ;
+         :reproductive-similarity-to-parent
+         (sequence-similarity 
+           genome
+           (produce-child-genome-by-autoconstruction
+             genome
+             (:genome parent1)
+             (:genome parent2)
+             argmap))
+         ;
+         :reproductive-difference-from-parent
+         (- 1 (sequence-similarity 
+                genome
+                (produce-child-genome-by-autoconstruction
+                  genome
+                  (:genome parent1)
+                  (:genome parent2)
+                  argmap))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; reproduction
@@ -41,14 +155,16 @@
   "Ignores the provided parent and returns a new, random individual, with age 0."
   [ind {:keys [maintain-ancestors max-genome-size-in-initial-program atom-generators]
         :as argmap}]
-  (make-individual :genome (random-plush-genome max-genome-size-in-initial-program 
-                                                atom-generators 
-                                                argmap)
-                   :history (:history ind)
-                   :age 0
-                   :ancestors (if maintain-ancestors
-                                (cons (:genome ind) (:ancestors ind))
-                                (:ancestors ind))))
+  (let [genome (random-plush-genome max-genome-size-in-initial-program 
+                                    atom-generators 
+                                    argmap)]
+    (make-individual :genome genome
+                     :history (:history ind)
+                     :age 0
+                     :grain-size (compute-grain-size genome argmap)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; uniform mutation
@@ -156,6 +272,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -173,7 +290,8 @@
         instruction-mutator (fn [token]
                               (assoc token
                                 :instruction
-                                (:instruction (first (random-plush-genome 1 atom-generators argmap)))))
+                                (:instruction 
+                                  (first (random-plush-genome 1 atom-generators argmap)))))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
                           (instruction-mutator token)
@@ -182,6 +300,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -192,7 +311,8 @@
 (defn uniform-integer-mutation
   "Uniformly mutates individual. For each integer in the genome, there is
    uniform-mutation-constant-tweak-rate probability of being mutated."
-  [ind {:keys [uniform-mutation-constant-tweak-rate uniform-mutation-int-gaussian-standard-deviation
+  [ind {:keys [uniform-mutation-constant-tweak-rate 
+               uniform-mutation-int-gaussian-standard-deviation
                maintain-ancestors atom-generators]
         :as argmap}]
   (let [uniform-mutation-constant-tweak-rate 
@@ -207,7 +327,8 @@
                                (assoc token
                                  :instruction
                                  (round (perturb-with-gaussian-noise 
-                                          uniform-mutation-int-gaussian-standard-deviation const)))
+                                          uniform-mutation-int-gaussian-standard-deviation 
+                                          const)))
                                token)))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-constant-tweak-rate)
@@ -217,6 +338,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -253,6 +375,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -286,6 +409,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -325,6 +449,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -352,6 +477,7 @@
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -365,7 +491,8 @@
    and those that are changed have a close-increment-rate chance of being
    incremented, and are otherwise decremented."
   [ind {:keys [uniform-close-mutation-rate close-increment-rate
-               epigenetic-markers maintain-ancestors]}]
+               epigenetic-markers maintain-ancestors]
+        :as argmap}]
   (if (not (some #{:close} epigenetic-markers))
     ind
     (let [uniform-close-mutation-rate (number uniform-close-mutation-rate)
@@ -385,6 +512,7 @@
       (make-individual :genome new-genome
                        :history (:history ind)
                        :age (inc (:age ind))
+                       :grain-size (compute-grain-size new-genome ind argmap)
                        :ancestors (if maintain-ancestors
                                     (cons (:genome ind) (:ancestors ind))
                                     (:ancestors ind))))))
@@ -396,7 +524,8 @@
   "Uniformly mutates the :silent's in the individual's instruction maps. Each
    :silent will have a uniform-silence-mutation-rate probability of being switched."
   [ind {:keys [uniform-silence-mutation-rate
-               epigenetic-markers maintain-ancestors]}]
+               epigenetic-markers maintain-ancestors]
+        :as argmap}]
   (if (not (some #{:silent} epigenetic-markers))
     ind
     (let [uniform-silence-mutation-rate (number uniform-silence-mutation-rate)
@@ -410,6 +539,7 @@
       (make-individual :genome new-genome
                        :history (:history ind)
                        :age (inc (:age ind))
+                       :grain-size (compute-grain-size new-genome ind argmap)
                        :ancestors (if maintain-ancestors
                                     (cons (:genome ind) (:ancestors ind))
                                     (:ancestors ind))))))
@@ -420,7 +550,7 @@
 (defn uniform-deletion
   "Returns the individual with each element of its genome possibly deleted, with probability
 given by uniform-deletion-rate."
-  [ind {:keys [uniform-deletion-rate maintain-ancestors]}]
+  [ind {:keys [uniform-deletion-rate maintain-ancestors] :as argmap}]
   (let [rate (number uniform-deletion-rate)
         new-genome (vec (filter identity
                                 (map #(if (< (lrand) rate) nil %)
@@ -428,6 +558,7 @@ given by uniform-deletion-rate."
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -450,6 +581,7 @@ given by uniform-deletion-rate."
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -465,7 +597,9 @@ given by uniform-deletion-rate."
   [ind {:keys [uniform-addition-and-deletion-rate maintain-ancestors atom-generators] 
         :as argmap}]
   (let [addition-rate (number uniform-addition-and-deletion-rate)
-        deletion-rate (/ 1 (+ (/ 1 addition-rate) 1))
+        deletion-rate (if (zero? addition-rate)
+                        0
+                        (/ 1 (+ (/ 1 addition-rate) 1)))
         after-addition (vec (apply concat
                                    (map #(if (< (lrand) addition-rate)
                                            (lshuffle [% 
@@ -479,6 +613,7 @@ given by uniform-deletion-rate."
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
@@ -496,7 +631,9 @@ given by uniform-deletion-rate."
    {:keys [uniform-combination-and-deletion-rate maintain-ancestors atom-generators] 
     :as argmap}]
   (let [combination-rate (number uniform-combination-and-deletion-rate)
-        deletion-rate (/ 1 (+ (/ 1 combination-rate) 1))
+        deletion-rate (if (zero? combination-rate)
+                        0
+                        (/ 1 (+ (/ 1 combination-rate) 1)))
         after-combination (vec 
                             (apply concat
                                    (map (fn [g1 g2]
@@ -510,9 +647,8 @@ given by uniform-deletion-rate."
                                      after-combination)))]
     (make-individual :genome new-genome
                      :history (:history parent1)
-                     :age ((age-combining-function argmap) 
-                           (inc (:age parent1)) 
-                           (inc (:age parent2)))
+                     :age ((age-combining-function argmap) parent1 parent2 new-genome)
+                     :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -549,9 +685,8 @@ given by uniform-deletion-rate."
                                 (dec iteration-budget)))))]
     (make-individual :genome new-genome
                      :history (:history parent1)
-                     :age ((age-combining-function argmap) 
-                           (inc (:age parent1)) 
-                           (inc (:age parent2)))
+                     :age ((age-combining-function argmap) parent1 parent2 new-genome)
+                     :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -575,9 +710,8 @@ given by uniform-deletion-rate."
                                       genome1)))]
     (make-individual :genome new-genome
                      :history (:history parent1)
-                     :age ((age-combining-function argmap) 
-                           (inc (:age parent1)) 
-                           (inc (:age parent2)))
+                     :age ((age-combining-function argmap) parent1 parent2 new-genome)
+                     :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
                                   (:ancestors parent1)))))
@@ -610,9 +744,8 @@ given by uniform-deletion-rate."
                                  long-genome)))]
       (make-individual :genome new-genome
                        :history (:history parent1)
-                       :age ((age-combining-function argmap) 
-                             (inc (:age parent1)) 
-                             (inc (:age parent2)))
+                       :age ((age-combining-function argmap) parent1 parent2 new-genome)
+                       :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                        :ancestors (if maintain-ancestors
                                     (cons (:genome parent1) (:ancestors parent1))
                                     (:ancestors parent1))))))
@@ -623,53 +756,49 @@ given by uniform-deletion-rate."
 ;; NOTE: EXPERIMENTAL!
 
 (defn process-genome-for-autoconstruction
-  "Replaces input instructions with noops and, if deterministic? is true then
-replaces non-autoconstructive rand instructions with noops, while if deterministic? 
-is false replaces autoconstructive_<type>_rand with <type>_rand."
-  [genome deterministic?]
-  (let [input-instruction? (fn [instruction]
-                             (and (symbol? instruction)
-                                  (or (re-seq #"in\d+" (name instruction)) ;; from input-output
-                                      (re-seq #"in_dm" (name instruction)) ;; from digital-multiplier
-                                      (some #{instruction}
-                                            '(a0 a1 a2 d0 d1 d2 d3 d4 d5 d6 d7)))))] ;; from mux problems
+  "Replaces input instructions with noops and  autoconstructive_<type>_rand
+  with <type>_rand."
+  [genome]
+  (let [input-instruction? 
+        (fn [instruction]
+          (and (symbol? instruction)
+               (or (re-seq #"in\d+" (name instruction)) ;; from input-output
+                   (re-seq #"in_dm" (name instruction)) ;; from digital-multiplier
+                   (some #{instruction}
+                         '(a0 a1 a2 d0 d1 d2 d3 d4 d5 d6 d7)))))] ;; from mux problems
     (mapv (fn [instruction-map]
             (if (input-instruction? (:instruction instruction-map))
               (assoc instruction-map :instruction 'code_noop)
-              (if deterministic?
-                (if (some #{(:instruction instruction-map)}
-                           '(boolean_rand integer_rand float_rand code_rand
-                                          string_rand char_rand 
-                                          genome_gene_randomize))
-                  (assoc instruction-map :instruction 'code_noop)
-                  instruction-map)
-                (if (= (:instruction instruction-map) 'autoconstructive_integer_rand)
-                  (assoc instruction-map :instruction 'integer_rand)
-                  (if (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
-                    (assoc instruction-map :instruction 'boolean_rand)
-                    instruction-map)))))
+              (if (= (:instruction instruction-map) 'autoconstructive_integer_rand)
+                (assoc instruction-map :instruction 'integer_rand)
+                (if (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
+                  (assoc instruction-map :instruction 'boolean_rand)
+                  instruction-map))))
          genome)))
 
 (defn produce-child-genome-by-autoconstruction
   "Runs the program expressed by parent1-genome with both parent genomes
 on the genome stack and also available via input instructions, and returns
 the resulting top genome."
-  [parent1-genome parent2-genome deterministic? argmap]
-  (let [run-result (top-item :genome
-                             (run-push
-                               (translate-plush-genome-to-push-program
-                                 {:genome (process-genome-for-autoconstruction
-                                            parent1-genome
-                                            deterministic?)}
-                                 argmap)
-                               (-> (->> (make-push-state)
-                                     (push-item parent2-genome :genome)
-                                     (push-item parent1-genome :genome))
-                                 (assoc :parent1-genome parent1-genome)
-                                 (assoc :parent2-genome parent2-genome))))]
-    (if (or (seq? run-result) (vector? run-result))
-      (vec run-result)
-      [])))
+  ([parent1-genome parent2-genome argmap]
+   (produce-child-genome-by-autoconstruction 
+     parent1-genome parent1-genome parent2-genome argmap))
+  ([genome-to-run parent1-genome parent2-genome argmap]
+   (let [run-result (top-item :genome
+                              (run-push
+                                (translate-plush-genome-to-push-program
+                                  {:genome
+                                   (process-genome-for-autoconstruction genome-to-run)}
+                                  argmap)
+                                (-> (->> (make-push-state)
+                                         (push-item parent2-genome :genome)
+                                         (push-item parent1-genome :genome))
+                                    (assoc :parent1-genome parent1-genome)
+                                    (assoc :parent2-genome parent2-genome)
+                                    (assoc :autoconstructing true))))]
+     (if (or (seq? run-result) (vector? run-result))
+       (vec run-result)
+       []))))
 
 (defn expressed-program-sequence-from-genome
   "Returns an open-close sequenc for the program produced by expressing
@@ -691,26 +820,59 @@ programs encoded by genomes g1 and g2."
   [g argmap]
   (let [delta #(expressed-difference 
                  g
-                 (produce-child-genome-by-autoconstruction g g false argmap)
+                 (produce-child-genome-by-autoconstruction g g argmap)
                  argmap)
         diffs (repeatedly 2 delta)]
     (and (> (reduce min diffs) 0) ;; diversification threshold set here
          (> (count (distinct diffs)) 1))))
 
-(defn no-clones-diversifying?
+(defn doesnt-clone-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   (not= (translate-plush-genome-to-push-program 
           {:genome g} 
           argmap)
         (translate-plush-genome-to-push-program 
-          {:genome (produce-child-genome-by-autoconstruction g g false argmap)} 
+          {:genome (produce-child-genome-by-autoconstruction g g argmap)} 
           argmap)))
+
+(defn not-a-clone-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g {:keys [parent1-genome parent2-genome] :as argmap}]
+  (let [express #(translate-plush-genome-to-push-program {:genome %} argmap)
+        pgm (express g)
+        parent1-pgm (express parent1-genome)
+        parent2-pgm (express parent2-genome)]
+    (and (not= pgm parent1-pgm)
+         (not= pgm parent2-pgm))))
+
+(defn minimum-genetic-difference-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g {:keys [parent1-genome parent2-genome]}]
+  (and (<= (sequence-similarity g parent1-genome) 0.9)
+       (<= (sequence-similarity g parent2-genome) 0.9)))
 
 (defn three-gens-diff-diffs-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+  (let [make-child #(produce-child-genome-by-autoconstruction % % argmap)
+        diff #(expressed-difference %1 %2 argmap)
+        c1 (make-child g)
+        c2 (make-child g)
+        gc1 (make-child c1)
+        gc2 (make-child c2)
+        c1-diff (diff g c1)
+        c2-diff (diff g c2)
+        gc1-diff (diff c1 gc1)
+        gc2-diff (diff c2 gc2)
+        diffs [c1-diff c2-diff gc1-diff gc2-diff]]
+    (and (> (reduce min diffs) 0)
+         (apply distinct? diffs))))
+
+(defn three-gens-same-inputs-diff-diffs-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [make-child #(produce-child-genome-by-autoconstruction % g g argmap)
         diff #(expressed-difference %1 %2 argmap)
         c1 (make-child g)
         c2 (make-child g)
@@ -727,7 +889,7 @@ programs encoded by genomes g1 and g2."
 (defn three-gens-some-diff-diffs-diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+  (let [make-child #(produce-child-genome-by-autoconstruction % % argmap)
         diff #(expressed-difference %1 %2 argmap)
         c1 (make-child g)
         c2 (make-child g)
@@ -748,7 +910,7 @@ programs encoded by genomes g1 and g2."
   [g argmap]
   (let [numkids (:autoconstructive-si-children argmap)
         kids (repeatedly numkids 
-                         #(produce-child-genome-by-autoconstruction g g false argmap))
+                         #(produce-child-genome-by-autoconstruction g g argmap))
         kid-counts (map count kids)
         instruction-set (fn [genome]
                           (hash-set (keys (frequencies (map :instruction genome)))))
@@ -762,7 +924,7 @@ programs encoded by genomes g1 and g2."
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   (let [numkids (:autoconstructive-si-children argmap)
-        make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+        make-child #(produce-child-genome-by-autoconstruction % % argmap)
         instruction-set (fn [genome]
                           (hash-set (keys (frequencies (map :instruction genome)))))
         kids (repeatedly numkids #(make-child g))
@@ -792,7 +954,7 @@ programs encoded by genomes g1 and g2."
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   (let [num-children (:autoconstructive-diffmeans-children argmap)
-        make-child #(produce-child-genome-by-autoconstruction % % false argmap)
+        make-child #(produce-child-genome-by-autoconstruction % % argmap)
         c1 (make-child g)
         diffs1 (vec (repeatedly 
                       num-children 
@@ -811,23 +973,83 @@ programs encoded by genomes g1 and g2."
           false
           true)))))
 
+
+(defn minimal-reproductive-difference-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [child1 (produce-child-genome-by-autoconstruction g g argmap)
+        child2 (produce-child-genome-by-autoconstruction child1 g g argmap)
+        c1-diff (sequence-similarity g child1)
+        c2-diff (sequence-similarity g child2)]
+    (and (not (zero? c1-diff))
+         (not (zero? c2-diff))
+         (not= c1-diff c2-diff))))
+
+(defn use-mate-differently-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [mate (vec (repeat (count g) {:instruction :from-mate :close 0}))
+        c1 (produce-child-genome-by-autoconstruction g mate argmap)
+        c1-from-mate-count (count (filter #(= (:instruction %) :from-mate) c1))]
+    (if (> c1-from-mate-count 0)
+      (let [c2 (produce-child-genome-by-autoconstruction g mate argmap)
+            c2-from-mate-count (count (filter #(= (:instruction %) :from-mate) c2))]
+        (and (> c2-from-mate-count 0)
+             (not= c1-from-mate-count c2-from-mate-count)))
+      false)))
+
+(defn si-and-mate-use-diversifying?
+  "Returns true iff genome g passes the diversification test."
+  [g argmap]
+  (let [mate (vec (repeat (count g) {:instruction :from-mate :close 0}))
+        c1 (produce-child-genome-by-autoconstruction g mate argmap)
+        c1-from-mate-count (count (filter #(= (:instruction %) :from-mate) c1))]
+    (if (> c1-from-mate-count 0)
+      (let [c1-not-from-mate (filter #(not= (:instruction %) :from-mate) c1)
+            c1-not-from-mate-count (count c1-not-from-mate)
+            g-count (count g)
+            c1-instructions (set (distinct (map :instruction c1-not-from-mate)))
+            g-instructions (set (distinct (map :instruction g)))]
+        (if (and (not= c1-instructions g-instructions)
+                 (not= c1-not-from-mate-count g-count))
+          (let [c2 (produce-child-genome-by-autoconstruction g mate argmap)
+                c2-from-mate-count (count (filter #(= (:instruction %) :from-mate) c2))]
+            (if (and (> c2-from-mate-count 0)
+                     (not= c1-from-mate-count c2-from-mate-count))
+              (let [c2-not-from-mate (filter #(not= (:instruction %) :from-mate) c2)
+                    c2-not-from-mate-count (count c2-not-from-mate)
+                    c2-instructions (set (distinct (map :instruction c2-not-from-mate)))]
+                (and (not= c2-instructions g-instructions)
+                     (not= c2-instructions c1-instructions)
+                     (not= c2-not-from-mate-count g-count)
+                     (not= c2-not-from-mate-count c1-not-from-mate-count)))
+              false))
+          false))
+      false)))
+
 (defn diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   ((case (:autoconstructive-diversification-test argmap)
      :gecco2016 gecco2016-diversifying?
      :three-gens-diff-diffs three-gens-diff-diffs-diversifying?
+     :three-gens-same-inputs-diff-diffs three-gens-same-inputs-diff-diffs-diversifying?
      :three-gens-some-diff-diffs three-gens-some-diff-diffs-diversifying?
      :size-and-instruction size-and-instruction-diversifying?
      :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?
      :diffmeans diffmeans-diversifying?
-     :no-clones no-clones-diversifying?
+     :minimal-reproductive-difference minimal-reproductive-difference-diversifying?
+     :use-mate-differently use-mate-differently-diversifying?
+     :si-and-mate-use si-and-mate-use-diversifying?
+     :doesnt-clone doesnt-clone-diversifying?
+     :not-a-clone not-a-clone-diversifying?
+     :minimum-genetic-difference minimum-genetic-difference-diversifying?
      :none (fn [genome argmap] true))
     g
     argmap))
 
 (defn fotd-autoconstruction
-  "The current 'flavor of the day' version of autoconstruction, used by specifying
+  "A historical 'flavor of the day' version of autoconstruction, used by specifying
   :autoconstructive-fotd true in the arguments to pushgp. Expect changes. Other
   autoconstruction-related parameters may or may not have any effect when using the
   fotd."
@@ -839,12 +1061,14 @@ programs encoded by genomes g1 and g2."
         parental-errors? (fn [errors]
                            (some #{errors} [(:errors parent1) (:errors parent2)]))
         make-child-genome (fn [g1 g2] 
-                            (produce-child-genome-by-autoconstruction g1 g2 false argmap))
+                            (produce-child-genome-by-autoconstruction g1 g2 argmap))
         diff #(expressed-difference %1 %2 argmap)
         genome-error #(do (swap! evaluations-count inc)
-                        (error-function (translate-plush-genome-to-push-program 
-                                          {:genome %} 
-                                          argmap)))
+                          (:errors (error-function
+                                    {:genome %
+                                     :program (translate-plush-genome-to-push-program
+                                               {:genome %}
+                                               argmap)})))
         acceptable? (fn [g]
                       (let [c1 (make-child-genome g g)
                             c1-diff (diff g c1)]
@@ -882,9 +1106,8 @@ programs encoded by genomes g1 and g2."
                          [])))]
     (assoc (make-individual :genome new-genome
                             :history (:history parent1)
-                            :age ((age-combining-function argmap) 
-                                  (inc (:age parent1)) 
-                                  (inc (:age parent2)))
+                            :age ((age-combining-function argmap) parent1 parent2 new-genome)
+                            :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
@@ -908,7 +1131,7 @@ be set globally or eliminated in the future."
           parent2-genome (:genome parent2)
           pre-entropy-child-genome (if (> (lrand) autoconstructive-clone-probability)
                                      (produce-child-genome-by-autoconstruction 
-                                       parent1-genome parent2-genome false argmap)
+                                       parent1-genome parent2-genome argmap)
                                      parent1-genome)
           child-genome (if (zero? autoconstructive-entropy)
                          pre-entropy-child-genome
@@ -918,39 +1141,43 @@ be set globally or eliminated in the future."
           child-errors (if autoconstructive-improve-or-diversify
                          (do
                            (swap! evaluations-count inc)
-                           (error-function (translate-plush-genome-to-push-program 
-                                             {:genome child-genome} 
-                                             argmap)))
+                           (:errors (error-function
+                                     {:genome child-genome
+                                      :program (translate-plush-genome-to-push-program
+                                                {:genome child-genome}
+                                                argmap)})))
                          nil)
-          variant (diversifying? child-genome argmap)
+          variant (diversifying? child-genome 
+                                 (-> argmap
+                                     (assoc :parent1-genome parent1-genome)
+                                     (assoc :parent2-genome parent2-genome)))
           use-child (or variant
                         (and autoconstructive-improve-or-diversify
                              (some (fn [[child-error parent1-error parent2-error]]
                                      (< child-error (min parent1-error parent2-error)))
-                                   (mapv vector child-errors (:errors parent1) (:errors parent2)))))
+                                   (mapv vector 
+                                         child-errors 
+                                         (:errors parent1) 
+                                         (:errors parent2)))))
           new-genome (if use-child
                        child-genome
-                       (random-plush-genome max-genome-size-in-initial-program atom-generators argmap))]
+                       (random-plush-genome 
+                         max-genome-size-in-initial-program atom-generators argmap))]
       (assoc (make-individual :genome (if (or use-child (diversifying? new-genome argmap))
                                         new-genome
                                         [])
                               :history (:history parent1)
-                              :age ((age-combining-function argmap) 
-                                    (inc (:age parent1)) 
-                                    (inc (:age parent2)))
+                              :age (if use-child
+                                     ((age-combining-function argmap) parent1 parent2 new-genome)
+                                     0)
+                              :grain-size (if use-child
+                                            (compute-grain-size new-genome parent1 parent2 argmap)
+                                            (compute-grain-size new-genome argmap))
                               :ancestors (if maintain-ancestors
                                            (cons (:genome parent1) (:ancestors parent1))
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
-
-
-
-
-
-
-
-
 
 
 

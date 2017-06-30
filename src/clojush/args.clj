@@ -63,10 +63,6 @@
           ;; When true, children produced through direct reproduction will not be re-evaluated but
           ;; will have the error vector of their parent.
 
-          :pass-individual-to-error-function false
-          ;; When true, entire individuals (rather than just programs) are passed to error
-          ;; functions.
-
           ;;----------------------------------------
           ;; Genetic operator probabilities
           ;;----------------------------------------
@@ -224,10 +220,6 @@
           ;; The number of extra instances of autoconstructive_boolean_rand to include in
           ;; :atom-generators for autoconstruction. If negative then autoconstructive_boolean_rand
           ;; will not be in :atom-generators at all.
-          
-          :age-combining-function :average
-          ;; For genetic operators that involve multiple parents, the function used to combine
-          ;; the incremented ages of the parents to produce the age of the child.
 
           ;;----------------------------------------
           ;; Epignenetics
@@ -256,16 +248,21 @@
           :parent-selection :lexicase
           ;; The parent selection method. Options include :tournament, :lexicase, :epsilon-lexicase,
           ;; :static-epsilon-lexicase, :super-dynamic-epsilon-lexicase,
-          ;; :elitegroup-lexicase, :uniform :leaky-lexicase
+          ;; :elitegroup-lexicase, :uniform, :leaky-lexicase, :random-threshold-lexicase,
+          ;; :novelty-search
 
           :epsilon-lexicase-epsilon nil
           ;; When parent-selection is :epsilon-lexicase,
           ;; the value for epsilon. If nil, automatic epsilon lexicase selection will be used.
 
+          :epsilon-lexicase-probability 1
+          ;; The probability that each filtering step in epsilon lexicase selection will allow
+          ;; candidates with errors within epsilon of the best to survive, rather than just
+          ;; the best.
+
           :lexicase-leakage 0.1
           ;; If using leaky lexicase selection, the probability that a selection event will return
-          ;; a random (tourny 1) individual from the entire population (note: currently ignores 
-          ;; location, so doesn't play nice with trivial geography).
+          ;; a random (tourny 1) individual from the entire population.
           
           :lexicase-slippage 0
           ;; If using lexicase or leaky lexicase selection, the probability that each step of the
@@ -292,10 +289,6 @@
           ;; A vector containing meta-error categories that can be used for parent selection, but
           ;; do not affect total error. See clojush.evaluate for options.
 
-          :trivial-geography-radius 0
-          ;; If non-zero, this is used as the radius from which to select individuals for
-          ;; tournament or lexicase selection.
-
           :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population
           ;; size that is retained before breeding. If 0 < decimation-ratio < 1, decimation
           ;; tournaments will be used to reduce the population to size (* population-size
@@ -313,6 +306,48 @@
           ;; effort will be made to select parents not equal to the first parent. The value
           ;; of this parameter is the number of re-selections that will be performed to try
           ;; to find a different parent, before using the same parent if the limit is exceeded.
+          
+          :age-mediated-parent-selection false
+          ;; If truthy, should be a vector of [pmin pmax]. In this case, then with probability
+          ;; pmin, parent selection will consider only individuals with the minimum age in
+          ;; the population; with probability pmax, all individuals will be considered; with
+          ;; probability (- 1.0 pmin pmax) an age cutoff will be chosen uniformly from 
+          ;; those present in the population, and only individuals with the cutoff age or 
+          ;; lower will be considered.
+          ;;
+          ;; NOTE: It doesn't make any sense to use this unless you have multiple ages in the
+          ;; population, as you migh have, for example, from using the genesis operator or
+          ;; autoconstruction.
+          
+          :age-combining-function :average
+          ;; For genetic operators that involve multiple parents, the function used to combine
+          ;; the incremented ages of the parents to produce the age of the child.
+          
+          :random-screen false
+          ;; If truthy, should be a map with values for :criterion, :probability and possibly
+          ;; :reversible. In this case, then with probability :probability, each parent 
+          ;; selection event will consider only individuals with :grain-size equal to or less
+          ;; than a :grain-size chosen randomly from those present in the population. The
+          ;; :criterion (see genetic-operators.clj for options) determines how :grain-size is
+          ;; computed for an individual when it is created. If :reversible is truthy, then the
+          ;; screen will be applied in reverse with probability 1/2, causing parent selection
+          ;; to consider only individuals with :grain-size equal to or GREATER than the
+          ;; chosen :grain-size.
+
+          :novelty-distance-metric :euclidean
+          ;; When using novelty, the distance metric between two behavior vectors
+          ;; Options: :manhattan, :euclidean
+
+          :individuals-for-novelty-archive-per-generation 0
+          ;; The number of individuals to add to the novelty archive per generation, if
+          ;; using novelty search for parent selection or novelty as a meta-error. Default
+          ;; of 0 means archive won't be maintained. Novelty GP paper uses one individual
+          ;; every-other generation for 1000 generations; as such, a value of 1 seems like
+          ;; a reasonable place to start.
+
+          :novelty-number-of-neighbors-k 25
+          ;; The number of neighbors to consider when calculating the sparseness with
+          ;; regard to the nearest neighbors. Paper claims it is "robust to modest variation."
 
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
@@ -377,11 +412,6 @@
           ;; If true, final report prints the ancestors of the solution. Requires
           ;; :maintain-ancestors to be true.
 
-          :print-behavioral-diversity false
-          ;; If true, prints the behavioral diversity of the population each generation.
-          ;; Note: The error function for the problem must support behavioral diversity.
-          ;; For an example, see wc.clj
-
           :print-homology-data false
           ;; If true, prints the homology statistics.
           
@@ -389,7 +419,7 @@
           ;; When true, will exit the run when there is an individual with a zero-error vector
 
           ;;----------------------------------------
-          ;; Arguments related to printing JSON, EDN, or CSV logs
+          ;; Arguments related to printing JSON, EDN, CSV, and remote recording
           ;;----------------------------------------
 
           :print-csv-logs false
@@ -428,6 +458,14 @@
 
           :json-log-program-strings false
           ;; If true, JSON logs will include program strings for each individual.
+
+          :record-host nil
+          ;; Should be in the format "<hostname>:<port>"
+          ;; If set, will send logs of each run to a server running on this
+          ;; host
+          :label nil
+          ;; If set, will send this in the configuration of the run, to the
+          ;; external record
           )))
 
 (defn load-push-argmap
@@ -554,3 +592,4 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+

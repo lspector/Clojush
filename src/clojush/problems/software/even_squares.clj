@@ -59,11 +59,11 @@
 (defn make-even-squares-error-function-from-cases
   [train-cases test-cases]
   (fn the-actual-even-squares-error-function
-    ([program]
-      (the-actual-even-squares-error-function program :train))
-    ([program data-cases] ;; data-cases should be :train or :test
-                          (the-actual-even-squares-error-function program data-cases false))
-    ([program data-cases print-outputs]
+    ([individual]
+      (the-actual-even-squares-error-function individual :train))
+    ([individual data-cases] ;; data-cases should be :train or :test
+     (the-actual-even-squares-error-function individual data-cases false))
+    ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (flatten
                      (doall
@@ -71,7 +71,7 @@
                                                                           :train train-cases
                                                                           :test test-cases
                                                                           [])]
-                         (let [final-state (run-push program
+                         (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item input1 :input)
                                                        (push-item "" :output)))
@@ -79,8 +79,7 @@
                            (when print-outputs
                              (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
                            ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
+                           (swap! behavior conj result)
                            (let [correct-number-lines (count correct-integers)
                                  result-lines (if (= result "")
                                                 []
@@ -107,9 +106,9 @@
                                                     100 ; penalty for not enough lines with parseable integers
                                                     (abs (- cor-int res-int))))
                                                 correct-result-int-pairs)))))))))]
-        (when @global-print-behavioral-diversity
-          (swap! population-behaviors conj @behavior))
-        errors))))
+        (if (= data-cases :train)
+          (assoc individual :behaviors @behavior :errors errors)
+          (assoc individual :test-errors errors))))))
 
 (defn get-even-squares-train-and-test
   "Returns the train and test cases."
@@ -131,26 +130,10 @@
     (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
   (println ";;******************************"))
 
-; Define error function. For now, each run uses different random inputs
-(defn even-squares-error-function
-  "Returns the error function for the Even Squares problem. Takes as
-   input Even Squares data domains."
-  [data-domains]
-  (let [[train-cases test-cases] (map #(sort-by first %)
-                                      (map even-squares-test-cases
-                                           (test-and-train-data-from-domains data-domains)))]
-    (when true ;; Change to false to not print test cases
-      (doseq [[i case] (map vector (range) train-cases)]
-        (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-      (doseq [[i case] (map vector (range) test-cases)]
-        (println (format "Test Case: %3d | Input/Output: %s" i (str case)))))
-   (make-even-squares-error-function-from-cases train-cases test-cases)))
-
 (defn even-squares-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
-  (let [best-program (not-lazy (:program best))
-        best-test-errors (error-function best-program :test)
+  (let [best-test-errors (:test-errors (error-function best :test))
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
     (printf ";; -*- Even Squares problem report - generation %s\n" generation)(flush)
@@ -163,7 +146,7 @@
         (println (format "Test Case  %3d | Error: %s" i (str error)))))
     (println ";;------------------------------")
     (println "Outputs of best individual on training cases:")
-    (error-function best-program :train true)
+    (error-function best :train true)
     (println ";;******************************")
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
@@ -191,7 +174,6 @@
    :uniform-mutation-rate 0.01
    :problem-specific-report even-squares-report
    :problem-specific-initial-report even-squares-initial-report
-   :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000

@@ -108,17 +108,18 @@
               (tagged-instruction-erc 100))})       
 
 (defn spiral-error
-  [program]
-  (let [classification (classify-spiral program)]
-    (with-meta (map #(cond (= (nth % 3) -1)  1000 ; Did we get an invalid reponse?
-                           (= (last %) 1)       0 ; Correct answer?
-                           :else               17); Else wrong
-                    classification)
-               {:classification classification})))
+  [individual]
+  (assoc individual
+         :errors
+         (let [classification (classify-spiral (:program individual))]
+           (with-meta (map #(cond (= (nth % 3) -1)  1000 ; Did we get an invalid reponse?
+                                  (= (last %) 1)       0 ; Correct answer?
+                                  :else               17); Else wrong
+                           classification)
+             {:classification classification}))))
 
 (def argmap
-  {:trivial-geography-radius 17,
-   :population-size 1000,
+  {:population-size 1000,
    :error-function spiral-error,
    :atom-generators (:basic spiral-instructions)
    :tag-limit 100
@@ -127,3 +128,4 @@
                                     :alternation 0.45
                                     :uniform-mutation 0.45}
    })
+

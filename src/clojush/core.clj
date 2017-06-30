@@ -16,6 +16,7 @@
 ;; for more details.
 
 (ns clojush.core
+  (:require [clojush.pushgp.record :as r])
   (:use [clojush.pushgp pushgp report])
   (:gen-class))
 
@@ -30,12 +31,13 @@
    This allows one to run an example with a call from the OS shell prompt like:
        lein run examples.simple-regression :population-size 3000"
   [& args]
+  (r/new-run!)
   (println "Command line args:" (apply str (interpose \space args)))
   (let [param-list (map #(if (.endsWith % ".ser")
                            (str %)
                            (read-string %))
                         (rest args))]
-    (require (symbol (first args)))
+    (require (symbol (r/config-data! [:problem-file] (first args))))
     (let [example-params (eval (symbol (str (first args) "/argmap")))
           params (merge example-params (apply sorted-map param-list))]
       (println "######################################")

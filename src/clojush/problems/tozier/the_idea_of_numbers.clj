@@ -24,17 +24,19 @@
 (defn missing-numbers-error-function
   "Returns the absolute error."
   [number-test-cases]
-  (fn [program]
-    (doall
-      (for [input (range 0 number-test-cases)]
-        (let [final-state (run-push program
-          (push-item input :input
-              (make-push-state)))
-             result-output (top-item :integer final-state)]
-          (if (and (number? result-output))
-            (abs (- result-output (birthday-polynomial input 1964 9 11)))  ;; edit this so it's your birthday
-            1000000000)
-          )))))
+  (fn [individual]
+    (assoc individual
+           :errors
+           (doall
+            (for [input (range 0 number-test-cases)]
+              (let [final-state (run-push (:program individual)
+                                          (push-item input :input
+                                                     (make-push-state)))
+                    result-output (top-item :integer final-state)]
+                (if (and (number? result-output))
+                  (abs (- result-output (birthday-polynomial input 1964 9 11)))  ;; edit this so it's your birthday
+                  1000000000)
+                ))))))
 
 ; Atom generators
 (def missing-numbers-atom-generators
@@ -54,7 +56,6 @@
    :max-generations 300
    :parent-selection :lexicase 
    :final-report-simplifications 1000
-   :genetic-operator-probabilities {
-     :alternation 0.5
-     :uniform-mutation 0.5}
+   :genetic-operator-probabilities {:alternation 0.5
+                                    :uniform-mutation 0.5}
    })

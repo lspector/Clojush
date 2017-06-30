@@ -55,15 +55,17 @@ We keep a record of the differences in the 'improvement-vector' atom, which is d
       (top-item :char state))))
 
 (defn string-generation-error-fn
-  [program]
-  (mapv
-    (fn [output target]
-      (cond
-        (= output :no-stack-item) 1000
-        (= output target) 0
-        :else 1))
-    (get-output-on-cases program)
-    @target-string))
+  [individual]
+  (assoc individual
+         :errors
+         (mapv
+          (fn [output target]
+            (cond
+              (= output :no-stack-item) 1000
+              (= output target) 0
+              :else 1))
+          (get-output-on-cases (:program individual))
+          @target-string)))
 
 (defn report
   [best _ generation error-fn _]
@@ -71,9 +73,9 @@ We keep a record of the differences in the 'improvement-vector' atom, which is d
   (if dynamic-string?
     (let [effective-generation (mod generation new-string-every)]
       (if (zero? effective-generation)
-        (reset! beginning-num-of-zero-cases (count (filter zero? (error-fn (not-lazy (:program best)))))))
+        (reset! beginning-num-of-zero-cases (count (filter zero? (:errors (error-fn best))))))
       (if (= (dec new-string-every) effective-generation)
-        (let [n-zero-cases (count (filter zero? (error-fn (not-lazy (:program best)))))]
+        (let [n-zero-cases (count (filter zero? (:errors (error-fn best))))]
           (swap! improvement-vector conj (- n-zero-cases @beginning-num-of-zero-cases))
           (reset! target-string (generate-target-string))
           (if spit-improvement-vector? (spit log-file @improvement-vector))

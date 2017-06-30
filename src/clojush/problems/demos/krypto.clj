@@ -39,15 +39,17 @@
 (println "Objective: " objective ", Hand (top of stack listed first): " hand)
 
 (def argmap
-  {:error-function (fn [program]
-                     (doall
-                       (list
-                         (let [state (run-push program
-                                               (assoc (make-push-state) :integer hand))
-                               top-int (top-item :integer state)]
-                           (if (and (empty? (rest (:integer state))) (number? top-int))
-                             (abs (- top-int objective))
-                             1000)))))
+  {:error-function (fn [individual]
+                     (assoc individual
+                            :errors
+                            (doall
+                             (list
+                              (let [state (run-push (:program individual)
+                                                    (assoc (make-push-state) :integer hand))
+                                    top-int (top-item :integer state)]
+                                (if (and (empty? (rest (:integer state))) (number? top-int))
+                                  (abs (- top-int objective))
+                                  1000))))))
    :atom-generators (list 'integer_div 'integer_mult 'integer_add 'integer_sub)
    :epigenetic-markers []
    :genetic-operator-probabilities {:alternation 0.5
