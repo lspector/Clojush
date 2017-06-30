@@ -101,7 +101,7 @@
                          ; Error is Levenshtein distance
                          (levenshtein-distance correct-output result))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors)
           (assoc individual :test-errors errors))))))
 
 (defn get-string-lengths-backwards-train-and-test

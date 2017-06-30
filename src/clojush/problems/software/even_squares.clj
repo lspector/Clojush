@@ -107,7 +107,7 @@
                                                     (abs (- cor-int res-int))))
                                                 correct-result-int-pairs)))))))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors)
           (assoc individual :test-errors errors))))))
 
 (defn get-even-squares-train-and-test

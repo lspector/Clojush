@@ -116,7 +116,7 @@
                                1000)
                              )))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors)
           (assoc individual :test-errors errors))))))
 
 (defn get-syllables-train-and-test

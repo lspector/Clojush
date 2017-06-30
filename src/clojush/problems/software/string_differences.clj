@@ -162,7 +162,7 @@
                                             (count (re-seq #"(?m)^\d+ \S \S$" result))))
                                     )))))] ;;NOTE: SEE NOTE IN INTRO
         (if (= data-cases :train)
-          (assoc individual :behaviors behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors)
           (assoc individual :test-errors errors))))))
 
 (defn get-string-differences-train-and-test

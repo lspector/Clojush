@@ -106,7 +106,7 @@
                            5000) ; penalty for no return value
                          )))]
         (if (= data-cases :train)
-          (assoc individual :behaviors behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors)
           (assoc individual :test-errors errors))))))
 
 (defn get-negative-to-zero-train-and-test

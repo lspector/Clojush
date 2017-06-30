@@ -31,7 +31,7 @@
                                           1000000000))))] ;; big penalty, since errors can be big
                        (assoc individual
                               :errors errors
-                              :behaviors behavior)))
+                              :behaviors @behavior)))
    :atom-generators '(0
                        1
                        in1

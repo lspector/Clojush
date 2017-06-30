@@ -309,7 +309,7 @@
                                        (abs (- result-line out-line))
                                        100000))))))]
           (if (= data-cases :train)
-            (assoc individual :errors errors :behaviors behavior)
+            (assoc individual :errors errors :behaviors @behavior)
             (assoc individual :test-errors errors)))))))
 
 (defn wc-report

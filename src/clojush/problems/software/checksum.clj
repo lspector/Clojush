@@ -114,7 +114,7 @@
                                1000) ;penalty for wrong format
                              )))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors)
           (assoc individual :test-errors errors))))))
 
 (defn get-checksum-train-and-test

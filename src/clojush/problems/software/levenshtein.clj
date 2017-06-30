@@ -71,7 +71,7 @@
                          (#(if (neg? %) (- %) %) (- top-int distance))
                          1000))))]
       (if (= cases @levenshtein-cases)
-        (assoc individual :errors errors :behaviors behavior)
+        (assoc individual :errors errors :behaviors @behavior)
         (assoc individual :test-errors errors)))))
 
 (defn levenshtein-report

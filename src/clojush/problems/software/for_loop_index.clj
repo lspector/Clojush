@@ -99,7 +99,7 @@
                          ; Error is Levenshtein distance of printed strings
                          (levenshtein-distance correct-output result))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors)
           (assoc individual :test-errors errors))))))
 
 (defn get-for-loop-index-train-and-test

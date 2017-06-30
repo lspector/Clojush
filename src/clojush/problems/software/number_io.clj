@@ -88,7 +88,7 @@
                                      4)
                                    (levenshtein-distance printed-result (pr-str (round-to-n-decimal-places out-float 10))))))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors)
           (assoc individual :test-errors errors))))))
 
 (defn get-number-io-train-and-test

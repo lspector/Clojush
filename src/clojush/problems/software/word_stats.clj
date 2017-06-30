@@ -223,7 +223,7 @@
                                10000.0) ;Penalty
                              )))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors)
           (assoc individual :test-errors errors))))))
 
 (defn get-word-stats-train-and-test

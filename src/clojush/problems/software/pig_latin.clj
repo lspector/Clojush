@@ -116,7 +116,7 @@
                          (levenshtein-distance correct-output result)
                          )))]
         (if (= data-cases :train)
-          (assoc individual :behaviors behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors)
           (assoc individual :test-errors errors))))))
 
 (defn get-pig-latin-train-and-test

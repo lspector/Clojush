@@ -96,7 +96,7 @@
                            0
                            1))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors)
           (assoc individual :test-errors errors))))))
   
 (defn get-compare-string-lengths-train-and-test
