@@ -71,39 +71,38 @@
 (defn make-vector-average-error-function-from-cases
   [train-cases test-cases]
   (fn the-actual-vector-average-error-function
-      ([program]
-        (the-actual-vector-average-error-function program :train))
-      ([program data-cases] ;; data-cases should be :train or :test
-        (the-actual-vector-average-error-function program data-cases false))
-      ([program data-cases print-outputs]
-        (let [behavior (atom '())
-              errors (doall
-                       (for [[input1 correct-output] (case data-cases
-                                                                  :train train-cases
-                                                                  :test test-cases
-                                                                  [])]
-                         (let [final-state (run-push program
-                                                     (->> (make-push-state)
-                                                       (push-item input1 :input)))
-                               result (top-item :float final-state)]
-                           (when print-outputs
-                             (let [res-str (if (float? result)
-                                             (format "%19.14f" result)
-                                             (str result))]
-                               (println (format "Correct output: %19.14f | Program output: %s" correct-output res-str))))
-                           ; Record the behavior
-                           (when @global-print-behavioral-diversity
-                             (swap! behavior conj result))
-                           ; Error is float error rounded to 4 decimal places
-                           (round-to-n-decimal-places
-                             (if (number? result)
-                              (abs (- result correct-output)) ; distance from correct integer
-                              1000000.0) ; penalty for no return value
-                             4)
-                           )))]
-          (when @global-print-behavioral-diversity
-            (swap! population-behaviors conj @behavior))
-          errors))))
+    ([individual]
+     (the-actual-vector-average-error-function individual :train))
+    ([individual data-cases] ;; data-cases should be :train or :test
+     (the-actual-vector-average-error-function individual data-cases false))
+    ([individual data-cases print-outputs]
+     (let [behavior (atom '())
+           errors (doall
+                   (for [[input1 correct-output] (case data-cases
+                                                   :train train-cases
+                                                   :test test-cases
+                                                   [])]
+                     (let [final-state (run-push (:program individual)
+                                                 (->> (make-push-state)
+                                                      (push-item input1 :input)))
+                           result (top-item :float final-state)]
+                       (when print-outputs
+                         (let [res-str (if (float? result)
+                                         (format "%19.14f" result)
+                                         (str result))]
+                           (println (format "Correct output: %19.14f | Program output: %s" correct-output res-str))))
+                       ; Record the behavior
+                       (swap! behavior conj result)
+                       ; Error is float error rounded to 4 decimal places
+                       (round-to-n-decimal-places
+                        (if (number? result)
+                          (abs (- result correct-output)) ; distance from correct integer
+                          1000000.0) ; penalty for no return value
+                        4)
+                       )))]
+       (if (= data-cases :train)
+         (assoc individual :behaviors behavior :errors errors)
+         (assoc individual :test-errors errors))))))
 
 (defn get-vector-average-train-and-test
   "Returns the train and test cases."
@@ -127,8 +126,7 @@
 (defn vector-average-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
-  (let [best-program (not-lazy (:program best))
-        best-test-errors (error-function best-program :test)
+  (let [best-test-errors (:test-errors (error-function best :test))
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
     (printf ";; -*- Vector Average problem report - generation %s\n" generation)(flush)
@@ -141,7 +139,7 @@
         (println (format "Test Case  %3d | Error: %s" i (str error)))))
     (println ";;------------------------------")
     (println "Outputs of best individual on training cases:")
-    (error-function best-program :train true)
+    (error-function best :train true)
     (println ";;******************************")
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
@@ -169,7 +167,6 @@
    :uniform-mutation-rate 0.01
    :problem-specific-report vector-average-report
    :problem-specific-initial-report vector-average-initial-report
-   :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
    :error-threshold 1.0E-3
