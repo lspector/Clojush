@@ -60,7 +60,7 @@
   "Returns a copy of the state with the value pushed on the named stack. This is a utility,
    not for use in Push programs."
   [value type state]
-  (update state type conj value))
+  (assoc state type (cons value (type state))))
 
 (defn top-item
   "Returns the top item of the type stack in state. Returns :no-stack-item if called on
