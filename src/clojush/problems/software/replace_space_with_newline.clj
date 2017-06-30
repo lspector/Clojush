@@ -154,8 +154,7 @@
 (defn replace-space-with-newline-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
-  (let [best-program (not-lazy (:program best))
-        best-with-test (error-function best :test)
+  (let [best-with-test (error-function best :test)
         best-test-errors (:test-errors best-with-test)
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")

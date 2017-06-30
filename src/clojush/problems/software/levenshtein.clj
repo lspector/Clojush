@@ -55,31 +55,30 @@
 (println "Validation cases:" (pr-str levenshtein-validation-cases))
 
 (defn levenshtein-error
-  ([program]
-    (levenshtein-error program @levenshtein-cases))
-  ([program cases]
+  ([individual]
+    (levenshtein-error individual @levenshtein-cases))
+  ([individual cases]
     (let [behavior (atom '())
           errors (doall
                    (for [[[str1 str2] distance] cases]
                      (let [state (->> (make-push-state)
                                    (push-item str1 :input)
                                    (push-item str2 :input)
-                                   (run-push program))
+                                   (run-push (:program individual)))
                            top-int (top-item :integer state)]
-                       (when @global-print-behavioral-diversity
-                         (swap! behavior conj [top-int]))
+                       (swap! behavior conj [top-int])
                        (if (number? top-int)
                          (#(if (neg? %) (- %) %) (- top-int distance))
                          1000))))]
-      (when @global-print-behavioral-diversity
-        (swap! population-behaviors conj @behavior))
-      errors)))
+      (if (= cases @levenshtein-cases)
+        (assoc individual :errors errors :behaviors behavior)
+        (assoc individual :test-errors errors)))))
 
 (defn levenshtein-report
   "Not actually used to report; instead, change test cases."
   [best population generation error-function report-simplifications]
-  (let [validation-errors (levenshtein-error (:program best) 
-                                             levenshtein-validation-cases)]
+  (let [validation-errors (:test-errors (levenshtein-error best 
+                                                           levenshtein-validation-cases))]
     (println "Validation errors:" validation-errors)
     (println "Total validation errors:" (reduce + validation-errors)))
   (let [new-cases (generate-levenshtein-cases)]
@@ -104,7 +103,6 @@
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report levenshtein-report
-   :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000
