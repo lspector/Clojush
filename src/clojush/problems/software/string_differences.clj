@@ -130,18 +130,18 @@
 (defn make-string-differences-error-function-from-cases
   [train-cases test-cases]
   (fn the-actual-string-differences-error-function
-    ([program]
-      (the-actual-string-differences-error-function program :train))
-    ([program data-cases] ;; data-cases should be :train or :test
-                          (the-actual-string-differences-error-function program data-cases false))
-    ([program data-cases print-outputs]
+    ([individual]
+      (the-actual-string-differences-error-function individual :train))
+    ([individual data-cases] ;; data-cases should be :train or :test
+     (the-actual-string-differences-error-function individual data-cases false))
+    ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (flatten (doall
                               (for [[[input1 input2] correct-output] (case data-cases
                                                                        :train train-cases
                                                                        :test test-cases
                                                                        [])]
-                                (let [final-state (run-push program
+                                (let [final-state (run-push (:program individual)
                                                             (->> (make-push-state)
                                                               (push-item input2 :input)
                                                               (push-item input1 :input)
@@ -152,8 +152,7 @@
                                     (println (format "INPUT2: %s" (pr-str input2)))
                                     (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
                                   ; Record the behavior
-                                  (when @global-print-behavioral-diversity
-                                    (swap! behavior conj result))
+                                  (swap! behavior conj result)
                                   ; Error is:
                                   ;   1. Levenshtein distance of printed strings
                                   ;   2. Difference in number of lines using the correct format
@@ -162,9 +161,9 @@
                                     (abs (- (count (re-seq #"(?m)^\d+ \S \S$" correct-output))
                                             (count (re-seq #"(?m)^\d+ \S \S$" result))))
                                     )))))] ;;NOTE: SEE NOTE IN INTRO
-        (when @global-print-behavioral-diversity
-          (swap! population-behaviors conj @behavior))
-        errors))))
+        (if (= data-cases :train)
+          (assoc individual :behaviors behavior :errors errors)
+          (assoc individual :test-errors errors))))))
 
 (defn get-string-differences-train-and-test
   "Returns the train and test cases."
@@ -188,8 +187,7 @@
 (defn string-differences-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
-  (let [best-program (not-lazy (:program best))
-        best-test-errors (error-function best-program :test)
+  (let [best-test-errors (:test-errors (error-function best :test))
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
     (printf ";; -*- String Differences problem report - generation %s\n" generation)(flush)
@@ -202,7 +200,7 @@
         (println (format "Test Case  %3d | Error: %s" i (str error)))))
     (println ";;------------------------------")
     (println "Outputs of best individual on training cases:")
-    (error-function best-program :train true)
+    (error-function best :train true)
     (println ";;******************************")
     )) ;; To do validation, could have this function return an altered best individual
        ;; with total-error > 0 if it had error of zero on train but not on validation
@@ -230,7 +228,6 @@
    :uniform-mutation-rate 0.01
    :problem-specific-report string-differences-report
    :problem-specific-initial-report string-differences-initial-report
-   :print-behavioral-diversity true
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000
