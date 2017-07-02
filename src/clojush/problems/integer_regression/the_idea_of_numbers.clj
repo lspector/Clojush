@@ -7,7 +7,7 @@
 ;;
 ;; Input and output are given as integers using the integer stack.
 
-(ns clojush.problems.tozier.the-idea-of-numbers
+(ns clojush.problems.integer-regression.the-idea-of-numbers
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util]
         [clojure.math.numeric-tower]

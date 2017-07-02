@@ -8,7 +8,7 @@
 ;;
 ;; Input and output are given as integers using the integer stack.
 
-(ns clojush.problems.tozier.winkler01
+(ns clojush.problems.software.winkler01
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util]
         [clojure.math.numeric-tower]
