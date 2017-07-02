@@ -6,12 +6,12 @@
 ; _doesn't_ run all the stuff in src, which midje tries
 ; to run by default, which breaks the world.
 
-(ns clojush.midje.problems.tozier.the-idea-of-numbers
+(ns clojush.midje.problems.integer-regression.the-idea-of-numbers
   (:use clojure.test
         clojush.pushstate
         clojush.interpreter
         midje.sweet
-        clojush.problems.tozier.the-idea-of-numbers))
+        clojush.problems.integer-regression.the-idea-of-numbers))
 
 (facts "birthday-polynomial works as expected"
   (birthday-polynomial 0 0 0 0) => 0

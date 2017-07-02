@@ -6,12 +6,12 @@
 ; _doesn't_ run all the stuff in src, which midje tries
 ; to run by default, which breaks the world.
 
-(ns clojush.midje.problems.tozier.winkler01
+(ns clojush.midje.problems.software.winkler01
   (:use clojure.test
         clojush.pushstate
         clojush.interpreter
         midje.sweet
-        clojush.problems.tozier.winkler01))
+        clojush.problems.software.winkler01))
 
 ;; check count-digits
 ;;
