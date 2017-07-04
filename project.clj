@@ -24,8 +24,6 @@
           :namespaces [#"^(?!clojush\.problems)"]
           :output-path "doc"
           :metadata {:doc/format :markdown}}
-  :dev-dependencies [[lein-ccw "1.2.0"][lein-midje "3.1.3"]]
-  :profiles {:dev {:dependencies [[midje "1.7.0"]]}}
   :repositories [["releases" {:url "https://clojars.org/repo"
                               :username :env
                               :sign-releases false
