@@ -16,8 +16,6 @@ results/
 logs/
 lib/
 /bin
-*.csv
-*.json
 .lein-failures
 doc/
 cov/*

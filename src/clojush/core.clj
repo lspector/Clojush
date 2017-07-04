@@ -23,7 +23,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; main function
 
-(defn -main 
+(defn -main
   "A main function for Clojush, which assumes that the first argument is the name
    of a problem file that contains an argmap of arguments to PushGP.
    Exits after completion of the call.
@@ -44,5 +44,4 @@
       (println "Parameters set at command line or in problem file argmap; may or may not be default:")
       (print-params (into (sorted-map) params))
       (println "######################################")
-      (pushgp params)
-      (System/exit 0))))
+      (pushgp params))))
