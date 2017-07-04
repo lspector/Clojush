@@ -10,8 +10,33 @@ parts of development.
 ### Testing
 
 Primarily it serves as a way to test every branch and pull request, using commands
-like `lein check` and `lein test`. Currently, the test cases are very limited
-and do not cover much of the codebase.
+like `lein check` and `lein test`.
+
+
+#### Integration tests
+The main tests for the codebase are integration tests. They run Clojush
+with a couple of different configurations, and verify that the output (CSV, JSON,
+EDN, as well as text) is the same as it is supposed to be. You can run them
+with:
+
+```bash
+# all integeration tests
+lein test clojush.test.integration-test
+
+# just one configuration
+lein test :only clojush.test.integration-test/<label>
+```
+If you change
+anything about how Clojush outputs data or computes things, they are likely to
+fail. You will need to regenerate the saved output with:
+
+```bash
+lein run -m clojush.test.integration-test/regenerate [<label> ...]
+```
+
+Since there are some things that will always change (like the time and git hash)
+there is some manual find and replace logic in `clojush.test.integration-test`
+that tries to replace things will change with `xxx` in the test output.
 
 ### Docs
 
@@ -36,11 +61,11 @@ It needs this so it can push the updated docs back to Github.
 ### Releases
 
 We use [the `lein release` command](https://github.com/technomancy/leiningen/blob/master/doc/DEPLOY.md#releasing-simplified)
-to add a new release on every build on the `master` branch. Check the 
-`:release-tasks` key in the [`project.clj`](./project.clj) for a list of 
+to add a new release on every build on the `master` branch. Check the
+`:release-tasks` key in the [`project.clj`](./project.clj) for a list of
 all steps it takes.
 
-This requires setting the `LEIN_USERNAME` and `LEIN_PASSWORD` in 
+This requires setting the `LEIN_USERNAME` and `LEIN_PASSWORD` in
 the [repository settings in Travis](http://docs.travis-ci.com/user/environment-variables/#Defining-Variables-in-Repository-Settings),
 so that it can the release to Clojars. It also needs the `GITHUB_TOKEN`
 in order to push the added tag and commit back to Github.
@@ -55,5 +80,3 @@ Travis will:
     2. Create jar and push that to clojars
     3. bump release number to next minor version
     4. Push new commits + tag back to github
-
-
