@@ -44,4 +44,5 @@
       (println "Parameters set at command line or in problem file argmap; may or may not be default:")
       (print-params (into (sorted-map) params))
       (println "######################################")
-      (pushgp params))))
+      (pushgp params)
+      (shutdown-agents))))
