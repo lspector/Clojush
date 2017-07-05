@@ -1,18 +1,18 @@
-Command line args: clojush.problems.software.replace-space-with-newline :use-single-thread true :max-generations 20 :population-size 5 :csv-log-filename "/var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush206701983863254194.csv" :edn-log-filename "/var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush4230611458292949784.edn" :json-log-filename "/var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush7389016069650622113.json" :error-threshold 100975 :maintain-ancestors true :print-ancestors-of-solution true
+Command line args: clojush.problems.software.replace-space-with-newline :use-single-thread true :max-generations 20 :population-size 5 :csv-log-filename "xxx" :edn-log-filename "xxx" :json-log-filename "xxx" :error-threshold 100975 :maintain-ancestors true :print-ancestors-of-solution true
 ######################################
 Parameters set at command line or in problem file argmap; may or may not be default:
 alignment-deviation = 10
 alternation-rate = 0.01
 atom-generators = (  
  #object[xxx] #object[xxx] #object[xxx] #object[xxx] in1 print_newline integer_sub integer_inc boolean_stackdepth boolean_pop string_fromchar exec_yankdup integer_yankdup string_flush boolean_swap exec_shove exec_y boolean_yank integer_eq string_butlast string_conjchar string_substring integer_mult boolean_or boolean_empty char_dup_items char_iswhitespace string_first exec_do*while exec_string_iterate string_indexofchar integer_fromstring char_frominteger exec_dup_items boolean_dup_items exec_empty string_shove exec_rot char_pop exec_dup boolean_flush char_isdigit string_reverse exec_k char_rot print_char boolean_xor integer_gte boolean_dup_times string_replacefirst boolean_shove string_last print_boolean boolean_rot integer_div integer_lte integer_mod string_concat exec_do*count integer_rot integer_add integer_shove string_dup_times char_swap integer_max char_dup_times string_eq integer_stackdepth string_take char_stackdepth integer_dup_times boolean_dup exec_dup_times exec_eq string_emptystring string_swap integer_yank exec_while integer_min exec_swap integer_fromchar string_stackdepth string_replacechar char_allfromstring char_yank string_pop integer_dup_items string_nth exec_do*range exec_if char_shove boolean_invert_first_then_and print_string integer_fromboolean char_yankdup boolean_frominteger string_setchar char_isletter print_integer boolean_eq string_occurrencesofchar string_replacefirstchar integer_flush string_replace char_dup char_eq integer_gt boolean_not exec_do*times string_empty char_empty exec_pop string_yankdup string_removechar char_flush exec_s integer_lt string_containschar string_yank exec_noop integer_swap string_split string_fromboolean integer_dup string_rest string_rot exec_yank string_parse_to_chars integer_pop integer_empty print_exec integer_dec string_contains string_dup_items exec_stackdepth boolean_and string_length string_frominteger exec_flush exec_when boolean_invert_second_then_and string_dup boolean_yankdup)
-csv-log-filename = /var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush206701983863254194.csv
-edn-log-filename = /var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush4230611458292949784.edn
+csv-log-filename = xxx
+edn-log-filename = xxx
 error-function = #object[xxx]
 error-threshold = 100975
 evalpush-limit = 1600
 final-report-simplifications = 5000
 genetic-operator-probabilities = {:alternation 0.2, :uniform-mutation 0.2, :uniform-close-mutation 0.1, [:alternation :uniform-mutation] 0.5}
-json-log-filename = /var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush7389016069650622113.json
+json-log-filename = xxx
 maintain-ancestors = true
 max-error = 5000
 max-generations = 20
@@ -1153,12 +1153,12 @@ autoconstructive-si-children = 8
 close-increment-rate = 0.2
 close-parens-probabilities = [0.772 0.206 0.021 0.001]
 csv-columns = [:generation :location :total-error :push-program-size]
-csv-log-filename = /var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush206701983863254194.csv
+csv-log-filename = xxx
 decimation-ratio = 1
 decimation-tournament-size = 2
 edn-additional-keys = [:generation :location]
 edn-keys = [:uuid :parent-uuids :genetic-operators :program :genome :total-error :errors]
-edn-log-filename = /var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush4230611458292949784.edn
+edn-log-filename = xxx
 epigenetic-markers = [:close]
 epsilon-lexicase-epsilon = nil
 epsilon-lexicase-probability = 1
@@ -1170,7 +1170,7 @@ exit-on-success = true
 final-report-simplifications = 5000
 genetic-operator-probabilities = {:alternation 0.2, :uniform-mutation 0.2, :uniform-close-mutation 0.1, [:alternation :uniform-mutation] 0.5}
 individuals-for-novelty-archive-per-generation = 0
-json-log-filename = /var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush7389016069650622113.json
+json-log-filename = xxx
 json-log-program-strings = false
 label = nil
 lexicase-leakage = 0.1

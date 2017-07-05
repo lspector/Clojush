@@ -1,13 +1,13 @@
-Command line args: clojush.problems.integer-regression.nth-prime :use-single-thread true :max-generations 0 :population-size 5 :csv-log-filename "/var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush8174684144999698546.csv" :edn-log-filename "/var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush8170718577157312876.edn" :json-log-filename "/var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush582048106203985944.json" :total-error-method :ifs :normalization :divide-by-max-error
+Command line args: clojush.problems.integer-regression.nth-prime :use-single-thread true :max-generations 0 :population-size 5 :csv-log-filename "xxx" :edn-log-filename "xxx" :json-log-filename "xxx" :total-error-method :ifs :normalization :divide-by-max-error
 ######################################
 Parameters set at command line or in problem file argmap; may or may not be default:
 atom-generators = (0 #object[xxx] #object[xxx] in1 integer_sub integer_inc boolean_stackdepth boolean_pop exec_yankdup integer_yankdup boolean_swap exec_shove exec_y boolean_yank integer_eq integer_mult boolean_or boolean_empty exec_do*while exec_dup_items boolean_dup_items exec_empty exec_rot exec_dup boolean_flush exec_k boolean_xor integer_gte boolean_dup_times boolean_shove boolean_rot integer_div integer_lte integer_mod exec_do*count integer_rot integer_add integer_shove integer_max integer_stackdepth integer_dup_times boolean_dup exec_dup_times exec_eq integer_yank exec_while integer_min exec_swap integer_dup_items exec_do*range exec_if boolean_invert_first_then_and integer_fromboolean boolean_frominteger boolean_eq integer_flush integer_gt boolean_not exec_do*times exec_pop exec_s integer_lt exec_noop integer_swap integer_dup exec_yank integer_pop integer_empty integer_dec exec_stackdepth boolean_and exec_flush exec_when boolean_invert_second_then_and boolean_yankdup)
-csv-log-filename = /var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush8174684144999698546.csv
-edn-log-filename = /var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush8170718577157312876.edn
+csv-log-filename = xxx
+edn-log-filename = xxx
 error-function = #object[xxx]
 evalpush-limit = 2000
 genetic-operator-probabilities = {:alternation 0.2, :uniform-mutation 0.2, :uniform-close-mutation 0.1, [:alternation :uniform-mutation] 0.5}
-json-log-filename = /var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush582048106203985944.json
+json-log-filename = xxx
 max-generations = 0
 max-genome-size-in-initial-program = 100
 max-points = 2000
@@ -39,12 +39,12 @@ autoconstructive-si-children = 8
 close-increment-rate = 0.2
 close-parens-probabilities = [0.772 0.206 0.021 0.001]
 csv-columns = [:generation :location :total-error :push-program-size]
-csv-log-filename = /var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush8174684144999698546.csv
+csv-log-filename = xxx
 decimation-ratio = 1
 decimation-tournament-size = 2
 edn-additional-keys = [:generation :location]
 edn-keys = [:uuid :parent-uuids :genetic-operators :program :genome :total-error :errors]
-edn-log-filename = /var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush8170718577157312876.edn
+edn-log-filename = xxx
 epigenetic-markers = [:close]
 epsilon-lexicase-epsilon = nil
 epsilon-lexicase-probability = 1
@@ -56,7 +56,7 @@ exit-on-success = true
 final-report-simplifications = 1000
 genetic-operator-probabilities = {:alternation 0.2, :uniform-mutation 0.2, :uniform-close-mutation 0.1, [:alternation :uniform-mutation] 0.5}
 individuals-for-novelty-archive-per-generation = 0
-json-log-filename = /var/folders/67/rgrfj0s939vf1gh0pvdf55ww0000gn/T/clojush582048106203985944.json
+json-log-filename = xxx
 json-log-program-strings = false
 label = nil
 lexicase-leakage = 0.1

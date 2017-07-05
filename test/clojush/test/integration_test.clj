@@ -4,6 +4,7 @@
   (:require [clojure.test :refer :all]
             [clojure.string :as string]
             [clojure.java.io :as io]
+            [plumbing.core :refer [map-vals map-from-keys]]
             clojush.core
             clojush.args
             clojush.globals
@@ -13,19 +14,17 @@
   (let [argmap-strs (mapcat (partial map pr-str) argmap)]
     (conj argmap-strs (str problem-file))))
 
-(defn replace-object [out]
-  (string/replace out #"#object\[[^]]+\]" "#object[xxx]"))
-
-(defn cleanup-clojush-output [out]
+(defn censor-nondeterministic-output [out]
   (-> out
     (string/replace #"Clojush version = .*" "Clojush version = xxx")
     (string/replace #"Hash of last Git commit = .*" "Hash of last Git commit = xxx")
     (string/replace #"GitHub link = .*" "GitHub link = xxx")
     (string/replace #"Current time: 14\d+ milliseconds" "Current time: 14xxx milliseconds")
-    (string/replace #"Current time: 14\d+ milliseconds" "Current time: 14xxx milliseconds")
     (string/replace #"\d+.\d+ seconds" "x.x seconds")
     (string/replace #"\d+.\d+%" "x.x%")
-    replace-object))
+    (string/replace #"log-filename = .*" "log-filename = xxx")
+    (string/replace #"log-filename \"[^\"]*\"" "log-filename \"xxx\"")
+    (string/replace #"#object\[[^]]+\]" "#object[xxx]")))
 
 (def globals
   [clojush.args/push-argmap
@@ -86,19 +85,26 @@
                   clojush.args/load-push-argmap mocked-load-push-argmap]
       (apply clojush.core/-main cli-args))))
 
+(defn filename-for-format [argmap format]
+  (-> format
+    name
+    (str "-log-filename")
+    keyword
+    argmap))
+
 (defn problem->formats
   "Calls clojush and returns a mapping of format to output, like {:txt <whatevever> :csv <whatever>}"
   [problem-file argmap other-formats]
   (reset-globals!)
   (let [total-argmap (merge universal-argmap argmap)
         cli-args (->cli-args problem-file total-argmap)
-        text-output (cleanup-clojush-output (clojush-main cli-args))
-        other-outputs (map
-                        (fn [fmt]
-                          [fmt (-> fmt (str "-log-filename") keyword total-argmap slurp replace-object)])
-                        other-formats)]
-    (assoc (into {} other-outputs)
-      "txt" text-output)))
+        output (clojush-main cli-args)]
+    (->> {"txt" output}
+      (merge
+        (map-from-keys
+          (comp slurp (partial filename-for-format total-argmap))
+          other-formats))
+      (map-vals censor-nondeterministic-output))))
 
 (def test-problems
   (->>
@@ -109,8 +115,8 @@
                 :population-size 5
                 :maintain-ancestors true
                 :print-ancestors-of-solution true}}]
-     [:x-word-lines-autoconstructive
-      {:problem-file 'clojush.problems.software.x-word-lines
+     [:rswn-autoconstructive
+      {:problem-file 'clojush.problems.software.replace-space-with-newline
        :argmap {:autoconstructive true}}]
      [:rswn-print-everything
       {:problem-file 'clojush.problems.software.replace-space-with-newline
