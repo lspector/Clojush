@@ -3,6 +3,7 @@
 (ns clojush.test.integration-test
   (:require [clojure.test :refer :all]
             [clojure.string :as string]
+            [clojure.java.io :as io]
             clojush.core
             clojush.args
             clojush.globals
@@ -52,13 +53,16 @@
 (defn format-tmp-file [format]
   (str "/tmp/clojush." format))
 
+(defn format->tmp-filename [format]
+  (str (java.io.File/createTempFile "clojush" (str "." format))))
+
 (def universal-argmap
   {:use-single-thread true
-   :max-generations 2
+   :max-generations 0
    :population-size 5
-   :csv-log-filename (format-tmp-file "csv")
-   :edn-log-filename (format-tmp-file "edn")
-   :json-log-filename (format-tmp-file "json")})
+   :csv-log-filename (format->tmp-filename "csv")
+   :edn-log-filename (format->tmp-filename "edn")
+   :json-log-filename (format->tmp-filename "json")})
 
 (def mock-uuid (java.util.UUID/fromString  "00000000-0000-0000-0000-000000000000"))
 
@@ -91,46 +95,51 @@
         text-output (cleanup-clojush-output (clojush-main cli-args))
         other-outputs (map
                         (fn [fmt]
-                          [fmt (-> fmt format-tmp-file slurp replace-object)])
+                          [fmt (-> fmt (str "-log-filename") keyword total-argmap slurp replace-object)])
                         other-formats)]
     (assoc (into {} other-outputs)
       "txt" text-output)))
 
 (def test-problems
-  {:rswn-success
-    {:problem-file 'clojush.problems.software.replace-space-with-newline
-     :argmap {:error-threshold 100976
-              :print-csv-logs true
-              :print-edn-logs true
-              :print-json-logs true}
-     :other-formats ["edn" "csv" "json"]}
-   :rswn
-    {:problem-file 'clojush.problems.software.replace-space-with-newline
-     :argmap {:print-errors false
-              :print-history true
-              :print-timings true
-              :print-error-frequencies-by-case true
-              :maintain-ancestors true
-              :print-ancestors-of-solution
-              :print-homology-data
-              :print-cosmos-data true
-              :print-csv-logs true
-              :csv-columns
-                [:generation :location :parent-uuids :genetic-operators
-                 :push-program-size :plush-genome-size :push-program
-                 :plush-genome :total-error :test-case-errors]
-              :print-edn-logs true
-              :edn-additional-keys
-                [:generation :location :push-program-size :plush-genome-size]
-              :print-json-logs true
-              :log-fitnesses-for-all-cases true
-              :json-log-program-strings true}
-     :other-formats ["edn" "csv" "json"]}
-   :nth-prime
-    {:problem-file 'clojush.problems.integer-regression.nth-prime}})
-
+  (->>
+    [[:rswn-success
+      {:problem-file 'clojush.problems.software.replace-space-with-newline
+       :argmap {:error-threshold 100975
+                :max-generations 20
+                :population-size 5
+                :maintain-ancestors true
+                :print-ancestors-of-solution true}}]
+     [:x-word-lines-autoconstructive
+      {:problem-file 'clojush.problems.software.x-word-lines
+       :argmap {:autoconstructive true}}]
+     [:rswn-print-everything
+      {:problem-file 'clojush.problems.software.replace-space-with-newline
+       :argmap {:print-errors false
+                :print-history true
+                :print-timings true
+                :print-error-frequencies-by-case true
+                :maintain-ancestors true
+                :print-homology-data true
+                :print-cosmos-data true
+                :print-csv-logs true
+                :csv-columns
+                  [:generation :location :parent-uuids :genetic-operators
+                   :push-program-size :plush-genome-size :push-program
+                   :plush-genome :total-error :test-case-errors]
+                :print-edn-logs true
+                :edn-additional-keys
+                  [:generation :location :push-program-size :plush-genome-size]
+                :print-json-logs true
+                :log-fitnesses-for-all-cases true
+                :json-log-program-strings true}
+       :other-formats ["edn" "csv" "json"]}]
+     [:nth-prime-ifs
+      {:problem-file 'clojush.problems.integer-regression.nth-prime
+       :argmap {:total-error-method :ifs
+                :normalization :divide-by-max-error}}]]
+    (into {})))
 (defn ->path [label format]
-  (str "test-outputs/" (name label) "." format))
+  (str (io/file "test-outputs" (str (name label) "." format))))
 
 (defn regenerate
   "Regenerates all test outputs.
