@@ -144,13 +144,13 @@
           :uniform-addition-rate 0.01
           ;; The probability that any instruction will have a new one added before or after it during
           ;; uniform addition.
-          
+
           :uniform-addition-and-deletion-rate 0.01
           ;; The probability, per gene, for additions in the first phase, and deletions in the second
           ;; phase, of uniform-addition-and-deletion.
-          
+
           :uniform-combination-and-deletion-rate 0.01
-          ;; The probability, per gene, for combinations in the first phase, and deletions in 
+          ;; The probability, per gene, for combinations in the first phase, and deletions in
           ;; the second phase, of uniform-combination-and-deletion.
 
           :uniform-silence-mutation-rate 0.1
@@ -185,27 +185,27 @@
           ;; Specifies the genome instructions to use for autoconstruction. The default value of
           ;; :all will use all genome instructions. See load-push-argmap in this file (args.clj)
           ;; for other options.
-          
+
           :autoconstructive-improve-or-diversify false
           ;; If true, the during autoconstruction a child will be allowed to survive even if it
-          ;; fails the diversification test, if it has lower errors than both of its parents 
+          ;; fails the diversification test, if it has lower errors than both of its parents
           ;; on at least one case.
-          
+
           :autoconstructive-clone-probability 0.0
           ;; Specifies the probability that a clone will be produced rather than the result of
           ;; actual autoconstruction, when :autoconstructive is true.
-          
+
           :autoconstructive-entropy 0.0
           ;; The rate for random gene deletions after autoconstruction.
-          
+
           :autoconstructive-diffmeans-children 10
           ;; When using :autoconstructive-diversification-test :diffmeans-diversifying?, specifies
           ;; how many children of each child to generate and test. See genetic-operators.clj.
-          
+
           :autoconstructive-si-children 8
           ;; When using a "size and instruction" diversification test, specifies how many
           ;; children to generate and test. See genetic-operators.clj.
-          
+
           :autoconstructive-fotd false
           ;; If true, autoconstruction will be performed using the 'flavor of the day' code in
           ;; genetic_operators.clj, which may change without fanfare. Other autoconstruction-related
@@ -240,7 +240,7 @@
           :track-instruction-maps false
           ;; If true, each Plush instruction map will have a UUID attached to it. If the
           ;; gene has a "parent gene", it will also have the UUID of its parent.
- 
+
           ;;----------------------------------------
           ;; Arguments related to parent selection
           ;;----------------------------------------
@@ -262,7 +262,7 @@
           :lexicase-leakage 0.1
           ;; If using leaky lexicase selection, the probability that a selection event will return
           ;; a random (tourny 1) individual from the entire population.
-          
+
           :lexicase-slippage 0
           ;; If using lexicase or leaky lexicase selection, the probability that each step of the
           ;; lexicase selection process will "slip" and return a random candidate from the current
@@ -282,7 +282,7 @@
           ;; :max-error), :e-over-e-plus-1 (e/(e+1) = 1 - 1/(e+1))
 
           :max-error 1000
-          ;; If :normalization is set to :max-error, will use this number for normalization.
+          ;; If :normalization is set to :divide-by-max-error, will use this number for normalization.
 
           :meta-error-categories []
           ;; A vector containing meta-error categories that can be used for parent selection, but
@@ -299,32 +299,32 @@
           :print-selection-counts false
           ;; If true, keeps track of and prints the number of times each individual was selected
           ;; to be a parent
-          
+
           :self-mate-avoidance-limit 0
           ;; If non-zero, then when multiple parents are required for a genetic operator, an
           ;; effort will be made to select parents not equal to the first parent. The value
           ;; of this parameter is the number of re-selections that will be performed to try
           ;; to find a different parent, before using the same parent if the limit is exceeded.
-          
+
           :age-mediated-parent-selection false
           ;; If truthy, should be a vector of [pmin pmax]. In this case, then with probability
           ;; pmin, parent selection will consider only individuals with the minimum age in
           ;; the population; with probability pmax, all individuals will be considered; with
-          ;; probability (- 1.0 pmin pmax) an age cutoff will be chosen uniformly from 
-          ;; those present in the population, and only individuals with the cutoff age or 
+          ;; probability (- 1.0 pmin pmax) an age cutoff will be chosen uniformly from
+          ;; those present in the population, and only individuals with the cutoff age or
           ;; lower will be considered.
           ;;
           ;; NOTE: It doesn't make any sense to use this unless you have multiple ages in the
           ;; population, as you migh have, for example, from using the genesis operator or
           ;; autoconstruction.
-          
+
           :age-combining-function :average
           ;; For genetic operators that involve multiple parents, the function used to combine
           ;; the incremented ages of the parents to produce the age of the child.
-          
+
           :random-screen false
           ;; If truthy, should be a map with values for :criterion, :probability and possibly
-          ;; :reversible. In this case, then with probability :probability, each parent 
+          ;; :reversible. In this case, then with probability :probability, each parent
           ;; selection event will consider only individuals with :grain-size equal to or less
           ;; than a :grain-size chosen randomly from those present in the population. The
           ;; :criterion (see genetic-operators.clj for options) determines how :grain-size is
@@ -413,7 +413,7 @@
 
           :print-homology-data false
           ;; If true, prints the homology statistics.
-          
+
           :exit-on-success true
           ;; When true, will exit the run when there is an individual with a zero-error vector
 
@@ -479,7 +479,7 @@
     (swap! push-argmap assoc :epigenetic-markers [:close :silent])
     (doseq [instr (case (:autoconstructive-genome-instructions @push-argmap)
                     :all (registered-for-stacks [:integer :boolean :exec :genome :float :tag])
-                    :gene-oriented (concat (registered-for-stacks 
+                    :gene-oriented (concat (registered-for-stacks
                                              [:integer :boolean :exec :float :tag])
                                            '(genome_pop
                                               genome_dup
@@ -509,7 +509,7 @@
                                               genome_parent2
                                               autoconstructive_integer_rand
                                               autoconstructive_boolean_rand))
-                    :uniform (concat (registered-for-stacks 
+                    :uniform (concat (registered-for-stacks
                                        [:integer :boolean :exec :float :tag])
                                      '(genome_pop
                                         genome_dup
@@ -545,45 +545,45 @@
                                         genome_uniform_crossover)))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
-    (swap! push-argmap assoc 
-           :atom-generators (conj (:atom-generators @push-argmap) 
+    (swap! push-argmap assoc
+           :atom-generators (conj (:atom-generators @push-argmap)
                                   (fn [] (lrand))))
-    (swap! push-argmap assoc 
-           :atom-generators (conj (:atom-generators @push-argmap) 
+    (swap! push-argmap assoc
+           :atom-generators (conj (:atom-generators @push-argmap)
                                   (fn [] (lrand-int 100))))
-    (swap! push-argmap assoc 
-           :atom-generators (conj (:atom-generators @push-argmap) 
+    (swap! push-argmap assoc
+           :atom-generators (conj (:atom-generators @push-argmap)
                                   (fn [] (lrand-nth [true false]))))
-    (swap! push-argmap assoc 
-           :atom-generators (conj (:atom-generators @push-argmap) 
+    (swap! push-argmap assoc
+           :atom-generators (conj (:atom-generators @push-argmap)
                                   (tag-instruction-erc [:integer :boolean :exec :float] 10000)))
-    (swap! push-argmap assoc 
-           :atom-generators (conj (:atom-generators @push-argmap) 
+    (swap! push-argmap assoc
+           :atom-generators (conj (:atom-generators @push-argmap)
                                   (untag-instruction-erc 10000)))
-    (swap! push-argmap assoc 
-           :atom-generators (conj (:atom-generators @push-argmap) 
+    (swap! push-argmap assoc
+           :atom-generators (conj (:atom-generators @push-argmap)
                                   (tagged-instruction-erc 10000)))
     (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
-      (swap! push-argmap assoc 
+      (swap! push-argmap assoc
              :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_integer_rand)))
     (if (neg? (:autoconstructive-integer-rand-enrichment @push-argmap))
       (swap! push-argmap assoc :atom-generators (remove #(= % 'autoconstructive_integer_rand)
                                                         (:atom-generators @push-argmap))))
     (dotimes [n (:autoconstructive-boolean-rand-enrichment @push-argmap)]
-      (swap! push-argmap assoc 
+      (swap! push-argmap assoc
              :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_boolean_rand)))
     (if (neg? (:autoconstructive-boolean-rand-enrichment @push-argmap))
-      (swap! push-argmap assoc 
+      (swap! push-argmap assoc
              :atom-generators (remove #(= % 'autoconstructive_boolean_rand)
                                       (:atom-generators @push-argmap))))
-    (swap! push-argmap assoc 
+    (swap! push-argmap assoc
            :replace-child-that-exceeds-size-limit-with :empty)))
 
 (defn reset-globals
   "Resets all Clojush globals according to values in @push-argmap. If an argmap argument is provided then it is loaded
   into @push-argmap first."
   ([]
-   (doseq [[gname gatom] (filter (fn [[a _]] (.startsWith (name a) "global-")) 
+   (doseq [[gname gatom] (filter (fn [[a _]] (.startsWith (name a) "global-"))
                                  (ns-publics 'clojush.globals))]
      (if (contains? @push-argmap (keyword (.substring (name gname) (count "global-"))))
        (reset! @gatom (get @push-argmap (keyword (.substring (str gname) (count "global-")))))
@@ -591,4 +591,3 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
-
