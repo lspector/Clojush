@@ -24,7 +24,8 @@
     (string/replace #"\d+.\d+%" "x.x%")
     (string/replace #"log-filename = .*" "log-filename = xxx")
     (string/replace #"log-filename \"[^\"]*\"" "log-filename \"xxx\"")
-    (string/replace #"#object\[[^]]+\]" "#object[xxx]")))
+    (string/replace #"#object\[[^]]+\]" "#object[xxx]")
+    (string/replace "\r\n" "\n")))
 
 (def globals
   [clojush.args/push-argmap
