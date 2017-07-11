@@ -58,14 +58,15 @@
 
 (def argmap
   {:error-function (fn [ind] (golomb-error ind training))
-   :atom-generators (vec (concat [0 1 Math/PI Math/E 'in1]
-                                 (registered-for-stacks [:integer :float :boolean :exec])))
+   :atom-generators (vec (concat [0 1 0.0 1.0 Math/PI Math/E 'in1]
+                                 (registered-for-stacks
+                                   [:integer :float :boolean :exec])))
    :max-points 400
-   :max-genome-size-in-initial-program 20
+   :max-genome-size-in-initial-program 100
    :evalpush-limit 400
    :genetic-operator-probabilities {:alternation 0.5
                                     :uniform-mutation 0.5}
    :parent-selection :lexicase
-   :problem-specific-report golomb-report
-   })
+   :report-simplifications 0
+   :problem-specific-report golomb-report})
 
