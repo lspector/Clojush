@@ -349,7 +349,7 @@
 (defn sequence-similarity
   [sequence1 sequence2]
   "Returns a number between 0 and 1, indicating how similar the sequences are as a normalized,
-  inverted Levenshtein distance, it 1 indicating identity and 0 indicating no similarity."
+  inverted Levenshtein distance, with 1 indicating identity and 0 indicating no similarity."
   (if (and (empty? sequence1) (empty? sequence2))
     1
     (let [dist (levenshtein-distance sequence1 sequence2)
