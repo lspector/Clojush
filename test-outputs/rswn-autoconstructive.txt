@@ -1711,7 +1711,7 @@ Number of random replacements for non-diversifying individuals: 0
 Number of program evaluations used so far: 5
 Number of point (instruction) evaluations so far: 197500
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
