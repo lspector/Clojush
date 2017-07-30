@@ -1,8 +1,7 @@
 (ns clojush.args
   (:require [clj-random.core :as random])
   (:use [clojush globals random util pushstate]
-        [clojush.instructions.tag]
-        [clojush.pushgp report]))
+        [clojush.instructions.tag]))
 
 (def push-argmap
   (atom (sorted-map
@@ -89,8 +88,8 @@
                                            :uniform-addition 0.0
                                            :uniform-addition-and-deletion 0.0
                                            :uniform-combination-and-deletion 0.0
-                                           :genesis 0.0
-                                           }
+                                           :genesis 0.0}
+
           ;; The map supplied to :genetic-operator-probabilities should contain genetic operators
           ;; that sum to 1.0. All available genetic operators are defined in clojush.pushgp.breed.
           ;; Along with single operators, pipelines (vectors) containing multiple operators are
@@ -376,11 +375,11 @@
           ;; The number of simplification steps that will happen during final report
           ;; simplifications.
 
-          :problem-specific-initial-report default-problem-specific-initial-report
+          :problem-specific-initial-report (fn [argmap] :no-problem-specific-initial-report-function-defined)
           ;; A function can be called to provide a problem-specific initial report, which happens
           ;; before the normal initial report is printed.
 
-          :problem-specific-report default-problem-specific-report
+          :problem-specific-report (fn [& args] :no-problem-specific-report-function-defined)
           ;; A function can be called to provide a problem-specific report, which happens before
           ;; the normal generational report is printed.
 
@@ -462,10 +461,10 @@
           ;; Should be in the format "<hostname>:<port>"
           ;; If set, will send logs of each run to a server running on this
           ;; host
-          :label nil
+          :label nil)))
           ;; If set, will send this in the configuration of the run, to the
           ;; external record
-          )))
+
 
 (defn load-push-argmap
   [argmap]
