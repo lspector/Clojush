@@ -19,7 +19,7 @@
     (string/replace #"Clojush version = .*" "Clojush version = xxx")
     (string/replace #"Hash of last Git commit = .*" "Hash of last Git commit = xxx")
     (string/replace #"GitHub link = .*" "GitHub link = xxx")
-    (string/replace #"Current time: 14\d+ milliseconds" "Current time: 14xxx milliseconds")
+    (string/replace #"Current time: 1\d+ milliseconds" "Current time: 1xxx milliseconds")
     (string/replace #"\d+.\d+ seconds" "x.x seconds")
     (string/replace #"\d+.\d+%" "x.x%")
     (string/replace #"log-filename = .*" "log-filename = xxx")

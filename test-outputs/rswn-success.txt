@@ -1712,7 +1712,7 @@ Behavioral diversity:				 0.6
 Number of program evaluations used so far: 5
 Number of point (instruction) evaluations so far: 302800
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2196,7 +2196,7 @@ Behavioral diversity:				 0.2
 Number of program evaluations used so far: 10
 Number of point (instruction) evaluations so far: 315600
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2680,7 +2680,7 @@ Behavioral diversity:				 0.4
 Number of program evaluations used so far: 15
 Number of point (instruction) evaluations so far: 328600
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 2
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3164,7 +3164,7 @@ Behavioral diversity:				 0.2
 Number of program evaluations used so far: 20
 Number of point (instruction) evaluations so far: 342200
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 3
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3648,7 +3648,7 @@ Behavioral diversity:				 0.4
 Number of program evaluations used so far: 25
 Number of point (instruction) evaluations so far: 355400
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 4
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4132,7 +4132,7 @@ Behavioral diversity:				 0.2
 Number of program evaluations used so far: 30
 Number of point (instruction) evaluations so far: 369300
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 5
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4616,7 +4616,7 @@ Behavioral diversity:				 0.4
 Number of program evaluations used so far: 35
 Number of point (instruction) evaluations so far: 382600
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 6
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -5100,7 +5100,7 @@ Behavioral diversity:				 0.4
 Number of program evaluations used so far: 40
 Number of point (instruction) evaluations so far: 396100
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 7
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -5584,7 +5584,7 @@ Behavioral diversity:				 0.2
 Number of program evaluations used so far: 45
 Number of point (instruction) evaluations so far: 409600
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 8
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -6068,7 +6068,7 @@ Behavioral diversity:				 0.2
 Number of program evaluations used so far: 50
 Number of point (instruction) evaluations so far: 422500
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 9
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -6552,7 +6552,7 @@ Behavioral diversity:				 0.4
 Number of program evaluations used so far: 55
 Number of point (instruction) evaluations so far: 433500
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 10
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -7036,7 +7036,7 @@ Behavioral diversity:				 0.2
 Number of program evaluations used so far: 60
 Number of point (instruction) evaluations so far: 447200
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 11
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -7520,7 +7520,7 @@ Behavioral diversity:				 0.2
 Number of program evaluations used so far: 65
 Number of point (instruction) evaluations so far: 460900
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 12
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -8004,7 +8004,7 @@ Behavioral diversity:				 0.4
 Number of program evaluations used so far: 70
 Number of point (instruction) evaluations so far: 593200
 --- Timings ---
-Current time: 14xxx milliseconds
+Current time: 1xxx milliseconds
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; -*- End of report for generation 13
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
