@@ -3,35 +3,17 @@
 [Here](https://gist.github.com/thelmuth/1361411) is a document describrining how
 to contribute to this project.
 
-## Logging
-
-We break up the logging of the run into a series of **events**, each
-identified by a label.
-We call `clojush.graphs/log!` with both the label of the event and the input
-data.
+## Computation Graphs
 
 We use
 [Plumatic's Graph framework](https://github.com/plumatic/plumbing#graph-the-functional-swiss-army-knife)
-to compute data for that event. We define each event's graph
-in `clojush.graphs.events.<label>/compute-graph`, They are compiled with `lazy-compile`.
+for dependency injection and lazy evaluation. C All graphs are compiled with `lazy-compile`,
 so that their outputs are lazy maps. This means that the values are only calculated
 when we ask for them.
-We execute the compiled graph for that event with the input
-passed into `log!` merged with a mapping of each previouslly logged event label to it's computed
-data.
 
-Then, we calls all the **handlers** that have handle functions defined
-for this event. We define the mapping of event label to handle functions
-in `clojush.graphs.handlers.<handler name>/handler`. Each handle function
-is called with a mapping of each event label to it's last computed result.
+The graphs we use are in `clojush.graphs`. The top level graphs all have a `:log`
+subgraph, that has keys for each logger on that graph.
 
-You can see what each event graph takes in as inputs and what it produces,
-by running (respectively):
-
-```bash
-lein run -m clojush.cli.log/event-inputs
-lein run -m clojush.cli.log/event-outputs
-```
 
 ### Population
 There are a bunch of bits things we might want to know about each
@@ -41,19 +23,13 @@ as program string of the partially simplified version of itself. Some
 of these things we just want to know about the best individual and others
 about all individuals, and we never want to compute them unless we need to.
 
-So the `generation` event computes an augmented `population`, where
+So the `generation` graph computes an augmented `population`, where
 each item has all the original keys of the individual plus some extra
 lazy dynamic ones. It does this by, again, computing a lazy map based on
-a graph. It is defined at `clojush.graphs.events.generation.individual/compute-graph`
+a graph. It is defined at `clojush.graphs.individual/graph`
 and takes as input the original individual, under the key `:individual` as
 well as the argmap and some computed stats on the population. The lazy map output
-is merged with the original individual record. You can see the input and
-output of this graph with:
-
-```bash
-lein run -m clojush.cli.log/individual-input
-lein run -m clojush.cli.log/individual-output
-```
+is merged with the original individual record.
 
 Since we need these extra values on the "best" individual, for logging,
 we compute the best from this augmented population.
@@ -63,7 +39,7 @@ we have succeeded and get the "best" individual, so that it can return it.
 So it get's the computed data from the generation and accesses
 the `outcome` and the `best`.
 
-### Modifying Logging
+### Modifying grpah computation
 
 #### Adding computed data
 OK let's say you want to log some more data during the run. First, decide
