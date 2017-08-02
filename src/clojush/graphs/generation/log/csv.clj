@@ -4,7 +4,7 @@
             [clojure.data.csv :as csv]))
 
 
-(defnk csv
+(defnk csv!
   [[:config [:argmap csv-log-filename csv-columns print-csv-logs]]
    index population errors-n]
   (when print-csv-logs

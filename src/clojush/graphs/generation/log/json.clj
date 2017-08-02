@@ -14,7 +14,7 @@
     (:weighted-error individual) (assoc :weighted-error (:weighted-error individual))))
 
 
-(defnk json
+(defnk json!
   [[:config [:argmap json-log-filename
                      print-json-logs
                      log-fitnesses-for-all-cases

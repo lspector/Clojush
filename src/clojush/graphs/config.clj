@@ -73,10 +73,8 @@
         (reset! timer-atom (System/currentTimeMillis))
         (swap! timing-map assoc step (+ current-time-for-step (- @timer-atom start-time)))))))
 
-(defnk assert-genetic-operator-probabilities-add-to-one
-  [reset-globals ;; for same order
-   record-time!
-   argmap]
+(defnk genetic-operator-probabilities-add-to-one!
+  [argmap]
   (let [gop (:genetic-operator-probabilities argmap)]
     (doseq [gen-op (keys gop)]
       (if (sequential? gen-op)
@@ -91,10 +89,9 @@
             (str "Genetic operator probabilities do not sum to 1.0:\n"
                  (clojure.string/replace (str gop \newline)
                                          \,
-                                         \newline))))
-  (record-time! :initialization))
+                                         \newline)))))
 
-(defnk reset-globals []
+(defnk reset-globals! []
   (clojush.args/reset-globals))
 
 (defnk initialization-ms [timing-map]
@@ -136,9 +133,9 @@
     git-hash
     timing-map
     initialization-ms
-    reset-globals
+    reset-globals!
     record-time!
-    assert-genetic-operator-probabilities-add-to-one
+    genetic-operator-probabilities-add-to-one!
     rng
     clojush.graphs.config.population/graph
     rand-gens

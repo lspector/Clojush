@@ -19,27 +19,46 @@
   "The top-level routine of pushgp."
   ([] (pushgp '()))
   ( [args]
-    (let [config (->config {:args args})]
+    (let [config (->config {:args args})
+          record-time! (:record-time! config)]
       (random/with-rng (:rng config)
-        (:assert-genetic-operator-probabilities-add-to-one config)
+        (:reset-globals! config)
+        (:genetic-operator-probabilities-add-to-one! config)
+        (record-time! :initialization)
         (-> config :log :all!)
+        (println "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
+        (println "\nGenerating initial population...") (flush)
         (loop [index 0
                novelty-archive '()]
-          (let [generation
-                (->generation
-                 {:index index
-                  :config config
-                  :novelty-archive novelty-archive})
-                report (:report generation)]
-            (-> generation :log :all!)
-            (case (:outcome report)
+          (let [generation (->generation {:index index
+                                          :config config
+                                          :novelty-archive novelty-archive})]
+            (println "Processing generation:" index) (flush)
+            (:plush->push! generation)
+            (record-time! :reproduction)
+            (print "Computing errors... ") (flush)
+            (:errors! generation)
+            (println "Done computing errors.") (flush)
+            (record-time! :fitness)
+            (:hah-solution-rates! generation)
+            (:elitegroups! generation)
+            (:implicit-fitness-sharing! generation)
+            (:novelty! generation)
+            (:epsilons-for-epsilon-lexicase! generation)
+            (record-time! :other)
+            (get-in generation [:log :all!])
+            (case (get-in generation [:report :outcome])
               :failure
-                (if (:return-simplified-on-failure (:argmap config))
-                   (get-in report [:best :final-simplification])
+                (if (get-in config [:argmap :return-simplified-on-failure])
+                   (get-in generation [:report :best :final-simplification])
                    (flush))
               :success
-                (:problem-specific-report-final-simplified-best report)
+                (get-in generation [:report :problem-specific-report-final-simplified-best])
               :continue
                 (let [next-novelty-archive (:next-novelty-archive generation)]
-                  (:install-next-generation generation)
+                  (record-time! :report)
+                  (println "\nProducing offspring...") (flush)
+                  (:produce-new-offspring! generation)
+                  (println "Installing next generation...") (flush)
+                  (:install-next-generation! generation)
                   (recur (inc index) next-novelty-archive)))))))))

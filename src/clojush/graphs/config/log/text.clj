@@ -5,7 +5,7 @@
 
             [clojush.graphs.init.log.text :refer [print-params]]))
 
-(defnk text
+(defnk text!
   [argmap
    registered-instructions
    clojush-version

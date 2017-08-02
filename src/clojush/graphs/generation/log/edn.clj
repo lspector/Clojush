@@ -2,7 +2,7 @@
   (:require [plumbing.core :refer [defnk]]
             [clojure.java.io :as io]))
 
-(defnk edn
+(defnk edn!
   [[:config argmap]
    index
    population]

@@ -27,8 +27,6 @@
 (defnk pop-agents
   "Makes the population of agents containing the initial random individuals in the population."
   [argmap]
-  (println "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
-  (println "\nGenerating initial population...") (flush)
   (let [population-agents (repeatedly (:population-size argmap)
                                       #(make-individual
                                          :genome (strip-random-insertion-flags

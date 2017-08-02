@@ -2,7 +2,7 @@
   (:require [plumbing.core :refer [defnk]]
             [clojure.java.io :as io]))
 
-(defnk edn [[:argmap print-edn-logs :as argmap]]
+(defnk edn! [[:argmap print-edn-logs :as argmap]]
   (when print-edn-logs
     (with-open [w (io/writer (:edn-log-filename argmap) :append false)]
       (.write w "#clojush/run")

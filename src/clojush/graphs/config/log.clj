@@ -2,13 +2,13 @@
   (:require [plumbing.graph]
             [plumbing.core :refer [defnk]]
 
-            [clojush.graphs.config.log.text :refer [text]]
-            [clojush.graphs.config.log.edn :refer [edn]]))
+            [clojush.graphs.config.log.text :refer [text!]]
+            [clojush.graphs.config.log.edn :refer [edn!]]))
 
-(defnk all! [text edn])
+(defnk all! [text! edn!])
 
 (def graph
   (plumbing.graph/graph
-    text
-    edn
+    text!
+    edn!
     all!))

@@ -62,7 +62,7 @@
   (printf "IFS best percent parens: %.3f\n"
     (:program-percent-parens ifs-best)))
 
-(defnk text
+(defnk text!
   [[:config argmap]
    report
    index

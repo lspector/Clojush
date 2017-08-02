@@ -49,7 +49,7 @@
         (set-writer!)
         (write-data! data)))))
 
-(defnk remote [[:config [:argmap record-host] :as config] population]
+(defnk remote! [[:config [:argmap record-host] :as config] population]
   (when (and record-host (not (some? @hostname-and-port)))
     (host! record-host))
   (write-data!
