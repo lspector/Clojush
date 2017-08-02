@@ -142,7 +142,7 @@ One other thing we could do to clean this up is to add a `genome-empty?` value o
 each individual. To do this, add a keyword function in `clojush.graphs.events.generation.individual`:
 
 ```clojure
-(defnk empty-genome? [[:individual genome]]
+(defnk empty-genome? [genome]
   (empty? genome))
 
 (def compute-graph

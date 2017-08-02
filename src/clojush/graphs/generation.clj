@@ -31,9 +31,9 @@
   (->> population-raw
     (map (fn [ind]
           (merge
-            (->individual {:individual ind
+            (->individual (assoc ind
                            :argmap argmap
-                           :min-error-by-case min-error-by-case})
+                           :min-error-by-case min-error-by-case))
             ind)))
     doall))
 

@@ -7,73 +7,73 @@
             [clojush.util :as util]
             [clojush.simplification :refer [auto-simplify]]))
 
-(defnk program-size [[:individual program]]
+(defnk program-size [program]
   (util/count-points program))
 
-(defnk program-str [[:individual program]]
+(defnk program-str [program]
   (if (and (seq? program)
            (empty? program))
     "()"
     (str program)))
 
-(defnk program-pr-str [[:individual program]]
+(defnk program-pr-str [program]
   (pr-str program))
 
-(defnk program-n-parens [[:individual program]]
+(defnk program-n-parens [program]
   (util/count-parens program))
 
-(defnk program-n-points [[:individual program]]
+(defnk program-n-points [program]
   (util/count-points program))
 
 (defnk program-percent-parens [program-n-points program-n-parens]
   (double (/ program-n-parens
              program-n-points)))
 
-(defnk genome-size [[:individual genome]]
+(defnk genome-size [genome]
   (count genome))
 
-(defnk genome-str [[:individual genome]]
+(defnk genome-str [genome]
   (if (empty? genome)
     "()"
     (str genome)))
 
-(defnk genome-without-uuid-pr-str [[:individual genome]]
+(defnk genome-without-uuid-pr-str [genome]
   (pr-str (util/not-lazy (map #(dissoc % :uuid :parent-uuid) genome))))
 
-(defnk parent-uuids-str [[:individual parent-uuids]]
+(defnk parent-uuids-str [parent-uuids]
   (into [] (map str parent-uuids)))
 
-(defnk error-mean [[:individual total-error errors]]
+(defnk error-mean [total-error errors]
   (float (/ total-error
             (count errors))))
 
 (defnk partial-simplification-program-pr-str
-  [individual
+  [history program errors total-error ancestors
    [:argmap report-simplifications error-function]]
-  (pr-str (util/not-lazy (:program (auto-simplify individual
-                                                  error-function
-                                                  report-simplifications
-                                                  false
-                                                  1000)))))
+  (-> {:history history :program program :errors errors :total-error total-error :ancestors ancestors}
+    (auto-simplify error-function report-simplifications false 1000)
+    :program
+    util/not-lazy
+    pr-str))
 
 (defnk final-simplification
-  [individual
+  [history program errors total-error ancestors
    [:argmap error-function final-report-simplifications]]
-  (auto-simplify individual
+  (auto-simplify {:history history :program program :errors errors :total-error total-error :ancestors ancestors}
                  error-function
                  final-report-simplifications
                  true
                  500))
 
 (defnk n-elite-cases
-  [[:individual errors]
+  [errors
    min-error-by-case]
   (apply + (map #(if (== %1 %2) 1 0)
                 errors
                 min-error-by-case)))
 
 (defnk n-zero-cases
-  [[:individual errors]]
+  [errors]
   (apply + (map #(if (zero? %) 1 0)
                 errors)))
 

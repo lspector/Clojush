@@ -44,22 +44,22 @@
                                                     (next rest-program))))]
           (open-close-sequence-to-list pair-removed-program))))))
 
-(defn auto-simplify 
+(defn auto-simplify
   "Auto-simplifies the provided individual."
   ([ind error-function steps print? progress-interval]
     (auto-simplify ind error-function steps print? progress-interval false))
   ([ind error-function steps print? progress-interval maintain-ancestors]
     (when print? (printf "\nAuto-simplifying with starting size: %s" (count-points (:program ind))))
     (loop [step 0 program (:program ind) errors (:errors ind) total-errors (:total-error ind)]
-      (when (and print? 
+      (when (and print?
                  (or (>= step steps)
                      (zero? (mod step progress-interval))))
-        (printf "\nstep: %s\nprogram: %s\nerrors: %s\ntotal: %s\nsize: %s\n" 
+        (printf "\nstep: %s\nprogram: %s\nerrors: %s\ntotal: %s\nsize: %s\n"
                 step (pr-str (not-lazy program)) (not-lazy errors) total-errors (count-points program))
         (flush))
       (if (>= step steps)
-        (make-individual :program program :errors errors :total-error total-errors 
-                         :history (:history ind) 
+        (make-individual :program program :errors errors :total-error total-errors
+                         :history (:history ind)
                          :ancestors (if maintain-ancestors
                                       (cons (:program ind) (:ancestors ind))
                                       (:ancestors ind))
