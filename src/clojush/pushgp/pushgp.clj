@@ -22,7 +22,7 @@
     (let [config (->config {:args args})]
       (random/with-rng (:rng config)
         (:assert-genetic-operator-probabilities-add-to-one config)
-        (doseq [_ (vals (:log config))])
+        (-> config :log :all!)
         (loop [index 0
                novelty-archive '()]
           (let [generation
@@ -31,7 +31,7 @@
                   :config config
                   :novelty-archive novelty-archive})
                 report (:report generation)]
-            (doseq [_ (vals (:log generation))])
+            (-> generation :log :all!)
             (case (:outcome report)
               :failure
                 (if (:return-simplified-on-failure (:argmap config))

@@ -33,8 +33,7 @@
        lein run examples.simple-regression :population-size 3000"
   [& args]
   (let [init (->init {:args args})]
-    ; call logging functions
-    (doseq [_ (vals (:log init))])
+    (-> init :log :all!)
     (try
       (do
         (pushgp (:params init))
