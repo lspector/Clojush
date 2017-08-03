@@ -13,7 +13,7 @@
 
 (defn nonempties-for-autoconstruction
   "When :autoconstuctive is truthy, and at least one individual in pop has a non-empty
-  genome, returns only those empty genomes."
+  genome, returns only those individuals with non-empty genomes."
   [pop {:keys [autoconstructive]}]
   (if autoconstructive
     (let [with-non-empty-genomes (filter #(not (empty? (:genome %))) pop)]
@@ -69,4 +69,5 @@
       (age-mediate argmap)
       (screen argmap)
       (one-individual-per-error-vector-for-lexicase argmap)))
+
 
