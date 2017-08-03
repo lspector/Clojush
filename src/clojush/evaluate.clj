@@ -39,14 +39,27 @@
                         (cond
                           (fn? cat) (cat ind argmap)
                           (= cat :size) (count (:genome ind))
-;                          (= cat :compressibility) 555 ;;TMH fix later
+                          ;(= cat :compressibility) 555 ;;TMH fix later
                           (= cat :total-error) (:total-error ind)
                           (= cat :unsolved-cases) (count (filter #(> % error-threshold) 
                                                                  (:errors ind)))
                           (= cat :rand) (lrand)
                           (= cat :rand-bit) (lrand-nth [0 1])
                           (= cat :age) (:age ind)
-                          (= cat :novelty) :novelty ; Keyword will be replaced later, since needs entire population to compute novelty
+                          (= cat :novelty) :novelty ; Keyword will be replaced later,
+                          ;                         ; needs entire population to compute novelty
+                          ;
+                          (= cat :reproductive-fidelity)
+                          (let [g (:genome ind)]
+                            (sequence-similarity
+                              g
+                              (produce-child-genome-by-autoconstruction g g argmap)))
+                          ;
+                          (= cat :reproductive-consistency)
+                          (let [g (:genome ind)]
+                            (sequence-similarity
+                              (produce-child-genome-by-autoconstruction g g argmap)
+                              (produce-child-genome-by-autoconstruction g g argmap)))
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
     (doall (map meta-error-fn meta-error-categories))))
 
@@ -130,3 +143,4 @@
                            :history (if print-history (cons te (:history i)) (:history i)))
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
+
