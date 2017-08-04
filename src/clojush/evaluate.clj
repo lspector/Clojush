@@ -1,5 +1,6 @@
 (ns clojush.evaluate
-  (:use [clojush util pushstate random globals individual])
+  (:use [clojush util pushstate random globals individual]
+        clojush.pushgp.genetic-operators)
   (:require [clojure.math.numeric-tower :as math]
             [clj-random.core :as random]))
 
