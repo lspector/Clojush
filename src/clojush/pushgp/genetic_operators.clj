@@ -553,8 +553,8 @@ given by uniform-deletion-rate."
   [ind {:keys [uniform-deletion-rate maintain-ancestors] :as argmap}]
   (let [rate (number uniform-deletion-rate)
         new-genome (vec (filter identity
-                                (map #(if (< (lrand) rate) nil %)
-                                     (:genome ind))))]
+                                (mapv #(if (< (lrand) rate) nil %)
+                                      (:genome ind))))]
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
@@ -572,12 +572,12 @@ given by uniform-deletion-rate."
   [ind {:keys [uniform-addition-rate maintain-ancestors atom-generators] :as argmap}]
   (let [rate (number uniform-addition-rate)
         new-genome (vec (apply concat
-                               (map #(if (< (lrand) rate)
-                                      (lshuffle [% 
-                                                 (random-plush-instruction-map 
-                                                   atom-generators argmap)])
-                                      [%])
-                                    (:genome ind))))]
+                               (mapv #(if (< (lrand) rate)
+                                        (lshuffle [% 
+                                                   (random-plush-instruction-map
+                                                     atom-generators argmap)])
+                                        [%])
+                                     (:genome ind))))]
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
@@ -601,15 +601,15 @@ given by uniform-deletion-rate."
                         0
                         (/ 1 (+ (/ 1 addition-rate) 1)))
         after-addition (vec (apply concat
-                                   (map #(if (< (lrand) addition-rate)
-                                           (lshuffle [% 
-                                                      (random-plush-instruction-map 
-                                                        atom-generators argmap)])
-                                           [%])
-                                        (:genome ind))))
+                                   (mapv #(if (< (lrand) addition-rate)
+                                            (lshuffle [% 
+                                                       (random-plush-instruction-map
+                                                         atom-generators argmap)])
+                                            [%])
+                                         (:genome ind))))
         new-genome (vec (filter identity
-                                (map #(if (< (lrand) deletion-rate) nil %)
-                                     after-addition)))]
+                                (mapv #(if (< (lrand) deletion-rate) nil %)
+                                      after-addition)))]
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
@@ -636,15 +636,15 @@ given by uniform-deletion-rate."
                         (/ 1 (+ (/ 1 combination-rate) 1)))
         after-combination (vec 
                             (apply concat
-                                   (map (fn [g1 g2]
-                                          (if (< (lrand) combination-rate)
-                                            (lshuffle [g1 g2])
-                                            [g1]))
-                                        (:genome parent1)
-                                        (cycle (:genome parent2)))))
+                                   (mapv (fn [g1 g2]
+                                           (if (< (lrand) combination-rate)
+                                             (lshuffle [g1 g2])
+                                             [g1]))
+                                         (:genome parent1)
+                                         (cycle (:genome parent2)))))
         new-genome (vec (filter identity
-                                (map #(if (< (lrand) deletion-rate) nil %)
-                                     after-combination)))]
+                                (mapv #(if (< (lrand) deletion-rate) nil %)
+                                      after-combination)))]
     (make-individual :genome new-genome
                      :history (:history parent1)
                      :age ((age-combining-function argmap) parent1 parent2 new-genome)
@@ -736,12 +736,12 @@ given by uniform-deletion-rate."
                                           (repeat (- (count long-genome) (count short-genome))
                                                   'uniform-padding))
           new-genome (vec (remove-uniform-padding
-                            (map (fn [x1 x2]
-                                   (if (< (lrand) 0.5)
-                                     x1
-                                     x2))
-                                 short-genome-lengthened
-                                 long-genome)))]
+                            (mapv (fn [x1 x2]
+                                    (if (< (lrand) 0.5)
+                                      x1
+                                      x2))
+                                  short-genome-lengthened
+                                  long-genome)))]
       (make-individual :genome new-genome
                        :history (:history parent1)
                        :age ((age-combining-function argmap) parent1 parent2 new-genome)
@@ -1178,7 +1178,4 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
-
-
-
 
