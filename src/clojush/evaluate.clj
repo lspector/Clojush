@@ -52,15 +52,17 @@
                           ;
                           (= cat :reproductive-fidelity)
                           (let [g (:genome ind)]
-                            (sequence-similarity
-                              g
-                              (produce-child-genome-by-autoconstruction g g argmap)))
+                            (#(Math/abs (- % 0.5))
+                              (sequence-similarity
+                                g
+                                (produce-child-genome-by-autoconstruction g g argmap))))
                           ;
                           (= cat :reproductive-consistency)
                           (let [g (:genome ind)]
-                            (sequence-similarity
-                              (produce-child-genome-by-autoconstruction g g argmap)
-                              (produce-child-genome-by-autoconstruction g g argmap)))
+                            (#(Math/abs (- % 0.5))
+                              (sequence-similarity
+                                (produce-child-genome-by-autoconstruction g g argmap)
+                                (produce-child-genome-by-autoconstruction g g argmap))))
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
     (doall (map meta-error-fn meta-error-categories))))
 
