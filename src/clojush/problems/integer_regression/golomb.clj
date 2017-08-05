@@ -53,7 +53,7 @@
     (println (format "Test mean error for best: %.5f" 
                      (double (/ best-total-test-error (count best-test-errors)))))
     (println ";;******************************")
-    best-with-test))
+    best))
 
 
 (def argmap
@@ -69,4 +69,5 @@
    :parent-selection :lexicase
    :report-simplifications 0
    :problem-specific-report golomb-report})
+
 
