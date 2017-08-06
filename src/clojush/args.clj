@@ -165,6 +165,11 @@
           ;; The probability of a child being reverted to its parent by a genetic operator that
           ;; has been made revertable, if the child is not as good as the parent on at least one
           ;; test case.
+          
+          :tag-enrichment false
+          ;; When true, half of the atom generators will be tag-related instructions.
+          ;; Currently just assumes that all types for which tags are currently implemented
+          ;; are present.
 
           :autoconstructive false
           ;; If true, then :genetic-operator-probabilities will be {:autoconstruction 1.0},
@@ -556,7 +561,8 @@
                                   (fn [] (lrand-nth [true false]))))
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
-                                  (tag-instruction-erc [:integer :boolean :exec :float] 10000)))
+                                  (tag-instruction-erc 
+                                    [:integer :boolean :exec :float :char :string :code] 10000)))
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
                                   (untag-instruction-erc 10000)))
@@ -577,7 +583,24 @@
              :atom-generators (remove #(= % 'autoconstructive_boolean_rand)
                                       (:atom-generators @push-argmap))))
     (swap! push-argmap assoc
-           :replace-child-that-exceeds-size-limit-with :empty)))
+           :replace-child-that-exceeds-size-limit-with :empty))
+  (when (:tag-enrichment argmap)
+    (swap! push-argmap assoc
+           :atom-generators (vec (concat (:atom-generators @push-argmap)
+                                         (take (count (:atom-generators @push-argmap))
+                                               (cycle [(tag-instruction-erc 
+                                                         [:integer :boolean :exec :float 
+                                                          :char :string :code] 10000)
+                                                       (untag-instruction-erc 10000)
+                                                       (tagged-instruction-erc 10000)
+                                                       'integer_tagged_instruction
+                                                       'integer_tag_exec_instruction
+                                                       'integer_tag_code_instruction
+                                                       'integer_tag_integer_instruction
+                                                       'integer_tag_float_instruction
+                                                       'integer_tag_boolean_instruction
+                                                       'integer_tag_char_instruction
+                                                       'integer_tag_string_instruction])))))))
 
 (defn reset-globals
   "Resets all Clojush globals according to values in @push-argmap. If an argmap argument is provided then it is loaded
@@ -591,3 +614,4 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
