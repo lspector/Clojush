@@ -16,8 +16,9 @@
 ;; for more details.
 
 (ns clojush.core
-  (:require [clojush.pushgp.record :as r])
-  (:use [clojush.pushgp pushgp report])
+  (:require [clojush.graphs.init :refer [->init]]
+            [clojush.graphs.utils :refer [end-profile!]]
+            [clojush.pushgp.pushgp :refer [pushgp]])
   (:gen-class))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -31,18 +32,11 @@
    This allows one to run an example with a call from the OS shell prompt like:
        lein run examples.simple-regression :population-size 3000"
   [& args]
-  (r/new-run!)
-  (println "Command line args:" (apply str (interpose \space args)))
-  (let [param-list (map #(if (.endsWith % ".ser")
-                           (str %)
-                           (read-string %))
-                        (rest args))]
-    (require (symbol (r/config-data! [:problem-file] (first args))))
-    (let [example-params (eval (symbol (str (first args) "/argmap")))
-          params (merge example-params (apply sorted-map param-list))]
-      (println "######################################")
-      (println "Parameters set at command line or in problem file argmap; may or may not be default:")
-      (print-params (into (sorted-map) params))
-      (println "######################################")
-      (pushgp params)
-      (shutdown-agents))))
+  (let [init (->init {:args args})]
+    (-> init :log :all!)
+    (try
+      (do
+        (pushgp (:params init))
+        (end-profile!))
+      (finally
+        (shutdown-agents)))))

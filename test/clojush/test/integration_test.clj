@@ -31,8 +31,6 @@
   [clojush.args/push-argmap
    clojush.globals/evaluations-count
    clojush.globals/point-evaluations-count
-   clojush.globals/timer-atom
-   clojush.globals/timing-map
    clojush.globals/solution-rates
    clojush.globals/elitegroups
    clojush.globals/elitegroups
