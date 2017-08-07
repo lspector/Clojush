@@ -166,8 +166,9 @@
           ;; has been made revertable, if the child is not as good as the parent on at least one
           ;; test case.
           
-          :tag-enrichment false
-          ;; When true, half of the atom generators will be tag-related instructions.
+          :tag-enrichment 0
+          ;; The number of extra copies of tag-related instructions that will be included in
+          ;; the atom-generators.
           ;; Currently just assumes that all types for which tags are currently implemented
           ;; are present.
 
@@ -584,23 +585,25 @@
                                       (:atom-generators @push-argmap))))
     (swap! push-argmap assoc
            :replace-child-that-exceeds-size-limit-with :empty))
-  (when (:tag-enrichment argmap)
+  (when (> (:tag-enrichment argmap) 0)
     (swap! push-argmap assoc
-           :atom-generators (vec (concat (:atom-generators @push-argmap)
-                                         (take (count (:atom-generators @push-argmap))
-                                               (cycle [(tag-instruction-erc 
-                                                         [:integer :boolean :exec :float 
-                                                          :char :string :code] 10000)
-                                                       (untag-instruction-erc 10000)
-                                                       (tagged-instruction-erc 10000)
-                                                       'integer_tagged_instruction
-                                                       'integer_tag_exec_instruction
-                                                       'integer_tag_code_instruction
-                                                       'integer_tag_integer_instruction
-                                                       'integer_tag_float_instruction
-                                                       'integer_tag_boolean_instruction
-                                                       'integer_tag_char_instruction
-                                                       'integer_tag_string_instruction])))))))
+           :atom-generators 
+           (vec (concat (:atom-generators @push-argmap)
+                        (apply concat
+                               (repeat (:tag-enrichment argmap)
+                                       [(tag-instruction-erc 
+                                          [:integer :boolean :exec :float 
+                                           :char :string :code] 10000)
+                                        (untag-instruction-erc 10000)
+                                        (tagged-instruction-erc 10000)
+                                        'integer_tagged_instruction
+                                        'integer_tag_exec_instruction
+                                        'integer_tag_code_instruction
+                                        'integer_tag_integer_instruction
+                                        'integer_tag_float_instruction
+                                        'integer_tag_boolean_instruction
+                                        'integer_tag_char_instruction
+                                        'integer_tag_string_instruction])))))))
 
 (defn reset-globals
   "Resets all Clojush globals according to values in @push-argmap. If an argmap argument is provided then it is loaded
