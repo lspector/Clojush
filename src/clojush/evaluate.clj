@@ -199,17 +199,3 @@
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
 
-(let [hist '(1 2 3 3 3 3)]
-  (if (empty? (rest hist))
-    1000000
-    (loop [remaining hist
-           new-best-count 0]
-      (print :remaining remaining :new-best-count new-best-count)
-      (if (empty? (rest remaining))
-        (- 1 (/ new-best-count (dec (count hist))))
-        (recur (rest remaining)
-               (+ new-best-count
-                  (if (every? #(> % (first remaining))
-                              (rest remaining))
-                    1
-                    0)))))))
