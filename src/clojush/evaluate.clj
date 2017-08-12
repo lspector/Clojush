@@ -50,6 +50,58 @@
                           (= cat :novelty) :novelty ; Keyword will be replaced later,
                           ;                         ; needs entire population to compute novelty
                           ;
+                          (= cat :gens-since-total-error-change)
+                          (if (not (:print-history argmap))
+                            (throw 
+                              (Exception. 
+                                ":print-history must be true for :gens-since-total-error-change"))
+                            (let [hist (:history ind)]
+                              (if (or (empty? hist)
+                                      (apply = hist))
+                                1000000
+                                (count (take-while #(= % (first hist)) (rest hist))))))
+                          ;
+                          (= cat :gens-since-total-error-improvement)
+                          (if (not (:print-history argmap))
+                            (throw 
+                              (Exception. 
+                                ":print-history must be true for :gens-since-total-error-improvement"))
+                            (let [diffs (mapv (fn [[a b]] (- a b)) (partition 2 1 (:history ind)))]
+                              (if (or (empty? diffs)
+                                      (not (some neg? diffs)))
+                                1000000
+                                (count (take-while #(>= % 0) diffs)))))
+                          ;
+                          (= cat :total-error-improvement-ratio)
+                          (if (not (:print-history argmap))
+                            (throw 
+                              (Exception. 
+                                ":print-history must be true for :total-error-improvement-ratio"))
+                            (let [diffs (mapv (fn [[a b]] (- a b)) (partition 2 1 (:history ind)))]
+                              (if (empty? diffs)
+                                1000000
+                                (- 1 (/ (count (filter neg? diffs))
+                                        (count diffs))))))
+                          ;
+                          (= cat :total-error-new-best-ratio)
+                          (if (not (:print-history argmap))
+                            (throw 
+                              (Exception. 
+                                ":print-history must be true for :total-error-new-best-ratio"))
+                            (let [hist (:history ind)]
+                              (if (empty? (rest hist))
+                                1000000
+                                (loop [remaining hist
+                                       new-best-count 0]
+                                  (if (empty? (rest remaining))
+                                    (- 1 (/ new-best-count (dec (count hist))))
+                                    (recur (rest remaining)
+                                           (+ new-best-count
+                                              (if (every? #(> % (first remaining))
+                                                          (rest remaining))
+                                                1
+                                                0))))))))
+                          ;
                           (= cat :reproductive-fidelity)
                           (let [g (:genome ind)]
                             (- 1.0
@@ -147,3 +199,17 @@
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
 
+(let [hist '(1 2 3 3 3 3)]
+  (if (empty? (rest hist))
+    1000000
+    (loop [remaining hist
+           new-best-count 0]
+      (print :remaining remaining :new-best-count new-best-count)
+      (if (empty? (rest remaining))
+        (- 1 (/ new-best-count (dec (count hist))))
+        (recur (rest remaining)
+               (+ new-best-count
+                  (if (every? #(> % (first remaining))
+                              (rest remaining))
+                    1
+                    0)))))))
