@@ -102,6 +102,27 @@
                                                 1
                                                 0))))))))
                           ;
+                          (= cat :discounted-total-error-new-best-ratio)
+                          (if (not (:print-history argmap))
+                            (throw 
+                              (Exception. 
+                                ":print-history must be true for :discounted-total-error-new-best-ratio"))
+                            (let [hist (:history ind)]
+                              (if (empty? (rest hist))
+                                1000000
+                                (loop [remaining hist
+                                       new-best-count 0
+                                       scale 1]
+                                  (if (empty? (rest remaining))
+                                    (- 1.0 (/ new-best-count (dec (count hist))))
+                                    (recur (rest remaining)
+                                           (+ new-best-count
+                                              (if (every? #(> % (first remaining))
+                                                          (rest remaining))
+                                                (/ 1 scale)
+                                                0))
+                                           (inc scale)))))))
+                          ;
                           (= cat :reproductive-fidelity)
                           (let [g (:genome ind)]
                             (- 1.0
