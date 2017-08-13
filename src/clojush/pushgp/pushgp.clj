@@ -37,14 +37,14 @@
   [{:keys [use-single-thread population-size
            max-genome-size-in-initial-program atom-generators]
     :as argmap}]
-  (let [population-agents (repeatedly population-size
-                                      #(make-individual
-                                         :genome (strip-random-insertion-flags
-                                                   (random-plush-genome 
-                                                     max-genome-size-in-initial-program
-                                                     atom-generators
-                                                     argmap))
-                                         :genetic-operators :random))]
+  (let [population-agents (vec (repeatedly population-size
+                                           #(make-individual
+                                              :genome (strip-random-insertion-flags
+                                                        (random-plush-genome 
+                                                          max-genome-size-in-initial-program
+                                                          atom-generators
+                                                          argmap))
+                                              :genetic-operators :random)))]
     (mapv #(if use-single-thread
              (atom %)
              (agent % :error-handler agent-error-handler))
