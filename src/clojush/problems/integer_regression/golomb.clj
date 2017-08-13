@@ -51,16 +51,17 @@
     (printf ";; -*- Golomb report - generation %s\n" generation)(flush)
     (println "Test total error for best:" best-total-test-error)
     (println (format "Test mean error for best: %.5f" 
-                     (double (/ best-total-test-error (count best-test-errors)))))
+                     (double (/ best-total-test-error 
+                                (count best-test-errors)))))
     (println ";;******************************")
     best))
 
 
 (def argmap
   {:error-function (fn [ind] (golomb-error ind training))
-   :atom-generators (vec (concat [0 1 0.0 1.0 Math/PI Math/E 'in1]
-                                 (registered-for-stacks
-                                   [:integer :float :boolean :exec])))
+   :atom-generators (into [0 1 0.0 1.0 Math/PI Math/E 'in1]
+                          (registered-for-stacks
+                            [:integer :float :boolean :exec]))
    :max-points 400
    :max-genome-size-in-initial-program 100
    :evalpush-limit 400
@@ -69,5 +70,4 @@
    :parent-selection :lexicase
    :report-simplifications 0
    :problem-specific-report golomb-report})
-
 
