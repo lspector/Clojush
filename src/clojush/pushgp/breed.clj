@@ -45,9 +45,9 @@
     :parent parent
     :empty (make-individual :genome [] :genetic-operators :empty)
     :truncate (assoc child :genome (vec (take (/ max-points 4) (:genome child))))
-    :random (make-individual :genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
-                             :genetic-operators :random)
-    ))
+    :random (make-individual 
+              :genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
+              :genetic-operators :random)))
 
 (defn revert-to-parent-if-worse
   "Evaluates child and parent, returning the child if it is at least as good as
@@ -151,6 +151,7 @@
                 (<= prob (second (first vectored-go-probabilities))))
           (perform-genetic-operator (first (first vectored-go-probabilities)) population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
+
 
 
 
