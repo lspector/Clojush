@@ -1,5 +1,5 @@
 (ns clojush.instructions.return
-  (:use [clojush.pushstate]))
+  (:use [clojush pushstate util]))
 
 (defn returner
   "Returns a function that takes a state and moves the top literal
@@ -95,4 +95,5 @@
       (let [top-env (top-item :environment state)
             new-env (assoc top-env :tag (:tag state))]
         (push-item new-env :environment (pop-item :environment state))))))
+
 

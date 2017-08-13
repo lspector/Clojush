@@ -33,7 +33,7 @@
         ;
         (tag-instruction? instruction) 
         (handle-tag-instruction instruction state)
-        l
+        ;
         (tagged-code-macro? instruction) 
         (handle-tag-code-macro instruction state)
         ;
@@ -121,4 +121,5 @@
           (if @global-top-level-pop-code
             (pop-item :code s)
             s))))))
+
 
