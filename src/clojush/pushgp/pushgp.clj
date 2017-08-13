@@ -69,10 +69,10 @@
                            (let [new-seeds (repeatedly num-remaining 
                                                        #(random/lrand-bytes 
                                                           (:mersennetwister random/*seed-length*)))]
-                             (recur (concat seeds (filter ; only add seeds that we do not already have
-                                                    (fn [candidate]
-                                                      (not (some #(random/=byte-array % candidate)
-                                                                 seeds))) new-seeds))))
+                             (recur (list-concat seeds (filter ; only add seeds that we do not already have
+                                                         (fn [candidate]
+                                                           (not (some #(random/=byte-array % candidate)
+                                                                      seeds))) new-seeds))))
                            seeds)))]
     {:random-seeds random-seeds
      :rand-gens (vec (doall (for [k (range population-size)]
@@ -205,10 +205,11 @@
                                                           true 
                                                           500)
                                            (flush)))
-                  (= outcome :continue) (let [next-novelty-archive (concat novelty-archive
-                                                                           (select-individuals-for-novelty-archive
-                                                                            (map deref pop-agents)
-                                                                            @push-argmap))]
+                  (= outcome :continue) (let [next-novelty-archive 
+                                              (list-concat novelty-archive
+                                                           (select-individuals-for-novelty-archive
+                                                             (map deref pop-agents)
+                                                             @push-argmap))]
                                           (timer @push-argmap :report)
                                           (println "\nProducing offspring...") (flush)
                                           (produce-new-offspring pop-agents 
@@ -220,6 +221,7 @@
                                           (recur (inc generation)
                                                  next-novelty-archive))
                   :else  (final-report generation best @push-argmap))))))))
+
 
 
 
