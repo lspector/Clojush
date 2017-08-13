@@ -18,7 +18,7 @@
   ^{:stack-types [:code]}
   (fn [state]
     (if (not (empty? (rest (:code state))))
-      (let [new-item (ensure-list
+      (let [new-item (not-lazy
                        (concat (ensure-list (stack-ref :code 0 state))
                                (ensure-list (stack-ref :code 1 state))))]
         (if (<= (count-points new-item) @global-max-points)
