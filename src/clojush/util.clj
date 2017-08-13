@@ -44,10 +44,17 @@
           (fn [node children] (with-meta children (meta node)))
           root))
 
-(defn ensure-list ;; really make-list-if-not-seq, but close enough for here
+(defn not-lazy
+  "Returns lst if it is not a list, or a non-lazy version of lst if it is."
+  [lst]
+  (if (seq? lst)
+    (apply list lst)
+    lst))
+
+(defn ensure-list
   [thing]
   (if (seq? thing)
-    thing
+    (not-lazy thing)
     (list thing)))
 
 (defn print-return
@@ -234,13 +241,6 @@
   (cons lst (if (seq? lst)
               (apply concat (doall (map all-items lst)))
               ())))
-
-(defn not-lazy
-  "Returns lst if it is not a list, or a non-lazy version of lst if it is."
-  [lst]
-  (if (seq? lst)
-    (apply list lst)
-    lst))
 
 (defn list-to-open-close-sequence
   [lst]
