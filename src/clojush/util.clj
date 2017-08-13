@@ -20,7 +20,6 @@
      :vector_string (fn [thing] (and (vector? thing) (string? (first thing))))
      :vector_boolean (fn [thing] (and (vector? thing) (or (= (first thing) true) (= (first thing) false))))}))
      
-
 (defn recognize-literal
   "If thing is a literal, return its type -- otherwise return false."
   [thing]
@@ -44,14 +43,22 @@
           (fn [node children] (with-meta children (meta node)))
           root))
 
+(defn list-concat
+  "Returns a (non-lazy) list of the items that result from calling concat
+  on args."
+  [& args]
+  (apply list (apply concat args)))
+
 (defn not-lazy
-  "Returns lst if it is not a list, or a non-lazy version of lst if it is."
+  "Returns lst if it is not a seq, or a non-lazy list of lst if it is."
   [lst]
   (if (seq? lst)
     (apply list lst)
     lst))
 
 (defn ensure-list
+  "Returns a non-lazy list of the contents of thing if thing is a seq.
+  Returns a list containing thing otherwise."
   [thing]
   (if (seq? thing)
     (not-lazy thing)
