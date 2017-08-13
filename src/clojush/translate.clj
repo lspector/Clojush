@@ -12,7 +12,8 @@
     (cond
       ; Check if reversed-prog is empty, in which case we are done
       (empty? reversed-prog) (vec (reverse new-prog))
-      ; Check if done, which is if we've found the first :close, the paren-stack is empty, and the first item in reversed-prog is :open
+      ; Check if done, which is if we've found the first :close, the paren-stack is empty, and 
+      ; the first item in reversed-prog is :open
       (and found-first-close
            (zero? number-close-parens)
            (= :open (first reversed-prog))) (vec (reverse (concat new-prog (rest reversed-prog))))
@@ -99,9 +100,9 @@
               :else (let [number-paren-groups (lookup-instruction-paren-groups (:instruction (first gn)))
                           new-paren-stack (if (>= 0 number-paren-groups)
                                             paren-stack
-                                            (concat (repeat (dec number-paren-groups) :close-open)
-                                                    '(:close)
-                                                    paren-stack))]
+                                            (list-concat (repeat (dec number-paren-groups) :close-open)
+                                                         '(:close)
+                                                         paren-stack))]
                       (if (= 'noop_delete_prev_paren_pair (:instruction (first gn)))
                         (recur (delete-prev-paren-pair prog)
                                (rest gn)
@@ -127,3 +128,4 @@
                     (fn [i] (assoc i :program (translate-plush-genome-to-push-program i argmap))))
               pop-agents))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
+

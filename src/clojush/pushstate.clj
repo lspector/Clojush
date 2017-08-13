@@ -1,5 +1,5 @@
 (ns clojush.pushstate
-  (:use [clojush.globals]
+  (:use [clojush globals util]
         [clojure.set]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -101,8 +101,8 @@
    :return stack is pushed onto the :exec stack."
   [state]
   (let [new-env (top-item :environment state)
-        new-exec (concat (:exec state)
-                         (:exec new-env))]
+        new-exec (list-concat (:exec state)
+                              (:exec new-env))]
     (loop [old-return (:return state)
            new-state (assoc new-env
                             :exec new-exec
@@ -145,4 +145,4 @@
    with those stacks set."
   [& {:as stack-assignments}]
   (merge (make-push-state) stack-assignments))
-    
+

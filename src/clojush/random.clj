@@ -32,8 +32,8 @@
   [close-parens-probabilities]
   (let [prob (lrand)]
     (loop [parens 0
-           probabilities (concat (reductions + close-parens-probabilities)
-                                 '(1.0))]
+           probabilities (vec (concat (reductions + close-parens-probabilities)
+                                      '(1.0)))]
       (if (<= prob (first probabilities))
         parens
         (recur (inc parens)
@@ -103,4 +103,5 @@
                                     atom-generators
                                     argmap)}
       argmap)))
+
 

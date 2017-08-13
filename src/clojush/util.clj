@@ -110,8 +110,8 @@
                  total)
           ;;
           :else 
-          (recur (concat (first remaining) 
-                         (rest remaining)) 
+          (recur (list-concat (first remaining) 
+                              (rest remaining)) 
                  (inc total)))))
 
 (defn count-points
@@ -131,8 +131,8 @@
                  (inc total))
           ;;
           :else 
-          (recur (concat (first remaining) 
-                         (rest remaining)) 
+          (recur (list-concat (first remaining) 
+                              (rest remaining)) 
                  (inc total)))))
 
 (defn code-at-point 
@@ -246,13 +246,13 @@
    Recursion in implementation could be improved."
   [lst]
   (cons lst (if (seq? lst)
-              (apply concat (doall (map all-items lst)))
+              (apply list-concat (doall (map all-items lst)))
               ())))
 
 (defn list-to-open-close-sequence
   [lst]
   (if (seq? lst)
-    (flatten (prewalkseq #(if (seq? %) (concat '(:open) % '(:close)) %) lst))
+    (flatten (prewalkseq #(if (seq? %) (list-concat '(:open) % '(:close)) %) lst))
     lst))
 
 ;(list-to-open-close-sequence '(1 2 (a b (c) ((d)) e)))
@@ -282,20 +282,25 @@
    be considered a solution unless it is perfect on both the train and test
    cases."
   [domains]
-  (apply mapv concat (map (fn [[input-set n-train n-test]]
-                            (if (fn? input-set)
-                              (vector (repeatedly n-train input-set)
-                                      (repeatedly n-test input-set))
-                              (let [shuffled-inputs (shuffle input-set)
-                                    train-inputs (if (= n-train (count input-set))
-                                                   input-set ; NOTE: input-set is not shuffled if it is the same size as n-train
-                                                   (take n-train shuffled-inputs))
-                                    test-inputs (if (= n-test (count input-set))
-                                                   input-set ; NOTE: input-set is not shuffled if it is the same size as n-test
-                                                   (drop n-train shuffled-inputs))]
-                                (assert (= (+ n-train n-test) (count input-set)) "Sizes of train and test sets don't add up to the size of the input set.")
-                                (vector train-inputs test-inputs))))
-                          domains)))
+  (vec
+    (apply 
+      mapv 
+      concat 
+      (map (fn [[input-set n-train n-test]]
+             (if (fn? input-set)
+               (vector (repeatedly n-train input-set)
+                       (repeatedly n-test input-set))
+               (let [shuffled-inputs (shuffle input-set)
+                     train-inputs (if (= n-train (count input-set))
+                                    input-set ; NOTE: input-set is not shuffled if the same size as n-train
+                                    (take n-train shuffled-inputs))
+                     test-inputs (if (= n-test (count input-set))
+                                   input-set ; NOTE: input-set is not shuffled if the same size as n-test
+                                   (drop n-train shuffled-inputs))]
+                 (assert (= (+ n-train n-test) (count input-set)) 
+                         "Sizes of train and test sets don't add up to the size of the input set.")
+                 (vector train-inputs test-inputs))))
+           domains))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; from https://github.com/KushalP/mailcheck-clj/blob/master/src/mailcheck/levenshtein.clj
