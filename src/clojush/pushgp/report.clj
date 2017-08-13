@@ -76,11 +76,12 @@
    If log-fitnesses-for-all-cases is true, it also prints the value
    of each fitness case."
   [population generation {:keys [csv-log-filename csv-columns]}]
-  (let [columns (concat [:uuid]
-                        (filter #(some #{%} csv-columns)
-                                [:generation :location :parent-uuids :genetic-operators 
-                                 :push-program-size :plush-genome-size :push-program 
-                                 :plush-genome :total-error :is-random-replacement]))]
+  (let [columns (vec
+                  (concat [:uuid]
+                          (filter #(some #{%} csv-columns)
+                                  [:generation :location :parent-uuids :genetic-operators 
+                                   :push-program-size :plush-genome-size :push-program 
+                                   :plush-genome :total-error :is-random-replacement])))]
     (when (zero? generation)
       (with-open [csv-file (io/writer csv-log-filename :append false)]
         (csv/write-csv csv-file
@@ -612,4 +613,5 @@
     (println "\n;;******************************")
     (println ";; Problem-Specific Report of Simplified Solution")
     (problem-specific-report simplified-best [] generation error-function report-simplifications)))
+
 
