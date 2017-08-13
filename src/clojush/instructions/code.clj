@@ -18,8 +18,9 @@
   ^{:stack-types [:code]}
   (fn [state]
     (if (not (empty? (rest (:code state))))
-      (let [new-item (concat (ensure-list (stack-ref :code 0 state))
-                             (ensure-list (stack-ref :code 1 state)))]
+      (let [new-item (ensure-list
+                       (concat (ensure-list (stack-ref :code 0 state))
+                               (ensure-list (stack-ref :code 1 state))))]
         (if (<= (count-points new-item) @global-max-points)
           (push-item new-item
                      :code
@@ -565,3 +566,4 @@
     (if (empty? (:environment state))
       state
       (end-environment state))))
+
