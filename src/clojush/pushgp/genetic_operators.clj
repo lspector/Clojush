@@ -227,8 +227,9 @@
         string-tweak (fn [st]
                        (apply str (map (fn [c]
                                          (if (< (lrand) uniform-mutation-string-char-change-rate)
-                                           (lrand-nth (concat ["\n" "\t"] 
-                                                              (map (comp str char) (range 32 127))))
+                                           (lrand-nth (vec (concat ["\n" "\t"] 
+                                                                   (map (comp str char) 
+                                                                        (range 32 127)))))
                                            c))
                                        st)))
         instruction-mutator (fn [token]
@@ -432,8 +433,9 @@
         string-tweak (fn [st]
                        (apply str (map (fn [c]
                                          (if (< (lrand) uniform-mutation-string-char-change-rate)
-                                           (lrand-nth (concat ["\n" "\t"] 
-                                                              (map (comp str char) (range 32 127))))
+                                           (lrand-nth (vec (concat ["\n" "\t"] 
+                                                                   (map (comp str char) 
+                                                                        (range 32 127)))))
                                            c))
                                        st)))
         constant-mutator (fn [token]
@@ -732,9 +734,10 @@ given by uniform-deletion-rate."
     (recur parent2 parent1 argmap)
     (let [short-genome (:genome parent1)
           long-genome (:genome parent2)
-          short-genome-lengthened (concat short-genome
-                                          (repeat (- (count long-genome) (count short-genome))
-                                                  'uniform-padding))
+          short-genome-lengthened (vec (concat short-genome
+                                               (repeat (- (count long-genome) 
+                                                          (count short-genome))
+                                                       'uniform-padding)))
           new-genome (vec (remove-uniform-padding
                             (mapv (fn [x1 x2]
                                     (if (< (lrand) 0.5)
@@ -1178,4 +1181,5 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
