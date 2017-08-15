@@ -136,7 +136,7 @@
                                                 (partition 2 1 (:history ind)))
                                     improvements (mapv #(if (neg? %) 1.0 0.0) 
                                                        diffs)
-                                    persistence 0.9
+                                    persistence 0.5
                                     weights (take (count diffs) 
                                                   (iterate (partial * persistence) 1))]
                                 (- 1 (/ (reduce + (mapv * improvements weights))
