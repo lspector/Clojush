@@ -197,9 +197,13 @@
           ;; for other options.
 
           :autoconstructive-improve-or-diversify false
-          ;; If true, the during autoconstruction a child will be allowed to survive even if it
+          ;; If true, then during autoconstruction a child will be allowed to survive even if it
           ;; fails the diversification test, if it has lower errors than both of its parents
           ;; on at least one case.
+          
+          :autoconstructive-require-error-change false
+          ;; If true, then during autoconstruction a child will be allowed to survive only if its
+          ;; error vector differs from that of its first parent.
 
           :autoconstructive-clone-probability 0.0
           ;; Specifies the probability that a clone will be produced rather than the result of

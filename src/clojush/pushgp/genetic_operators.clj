@@ -1126,7 +1126,7 @@ be set globally or eliminated in the future."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program 
                            error-function autoconstructive-improve-or-diversify 
                            autoconstructive-fotd autoconstructive-clone-probability
-                           autoconstructive-entropy]
+                           autoconstructive-entropy autoconstructive-require-error-change]
                     :as argmap}]
   (if autoconstructive-fotd
     (fotd-autoconstruction parent1 parent2 argmap)
@@ -1141,7 +1141,9 @@ be set globally or eliminated in the future."
                          (vec (filter identity
                                       (map #(if (< (lrand) autoconstructive-entropy) nil %)
                                            pre-entropy-child-genome))))
-          child-errors (if autoconstructive-improve-or-diversify
+          compute-errors (or autoconstructive-improve-or-diversify 
+                             autoconstructive-require-error-change)
+          child-errors (if compute-errors
                          (do
                            (swap! evaluations-count inc)
                            (:errors (error-function
@@ -1154,14 +1156,21 @@ be set globally or eliminated in the future."
                                  (-> argmap
                                      (assoc :parent1-genome parent1-genome)
                                      (assoc :parent2-genome parent2-genome)))
-          use-child (or variant
-                        (and autoconstructive-improve-or-diversify
-                             (some (fn [[child-error parent1-error parent2-error]]
-                                     (< child-error (min parent1-error parent2-error)))
-                                   (mapv vector 
-                                         child-errors 
-                                         (:errors parent1) 
-                                         (:errors parent2)))))
+          use-child (and (or (not autoconstructive-require-error-change)
+                             (and (:errors parent1)
+                                  (:errors parent2)
+                                  (not= child-errors ;; don't include meta-errors
+                                        (take (count child-errors) (:errors parent1)))
+                                  (not= child-errors 
+                                        (take (count child-errors) (:errors parent2)))))
+                         (or variant
+                             (and autoconstructive-improve-or-diversify
+                                  (some (fn [[child-error parent1-error parent2-error]]
+                                          (< child-error (min parent1-error parent2-error)))
+                                        (mapv vector 
+                                              child-errors 
+                                              (:errors parent1) 
+                                              (:errors parent2))))))
           new-genome (if use-child
                        child-genome
                        (random-plush-genome 
@@ -1181,5 +1190,4 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
-
 
