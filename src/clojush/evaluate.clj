@@ -146,6 +146,26 @@
                                 (- 1 (/ (reduce + (mapv * improvements weights))
                                         (reduce + weights))))))
                           ;
+                          (= cat :discounted-case-improvement-ratios)
+                          (if (not (:print-history argmap))
+                            (throw 
+                              (Exception. 
+                                ":print-history must be true for :discounted-case-improvement-ratios"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (<= (first case-history) error-threshold)
+                                       0
+                                       (let [diffs (mapv (fn [[a b]] (- a b))
+                                                         (partition 2 1 case-history))
+                                             improvements (mapv #(if (neg? %) 1.0 0.0) 
+                                                                diffs)
+                                             persistence 0.5
+                                             weights (take (count diffs) 
+                                                           (iterate (partial * persistence) 1))]
+                                         (- 1 (/ (reduce + (mapv * improvements weights))
+                                                 (reduce + weights)))))))))
+                          ;
                           (= cat :reproductive-fidelity)
                           (let [g (:genome ind)]
                             (- 1.0
@@ -160,7 +180,7 @@
                                  (produce-child-genome-by-autoconstruction g g argmap)
                                  (produce-child-genome-by-autoconstruction g g argmap))))
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
-    (doall (map meta-error-fn meta-error-categories))))
+    (vec (flatten (mapv meta-error-fn meta-error-categories)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; evaluate individuals
