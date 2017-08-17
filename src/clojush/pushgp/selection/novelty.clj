@@ -123,3 +123,4 @@
                                 (lrand-nth pop)))]
     (reduce (fn [i1 i2] (if (> (:novelty i1) (:novelty i2)) i1 i2))
             tournament-set)))
+

@@ -27,12 +27,13 @@
           ;; Function that takes a program and returns a list of errors.
 
           :error-threshold 0
-          ;; Pushgp will stop and return the best program if its total error is <= error-threshold.
+          ;; Pushgp will stop and return the best program if its total error 
+          ;; is <= error-threshold.
 
-          :atom-generators (concat @registered-instructions
-                                   (list
-                                     (fn [] (lrand-int 100))
-                                     (fn [] (lrand))))
+          :atom-generators (into @registered-instructions
+                                 (list
+                                   (fn [] (lrand-int 100))
+                                   (fn [] (lrand))))
           ;; The instructions that pushgp will use in random code.
 
           :population-size 1000
@@ -42,26 +43,29 @@
           ;; The maximum number of generations to run GP.
 
           :max-point-evaluations 10e100
-          ;; The limit for the number of point (instruction) evaluations to execute during the run.
+          ;; The limit for the number of point (instruction) evaluations to 
+          ;; execute during the run.
 
           :max-points 200
-          ;; Maximum size of push programs and push code, as counted by points in the program.
-          ;; 1/4 this limit is used as the limit for sizes of Plush genomes.
+          ;; Maximum size of push programs and push code, as counted by points 
+          ;; in the program. 1/4 this limit is used as the limit for sizes of 
+          ;; Plush genomes.
 
           :max-genome-size-in-initial-program 50
-          ;; Maximum size of initial Plush genomes in generation 0. Keep in mind that genome lengths
-          ;; will otherwise be limited by 1/4 of :max-points.
+          ;; Maximum size of initial Plush genomes in generation 0. Keep in mind 
+          ;; that genome lengths will otherwise be limited by 1/4 of :max-points.
 
           :evalpush-limit 150
-          ;; The number of Push instructions that can be evaluated before stopping evaluation.
+          ;; The number of Push instructions that can be evaluated before stopping 
+          ;; evaluation.
 
           :evalpush-time-limit 0
-          ;; The time in nanoseconds that a program can evaluate before stopping, 0 means no time
-          ;; limit.
+          ;; The time in nanoseconds that a program can evaluate before stopping, 
+          ;; 0 means no time limit.
 
           :reuse-errors true
-          ;; When true, children produced through direct reproduction will not be re-evaluated but
-          ;; will have the error vector of their parent.
+          ;; When true, children produced through direct reproduction will not be 
+          ;; re-evaluated but will have the error vector of their parent.
 
           ;;----------------------------------------
           ;; Genetic operator probabilities
@@ -193,9 +197,13 @@
           ;; for other options.
 
           :autoconstructive-improve-or-diversify false
-          ;; If true, the during autoconstruction a child will be allowed to survive even if it
+          ;; If true, then during autoconstruction a child will be allowed to survive even if it
           ;; fails the diversification test, if it has lower errors than both of its parents
           ;; on at least one case.
+          
+          :autoconstructive-require-error-change false
+          ;; If true, then during autoconstruction a child will be allowed to survive only if its
+          ;; error vector differs from that of its first parent.
 
           :autoconstructive-clone-probability 0.0
           ;; Specifies the probability that a clone will be produced rather than the result of
@@ -288,7 +296,8 @@
           ;; :max-error), :e-over-e-plus-1 (e/(e+1) = 1 - 1/(e+1))
 
           :max-error 1000
-          ;; If :normalization is set to :divide-by-max-error, will use this number for normalization.
+          ;; If :normalization is set to :divide-by-max-error, will use this number for 
+          ;; normalization.
 
           :meta-error-categories []
           ;; A vector containing meta-error categories that can be used for parent selection, but
@@ -476,7 +485,8 @@
 (defn load-push-argmap
   [argmap]
   (doseq [[argkey argval] argmap]
-    (assert (contains? @push-argmap argkey) (str "Argument key " argkey " is not a recognized argument to pushgp."))
+    (assert (contains? @push-argmap argkey) 
+            (str "Argument key " argkey " is not a recognized argument to pushgp."))
     (swap! push-argmap assoc argkey argval))
   (swap! push-argmap assoc :run-uuid (java.util.UUID/randomUUID))
   ;; Augmentation for autoconstruction
@@ -485,70 +495,70 @@
     (swap! push-argmap assoc :epigenetic-markers [:close :silent])
     (doseq [instr (case (:autoconstructive-genome-instructions @push-argmap)
                     :all (registered-for-stacks [:integer :boolean :exec :genome :float :tag])
-                    :gene-oriented (concat (registered-for-stacks
-                                             [:integer :boolean :exec :float :tag])
-                                           '(genome_pop
-                                              genome_dup
-                                              genome_swap
-                                              genome_rot
-                                              genome_flush
-                                              genome_eq
-                                              genome_stackdepth
-                                              genome_yank
-                                              genome_yankdup
-                                              genome_shove
-                                              genome_empty
-                                              genome_gene_dup
-                                              genome_gene_randomize
-                                              genome_gene_replace
-                                              genome_gene_delete
-                                              genome_rotate
-                                              genome_gene_copy
-                                              genome_gene_copy_range
-                                              genome_toggle_silent
-                                              genome_silence
-                                              genome_unsilence
-                                              genome_close_inc
-                                              genome_close_dec
-                                              genome_new
-                                              genome_parent1
-                                              genome_parent2
-                                              autoconstructive_integer_rand
-                                              autoconstructive_boolean_rand))
-                    :uniform (concat (registered-for-stacks
-                                       [:integer :boolean :exec :float :tag])
-                                     '(genome_pop
-                                        genome_dup
-                                        genome_swap
-                                        genome_rot
-                                        genome_flush
-                                        genome_eq
-                                        genome_stackdepth
-                                        genome_yank
-                                        genome_yankdup
-                                        genome_shove
-                                        genome_empty
-                                        genome_rotate
-                                        genome_new
-                                        genome_parent1
-                                        genome_parent2
-                                        autoconstructive_integer_rand
-                                        autoconstructive_boolean_rand
-                                        genome_uniform_instruction_mutation
-                                        genome_uniform_integer_mutation
-                                        genome_uniform_float_mutation
-                                        genome_uniform_tag_mutation
-                                        genome_uniform_string_mutation
-                                        genome_uniform_boolean_mutation
-                                        genome_uniform_close_mutation
-                                        genome_uniform_silence_mutation
-                                        genome_uniform_deletion
-                                        genome_uniform_addition
-                                        genome_uniform_addition_and_deletion
-                                        genome_uniform_combination_and_deletion
-                                        genome_genesis
-                                        genome_alternation
-                                        genome_uniform_crossover)))]
+                    :gene-oriented (into (registered-for-stacks
+                                           [:integer :boolean :exec :float :tag])
+                                         '(genome_pop
+                                            genome_dup
+                                            genome_swap
+                                            genome_rot
+                                            genome_flush
+                                            genome_eq
+                                            genome_stackdepth
+                                            genome_yank
+                                            genome_yankdup
+                                            genome_shove
+                                            genome_empty
+                                            genome_gene_dup
+                                            genome_gene_randomize
+                                            genome_gene_replace
+                                            genome_gene_delete
+                                            genome_rotate
+                                            genome_gene_copy
+                                            genome_gene_copy_range
+                                            genome_toggle_silent
+                                            genome_silence
+                                            genome_unsilence
+                                            genome_close_inc
+                                            genome_close_dec
+                                            genome_new
+                                            genome_parent1
+                                            genome_parent2
+                                            autoconstructive_integer_rand
+                                            autoconstructive_boolean_rand))
+                    :uniform (into (registered-for-stacks
+                                     [:integer :boolean :exec :float :tag])
+                                   '(genome_pop
+                                      genome_dup
+                                      genome_swap
+                                      genome_rot
+                                      genome_flush
+                                      genome_eq
+                                      genome_stackdepth
+                                      genome_yank
+                                      genome_yankdup
+                                      genome_shove
+                                      genome_empty
+                                      genome_rotate
+                                      genome_new
+                                      genome_parent1
+                                      genome_parent2
+                                      autoconstructive_integer_rand
+                                      autoconstructive_boolean_rand
+                                      genome_uniform_instruction_mutation
+                                      genome_uniform_integer_mutation
+                                      genome_uniform_float_mutation
+                                      genome_uniform_tag_mutation
+                                      genome_uniform_string_mutation
+                                      genome_uniform_boolean_mutation
+                                      genome_uniform_close_mutation
+                                      genome_uniform_silence_mutation
+                                      genome_uniform_deletion
+                                      genome_uniform_addition
+                                      genome_uniform_addition_and_deletion
+                                      genome_uniform_combination_and_deletion
+                                      genome_genesis
+                                      genome_alternation
+                                      genome_uniform_crossover)))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     (swap! push-argmap assoc
@@ -572,13 +582,15 @@
                                   (tagged-instruction-erc 10000)))
     (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
       (swap! push-argmap assoc
-             :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_integer_rand)))
+             :atom-generators (conj (:atom-generators @push-argmap) 
+                                    'autoconstructive_integer_rand)))
     (if (neg? (:autoconstructive-integer-rand-enrichment @push-argmap))
       (swap! push-argmap assoc :atom-generators (remove #(= % 'autoconstructive_integer_rand)
                                                         (:atom-generators @push-argmap))))
     (dotimes [n (:autoconstructive-boolean-rand-enrichment @push-argmap)]
       (swap! push-argmap assoc
-             :atom-generators (conj (:atom-generators @push-argmap) 'autoconstructive_boolean_rand)))
+             :atom-generators (conj (:atom-generators @push-argmap) 
+                                    'autoconstructive_boolean_rand)))
     (if (neg? (:autoconstructive-boolean-rand-enrichment @push-argmap))
       (swap! push-argmap assoc
              :atom-generators (remove #(= % 'autoconstructive_boolean_rand)
@@ -588,26 +600,26 @@
   (when (> (:tag-enrichment argmap) 0)
     (swap! push-argmap assoc
            :atom-generators 
-           (vec (concat (:atom-generators @push-argmap)
-                        (apply concat
-                               (repeat (:tag-enrichment argmap)
-                                       [(tag-instruction-erc 
-                                          [:integer :boolean :exec :float 
-                                           :char :string :code] 10000)
-                                        (untag-instruction-erc 10000)
-                                        (tagged-instruction-erc 10000)
-                                        'integer_tagged_instruction
-                                        'integer_tag_exec_instruction
-                                        'integer_tag_code_instruction
-                                        'integer_tag_integer_instruction
-                                        'integer_tag_float_instruction
-                                        'integer_tag_boolean_instruction
-                                        'integer_tag_char_instruction
-                                        'integer_tag_string_instruction])))))))
+           (let [tag-instructions [(tag-instruction-erc 
+                                     [:integer :boolean :exec :float 
+                                      :char :string :code] 10000)
+                                   (untag-instruction-erc 10000)
+                                   (tagged-instruction-erc 10000)
+                                   'integer_tagged_instruction
+                                   'integer_tag_exec_instruction
+                                   'integer_tag_code_instruction
+                                   'integer_tag_integer_instruction
+                                   'integer_tag_float_instruction
+                                   'integer_tag_boolean_instruction
+                                   'integer_tag_char_instruction
+                                   'integer_tag_string_instruction]]
+             (into (:atom-generators @push-argmap)
+                   (take (* (:tag-enrichment argmap) (count tag-instructions))
+                         (cycle tag-instructions)))))))
 
 (defn reset-globals
-  "Resets all Clojush globals according to values in @push-argmap. If an argmap argument is provided then it is loaded
-  into @push-argmap first."
+  "Resets all Clojush globals according to values in @push-argmap. If an argmap argument 
+  is provided then it is loaded into @push-argmap first."
   ([]
    (doseq [[gname gatom] (filter (fn [[a _]] (.startsWith (name a) "global-"))
                                  (ns-publics 'clojush.globals))]

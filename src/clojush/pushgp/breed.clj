@@ -45,9 +45,9 @@
     :parent parent
     :empty (make-individual :genome [] :genetic-operators :empty)
     :truncate (assoc child :genome (vec (take (/ max-points 4) (:genome child))))
-    :random (make-individual :genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
-                             :genetic-operators :random)
-    ))
+    :random (make-individual 
+              :genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
+              :genetic-operators :random)))
 
 (defn revert-to-parent-if-worse
   "Evaluates child and parent, returning the child if it is at least as good as
@@ -79,20 +79,23 @@
                     operator-list)
           operator (first op-list)
           num-parents (:parents (get genetic-operators operator))
-          other-parents (repeatedly 
-                          (dec num-parents) 
-                          (fn []
-                            (loop [re-selections 0
-                                   other (select population argmap)]
-                              (if (and (= other first-parent)
-                                       (< re-selections (:self-mate-avoidance-limit argmap)))
-                                (recur (inc re-selections)
-                                       (select population argmap))
-                                other))))
+          other-parents (vec (repeatedly 
+                               (dec num-parents) 
+                               (fn []
+                                 (loop [re-selections 0
+                                        other (select population argmap)]
+                                   (if (and (= other first-parent)
+                                            (< re-selections 
+                                               (:self-mate-avoidance-limit argmap)))
+                                     (recur (inc re-selections)
+                                            (select population argmap))
+                                     other)))))
           op-fn (:fn (get genetic-operators operator))
-          child (assoc (apply op-fn (concat (vector first-parent) other-parents (vector argmap)))
-                       :parent-uuids (concat (:parent-uuids first-parent)
-                                             (map :uuid other-parents)))]
+          child (assoc (apply op-fn (vec (concat (vector first-parent) 
+                                                 other-parents 
+                                                 (vector argmap))))
+                       :parent-uuids (vec (concat (:parent-uuids first-parent)
+                                                  (map :uuid other-parents))))]
       (recur (rest op-list)
              (if revertable
                (revert-to-parent-if-worse child first-parent rand-gen argmap)
@@ -151,6 +154,7 @@
                 (<= prob (second (first vectored-go-probabilities))))
           (perform-genetic-operator (first (first vectored-go-probabilities)) population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
+
 
 
 

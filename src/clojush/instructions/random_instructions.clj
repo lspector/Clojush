@@ -55,7 +55,9 @@
                    (+' min-random-string-length
                        (lrand-int (- max-random-string-length
                                      min-random-string-length)))
-                   (fn [] (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127)))))))
+                   (fn [] (lrand-nth (vec (concat ["\n" "\t"] 
+                                                  (map (comp str char) 
+                                                       (range 32 127))))))))
       :string
       state)))
 
@@ -63,6 +65,8 @@
   char_rand
   ^{:stack-types [:char :random]}
   (fn [state]
-    (push-item (lrand-nth (concat [\newline \tab] (map char (range 32 127))))
+    (push-item (lrand-nth (vec (concat [\newline \tab] 
+                                       (map char (range 32 127)))))
                :char
                state)))
+

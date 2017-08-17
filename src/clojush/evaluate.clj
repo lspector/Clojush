@@ -112,16 +112,35 @@
                                 1000000
                                 (loop [remaining hist
                                        new-best-count 0
-                                       scale 1]
+                                       scale 1
+                                       max-total 0]
                                   (if (empty? (rest remaining))
-                                    (- 1.0 (/ new-best-count (dec (count hist))))
+                                    (- 1.0 (/ new-best-count max-total))
                                     (recur (rest remaining)
                                            (+ new-best-count
                                               (if (every? #(> % (first remaining))
                                                           (rest remaining))
                                                 (/ 1 scale)
                                                 0))
-                                           (inc scale)))))))
+                                           (* 2.0 scale)
+                                           (+ max-total (/ 1 scale))))))))
+                          ;
+                          (= cat :discounted-total-error-improvement-ratio)
+                          (if (not (:print-history argmap))
+                            (throw 
+                              (Exception. 
+                                ":print-history must be true for :discounted-total-error-improvement-ratio"))
+                            (if (empty? (rest (:history ind)))
+                              1000000
+                              (let [diffs (mapv (fn [[a b]] (- a b))
+                                                (partition 2 1 (:history ind)))
+                                    improvements (mapv #(if (neg? %) 1.0 0.0) 
+                                                       diffs)
+                                    persistence 0.5
+                                    weights (take (count diffs) 
+                                                  (iterate (partial * persistence) 1))]
+                                (- 1 (/ (reduce + (mapv * improvements weights))
+                                        (reduce + weights))))))
                           ;
                           (= cat :reproductive-fidelity)
                           (let [g (:genome ind)]

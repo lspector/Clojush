@@ -20,7 +20,6 @@
      :vector_string (fn [thing] (and (vector? thing) (string? (first thing))))
      :vector_boolean (fn [thing] (and (vector? thing) (or (= (first thing) true) (= (first thing) false))))}))
      
-
 (defn recognize-literal
   "If thing is a literal, return its type -- otherwise return false."
   [thing]
@@ -44,10 +43,25 @@
           (fn [node children] (with-meta children (meta node)))
           root))
 
-(defn ensure-list ;; really make-list-if-not-seq, but close enough for here
+(defn list-concat
+  "Returns a (non-lazy) list of the items that result from calling concat
+  on args."
+  [& args]
+  (apply list (apply concat args)))
+
+(defn not-lazy
+  "Returns lst if it is not a seq, or a non-lazy list of lst if it is."
+  [lst]
+  (if (seq? lst)
+    (apply list lst)
+    lst))
+
+(defn ensure-list
+  "Returns a non-lazy list of the contents of thing if thing is a seq.
+  Returns a list containing thing otherwise."
   [thing]
   (if (seq? thing)
-    thing
+    (not-lazy thing)
     (list thing)))
 
 (defn print-return
@@ -96,8 +110,8 @@
                  total)
           ;;
           :else 
-          (recur (concat (first remaining) 
-                         (rest remaining)) 
+          (recur (list-concat (first remaining) 
+                              (rest remaining)) 
                  (inc total)))))
 
 (defn count-points
@@ -117,8 +131,8 @@
                  (inc total))
           ;;
           :else 
-          (recur (concat (first remaining) 
-                         (rest remaining)) 
+          (recur (list-concat (first remaining) 
+                              (rest remaining)) 
                  (inc total)))))
 
 (defn code-at-point 
@@ -232,20 +246,13 @@
    Recursion in implementation could be improved."
   [lst]
   (cons lst (if (seq? lst)
-              (apply concat (doall (map all-items lst)))
+              (apply list-concat (doall (map all-items lst)))
               ())))
-
-(defn not-lazy
-  "Returns lst if it is not a list, or a non-lazy version of lst if it is."
-  [lst]
-  (if (seq? lst)
-    (apply list lst)
-    lst))
 
 (defn list-to-open-close-sequence
   [lst]
   (if (seq? lst)
-    (flatten (prewalkseq #(if (seq? %) (concat '(:open) % '(:close)) %) lst))
+    (flatten (prewalkseq #(if (seq? %) (list-concat '(:open) % '(:close)) %) lst))
     lst))
 
 ;(list-to-open-close-sequence '(1 2 (a b (c) ((d)) e)))
@@ -275,20 +282,25 @@
    be considered a solution unless it is perfect on both the train and test
    cases."
   [domains]
-  (apply mapv concat (map (fn [[input-set n-train n-test]]
-                            (if (fn? input-set)
-                              (vector (repeatedly n-train input-set)
-                                      (repeatedly n-test input-set))
-                              (let [shuffled-inputs (shuffle input-set)
-                                    train-inputs (if (= n-train (count input-set))
-                                                   input-set ; NOTE: input-set is not shuffled if it is the same size as n-train
-                                                   (take n-train shuffled-inputs))
-                                    test-inputs (if (= n-test (count input-set))
-                                                   input-set ; NOTE: input-set is not shuffled if it is the same size as n-test
-                                                   (drop n-train shuffled-inputs))]
-                                (assert (= (+ n-train n-test) (count input-set)) "Sizes of train and test sets don't add up to the size of the input set.")
-                                (vector train-inputs test-inputs))))
-                          domains)))
+  (vec
+    (apply 
+      mapv 
+      concat 
+      (map (fn [[input-set n-train n-test]]
+             (if (fn? input-set)
+               (vector (repeatedly n-train input-set)
+                       (repeatedly n-test input-set))
+               (let [shuffled-inputs (shuffle input-set)
+                     train-inputs (if (= n-train (count input-set))
+                                    input-set ; NOTE: input-set is not shuffled if the same size as n-train
+                                    (take n-train shuffled-inputs))
+                     test-inputs (if (= n-test (count input-set))
+                                   input-set ; NOTE: input-set is not shuffled if the same size as n-test
+                                   (drop n-train shuffled-inputs))]
+                 (assert (= (+ n-train n-test) (count input-set)) 
+                         "Sizes of train and test sets don't add up to the size of the input set.")
+                 (vector train-inputs test-inputs))))
+           domains))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; from https://github.com/KushalP/mailcheck-clj/blob/master/src/mailcheck/levenshtein.clj

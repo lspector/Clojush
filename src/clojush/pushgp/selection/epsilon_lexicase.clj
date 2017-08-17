@@ -19,7 +19,7 @@
     (let [pop (map deref pop-agents)
           test-case-errors (apply map list (map :errors pop))
           meta-case-errors (apply map list (map :meta-errors pop))
-          all-errors (concat test-case-errors meta-case-errors)
+          all-errors (vec (concat test-case-errors meta-case-errors))
           epsilons (map mad all-errors)]
       (println "Epsilons for epsilon lexicase:" epsilons)
       (reset! epsilons-for-epsilon-lexicase epsilons))))
@@ -48,5 +48,4 @@
                                epsilon))
                        survivors)
                (rest cases))))))
-
 
