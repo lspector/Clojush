@@ -15,7 +15,8 @@
                  ;; https://mvnrepository.com/artifact/org.apache.commons/commons-math3
                  [org.apache.commons/commons-math3 "3.2"]
                  [cheshire "5.7.1"]
-                 [prismatic/plumbing "0.5.4"]]
+                 [prismatic/plumbing "0.5.4"]
+                 [criterium "0.4.4"]]
   :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
             [lein-gorilla "0.4.0"]

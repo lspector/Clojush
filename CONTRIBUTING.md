@@ -21,17 +21,17 @@ with:
 
 ```bash
 # all integeration tests
-lein test clojush.test.integration-test
+lein test clojush.test.core-test
 
 # just one configuration
-lein test :only clojush.test.integration-test/<label>
+lein test :only clojush.test.core-test/<label>
 ```
 If you change
 anything about how Clojush outputs data or computes things, they are likely to
 fail. You will need to regenerate the saved output with:
 
 ```bash
-lein run -m clojush.test.integration-test/regenerate [<label> ...]
+lein run -m clojush.test.core-test/regenerate [<label> ...]
 ```
 
 Since there are some things that will always change (like the time and git hash)

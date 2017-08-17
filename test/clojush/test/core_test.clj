@@ -1,6 +1,6 @@
 ;; this tests the full CLI process to make sure it outputs the same thing
 ;; it uses
-(ns clojush.test.integration-test
+(ns clojush.test.core-test
   (:require [clojure.test :refer :all]
             [clojure.string :as string]
             [clojure.java.io :as io]
