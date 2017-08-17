@@ -55,7 +55,7 @@
                             (throw 
                               (Exception. 
                                 ":print-history must be true for :gens-since-total-error-change"))
-                            (let [hist (:history ind)]
+                            (let [hist (mapv (partial reduce +) (:history ind))]
                               (if (or (empty? hist)
                                       (apply = hist))
                                 1000000
@@ -66,7 +66,9 @@
                             (throw 
                               (Exception. 
                                 ":print-history must be true for :gens-since-total-error-improvement"))
-                            (let [diffs (mapv (fn [[a b]] (- a b)) (partition 2 1 (:history ind)))]
+                            (let [diffs (mapv (fn [[a b]] (- a b)) 
+                                              (partition 2 1 (mapv (partial reduce +) 
+                                                                   (:history ind))))]
                               (if (or (empty? diffs)
                                       (not (some neg? diffs)))
                                 1000000
@@ -77,7 +79,9 @@
                             (throw 
                               (Exception. 
                                 ":print-history must be true for :total-error-improvement-ratio"))
-                            (let [diffs (mapv (fn [[a b]] (- a b)) (partition 2 1 (:history ind)))]
+                            (let [diffs (mapv (fn [[a b]] (- a b)) 
+                                              (partition 2 1 (mapv (partial reduce +) 
+                                                                   (:history ind))))]
                               (if (empty? diffs)
                                 1000000
                                 (- 1 (/ (count (filter neg? diffs))
@@ -88,7 +92,7 @@
                             (throw 
                               (Exception. 
                                 ":print-history must be true for :total-error-new-best-ratio"))
-                            (let [hist (:history ind)]
+                            (let [hist (mapv (partial reduce +) (:history ind))]
                               (if (empty? (rest hist))
                                 1000000
                                 (loop [remaining hist
@@ -107,7 +111,7 @@
                             (throw 
                               (Exception. 
                                 ":print-history must be true for :discounted-total-error-new-best-ratio"))
-                            (let [hist (:history ind)]
+                            (let [hist (mapv (partial reduce +) (:history ind))]
                               (if (empty? (rest hist))
                                 1000000
                                 (loop [remaining hist
@@ -133,7 +137,7 @@
                             (if (empty? (rest (:history ind)))
                               1000000
                               (let [diffs (mapv (fn [[a b]] (- a b))
-                                                (partition 2 1 (:history ind)))
+                                                (partition 2 1 (mapv (partial reduce +) (:history ind))))
                                     improvements (mapv #(if (neg? %) 1.0 0.0) 
                                                        diffs)
                                     persistence 0.5
@@ -235,7 +239,7 @@
                            :total-error te
                            :weighted-error we
                            :normalized-error ne
-                           :history (if print-history (cons te (:history i)) (:history i)))
+                           :history (if print-history (cons e (:history i)) (:history i)))
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
 
