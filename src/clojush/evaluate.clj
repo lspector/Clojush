@@ -160,11 +160,10 @@
                                                          (partition 2 1 case-history))
                                              improvements (mapv #(if (neg? %) 1.0 0.0) 
                                                                 diffs)
-                                             persistence 0.5
+                                             persistence 0.49
                                              weights (take (count diffs) 
                                                            (iterate (partial * persistence) 1))]
-                                         (- 1 (/ (reduce + (mapv * improvements weights))
-                                                 (reduce + weights)))))))))
+                                         (- 2.0 (reduce + (mapv * improvements weights)))))))))
                           ;
                           (= cat :reproductive-fidelity)
                           (let [g (:genome ind)]
