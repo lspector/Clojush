@@ -27,7 +27,7 @@
           ;; Function that takes a program and returns a list of errors.
 
           :error-threshold 0
-          ;; Pushgp will stop and return the best program if its total error 
+          ;; Pushgp will stop and return the best program if its total error
           ;; is <= error-threshold.
 
           :atom-generators (into @registered-instructions
@@ -43,28 +43,28 @@
           ;; The maximum number of generations to run GP.
 
           :max-point-evaluations 10e100
-          ;; The limit for the number of point (instruction) evaluations to 
+          ;; The limit for the number of point (instruction) evaluations to
           ;; execute during the run.
 
           :max-points 200
-          ;; Maximum size of push programs and push code, as counted by points 
-          ;; in the program. 1/4 this limit is used as the limit for sizes of 
+          ;; Maximum size of push programs and push code, as counted by points
+          ;; in the program. 1/4 this limit is used as the limit for sizes of
           ;; Plush genomes.
 
           :max-genome-size-in-initial-program 50
-          ;; Maximum size of initial Plush genomes in generation 0. Keep in mind 
+          ;; Maximum size of initial Plush genomes in generation 0. Keep in mind
           ;; that genome lengths will otherwise be limited by 1/4 of :max-points.
 
           :evalpush-limit 150
-          ;; The number of Push instructions that can be evaluated before stopping 
+          ;; The number of Push instructions that can be evaluated before stopping
           ;; evaluation.
 
           :evalpush-time-limit 0
-          ;; The time in nanoseconds that a program can evaluate before stopping, 
+          ;; The time in nanoseconds that a program can evaluate before stopping,
           ;; 0 means no time limit.
 
           :reuse-errors true
-          ;; When true, children produced through direct reproduction will not be 
+          ;; When true, children produced through direct reproduction will not be
           ;; re-evaluated but will have the error vector of their parent.
 
           ;;----------------------------------------
@@ -169,7 +169,7 @@
           ;; The probability of a child being reverted to its parent by a genetic operator that
           ;; has been made revertable, if the child is not as good as the parent on at least one
           ;; test case.
-          
+
           :tag-enrichment 0
           ;; The number of extra copies of tag-related instructions that will be included in
           ;; the atom-generators.
@@ -200,7 +200,7 @@
           ;; If true, then during autoconstruction a child will be allowed to survive even if it
           ;; fails the diversification test, if it has lower errors than both of its parents
           ;; on at least one case.
-          
+
           :autoconstructive-require-error-change false
           ;; If true, then during autoconstruction a child will be allowed to survive only if its
           ;; error vector differs from that of its first parent.
@@ -296,7 +296,7 @@
           ;; :max-error), :e-over-e-plus-1 (e/(e+1) = 1 - 1/(e+1))
 
           :max-error 1000
-          ;; If :normalization is set to :divide-by-max-error, will use this number for 
+          ;; If :normalization is set to :divide-by-max-error, will use this number for
           ;; normalization.
 
           :meta-error-categories []
@@ -485,7 +485,7 @@
 (defn load-push-argmap
   [argmap]
   (doseq [[argkey argval] argmap]
-    (assert (contains? @push-argmap argkey) 
+    (assert (contains? @push-argmap argkey)
             (str "Argument key " argkey " is not a recognized argument to pushgp."))
     (swap! push-argmap assoc argkey argval))
   (swap! push-argmap assoc :run-uuid (java.util.UUID/randomUUID))
@@ -572,7 +572,7 @@
                                   (fn [] (lrand-nth [true false]))))
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
-                                  (tag-instruction-erc 
+                                  (tag-instruction-erc
                                     [:integer :boolean :exec :float :char :string :code] 10000)))
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
@@ -582,14 +582,14 @@
                                   (tagged-instruction-erc 10000)))
     (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
       (swap! push-argmap assoc
-             :atom-generators (conj (:atom-generators @push-argmap) 
+             :atom-generators (conj (:atom-generators @push-argmap)
                                     'autoconstructive_integer_rand)))
     (if (neg? (:autoconstructive-integer-rand-enrichment @push-argmap))
       (swap! push-argmap assoc :atom-generators (remove #(= % 'autoconstructive_integer_rand)
                                                         (:atom-generators @push-argmap))))
     (dotimes [n (:autoconstructive-boolean-rand-enrichment @push-argmap)]
       (swap! push-argmap assoc
-             :atom-generators (conj (:atom-generators @push-argmap) 
+             :atom-generators (conj (:atom-generators @push-argmap)
                                     'autoconstructive_boolean_rand)))
     (if (neg? (:autoconstructive-boolean-rand-enrichment @push-argmap))
       (swap! push-argmap assoc
@@ -599,9 +599,9 @@
            :replace-child-that-exceeds-size-limit-with :empty))
   (when (> (:tag-enrichment @push-argmap) 0)
     (swap! push-argmap assoc
-           :atom-generators 
-           (let [tag-instructions [(tag-instruction-erc 
-                                     [:integer :boolean :exec :float 
+           :atom-generators
+           (let [tag-instructions [(tag-instruction-erc
+                                     [:integer :boolean :exec :float
                                       :char :string :code] 10000)
                                    (untag-instruction-erc 10000)
                                    (tagged-instruction-erc 10000)
@@ -618,7 +618,7 @@
                          (cycle tag-instructions)))))))
 
 (defn reset-globals
-  "Resets all Clojush globals according to values in @push-argmap. If an argmap argument 
+  "Resets all Clojush globals according to values in @push-argmap. If an argmap argument
   is provided then it is loaded into @push-argmap first."
   ([]
    (doseq [[gname gatom] (filter (fn [[a _]] (.startsWith (name a) "global-"))
@@ -629,5 +629,4 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
-
 
