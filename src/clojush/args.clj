@@ -597,7 +597,7 @@
                                       (:atom-generators @push-argmap))))
     (swap! push-argmap assoc
            :replace-child-that-exceeds-size-limit-with :empty))
-  (when (> (:tag-enrichment argmap) 0)
+  (when (> (:tag-enrichment @push-argmap) 0)
     (swap! push-argmap assoc
            :atom-generators 
            (let [tag-instructions [(tag-instruction-erc 
@@ -614,7 +614,7 @@
                                    'integer_tag_char_instruction
                                    'integer_tag_string_instruction]]
              (into (:atom-generators @push-argmap)
-                   (take (* (:tag-enrichment argmap) (count tag-instructions))
+                   (take (* (:tag-enrichment @push-argmap) (count tag-instructions))
                          (cycle tag-instructions)))))))
 
 (defn reset-globals
@@ -629,4 +629,5 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
