@@ -157,10 +157,13 @@
                                      (if (<= (first case-history) error-threshold)
                                        0 ;; solved, improvement doesn't matter
                                        (let [improvements (mapv (fn [[older-error newer-error]] 
-                                                                  (max 0 (- older-error newer-error)))
+                                                                  (- older-error newer-error))
                                                                 (partition 2 1 case-history))
-                                             weights (iterate (partial * 0.5) 0.5)]
-                                         (/ 1.0 (reduce + (mapv * improvements weights)))))))))
+                                             weights (iterate (partial * 0.5) 0.5)
+                                             sum (reduce + (mapv * improvements weights))]
+                                         (if (<= sum 0) 
+                                           (+ 1.0 (Math/abs sum))
+                                           (/ 1.0 sum))))))))
                           ;
                           (= cat :reproductive-fidelity)
                           (let [g (:genome ind)]
