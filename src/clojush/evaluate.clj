@@ -162,7 +162,7 @@
                                              weights (iterate (partial * 0.5) 0.5)
                                              sum (reduce + (mapv * improvements weights))]
                                          (if (<= sum 0) 
-                                           (+ 1.0 (Math/abs sum))
+                                           1.0E100
                                            (/ 1.0 sum))))))))
                           ;
                           (= cat :reproductive-fidelity)
