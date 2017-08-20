@@ -155,15 +155,12 @@
                               (vec (repeat (count (:errors ind)) 1000000))
                               (vec (for [case-history (apply map list (:history ind))]
                                      (if (<= (first case-history) error-threshold)
-                                       0
-                                       (let [diffs (mapv (fn [[a b]] (- a b))
-                                                         (partition 2 1 case-history))
-                                             improvements (mapv #(if (neg? %) 1.0 0.0) 
-                                                                diffs)
-                                             persistence 0.49
-                                             weights (take (count diffs) 
-                                                           (iterate (partial * persistence) 1))]
-                                         (- 2.0 (reduce + (mapv * improvements weights)))))))))
+                                       0 ;; solved, improvement doesn't matter
+                                       (let [improvements (mapv (fn [[older-error newer-error]] 
+                                                                  (max 0 (- older-error newer-error)))
+                                                                (partition 2 1 case-history))
+                                             weights (iterate (partial * 0.5) 0.5)]
+                                         (/ 1.0 (reduce + (mapv * improvements weights)))))))))
                           ;
                           (= cat :reproductive-fidelity)
                           (let [g (:genome ind)]
@@ -261,4 +258,5 @@
                            :history (if print-history (cons e (:history i)) (:history i)))
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
+
 
