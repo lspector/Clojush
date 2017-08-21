@@ -231,8 +231,7 @@
     (random/with-rng rand-gen
       (let [p (:program i)
             evaluated-i (if (or (not reuse-errors)
-                                (nil? (:errors i))
-                                (nil? (:total-error i)))
+                                (nil? (:errors i)))
                          (error-function i)
                          i)
             raw-errors (:errors evaluated-i)
@@ -261,5 +260,4 @@
                            :history (if print-history (cons e (:history i)) (:history i)))
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
-
 

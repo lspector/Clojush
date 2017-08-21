@@ -819,46 +819,50 @@ programs encoded by genomes g1 and g2."
                         (expressed-program-sequence-from-genome g2 argmap)))
 
 (defn gecco2016-diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g argmap]
-  (let [delta #(expressed-difference 
+  [ind argmap]
+  (let [g (:genome ind)
+        delta #(expressed-difference 
                  g
                  (produce-child-genome-by-autoconstruction g g argmap)
                  argmap)
         diffs (repeatedly 2 delta)]
-    (and (> (reduce min diffs) 0) ;; diversification threshold set here
-         (> (count (distinct diffs)) 1))))
+    (assoc ind :diversifying
+      (and (> (reduce min diffs) 0) ;; diversification threshold set here
+           (> (count (distinct diffs)) 1)))))
 
 (defn doesnt-clone-diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g argmap]
-  (not= (translate-plush-genome-to-push-program 
-          {:genome g} 
-          argmap)
-        (translate-plush-genome-to-push-program 
-          {:genome (produce-child-genome-by-autoconstruction g g argmap)} 
-          argmap)))
+  [ind argmap]
+  (let [g (:genome ind)]
+    (assoc ind :diversifying
+      (not= (translate-plush-genome-to-push-program 
+              {:genome g} 
+              argmap)
+            (translate-plush-genome-to-push-program 
+              {:genome (produce-child-genome-by-autoconstruction g g argmap)} 
+              argmap)))))
 
 (defn not-a-clone-diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g {:keys [parent1-genome parent2-genome] :as argmap}]
-  (let [express #(translate-plush-genome-to-push-program {:genome %} argmap)
+  [ind {:keys [parent1-genome parent2-genome] :as argmap}]
+  (let [g (:genome ind)
+        express #(translate-plush-genome-to-push-program {:genome %} argmap)
         pgm (express g)
         parent1-pgm (express parent1-genome)
         parent2-pgm (express parent2-genome)]
-    (and (not= pgm parent1-pgm)
-         (not= pgm parent2-pgm))))
+    (assoc ind :diversifying
+      (and (not= pgm parent1-pgm)
+           (not= pgm parent2-pgm)))))
 
 (defn minimum-genetic-difference-diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g {:keys [parent1-genome parent2-genome]}]
-  (and (<= (sequence-similarity g parent1-genome) 0.9)
-       (<= (sequence-similarity g parent2-genome) 0.9)))
+  [ind {:keys [parent1-genome parent2-genome]}]
+  (let [g (:genome ind)]
+    (assoc ind :diversifying
+      (and (<= (sequence-similarity g parent1-genome) 0.9)
+           (<= (sequence-similarity g parent2-genome) 0.9)))))
 
 (defn three-gens-diff-diffs-diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g argmap]
-  (let [make-child #(produce-child-genome-by-autoconstruction % % argmap)
+  [ind argmap]
+  (let [g (:genome ind)
+        make-child #(produce-child-genome-by-autoconstruction % % argmap)
         diff #(expressed-difference %1 %2 argmap)
         c1 (make-child g)
         c2 (make-child g)
@@ -869,13 +873,14 @@ programs encoded by genomes g1 and g2."
         gc1-diff (diff c1 gc1)
         gc2-diff (diff c2 gc2)
         diffs [c1-diff c2-diff gc1-diff gc2-diff]]
-    (and (> (reduce min diffs) 0)
-         (apply distinct? diffs))))
+    (assoc ind :diversifying
+      (and (> (reduce min diffs) 0)
+           (apply distinct? diffs)))))
 
 (defn three-gens-same-inputs-diff-diffs-diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g argmap]
-  (let [make-child #(produce-child-genome-by-autoconstruction % g g argmap)
+  [ind argmap]
+  (let [g (:genome ind)
+        make-child #(produce-child-genome-by-autoconstruction % g g argmap)
         diff #(expressed-difference %1 %2 argmap)
         c1 (make-child g)
         c2 (make-child g)
@@ -886,13 +891,14 @@ programs encoded by genomes g1 and g2."
         gc1-diff (diff c1 gc1)
         gc2-diff (diff c2 gc2)
         diffs [c1-diff c2-diff gc1-diff gc2-diff]]
-    (and (> (reduce min diffs) 0)
-         (apply distinct? diffs))))
+    (assoc ind :diversifying
+      (and (> (reduce min diffs) 0)
+           (apply distinct? diffs)))))
 
 (defn three-gens-some-diff-diffs-diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g argmap]
-  (let [make-child #(produce-child-genome-by-autoconstruction % % argmap)
+  [ind argmap]
+  (let [g (:genome ind)
+        make-child #(produce-child-genome-by-autoconstruction % % argmap)
         diff #(expressed-difference %1 %2 argmap)
         c1 (make-child g)
         c2 (make-child g)
@@ -903,30 +909,32 @@ programs encoded by genomes g1 and g2."
         gc1-diff (diff c1 gc1)
         gc2-diff (diff c2 gc2)
         diffs [c1-diff c2-diff gc1-diff gc2-diff]]
-    (and (> (reduce min diffs) 0)
-         (not= c1-diff c2-diff)
-         (not= c1-diff gc1-diff)
-         (not= c2-diff gc2-diff))))
+    (assoc ind :diversifying
+      (and (> (reduce min diffs) 0)
+           (not= c1-diff c2-diff)
+           (not= c1-diff gc1-diff)
+           (not= c2-diff gc2-diff)))))
 
 (defn size-and-instruction-diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g argmap]
-  (let [numkids (:autoconstructive-si-children argmap)
+  [ind argmap]
+  (let [g (:genome ind)
+        numkids (:autoconstructive-si-children argmap)
         kids (repeatedly numkids 
                          #(produce-child-genome-by-autoconstruction g g argmap))
         kid-counts (map count kids)
         instruction-set (fn [genome]
                           (hash-set (keys (frequencies (map :instruction genome)))))
         kid-sets (map instruction-set kids)]
-    (and (not (some #{(count g)} kid-counts))
-         (not (some #{(instruction-set g)} kid-sets))
-         (or (< numkids 2) (not (apply = kid-counts)))
-         (or (< numkids 2) (not (apply = kid-sets))))))
+    (assoc ind :diversifying
+      (and (not (some #{(count g)} kid-counts))
+           (not (some #{(instruction-set g)} kid-sets))
+           (or (< numkids 2) (not (apply = kid-counts)))
+           (or (< numkids 2) (not (apply = kid-sets)))))))
 
 (defn three-gens-size-and-instruction-diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g argmap]
-  (let [numkids (:autoconstructive-si-children argmap)
+  [ind argmap]
+  (let [g (:genome ind)
+        numkids (:autoconstructive-si-children argmap)
         make-child #(produce-child-genome-by-autoconstruction % % argmap)
         instruction-set (fn [genome]
                           (hash-set (keys (frequencies (map :instruction genome)))))
@@ -936,14 +944,15 @@ programs encoded by genomes g1 and g2."
         grandkids (map make-child kids)
         grandkid-counts (map count grandkids)
         grandkid-sets (map instruction-set grandkids)]
-    (and (not (some #{(count g)} kid-counts))
-         (not (some #{(instruction-set g)} kid-sets))
-         (not (some #{(count g)} grandkid-counts))
-         (not (some #{(instruction-set g)} grandkid-sets))
-         (or (< numkids 2) (not (apply = (map count kids))))
-         (or (< numkids 2) (not (apply = (map count grandkids))))
-         (or (< numkids 2) (not (apply = (map instruction-set kids))))
-         (or (< numkids 2) (not (apply = (map instruction-set grandkids)))))))
+    (assoc ind :diversifying
+      (and (not (some #{(count g)} kid-counts))
+           (not (some #{(instruction-set g)} kid-sets))
+           (not (some #{(count g)} grandkid-counts))
+           (not (some #{(instruction-set g)} grandkid-sets))
+           (or (< numkids 2) (not (apply = (map count kids))))
+           (or (< numkids 2) (not (apply = (map count grandkids))))
+           (or (< numkids 2) (not (apply = (map instruction-set kids))))
+           (or (< numkids 2) (not (apply = (map instruction-set grandkids))))))))
 
 (defn safe-t-test ;; safely answers 1.0 if t-test would divide by zero
   [xvec yvec]
@@ -954,102 +963,131 @@ programs encoded by genomes g1 and g2."
       (.tTest new-t (double-array xvec) (double-array yvec)))))
 
 (defn diffmeans-diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g argmap]
-  (let [num-children (:autoconstructive-diffmeans-children argmap)
+  [ind argmap]
+  (let [g (:genome ind)
+        num-children (:autoconstructive-diffmeans-children argmap)
         make-child #(produce-child-genome-by-autoconstruction % % argmap)
         c1 (make-child g)
         diffs1 (vec (repeatedly 
                       num-children 
                       #(expressed-difference c1 (make-child c1) argmap)))]
-    (if (or (some #{0} diffs1)
-            (apply = diffs1))
-      false
-      (let [c2 (make-child g)
-            diffs2 (vec (repeatedly 
-                          num-children 
-                          #(expressed-difference c2 (make-child c2) argmap)))]
-        (if (or (some #{0} diffs2)
-                (apply = diffs2)
-                (> (safe-t-test diffs1 diffs2)
-                   0.01))
-          false
-          true)))))
-
+    (assoc ind :diversifying
+      (if (or (some #{0} diffs1)
+              (apply = diffs1))
+        false
+        (let [c2 (make-child g)
+              diffs2 (vec (repeatedly 
+                            num-children 
+                            #(expressed-difference c2 (make-child c2) argmap)))]
+          (if (or (some #{0} diffs2)
+                  (apply = diffs2)
+                  (> (safe-t-test diffs1 diffs2)
+                     0.01))
+            false
+            true))))))
 
 (defn minimal-reproductive-difference-diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g argmap]
-  (let [child1 (produce-child-genome-by-autoconstruction g g argmap)
+  [ind argmap]
+  (let [g (:genome ind)
+        child1 (produce-child-genome-by-autoconstruction g g argmap)
         child2 (produce-child-genome-by-autoconstruction child1 g g argmap)
         c1-diff (sequence-similarity g child1)
         c2-diff (sequence-similarity g child2)]
-    (and (not (zero? c1-diff))
-         (not (zero? c2-diff))
-         (not= c1-diff c2-diff))))
+    (assoc ind :diversifying
+      (and (not (zero? c1-diff))
+           (not (zero? c2-diff))
+           (not= c1-diff c2-diff)))))
 
 (defn use-mate-differently-diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g argmap]
-  (let [mate (vec (repeat (count g) {:instruction :from-mate :close 0}))
+  [ind argmap]
+  (let [g (:genome ind)
+        mate (vec (repeat (count g) {:instruction :from-mate :close 0}))
         c1 (produce-child-genome-by-autoconstruction g mate argmap)
         c1-from-mate-count (count (filter #(= (:instruction %) :from-mate) c1))]
-    (if (> c1-from-mate-count 0)
-      (let [c2 (produce-child-genome-by-autoconstruction g mate argmap)
-            c2-from-mate-count (count (filter #(= (:instruction %) :from-mate) c2))]
-        (and (> c2-from-mate-count 0)
-             (not= c1-from-mate-count c2-from-mate-count)))
-      false)))
+    (assoc ind :diversifying
+      (if (> c1-from-mate-count 0)
+        (let [c2 (produce-child-genome-by-autoconstruction g mate argmap)
+              c2-from-mate-count (count (filter #(= (:instruction %) :from-mate) c2))]
+          (and (> c2-from-mate-count 0)
+               (not= c1-from-mate-count c2-from-mate-count)))
+        false))))
 
 (defn si-and-mate-use-diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g argmap]
-  (let [mate (vec (repeat (count g) {:instruction :from-mate :close 0}))
+  [ind argmap]
+  (let [g (:genome ind)
+        mate (vec (repeat (count g) {:instruction :from-mate :close 0}))
         c1 (produce-child-genome-by-autoconstruction g mate argmap)
         c1-from-mate-count (count (filter #(= (:instruction %) :from-mate) c1))]
-    (if (> c1-from-mate-count 0)
-      (let [c1-not-from-mate (filter #(not= (:instruction %) :from-mate) c1)
-            c1-not-from-mate-count (count c1-not-from-mate)
-            g-count (count g)
-            c1-instructions (set (distinct (map :instruction c1-not-from-mate)))
-            g-instructions (set (distinct (map :instruction g)))]
-        (if (and (not= c1-instructions g-instructions)
-                 (not= c1-not-from-mate-count g-count))
-          (let [c2 (produce-child-genome-by-autoconstruction g mate argmap)
-                c2-from-mate-count (count (filter #(= (:instruction %) :from-mate) c2))]
-            (if (and (> c2-from-mate-count 0)
-                     (not= c1-from-mate-count c2-from-mate-count))
-              (let [c2-not-from-mate (filter #(not= (:instruction %) :from-mate) c2)
-                    c2-not-from-mate-count (count c2-not-from-mate)
-                    c2-instructions (set (distinct (map :instruction c2-not-from-mate)))]
-                (and (not= c2-instructions g-instructions)
-                     (not= c2-instructions c1-instructions)
-                     (not= c2-not-from-mate-count g-count)
-                     (not= c2-not-from-mate-count c1-not-from-mate-count)))
-              false))
-          false))
-      false)))
+    (assoc ind :diversifying
+      (if (> c1-from-mate-count 0)
+        (let [c1-not-from-mate (filter #(not= (:instruction %) :from-mate) c1)
+              c1-not-from-mate-count (count c1-not-from-mate)
+              g-count (count g)
+              c1-instructions (set (distinct (map :instruction c1-not-from-mate)))
+              g-instructions (set (distinct (map :instruction g)))]
+          (if (and (not= c1-instructions g-instructions)
+                   (not= c1-not-from-mate-count g-count))
+            (let [c2 (produce-child-genome-by-autoconstruction g mate argmap)
+                  c2-from-mate-count (count (filter #(= (:instruction %) :from-mate) c2))]
+              (if (and (> c2-from-mate-count 0)
+                       (not= c1-from-mate-count c2-from-mate-count))
+                (let [c2-not-from-mate (filter #(not= (:instruction %) :from-mate) c2)
+                      c2-not-from-mate-count (count c2-not-from-mate)
+                      c2-instructions (set (distinct (map :instruction c2-not-from-mate)))]
+                  (and (not= c2-instructions g-instructions)
+                       (not= c2-instructions c1-instructions)
+                       (not= c2-not-from-mate-count g-count)
+                       (not= c2-not-from-mate-count c1-not-from-mate-count)))
+                false))
+            false))
+        false))))
+
+(defn different-errors-diversifying?
+  [ind argmap]
+  (if (and (:parent1-errors argmap)
+           (:parent2-errors argmap))
+    (let [errs (do
+                 (swap! evaluations-count inc)
+                 (:errors ((:error-function argmap)
+                           {:genome (:genome ind)
+                            :program (translate-plush-genome-to-push-program
+                                       {:genome (:genome ind)}
+                                       argmap)})))]
+      (assoc ind :diversifying
+        (and (not= (:errors ind) (take (count errs) (:parent1-errors argmap)))
+             (not= (:errors ind) (take (count errs) (:parent2-errors argmap))))))
+    (assoc ind :diversifying true)))
 
 (defn diversifying?
-  "Returns true iff genome g passes the diversification test."
-  [g argmap]
-  ((case (:autoconstructive-diversification-test argmap)
-     :gecco2016 gecco2016-diversifying?
-     :three-gens-diff-diffs three-gens-diff-diffs-diversifying?
-     :three-gens-same-inputs-diff-diffs three-gens-same-inputs-diff-diffs-diversifying?
-     :three-gens-some-diff-diffs three-gens-some-diff-diffs-diversifying?
-     :size-and-instruction size-and-instruction-diversifying?
-     :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?
-     :diffmeans diffmeans-diversifying?
-     :minimal-reproductive-difference minimal-reproductive-difference-diversifying?
-     :use-mate-differently use-mate-differently-diversifying?
-     :si-and-mate-use si-and-mate-use-diversifying?
-     :doesnt-clone doesnt-clone-diversifying?
-     :not-a-clone not-a-clone-diversifying?
-     :minimum-genetic-difference minimum-genetic-difference-diversifying?
-     :none (fn [genome argmap] true))
-    g
-    argmap))
+  "Returns ind with :diversifying set to true if it staisfies all test
+  specified in (:autoconstructive-diversification-test argmap), or false
+  otherwise."
+  [ind argmap]
+  (loop [i (assoc ind :diversifying true)
+         tests (let [raw-tests (:autoconstructive-diversification-test argmap)]
+                 (if (coll? raw-tests) raw-tests [raw-tests]))]
+    (if (or (empty? tests)
+            (not (:diversifying i)))
+      i
+      (recur ((case (first tests)
+                :gecco2016 gecco2016-diversifying?
+                :three-gens-diff-diffs three-gens-diff-diffs-diversifying?
+                :three-gens-same-inputs-diff-diffs three-gens-same-inputs-diff-diffs-diversifying?
+                :three-gens-some-diff-diffs three-gens-some-diff-diffs-diversifying?
+                :size-and-instruction size-and-instruction-diversifying?
+                :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?
+                :diffmeans diffmeans-diversifying?
+                :minimal-reproductive-difference minimal-reproductive-difference-diversifying?
+                :use-mate-differently use-mate-differently-diversifying?
+                :si-and-mate-use si-and-mate-use-diversifying?
+                :doesnt-clone doesnt-clone-diversifying?
+                :not-a-clone not-a-clone-diversifying?
+                :minimum-genetic-difference minimum-genetic-difference-diversifying?
+                :different-errors different-errors-diversifying?
+                :none (fn [ind argmap] i))
+              i
+              argmap)
+             (rest tests)))))
 
 (defn autoconstruction
   "Returns a genome for a child produced either by autoconstruction (executing parent1
@@ -1059,9 +1097,7 @@ programs encoded by genomes g1 and g2."
   genome is returned. The construct/clone ration is hardcoded here, but might
   be set globally or eliminated in the future."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program 
-                           error-function autoconstructive-improve-or-diversify 
-                           autoconstructive-clone-probability autoconstructive-entropy 
-                           autoconstructive-require-error-change]
+                           autoconstructive-clone-probability autoconstructive-entropy]
                     :as argmap}]
   (let [parent1-genome (:genome parent1)
         parent2-genome (:genome parent2)
@@ -1074,53 +1110,41 @@ programs encoded by genomes g1 and g2."
                        (vec (filter identity
                                     (map #(if (< (lrand) autoconstructive-entropy) nil %)
                                          pre-entropy-child-genome))))
-        compute-errors (or autoconstructive-improve-or-diversify 
-                           autoconstructive-require-error-change)
-        child-errors (if compute-errors
-                       (do
-                         (swap! evaluations-count inc)
-                         (:errors (error-function
-                                    {:genome child-genome
-                                     :program (translate-plush-genome-to-push-program
-                                                {:genome child-genome}
-                                                argmap)})))
-                       nil)
-        variant (diversifying? child-genome 
-                               (-> argmap
-                                   (assoc :parent1-genome parent1-genome)
-                                   (assoc :parent2-genome parent2-genome)))
-        use-child (and (or (not autoconstructive-require-error-change)
-                           (and (:errors parent1)
-                                (:errors parent2)
-                                (not= child-errors ;; don't include meta-errors
-                                      (take (count child-errors) (:errors parent1)))
-                                (not= child-errors 
-                                      (take (count child-errors) (:errors parent2)))))
-                       (or variant
-                           (and autoconstructive-improve-or-diversify
-                                (some (fn [[child-error parent1-error parent2-error]]
-                                        (< child-error (min parent1-error parent2-error)))
-                                      (mapv vector 
-                                            child-errors 
-                                            (:errors parent1) 
-                                            (:errors parent2))))))
-        new-genome (if use-child
-                     child-genome
-                     (random-plush-genome 
-                       max-genome-size-in-initial-program atom-generators argmap))]
-    (assoc (make-individual :genome (if (or use-child (diversifying? new-genome argmap))
-                                      new-genome
-                                      [])
-                            :history (:history parent1)
-                            :age (if use-child
-                                   ((age-combining-function argmap) parent1 parent2 new-genome)
-                                   0)
-                            :grain-size (if use-child
-                                          (compute-grain-size new-genome parent1 parent2 argmap)
-                                          (compute-grain-size new-genome argmap))
-                            :ancestors (if maintain-ancestors
-                                         (cons (:genome parent1) (:ancestors parent1))
-                                         (:ancestors parent1)))
-      :is-random-replacement
-      (if use-child false true))))
+        check-diversification #(diversifying? 
+                                 %
+                                 (-> argmap
+                                     (assoc :parent1-genome parent1-genome)
+                                     (assoc :parent2-genome parent2-genome)
+                                     (assoc :parent1-errors (:errors parent1))
+                                     (assoc :parent2-errors (:errors parent2))))
+        checked (check-diversification {:genome child-genome})]
+    (if (:diversifying checked)
+      (make-individual :genome child-genome
+                       :errors (:errors checked)
+                       :history (:history parent1)
+                       :age ((age-combining-function argmap) parent1 parent2 child-genome)
+                       :grain-size (compute-grain-size child-genome parent1 parent2 argmap)
+                       :ancestors (if maintain-ancestors
+                                    (cons (:genome parent1) (:ancestors parent1))
+                                    (:ancestors parent1))
+                       :is-random-replacement false)
+      (let [new-genome (random-plush-genome 
+                         max-genome-size-in-initial-program atom-generators argmap)
+            new-checked (check-diversification {:genome new-genome})]
+        (if (:diversifying new-checked)
+          (make-individual :genome new-genome
+                           :errors (:errors new-checked)
+                           :history ()
+                           :age 0
+                           :grain-size (compute-grain-size new-genome argmap)
+                           :ancestors ()
+                           :is-random-replacement true)
+          (make-individual :genome []
+                           :errors nil
+                           :history ()
+                           :age 0
+                           :grain-size (compute-grain-size [] argmap)
+                           :ancestors ()
+                           :is-random-replacement true))))))
+
 
