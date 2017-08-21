@@ -1051,143 +1051,76 @@ programs encoded by genomes g1 and g2."
     g
     argmap))
 
-(defn fotd-autoconstruction
-  "A historical 'flavor of the day' version of autoconstruction, used by specifying
-  :autoconstructive-fotd true in the arguments to pushgp. Expect changes. Other
-  autoconstruction-related parameters may or may not have any effect when using the
-  fotd."
+(defn autoconstruction
+  "Returns a genome for a child produced either by autoconstruction (executing parent1
+  with both parents on top of the genome stack and also available via input instructions)
+  or by cloning. In either case if the child is not diversifying then a random
+  genome is returned instead IF that is itself diversifying; if it isn't then an empty 
+  genome is returned. The construct/clone ration is hardcoded here, but might
+  be set globally or eliminated in the future."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program 
-                           error-function]
+                           error-function autoconstructive-improve-or-diversify 
+                           autoconstructive-clone-probability autoconstructive-entropy 
+                           autoconstructive-require-error-change]
                     :as argmap}]
   (let [parent1-genome (:genome parent1)
         parent2-genome (:genome parent2)
-        parental-errors? (fn [errors]
-                           (some #{errors} [(:errors parent1) (:errors parent2)]))
-        make-child-genome (fn [g1 g2] 
-                            (produce-child-genome-by-autoconstruction g1 g2 argmap))
-        diff #(expressed-difference %1 %2 argmap)
-        genome-error #(do (swap! evaluations-count inc)
-                          (:errors (error-function
-                                    {:genome %
+        pre-entropy-child-genome (if (> (lrand) autoconstructive-clone-probability)
+                                   (produce-child-genome-by-autoconstruction 
+                                     parent1-genome parent2-genome argmap)
+                                   parent1-genome)
+        child-genome (if (zero? autoconstructive-entropy)
+                       pre-entropy-child-genome
+                       (vec (filter identity
+                                    (map #(if (< (lrand) autoconstructive-entropy) nil %)
+                                         pre-entropy-child-genome))))
+        compute-errors (or autoconstructive-improve-or-diversify 
+                           autoconstructive-require-error-change)
+        child-errors (if compute-errors
+                       (do
+                         (swap! evaluations-count inc)
+                         (:errors (error-function
+                                    {:genome child-genome
                                      :program (translate-plush-genome-to-push-program
-                                               {:genome %}
-                                               argmap)})))
-        acceptable? (fn [g]
-                      (let [c1 (make-child-genome g g)
-                            c1-diff (diff g c1)]
-                        (if (zero? c1-diff)
-                          false
-                          (let [c1-errors (genome-error c1)]
-                            (if (parental-errors? c1-errors)
-                              false
-                              (let [c2 (make-child-genome g g)
-                                    c2-diff (diff g c2)]
-                                (if (or (zero? c2-diff)
-                                        (= c1-diff c2-diff))
-                                  false
-                                  (let [c2-errors (genome-error c2)]
-                                    (if (or (parental-errors? c2-errors)
-                                            (= c1-errors c2-errors))
-                                      false
-                                      (let [gc1-diff (diff c1 (make-child-genome c1 c1))]
-                                        (if (or (zero? gc1-diff)
-                                                (= c1-diff gc1-diff))
-                                          false
-                                          (let [gc2-diff (diff c2 (make-child-genome c2 c2))]
-                                            (if (or (zero? gc2-diff)
-                                                    (= c2-diff gc2-diff))
-                                              false
-                                              true)))))))))))))
-        child-genome (make-child-genome parent1-genome parent2-genome)
-        new-genome (if (acceptable? child-genome)
+                                                {:genome child-genome}
+                                                argmap)})))
+                       nil)
+        variant (diversifying? child-genome 
+                               (-> argmap
+                                   (assoc :parent1-genome parent1-genome)
+                                   (assoc :parent2-genome parent2-genome)))
+        use-child (and (or (not autoconstructive-require-error-change)
+                           (and (:errors parent1)
+                                (:errors parent2)
+                                (not= child-errors ;; don't include meta-errors
+                                      (take (count child-errors) (:errors parent1)))
+                                (not= child-errors 
+                                      (take (count child-errors) (:errors parent2)))))
+                       (or variant
+                           (and autoconstructive-improve-or-diversify
+                                (some (fn [[child-error parent1-error parent2-error]]
+                                        (< child-error (min parent1-error parent2-error)))
+                                      (mapv vector 
+                                            child-errors 
+                                            (:errors parent1) 
+                                            (:errors parent2))))))
+        new-genome (if use-child
                      child-genome
-                     (let [replacement (random-plush-genome max-genome-size-in-initial-program 
-                                                            atom-generators 
-                                                            argmap)]
-                       (if (acceptable? replacement)
-                         replacement
-                         [])))]
-    (assoc (make-individual :genome new-genome
+                     (random-plush-genome 
+                       max-genome-size-in-initial-program atom-generators argmap))]
+    (assoc (make-individual :genome (if (or use-child (diversifying? new-genome argmap))
+                                      new-genome
+                                      [])
                             :history (:history parent1)
-                            :age ((age-combining-function argmap) parent1 parent2 new-genome)
-                            :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
+                            :age (if use-child
+                                   ((age-combining-function argmap) parent1 parent2 new-genome)
+                                   0)
+                            :grain-size (if use-child
+                                          (compute-grain-size new-genome parent1 parent2 argmap)
+                                          (compute-grain-size new-genome argmap))
                             :ancestors (if maintain-ancestors
                                          (cons (:genome parent1) (:ancestors parent1))
                                          (:ancestors parent1)))
-      :is-random-replacement (not= child-genome new-genome))))
-
-(defn autoconstruction
-  "Returns a genome for a child produced either by autoconstruction (executing parent1
-with both parents on top of the genome stack and also available via input instructions)
-or by cloning. In either case if the child is not diversifying then a random
-genome is returned instead IF that is itself diversifying; if it isn't then an empty 
-genome is returned. The construct/clone ration is hardcoded here, but might
-be set globally or eliminated in the future."
-  [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program 
-                           error-function autoconstructive-improve-or-diversify 
-                           autoconstructive-fotd autoconstructive-clone-probability
-                           autoconstructive-entropy autoconstructive-require-error-change]
-                    :as argmap}]
-  (if autoconstructive-fotd
-    (fotd-autoconstruction parent1 parent2 argmap)
-    (let [parent1-genome (:genome parent1)
-          parent2-genome (:genome parent2)
-          pre-entropy-child-genome (if (> (lrand) autoconstructive-clone-probability)
-                                     (produce-child-genome-by-autoconstruction 
-                                       parent1-genome parent2-genome argmap)
-                                     parent1-genome)
-          child-genome (if (zero? autoconstructive-entropy)
-                         pre-entropy-child-genome
-                         (vec (filter identity
-                                      (map #(if (< (lrand) autoconstructive-entropy) nil %)
-                                           pre-entropy-child-genome))))
-          compute-errors (or autoconstructive-improve-or-diversify 
-                             autoconstructive-require-error-change)
-          child-errors (if compute-errors
-                         (do
-                           (swap! evaluations-count inc)
-                           (:errors (error-function
-                                     {:genome child-genome
-                                      :program (translate-plush-genome-to-push-program
-                                                {:genome child-genome}
-                                                argmap)})))
-                         nil)
-          variant (diversifying? child-genome 
-                                 (-> argmap
-                                     (assoc :parent1-genome parent1-genome)
-                                     (assoc :parent2-genome parent2-genome)))
-          use-child (and (or (not autoconstructive-require-error-change)
-                             (and (:errors parent1)
-                                  (:errors parent2)
-                                  (not= child-errors ;; don't include meta-errors
-                                        (take (count child-errors) (:errors parent1)))
-                                  (not= child-errors 
-                                        (take (count child-errors) (:errors parent2)))))
-                         (or variant
-                             (and autoconstructive-improve-or-diversify
-                                  (some (fn [[child-error parent1-error parent2-error]]
-                                          (< child-error (min parent1-error parent2-error)))
-                                        (mapv vector 
-                                              child-errors 
-                                              (:errors parent1) 
-                                              (:errors parent2))))))
-          new-genome (if use-child
-                       child-genome
-                       (random-plush-genome 
-                         max-genome-size-in-initial-program atom-generators argmap))]
-      (assoc (make-individual :genome (if (or use-child (diversifying? new-genome argmap))
-                                        new-genome
-                                        [])
-                              :history (:history parent1)
-                              :age (if use-child
-                                     ((age-combining-function argmap) parent1 parent2 new-genome)
-                                     0)
-                              :grain-size (if use-child
-                                            (compute-grain-size new-genome parent1 parent2 argmap)
-                                            (compute-grain-size new-genome argmap))
-                              :ancestors (if maintain-ancestors
-                                           (cons (:genome parent1) (:ancestors parent1))
-                                           (:ancestors parent1)))
-        :is-random-replacement
-        (if use-child false true)))))
+      :is-random-replacement
+      (if use-child false true))))
 

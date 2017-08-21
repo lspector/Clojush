@@ -220,11 +220,6 @@
           ;; When using a "size and instruction" diversification test, specifies how many
           ;; children to generate and test. See genetic-operators.clj.
 
-          :autoconstructive-fotd false
-          ;; If true, autoconstruction will be performed using the 'flavor of the day' code in
-          ;; genetic_operators.clj, which may change without fanfare. Other autoconstruction-related
-          ;; changes may or may not have any effect when this is true.
-
           :autoconstructive-integer-rand-enrichment 0
           ;; The number of extra instances of autoconstructive_integer_rand to include in
           ;; :atom-generators for autoconstruction. If negative then autoconstructive_integer_rand
@@ -629,4 +624,5 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
