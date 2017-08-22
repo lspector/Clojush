@@ -1046,16 +1046,17 @@ programs encoded by genomes g1 and g2."
   [ind argmap]
   (if (and (:parent1-errors argmap)
            (:parent2-errors argmap))
-    (let [errs (do
-                 (swap! evaluations-count inc)
-                 (:errors ((:error-function argmap)
-                           {:genome (:genome ind)
-                            :program (translate-plush-genome-to-push-program
-                                       {:genome (:genome ind)}
-                                       argmap)})))]
+    (let [errs (or (:errors ind)
+                   (do
+                     (swap! evaluations-count inc)
+                     (:errors ((:error-function argmap)
+                               {:genome (:genome ind)
+                                :program (translate-plush-genome-to-push-program
+                                           {:genome (:genome ind)}
+                                           argmap)}))))]
       (assoc ind :diversifying
-        (and (not= (:errors ind) (take (count errs) (:parent1-errors argmap)))
-             (not= (:errors ind) (take (count errs) (:parent2-errors argmap))))))
+        (and (not= errs (take (count errs) (:parent1-errors argmap)))
+             (not= errs (take (count errs) (:parent2-errors argmap))))))
     (assoc ind :diversifying true)))
 
 (defn diversifying?
@@ -1110,14 +1111,12 @@ programs encoded by genomes g1 and g2."
                        (vec (filter identity
                                     (map #(if (< (lrand) autoconstructive-entropy) nil %)
                                          pre-entropy-child-genome))))
-        check-diversification #(diversifying? 
-                                 %
-                                 (-> argmap
+        checked (diversifying? {:genome child-genome}
+                               (-> argmap
                                      (assoc :parent1-genome parent1-genome)
                                      (assoc :parent2-genome parent2-genome)
                                      (assoc :parent1-errors (:errors parent1))
-                                     (assoc :parent2-errors (:errors parent2))))
-        checked (check-diversification {:genome child-genome})]
+                                     (assoc :parent2-errors (:errors parent2))))]
     (if (:diversifying checked)
       (make-individual :genome child-genome
                        :errors (:errors checked)
@@ -1130,7 +1129,7 @@ programs encoded by genomes g1 and g2."
                        :is-random-replacement false)
       (let [new-genome (random-plush-genome 
                          max-genome-size-in-initial-program atom-generators argmap)
-            new-checked (check-diversification {:genome new-genome})]
+            new-checked (diversifying? {:genome new-genome} argmap)]
         (if (:diversifying new-checked)
           (make-individual :genome new-genome
                            :errors (:errors new-checked)
