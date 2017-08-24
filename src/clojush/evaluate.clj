@@ -146,11 +146,11 @@
                                 (- 1 (/ (reduce + (mapv * improvements weights))
                                         (reduce + weights))))))
                           ;
-                          (= cat :discounted-case-improvement-ratios)
+                          (= cat :discounted-case-improvements)
                           (if (not (:print-history argmap))
                             (throw 
                               (Exception. 
-                                ":print-history must be true for :discounted-case-improvement-ratios"))
+                                ":print-history must be true for :discounted-case-improvements"))
                             (if (empty? (rest (:history ind)))
                               (vec (repeat (count (:errors ind)) 1000000))
                               (vec (for [case-history (apply map list (:history ind))]
