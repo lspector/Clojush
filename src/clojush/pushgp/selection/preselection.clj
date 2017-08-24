@@ -26,20 +26,26 @@
   "If age-mediated-parent-selection is falsy, returns pop. Otherwise, 
   age-mediated-parent-selection should be a vector of [pmin pmax] with pmin and pmax both 
   being between 0 and 1 (inclusive) with pmin + pmax <= 1.0. Then, with probability pmin,
-  returns individuals in pop with age @min-age; with probability pmax, returns all of pop;
+  returns individuals in pop with the minimum age; with probability pmax, returns all of pop;
   with probability (- 1.0 pmin pmax), selects an age cutoff uniformly from those present
-  in the population and returns individuals with the cutoff age or lower."
+  in the population and returns individuals with the cutoff age or lower. If a third
+  element of :invert is included in age-mediated-parent-selection then with probability
+  pmin, returns individuals in pop with the maximum age; with probability pmax, returns 
+  all of pop; with probability (- 1.0 pmin pmax), selects an age cutoff uniformly from
+  those present in the population and returns individuals with the cutoff age or higher."
   [pop {:keys [age-mediated-parent-selection]}]
   (if (not age-mediated-parent-selection)
     pop
-    (let [rand-val (lrand)]
-      (if (<= rand-val (first age-mediated-parent-selection))
-        (let [min-age (reduce min (map :age pop))]
-          (filter #(= (:age %) min-age) pop))
-        (if (<= rand-val (apply + age-mediated-parent-selection))
+    (let [rand-val (lrand)
+          amps age-mediated-parent-selection ;; just abbreviate
+          invert (> (count amps) 2)] ;; assume any more args are just :invert
+      (if (<= rand-val (first amps))
+        (let [extreme-age (reduce (if invert max min) (map :age pop))]
+          (filter #(= (:age %) extreme-age) pop))
+        (if (<= rand-val (+ (first amps) (second amps)))
           pop
           (let [age-limit (lrand-nth (distinct (map :age pop)))]
-            (filter (fn [ind] (<= (:age ind) age-limit))
+            (filter (fn [ind] ((if invert >= <=) (:age ind) age-limit))
                     pop)))))))
 
 (defn screen
@@ -69,5 +75,4 @@
       (age-mediate argmap)
       (screen argmap)
       (one-individual-per-error-vector-for-lexicase argmap)))
-
 
