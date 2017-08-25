@@ -288,6 +288,10 @@
           :meta-error-categories []
           ;; A vector containing meta-error categories that can be used for parent selection, but
           ;; do not affect total error. See clojush.evaluate for options.
+          
+          :improvement-discount 0.99
+          ;; The factor by successively older improvements are discounted when calculating
+          ;; discounted-case-improvements meta-errors.
 
           :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population
           ;; size that is retained before breeding. If 0 < decimation-ratio < 1, decimation
@@ -615,5 +619,4 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
-
 

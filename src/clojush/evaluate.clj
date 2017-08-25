@@ -159,7 +159,7 @@
                                        (let [improvements (mapv (fn [[older-error newer-error]] 
                                                                   (- older-error newer-error))
                                                                 (partition 2 1 case-history))
-                                             weights (iterate (partial * 0.5) 0.5)
+                                             weights (iterate (partial * 0.01) 1)
                                              sum (reduce + (mapv * improvements weights))]
                                          (if (<= sum 0) 
                                            1.0E100
