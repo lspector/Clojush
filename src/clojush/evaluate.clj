@@ -35,7 +35,7 @@
      :rand (a random floating-point value)
      :rand-bit (randomly 0 or 1)
      :age (minimize genealogical age of program)"
-  [ind {:keys [meta-error-categories error-threshold] :as argmap}]
+  [ind {:keys [meta-error-categories error-threshold improvement-discount] :as argmap}]
   (let [meta-error-fn (fn [cat]
                         (cond
                           (fn? cat) (cat ind argmap)
@@ -159,7 +159,7 @@
                                        (let [improvements (mapv (fn [[older-error newer-error]] 
                                                                   (- older-error newer-error))
                                                                 (partition 2 1 case-history))
-                                             weights (iterate (partial * 0.01) 1)
+                                             weights (iterate (partial * (- 1 improvement-discount)) 1)
                                              sum (reduce + (mapv * improvements weights))]
                                          (if (<= sum 0) 
                                            1.0E100
@@ -260,4 +260,5 @@
                            :history (if print-history (cons e (:history i)) (:history i)))
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
+
 
