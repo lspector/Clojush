@@ -147,7 +147,7 @@
                                         (reduce + weights))))))
                           ;
                           (= cat :discounted-case-improvements)
-                          (if (not (:print-history argmap))
+                          #_(if (not (:print-history argmap))
                             (throw 
                               (Exception. 
                                 ":print-history must be true for :discounted-case-improvements"))
@@ -162,6 +162,69 @@
                                              weights (iterate (partial * (- 1 improvement-discount)) 1)
                                              sum (reduce + (mapv * improvements weights))]
                                          (if (<= sum 0) 
+                                           1.0E100
+                                           (/ 1.0 sum))))))))
+                          #_(if (not (:print-history argmap))
+                            (throw 
+                              (Exception. 
+                                ":print-history must be true for :discounted-case-improvements"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (let [improvements (mapv (fn [[older-error newer-error]] 
+                                                                (- older-error newer-error))
+                                                              (partition 2 1 case-history))
+                                           weights (iterate (partial * (- 1 improvement-discount)) 1)
+                                           sum (reduce + (mapv * improvements weights))]
+                                       (- 0 sum))))))
+                          #_(if (not (:print-history argmap))
+                            (throw 
+                              (Exception. 
+                                ":print-history must be true for :discounted-case-improvements"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (<= (first case-history) error-threshold)
+                                       -1.0E100 ;; solved, improvement doesn't matter
+                                       (let [improvements (mapv (fn [[older-error newer-error]] 
+                                                                  (- older-error newer-error))
+                                                                (partition 2 1 case-history))
+                                             weights (iterate (partial * (- 1 improvement-discount)) 1)
+                                             sum (reduce + (mapv * improvements weights))]
+                                         (- 0 sum)))))))
+                          #_(if (not (:print-history argmap))
+                            (throw 
+                              (Exception. 
+                                ":print-history must be true for :discounted-case-improvements"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (let [improvements (mapv (fn [[older-error newer-error]] 
+                                                                (- older-error newer-error))
+                                                              (partition 2 1 case-history))
+                                           weights (iterate (partial * (- 1 improvement-discount)) 1)
+                                           sum (reduce + (mapv * improvements weights))]
+                                       (if (<= sum 0) 
+                                         1.0E100
+                                         (/ 1.0 sum)))))))
+                          (if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :discounted-case-improvements"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (<= (first case-history) error-threshold)
+                                       0 ;; solved, improvement doesn't matter
+                                       (let [max-error 200
+                                             cap #(if (> % max-error) max-error %)
+                                             improvements (mapv (fn [[older-error newer-error]]
+                                                                  (- older-error newer-error))
+                                                                (partition
+                                                                  2 1 (mapv cap case-history)))
+                                             weights (iterate (partial * (- 1 improvement-discount)) 1)
+                                             sum (reduce + (mapv * improvements weights))]
+                                         (if (<= sum 0)
                                            1.0E100
                                            (/ 1.0 sum))))))))
                           ;
@@ -260,5 +323,4 @@
                            :history (if print-history (cons e (:history i)) (:history i)))
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
-
 
