@@ -383,7 +383,7 @@
 (defn mean
   [coll]
   "https://github.com/clojure-cookbook/clojure-cookbook/blob/master/01_primitive-data/1-20_simple-statistics.asciidoc"
-  (let [sum (apply + coll)
+  (let [sum (apply +' coll)
         count (count coll)]
     (if (pos? count)
       (/ sum count)
