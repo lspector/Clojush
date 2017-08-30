@@ -264,7 +264,7 @@
                                              sum (reduce + (mapv * improvements weights))]
                                          (if (<= sum 0)
                                            1.0E100
-                                           (/ 1.0 (* (first case-history) sum)))))))))
+                                           (* (first case-history) (/ 1.0 sum)))))))))
                           (= cat :reproductive-fidelity)
                           (let [g (:genome ind)]
                             (- 1.0
