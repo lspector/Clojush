@@ -207,7 +207,7 @@
                                        (if (<= sum 0) 
                                          1.0E100
                                          (/ 1.0 sum)))))))
-                          (if (not (:print-history argmap))
+                          #_(if (not (:print-history argmap))
                             (throw
                               (Exception.
                                 ":print-history must be true for :discounted-case-improvements"))
@@ -218,7 +218,7 @@
                                        0 ;; solved, improvement doesn't matter
                                        (let [max-error 200
                                              cap #(if (> % max-error) max-error %)
-                                             improvements (mapv (fn [[older-error newer-error]]
+                                             improvements (mapv (fn [[newer-error older-error]]
                                                                   (- older-error newer-error))
                                                                 (partition
                                                                   2 1 (mapv cap case-history)))
@@ -227,7 +227,25 @@
                                          (if (<= sum 0)
                                            1.0E100
                                            (/ 1.0 sum))))))))
-                          ;
+                          (if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :discounted-case-improvements"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (<= (first case-history) error-threshold)
+                                       0 ;; solved, improvement doesn't matter
+                                       (let [improvements (mapv (fn [[newer-error older-error]]
+                                                                  (if (> (- older-error newer-error) 0)
+                                                                    1.0
+                                                                    0.0))
+                                                                (partition 2 1 case-history))
+                                             weights (iterate (partial * (- 1 improvement-discount)) 0.5)
+                                             sum (reduce + (mapv * improvements weights))]
+                                         (if (<= sum 0)
+                                           1.0E100
+                                           (/ 1.0 sum))))))))
                           (= cat :reproductive-fidelity)
                           (let [g (:genome ind)]
                             (- 1.0
