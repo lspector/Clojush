@@ -895,6 +895,28 @@ programs encoded by genomes g1 and g2."
       (and (> (reduce min diffs) 0)
            (apply distinct? diffs)))))
 
+(defn four-gens-same-inputs-diff-diffs-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)
+        make-child #(produce-child-genome-by-autoconstruction % g g argmap)
+        diff #(expressed-difference %1 %2 argmap)
+        c1 (make-child g)
+        c2 (make-child g)
+        gc1 (make-child c1)
+        gc2 (make-child c2)
+        ggc1 (make-child gc1)
+        ggc2 (make-child gc2)
+        c1-diff (diff g c1)
+        c2-diff (diff g c2)
+        gc1-diff (diff c1 gc1)
+        gc2-diff (diff c2 gc2)
+        ggc1-diff (diff gc1 ggc1)
+        ggc2-diff (diff gc2 ggc2)
+        diffs [c1-diff c2-diff gc1-diff gc2-diff ggc1-diff ggc2-diff]]
+    (assoc ind :diversifying
+      (and (> (reduce min diffs) 0)
+           (apply distinct? diffs)))))
+
 (defn three-gens-some-diff-diffs-diversifying?
   [ind argmap]
   (let [g (:genome ind)
@@ -1074,6 +1096,7 @@ programs encoded by genomes g1 and g2."
                 :gecco2016 gecco2016-diversifying?
                 :three-gens-diff-diffs three-gens-diff-diffs-diversifying?
                 :three-gens-same-inputs-diff-diffs three-gens-same-inputs-diff-diffs-diversifying?
+                :four-gens-same-inputs-diff-diffs three-gens-same-inputs-diff-diffs-diversifying?
                 :three-gens-some-diff-diffs three-gens-some-diff-diffs-diversifying?
                 :size-and-instruction size-and-instruction-diversifying?
                 :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?
@@ -1145,5 +1168,6 @@ programs encoded by genomes g1 and g2."
                            :grain-size (compute-grain-size [] argmap)
                            :ancestors ()
                            :is-random-replacement true))))))
+
 
 
