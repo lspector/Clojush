@@ -253,7 +253,7 @@
                             (if (empty? (rest (:history ind)))
                               (vec (repeat (count (:errors ind)) 1000000))
                               (vec (for [case-history (apply map list (:history ind))]
-                                     (if (<= (first case-history) error-threshold)
+                                     (if (<= (first case-history) error-threshold) ;; wrong, thresh is on total
                                        0 ;; solved, improvement doesn't matter
                                        (let [improvements (mapv (fn [[newer-error older-error]]
                                                                   (let [imp (- older-error newer-error)]
@@ -266,7 +266,10 @@
                                          (if (<= sum 0)
                                            1.0E100
                                            ;(* (first case-history) (/ 1.0 sum))
+                                           ; arbitrating error ties with improvement 
                                            (+ (first case-history) (- 1.0 sum))
+                                           ; (mostly) arbitrating improvement ties with error
+                                           ;(+ (first case-history) (* 1000 (/ 1.0 sum)))
                                            )))))))
                           (= cat :reproductive-fidelity)
                           (let [g (:genome ind)]
@@ -363,6 +366,7 @@
                            :history (if print-history (cons e (:history i)) (:history i)))
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
+
 
 
 
