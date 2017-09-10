@@ -1081,6 +1081,21 @@ programs encoded by genomes g1 and g2."
              (not= errs (take (count errs) (:parent2-errors argmap))))))
     (assoc ind :diversifying true)))
 
+(defn new-instruction-diversifying?
+  [ind {:keys [parent1-genome parent2-genome] :as argmap}]
+  (let [child-instructions (set (map :instruction (:genome ind)))
+        parent-instructions (set (map :instruction
+                                      (concat parent1-genome parent2-genome)))]
+    (assoc ind :diversifying 
+      (not (empty? (clojure.set/difference child-instructions parent-instructions))))))
+
+(defn new-size-diversifying?
+  [ind {:keys [parent1-genome parent2-genome] :as argmap}]
+  (let [child-size (count (:genome ind))]
+    (assoc ind :diversifying
+      (and (not= child-size (count parent1-genome))
+           (not= child-size (count parent2-genome))))))
+
 (defn diversifying?
   "Returns ind with :diversifying set to true if it staisfies all test
   specified in (:autoconstructive-diversification-test argmap), or false
@@ -1108,6 +1123,8 @@ programs encoded by genomes g1 and g2."
                 :not-a-clone not-a-clone-diversifying?
                 :minimum-genetic-difference minimum-genetic-difference-diversifying?
                 :different-errors different-errors-diversifying?
+                :new-instruction-diversifying new-instruction-diversifying?
+                :new-size-diversifying new-size-diversifying?
                 :none (fn [ind argmap] i))
               i
               argmap)
@@ -1168,6 +1185,7 @@ programs encoded by genomes g1 and g2."
                            :grain-size (compute-grain-size [] argmap)
                            :ancestors ()
                            :is-random-replacement true))))))
+
 
 
 
