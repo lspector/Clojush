@@ -182,7 +182,9 @@
           ;; everything in (registered-for-stacks [:integer :boolean :exec :genome :float]). Also sets
           ;; :replace-child-that-exceeds-size-limit-with to :empty. Also, empty-genome individuals
           ;; will not be selected as parents. You will probably also want to provide a high value
-          ;; for :max-generations.
+          ;; for :max-generations. If :autoconstructive is :revertable, rather than true, then
+          ;; :genetic-operator-probabilities will be {[:make-next-operator-revertable 
+          ;; :autoconstruction] 1.0}.
 
           :autoconstructive-diversification-test :gecco2016
           ;; Specifies the diversification test for autoconstruction. The default value of
@@ -481,7 +483,10 @@
   (swap! push-argmap assoc :run-uuid (java.util.UUID/randomUUID))
   ;; Augmentation for autoconstruction
   (when (:autoconstructive @push-argmap)
-    (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0})
+    (if (= :revertable (:autoconstuctive @push-argmap))
+      (swap! push-argmap assoc :genetic-operator-probabilities 
+             {[:make-next-operator-revertable :autoconstruction] 1.0})
+      (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0}))
     (swap! push-argmap assoc :epigenetic-markers [:close :silent])
     (doseq [instr (case (:autoconstructive-genome-instructions @push-argmap)
                     :all (registered-for-stacks [:integer :boolean :exec :genome :float :tag])

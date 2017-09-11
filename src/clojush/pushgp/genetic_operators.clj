@@ -1142,10 +1142,11 @@ programs encoded by genomes g1 and g2."
                     :as argmap}]
   (let [parent1-genome (:genome parent1)
         parent2-genome (:genome parent2)
-        pre-entropy-child-genome (if (> (lrand) autoconstructive-clone-probability)
+        clone (<= (lrand) autoconstructive-clone-probability)
+        pre-entropy-child-genome (if clone
+                                   parent1-genome
                                    (produce-child-genome-by-autoconstruction 
-                                     parent1-genome parent2-genome argmap)
-                                   parent1-genome)
+                                     parent1-genome parent2-genome argmap))
         child-genome (if (zero? autoconstructive-entropy)
                        pre-entropy-child-genome
                        (vec (filter identity
@@ -1153,10 +1154,10 @@ programs encoded by genomes g1 and g2."
                                          pre-entropy-child-genome))))
         checked (diversifying? {:genome child-genome}
                                (-> argmap
-                                     (assoc :parent1-genome parent1-genome)
-                                     (assoc :parent2-genome parent2-genome)
-                                     (assoc :parent1-errors (:errors parent1))
-                                     (assoc :parent2-errors (:errors parent2))))]
+                                   (assoc :parent1-genome parent1-genome)
+                                   (assoc :parent2-genome parent2-genome)
+                                   (assoc :parent1-errors (:errors parent1))
+                                   (assoc :parent2-errors (:errors parent2))))]
     (if (:diversifying checked)
       (make-individual :genome child-genome
                        :errors (:errors checked)
@@ -1185,7 +1186,4 @@ programs encoded by genomes g1 and g2."
                            :grain-size (compute-grain-size [] argmap)
                            :ancestors ()
                            :is-random-replacement true))))))
-
-
-
 
