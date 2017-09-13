@@ -253,7 +253,9 @@
                             (if (empty? (rest (:history ind)))
                               (vec (repeat (count (:errors ind)) 1000000))
                               (vec (for [case-history (apply map list (:history ind))]
-                                     (if (<= (first case-history) error-threshold) ;; wrong, thresh is on total
+                                     (if (zero? (first case-history)) 
+                                       ;; note only zero is solved
+                                       ;; error-threshold applies to total so can't be used here
                                        0 ;; solved, improvement doesn't matter
                                        (let [improvements (mapv (fn [[newer-error older-error]]
                                                                   (let [imp (- older-error newer-error)]
