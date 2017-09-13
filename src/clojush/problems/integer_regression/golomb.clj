@@ -34,7 +34,7 @@
         errors (mapv (fn [behavior case]
                        (if (number? behavior)
                          (abs (- behavior (second case)))
-                         100000000))
+                         100000000N))
                      behaviors
                      cases)]
     (assoc ind

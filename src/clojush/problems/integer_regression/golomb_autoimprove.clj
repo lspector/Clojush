@@ -34,7 +34,7 @@
         raw-errors (mapv (fn [behavior case]
                            (if (number? behavior)
                              (abs (- behavior (second case)))
-                             100000000))
+                             100000000N))
                          behaviors
                          cases)
         errors (if (empty? (rest (:history ind)))
@@ -91,3 +91,4 @@
    :evalpush-limit 800 
    :max-generations 10000 
    :print-history true})
+
