@@ -252,7 +252,7 @@
                                 ":print-history must be true for :discounted-case-improvements"))
                             (if (empty? (rest (:history ind)))
                               (vec (repeat (count (:errors ind)) 1000000))
-                              (vec (for [case-history (apply map list (:history ind))]
+                              (vec (for [case-history (apply map list (take 10 (:history ind)))]
                                      (if (zero? (first case-history)) 
                                        ;; note only zero is solved
                                        ;; error-threshold applies to total so can't be used here
