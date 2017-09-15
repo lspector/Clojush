@@ -17,7 +17,7 @@
     number-or-numbers
     (lrand-nth number-or-numbers)))
 
-(declare produce-child-genome-by-autoconstruction) ;; forward declaration for :consistency
+(declare produce-child-genome-by-autoconstruction) ;; forward declaration for grain size calculations
 
 (defn age-combining-function
   "Returns the actual age combining function specified by the :age-combining-function
@@ -1167,6 +1167,8 @@ programs encoded by genomes g1 and g2."
                        :ancestors (if maintain-ancestors
                                     (cons (:genome parent1) (:ancestors parent1))
                                     (:ancestors parent1))
+                       :parent1-genome parent1-genome
+                       :parent2-genome parent2-genome
                        :is-random-replacement false)
       (let [new-genome (random-plush-genome 
                          max-genome-size-in-initial-program atom-generators argmap)
@@ -1178,6 +1180,8 @@ programs encoded by genomes g1 and g2."
                            :age 0
                            :grain-size (compute-grain-size new-genome argmap)
                            :ancestors ()
+                           :parent1-genome nil
+                           :parent2-genome nil
                            :is-random-replacement true)
           (make-individual :genome []
                            :errors nil
@@ -1185,5 +1189,7 @@ programs encoded by genomes g1 and g2."
                            :age 0
                            :grain-size (compute-grain-size [] argmap)
                            :ancestors ()
+                           :parent1-genome nil
+                           :parent2-genome nil
                            :is-random-replacement true))))))
 

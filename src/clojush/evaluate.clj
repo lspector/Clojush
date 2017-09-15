@@ -194,11 +194,18 @@
                                (sequence-similarity
                                  (produce-child-genome-by-autoconstruction g g argmap)
                                  (produce-child-genome-by-autoconstruction g g argmap))))
+                          ;
                           (= cat :reproductive-consistency)
                           (let [g (:genome ind)]
                             (sequence-similarity
                               (produce-child-genome-by-autoconstruction g g argmap)
                               (produce-child-genome-by-autoconstruction g g argmap)))
+                          ;
+                          (= cat :similarity-to-most-similar-parent)
+                          (if (and (:parent1-genome ind) (:parent2-genome ind))
+                            (max (sequence-similarity (:genome ind) (:parent1-genome ind))
+                                 (sequence-similarity (:genome ind) (:parent2-genome ind)))
+                            1.0)
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
     (vec (flatten (mapv meta-error-fn meta-error-categories)))))
 
@@ -281,5 +288,3 @@
                            :history (if print-history (cons e (:history i)) (:history i)))
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
-
-
