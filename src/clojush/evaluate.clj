@@ -175,26 +175,26 @@
                                            ;(+ (first case-history) (* 1000 (/ 1.0 sum)))
                                            (- 1.0 sum)
                                            )))))))
-                          (= cat :reproductive-fidelity)
+                          (= cat :reproductive-infidelity)
                           (let [g (:genome ind)]
                             (- 1.0
                                (sequence-similarity
                                  g
                                  (produce-child-genome-by-autoconstruction g g argmap))))
                           ;
-                          (= cat :reproductive-infidelity)
+                          (= cat :reproductive-fidelity)
                           (let [g (:genome ind)]
                             (sequence-similarity
                               g
                               (produce-child-genome-by-autoconstruction g g argmap)))
                           ;
-                          (= cat :reproductive-consistency)
+                          (= cat :reproductive-inconsistency)
                           (let [g (:genome ind)]
                             (- 1.0
                                (sequence-similarity
                                  (produce-child-genome-by-autoconstruction g g argmap)
                                  (produce-child-genome-by-autoconstruction g g argmap))))
-                          (= cat :reproductive-inconsistency)
+                          (= cat :reproductive-consistency)
                           (let [g (:genome ind)]
                             (sequence-similarity
                               (produce-child-genome-by-autoconstruction g g argmap)
