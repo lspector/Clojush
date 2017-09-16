@@ -1159,17 +1159,17 @@ programs encoded by genomes g1 and g2."
                                    (assoc :parent1-errors (:errors parent1))
                                    (assoc :parent2-errors (:errors parent2))))]
     (if (:diversifying checked)
-      (make-individual :genome child-genome
-                       :errors (:errors checked)
-                       :history (:history parent1)
-                       :age ((age-combining-function argmap) parent1 parent2 child-genome)
-                       :grain-size (compute-grain-size child-genome parent1 parent2 argmap)
-                       :ancestors (if maintain-ancestors
-                                    (cons (:genome parent1) (:ancestors parent1))
-                                    (:ancestors parent1))
-                       :parent1-genome parent1-genome
-                       :parent2-genome parent2-genome
-                       :is-random-replacement false)
+      (assoc (make-individual :genome child-genome
+                              :errors (:errors checked)
+                              :history (:history parent1)
+                              :age ((age-combining-function argmap) parent1 parent2 child-genome)
+                              :grain-size (compute-grain-size child-genome parent1 parent2 argmap)
+                              :ancestors (if maintain-ancestors
+                                           (cons (:genome parent1) (:ancestors parent1))
+                                           (:ancestors parent1))
+                              :is-random-replacement false)
+        :parent1-genome parent1-genome
+        :parent2-genome parent2-genome)
       (let [new-genome (random-plush-genome 
                          max-genome-size-in-initial-program atom-generators argmap)
             new-checked (diversifying? {:genome new-genome} argmap)]
@@ -1180,8 +1180,6 @@ programs encoded by genomes g1 and g2."
                            :age 0
                            :grain-size (compute-grain-size new-genome argmap)
                            :ancestors ()
-                           :parent1-genome nil
-                           :parent2-genome nil
                            :is-random-replacement true)
           (make-individual :genome []
                            :errors nil
@@ -1189,7 +1187,5 @@ programs encoded by genomes g1 and g2."
                            :age 0
                            :grain-size (compute-grain-size [] argmap)
                            :ancestors ()
-                           :parent1-genome nil
-                           :parent2-genome nil
                            :is-random-replacement true))))))
 
