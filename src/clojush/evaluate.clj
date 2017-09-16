@@ -202,10 +202,12 @@
                               (produce-child-genome-by-autoconstruction g g argmap)))
                           ;
                           (= cat :similarity-to-most-similar-parent)
+                          (do (println "PARENT1-GENOME: " (:parent1-genome ind))
                           (if (and (:parent1-genome ind) (:parent2-genome ind))
                             (max (sequence-similarity (:genome ind) (:parent1-genome ind))
                                  (sequence-similarity (:genome ind) (:parent2-genome ind)))
                             1.0)
+                            )
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
     (vec (flatten (mapv meta-error-fn meta-error-categories)))))
 
