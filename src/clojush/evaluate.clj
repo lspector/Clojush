@@ -206,6 +206,16 @@
                             (max (sequence-similarity (:genome ind) (:parent1-genome ind))
                                  (sequence-similarity (:genome ind) (:parent2-genome ind)))
                             1.0)
+                          ;
+                          (= cat :reproductive-convergence)
+                          (if (and (:parent1-genome ind) (:parent2-genome ind))
+                            (let [g (:genome ind)
+                                  child1-genome (produce-child-genome-by-autoconstruction g g argmap)
+                                  child2-genome (produce-child-genome-by-autoconstruction g g argmap)]
+                              (max (sequence-similarity g child1-genome)
+                                   (sequence-similarity g child2-genome)
+                                   (sequence-similarity child1-genome child2-genome)))
+                            1.0)
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
     (vec (flatten (mapv meta-error-fn meta-error-categories)))))
 
