@@ -173,8 +173,8 @@
                                            ;(+ (first case-history) (- 1.0 sum))
                                            ; (mostly) arbitrating improvement ties with error
                                            ;(+ (first case-history) (* 1000 (/ 1.0 sum)))
-                                           ;(- 1.0 sum)
-                                           (* (first case-history) (- 1.0 sum))
+                                           (- 1.0 sum)
+                                           ;(* (first case-history) (- 1.0 sum))
                                            )))))))
                           (= cat :reproductive-infidelity)
                           (let [g (:genome ind)]
