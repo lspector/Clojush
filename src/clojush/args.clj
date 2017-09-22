@@ -291,7 +291,7 @@
           ;; A vector containing meta-error categories that can be used for parent selection, but
           ;; do not affect total error. See clojush.evaluate for options.
           
-          :improvement-discount 0.99
+          :improvement-discount 0.5
           ;; The factor by successively older improvements are discounted when calculating
           ;; discounted-case-improvements meta-errors.
 
