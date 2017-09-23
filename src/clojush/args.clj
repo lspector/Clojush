@@ -574,7 +574,7 @@
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
                                   (tag-instruction-erc
-                                    (:autoconstructive-tag-types @push-armap) 10000)))
+                                    (:autoconstructive-tag-types @push-argmap) 10000)))
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
                                   (untag-instruction-erc 10000)))
@@ -600,7 +600,7 @@
            :replace-child-that-exceeds-size-limit-with :empty))
   (when (> (:tag-enrichment @push-argmap) 0)
     (let [types (:tag-enrichment-types @push-argmap)
-          use-type #(some #{%} types_)]
+          use-type #(some #{%} types)]
       (swap! push-argmap assoc
              :atom-generators
              (let [tag-instructions 
@@ -615,9 +615,9 @@
                            (if (use-type :boolean) '[integer_tag_boolean_instruction] [])
                            (if (use-type :char) '[integer_tag_char_instruction] [])
                            (if (use-type :string) '[integer_tag_string_instruction] []))]
-             (into (:atom-generators @push-argmap)
-                   (take (* (:tag-enrichment @push-argmap) (count tag-instructions))
-                         (cycle tag-instructions)))))))
+               (into (:atom-generators @push-argmap)
+                     (take (* (:tag-enrichment @push-argmap) (count tag-instructions))
+                           (cycle tag-instructions))))))))
 
 (defn reset-globals
   "Resets all Clojush globals according to values in @push-argmap. If an argmap argument
