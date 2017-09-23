@@ -6,6 +6,10 @@
 ;; the shortest (optimal) Golomb ruler with n marks.
 ;; See http://oeis.org/A003022
 
+;; In this version of the problem, autoconstruction is specified
+;; as the default and a factor based on case improvement is built
+;; into the error for each case.
+
 (ns clojush.problems.integer-regression.golomb-autoimprove
   (:use [clojush.pushgp.pushgp]
         [clojush pushstate interpreter globals]
@@ -44,7 +48,8 @@
                           0 ;; solved, improvement doesn't matter
                           (let [improvements (mapv (fn [[newer-error older-error]]
                                                      (let [imp (- older-error newer-error)]
-                                                       (if (> imp 0)
+                                                       ;; ignore improvement due to improvement
+                                                       (if (> imp 0.75) 
                                                          1.0
                                                          0.0)))
                                                    (partition 2 1 case-history))
@@ -78,14 +83,12 @@
    :atom-generators (into [0 1 0.0 1.0 Math/PI Math/E 'in1]
                           (registered-for-stacks
                             [:integer :float :boolean :exec]))
-   :genetic-operator-probabilities {:alternation 0.5
-                                    :uniform-mutation 0.5}
    :parent-selection :lexicase
    :report-simplifications 0
    :problem-specific-report golomb-report
    :autoconstructive true 
    :autoconstructive-genome-instructions :all 
-   :autoconstructive-diversification-test :gecco2016 
+   :autoconstructive-diversification-test :not-a-clone 
    :max-points 800 
    :max-genome-size-in-initial-program 100 
    :evalpush-limit 800 

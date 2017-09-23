@@ -168,14 +168,7 @@
                                              sum (reduce + (mapv * improvements weights))]
                                          (if (<= sum 0)
                                            1.0E100
-                                           ;(* (first case-history) (/ 1.0 sum))
-                                           ; arbitrating error ties with improvement 
-                                           ;(+ (first case-history) (- 1.0 sum))
-                                           ; (mostly) arbitrating improvement ties with error
-                                           ;(+ (first case-history) (* 1000 (/ 1.0 sum)))
-                                           (- 1.0 sum)
-                                           ;(* (first case-history) (- 1.0 sum))
-                                           )))))))
+                                           (- 1.0 sum))))))))
                           (= cat :reproductive-infidelity)
                           (let [g (:genome ind)]
                             (- 1.0
@@ -299,3 +292,4 @@
                            :history (if print-history (cons e (:history i)) (:history i)))
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
+
