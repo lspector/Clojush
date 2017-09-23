@@ -173,8 +173,10 @@
           :tag-enrichment 0
           ;; The number of extra copies of tag-related instructions that will be included in
           ;; the atom-generators.
-          ;; Currently just assumes that all types for which tags are currently implemented
-          ;; are present.
+          
+          :tag-enrichment-types [:integer :boolean :exec :float :char :string :code]
+          ;; The types for tag-related instructions that will be included in the atom-generators
+          ;; when :tag-enrichment is greater than 0.
 
           :autoconstructive false
           ;; If true, then :genetic-operator-probabilities will be {:autoconstruction 1.0},
@@ -222,6 +224,10 @@
           ;; The number of extra instances of autoconstructive_boolean_rand to include in
           ;; :atom-generators for autoconstruction. If negative then autoconstructive_boolean_rand
           ;; will not be in :atom-generators at all.
+          
+          :autoconstructive-tag-types [:integer :boolean :exec :float :char :string :code]
+          ;; The types for tag-related instructions that will be included in the atom-generators
+          ;; when :autoconstructive is true.
 
           ;;----------------------------------------
           ;; Epignenetics
@@ -568,7 +574,7 @@
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
                                   (tag-instruction-erc
-                                    [:integer :boolean :exec :float :char :string :code] 10000)))
+                                    (:autoconstructive-tag-types @push-armap) 10000)))
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
                                   (untag-instruction-erc 10000)))
@@ -593,21 +599,22 @@
     (swap! push-argmap assoc
            :replace-child-that-exceeds-size-limit-with :empty))
   (when (> (:tag-enrichment @push-argmap) 0)
-    (swap! push-argmap assoc
-           :atom-generators
-           (let [tag-instructions [(tag-instruction-erc
-                                     [:integer :boolean :exec :float
-                                      :char :string :code] 10000)
-                                   (untag-instruction-erc 10000)
-                                   (tagged-instruction-erc 10000)
-                                   'integer_tagged_instruction
-                                   'integer_tag_exec_instruction
-                                   'integer_tag_code_instruction
-                                   'integer_tag_integer_instruction
-                                   'integer_tag_float_instruction
-                                   'integer_tag_boolean_instruction
-                                   'integer_tag_char_instruction
-                                   'integer_tag_string_instruction]]
+    (let [types (:tag-enrichment-types @push-argmap)
+          use-type #(some #{%} types_)]
+      (swap! push-argmap assoc
+             :atom-generators
+             (let [tag-instructions 
+                   (concat [(tag-instruction-erc types 10000)
+                            (untag-instruction-erc 10000)
+                            (tagged-instruction-erc 10000)
+                            'integer_tagged_instruction]
+                           (if (use-type :integer) '[integer_tag_exec_instruction] [])
+                           (if (use-type :code) '[integer_tag_code_instruction] [])
+                           (if (use-type :integer) '[integer_tag_integer_instruction] [])
+                           (if (use-type :float) '[integer_tag_float_instruction] [])
+                           (if (use-type :boolean) '[integer_tag_boolean_instruction] [])
+                           (if (use-type :char) '[integer_tag_char_instruction] [])
+                           (if (use-type :string) '[integer_tag_string_instruction] []))]
              (into (:atom-generators @push-argmap)
                    (take (* (:tag-enrichment @push-argmap) (count tag-instructions))
                          (cycle tag-instructions)))))))
