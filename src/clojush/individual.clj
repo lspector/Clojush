@@ -44,11 +44,9 @@
 
 (defn individual-string [i]
   (cons 'individual.
-        (let [k '(:genome :program :errors :behaviors :total-error :normalized-error :weighted-error
-                          :novelty :meta-errors :history :ancestors :uuid :parent-uuids
-                          :genetic-operators :age :grain-size :is-random-replacement)]
+        (let [k '(:genome :program :errors :behaviors :total-error :normalized-error 
+                          :weighted-error :novelty :meta-errors :history :ancestors :uuid 
+                          :parent-uuids :genetic-operators :age :grain-size 
+                          :is-random-replacement)]
           (interleave k  (map #(printable (get i %)) k)))))
-
-
-
 
