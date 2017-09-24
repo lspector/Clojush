@@ -19,11 +19,16 @@ git branch --set-upstream-to origin/master master
 git config user.name "$AUTOMATED_AUTHOR_NAME"
 git config user.email "$AUTOMATED_AUTHOR_EMAIL"
 git config push.default simple
-# dont output all of lein doc, because its overly long because it tries
+
+# the next lines are commented out because docs seem to fail to build
+# https://travis-ci.org/lspector/Clojush/builds/279236960#L1689
+# we can fix this if anyone starts using the auto generated docs
+# dont output all of lein codox, because its overly long because it tries
 # to run experiments
-lein codox 2>&1 | head -n 100
-git pull origin gh-pages
-./scripts/deploy-docs.sh --verbose
+# lein codox 2>&1 | head -n 100
+# git pull origin gh-pages
+# ./scripts/deploy-docs.sh --verbose
+
 git checkout master
 git pull origin master
 eval $LEIN_RELEASE_COMMAND
