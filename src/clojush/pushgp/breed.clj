@@ -60,7 +60,8 @@
       evaluated-child
       (let [child-errors (:errors evaluated-child)
             evaluated-parent (evaluate-individual 
-                               (assoc parent :program (translate-plush-genome-to-push-program parent argmap))
+                               (assoc parent :program 
+                                 (translate-plush-genome-to-push-program parent argmap))
                                error-function rand-gen argmap)
             parent-errors (:errors evaluated-parent)]
         (if (reduce #(and %1 %2)
@@ -154,6 +155,7 @@
                                                    (vec genetic-operator-probabilities))]
         (if (or (= 1 (count vectored-go-probabilities))
                 (<= prob (second (first vectored-go-probabilities))))
-          (perform-genetic-operator (first (first vectored-go-probabilities)) population location rand-gen argmap)
+          (perform-genetic-operator (first (first vectored-go-probabilities)) 
+                                    population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
 
