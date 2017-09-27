@@ -1,4 +1,3 @@
-
 (ns clojush.random
   (:use [clojush globals translate])
   (:require [clj-random.core :as random]))
@@ -94,7 +93,8 @@
 ;; random Push code generator
 
 (defn random-push-code
-  "Returns a random Push expression with size limited by max-points."
+  "Returns a random Push expression with size limited by max-points. Will not include
+  germ-line instructions."
   ([max-points atom-generators]
     (random-push-code max-points atom-generators {:max-points @global-max-points}))
   ([max-points atom-generators argmap]
@@ -103,5 +103,4 @@
                                     atom-generators
                                     argmap)}
       argmap)))
-
 
