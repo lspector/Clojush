@@ -46,3 +46,4 @@
 (defbench-eval-push 1000 "clojush.problems.software.replace-space-with-newline")
 (defbench-eval-push 1000 "clojush.problems.integer-regression.nth-prime")
 (defbench-eval-push 10000 "clojush.problems.integer-regression.nth-prime")
+)
