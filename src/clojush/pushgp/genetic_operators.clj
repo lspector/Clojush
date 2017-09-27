@@ -847,6 +847,9 @@ programs encoded by genomes g1 and g2."
 (defn not-a-clone-diversifying?
   [ind {:keys [parent1-genome parent2-genome] :as argmap}]
   (let [g (:genome ind)
+        express #(translate-plush-genome-to-push-program {:genome %} 
+                                                         argmap 
+                                                         {:germline true})
         pgm (express g)
         parent1-pgm (express parent1-genome)
         parent2-pgm (express parent2-genome)]
