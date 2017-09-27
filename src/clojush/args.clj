@@ -228,6 +228,11 @@
           :autoconstructive-tag-types [:integer :boolean :exec :float :char :string :code]
           ;; The types for tag-related instructions that will be included in the atom-generators
           ;; when :autoconstructive is true.
+          
+          :germ-line-silencing true
+          ;; When true, germ-line instructions will be silenced prior to translation of genomes
+          ;; to programs, except when translate-plush-genome-to-push-program is provided with
+          ;; a :germ-line option of true. See translate-plush-genome-to-push-program for details.
 
           ;;----------------------------------------
           ;; Epignenetics
