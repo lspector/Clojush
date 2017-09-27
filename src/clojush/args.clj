@@ -230,9 +230,9 @@
           ;; when :autoconstructive is true.
           
           :germline-silencing true
-          ;; When true, germ-line instructions will be silenced prior to translation of genomes
+          ;; When true, germline instructions will be silenced prior to translation of genomes
           ;; to programs, except when translate-plush-genome-to-push-program is provided with
-          ;; a :germ-line option of true. See translate-plush-genome-to-push-program for details.
+          ;; a :germline option. See translate-plush-genome-to-push-program for details.
 
           ;;----------------------------------------
           ;; Epignenetics

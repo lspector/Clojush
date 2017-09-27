@@ -71,104 +71,101 @@
   If the end of the program is reached but parens are still needed (as indicated by
   the paren-stack), parens are added until the paren-stack is empty.
   Instruction maps that have :silence set to true will be ignored entirely."
-  ([ind argmap options]
-   (translate-plush-genome-to-push-program
-     (if (and (:germline-silencing argmap)
-              (not (:germline options)))
-       (assoc ind :genome (silence-germline (:genome ind)))
-       ind)
-     argmap))
-  ([{:keys [genome program]}
-    {:keys [max-points] :as argmap}]
-   (if program
-     program
-     (let [translated-program
-           (loop [prog [] 
-                  ; The Push program incrementally being built
+  [{:keys [genome program]}
+   {:keys [max-points] :as argmap}
+   & options]
+  (if program
+    program
+    (let [translated-program
+          (loop [prog [] 
+                 ; The Push program incrementally being built
 
-                  gn genome 
-                  ; The linear Plush genome, where items will be popped off the 
-                  ; front. Each item is a map containing at least the key 
-                  ; :instruction, and unless the program is flat, also :close
+                 gn (if (and (:germline-silencing argmap)
+                             (not (some #{:germline} options)))
+                      (silence-germline genome)
+                      genome)
+                 ; The linear Plush genome, where items will be popped off the 
+                 ; front. Each item is a map containing at least the key 
+                 ; :instruction, and unless the program is flat, also :close
 
-                  num-parens-here 0 
-                  ; The number of parens that still need to be added at this 
-                  ; location.
+                 num-parens-here 0 
+                 ; The number of parens that still need to be added at this 
+                 ; location.
 
-                  paren-stack '() 
-                  ; Whenever an instruction requires parens grouping, it will 
-                  ; push either :close or :close-open on this stack. This will 
-                  ; indicate what to insert in the program the next time a paren 
-                  ; is indicated by the :close key in the instruction map.
-                  ]
-             (cond
-               ; Check if need to add close parens here
-               (< 0 num-parens-here) 
-               (recur (cond
-                        (= (first paren-stack) :close) 
-                        (conj prog :close)
-                        ;
-                        (= (first paren-stack) :close-open) 
-                        (conj (conj prog :close) :open)
-                        ; 
-                        ; If paren-stack is empty, we won't put any parens in 
-                        ; even though the :close epigenetic marker indicated to 
-                        ; do so
-                        :else prog
-                        )
-                      gn
-                      (dec num-parens-here)
-                      (rest paren-stack))
-               ; Check if at end of program but still need to add parens
-               (and (empty? gn)
-                    (not (empty? paren-stack)))
-               (recur prog
-                      gn
-                      (count paren-stack)
-                      paren-stack)
-               ; Check if done
-               (empty? gn) 
-               (open-close-sequence-to-list (apply list prog))
-               ; Check for no-oped instruction. This instruction will be replaced
-               ; by exec_noop, but will still have effects like :close count
-               (= (:silent (first gn)) :no-op)
-               (recur (conj prog 'exec_noop)
-                      (rest gn)
-                      (get (first gn) :close 0)
-                      paren-stack)
-               ; Check for silenced instruction
-               (get (first gn) :silent false)
-               (recur prog
-                      (rest gn)
-                      num-parens-here
-                      paren-stack)
-               ; If here, ready for next instruction
-               :else (let [number-paren-groups (lookup-instruction-paren-groups 
-                                                 (:instruction (first gn)))
-                           new-paren-stack (if (>= 0 number-paren-groups)
-                                             paren-stack
-                                             (list-concat (repeat (dec number-paren-groups) 
-                                                                  :close-open)
-                                                          '(:close)
-                                                          paren-stack))]
-                       (if (= 'noop_delete_prev_paren_pair (:instruction (first gn)))
-                         (recur (delete-prev-paren-pair prog)
-                                (rest gn)
-                                (get (first gn) :close 0)
-                                new-paren-stack)
-                         (recur (if (= 'noop_open_paren (:instruction (first gn)))
-                                  (conj prog :open)
-                                  (if (>= 0 number-paren-groups)
-                                    (conj prog (:instruction (first gn)))
-                                    (conj (conj prog (:instruction (first gn))) :open)))
-                                (rest gn)
-                                (get (first gn) :close 0) 
-                                ; ^ The number of close parens to put after this instruction;
-                                ; if :close isn't in instruction map, default to zero
-                                new-paren-stack)))))]
-       (if (> (count-points translated-program) max-points)
-         '() ; Translates to an empty program if program exceeds max-points
-         translated-program)))))
+                 paren-stack '() 
+                 ; Whenever an instruction requires parens grouping, it will 
+                 ; push either :close or :close-open on this stack. This will 
+                 ; indicate what to insert in the program the next time a paren 
+                 ; is indicated by the :close key in the instruction map.
+                 ]
+            (cond
+              ; Check if need to add close parens here
+              (< 0 num-parens-here) 
+              (recur (cond
+                       (= (first paren-stack) :close) 
+                       (conj prog :close)
+                       ;
+                       (= (first paren-stack) :close-open) 
+                       (conj (conj prog :close) :open)
+                       ; 
+                       ; If paren-stack is empty, we won't put any parens in 
+                       ; even though the :close epigenetic marker indicated to 
+                       ; do so
+                       :else prog
+                       )
+                     gn
+                     (dec num-parens-here)
+                     (rest paren-stack))
+              ; Check if at end of program but still need to add parens
+              (and (empty? gn)
+                   (not (empty? paren-stack)))
+              (recur prog
+                     gn
+                     (count paren-stack)
+                     paren-stack)
+              ; Check if done
+              (empty? gn) 
+              (open-close-sequence-to-list (apply list prog))
+              ; Check for no-oped instruction. This instruction will be replaced
+              ; by exec_noop, but will still have effects like :close count
+              (= (:silent (first gn)) :no-op)
+              (recur (conj prog 'exec_noop)
+                     (rest gn)
+                     (get (first gn) :close 0)
+                     paren-stack)
+              ; Check for silenced instruction
+              (get (first gn) :silent false)
+              (recur prog
+                     (rest gn)
+                     num-parens-here
+                     paren-stack)
+              ; If here, ready for next instruction
+              :else (let [number-paren-groups (lookup-instruction-paren-groups 
+                                                (:instruction (first gn)))
+                          new-paren-stack (if (>= 0 number-paren-groups)
+                                            paren-stack
+                                            (list-concat (repeat (dec number-paren-groups) 
+                                                                 :close-open)
+                                                         '(:close)
+                                                         paren-stack))]
+                      (if (= 'noop_delete_prev_paren_pair (:instruction (first gn)))
+                        (recur (delete-prev-paren-pair prog)
+                               (rest gn)
+                               (get (first gn) :close 0)
+                               new-paren-stack)
+                        (recur (if (= 'noop_open_paren (:instruction (first gn)))
+                                 (conj prog :open)
+                                 (if (>= 0 number-paren-groups)
+                                   (conj prog (:instruction (first gn)))
+                                   (conj (conj prog (:instruction (first gn))) :open)))
+                               (rest gn)
+                               (get (first gn) :close 0) 
+                               ; ^ The number of close parens to put after this instruction;
+                               ; if :close isn't in instruction map, default to zero
+                               new-paren-stack)))))]
+      (if (> (count-points translated-program) max-points)
+        '() ; Translates to an empty program if program exceeds max-points
+        translated-program))))
 
 (defn population-translate-plush-to-push
   "Converts the population of Plush genomes into Push programs."
