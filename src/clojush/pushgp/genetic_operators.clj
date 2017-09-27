@@ -792,7 +792,8 @@ the resulting top genome."
                                 (translate-plush-genome-to-push-program
                                   {:genome
                                    (process-genome-for-autoconstruction genome-to-run)}
-                                  argmap)
+                                  argmap
+                                  {:germline true})
                                 (-> (->> (make-push-state)
                                          (push-item parent2-genome :genome)
                                          (push-item parent1-genome :genome))
@@ -809,7 +810,7 @@ genome g."
   [g argmap]
   (ensure-list
     (list-to-open-close-sequence
-      (translate-plush-genome-to-push-program {:genome g} argmap))))
+      (translate-plush-genome-to-push-program {:genome g} argmap {:germline true}))))
 
 (defn expressed-difference
   "Returns the levenshtein distance between the open-close sequences for the
@@ -836,15 +837,16 @@ programs encoded by genomes g1 and g2."
     (assoc ind :diversifying
       (not= (translate-plush-genome-to-push-program 
               {:genome g} 
-              argmap)
+              argmap
+              {:germline true})
             (translate-plush-genome-to-push-program 
               {:genome (produce-child-genome-by-autoconstruction g g argmap)} 
-              argmap)))))
+              argmap
+              {:germline true})))))
 
 (defn not-a-clone-diversifying?
   [ind {:keys [parent1-genome parent2-genome] :as argmap}]
   (let [g (:genome ind)
-        express #(translate-plush-genome-to-push-program {:genome %} argmap)
         pgm (express g)
         parent1-pgm (express parent1-genome)
         parent2-pgm (express parent2-genome)]
