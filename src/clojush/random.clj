@@ -94,7 +94,7 @@
 
 (defn random-push-code
   "Returns a random Push expression with size limited by max-points. Will not include
-  germ-line instructions."
+  germline instructions."
   ([max-points atom-generators]
     (random-push-code max-points atom-generators {:max-points @global-max-points}))
   ([max-points atom-generators argmap]
