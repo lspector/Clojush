@@ -3,17 +3,13 @@
 [Here](https://gist.github.com/thelmuth/1361411) is a document describrining how
 to contribute to this project.
 
-## Travic CI
-Recently we have begun using [Travis CI](travis-ci.org) to automate multiple
-parts of development.
-
-### Testing
+## Testing
 
 Primarily it serves as a way to test every branch and pull request, using commands
 like `lein check` and `lein test`.
 
+### Integration tests
 
-#### Integration tests
 The main tests for the codebase are integration tests. They run Clojush
 with a couple of different configurations, and verify that the output (CSV, JSON,
 EDN, as well as text) is the same as it is supposed to be. You can run them
@@ -26,6 +22,7 @@ lein test clojush.test.core-test
 # just one configuration
 lein test :only clojush.test.core-test/<label>
 ```
+
 If you change
 anything about how Clojush outputs data or computes things, they are likely to
 fail. You will need to regenerate the saved output with:
@@ -37,6 +34,30 @@ lein run -m clojush.test.core-test/regenerate [<label> ...]
 Since there are some things that will always change (like the time and git hash)
 there is some manual find and replace logic in `clojush.test.integration-test`
 that tries to replace things will change with `xxx` in the test output.
+
+### Benchmarks
+
+We use the [libra](https://github.com/totakke/libra) library to define tests
+(some using [Criterium](https://github.com/hugoduncan/criterium)):
+
+```bash
+$ lein libra
+
+Measuring clojush.interpreter-bench
+
+eval-push-on-1000-from-clojush.problems.software.replace-space-with-newline (interpreter_bench.clj:46)
+Grabbing executions...
+Running benchmark...
+
+time: 805.688731 ms, sd: 202.088504 µs
+
+...
+```
+
+## Travic CI
+
+Recently we have begun using [Travis CI](travis-ci.org) to automate multiple
+parts of development.
 
 ### Docs
 

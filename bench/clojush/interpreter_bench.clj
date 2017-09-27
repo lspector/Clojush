@@ -1,10 +1,9 @@
-(ns clojush.test.interpreter-benchmark
-  "Tests and benchmarks for the interpreter. Runs the interpreter through
-   programs, that have been generated randomly during runs.
+(ns clojush.interpreter-bench
+  "Bnchmarks for the interpreter. Runs the interpreter through
+   programs, that have been generated randomly during runs."
+  (:require [libra.bench :refer :all]
+            [libra.criterium :as c]
 
-   Run `lein run -m clojush.test.interpreter-test/benchmark <n push programs> <problem file> [<args>] `
-   to profile the first <n push programs> generated from the problem file."
-  (:require [criterium.core]
             [clojush.core :refer [-main]]
             [clojush.interpreter :refer [eval-push]]))
 
@@ -33,15 +32,17 @@
             (throw e))))
       @calls-atom)))
 
+(defmacro defbench-eval-push [number-programs problem]
+  `(defbench ~(symbol (str "eval-push-on-" number-programs "-from-" problem))
+    (println "Grabbing executions...")
+    (let [args# [~problem ":use-single-thread" "true"]
+          executions# (grab-executions ~number-programs args#)
+          inputs# (into [] (map :input executions#))]
+      (println "Running benchmark...")
+      (is (c/quick-bench
+            (doseq [input# inputs#]
+              (eval-push input#)))))))
 
-(defn benchmark [number-programs & args]
-  (apply println "Getting first" number-programs "push program executions from run" args)
-  (let [total-args  (concat args [":use-single-thread" "true"])
-        executions (grab-executions (Integer/parseInt number-programs) total-args)
-        inputs (into [] (map :input executions))]
-    (println "Benchmarking executing them all in succession with criteriom...")
-    (criterium.core/with-progress-reporting
-      (criterium.core/quick-bench
-        (doseq [input inputs]
-          (eval-push input))
-        :verbose))))
+(defbench-eval-push 1000 "clojush.problems.software.replace-space-with-newline")
+(defbench-eval-push 1000 "clojush.problems.integer-regression.nth-prime")
+(defbench-eval-push 10000 "clojush.problems.integer-regression.nth-prime")
