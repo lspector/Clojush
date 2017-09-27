@@ -7,8 +7,8 @@
 (defmacro defbench-main [name args]
   `(defbench ~(symbol (str "main-" name))
     (with-redefs [shutdown-agents (fn [])]
-      (is (dur 5 (do (reset-globals!)
-                     (with-out-str (-main ~@args))))))))
+      (is (dur 10 (do (reset-globals!)
+                      (with-out-str (-main ~@args))))))))
 
 (defbench-main "autocon-5-gen-jan-13"
    ["clojush.problems.software.replace-space-with-newline"
