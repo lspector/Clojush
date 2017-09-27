@@ -1,5 +1,5 @@
 (ns clojush.translate
-  (:use [clojush util]
+  (:use [clojush util pushstate]
         clojush.instructions.common))
 
 (defn delete-prev-paren-pair
