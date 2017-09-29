@@ -1103,7 +1103,7 @@ programs encoded by genomes g1 and g2."
 
 (defn checks-autoconstructing-diversifying?
   [ind argmap]
-  (assoc in :diversifying
+  (assoc ind :diversifying
     (some (fn [instruction-map]
             (and (= (:instruction instruction-map) 'genome_autoconstructing)
                  (not (:silent instruction-map))))
