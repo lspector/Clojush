@@ -770,20 +770,18 @@ given by uniform-deletion-rate."
                    (some #{instruction}
                          '(a0 a1 a2 d0 d1 d2 d3 d4 d5 d6 d7)))))] ;; from mux problems
     (mapv (fn [instruction-map]
-            (assoc (cond 
-                     (input-instruction? (:instruction instruction-map))
-                     (assoc instruction-map :instruction 'code_noop)
-                     ;
-                     (= (:instruction instruction-map) 'autoconstructive_integer_rand)
-                     (assoc instruction-map :instruction 'integer_rand)
-                     ;
-                     (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
-                     (assoc instruction-map :instruction 'boolean_rand)
-                     ;
-                     :else
-                     instruction-map)
-              :silent
-              (not (:silent instruction-map))))
+            (cond 
+              (input-instruction? (:instruction instruction-map))
+              (assoc instruction-map :instruction 'code_noop)
+              ;
+              (= (:instruction instruction-map) 'autoconstructive_integer_rand)
+              (assoc instruction-map :instruction 'integer_rand)
+              ;
+              (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
+              (assoc instruction-map :instruction 'boolean_rand)
+              ;
+              :else
+              instruction-map))
          genome)))
 
 (defn produce-child-genome-by-autoconstruction
@@ -1195,5 +1193,4 @@ programs encoded by genomes g1 and g2."
                            :grain-size (compute-grain-size [] argmap)
                            :ancestors ()
                            :is-random-replacement true))))))
-
 
