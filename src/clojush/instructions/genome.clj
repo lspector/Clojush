@@ -653,5 +653,9 @@
                         :boolean)))
       state)))
 
-
+(define-registered
+  genome_autoconstructing
+  ^{:stack-types [:genome :boolean]}
+  (fn [state]
+    (push-item (if (:autoconstructing state) true false) :boolean state)))
 
