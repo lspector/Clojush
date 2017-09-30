@@ -219,6 +219,14 @@
                             0
                             1)
                           ;
+                          (= cat :checks-if-autoconstructing)
+                          (if (some (fn [instruction-map]
+                                      (and (= (:instruction instruction-map) 'genome_if_autoconstructing)
+                                           (not (:silent instruction-map))))
+                                    (:genome ind))
+                            0
+                            1)
+                          ;
                           (= cat :context-insensitivity)
                           (let [checks (count (filter (fn [instruction-map]
                                                         (and (= (:instruction instruction-map)
