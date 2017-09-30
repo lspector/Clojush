@@ -210,6 +210,25 @@
                                    (sequence-similarity g child2-genome)
                                    (sequence-similarity child1-genome child2-genome)))
                             1.0)
+                          ;
+                          (= cat :checks-autoconstructing)
+                          (if (some (fn [instruction-map]
+                                      (and (= (:instruction instruction-map) 'genome_autoconstructing)
+                                           (not (:silent instruction-map))))
+                                    (:genome ind))
+                            0
+                            1)
+                          ;
+                          (= cat :context-insensitivity)
+                          (let [checks (count (filter (fn [instruction-map]
+                                                        (and (= (:instruction instruction-map)
+                                                                'genome_autoconstructing)
+                                                             (not (:silent instruction-map))))
+                                                      (:genome ind)))]
+                            (if (zero? checks)
+                              1
+                              (/ 1 checks)))
+                          ;
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
     (vec (flatten (mapv meta-error-fn meta-error-categories)))))
 
