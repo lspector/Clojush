@@ -227,15 +227,14 @@
                             0
                             1)
                           ;
-                          (= cat :context-insensitivity)
-                          (let [checks (count (filter (fn [instruction-map]
-                                                        (and (= (:instruction instruction-map)
-                                                                'genome_autoconstructing)
-                                                             (not (:silent instruction-map))))
-                                                      (:genome ind)))]
-                            (if (zero? checks)
-                              1
-                              (/ 1 checks)))
+                          (= cat :autoconstruction-blindness)
+                          (if (some (fn [instruction-map]
+                                      (and (not (:silent instruction-map))
+                                           (some #{(:instruction instruction-map)}
+                                                 #{'genome_autoconstructing 'genome_if_autoconstructing})))
+                                    (:genome ind))
+                            0
+                            1)
                           ;
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
     (vec (flatten (mapv meta-error-fn meta-error-categories)))))
