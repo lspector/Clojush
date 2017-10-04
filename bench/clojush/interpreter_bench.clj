@@ -34,9 +34,9 @@
     @inputs-atom))
 
 (defmacro defbench-grab-then-benchmark [func-var n-inputs args]
-  `(defbench ~(symbol (str (:name (meta (eval func-var))) "-on-" n-inputs "-from-" (first args)))
+  `(defbench ~(symbol (str (:name (meta (eval func-var))) "-on-" n-inputs "-from-" (first (eval args))))
     (println "Grabbing inputs...")
-    (let [total-args# [~@args ":use-single-thread" "true"]
+    (let [total-args# (concat ~args [":use-single-thread" "true"])
           inputs# (grab-call-inputs ~func-var ~n-inputs total-args#)
           func# (var-get ~func-var)]
       (println "Running benchmark...")
