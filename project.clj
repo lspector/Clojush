@@ -45,19 +45,8 @@
                   ["change" "version" "leiningen.release/bump-version" "qualifier"]
                   ["shell" "git" "commit" "-am" "Version ${:version} [ci skip]"]
                   ["vcs" "push"]]
-;;;;;;;;;; jvm settings for high performance, using most of the machine's RAM
-;  :jvm-opts ~(let [mem-to-use
-;                   (long (* (.getTotalPhysicalMemorySize
-;                              (java.lang.management.ManagementFactory/getOperatingSystemMXBean))
-;                            0.8))]
-;               ^:replace [(str "-Xmx" mem-to-use)
-;                          (str "-Xms" mem-to-use)
-;                          "-server"
-;                          "-XX:-TieredCompilation"
-;                          "-XX:+AggressiveOpts"
-;                          "-Djava.awt.headless=true"])
-  ;;;;;;;;;; misc other jvm-opts
-  ;:jvm-opts ["-Djava.awt.headless=true"]
-  ;;"-XX:+UseG1GC"
-  ;:jvm-opts ["-Xmx12g" "-Xms12g" "-XX:+UseParallelGC"]
+  ;; faster without defaults
+  ;; https://plot.ly/~SaulShanabrook/11/?share_key=pNTJGA4S58MA29Uqskbr6j
+  ;; https://push-language.hampshire.edu/t/improving-profiling-clojush-performance-results/904/13?u=saulshanabrook
+  :jvm-opts ^:replace []
   :main clojush.core)

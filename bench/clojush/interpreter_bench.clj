@@ -14,13 +14,13 @@
   Does this by wrapping `func-var` function to save each call, and
   raising an exception after we have enough calls done, which is then caught."
   [func-var n cli-args]
-  (let [inputs-atom (atom (list))
+  (let [inputs-outputs-atom (atom (list))
         func-original (var-get func-var)
         done-fn #(>= (count %) n)
         func-log (fn [& input]
                         (let [ret (apply func-original input)
-                              inputs (swap! inputs-atom conj input)]
-                          (when (done-fn inputs)
+                              inputs-outputs (swap! inputs-outputs-atom conj {:input input :output ret})]
+                          (when (done-fn inputs-outputs)
                             (throw (Exception. "")))
                           ret))]
 
@@ -29,15 +29,16 @@
         (try
           (with-out-str (apply -main cli-args))
           (catch Exception e
-            (when-not (done-fn @inputs-atom)
+            (when-not (done-fn @inputs-outputs-atom)
               (throw e))))))
-    @inputs-atom))
+    @inputs-outputs-atom))
 
 (defmacro defbench-grab-then-benchmark [func-var n-inputs args]
-  `(defbench ~(symbol (str (:name (meta (eval func-var))) "-on-" n-inputs "-from-" (first args)))
+  `(defbench ~(symbol (str (:name (meta (eval func-var))) "-on-" n-inputs "-from-" (first (eval args))))
     (println "Grabbing inputs...")
-    (let [total-args# [~@args ":use-single-thread" "true"]
-          inputs# (grab-call-inputs ~func-var ~n-inputs total-args#)
+    (let [total-args# (concat ~args [":use-single-thread" "true"])
+          inputs-outputs# (grab-call-inputs ~func-var ~n-inputs total-args#)
+          inputs# (map :input inputs-outputs#)
           func# (var-get ~func-var)]
       (println "Running benchmark...")
       (is (c/quick-bench
