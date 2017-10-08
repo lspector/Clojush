@@ -129,7 +129,7 @@
                                            (* 2.0 scale)
                                            (+ max-total (/ 1 scale))))))))
                           ;
-                          (= cat :discounted-total-error-improvement-ratio)
+                          (= cat :discounted-total-error-improvement)
                           (if (not (:print-history argmap))
                             (throw 
                               (Exception. 
@@ -142,9 +142,11 @@
                                                        diffs)
                                     persistence 0.5
                                     weights (take (count diffs) 
-                                                  (iterate (partial * persistence) 1))]
-                                (- 1 (/ (reduce + (mapv * improvements weights))
-                                        (reduce + weights))))))
+                                                  (iterate (partial * persistence) 0.5))
+                                    sum (reduce + (mapv * improvements weights))]
+                                (if (<= sum 0)
+                                  1.0E100
+                                  (- 1.0 sum)))))
                           ;
                           (= cat :discounted-case-improvements)
                           (if (not (:print-history argmap))
@@ -210,6 +212,32 @@
                                    (sequence-similarity g child2-genome)
                                    (sequence-similarity child1-genome child2-genome)))
                             1.0)
+                          ;
+                          (= cat :checks-autoconstructing)
+                          (if (some (fn [instruction-map]
+                                      (and (= (:instruction instruction-map) 'genome_autoconstructing)
+                                           (not (:silent instruction-map))))
+                                    (:genome ind))
+                            0
+                            1)
+                          ;
+                          (= cat :checks-if-autoconstructing)
+                          (if (some (fn [instruction-map]
+                                      (and (= (:instruction instruction-map) 'genome_if_autoconstructing)
+                                           (not (:silent instruction-map))))
+                                    (:genome ind))
+                            0
+                            1)
+                          ;
+                          (= cat :autoconstruction-blindness)
+                          (if (some (fn [instruction-map]
+                                      (and (not (:silent instruction-map))
+                                           (some #{(:instruction instruction-map)}
+                                                 #{'genome_autoconstructing 'genome_if_autoconstructing})))
+                                    (:genome ind))
+                            0
+                            1)
+                          ;
                           :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
     (vec (flatten (mapv meta-error-fn meta-error-categories)))))
 

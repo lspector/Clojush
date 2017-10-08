@@ -659,3 +659,16 @@
   (fn [state]
     (push-item (if (:autoconstructing state) true false) :boolean state)))
 
+(define-registered 
+  genome_if_autoconstructing
+  ^{:stack-types [:genome :exec]
+    :parentheses 2}
+  (fn [state]
+    (if (not (empty? (rest (:exec state))))
+      (push-item (if (:autoconstructing state)
+                   (first (:exec state))
+                   (first (rest (:exec state))))
+                 :exec
+                 (pop-item :boolean (pop-item :exec (pop-item :exec state))))
+      state)))
+
