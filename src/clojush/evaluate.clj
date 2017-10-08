@@ -129,7 +129,7 @@
                                            (* 2.0 scale)
                                            (+ max-total (/ 1 scale))))))))
                           ;
-                          (= cat :discounted-total-error-improvement-ratio)
+                          (= cat :discounted-total-error-improvement)
                           (if (not (:print-history argmap))
                             (throw 
                               (Exception. 
@@ -142,9 +142,11 @@
                                                        diffs)
                                     persistence 0.5
                                     weights (take (count diffs) 
-                                                  (iterate (partial * persistence) 1))]
-                                (- 1 (/ (reduce + (mapv * improvements weights))
-                                        (reduce + weights))))))
+                                                  (iterate (partial * persistence) 0.5))
+                                    sum (reduce + (mapv * improvements weights))]
+                                (if (<= sum 0)
+                                  1.0E100
+                                  (- 1.0 sum)))))
                           ;
                           (= cat :discounted-case-improvements)
                           (if (not (:print-history argmap))
