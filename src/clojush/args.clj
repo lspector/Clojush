@@ -525,7 +525,9 @@
                                             genome_parent1
                                             genome_parent2
                                             autoconstructive_integer_rand
-                                            autoconstructive_boolean_rand))
+                                            autoconstructive_boolean_rand
+                                            genome_autoconstructing
+                                            genome_if_autoconstructing))
                     :uniform (into (registered-for-stacks
                                      [:integer :boolean :exec :float :tag])
                                    '(genome_pop
@@ -545,6 +547,8 @@
                                       genome_parent2
                                       autoconstructive_integer_rand
                                       autoconstructive_boolean_rand
+                                      genome_autoconstructing
+                                      genome_if_autoconstructing
                                       genome_uniform_instruction_mutation
                                       genome_uniform_integer_mutation
                                       genome_uniform_float_mutation
