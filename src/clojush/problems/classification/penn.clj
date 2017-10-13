@@ -226,6 +226,6 @@
    ;:autoconstructive-genome-instructions :uniform
    ;:autoconstructive-diversification-test :three-gens-size-and-instruction
    ;:autoconstructive-si-children 2
-   ;:autoconstructive-entropy 0.1
+   ;:autoconstructive-decay 0.1
    })
 

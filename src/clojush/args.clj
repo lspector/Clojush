@@ -204,7 +204,7 @@
           ;; Specifies the probability that a clone will be produced rather than the result of
           ;; actual autoconstruction, when :autoconstructive is true.
 
-          :autoconstructive-entropy 0.0
+          :autoconstructive-decay 0.0
           ;; The rate for random gene deletions after autoconstruction.
 
           :autoconstructive-diffmeans-children 10
