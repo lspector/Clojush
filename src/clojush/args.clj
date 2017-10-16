@@ -228,6 +228,10 @@
           :autoconstructive-tag-types [:integer :boolean :exec :float :char :string :code]
           ;; The types for tag-related instructions that will be included in the atom-generators
           ;; when :autoconstructive is true.
+          
+          :autoconstructive-environments false
+          ;; If true, then :environment is included in the types for which instructions are
+          ;; included for autoconstruction.
 
           ;;----------------------------------------
           ;; Epignenetics
@@ -495,9 +499,14 @@
       (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0}))
     (swap! push-argmap assoc :epigenetic-markers [:close :silent])
     (doseq [instr (case (:autoconstructive-genome-instructions @push-argmap)
-                    :all (registered-for-stacks [:integer :boolean :exec :genome :float :tag])
+                    :all (registered-for-stacks
+                           (if (:autoconstructive-environments @push-argmap)
+                             [:integer :boolean :exec :float :tag :environment]
+                             [:integer :boolean :exec :float :tag]))
                     :gene-oriented (into (registered-for-stacks
-                                           [:integer :boolean :exec :float :tag])
+                                           (if (:autoconstructive-environments @push-argmap)
+                                             [:integer :boolean :exec :float :tag :environment]
+                                             [:integer :boolean :exec :float :tag]))
                                          '(genome_pop
                                             genome_dup
                                             genome_swap
@@ -529,7 +538,9 @@
                                             genome_autoconstructing
                                             genome_if_autoconstructing))
                     :uniform (into (registered-for-stacks
-                                     [:integer :boolean :exec :float :tag])
+                                     (if (:autoconstructive-environments @push-argmap)
+                                       [:integer :boolean :exec :float :tag :environment]
+                                       [:integer :boolean :exec :float :tag]))
                                    '(genome_pop
                                       genome_dup
                                       genome_swap
