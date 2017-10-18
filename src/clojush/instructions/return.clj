@@ -24,57 +24,49 @@
   return_exec_pop
   ^{:stack-types [:environment :exec]}
   (fn [state]
-    (assoc state :return (list-concat (:return state)
-                                      (list 'exec_pop)))))
+    (assoc state :return (list-concat (list 'exec_pop) (:return state)))))
 
 (define-registered
   return_code_pop
   ^{:stack-types [:environment :code]}
   (fn [state]
-    (assoc state :return (list-concat (:return state)
-                                      (list 'code_pop)))))
+    (assoc state :return (list-concat (list 'code_pop) (:return state)))))
 
 (define-registered
   return_integer_pop
   ^{:stack-types [:environment :integer]}
   (fn [state]
-    (assoc state :return (list-concat (:return state)
-                                      (list 'integer_pop)))))
+    (assoc state :return (list-concat (list 'integer_pop) (:return state)))))
 
 (define-registered
   return_float_pop
   ^{:stack-types [:environment :float]}
   (fn [state]
-    (assoc state :return (list-concat (:return state)
-                                      (list 'float_pop)))))
+    (assoc state :return (list-concat (list 'float_pop) (:return state)))))
 
 (define-registered
   return_boolean_pop
   ^{:stack-types [:environment :boolean]}
   (fn [state]
-    (assoc state :return (list-concat (:return state)
-                                      (list 'boolean_pop)))))
+    (assoc state :return (list-concat (list 'boolean_pop) (:return state)))))
 
 (define-registered
   return_zip_pop
   ^{:stack-types [:environment :zip]}
   (fn [state]
-    (assoc state :return (list-concat (:return state)
-                                      (list 'zip_pop)))))
+    (assoc state :return (list-concat (list 'zip_pop) (:return state)))))
 
 (define-registered
   return_string_pop
   ^{:stack-types [:environment :string]}
   (fn [state]
-    (assoc state :return (list-concat (:return state)
-                                      (list 'string_pop)))))
+    (assoc state :return (list-concat (list 'string_pop) (:return state)))))
 
 (define-registered
   return_char_pop
   ^{:stack-types [:environment :char]}
   (fn [state]
-    (assoc state :return (list-concat (:return state)
-                                      (list 'char_pop)))))
+    (assoc state :return (list-concat (list 'char_pop) (:return state)))))
 
 ; Immediately copies the current tagspace to the environment on the top
 ; of the :environment stack.
