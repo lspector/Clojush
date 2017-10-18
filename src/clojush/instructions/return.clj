@@ -9,7 +9,7 @@
     (if (empty? (type state))
       state
       (let [item (top-item type state)]
-        (push-item item :return (pop-item type state))))))
+        (push-item {:type type :item item} :return (pop-item type state))))))
 
 (define-registered return_fromexec (with-meta (returner :exec) {:stack-types [:environment :exec] :parentheses 1}))
 (define-registered return_frominteger (with-meta (returner :integer) {:stack-types [:environment :integer]}))
@@ -95,5 +95,4 @@
       (let [top-env (top-item :environment state)
             new-env (assoc top-env :tag (:tag state))]
         (push-item new-env :environment (pop-item :environment state))))))
-
 
