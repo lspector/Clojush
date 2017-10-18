@@ -19,6 +19,7 @@
 (define-registered return_fromboolean (with-meta (returner :zip) {:stack-types [:environment :zip]}))
 (define-registered return_fromstring (with-meta (returner :string) {:stack-types [:environment :string]}))
 (define-registered return_fromchar (with-meta (returner :char) {:stack-types [:environment :char]}))
+(define-registered return_fromgenome (with-meta (returner :genome) {:stack-types [:environment :genome]}))
 
 (define-registered
   return_exec_pop
