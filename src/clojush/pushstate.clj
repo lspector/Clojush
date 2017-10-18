@@ -110,7 +110,9 @@
       (if (empty? old-return)
         new-state
         (recur (rest old-return)
-               (push-item (first old-return) :exec new-state))))))
+               (push-item (:item (first old-return)) 
+                          (:type (first old-return)) 
+                          new-state))))))
 
 (defn registered-for-type
   "Returns a list of all registered instructions with the given type name as a prefix."
@@ -145,4 +147,5 @@
    with those stacks set."
   [& {:as stack-assignments}]
   (merge (make-push-state) stack-assignments))
+
 
