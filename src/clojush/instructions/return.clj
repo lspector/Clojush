@@ -16,7 +16,7 @@
 (define-registered return_frominteger (with-meta (returner :integer) {:stack-types [:environment :integer]}))
 (define-registered return_fromfloat (with-meta (returner :float) {:stack-types [:environment :float]}))
 (define-registered return_fromboolean (with-meta (returner :boolean) {:stack-types [:environment :boolean]}))
-;(define-registered return_fromzip (returner :zip)) ;; won't work, reconsider
+(define-registered return_fromboolean (with-meta (returner :zip) {:stack-types [:environment :zip]}))
 (define-registered return_fromstring (with-meta (returner :string) {:stack-types [:environment :string]}))
 (define-registered return_fromchar (with-meta (returner :char) {:stack-types [:environment :char]}))
 
