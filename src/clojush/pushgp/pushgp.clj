@@ -5,7 +5,7 @@
             [clojush.pushgp.record :as r])
   (:use [clojush args globals util pushstate random individual evaluate simplification translate]
         [clojush.instructions boolean code common numbers random-instructions string char vectors
-         tag zip return input-output genome]
+         tag zip environment input-output genome]
         [clojush.pushgp breed report]
         [clojush.pushgp.selection 
          selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty]
