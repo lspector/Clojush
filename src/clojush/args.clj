@@ -501,8 +501,8 @@
     (doseq [instr (case (:autoconstructive-genome-instructions @push-argmap)
                     :all (registered-for-stacks
                            (if (:autoconstructive-environments @push-argmap)
-                             [:integer :boolean :exec :float :tag :environment]
-                             [:integer :boolean :exec :float :tag]))
+                             [:integer :boolean :exec :genome :float :tag :environment]
+                             [:integer :boolean :exec :genome :float :tag]))
                     :gene-oriented (into (registered-for-stacks
                                            (if (:autoconstructive-environments @push-argmap)
                                              [:integer :boolean :exec :float :tag :environment]
