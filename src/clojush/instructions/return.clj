@@ -67,7 +67,13 @@
   return_char_pop
   ^{:stack-types [:environment :char]}
   (fn [state]
-    (assoc state :return (list-concat (list {:type :char :popper true})) (:return state)))))
+    (assoc state :return (list-concat (list {:type :char :popper true}) (:return state)))))
+
+(define-registered
+  return_genome_pop
+  ^{:stack-types [:environment :genome]}
+  (fn [state]
+    (assoc state :return (list-concat (list {:type :genome :popper true}) (:return state)))))
 
 ; Immediately copies the current tagspace to the environment on the top
 ; of the :environment stack.
