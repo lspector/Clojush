@@ -148,11 +148,11 @@
                                   1.0E100
                                   (- 1.0 sum)))))
                           ;
-                          (= cat :discounted-case-improvements)
+                          (= cat :case-stagnation) ;; formerly :discounted-case-improvements
                           (if (not (:print-history argmap))
                             (throw
                               (Exception.
-                                ":print-history must be true for :discounted-case-improvements"))
+                                ":print-history must be true for :case-stagnation"))
                             (if (empty? (rest (:history ind)))
                               (vec (repeat (count (:errors ind)) 1000000))
                               (vec (for [case-history (apply map list (:history ind))]
