@@ -1,14 +1,17 @@
-(ns clojush.core-bench
+(ns clojush.bench.core-bench
   (:require [libra.bench :refer :all]
 
             [clojush.core :refer [-main]]
             [clojush.test.core-test :refer [reset-globals!]]))
 
+(defn call-main [args]
+  (reset-globals!)
+  (with-out-str (apply -main args)))
+
 (defmacro defbench-main [name args]
   `(defbench ~(symbol (str "main-" name))
     (with-redefs [shutdown-agents (fn [])]
-      (is (dur 10 (do (reset-globals!)
-                      (with-out-str (apply -main ~args))))))))
+      (is (dur 10 (call-main ~args))))))
 
 (def configurations
   {:jan-13

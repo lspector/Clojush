@@ -1,4 +1,4 @@
-(ns clojush.interpreter-bench
+(ns clojush.bench.interpreter-bench
   "Bnchmarks for the interpreter. Runs the interpreter through
    programs, that have been generated randomly during runs."
   (:require [libra.bench :refer :all]

@@ -32,6 +32,7 @@
   :ultra {:repl         false
           :stacktraces  false
           :tests        true}
+  :libra {:bench-paths ["test/clojush/bench"]}
   :repositories [["releases" {:url "https://clojars.org/repo"
                               :username :env
                               :sign-releases false
