@@ -547,6 +547,34 @@
                                     (:ancestors ind))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform silence-during-autoconstruction mutation
+
+(defn uniform-silence-during-autoconstruction-mutation
+  "Uniformly mutates the :silent_during_autoconstruction's in the individual's instruction
+  maps. Each :silent_during_autonstruction will have a uniform-silence-mutation-rate 
+  probability of being switched."
+  [ind {:keys [uniform-silence-mutation-rate
+               epigenetic-markers maintain-ancestors]
+        :as argmap}]
+  (if (not (some #{:silent_during_autoconstruction} epigenetic-markers))
+    ind
+    (let [uniform-silence-mutation-rate (number uniform-silence-mutation-rate)
+          silent-mutator (fn [instr-map]
+                           (let [silent (get instr-map :silent-during-autoconstruction false)]
+                             (assoc instr-map :silent-during-autoconstruction
+                                    (if (< (lrand) uniform-silence-mutation-rate)
+                                      (not silent)
+                                      silent))))
+          new-genome (mapv silent-mutator (:genome ind))]
+      (make-individual :genome new-genome
+                       :history (:history ind)
+                       :age (inc (:age ind))
+                       :grain-size (compute-grain-size new-genome ind argmap)
+                       :ancestors (if maintain-ancestors
+                                    (cons (:genome ind) (:ancestors ind))
+                                    (:ancestors ind))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; uniform deletion
 
 (defn uniform-deletion
