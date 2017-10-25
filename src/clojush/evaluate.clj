@@ -215,7 +215,7 @@
                           ;
                           (= cat :autoconstruction-blindness)
                           (if (some (fn [instruction-map]
-                                      (and (not (:silent instruction-map))
+                                      (and (not (:silent-during-autoconstruction instruction-map))
                                            (some #{(:instruction instruction-map)}
                                                  #{'genome_autoconstructing 'genome_if_autoconstructing})))
                                     (:genome ind))
