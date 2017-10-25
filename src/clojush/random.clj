@@ -68,6 +68,10 @@
                        :silent (if (< (lrand) silent-instruction-probability)
                                  true
                                  false)
+                       :silent-during-autoconstruction (if (< (lrand) 
+                                                              silent-instruction-probability)
+                                                         true
+                                                         false)
                        :random-insertion true
                        :uuid (java.util.UUID/randomUUID)
                        ))
@@ -103,5 +107,4 @@
                                     atom-generators
                                     argmap)}
       argmap)))
-
 
