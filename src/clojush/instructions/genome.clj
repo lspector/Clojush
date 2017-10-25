@@ -179,6 +179,26 @@
       state)))
 
 (define-registered
+  genome_toggle_silent_during_autoconstruction
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (if (and (not (empty? (:integer state)))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))]
+        (->> (pop-item :integer state)
+             (pop-item :genome)
+             (push-item (assoc genome
+                          index
+                          (let [g (nth genome index)]
+                            (assoc g 
+                              :silent_during_autoconstruction 
+                              (not (:silent_during_autoconstruction g)))))
+                        :genome)))
+      state)))
+
+(define-registered
   genome_silence
   ^{:stack-types [:genome :integer]}
   (fn [state]
@@ -197,6 +217,24 @@
       state)))
 
 (define-registered
+  genome_silence_during_autoconstruction
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (if (and (not (empty? (:integer state)))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))]
+        (->> (pop-item :integer state)
+             (pop-item :genome)
+             (push-item (assoc genome
+                          index
+                          (let [g (nth genome index)]
+                            (assoc g :silent_during_autoconstruction true)))
+                        :genome)))
+      state)))
+
+(define-registered
   genome_unsilence
   ^{:stack-types [:genome :integer]}
   (fn [state]
@@ -211,6 +249,24 @@
                           index
                           (let [g (nth genome index)]
                             (assoc g :silent false)))
+                        :genome)))
+      state)))
+
+(define-registered
+  genome_unsilence_during_autoconstruction
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (if (and (not (empty? (:integer state)))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))]
+        (->> (pop-item :integer state)
+             (pop-item :genome)
+             (push-item (assoc genome
+                          index
+                          (let [g (nth genome index)]
+                            (assoc g :silent_during_autoconstruction false)))
                         :genome)))
       state)))
 
@@ -458,6 +514,24 @@
       state)))
 
 (define-registered
+  genome_uniform_silence_during_autoconstruction_mutation
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (and (not (empty? (:float state)))
+             (not (empty? (:genome state))))
+      (let [rate (mod (first (:float state)) 1.0)
+            genome (first (:genome state))]
+        (->> (pop-item :float state)
+             (pop-item :genome)
+             (push-item (if (:autoconstructing state)
+                          (vec (:genome (uniform-silence-during-autoconstruction-mutation
+                                          {:genome genome :dummy true :age -1}
+                                          (merge @push-argmap {:uniform-silence-mutation-rate rate}))))
+                          genome)
+                        :genome)))
+      state)))
+
+(define-registered
   genome_uniform_deletion
   ^{:stack-types [:genome :float]}
   (fn [state]
@@ -650,6 +724,24 @@
              (pop-item :genome)
              (push-item (= (top-item :exec state)
                            (:silent (nth genome index)))
+                        :boolean)))
+      state)))
+
+(define-registered
+  genome_silent_during_autoconstruction_eq
+  ^{:stack-types [:genome :integer :exec :boolean]}
+  (fn [state]
+    (if (and (not (empty? (:integer state)))
+             (not (empty? (:exec state)))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))]
+        (->> (pop-item :integer state)
+             (pop-item :exec)
+             (pop-item :genome)
+             (push-item (= (top-item :exec state)
+                           (:silent_during_autoconstruction (nth genome index)))
                         :boolean)))
       state)))
 
