@@ -180,13 +180,13 @@
 
           :autoconstructive false
           ;; If true, then :genetic-operator-probabilities will be {:autoconstruction 1.0},
-          ;; :epigenetic-markers will be [:close :silent], and :atom-generators will include
-          ;; everything in (registered-for-stacks [:integer :boolean :exec :genome :float]). Also sets
-          ;; :replace-child-that-exceeds-size-limit-with to :empty. Also, empty-genome individuals
-          ;; will not be selected as parents. You will probably also want to provide a high value
-          ;; for :max-generations. If :autoconstructive is :revertable, rather than true, then
-          ;; :genetic-operator-probabilities will be {[:make-next-operator-revertable 
-          ;; :autoconstruction] 1.0}.
+          ;; :epigenetic-markers will be [:close :silent :silent-during-autoconstruction], and 
+          ;; :atom-generators will include everything in (registered-for-stacks [:integer
+          ;; :boolean :exec :genome :float]). Also sets :replace-child-that-exceeds-size-limit-with
+          ;; to :empty. Also, empty-genome individuals will not be selected as parents. You will
+          ;; probably also want to provide a high value for :max-generations. If :autoconstructive
+          ;; is :revertable, rather than true, then :genetic-operator-probabilities will be
+          ;; {[:make-next-operator-revertable :autoconstruction] 1.0}.
 
           :autoconstructive-diversification-test :gecco2016
           ;; Specifies the diversification test for autoconstruction. The default value of
@@ -239,7 +239,7 @@
 
           :epigenetic-markers [:close]
           ;; A vector of the epigenetic markers that should be used in the individuals.
-          ;; Implemented options include: :close, :silent
+          ;; Implemented options include: :close, :silent, :silent-during-autoconstruction
 
           :close-parens-probabilities [0.772 0.206 0.021 0.001]
           ;; A vector of the probabilities for the number of parens ending at that position. See
@@ -247,7 +247,7 @@
 
           :silent-instruction-probability 0.2
           ;; If :silent is used as an epigenetic-marker, this is the probability of random
-          ;; instructions having :silent be true.
+          ;; instructions having :silent be true. Applies also to :silent-during-autoconstruction.
 
           :track-instruction-maps false
           ;; If true, each Plush instruction map will have a UUID attached to it. If the
@@ -497,7 +497,7 @@
       (swap! push-argmap assoc :genetic-operator-probabilities 
              {[:make-next-operator-revertable :autoconstruction] 1.0})
       (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0}))
-    (swap! push-argmap assoc :epigenetic-markers [:close :silent])
+    (swap! push-argmap assoc :epigenetic-markers [:close :silent :silent-during-autoconstruction])
     (doseq [instr (case (:autoconstructive-genome-instructions @push-argmap)
                     :all (registered-for-stacks
                            (if (:autoconstructive-environments @push-argmap)
@@ -526,8 +526,11 @@
                                             genome_gene_copy
                                             genome_gene_copy_range
                                             genome_toggle_silent
+                                            genome_toggle_silent_during_autoconstruction
                                             genome_silence
+                                            genome_silence_during_autoconstruction
                                             genome_unsilence
+                                            genome_unsilence_during_autoconstruction
                                             genome_close_inc
                                             genome_close_dec
                                             genome_new
@@ -568,6 +571,7 @@
                                       genome_uniform_boolean_mutation
                                       genome_uniform_close_mutation
                                       genome_uniform_silence_mutation
+                                      genome_uniform_silence_during_autoconstruction_mutation
                                       genome_uniform_deletion
                                       genome_uniform_addition
                                       genome_uniform_addition_and_deletion
