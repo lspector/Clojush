@@ -102,7 +102,7 @@
 
 (def global-epigenetic-markers (atom [:close])) 
 ;; A vector of the epigenetic markers that should be used in the individuals. Implemented 
-;; options include: :close, :silent
+;; options include: :close, :silent, :silent-during-autoconstruction
 
 (def global-close-parens-probabilities (atom [0.772 0.206 0.021 0.001])) 
 ;; A vector of the probabilities for the number of parens ending at that position. See
@@ -110,7 +110,7 @@
 
 (def global-silent-instruction-probability (atom 0.2)) 
 ;; If :silent is used as an epigenetic-marker, this is the probability of random 
-;; instructions having :silent be true
+;; instructions having :silent be true. Applies also to :silent-during-autoconstruction.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; These definitions are used by run-push (and functions it calls), and must be global 
@@ -138,3 +138,4 @@
 
 (def global-parent-selection (atom :lexicase)) 
 ;; The type of parent selection used
+
