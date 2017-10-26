@@ -531,6 +531,8 @@
                                             genome_silence_during_autoconstruction
                                             genome_unsilence
                                             genome_unsilence_during_autoconstruction
+                                            genome_instruction_eq
+                                            genome_gene_close
                                             genome_gene_silent
                                             genome_gene_silent_during_autoconstruction
                                             genome_close_inc
