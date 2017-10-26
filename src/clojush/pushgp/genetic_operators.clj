@@ -788,7 +788,8 @@ given by uniform-deletion-rate."
 
 (defn process-genome-for-autoconstruction
   "Replaces input instructions with noops and  autoconstructive_<type>_rand
-  with <type>_rand."
+  with <type>_rand. Also silences any genes for which :silent-during-autoconstruction
+  is true."
   [genome]
   (let [input-instruction? 
         (fn [instruction]
@@ -797,20 +798,24 @@ given by uniform-deletion-rate."
                    (re-seq #"in_dm" (name instruction)) ;; from digital-multiplier
                    (some #{instruction}
                          '(a0 a1 a2 d0 d1 d2 d3 d4 d5 d6 d7)))))] ;; from mux problems
-    (mapv (fn [instruction-map]
-            (cond 
-              (input-instruction? (:instruction instruction-map))
-              (assoc instruction-map :instruction 'code_noop)
-              ;
-              (= (:instruction instruction-map) 'autoconstructive_integer_rand)
-              (assoc instruction-map :instruction 'integer_rand)
-              ;
-              (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
-              (assoc instruction-map :instruction 'boolean_rand)
-              ;
-              :else
-              instruction-map))
-         genome)))
+    (->> genome
+         (mapv (fn [instruction-map]
+                 (cond 
+                   (input-instruction? (:instruction instruction-map))
+                   (assoc instruction-map :instruction 'code_noop)
+                   ;
+                   (= (:instruction instruction-map) 'autoconstructive_integer_rand)
+                   (assoc instruction-map :instruction 'integer_rand)
+                   ;
+                   (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
+                   (assoc instruction-map :instruction 'boolean_rand)
+                   ;
+                   :else
+                   instruction-map)))
+         (mapv (fn [instruction-map]
+                 (if (:silent-during-autoconstruction instruction-map)
+                   (assoc instruction-map :silent true)
+                   instruction-map))))))
 
 (defn produce-child-genome-by-autoconstruction
   "Runs the program expressed by parent1-genome with both parent genomes
