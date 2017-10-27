@@ -213,22 +213,6 @@
                                    (sequence-similarity child1-genome child2-genome)))
                             1.0)
                           ;
-                          (= cat :checks-autoconstructing)
-                          (if (some (fn [instruction-map]
-                                      (and (= (:instruction instruction-map) 'genome_autoconstructing)
-                                           (not (:silent instruction-map))))
-                                    (:genome ind))
-                            0
-                            1)
-                          ;
-                          (= cat :checks-if-autoconstructing)
-                          (if (some (fn [instruction-map]
-                                      (and (= (:instruction instruction-map) 'genome_if_autoconstructing)
-                                           (not (:silent instruction-map))))
-                                    (:genome ind))
-                            0
-                            1)
-                          ;
                           (= cat :autoconstruction-blindness)
                           (if (some (fn [instruction-map]
                                       (and (not (:silent instruction-map))
