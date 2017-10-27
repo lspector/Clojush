@@ -528,6 +528,9 @@
                                             genome_toggle_silent
                                             genome_silence
                                             genome_unsilence
+                                            genome_instruction_eq
+                                            genome_gene_close
+                                            genome_gene_silent
                                             genome_close_inc
                                             genome_close_dec
                                             genome_new
