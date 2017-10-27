@@ -28,6 +28,17 @@
       ":max-genome-size-in-initial-program" "400"
       ":evalpush-limit" "1600"
       ":parent-selection" ":leaky-lexicase"]
+   :oct-12
+    ["clojush.problems.software.replace-space-with-newline"
+     ":autoconstructive" "true"
+     ":autoconstructive-genome-instructions" ":all"
+     ":autoconstructive-diversification-test" "[:not-a-clone :doesnt-clone]"
+     ":report-simplifications" "0"
+     ":max-generations" "5000"
+     ":meta-error-categories" "[:case-stagnation :autoconstruction-blindness]"
+     ":print-history" "true"
+     ":parent-selection" ":leaky-lexicase"
+     ":lexicase-leakage" "0.1"]
    :nth-prime
     ["clojush.problems.integer-regression.nth-prime"
      ":final-report-simplifications" "0"
@@ -36,15 +47,14 @@
 (defbench-main "autocon-10-gen-jan-13"
   (concat (:jan-13 configurations) [":max-generations" "10"]))
 
-(defbench-main "autocon-10-gen-jan-13-serial"
-  (concat (:jan-13 configurations) [":max-generations" "10" ":use-single-thread" "true"]))
+(defbench-main "autocon-10-gen-oct-12"
+  (concat (:oct-12 configurations) [":max-generations" "10"]))
 
+(defbench-main "autocon-10-gen-oct-12-serial"
+  (concat (:oct-12 configurations) [":max-generations" "10" ":use-single-thread" "true"]))
 
 (defbench-main "nth-prime-10-gen"
   (concat (:nth-prime configurations) [":max-generations" "10"]))
-
-(defbench-main "nth-prime-10-gen-serial"
-  (concat (:nth-prime configurations) [":max-generations" "10" ":use-single-thread" "true"]))
 
 
 (defbench cleanup
