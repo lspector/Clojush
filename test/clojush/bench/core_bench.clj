@@ -27,8 +27,7 @@
       ":report-simplifications" "0"
       ":max-genome-size-in-initial-program" "400"
       ":evalpush-limit" "1600"
-      ":parent-selection" ":leaky-lexicase"
-      ":autoconstructive-entropy" "0.1"]
+      ":parent-selection" ":leaky-lexicase"]
    :nth-prime
     ["clojush.problems.integer-regression.nth-prime"
      ":final-report-simplifications" "0"
