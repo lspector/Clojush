@@ -6,6 +6,86 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; push interpreter
 
+(defprotocol Executable
+  (execute [_ state])
+  (execute-in-vector [_ state v]))
+
+
+(defn handle-undefined [instruction]
+  (throw (Exception. (str "Undefined instruction: " (pr-str instruction) (type instruction)))))
+
+(extend-protocol Executable
+  nil
+  (execute-instruction [_ state] state)
+
+  clojure.lang.Symbol
+  (execute [instruction state]
+    (if-let [instruction-fn (@instruction-table instruction)]
+      (instruction-fn state)
+      (cond
+        (re-seq #"in\d+" (name instruction))
+        (handle-input-instruction instruction state)
+        (tag-instruction? instruction)
+        (handle-tag-instruction instruction state)
+        (tagged-code-macro? instruction)
+        (handle-tag-code-macro instruction state)
+        :else (handle-undefined instruction))))
+
+  BigInteger
+  (execute [instruction state] (push-item instruction :integer state))
+  (execute-in-vector [_ state v] (push-item v :vector_integer state))
+
+  Short
+  (execute [instruction state] (push-item instruction :integer state))
+  (execute-in-vector [_ state v] (push-item v :vector_integer state))
+
+  clojure.lang.BigInt
+  (execute [instruction state] (push-item instruction :integer state))
+  (execute-in-vector [_ state v] (push-item v :vector_integer state))
+
+  java.lang.Integer
+  (execute [instruction state] (push-item instruction :integer state))
+  (execute-in-vector [_ state v] (push-item v :vector_integer state))
+
+  java.lang.Long
+  (execute [instruction state] (push-item instruction :integer state))
+  (execute-in-vector [_ state v] (push-item v :vector_integer state))
+
+  java.lang.Float
+  (execute [instruction state] (push-item instruction :float state))
+  (execute-in-vector [_ state v] (push-item v :vector_float state))
+
+  java.lang.Double
+  (execute [instruction state] (push-item instruction :float state))
+  (execute-in-vector [_ state v] (push-item v :vector_float state))
+
+  java.lang.Character
+  (execute [instruction state] (push-item instruction :char state))
+  (execute-in-vector [_ state v] (push-item v :vector_char state))
+
+  java.lang.String
+  (execute [instruction state] (push-item instruction :string state))
+
+  java.lang.Boolean
+  (execute [instruction state] (push-item instruction :boolean state))
+  (execute-in-vector [_ state v] (push-item v :vector_boolean state))
+
+  clojure.lang.PersistentVector
+  (execute [instruction state]
+    (if (= [] instruction)
+      (->> state
+        (push-item [] :vector_boolean)
+        (push-item [] :vector_string)
+        (push-item [] :vector_float)
+        (push-item [] :vector_integer))
+      (execute-in-vector (nth instruction 0) state instruction)))
+
+  java.lang.Object
+  (execute [instruction _]
+     (handle-undefined instruction))
+  (execute-in-vector [_ _ instruction]
+     (handle-undefined instruction)))
+
 (defn execute-instruction
   "Executes a single Push instruction."
   [instruction state]
@@ -13,35 +93,7 @@
   ;(def debug-recent-instructions (cons instruction debug-recent-instructions))
   ;(def debug-recent-state state)
   (swap! point-evaluations-count inc)
-  (if (= instruction nil) ;; tests for nil and ignores it
-    state
-    (let [literal-type (recognize-literal instruction)]
-      (cond
-        ;
-        literal-type 
-        (push-item instruction literal-type state)
-        ;
-        (and (vector? instruction) (= [] instruction)) 
-        (push-item [] :vector_integer 
-                   (push-item [] :vector_float 
-                              (push-item [] :vector_string 
-                                         (push-item [] :vector_boolean state))))
-        ;
-        (and (symbol? instruction) 
-             (re-seq #"in\d+" (name instruction))) 
-        (handle-input-instruction instruction state)
-        ;
-        (tag-instruction? instruction) 
-        (handle-tag-instruction instruction state)
-        ;
-        (tagged-code-macro? instruction) 
-        (handle-tag-code-macro instruction state)
-        ;
-        (contains? @instruction-table instruction) 
-        ((instruction @instruction-table) state)
-        ;
-        :else 
-        (throw (Exception. (str "Undefined instruction: " (pr-str instruction))))))))
+  (execute instruction state))
 
 (def saved-state-sequence (atom []))
 

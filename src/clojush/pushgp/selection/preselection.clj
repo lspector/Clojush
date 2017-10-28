@@ -1,14 +1,13 @@
 (ns clojush.pushgp.selection.preselection
+  (:require [clojush.globals :refer [individuals-per-error]])
   (:use [clojush random]))
 
 (defn one-individual-per-error-vector-for-lexicase
   "When :parent-selection is a lexicase method, returns onl one random individual 
   to represent each error vector."
   [pop {:keys [parent-selection]}]
-  (if (some #{parent-selection}
-            #{:lexicase :leaky-lexicase :epsilon-lexicase :elitegroup-lexicase 
-              :random-threshold-lexicase})
-    (map lrand-nth (vals (group-by #(:errors %) pop)))
+  (if-let [es @individuals-per-error]
+    (map lrand-nth es)
     pop))
 
 (defn nonempties-for-autoconstruction

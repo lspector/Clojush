@@ -2,7 +2,8 @@
   (:require [clojure.java.io :as io]
             [clj-random.core :as random]
             [clojure.repl :as repl]
-            [clojush.pushgp.record :as r])
+            [clojush.pushgp.record :as r]
+            [clojush.pushgp.selection.preselection :refer [preselect]])
   (:use [clojush args globals util pushstate random individual evaluate simplification translate]
         [clojush.instructions boolean code common numbers random-instructions string char vectors
          tag zip environment input-output genome]
@@ -89,7 +90,7 @@
 
 (defn produce-new-offspring
   [pop-agents child-agents rand-gens
-   {:keys [decimation-ratio population-size decimation-tournament-size use-single-thread ]}]
+   {:keys [decimation-ratio population-size decimation-tournament-size use-single-thread parent-selection]}]
   (let [pop (if (>= decimation-ratio 1)
               (vec (doall (map deref pop-agents)))
               (decimate (vec (doall (map deref pop-agents)))
@@ -98,6 +99,12 @@
         ages (map :age pop)]
     (reset! min-age (apply min ages))
     (reset! max-age (apply max ages))
+    (when (contains?
+            #{:lexicase :leaky-lexicase :epsilon-lexicase :elitegroup-lexicase
+              :random-threshold-lexicase}
+            :parent-selection)
+      (reset! individuals-per-error
+              (vals (group-by :errors (preselect pop)))))
     (dotimes [i population-size]
       ((if use-single-thread swap! send)
            (nth child-agents i)
