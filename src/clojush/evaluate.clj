@@ -156,7 +156,7 @@
                             (if (empty? (rest (:history ind)))
                               (vec (repeat (count (:errors ind)) 1000000))
                               (vec (for [case-history (apply map list (:history ind))]
-                                     (if (zero? (first case-history)) 
+                                     (if false ;(zero? (first case-history)) ;;;;;;;;;;;;;;;;;;;HACK!!!!!!!!
                                        ;; note only zero is solved
                                        ;; error-threshold applies to total so can't be used here
                                        0 ;; solved, improvement doesn't matter
