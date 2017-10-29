@@ -205,7 +205,7 @@
                                 ":print-history must be true for :case-stagnation"))
                             (if (empty? (rest (:history ind)))
                               (vec (repeat (count (:errors ind)) 1000000))
-                              (vec (for [case-history (take 10 (apply map list (:history ind)))] ;;;; NOTE WINDOW
+                              (vec (for [case-history (map (partial take 10) (apply map list (:history ind)))] ;;;; NOTE WINDOW
                                      (if (zero? (first case-history))
                                        ;; note only zero is solved
                                        ;; error-threshold applies to total so can't be used here
