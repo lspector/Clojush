@@ -149,14 +149,14 @@
                                   (- 1.0 sum)))))
                           ;
                           (= cat :case-stagnation) ;; formerly :discounted-case-improvements
-                          (if (not (:print-history argmap))
+                          #_(if (not (:print-history argmap)) ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACK
                             (throw
                               (Exception.
                                 ":print-history must be true for :case-stagnation"))
                             (if (empty? (rest (:history ind)))
                               (vec (repeat (count (:errors ind)) 1000000))
                               (vec (for [case-history (apply map list (:history ind))]
-                                     (if false ;(zero? (first case-history)) ;;;;;;;;;;;;;;;;;;;HACK!!!!!!!!
+                                     (if (zero? (first case-history))
                                        ;; note only zero is solved
                                        ;; error-threshold applies to total so can't be used here
                                        0 ;; solved, improvement doesn't matter
@@ -171,6 +171,33 @@
                                          (if (<= sum 0)
                                            1.0E100
                                            (- 1.0 sum))))))))
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACK
+                          (if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (zero? (first case-history))
+                                       ;; note only zero is solved
+                                       ;; error-threshold applies to total so can't be used here
+                                       0 ;; solved, improvement doesn't matter
+                                       (let [improvements (mapv (fn [[newer-error older-error]]
+                                                                  (let [imp (- older-error newer-error)]
+                                                                    (if (> imp 0)
+                                                                      1.0
+                                                                      (if (< imp 0)
+                                                                        -1.0
+                                                                        0.0))))
+                                                                (partition 2 1 case-history))
+                                             weights (iterate (partial * (- 1 improvement-discount)) 0.5)
+                                             sum (reduce + (mapv * improvements weights))]
+                                         (- 1.0 sum) ;;;;;;;;;;;;;; HACK
+                                         #_(if (<= sum 0)
+                                           1.0E100
+                                           (- 1.0 sum))
+                                         ))))))
                           (= cat :reproductive-infidelity)
                           (let [g (:genome ind)]
                             (- 1.0
