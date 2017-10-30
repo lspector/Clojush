@@ -199,6 +199,28 @@
                                            (- 1.0 sum))
                                          ))))))
                           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACK
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (map (partial take 20) (apply map list (:history ind)))] ;;;; NOTE WINDOW
+                                     (if (zero? (first case-history))
+                                       ;; note only zero is solved
+                                       ;; error-threshold applies to total so can't be used here
+                                       0 ;; solved, improvement doesn't matter
+                                       (let [improvements (mapv (fn [[newer-error older-error]]
+                                                                  (let [imp (- older-error newer-error)]
+                                                                    (if (> imp 0)
+                                                                      1.0
+                                                                      (if (< imp 0)
+                                                                        0.0 ;-1.0  ;;;;;; HACK
+                                                                        0.0))))
+                                                                (partition 2 1 case-history))]
+                                         (- 1.0 (/ (reduce + improvements) 
+                                                   (count improvements))))))))) ;;;;;;;;;;;;;; HACK
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACK
                           (if (not (:print-history argmap))
                             (throw
                               (Exception.
@@ -215,10 +237,10 @@
                                                                     (if (> imp 0)
                                                                       1.0
                                                                       (if (< imp 0)
-                                                                        -1.0
+                                                                        -1.0  ;;;;;; HACK
                                                                         0.0))))
                                                                 (partition 2 1 case-history))]
-                                         (- 1.0 (/ (reduce + improvements) 
+                                         (- 1.0 (/ (max 0 (reduce + improvements))
                                                    (count improvements))))))))) ;;;;;;;;;;;;;; HACK
                           (= cat :reproductive-infidelity)
                           (let [g (:genome ind)]
