@@ -221,13 +221,13 @@
                                          (- 1.0 (/ (reduce + improvements) 
                                                    (count improvements))))))))) ;;;;;;;;;;;;;; HACK
                           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACK
-                          (if (not (:print-history argmap))
+                          #_(if (not (:print-history argmap))
                             (throw
                               (Exception.
                                 ":print-history must be true for :case-stagnation"))
                             (if (empty? (rest (:history ind)))
                               (vec (repeat (count (:errors ind)) 1000000))
-                              (vec (for [case-history (map (partial take 10) (apply map list (:history ind)))] ;;;; NOTE WINDOW
+                              (vec (for [case-history (map (partial take 5) (apply map list (:history ind)))] ;;;; NOTE WINDOW
                                      (if (zero? (first case-history))
                                        ;; note only zero is solved
                                        ;; error-threshold applies to total so can't be used here
@@ -242,6 +242,50 @@
                                                                 (partition 2 1 case-history))]
                                          (- 1.0 (/ (max 0 (reduce + improvements))
                                                    (count improvements))))))))) ;;;;;;;;;;;;;; HACK
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (map (partial take 20) (apply map list (:history ind)))] ;;;; NOTE WINDOW
+                                     (if (zero? (first case-history))
+                                       ;; note only zero is solved
+                                       ;; error-threshold applies to total so can't be used here
+                                       0 ;; solved, improvement doesn't matter
+                                       (let [improvements (mapv (fn [[newer-error older-error]]
+                                                                  (let [imp (- older-error newer-error)]
+                                                                    (if (> imp 0)
+                                                                      1.0
+                                                                      (if (< imp 0)
+                                                                        1.0  ;;;;;; HACK
+                                                                        0.0))))
+                                                                (partition 2 1 case-history))]
+                                         (- 1.0 (/ (max 0 (reduce + improvements))
+                                                   (count improvements))))))))) ;;;;;;;;;;;;;; HACK
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          (if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if false ;(zero? (first case-history)) ;;;;;;;;;; HACK
+                                       ;; note only zero is solved
+                                       ;; error-threshold applies to total so can't be used here
+                                       0 ;; solved, improvement doesn't matter
+                                       (let [changes (mapv (fn [[newer-error older-error]]
+                                                             (if (= older-error newer-error)
+                                                               0.0
+                                                               1.0))
+                                                           (partition 2 1 case-history))
+                                             weights (take (count changes)
+                                                           (iterate (partial * (- 1 improvement-discount)) 1.0))
+                                             sum (reduce + (mapv * changes weights))]
+                                         (/ 1.0 (inc (/ sum
+                                                        (reduce + weights)))))))))) ;;;;;;;;;;;;;; HACK
                           (= cat :reproductive-infidelity)
                           (let [g (:genome ind)]
                             (- 1.0
