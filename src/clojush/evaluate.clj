@@ -287,7 +287,7 @@
                                          (/ 1.0 (inc (/ sum
                                                         (reduce + weights)))))))))) ;;;;;;;;;;;;;; HACK
                           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
-                          (if (not (:print-history argmap))
+                          #_(if (not (:print-history argmap))
                             (throw
                               (Exception.
                                 ":print-history must be true for :case-stagnation"))
@@ -303,13 +303,304 @@
                                                                1.0
                                                                (if (= older-error newer-error)
                                                                  0.0
-                                                                 0.5)))
+                                                                 0.0)))
                                                            (partition 2 1 case-history))
                                              weights (take (count changes)
                                                            (iterate (partial * (- 1 improvement-discount)) 1.0))
                                              sum (reduce + (mapv * changes weights))]
-                                         (/ 1.0 (inc (/ sum
-                                                        (reduce + weights)))))))))) ;;;;;;;;;;;;;; HACK
+                                         (* (first case-history)
+                                            (/ 1.0 (inc (/ sum
+                                                           (reduce + weights))))))))))) ;;;;;;;;;;;;;; HACK
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (* 2 (count (:errors ind))) 1000000)) ;******************** HACK
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if false ;(zero? (first case-history)) ;;;;;;;;;; HACK
+                                       ;; note only zero is solved
+                                       ;; error-threshold applies to total so can't be used here
+                                       0 ;; solved, improvement doesn't matter
+                                       (let [changes (mapv (fn [[newer-error older-error]]
+                                                             (if (> older-error newer-error)
+                                                               1.0
+                                                               (if (= older-error newer-error)
+                                                                 0.0
+                                                                 0.0)))
+                                                           (partition 2 1 case-history))
+                                             weights (take (count changes)
+                                                           (iterate (partial * (- 1 improvement-discount)) 1.0))
+                                             sum (reduce + (mapv * changes weights))]
+                                         [(first case-history)
+                                          (/ 1.0 (inc (/ sum
+                                                         (reduce + weights))))])))))) ;;;;;;;;;;;;;; HACK
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (* 2 (count (:errors ind))) 1000000)) ;******************** HACK
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if false ;(zero? (first case-history)) ;;;;;;;;;; HACK
+                                       ;; note only zero is solved
+                                       ;; error-threshold applies to total so can't be used here
+                                       0 ;; solved, improvement doesn't matter
+                                       (let [changes (mapv (fn [[newer-error older-error]]
+                                                             (if (> older-error newer-error)
+                                                               1.0
+                                                               (if (= older-error newer-error)
+                                                                 0.0
+                                                                 0.0)))
+                                                           (partition 2 1 case-history))
+                                             weights (take (count changes)
+                                                           (iterate (partial * (- 1 improvement-discount)) 1.0))
+                                             sum (reduce + (mapv * changes weights))]
+                                         (vec (repeat 2 (/ 1.0 (inc (/ sum
+                                                                       (reduce + weights)))))))))))) ;;;;;;;;;;;;;; HACK
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              1000000 ;******************** HACK
+                              (let [case-meta-errors
+                                    (for [case-history (apply map list (:history ind))]
+                                      (if false ;(zero? (first case-history)) ;;;;;;;;;; HACK
+                                        ;; note only zero is solved
+                                        ;; error-threshold applies to total so can't be used here
+                                        0 ;; solved, improvement doesn't matter
+                                        (let [changes (mapv (fn [[newer-error older-error]]
+                                                              (if (> older-error newer-error)
+                                                                1.0
+                                                                (if (= older-error newer-error)
+                                                                  0.0
+                                                                  0.0)))
+                                                            (partition 2 1 case-history))
+                                              weights (take (count changes)
+                                                            (iterate (partial * (- 1 improvement-discount)) 1.0))
+                                              sum (reduce + (mapv * changes weights))]
+                                          (/ 1.0 (inc (/ sum
+                                                         (reduce + weights)))))))]
+                                (mean case-meta-errors))))
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (zero? (first case-history))
+                                       ;; note only zero is solved
+                                       ;; error-threshold applies to total so can't be used here
+                                       0 ;; solved, improvement doesn't matter
+                                       (if (< (first case-history)
+                                              (second case-history))
+                                         0
+                                         1))))))
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (< (first case-history)
+                                            (second case-history))
+                                       0
+                                       1)))))
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (< (first case-history)
+                                            (second case-history))
+                                       0
+                                       (if (= (first case-history)
+                                              (second case-history))
+                                         1
+                                         0.5))))))
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (zero? (first case-history))
+                                       0 ;; solved, improvement doesn't matter
+                                       (if (< (first case-history)
+                                              (second case-history))
+                                         0
+                                         (if (= (first case-history)
+                                                (second case-history))
+                                           1
+                                           1)))))))
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (zero? (first case-history))
+                                       0 ;; solved, improvement doesn't matter
+                                       (let [improvements (mapv (fn [[newer-error older-error]]
+                                                                  (if (< newer-error older-error)
+                                                                    1.0
+                                                                    (if (= newer-error older-error)
+                                                                      0.0
+                                                                      0.5)))
+                                                                (partition 2 1 case-history))
+                                             weights (take (count improvements)
+                                                           (iterate (partial * (- 1 improvement-discount)) 1.0))
+                                             sum (reduce + (mapv * improvements weights))]
+                                         (inc (/ 1.0 (inc (/ sum (reduce + weights)))))))))))
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (let [improvements (mapv (fn [[newer-error older-error]]
+                                                                (if (or (zero? newer-error)
+                                                                        (< newer-error older-error))
+                                                                  1.0
+                                                                  (if (= newer-error older-error)
+                                                                    0.0
+                                                                    0.5)))
+                                                              (partition 2 1 case-history))
+                                           weights (take (count improvements)
+                                                         (iterate (partial * (- 1 improvement-discount)) 1.0))
+                                           sum (reduce + (mapv * improvements weights))]
+                                       (/ 1.0 (inc (/ sum (reduce + weights)))))))))
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (let [improvements (mapv (fn [[newer-error older-error]]
+                                                                (cond 
+                                                                  (zero? newer-error) 1
+                                                                  (< newer-error older-error) 1/2
+                                                                  (= newer-error older-error) 0
+                                                                  :else 1/4))
+                                                              (partition 2 1 case-history))
+                                           weights (take (count improvements)
+                                                         (iterate (partial * (- 1 improvement-discount)) 1.0))
+                                           sum (reduce + (mapv * improvements weights))]
+                                       (/ 1.0 (inc (/ sum (reduce + weights)))))))))
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) [1000000 1000000]))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     [(let [improvements (mapv (fn [[newer-error older-error]]
+                                                                 (cond 
+                                                                   (zero? newer-error) 1
+                                                                   (< newer-error older-error) 0.5
+                                                                   (= newer-error older-error) 0
+                                                                   :else 0))
+                                                               (partition 2 1 case-history))
+                                            weights (take (count improvements)
+                                                          (iterate (partial * (- 1 improvement-discount)) 1.0))
+                                            sum (reduce + (mapv * improvements weights))]
+                                        (/ 1.0 (inc (/ sum (reduce + weights)))))
+                                      (let [improvements (mapv (fn [[newer-error older-error]]
+                                                                 (cond 
+                                                                   (zero? newer-error) 1
+                                                                   (< newer-error older-error) 0.5
+                                                                   (= newer-error older-error) 0
+                                                                   :else 0.5))
+                                                               (partition 2 1 case-history))
+                                            weights (take (count improvements)
+                                                          (iterate (partial * (- 1 improvement-discount)) 1.0))
+                                            sum (reduce + (mapv * improvements weights))]
+                                        (/ 1.0 (inc (/ sum (reduce + weights)))))]))))
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (zero? (first case-history))
+                                       0  ;; solved, improvement doesn't matter
+                                       (let [improvements (mapv (fn [[newer-error older-error]]
+                                                                  (if (< newer-error older-error)
+                                                                    1.0
+                                                                    (if (= newer-error older-error)
+                                                                      0.0
+                                                                      0.0)))
+                                                                (partition 2 1 case-history))
+                                             weights (take (count improvements)
+                                                           (iterate (partial * (- 1 improvement-discount)) 1.0))
+                                             sum (reduce + (mapv * improvements weights))]
+                                         (/ 1.0 (inc (/ sum 
+                                                        1 ;(reduce + weights)
+                                                        ))))))))) ;;;;;;;;;;;;;; HACK
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          #_(if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (zero? (first case-history))
+                                       0  ;; solved, improvement doesn't matter
+                                       (let [improvements (mapv (fn [[newer-error older-error]]
+                                                                  (if (< newer-error older-error)
+                                                                    1.0
+                                                                    (if (= newer-error older-error)
+                                                                      0.0
+                                                                      -1.0)))
+                                                                (partition 2 1 case-history))
+                                             weights (take (count improvements)
+                                                           (iterate (partial * 0.5) 0.5))
+                                             sum (reduce + (mapv * improvements weights))]
+                                         (- sum)))))))
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          (if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (zero? (first case-history))
+                                       -100000  ;; solved, improvement doesn't matter
+                                       (let [improvements (mapv (fn [[newer-error older-error]]
+                                                                  (if (< newer-error older-error)
+                                                                    1.0
+                                                                    (if (= newer-error older-error)
+                                                                      0.0
+                                                                      -1.0)))
+                                                                (partition 2 1 case-history))
+                                             weights (take (count improvements)
+                                                           (iterate (partial * (- 1 improvement-discount)) 0.5))
+                                             sum (reduce + (mapv * improvements weights))]
+                                         (- sum)))))))
                           (= cat :reproductive-infidelity)
                           (let [g (:genome ind)]
                             (- 1.0
