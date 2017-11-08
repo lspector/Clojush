@@ -623,7 +623,7 @@
                                              sum (reduce + (mapv * improvements weights))]
                                          (- sum)))))))
                           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
-                          (if (not (:print-history argmap))
+                          #_(if (not (:print-history argmap))
                             (throw
                               (Exception.
                                 ":print-history must be true for :case-stagnation"))
@@ -638,6 +638,27 @@
                                                                     (if (= newer-error older-error)
                                                                       0.0
                                                                       -1.0)))
+                                                                (partition 2 1 case-history))
+                                             weights (take (count improvements)
+                                                           (iterate (partial * (- 1 improvement-discount)) 1))
+                                             sum (reduce + (mapv * improvements weights))]
+                                         (- sum)))))))
+                          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HACKED STABILITY
+                          (if (not (:print-history argmap))
+                            (throw
+                              (Exception.
+                                ":print-history must be true for :case-stagnation"))
+                            (if (empty? (rest (:history ind)))
+                              (vec (repeat (count (:errors ind)) 1000000))
+                              (vec (for [case-history (apply map list (:history ind))]
+                                     (if (zero? (first case-history))
+                                       -100000  ;; solved, improvement doesn't matter
+                                       (let [improvements (mapv (fn [[newer-error older-error]]
+                                                                  (if (< newer-error older-error)
+                                                                    1.0
+                                                                    (if (= newer-error older-error)
+                                                                      -0.1
+                                                                      0.0)))
                                                                 (partition 2 1 case-history))
                                              weights (take (count improvements)
                                                            (iterate (partial * (- 1 improvement-discount)) 1))
@@ -776,4 +797,5 @@
                            :history (if print-history (cons e (:history i)) (:history i)))
             me (calculate-meta-errors new-ind argmap)]
         (assoc new-ind :meta-errors me)))))
+
 
