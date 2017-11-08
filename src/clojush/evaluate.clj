@@ -657,8 +657,8 @@
                                                                   (if (< newer-error older-error)
                                                                     1.0
                                                                     (if (= newer-error older-error)
-                                                                      -0.1
-                                                                      0.0)))
+                                                                      -2
+                                                                      0)))
                                                                 (partition 2 1 case-history))
                                              weights (take (count improvements)
                                                            (iterate (partial * (- 1 improvement-discount)) 1))
