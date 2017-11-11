@@ -663,6 +663,40 @@
                    (first (:exec state))
                    (first (rest (:exec state))))
                  :exec
-                 (pop-item :boolean (pop-item :exec (pop-item :exec state))))
+                 (pop-item :exec (pop-item :exec state)))
       state)))
 
+(define-registered
+  genome_gene_genome_instruction
+  ^{:stack-types [:genome :integer :boolean]}
+  (fn [state]
+    (if (and (not (empty? (:integer state)))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))]
+        (->> (pop-item :integer state)
+             (pop-item :genome)
+             (push-item (some #{:genome} 
+                              (:stack-types (meta (:instruction (nth genome index)))))
+                        :boolean)))
+      state)))
+
+(define-registered 
+  genome_if_gene_genome_instruction
+  ^{:stack-types [:genome :integer :exec]
+    :parentheses 2}
+  (fn [state]
+    (if (and (not (empty? (rest (:exec state))))
+             (not (empty? (:integer state)))
+             (not (empty? (:genome state)))
+             (not (empty? (stack-ref :genome 0 state))))
+      (let [genome (stack-ref :genome 0 state)
+            index (mod (stack-ref :integer 0 state) (count genome))]
+        (push-item (if (some #{:genome} 
+                              (:stack-types (meta (:instruction (nth genome index)))))
+                     (first (:exec state))
+                     (first (rest (:exec state))))
+                   :exec
+                   (pop-item :exec (pop-item :exec (pop-item :integer (pop-item :genome state))))))
+      state)))
