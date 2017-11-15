@@ -539,7 +539,9 @@
                                             autoconstructive_integer_rand
                                             autoconstructive_boolean_rand
                                             genome_autoconstructing
-                                            genome_if_autoconstructing))
+                                            genome_if_autoconstructing
+                                            genome_gene_genome_instruction
+                                            genome_if_gene_genome_instruction))
                     :uniform (into (registered-for-stacks
                                      (if (:autoconstructive-environments @push-argmap)
                                        [:integer :boolean :exec :float :tag :environment]
@@ -577,7 +579,9 @@
                                       genome_uniform_combination_and_deletion
                                       genome_genesis
                                       genome_alternation
-                                      genome_uniform_crossover)))]
+                                      genome_uniform_crossover
+                                      genome_gene_genome_instruction
+                                      genome_if_gene_genome_instruction)))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     (swap! push-argmap assoc
@@ -649,4 +653,5 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 
