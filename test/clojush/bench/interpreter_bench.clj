@@ -5,7 +5,8 @@
             [libra.criterium :as c]
 
             [clojush.core :refer [-main]]
-            [clojush.interpreter :refer [eval-push]]))
+            [clojush.interpreter :refer [eval-push]]
+            [clojush.bench.core-bench :refer [configurations]]))
 
 (defn grab-call-inputs
   "Returns the first `n` inputs to the `func-var`, from Running
@@ -18,11 +19,11 @@
         func-original (var-get func-var)
         done-fn #(>= (count %) n)
         func-log (fn [& input]
-                        (let [ret (apply func-original input)
-                              inputs-outputs (swap! inputs-outputs-atom conj {:input input :output ret})]
-                          (when (done-fn inputs-outputs)
-                            (throw (Exception. "")))
-                          ret))]
+                     (let [ret (apply func-original input)
+                           inputs-outputs (swap! inputs-outputs-atom conj {:input input :output ret})]
+                       (when (done-fn inputs-outputs)
+                         (throw (Exception. "")))
+                       ret))]
 
     (with-redefs-fn {func-var func-log}
       (fn []
@@ -45,6 +46,6 @@
             (doseq [input# inputs#]
               (apply func# input#)))))))
 
-(defbench-grab-then-benchmark #'eval-push 1000 ["clojush.problems.software.replace-space-with-newline"])
-(defbench-grab-then-benchmark #'eval-push 1000 ["clojush.problems.integer-regression.nth-prime"])
-(defbench-grab-then-benchmark #'eval-push 10000 ["clojush.problems.integer-regression.nth-prime"])
+(defbench-grab-then-benchmark #'eval-push 1000 (:oct-12 configurations))
+(defbench-grab-then-benchmark #'eval-push 10000 (:oct-12 configurations))
+(defbench-grab-then-benchmark #'eval-push 10000 (:nth-prime configurations))
