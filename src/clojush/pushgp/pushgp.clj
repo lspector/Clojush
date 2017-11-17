@@ -82,7 +82,13 @@
 (defn compute-errors
   [pop-agents rand-gens {:keys [use-single-thread error-function] :as argmap}]
   (dorun (map #((if use-single-thread swap! send)
-                    % evaluate-individual error-function %2 argmap)
+                %1 evaluate-individual error-function %2 argmap)
+              pop-agents
+              rand-gens))
+  (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
+  ;; compute meta-errors in a second pass, passing evaluated population
+  (dorun (map #((if use-single-thread swap! send)
+                %1 evaluate-individual-meta-errors (mapv deref pop-agents) %2 argmap)
               pop-agents
               rand-gens))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
