@@ -174,6 +174,18 @@
                                  sum (reduce + (mapv * improvements weights))]
                              (- sum)))))))
               ;
+              (= cat :case-sibling-uniformity)
+              (if (empty? (:parent-uuids ind))
+                (vec (repeat (count (:errors ind)) 1))
+                (let [siblings (filter #(= (first (:parent-uuids ind))
+                                           (first (:parent-uuids %)))
+                                       evaluated-population)]
+                  (vec (for [case-index (range (count (:errors ind)))]
+                         (if (apply = (mapv #(nth (:errors %) case-index)
+                                            siblings))
+                           1
+                           0)))))
+              ;
               (= cat :reproductive-infidelity)
               (let [g (:genome ind)]
                 (- 1.0
