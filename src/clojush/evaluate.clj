@@ -177,14 +177,45 @@
               (= cat :case-sibling-uniformity)
               (if (empty? (:parent-uuids ind))
                 (vec (repeat (count (:errors ind)) 1))
-                (let [siblings (filter #(= (first (:parent-uuids ind))
-                                           (first (:parent-uuids %)))
+                (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                                (first (:parent-uuids %)))
+                                             (not (:is-random-replacement %))) ; new random sibs don't count
                                        evaluated-population)]
                   (vec (for [case-index (range (count (:errors ind)))]
-                         (if (apply = (mapv #(nth (:errors %) case-index)
-                                            siblings))
-                           1
-                           0)))))
+                         (if (zero? (nth (:errors ind) case-index)) ;; solved
+                           0 
+                           (if (or (empty? siblings)
+                                   (apply = (mapv #(nth (:errors %) case-index)
+                                                  siblings)))
+                             1
+                             0))))))
+              ;
+              (= cat :washout-mother)
+              (if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :washout-mother"))
+                (if (or (empty? (:parent-uuids ind))
+                        (empty? (rest (:history ind))))
+                  (vec (repeat (count (:errors ind)) 1))
+                  (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                                  (first (:parent-uuids %)))
+                                               (not (empty? (rest (:history %))))) ; new random sibs don't count
+                                         evaluated-population)]
+                    (vec (for [case-index (range (count (:errors ind)))]
+                           (if (zero? (nth (:errors ind) case-index)) ;; solved
+                             0 
+                             (if 
+                               (some (fn [sib]
+                                       (< (-> (:history sib)
+                                              (first)
+                                              (nth case-index))
+                                          (-> (:history sib)
+                                              (second)
+                                              (nth case-index))))
+                                     siblings)
+                               0
+                               1)))))))
               ;
               (= cat :reproductive-infidelity)
               (let [g (:genome ind)]
