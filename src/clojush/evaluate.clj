@@ -207,12 +207,15 @@
                              0 
                              (if 
                                (some (fn [sib]
-                                       (< (-> (:history sib)
-                                              (first)
-                                              (nth case-index))
-                                          (-> (:history sib)
-                                              (second)
-                                              (nth case-index))))
+                                       (or (zero? (-> (:history sib)
+                                                      (first)
+                                                      (nth case-index)))
+                                           (< (-> (:history sib)
+                                                  (first)
+                                                  (nth case-index))
+                                              (-> (:history sib)
+                                                  (second)
+                                                  (nth case-index)))))
                                      siblings)
                                0
                                1)))))))
