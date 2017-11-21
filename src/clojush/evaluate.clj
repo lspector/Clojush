@@ -190,6 +190,36 @@
                              1
                              0))))))
               ;
+              (= cat :case-family-uniformity)
+              (if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :case-family-uniformity"))
+                (if (or (empty? (:parent-uuids ind))
+                        (empty? (rest (:history ind))))
+                  (vec (repeat (count (:errors ind)) 1))
+                  (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                                  (first (:parent-uuids %)))
+                                               (not (empty? (rest (:history %))))) ; new random sibs don't count
+                                         evaluated-population)]
+                    (vec (for [case-index (range (count (:errors ind)))]
+                           (if (zero? (nth (:errors ind) case-index)) ;; solved
+                             0 
+                             (if 
+                               (some (fn [sib]
+                                       (or (zero? (-> (:history sib)
+                                                      (first)
+                                                      (nth case-index)))
+                                           (not= (-> (:history sib)
+                                                     (first)
+                                                     (nth case-index))
+                                                 (-> (:history sib)
+                                                     (second)
+                                                     (nth case-index)))))
+                                     siblings)
+                               0
+                               1)))))))
+              ;
               (= cat :washout-mother)
               (if (not (:print-history argmap))
                 (throw
