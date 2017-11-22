@@ -282,6 +282,12 @@
                      (sequence-similarity (:genome ind) (:parent2-genome ind)))
                 1.0)
               ;
+              (= cat :difference-from-most-similar-parent)
+              (- 1.0 (if (and (:parent1-genome ind) (:parent2-genome ind))
+                       (max (sequence-similarity (:genome ind) (:parent1-genome ind))
+                            (sequence-similarity (:genome ind) (:parent2-genome ind)))
+                       1.0))
+              ;
               (= cat :reproductive-convergence)
               (if (and (:parent1-genome ind) (:parent2-genome ind))
                 (let [g (:genome ind)
