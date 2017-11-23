@@ -319,7 +319,7 @@
               (- 1.0 (if (and (:parent1-genome ind) (:parent2-genome ind))
                        (max (sequence-similarity (:genome ind) (:parent1-genome ind))
                             (sequence-similarity (:genome ind) (:parent2-genome ind)))
-                       1.0))
+                       0.0))
               ;
               (= cat :difference-from-mate)
               (- 1.0 (if (:parent2-genome ind)
