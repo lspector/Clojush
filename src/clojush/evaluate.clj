@@ -165,9 +165,9 @@
                            (let [improvements (mapv (fn [[newer-error older-error]]
                                                       (if (< newer-error older-error)
                                                         1.0
-                                                        (if (= newer-error older-error)
-                                                          -1.0
-                                                          0.0)))
+                                                        (if true ;(= newer-error older-error) ;for now only improvement counts
+                                                          0.0
+                                                          -1.0)))
                                                     (partition 2 1 case-history))
                                  weights (take (count improvements)
                                                (iterate (partial * (- 1 improvement-discount)) 1))
