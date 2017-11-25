@@ -1133,7 +1133,7 @@ programs encoded by genomes g1 and g2."
                 :gecco2016 gecco2016-diversifying?
                 :three-gens-diff-diffs three-gens-diff-diffs-diversifying?
                 :three-gens-same-inputs-diff-diffs three-gens-same-inputs-diff-diffs-diversifying?
-                :four-gens-same-inputs-diff-diffs three-gens-same-inputs-diff-diffs-diversifying?
+                :four-gens-same-inputs-diff-diffs four-gens-same-inputs-diff-diffs-diversifying?
                 :three-gens-some-diff-diffs three-gens-some-diff-diffs-diversifying?
                 :size-and-instruction size-and-instruction-diversifying?
                 :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?
