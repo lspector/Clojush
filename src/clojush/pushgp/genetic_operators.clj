@@ -846,6 +846,12 @@ programs encoded by genomes g1 and g2."
               {:genome (produce-child-genome-by-autoconstruction g g argmap)} 
               argmap)))))
 
+(defn doesnt-clone-genetically-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)]
+    (assoc ind :diversifying
+      (not= g (produce-child-genome-by-autoconstruction g g argmap)))))
+
 (defn child-doesnt-clone-diversifying?
   [ind argmap]
   (let [g (:genome ind)]
@@ -1155,6 +1161,7 @@ programs encoded by genomes g1 and g2."
                 :use-mate-differently use-mate-differently-diversifying?
                 :si-and-mate-use si-and-mate-use-diversifying?
                 :doesnt-clone doesnt-clone-diversifying?
+                :doesnt-clone-genetically doesnt-clone-genetically-diversifying?
                 :child-doesnt-clone child-doesnt-clone-diversifying?
                 :not-a-clone not-a-clone-diversifying?
                 :minimum-genetic-difference minimum-genetic-difference-diversifying?
