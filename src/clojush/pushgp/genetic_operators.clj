@@ -1044,6 +1044,14 @@ programs encoded by genomes g1 and g2."
            (not (zero? c2-diff))
            (not= c1-diff c2-diff)))))
 
+(defn use-mate-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)
+        mate (vec (repeat (count g) {:instruction :from-mate :close 0}))
+        c (produce-child-genome-by-autoconstruction g mate argmap)]
+    (assoc ind :diversifying
+      (some #(= (:instruction %) :from-mate) c))))
+
 (defn use-mate-differently-diversifying?
   [ind argmap]
   (let [g (:genome ind)
@@ -1158,6 +1166,7 @@ programs encoded by genomes g1 and g2."
                 :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?
                 :diffmeans diffmeans-diversifying?
                 :minimal-reproductive-difference minimal-reproductive-difference-diversifying?
+                :use-mate use-mate-diversifying?
                 :use-mate-differently use-mate-differently-diversifying?
                 :si-and-mate-use si-and-mate-use-diversifying?
                 :doesnt-clone doesnt-clone-diversifying?
