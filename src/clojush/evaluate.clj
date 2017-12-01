@@ -220,6 +220,25 @@
                                0
                                1)))))))
               ;
+              (= cat :family-uniformity)
+              (if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :family-variation"))
+                (if (or (empty? (:parent-uuids ind))
+                        (empty? (rest (:history ind))))
+                  1
+                  (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                                  (first (:parent-uuids %)))
+                                               (not (empty? (rest (:history %))))) ; new random sibs don't count
+                                         evaluated-population)]
+                    (if (some (fn [sib]
+                                (not= (first (:history sib))
+                                      (second (:history sib))))
+                              siblings)
+                      0
+                      1))))
+              ;
               (= cat :case-family-variation)
               (if (not (:print-history argmap))
                 (throw
@@ -282,6 +301,20 @@
                                      siblings)
                                0
                                1)))))))
+              ;
+              (= cat :clone-distance)
+              (/ 1 (let [limit 100]
+                     (loop [step 1
+                            genomes (list (:genome ind))]
+                       (if (>= step limit)
+                         step
+                         (let [child (produce-child-genome-by-autoconstruction 
+                                       (first genomes) 
+                                       (first genomes) 
+                                       argmap)]
+                           (if (some #{child} (set genomes))
+                             step
+                             (recur (inc step) (cons child genomes))))))))
               ;
               (= cat :reproductive-infidelity)
               (let [g (:genome ind)]
