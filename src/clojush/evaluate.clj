@@ -354,6 +354,12 @@
                             (sequence-similarity (:genome ind) (:parent2-genome ind)))
                        0.0))
               ;
+              (= cat :difference-from-least-similar-parent)
+              (- 1.0 (if (and (:parent1-genome ind) (:parent2-genome ind))
+                       (min (sequence-similarity (:genome ind) (:parent1-genome ind))
+                            (sequence-similarity (:genome ind) (:parent2-genome ind)))
+                       0.0))
+              ;
               (= cat :difference-from-mate)
               (- 1.0 (if (:parent2-genome ind)
                        (sequence-similarity (:genome ind) (:parent2-genome ind))
