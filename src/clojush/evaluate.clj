@@ -365,6 +365,13 @@
                        (sequence-similarity (:genome ind) (:parent2-genome ind))
                        0.0))
               ;
+              (= cat :parent2-irrelevance)
+              (if (and (:parent1-genome ind) (:parent2-genome ind))
+                (let [similarity-to-p2 (sequence-similarity (:genome ind) (:parent2-genome ind))
+                      p1-similarity-to-p2 (sequence-similarity (:parent1-genome ind) (:parent2-genome ind))]
+                   (- 1.0 (max 0.0 (- similarity-to-p2 p1-similarity-to-p2))))
+                1.0)
+              ;
               (= cat :reproductive-convergence)
               (if (and (:parent1-genome ind) (:parent2-genome ind))
                 (let [g (:genome ind)

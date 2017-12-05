@@ -977,6 +977,20 @@ programs encoded by genomes g1 and g2."
            (or (< numkids 2) (not (apply = kid-counts)))
            (or (< numkids 2) (not (apply = kid-sets)))))))
 
+(defn distinct-size-and-instruction-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)
+        numkids (:autoconstructive-si-children argmap)
+        kids (repeatedly numkids 
+                         #(produce-child-genome-by-autoconstruction g g argmap))
+        kid-counts (map count kids)
+        instruction-set (fn [genome]
+                          (hash-set (keys (frequencies (map :instruction genome)))))
+        kid-sets (map instruction-set kids)]
+    (assoc ind :diversifying
+      (and (distinct? (conj kid-counts (count g)))
+           (distinct? (conj kid-sets (instruction-set g)))))))
+
 (defn three-gens-size-and-instruction-diversifying?
   [ind argmap]
   (let [g (:genome ind)
@@ -1163,6 +1177,7 @@ programs encoded by genomes g1 and g2."
                 :four-gens-same-inputs-diff-diffs four-gens-same-inputs-diff-diffs-diversifying?
                 :three-gens-some-diff-diffs three-gens-some-diff-diffs-diversifying?
                 :size-and-instruction size-and-instruction-diversifying?
+                :distinct-size-and-instruction distinct-size-and-instruction-diversifying?
                 :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?
                 :diffmeans diffmeans-diversifying?
                 :minimal-reproductive-difference minimal-reproductive-difference-diversifying?
