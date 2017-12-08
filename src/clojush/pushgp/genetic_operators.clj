@@ -988,8 +988,8 @@ programs encoded by genomes g1 and g2."
                           (hash-set (keys (frequencies (map :instruction genome)))))
         kid-sets (map instruction-set kids)]
     (assoc ind :diversifying
-      (and (distinct? (conj kid-counts (count g)))
-           (distinct? (conj kid-sets (instruction-set g)))))))
+      (and (apply distinct? (conj kid-counts (count g)))
+           (apply distinct? (conj kid-sets (instruction-set g)))))))
 
 (defn three-gens-size-and-instruction-diversifying?
   [ind argmap]
