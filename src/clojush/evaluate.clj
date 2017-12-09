@@ -391,6 +391,24 @@
                 0
                 1)
               ;
+              (= cat :static-size)
+              (if (:parent1-genome ind)
+                (if (= (count (:genome ind))
+                       (count (:parent1-genome ind)))
+                  1
+                  0)
+                1)
+              ;
+              (= cat :static-instruction-set)
+              (if (:parent1-genome ind)
+                (let [instruction-set (fn [genome]
+                                        (hash-set (keys (frequencies (map :instruction genome)))))]
+                  (if (= (instruction-set (:genome ind))
+                         (instruction-set (:parent1-genome ind)))
+                    1
+                    0))
+                1)
+              ;
               :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
       (assoc ind :meta-errors (vec (flatten (mapv meta-error-fn meta-error-categories)))))))
 
