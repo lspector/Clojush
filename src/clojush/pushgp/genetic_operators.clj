@@ -1218,20 +1218,21 @@ programs encoded by genomes g1 and g2."
   genome is returned. The construct/clone ration is hardcoded here, but might
   be set globally or eliminated in the future."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program 
-                           autoconstructive-clone-probability autoconstructive-decay]
+                           autoconstructive-clone-probability autoconstructive-decay
+                           autoconstructive-parent-decay]
                     :as argmap}]
-  (let [parent1-genome (:genome parent1)
-        parent2-genome (:genome parent2)
+  (let [decay (fn [g rate]
+                (if (zero? rate)
+                  g
+                  (vec (filter identity (map #(if (< (lrand) rate) nil %) g)))))
+        parent1-genome (decay (:genome parent1) autoconstructive-parent-decay)
+        parent2-genome (decay (:genome parent2) autoconstructive-parent-decay)
         clone (<= (lrand) autoconstructive-clone-probability)
         pre-decay-child-genome (if clone
                                    parent1-genome
                                    (produce-child-genome-by-autoconstruction 
                                      parent1-genome parent2-genome argmap))
-        child-genome (if (zero? autoconstructive-decay)
-                       pre-decay-child-genome
-                       (vec (filter identity
-                                    (map #(if (< (lrand) autoconstructive-decay) nil %)
-                                         pre-decay-child-genome))))
+        child-genome (decay pre-decay-child-genome autoconstructive-decay)
         checked (diversifying? {:genome child-genome}
                                (-> argmap
                                    (assoc :parent1-genome parent1-genome)

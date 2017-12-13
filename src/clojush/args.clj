@@ -206,6 +206,9 @@
 
           :autoconstructive-decay 0.0
           ;; The rate for random gene deletions after autoconstruction.
+          
+          :autoconstructive-parent-decay 0.0
+          ;; The rate for random gene deletions in parent genomes used for autoconstruction.
 
           :autoconstructive-diffmeans-children 10
           ;; When using :autoconstructive-diversification-test :diffmeans-diversifying?, specifies
@@ -653,5 +656,3 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
-
-
