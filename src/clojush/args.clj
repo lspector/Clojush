@@ -273,6 +273,11 @@
           ;; The probability that each filtering step in epsilon lexicase selection will allow
           ;; candidates with errors within epsilon of the best to survive, rather than just
           ;; the best.
+          
+          :random-threshold-lexicase-probability 1
+          ;; The probability that each filtering step in random threshold lexicase selection will 
+          ;; allow candidates with errors equal to or better than a randomly chosen threshold to 
+          ;; survive, rather than just the best.
 
           :lexicase-leakage 0.1
           ;; If using leaky lexicase selection, the probability that a selection event will return
@@ -656,3 +661,4 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
