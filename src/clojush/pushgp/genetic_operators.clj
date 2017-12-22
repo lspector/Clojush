@@ -835,6 +835,18 @@ programs encoded by genomes g1 and g2."
       (and (> (reduce min diffs) 0) ;; diversification threshold set here
            (> (count (distinct diffs)) 1)))))
 
+(defn gecco2016-plus1-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)
+        delta #(expressed-difference 
+                 g
+                 (produce-child-genome-by-autoconstruction g g argmap)
+                 argmap)
+        diffs (repeatedly 3 delta)]
+    (assoc ind :diversifying
+      (and (> (reduce min diffs) 0) ;; diversification threshold set here
+           (> (count (distinct diffs)) 2)))))
+
 (defn doesnt-clone-diversifying?
   [ind argmap]
   (let [g (:genome ind)]
@@ -1182,6 +1194,7 @@ programs encoded by genomes g1 and g2."
       i
       (recur ((case (first tests)
                 :gecco2016 gecco2016-diversifying?
+                :gecco2016-plus1 gecco2016-plus1-diversifying?
                 :three-gens-diff-diffs three-gens-diff-diffs-diversifying?
                 :three-gens-same-inputs-diff-diffs three-gens-same-inputs-diff-diffs-diversifying?
                 :four-gens-same-inputs-diff-diffs four-gens-same-inputs-diff-diffs-diversifying?
