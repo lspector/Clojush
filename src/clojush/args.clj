@@ -284,9 +284,10 @@
           ;; a random (tourny 1) individual from the entire population.
 
           :lexicase-slippage 0
-          ;; If using lexicase or leaky lexicase selection, the probability that each step of the
-          ;; lexicase selection process will "slip" and return a random candidate from the current
-          ;; pool, rather than continuing to filter the pool.
+          ;; If using lexicase, leaky lexicase, epsilon lexicase, or random threshold lexicase
+          ;; selection, the probability that each step of the lexicase selection process will
+          ;; "slip" and return a random candidate from the current pool, rather than continuing 
+          ;; to filter the pool.
 
           :tournament-size 7
           ;; If using tournament selection, the size of the tournaments.
