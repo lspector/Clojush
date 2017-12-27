@@ -206,6 +206,9 @@
 
           :autoconstructive-decay 0.0
           ;; The rate for random gene deletions after autoconstruction.
+          
+          :autoconstructive-parent-decay 0.0
+          ;; The rate for random gene deletions in parent genomes used for autoconstruction.
 
           :autoconstructive-diffmeans-children 10
           ;; When using :autoconstructive-diversification-test :diffmeans-diversifying?, specifies
@@ -270,15 +273,21 @@
           ;; The probability that each filtering step in epsilon lexicase selection will allow
           ;; candidates with errors within epsilon of the best to survive, rather than just
           ;; the best.
+          
+          :random-threshold-lexicase-probability 1
+          ;; The probability that each filtering step in random threshold lexicase selection will 
+          ;; allow candidates with errors equal to or better than a randomly chosen threshold to 
+          ;; survive, rather than just the best.
 
           :lexicase-leakage 0.1
           ;; If using leaky lexicase selection, the probability that a selection event will return
           ;; a random (tourny 1) individual from the entire population.
 
           :lexicase-slippage 0
-          ;; If using lexicase or leaky lexicase selection, the probability that each step of the
-          ;; lexicase selection process will "slip" and return a random candidate from the current
-          ;; pool, rather than continuing to filter the pool.
+          ;; If using lexicase, leaky lexicase, epsilon lexicase, or random threshold lexicase
+          ;; selection, the probability that each step of the lexicase selection process will
+          ;; "slip" and return a random candidate from the current pool, rather than continuing 
+          ;; to filter the pool.
 
           :tournament-size 7
           ;; If using tournament selection, the size of the tournaments.
@@ -653,5 +662,4 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
-
 

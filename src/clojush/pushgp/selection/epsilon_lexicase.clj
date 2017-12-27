@@ -31,7 +31,8 @@
   (loop [survivors pop
          cases (lshuffle (range (count (:errors (first pop)))))]
     (if (or (empty? cases)
-            (empty? (rest survivors)))
+            (empty? (rest survivors))
+            (< (lrand) (:lexicase-slippage argmap)))
       (lrand-nth survivors)
       (let [; If epsilon-lexicase-epsilon is set in the argmap, use it for epsilon.
              ; Otherwise, use automatic epsilon selections, which are calculated once per generation.

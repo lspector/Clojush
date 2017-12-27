@@ -12,8 +12,11 @@
             (empty? (rest survivors))
             (< (lrand) (:lexicase-slippage argmap)))
       (lrand-nth survivors)
-      (let [threshold (lrand-nth (distinct (map #(nth % (first cases))
-                                                (map :errors survivors))))]
+      (let [threshold (if (<= (lrand) (:random-threshold-lexicase-probability argmap))
+                        (lrand-nth (distinct (map #(nth % (first cases))
+                                                  (map :errors survivors))))
+                        (apply min (map #(nth % (first cases))
+                                        (map :errors survivors))))]
         (recur (filter #(<= (nth (:errors %) (first cases)) threshold)
                        survivors)
                (rest cases))))))
