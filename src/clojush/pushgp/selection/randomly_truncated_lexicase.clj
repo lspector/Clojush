@@ -9,7 +9,9 @@
   [pop argmap]
   (let [num-cases (count (:errors (first pop)))]
     (loop [survivors pop
-           cases (drop (lrand-int num-cases)
+           cases (drop (if (< (lrand) (:randomly-truncated-lexicase-probability argmap))
+                         (lrand-int num-cases)
+                         0)
                        (lshuffle (range num-cases)))]
       (if (or (empty? cases)
               (empty? (rest survivors))

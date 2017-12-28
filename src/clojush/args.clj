@@ -282,6 +282,10 @@
           :random-toggle-lexicase-probability 1
           ;; The probability that each filtering step in random toggle lexicase selection will 
           ;; allow just the best to survive, rather than all individuals in the pool.
+          
+          :randomly-truncated-lexicase-probability 1
+          ;; The probability that an application of randomly-truncated-lexicase-selection
+          ;; will consider only a random subset of the test cases, rather than all of them.
 
           :lexicase-leakage 0.1
           ;; If using leaky lexicase selection, the probability that a selection event will return
