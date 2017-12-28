@@ -15,5 +15,5 @@
      (use '(clojush.pushgp.selection 
              selection preselection tournament lexicase epsilon-lexicase 
              elitegroup-lexicase random-threshold-lexicase random-toggle-lexicase 
-             implicit-fitness-sharing))))
+             randomly-truncated-lexicase implicit-fitness-sharing))))
 

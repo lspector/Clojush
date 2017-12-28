@@ -263,7 +263,7 @@
           :parent-selection :lexicase
           ;; The parent selection method. Options include :tournament, :lexicase, :epsilon-lexicase,
           ;; :elitegroup-lexicase, :uniform, :leaky-lexicase, :random-threshold-lexicase,
-          ;; :random-toggle-lexicase, :novelty-search
+          ;; :random-toggle-lexicase, :randomly-truncated-lexicase, :novelty-search
 
           :epsilon-lexicase-epsilon nil
           ;; When parent-selection is :epsilon-lexicase,
@@ -282,7 +282,6 @@
           :random-toggle-lexicase-probability 1
           ;; The probability that each filtering step in random toggle lexicase selection will 
           ;; allow just the best to survive, rather than all individuals in the pool.
-
 
           :lexicase-leakage 0.1
           ;; If using leaky lexicase selection, the probability that a selection event will return
