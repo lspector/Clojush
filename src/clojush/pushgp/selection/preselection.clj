@@ -2,7 +2,7 @@
   (:use [clojush random]))
 
 (defn one-individual-per-error-vector-for-lexicase
-  "When :parent-selection is a lexicase method, returns onl one random individual 
+  "When :parent-selection is a lexicase method, returns only one random individual 
   to represent each error vector."
   [pop {:keys [parent-selection]}]
   (if (some #{parent-selection}
