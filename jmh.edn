@@ -20,7 +20,8 @@
 
  :options
  {:main {:mode :single-shot
-         :fork 5}}
+         :fork 5
+         :timeout [1 :hr]}}      ;; Interrupt the worker thread if the run exceeds this maximum.
 
  :params
  {:one-generation 1
