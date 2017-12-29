@@ -1,5 +1,4 @@
-;; this tests the full CLI process to make sure it outputs the same thing
-;; it uses
+;; this tests the full CLI process to make sure it outputs the same to stdout
 (ns clojush.test.core-test
   (:require [clojure.test :refer :all]
             [clojure.string :as string]

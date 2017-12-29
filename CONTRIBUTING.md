@@ -37,19 +37,35 @@ that tries to replace things will change with `xxx` in the test output.
 
 ### Benchmarks
 
-We use the [libra](https://github.com/totakke/libra) library to define tests
-(some using [Criterium](https://github.com/hugoduncan/criterium)):
+We use the [lein-jmh](https://github.com/jgpc42/lein-jmh) library
+to define benchmarks that run with Java Microbenchmark Harness (JMH):
 
 ```bash
-$ lein libra
+$ lein jmh '{:status true :format :table :select [:main-1-generation]}'
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by org.openjdk.jmh.util.Utils (file:/Users/saul/.m2/repository/org/openjdk/jmh/jmh-core/1.19/jmh-core-1.19.jar) to field java.io.PrintStream.charOut
+WARNING: Please consider reporting this to the maintainers of org.openjdk.jmh.util.Utils
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+# JMH version: 1.19
+# VM version: JDK 9.0.1, VM 9.0.1+11
+# VM invoker: /Library/Java/JavaVirtualMachines/jdk-9.0.1.jdk/Contents/Home/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Dclojure.compile.path=/Users/saul/projects/Clojush/target/classes -Dclojush.version=3.4.1-1-SNAPSHOT -Dclojure.debug=false
+# Warmup: <none>
+# Measurement: 1 iterations, single-shot each
+# Timeout: 10 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: jmh1514521458400.bench_0_main_1_generation.run
+# Parameters: (_param_2231_one_generation = 1, _param_2231_parallel = false)
 
-Measuring clojush.interpreter-bench
+# Run progress: 0.00% complete, ETA 00:00:00
+# Fork: 1 of 5
+Iteration   1: 84.144 s/op
 
-eval-push-on-1000-from-clojush.problems.software.replace-space-with-newline (interpreter_bench.clj:46)
-Grabbing executions...
-Running benchmark...
-
-time: 805.688731 ms, sd: 202.088504 µs
+# Run progress: 20.00% complete, ETA 00:05:54
+# Fork: 2 of 5
+Iteration   1:
 
 ...
 ```

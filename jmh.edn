@@ -1,0 +1,29 @@
+;; see the sample file jmh.edn for more examples:
+;; https://github.com/jgpc42/jmh-clojure/blob/master/resources/sample.jmh.edn
+;; also refer to the Java example files for more documentation
+;; http://hg.openjdk.java.net/code-tools/jmh/file/default/jmh-samples/src/main/java/org/openjdk/jmh/samples/
+
+
+{:benchmarks
+ [{:name :main-1-generation
+   :fn clojush.bench.helpers/call-main
+   :args [:param/one-generation :param/parallel]
+   :options [:main]}
+  {:name :main-1-generation-serial
+   :fn clojush.bench.helpers/call-main
+   :args [:param/one-generation :param/serial]
+   :options [:main]}
+  {:name :main-20-generations
+   :fn clojush.bench.helpers/call-main
+   :args [:param/twenty-generations :param/parallel]
+   :options [:main]}]
+
+ :options
+ {:main {:mode :single-shot
+         :fork 5}}
+
+ :params
+ {:one-generation 1
+  :twenty-generations 20
+  :serial true
+  :parallel false}}
