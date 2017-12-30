@@ -11,47 +11,114 @@ n="$1"
 fly_user="$2"
 label="$3"
 tag="$4"
-number="$RANDOM"
+
+
 
 # from http://stackoverflow.com/a/3104922/907060
 function quote_args {
   printf '"%s" ' "$@"; echo "";
 }
 # quote each arg so it is quoted in SSH
-lein_command=$(quote_args "${@:5}")
+rest_args=$(quote_args "${@:6}")
 
 
-homedir="/home/${fly_user}"
-rundir="$homedir/runs/$label-$number"
-repodir="$rundir/Clojush"
-outputdir="$rundir/output"
-ssh ${fly_user}@fly.hampshire.edu "mkdir -p $rundir"
-
-rsync --exclude=out -v --progress \
-  --recursive \
-  --inplace \
-  --links \
-  --perms \
-  --times \
-  --delete \
-  --force \
-  --human-readable \
-  . "${fly_user}@fly.hampshire.edu:${repodir}"
-
-
-ssh ${fly_user}@fly.hampshire.edu "mkdir -p $outputdir"
-
-ssh ${fly_user}@fly.hampshire.edu /opt/pixar/tractor-blade-1.7.2/tractor-spool.py \
-  --engine=fly:8000  \
-  --svckey="${tag}" \
-  --title="$label-$number" \
-  --jobcwd="${repodir}" \
-  --priority=1 \
-  --range 1-${n} \
-  -c "bash -c 'env JAVA_CMD=/usr/java/latest/bin/java /share/apps/bin/lein run $lein_command :label $label >  $outputdir/RANGE.out 2> $outputdir/RANGE.err'"
-
-
-echo "Job ID: ${number}"
+if [ "$5" == "ss-suite" ]
+then
+  ss_namespaces=(
+    "clojush.problems.software.checksum"
+    "clojush.problems.software.collatz-numbers"
+    "clojush.problems.software.compare-string-lengths"
+    "clojush.problems.software.count-odds"
+    "clojush.problems.software.digits"
+    "clojush.problems.software.double-letters"
+    "clojush.problems.software.even-squares"
+    "clojush.problems.software.for-loop-index"
+    "clojush.problems.software.grade"
+    "clojush.problems.software.last-index-of-zero"
+    "clojush.problems.software.median"
+    "clojush.problems.software.mirror-image"
+    "clojush.problems.software.negative-to-zero"
+    "clojush.problems.software.number-io"
+    "clojush.problems.software.pig-latin"
+    "clojush.problems.software.replace-space-with-newline"
+    "clojush.problems.software.scrabble-score"
+    "clojush.problems.software.small-or-large"
+    "clojush.problems.software.smallest"
+    "clojush.problems.software.string-differences"
+    "clojush.problems.software.string-lengths-backwards"
+    "clojush.problems.software.sum-of-squares"
+    "clojush.problems.software.super-anagrams"
+    "clojush.problems.software.syllables"
+    "clojush.problems.software.vector-average"
+    "clojush.problems.software.vectors-summed"
+    "clojush.problems.software.wallis-pi"
+    "clojush.problems.software.winkler01"
+    "clojush.problems.software.word-stats"
+    "clojush.problems.software.x-word-lines"
+  )
+  for ns in "${ss_namespaces[@]}"
+  do
+    # Since each problem in the ss-suite has its own name, we will use the label
+    # and problem name as the run directory and job name.
+    problemName="$(cut -d'.' -f4 <<<"$ns")"
+    homedir="/home/${fly_user}"
+    rundir="$homedir/runs/$label--$problemName"
+    repodir="$rundir/Clojush"
+    outputdir="$rundir/output"
+    ssh ${fly_user}@fly.hampshire.edu "mkdir -p $rundir && mkdir -p $outputdir"
+    rsync -v --progress \
+      --exclude=out \
+      --exclude=.git \
+      --exclude=*data/ \
+      --recursive \
+      --inplace \
+      --links \
+      --perms \
+      --times \
+      --delete \
+      --force \
+      --human-readable \
+      . "${fly_user}@fly.hampshire.edu:${repodir}"
+    lein_command="\"$ns\" $rest_args"
+    ssh ${fly_user}@fly.hampshire.edu /opt/pixar/tractor-blade-1.7.2/tractor-spool.py \
+      --engine=fly:8000  \
+      --svckey="${tag}" \
+      --title="$label:$problemName" \
+      --jobcwd="${repodir}" \
+      --priority=1 \
+      --range 1-${n} \
+      -c "bash -c 'env JAVA_CMD=/usr/java/latest/bin/java /share/apps/bin/lein run $lein_command :label $label >  $outputdir/RANGE.out 2> $outputdir/RANGE.err'"
+  done
+else
+  number="$RANDOM"
+  homedir="/home/${fly_user}"
+  rundir="$homedir/runs/$label-$number"
+  repodir="$rundir/Clojush"
+  outputdir="$rundir/output"
+  ssh ${fly_user}@fly.hampshire.edu "mkdir -p $rundir && mkdir -p $outputdir"
+  rsync -v --progress \
+    --exclude=out \
+    --exclude=.git \
+    --exclude=*data/ \
+    --recursive \
+    --inplace \
+    --links \
+    --perms \
+    --times \
+    --delete \
+    --force \
+    --human-readable \
+    . "${fly_user}@fly.hampshire.edu:${repodir}"
+  lein_command="\"$5\" $rest_args"
+  ssh ${fly_user}@fly.hampshire.edu /opt/pixar/tractor-blade-1.7.2/tractor-spool.py \
+    --engine=fly:8000  \
+    --svckey="${tag}" \
+    --title="$label-$number" \
+    --jobcwd="${repodir}" \
+    --priority=1 \
+    --range 1-${n} \
+    -c "bash -c 'env JAVA_CMD=/usr/java/latest/bin/java /share/apps/bin/lein run $lein_command :label $label >  $outputdir/RANGE.out 2> $outputdir/RANGE.err'"
+fi
 
 echo "Monitor status on http://fly.hampshire.edu:8000/tractor/tv/"
 echo "Once the job has been started, you can monitor the outputs with:"
