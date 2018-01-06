@@ -15,13 +15,17 @@
                  ;; https://mvnrepository.com/artifact/org.apache.commons/commons-math3
                  [org.apache.commons/commons-math3 "3.2"]
                  [cheshire "5.7.1"]
-                 [prismatic/plumbing "0.5.4"]]
+                 [prismatic/plumbing "0.5.4"]
+                 [lein-jmh "0.2.5"]
+                 [jmh-clojure "0.2.1"]
+                 [clojure-future-spec "1.9.0-beta4"]]
+
   :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
             [lein-gorilla "0.4.0"]
             [cider/cider-nrepl "0.15.1"]
             [lein-cloverage "1.0.6"]
-            [lein-jmh "0.2.3"]]
+            [lein-jmh "0.2.5"]]
   :profiles {:text {:plugins [[venantius/ultra "0.5.1"]]}}
   :codox {:source-uri "http://github.com/lspector/Clojush/blob/master/{filepath}#L{line}"
           :namespaces [#"^(?!clojush\.problems)"]
