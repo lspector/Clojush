@@ -296,6 +296,11 @@
           ;; selection, the probability that each step of the lexicase selection process will
           ;; "slip" and return a random candidate from the current pool, rather than continuing 
           ;; to filter the pool.
+          
+          :sort-meta-errors-for-lexicase :random
+          ;; If using lexicase selection, determines how meta-errors will be sorted among
+          ;; the actual errors. Options are :random (errors and meta-errors are shuffled 
+          ;; together), :first (meta-errors come first), or :last (meta-errors come last).
 
           :tournament-size 7
           ;; If using tournament selection, the size of the tournaments.
