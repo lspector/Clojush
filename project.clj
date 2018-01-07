@@ -21,7 +21,7 @@
   :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
             [lein-gorilla "0.4.0"]
-            [cider/cider-nrepl "0.14.0"]
+            [cider/cider-nrepl "0.15.1"]
             [lein-cloverage "1.0.6"]
             [net.totakke/lein-libra "0.1.0"]]
   :profiles {:text {:plugins [[venantius/ultra "0.5.1"]]}}
