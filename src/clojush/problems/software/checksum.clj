@@ -165,7 +165,7 @@
   {:error-function (make-checksum-error-function-from-cases (first checksum-train-and-test-cases)
                                                             (second checksum-train-and-test-cases))
    :atom-generators checksum-atom-generators
-   :max-points 1600
+   :max-points 3200
    :max-genome-size-in-initial-program 400
    :evalpush-limit 1500
    :population-size 1000
