@@ -146,7 +146,7 @@
   {:error-function (make-collatz-numbers-error-function-from-cases (first collatz-numbers-train-and-test-cases)
                                                                    (second collatz-numbers-train-and-test-cases))
    :atom-generators collatz-numbers-atom-generators
-   :max-points 1200
+   :max-points 2400
    :max-genome-size-in-initial-program 300
    :evalpush-limit 15000
    :population-size 1000

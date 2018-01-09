@@ -146,7 +146,7 @@
   {:error-function (make-compare-string-lengths-error-function-from-cases (first compare-string-lengths-train-and-test-cases)
                                                                           (second compare-string-lengths-train-and-test-cases))
    :atom-generators csl-atom-generators
-   :max-points 800
+   :max-points 1600
    :max-genome-size-in-initial-program 200
    :evalpush-limit 600
    :population-size 1000
