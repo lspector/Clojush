@@ -404,7 +404,7 @@
                 1.0)
               (= cat :favoritism)
               (if (and (:parent1-genome ind) (:parent2-genome ind))
-                (Math/abs (- (sequence-similarity (:genome ind) (:parent1-genome ind))
+                (math/abs (- (sequence-similarity (:genome ind) (:parent1-genome ind))
                              (sequence-similarity (:genome ind) (:parent2-genome ind))))
                 1.0)
               ;
