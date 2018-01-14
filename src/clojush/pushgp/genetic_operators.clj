@@ -1245,7 +1245,7 @@ programs encoded by genomes g1 and g2."
   be set globally or eliminated in the future."
   [parent1 parent2 {:keys [maintain-ancestors atom-generators max-genome-size-in-initial-program 
                            autoconstructive-clone-probability autoconstructive-decay
-                           autoconstructive-parent-decay]
+                           autoconstructive-parent-decay autoconstructive-clone-decay]
                     :as argmap}]
   (let [decay (fn [g rate]
                 (if (zero? rate)
@@ -1258,7 +1258,9 @@ programs encoded by genomes g1 and g2."
                                    parent1-genome
                                    (produce-child-genome-by-autoconstruction 
                                      parent1-genome parent2-genome argmap))
-        child-genome (decay pre-decay-child-genome autoconstructive-decay)
+        child-genome (if (and clone (not= autoconstructive-clone-decay :same))
+                       (decay pre-decay-child-genome autoconstructive-clone-decay)
+                       (decay pre-decay-child-genome autoconstructive-decay))
         checked (diversifying? {:genome child-genome}
                                (-> argmap
                                    (assoc :parent1-genome parent1-genome)

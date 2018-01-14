@@ -207,6 +207,10 @@
           :autoconstructive-decay 0.0
           ;; The rate for random gene deletions after autoconstruction.
           
+          :autoconstructive-clone-decay :same
+          ;; The rate for random gene deletions after cloning in autoconstruction. If this is
+          ;; :same then the value for :autoconstructive-decay is used.
+          
           :autoconstructive-parent-decay 0.0
           ;; The rate for random gene deletions in parent genomes used for autoconstruction.
 
