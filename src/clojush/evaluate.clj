@@ -260,6 +260,17 @@
                       0
                       1))))
               ;
+              (= cat :repeated-errors)
+              (if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :repeated-errors"))
+                (if (or (empty? (rest (:history ind)))
+                        (some #{(first (:history ind))}
+                              (set (rest (:history ind)))))
+                    1
+                    0))
+              ;
               (= cat :case-family-variation)
               (if (not (:print-history argmap))
                 (throw
