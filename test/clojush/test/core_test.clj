@@ -34,7 +34,6 @@
    clojush.globals/timing-map
    clojush.globals/solution-rates
    clojush.globals/elitegroups
-   clojush.globals/elitegroups
    clojush.globals/epsilons-for-epsilon-lexicase
    clojush.globals/selection-counts
    clojush.globals/min-age

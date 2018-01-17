@@ -7,44 +7,38 @@
 {:benchmarks
  [{:name :main-1-generation
    :fn clojush.bench.helpers/call-main
-   :args [:param/one-generation :param/parallel]
-   :options [:main]}
-  {:name :main-1-generation-serial
-   :fn clojush.bench.helpers/call-main
-   :args [:param/one-generation :param/serial]
-   :options [:main]}
-  {:name :main-20-generations
-   :fn clojush.bench.helpers/call-main
-   :args [:param/twenty-generations :param/parallel]
+   :args [:param/max-generations :param/serial :param/population-size]
    :options [:main]}
 
   {:name :eval-push
-   :fn clojush.interpreter/eval-push
-   :args [:eval-push-input]
-   :apply true
+   :fn clojush.bench.helpers/run-fn
+   :args [:jmh/blackhole :state/captured-fn :state/captured-inputs]
    :options [:captured]}]
+
+ ; :selectors
+ ; {:fun (fn [d] (println d) true)}
 
  :options
  {:main {:mode :single-shot
-         :fork 5
-         :timeout [1 :hr]}
+         :fork 20
+         :threads 1
+         :timeout [2 :hr]}
   :captured {:mode :single-shot
-             :fork 5
-             :output-time-unit :ms
-             :measurement {:iterations 1000}}}
+             :fork 1
+             :output-time-unit :s
+             :measurement {:iterations 5}}}
  :states
- {:eval-push-inputs
+ {:captured-fn
   {:scope :benchmark
-   :trial {:setup {:fn clojush.bench.helpers/grab-call-inputs
-                   :args [:param/eval-push-sym :param/n-call-inputs]}}}
-  :eval-push-input
-  {:iteration {:setup {:fn (fn [a b] (rand-nth b))
-                       :args [:state/eval-push-inputs]}}}}
+   :trial {:setup {:fn clojush.bench.helpers/load-symbol
+                   :args [:param/captured-fn-sym]}}}
+  :captured-inputs
+  {:scope :benchmark
+   :trial {:setup {:fn clojush.bench.helpers/load-call-inputs
+                   :args [:param/captured-fn-sym]}}}}
 
  :params
- {:one-generation 1
-  :twenty-generations 20
-  :serial true
-  :parallel false
-  :eval-push-sym clojush.interpreter/eval-push
-  :n-call-inputs 1000}}
+ {:max-generations [10]
+  :population-size [200]
+  :serial [false]
+  :captured-fn-sym [clojush.interpreter/eval-push]}}

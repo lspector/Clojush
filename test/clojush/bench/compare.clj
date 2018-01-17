@@ -85,7 +85,7 @@
   Compares the benchmarks results saved in `old filename` to those in `new filename`.
   It prints out the ratio of the new to the old means, with a 95% CI for each benchmark
   in both files."
-  (let [keys #{:name :params}]
+  (let [keys #{:name :params :samples}]
     (->> [old-filename new-filename]
       ;; makes two maps of {keys -> {:mean ...}}
       (map (comp (partial into {})

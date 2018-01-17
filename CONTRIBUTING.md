@@ -38,7 +38,14 @@ that tries to replace things will change with `xxx` in the test output.
 ### Benchmarks
 
 We use the [lein-jmh](https://github.com/jgpc42/lein-jmh) library
-to define benchmarks that run with Java Microbenchmark Harness (JMH):
+to define benchmarks that run with Java Microbenchmark Harness (JMH).
+
+In order to run the benchmarks, you have to first generate some test data for
+the benchmarks:
+
+```bash
+$ lein run -m clojush.bench.helpers/save-call-inputs clojush.interpreter/eval-push 2 # number of generations to run to get the inputs
+```
 
 ```bash
 $ lein jmh '{:status true :format :table :select [:main-1-generation]}'

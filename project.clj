@@ -15,6 +15,7 @@
                  ;; https://mvnrepository.com/artifact/org.apache.commons/commons-math3
                  [org.apache.commons/commons-math3 "3.2"]
                  [cheshire "5.7.1"]
+                 [de.ruedigermoeller/fst "2.56"]
                  [prismatic/plumbing "0.5.4"]
                  [lein-jmh "0.2.5"]
                  [jmh-clojure "0.2.1"]
