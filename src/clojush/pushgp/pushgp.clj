@@ -7,7 +7,7 @@
         [clojush.instructions boolean code common numbers random-instructions string char vectors
          tag zip environment input-output genome]
         [clojush.pushgp breed report]
-        [clojush.pushgp.selection 
+        [clojush.pushgp.selection
          selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty]
         [clojush.experimental.decimation]))
 
@@ -40,7 +40,7 @@
   (let [population-agents (vec (repeatedly population-size
                                            #(make-individual
                                               :genome (strip-random-insertion-flags
-                                                        (random-plush-genome 
+                                                        (random-plush-genome
                                                           max-genome-size-in-initial-program
                                                           atom-generators
                                                           argmap))
@@ -56,8 +56,8 @@
   [{:keys [use-single-thread population-size]}]
   (vec (repeatedly population-size
                    #((if use-single-thread atom agent)
-                      (make-individual)
-                      :error-handler agent-error-handler))))
+                     (make-individual)
+                     :error-handler agent-error-handler))))
 
 (defn make-rng
   "Creates the random number generators used by the agents in the population.
@@ -66,8 +66,8 @@
   (let [random-seeds (loop [seeds '()]
                        (let [num-remaining (- population-size (count seeds))]
                          (if (pos? num-remaining)
-                           (let [new-seeds (repeatedly num-remaining 
-                                                       #(random/lrand-bytes 
+                           (let [new-seeds (repeatedly num-remaining
+                                                       #(random/lrand-bytes
                                                           (:mersennetwister random/*seed-length*)))]
                              (recur (list-concat seeds (filter ; only add seeds that we do not already have
                                                          (fn [candidate]
@@ -76,8 +76,8 @@
                            seeds)))]
     {:random-seeds random-seeds
      :rand-gens (vec (doall (for [k (range population-size)]
-                              (random/make-mersennetwister-rng (nth random-seeds k)))))
-     }))
+                              (random/make-mersennetwister-rng (nth random-seeds k)))))}))
+
 
 (defn compute-errors
   [pop-agents rand-gens {:keys [use-single-thread error-function] :as argmap}]
@@ -95,7 +95,7 @@
 
 (defn produce-new-offspring
   [pop-agents child-agents rand-gens
-   {:keys [decimation-ratio population-size decimation-tournament-size use-single-thread ]}]
+   {:keys [decimation-ratio population-size decimation-tournament-size use-single-thread]}]
   (let [pop (if (>= decimation-ratio 1)
               (vec (doall (map deref pop-agents)))
               (decimate (vec (doall (map deref pop-agents)))
@@ -106,16 +106,16 @@
     (reset! max-age (apply max ages))
     (dotimes [i population-size]
       ((if use-single-thread swap! send)
-           (nth child-agents i)
-           breed
-           i (nth rand-gens i) pop @push-argmap)))
+       (nth child-agents i)
+       breed
+       i (nth rand-gens i) pop @push-argmap)))
   (when-not use-single-thread (apply await child-agents))) ;; SYNCHRONIZE
 
 (defn install-next-generation
   [pop-agents child-agents {:keys [population-size use-single-thread]}]
   (dotimes [i population-size]
     ((if use-single-thread swap! send)
-         (nth pop-agents i) (fn [av] (deref (nth child-agents i)))))
+     (nth pop-agents i) (fn [av] (deref (nth child-agents i)))))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
 
 (defn check-genetic-operator-probabilities-add-to-one
@@ -145,86 +145,92 @@
       (reset! timer-atom (System/currentTimeMillis))
       (swap! timing-map assoc step (+ current-time-for-step (- @timer-atom start-time))))))
 
+
+(defn process-generation
+  "Processes the generation, returning the new `novelty-archive` if we should
+   continue or else nil"
+  [rand-gens pop-agents child-agents generation novelty-archive]
+  (r/new-generation! generation)
+  (println "Processing generation:" generation) (flush)
+  (population-translate-plush-to-push pop-agents @push-argmap)
+  (timer @push-argmap :reproduction)
+  (print "Computing errors... ") (flush)
+  (compute-errors pop-agents rand-gens @push-argmap)
+  (println "Done computing errors.") (flush)
+  (timer @push-argmap :fitness)
+  ;; calculate solution rates if necessary for historically-assessed hardness
+  (calculate-hah-solution-rates pop-agents @push-argmap)
+  ;; create global structure to support elite group lexicase selection
+  (when (= (:parent-selection @push-argmap) :elitegroup-lexicase)
+    (build-elitegroups pop-agents @push-argmap))
+  ;; calculate implicit fitness sharing fitness for population
+  (when (= (:total-error-method @push-argmap) :ifs)
+    (calculate-implicit-fitness-sharing pop-agents @push-argmap))
+  ;; calculate epsilons for epsilon lexicase selection
+  (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
+    (calculate-epsilons-for-epsilon-lexicase pop-agents @push-argmap))
+  ;; calculate novelty when necessary
+  (when (or (= (:parent-selection @push-argmap) :novelty-search)
+            (some #{:novelty} (:meta-error-categories @push-argmap)))
+    (calculate-novelty pop-agents novelty-archive @push-argmap))
+  (timer @push-argmap :other)
+  ;; report and check for success
+  (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
+                                                     generation @push-argmap)]
+    (r/generation-data! [:outcome] outcome)
+    (r/end-generation!)
+    (cond (= outcome :failure) (do (printf "\nFAILURE\n")
+                                 (if (:return-simplified-on-failure @push-argmap)
+                                   (auto-simplify best
+                                                  (:error-function @push-argmap)
+                                                  (:final-report-simplifications @push-argmap)
+                                                  true
+                                                  500)
+                                   (flush)))
+          (= outcome :continue) (let [next-novelty-archive
+                                      (list-concat novelty-archive
+                                                   (select-individuals-for-novelty-archive
+                                                     (map deref pop-agents)
+                                                     @push-argmap))]
+                                  (timer @push-argmap :report)
+                                  (println "\nProducing offspring...") (flush)
+                                  (produce-new-offspring pop-agents
+                                                         child-agents
+                                                         rand-gens
+                                                         @push-argmap)
+                                  (println "Installing next generation...") (flush)
+                                  (install-next-generation pop-agents child-agents @push-argmap)
+                                  next-novelty-archive)
+          :else  (do (final-report generation best @push-argmap)
+                     nil))))
+
+
 (defn pushgp
   "The top-level routine of pushgp."
   ([] (pushgp '()))
   ([args]
-    (reset! timer-atom (System/currentTimeMillis))
-    (load-push-argmap args)
-    (when (some? (:record-host @push-argmap))
-      (r/host! (str (:record-host @push-argmap))))
-    (random/with-rng (random/make-mersennetwister-rng (:random-seed @push-argmap))
-      ;; set globals from parameters
-      (reset-globals)
-      (initial-report @push-argmap) ;; Print the inital report
-      (r/uuid! (:run-uuid @push-argmap))
-      (print-params (r/config-data! [:argmap] (dissoc @push-argmap :run-uuid)))
-      (check-genetic-operator-probabilities-add-to-one @push-argmap)
-      (timer @push-argmap :initialization)
-      (when (:print-timings @push-argmap)
-        (r/config-data! [:initialization-ms] (:initialization @timer-atom)))
-      (println "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
-      (println "\nGenerating initial population...") (flush)
-      (let [pop-agents (make-pop-agents @push-argmap)
-            child-agents (make-child-agents @push-argmap)
-            {:keys [rand-gens random-seeds]} (make-rng @push-argmap)]
-        ;(print "Random seeds: ")
-        ;(doseq [seed random-seeds] (print " " seed))
-        ;(println)
-        ;; Main loop
-        (loop [generation 0
-               novelty-archive '()]
-          (r/new-generation! generation)
-          (println "Processing generation:" generation) (flush)
-          (population-translate-plush-to-push pop-agents @push-argmap)
-          (timer @push-argmap :reproduction)
-          (print "Computing errors... ") (flush)
-          (compute-errors pop-agents rand-gens @push-argmap)
-          (println "Done computing errors.") (flush)
-          (timer @push-argmap :fitness)
-          ;; calculate solution rates if necessary for historically-assessed hardness
-          (calculate-hah-solution-rates pop-agents @push-argmap)
-          ;; create global structure to support elite group lexicase selection
-          (when (= (:parent-selection @push-argmap) :elitegroup-lexicase)
-            (build-elitegroups pop-agents @push-argmap))
-          ;; calculate implicit fitness sharing fitness for population
-          (when (= (:total-error-method @push-argmap) :ifs)
-            (calculate-implicit-fitness-sharing pop-agents @push-argmap))
-          ;; calculate epsilons for epsilon lexicase selection
-          (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
-            (calculate-epsilons-for-epsilon-lexicase pop-agents @push-argmap))
-          ;; calculate novelty when necessary
-          (when (or (= (:parent-selection @push-argmap) :novelty-search)
-                    (some #{:novelty} (:meta-error-categories @push-argmap)))
-            (calculate-novelty pop-agents novelty-archive @push-argmap))
-          (timer @push-argmap :other)
-          ;; report and check for success
-          (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
-                                                             generation @push-argmap)]
-            (r/generation-data! [:outcome] outcome)
-            (r/end-generation!)
-            (cond (= outcome :failure) (do (printf "\nFAILURE\n")
-                                         (if (:return-simplified-on-failure @push-argmap)
-                                           (auto-simplify best 
-                                                          (:error-function @push-argmap) 
-                                                          (:final-report-simplifications @push-argmap) 
-                                                          true 
-                                                          500)
-                                           (flush)))
-                  (= outcome :continue) (let [next-novelty-archive 
-                                              (list-concat novelty-archive
-                                                           (select-individuals-for-novelty-archive
-                                                             (map deref pop-agents)
-                                                             @push-argmap))]
-                                          (timer @push-argmap :report)
-                                          (println "\nProducing offspring...") (flush)
-                                          (produce-new-offspring pop-agents 
-                                                                 child-agents 
-                                                                 rand-gens 
-                                                                 @push-argmap)
-                                          (println "Installing next generation...") (flush)
-                                          (install-next-generation pop-agents child-agents @push-argmap)
-                                          (recur (inc generation)
-                                                 next-novelty-archive))
-                  :else  (final-report generation best @push-argmap))))))))
-
+   (reset! timer-atom (System/currentTimeMillis))
+   (load-push-argmap args)
+   (when (some? (:record-host @push-argmap))
+     (r/host! (str (:record-host @push-argmap))))
+   (random/with-rng (random/make-mersennetwister-rng (:random-seed @push-argmap))
+     ;; set globals from parameters
+     (reset-globals)
+     (initial-report @push-argmap) ;; Print the inital report
+     (r/uuid! (:run-uuid @push-argmap))
+     (print-params (r/config-data! [:argmap] (dissoc @push-argmap :run-uuid)))
+     (check-genetic-operator-probabilities-add-to-one @push-argmap)
+     (timer @push-argmap :initialization)
+     (when (:print-timings @push-argmap)
+       (r/config-data! [:initialization-ms] (:initialization @timer-atom)))
+     (println "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
+     (println "\nGenerating initial population...") (flush)
+     (let [pop-agents (make-pop-agents @push-argmap)
+           child-agents (make-child-agents @push-argmap)
+           {:keys [rand-gens]} (make-rng @push-argmap)]
+       (loop [generation 0
+              novelty-archive '()]
+         (when-let [next-novelty-archive
+                    (process-generation rand-gens pop-agents child-agents
+                                        generation novelty-archive)]
+           (recur (inc generation) next-novelty-archive)))))))
