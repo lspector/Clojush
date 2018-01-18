@@ -147,8 +147,8 @@
 
 
 (defn process-generation
-  "Processes the generation, returning the new `novelty-archive` if we should
-   continue or else nil"
+  "Processes the generation, returning [new novelty archive, return val],
+   where new novelty archive will be nil if we are done."
   [rand-gens pop-agents child-agents generation novelty-archive]
   (r/new-generation! generation)
   (println "Processing generation:" generation) (flush)
@@ -180,13 +180,14 @@
     (r/generation-data! [:outcome] outcome)
     (r/end-generation!)
     (cond (= outcome :failure) (do (printf "\nFAILURE\n")
-                                 (if (:return-simplified-on-failure @push-argmap)
-                                   (auto-simplify best
-                                                  (:error-function @push-argmap)
-                                                  (:final-report-simplifications @push-argmap)
-                                                  true
-                                                  500)
-                                   (flush)))
+                                   (flush)
+                                   [nil
+                                    (when (:return-simplified-on-failure @push-argmap)
+                                      (auto-simplify best
+                                                     (:error-function @push-argmap)
+                                                     (:final-report-simplifications @push-argmap)
+                                                     true
+                                                     500))])
           (= outcome :continue) (let [next-novelty-archive
                                       (list-concat novelty-archive
                                                    (select-individuals-for-novelty-archive
@@ -200,9 +201,9 @@
                                                          @push-argmap)
                                   (println "Installing next generation...") (flush)
                                   (install-next-generation pop-agents child-agents @push-argmap)
-                                  next-novelty-archive)
-          :else  (do (final-report generation best @push-argmap)
-                     nil))))
+                                  [next-novelty-archive nil])
+          :else [nil (final-report generation best @push-argmap)])))
+
 
 
 (defn pushgp
@@ -230,7 +231,9 @@
            {:keys [rand-gens]} (make-rng @push-argmap)]
        (loop [generation 0
               novelty-archive '()]
-         (when-let [next-novelty-archive
-                    (process-generation rand-gens pop-agents child-agents
-                                        generation novelty-archive)]
-           (recur (inc generation) next-novelty-archive)))))))
+         (let [[next-novelty-archive return-val]
+               (process-generation rand-gens pop-agents child-agents
+                                   generation novelty-archive)]
+           (if (nil? next-novelty-archive)
+             return-val
+             (recur (inc generation) next-novelty-archive))))))))
