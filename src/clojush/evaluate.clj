@@ -278,7 +278,7 @@
                           (set (rest (:history ind))))
                     1
                     0))
-              (if (not (:print-history argmap))
+              #_(if (not (:print-history argmap))
                 (throw
                   (Exception.
                     ":print-history must be true for :repeated-errors"))
@@ -287,6 +287,17 @@
                               (set (take 3 (rest (:history ind))))))
                     1
                     0))
+              (if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :repeated-errors"))
+                (if (empty? (rest (:history ind)))
+                  1
+                  (if (some #{(first (:history ind))}
+                            (set (rest (:history ind))))
+                    (/ 1 (inc (count (take-while #(not= % (first (:history ind)))
+                                                 (rest (:history ind))))))
+                    0)))
               ;
               (= cat :case-family-variation)
               (if (not (:print-history argmap))
