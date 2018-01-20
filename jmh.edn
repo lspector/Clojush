@@ -5,40 +5,18 @@
 
 
 {:benchmarks
- [{:name :main-1-generation
-   :fn clojush.bench.helpers/call-main
-   :args [:param/max-generations :param/serial :param/population-size]
-   :options [:main]}
-
-  {:name :eval-push
-   :fn clojush.bench.helpers/run-fn
-   :args [:jmh/blackhole :state/captured-fn :state/captured-inputs]
+ [{:fn clojush.interpreter/eval-push
+   :args [:param/eval-push-input]
+   :apply true
    :options [:captured]}]
 
- ; :selectors
- ; {:fun (fn [d] (println d) true)}
-
  :options
- {:main {:mode :single-shot
-         :fork 20
-         :threads 1
-         :timeout [2 :hr]}
-  :captured {:mode :single-shot
-             :fork 1
-             :output-time-unit :s
-             :measurement {:iterations 5}}}
+ {:captured {:mode :single-shot
+             :measurement {:iterations 5}
+             :timeout [10 :m]}}
  :states
- {:captured-fn
-  {:scope :benchmark
-   :trial {:setup {:fn clojush.bench.helpers/load-symbol
-                   :args [:param/captured-fn-sym]}}}
-  :captured-inputs
-  {:scope :benchmark
-   :trial {:setup {:fn clojush.bench.helpers/load-call-inputs
-                   :args [:param/captured-fn-sym]}}}}
+ {:eval-push-input {:fn clojush.bench.helpers/load-eval-push-input
+                     :args [:param/input-i]}}
 
  :params
- {:max-generations [10]
-  :population-size [200]
-  :serial [false]
-  :captured-fn-sym [clojush.interpreter/eval-push]}}
+ {:input-i [0 1 2 3 4 5 6 7 8 9]}}
