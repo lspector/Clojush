@@ -287,7 +287,7 @@
                               (set (take 3 (rest (:history ind))))))
                     1
                     0))
-              (if (not (:print-history argmap))
+              #_(if (not (:print-history argmap))
                 (throw
                   (Exception.
                     ":print-history must be true for :repeated-errors"))
@@ -298,6 +298,59 @@
                     (/ 1 (inc (count (take-while #(not= % (first (:history ind)))
                                                  (rest (:history ind))))))
                     0)))
+              #_(if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :repeated-errors"))
+                (if (empty? (rest (:history ind)))
+                  (vec (repeat (count (:errors ind)) 1))
+                  (vec (for [case-index (range (count (:errors ind)))]
+                         (if (zero? (nth (:errors ind) case-index)) ;; solved
+                           0 
+                           (let [latest (nth (first (:history ind)) case-index)
+                                 olders (map #(nth % case-index) (rest (:history ind)))]
+                             (if (some #{latest} (set olders))
+                               (/ 1 (inc (count (take-while #(not= % latest) olders))))
+                               0)))))))
+              #_(if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :repeated-errors"))
+                (if (empty? (rest (:history ind)))
+                  (vec (repeat (count (:errors ind)) 2))
+                  (vec (for [case-index (range (count (:errors ind)))]
+                         (if (zero? (nth (:errors ind) case-index)) ;; solved
+                           0 
+                           (let [latest (nth (first (:history ind)) case-index)
+                                 olders (map #(nth % case-index) (rest (:history ind)))]
+                             (if (some #{latest} (set olders))
+                               2
+                               1)))))))
+              #_(if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :repeated-errors"))
+                (if (empty? (rest (:history ind)))
+                  (vec (repeat (count (:errors ind)) 2))
+                  (vec (for [case-index (range (count (:errors ind)))]
+                         (if (zero? (nth (:errors ind) case-index)) ;; solved
+                           0 
+                           (let [latest (nth (first (:history ind)) case-index)
+                                 olders (map #(nth % case-index) (rest (:history ind)))]
+                             (if (some #{latest} (set olders))
+                               3
+                               1)))))))
+              (if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :repeated-errors"))
+                (if (empty? (rest (:history ind)))
+                  1
+                  (let [latest (first (:history ind))
+                        olders (rest (:history ind))]
+                    (if (some #{latest} (set olders))
+                      2
+                      0))))
               ;
               (= cat :case-family-variation)
               (if (not (:print-history argmap))
