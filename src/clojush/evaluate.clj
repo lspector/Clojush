@@ -363,7 +363,7 @@
                            (if (some #{latest} (set olders))
                              2
                              0))))))
-              (if (not (:print-history argmap))
+              #_(if (not (:print-history argmap))
                 (throw
                   (Exception.
                     ":print-history must be true for :repeated-errors"))
@@ -372,6 +372,18 @@
                   (vec (for [case-index (range (count (:errors ind)))]
                          (let [latest (nth (first (:history ind)) case-index)
                                olders (map #(nth % case-index) (take 3 (rest (:history ind))))]
+                           (if (some #{latest} (set olders))
+                             2
+                             0))))))
+              (if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :repeated-errors"))
+                (if (empty? (rest (:history ind)))
+                  (vec (repeat (count (:errors ind)) 1))
+                  (vec (for [case-index (range (count (:errors ind)))]
+                         (let [latest (nth (first (:history ind)) case-index)
+                               olders (map #(nth % case-index) (rest (:history ind)))]
                            (if (some #{latest} (set olders))
                              2
                              0))))))
