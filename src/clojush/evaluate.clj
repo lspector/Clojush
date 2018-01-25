@@ -388,6 +388,63 @@
                              2
                              0))))))
               ;
+              (= cat :error-favoritism)
+              (if (and (:parent1-errors ind) (:parent2-errors ind))
+                (math/abs (- (sequence-similarity (:errors ind) (:parent1-errors ind))
+                             (sequence-similarity (:errors ind) (:parent2-errors ind))))
+                1.0)
+              ;
+              (= cat :case-error-neglect)
+              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
+                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                             (:errors ind)
+                                             (:parent1-errors ind)
+                                             (:parent2-errors ind))]
+                       (if (== e (min p1e p2e))
+                         0
+                         1)))
+                (vec (repeat (count (:errors ind)) 1)))
+              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
+                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                             (:errors ind)
+                                             (:parent1-errors ind)
+                                             (:parent2-errors ind))]
+                       (if (and (not= p1e p2e)
+                                (== e (min p1e p2e)))
+                         0
+                         1)))
+                (vec (repeat (count (:errors ind)) 1)))
+              (if (and (:parent1-errors ind) (:parent2-errors ind))
+                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                             (:errors ind)
+                                             (:parent1-errors ind)
+                                             (:parent2-errors ind))]
+                       (if (< e (min p1e p2e))
+                         0
+                         1)))
+                (vec (repeat (count (:errors ind)) 1)))
+              ;
+              (= cat :error-neglect)
+              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
+                (reduce + (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                                  (:errors ind)
+                                                  (:parent1-errors ind)
+                                                  (:parent2-errors ind))]
+                            (if (and (not= p1e p2e)
+                                     (== e (min p1e p2e)))
+                              0
+                              1)))
+                (count (:errors ind)))
+              (if (and (:parent1-errors ind) (:parent2-errors ind))
+                (reduce + (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                                  (:errors ind)
+                                                  (:parent1-errors ind)
+                                                  (:parent2-errors ind))]
+                            (if (< e (max p1e p2e))
+                              0
+                              1)))
+                (count (:errors ind)))
+              ;
               (= cat :case-family-variation)
               (if (not (:print-history argmap))
                 (throw
