@@ -419,7 +419,7 @@
                                              (:errors ind)
                                              (:parent1-errors ind)
                                              (:parent2-errors ind))]
-                       (if (< e (min p1e p2e))
+                       (if (< e (max p1e p2e))
                          0
                          1)))
                 (vec (repeat (count (:errors ind)) 1)))
