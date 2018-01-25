@@ -5,18 +5,44 @@
 
 
 {:benchmarks
- [{:fn clojush.interpreter/eval-push
-   :args [:param/eval-push-input]
+ [{:fn clojush.bench.helpers/process-generation-deserialize
+   :args [:state/process-generation-input]
    :apply true
-   :options [:captured]}]
+   :options [{:mode :single-shot
+              :measurement 5
+              :warmup 5
+              :threads 1
+              :fork 1
+              :output-time-unit :s}]}
+  {:fn clojush.interpreter/eval-push
+   :args [:state/eval-push-input]
+   :apply true
+   :options [{:mode :single-shot
+              :measurement
+              {:count 100
+               :iterations 50}
+              :warmup
+              {:count 100
+               :iterations 50}
+              :threads 20
+              :fork 1
+              :output-time-unit :ms}]}]
 
- :options
- {:captured {:mode :single-shot
-             :measurement {:iterations 5}
-             :timeout [10 :m]}}
  :states
- {:eval-push-input {:fn clojush.bench.helpers/load-eval-push-input
-                     :args [:param/input-i]}}
-
+ {:process-generation-input
+  {:scope :benchmark
+   :trial {:fn clojush.bench.helpers/->process-generation-input
+           :args [:param/process-generation-input-id]}}}
+ :eval-push-input
+ {:scope :benchmark
+  :trial {:fn clojush.bench.helpers/->eval-push-input
+          :args [:param/eval-push-input-id]}}
  :params
- {:input-i [0 1 2 3 4 5 6 7 8 9]}}
+ {:eval-push-input-id
+  ["0a885c30-aab2-4119-ab3e-f764895464a0"
+   "0bac9069-6b32-4aea-9794-155701db021d"
+   "1d9c2334-0541-4a6a-8eab-a5e5a9d553b5"]
+  :process-generation-input-id
+  ["48e05242-51b4-4929-8e62-5c168af75524"
+   "a1d08373-5fc4-4145-afb7-dcc85a8aa399"
+   "e7076240-5947-4d3d-823f-0ea983c9f60c"]}}

@@ -7,8 +7,6 @@
             [clojure.future :refer :all]
             [clojure.spec.test.alpha :as stest]))
 
-
-
 (def CI 0.95)
 
 (defn- sq
@@ -20,9 +18,6 @@
 (s/def ::n int?)
 (s/def ::stats (s/keys :req-un [::mean ::variance ::n]))
 
-(s/fdef ratio
-  :args (s/cat :old ::stats :new ::stats)
-  :ret string?)
 
 (defn ratio
   "Returns the ratio of the of the new mean to the old mean
@@ -58,16 +53,18 @@
     (str (format "%.2f" r)
          " +/- "
          (format "%.2f" ci))))
+
+(s/fdef ratio
+        :args (s/cat :old ::stats :new ::stats)
+        :ret string?)
+
 (stest/instrument `ratio)
 
 (defn ->results [filename]
   (-> filename slurp edn/read-string))
 
-(s/fdef map-intersction
-  :args (s/cat :ms (s/coll-of (s/map-of any? any?)))
-  :ret (s/coll-of (s/map-of any? any?)))
 
-(defn map-intersction
+(defn map-intersection
   "takes a sequence of maps and return a new sequence of maps with only the
    common keys remaining"
   [ms]
@@ -76,7 +73,12 @@
                          (apply clojure.set/intersection))]
     (map #(select-keys % common-keys) ms)))
 
-(stest/instrument `map-intersction)
+(s/fdef map-intersection
+        :args (s/cat :ms (s/coll-of (s/map-of any? any?)))
+        :ret (s/coll-of (s/map-of any? any?)))
+
+
+(stest/instrument `map-intersection)
 
 
 (defn -main [old-filename new-filename]
@@ -89,10 +91,10 @@
     (->> [old-filename new-filename]
       ;; makes two maps of {keys -> {:mean ...}}
       (map (comp (partial into {})
-                 (partial map (juxt #(select-keys % keys) :statistics))
-                 ->results))
+              (partial map (juxt #(select-keys % keys) :statistics))
+              ->results))
       ;; filters for only experiments run in both
-      map-intersction
+      map-intersection
       ;; calculates mean ratio and CI of new/old
       (apply merge-with ratio)
       (map (fn [[ks r]] (assoc ks :mean-ratio r)))

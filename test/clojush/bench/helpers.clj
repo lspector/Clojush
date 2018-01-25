@@ -1,14 +1,45 @@
 (ns clojush.bench.helpers
-  (:require [clojure.java.io :as io]
-            [clojure.spec.alpha :as s]
-            [clojure.future :refer :all]
-            [clojure.spec.test.alpha :as stest]
+  "Tools to save samples for benchmarks and run them.
 
-            [clojush.core :refer [-main]]
+   TODO:
+   * Change from using lein-jmh to custom runner that automatically
+     creates profiles (using jmh.core/run {:compile-path \"target/classes\"})
+   * Add generation number to sample file so we can see what generations are slow"
+  (:require [clojure.java.io :as io]
+            [taoensso.nippy :as nippy]
+
+            [clojush.core]
             [clojush.pushgp.pushgp :refer [process-generation]]))
 
+(def sampled-functions
+  [{:fn-var #'clojush.interpreter/eval-push
+    :save-prob (/ 1 5000000)}
+
+
+   {:fn-var #'clojush.pushgp.pushgp/process-generation
+    :save-prob (/ 1 50)
+    ; we want to serialize the *values* inside the agents and the RNG
+    ; instead of the objects themselves
+    :serialize-inputs
+    (fn [rand-gens pop-agents child-agents generation novelty-archive]
+      [(vec (map #(.getSeed %) rand-gens))
+       (vec (map deref pop-agents))
+       (vec (map deref child-agents))
+       generation
+       novelty-archive])
+    ;; then, before each execution, we want to deserialize them,
+    ;; so that each execution get's its own new version
+    :deserialize-inputs
+    (fn [rand-gens pop-agents child-agents generation novelty-archive]
+      [(vec (map clj-random.core/make-mersennetwister-rng rand-gens))
+       (vec (map agent pop-agents))
+       (vec (map agent child-agents))
+       generation
+       novelty-archive])}])
+
+; The args are taken from a configuration that performed well for Lee Spector
 (def call-main
-  (partial -main
+  (partial clojush.core/-main
     "clojush.problems.software.replace-space-with-newline"
     ":autoconstructive" "true"
     ":autoconstructive-genome-instructions" ":all"
@@ -19,182 +50,84 @@
     ":parent-selection" ":leaky-lexicase"
     ":lexicase-leakage" "0.1"))
 
-(defn symb->var [s]
-  (eval `(var ~s)))
+(defn fn-str [fn-var]
+  (str (:ns (meta fn-var))
+       "__"
+       (:name (meta fn-var))))
 
-(defn load-symbol [s]
-  (require (symbol (namespace s)))
-  (var-get (symb->var v)))
-
-(s/fdef load-symbol
-  :args (s/and :s symbol?)
-  :ret (s/and :v var? :val any?))
-
-(defn run-sample [configs-str]
-  (sample (eval configs-str)))
-
-(s/def ::fn-symbol symbol?)
-(s/def ::save-prob (s/and number? #(<= 0 % 1)))
-(s/def ::sample-config (s/keys :req-un [::fn-symbol ::save-prob]))
-(s/def ::sample-configs (s/coll-of ::sample-config))
-
-(defn sample
-  [configs]
-  (as-> v
-    (map (fn [{:keys fn-symbol save-prob}]
-           (let [fn-original (load-symbol fn-symbol)
-                 fn-log (fn [& inputs]
-                          (if (< rand save-prob)
-                            (let [globals (get-globals)
-                                  ret (apply fn-original inputs)]
-                              (binding [*out* *err*]
-                                (time (save-sample fn-symbol inputs globals))
-                                (println fn-symbol)
-                                (flush))
-                              ret)
-                            (apply fn-original inputs)))]))
-         v)
-    (into {} v)
-    (with-redefs-fn v call-main)))
-
-(s/fdef sample
-  :args (s/and :configs ::sample-configs)
-  :ret nil?)
-
-(defn var->symb [v]
-  (let [{:keys [ns name]} (meta v)]
-    (symbol (str ns) (str name))))
-
-(def atom-globals
-  [#'clojush.globals/evaluations-count
-   #'clojush.globals/point-evaluations-count
-   #'clojush.globals/epsilons-for-epsilon-lexicase])
-
-(def var-globals
-  [#'clj-random.core/*RNG*])
-
-(defn get-globals []
-  (let [atoms (->> atom-globals
-                   (map #([(var->symb %) @(var-get %)]))
-                   (into {}))
-        vars (->> var-globals
-                  (map #([(var->symb %) (var-get %)]))
-                  (into {}))]
-    {:atoms atoms :vars vars}))
-
-(s/def ::atoms (s/map-of symbol? any?))
-(s/def ::vars (s/map-of symbol? any?))
-(s/def ::globals (s/keys :req-un [::atoms ::vars]))
-(s/fdef get-globals
-  :ret ::globals)
-
-
-(defn save-sample
-  [fn-symbol inputs globals]
-  (let [f (sample-file fn-symbol)]
-    (clojure.java.io/make-parents f)
-    (serialize-obj {:inputs inputs :globals globals}
-                   f)))
-(s/def ::inputs (s/coll-of any?))
-(s/fdef save-sample
-  :args (s/cat :fn-symbol ::fn-symbol
-               :inputs ::inputs
-               :globals ::globals))
-
-
-(def data-dir
+(defn sample-dir [fn-var]
   (io/file
-    "test"
-    "clojush"
-    "bench"
-    "data"))
+    "bench-inputs"
+    (fn-str fn-var)))
 
-(defn fn-str [fn-symb]
-  (clojure.string/replace (str fn-symb) #"/" "_"))
-
-(defn sample-file-dir [fn-symb]
-  (io/file data-dir "sample" (fn-str fn-symbol)))
-
-(defn sample-file [fn-symb]
+(defn sample-file [fn-var id]
   (io/file
-    (sample-file-dir fn-symb)
-    (str (java.util.UUID/randomUUID))))
+    (sample-dir fn-var)
+    (str id)))
 
-(defn selected-file [fn-symbol i]
-  (io/file
-    data-dir
-    "selected"
-    (fn-str fn-symbol)
-    (str i)))
-
-(s/def ::sample (s/keys :req-un [::inputs ::globals]))
+(defmacro time-labeled
+  [label & body]
+  `(let [s# (new java.io.StringWriter)]
+     (binding [*out* s#]
+       (let [r# (time ~@body)]
+         (binding [*out* *err*]
+           (println ~label (str s#)))
+         r#))))
 
 ;  from https://gist.github.com/orendon/e38ac86dcd4c64cadad8fd5c749452b7
 (defn serialize-obj [object file]
-  (with-open [outp (-> file java.io.FileOutputStream. org.nustaq.serialization.FSTObjectOutput.)]
-    (.writeObject outp object)))
-
-(s/fdef serialize-obj
-  :args (s/cat :object ::sample :file any?))
-
+  (with-open [fos (java.io.FileOutputStream. file)]
+    (with-open [outp (java.io.ObjectOutputStream. fos)]
+      (time-labeled (str "Wrote " (.getPath file))
+                    (.writeObject outp object)))))
 
 (defn deserialize-obj [file]
-  (with-open [inp (-> file java.io.FileInputStream. org.nustaq.serialization.FSTObjectInput.)]
-    (.readObject inp)))
+  (with-open [fis (java.io.FileInputStream. file)]
+    (with-open [inp (java.io.ObjectInputStream. fis)]
+      (time-labeled (str "Read " (.getPath file))
+                    (.readObject inp)))))
+
+(defn save-sample
+  [fn-symbol inputs]
+  (let [f (sample-file fn-symbol (java.util.UUID/randomUUID))]
+    (io/make-parents f)
+    (serialize-obj inputs f)))
+
+(defn ->sample-fn [{:keys [fn-var save-prob serialize-inputs]}]
+  (let [fn-original (var-get fn-var)
+        serialize-inputs-fn (comp
+                             (partial clojure.walk/postwalk identity)
+                             (if serialize-inputs
+                               (partial apply serialize-inputs)
+                               identity))]
+   [fn-var
+    (fn [& inputs]
+      (when (< (rand) save-prob)
+        (save-sample fn-var (serialize-inputs-fn inputs)))
+      (apply fn-original inputs))]))
+
+(defn sample []
+  (as-> sampled-functions v
+    (map ->sample-fn v)
+    (into {} v)
+    (with-redefs-fn v call-main)))
+
+(defn setup-globals []
+  (with-redefs-fn {#'clojush.pushgp.report/initial-report #(throw (Exception.))}
+    #(time-labeled "Setup globals"
+       (try
+         (with-out-str (call-main))
+         (catch Exception _  nil)))))
+
+(def ->input (comp (fn [x] (setup-globals) x) deserialize-obj sample-file))
 
 
-(s/fdef deserialize-obj
-  :ret ::sample)
+(def ->eval-push-input (partial ->input #'clojush.interpreter/eval-push))
+(def ->process-generation-input (partial ->input #'clojush.pushgp.pushgp/process-generation))
 
+(def f (:deserialize-inputs (nth sampled-functions 1)))
+(defn process-generation-deserialize [& xs]
+  (let [inputs (time-labeled "Setup inputs" (apply f xs))]
+    (with-out-str
+      (apply clojush.pushgp.pushgp/process-generation inputs))))
 
-
-(def NUM-SAMPLES 10)
-
-(defn select-samples [fn-symbol]
-  (let [files
-        (->> sample-file-dir
-          file-seq
-          shuffle
-          (take NUM-SAMPLES)
-          (map-indexed (fn [i f] [f (selected-file fn-symbol i)])))]
-    (doseq [[sample-file selected-file] files]
-      (clojure.java.io/make-parents selected-file)
-      (clojure.java.io/copy sample-file selected-file))))
-
-
-(defn ->sample [fn-symbol i]
-  (->> (selected-file fn-symbol i)
-    deserialize-obj))
-
-
-(def atom-globals-vals {})
-(def var-globals-vals {})
-
-(defn set-globals! []
-  (doseq [[global intial-value] atom-globals-vals]
-    (reset! global intial-value))
-  (doseq [[global intial-value] atom-globals-vals]
-    (set! global intial-value)))
-
-
-
-(defn load-sample [fn-symbol i])
-
-
-(def load-eval-push-input (partial load-sample 'clojush.interpreter/eval-push))
-
-(defn init-globals! []
-  (with-redefs [process-generation (fn [_] (throw (Exception. "")))]
-    (try
-      (with-out-str (call-main))
-      (catch Exception _))))
-
-(defn set-globals! [globals])
-
-(defn load-call-inputs [func-symb]
-  (set-globals!)
-  (deserialize-obj (input-file func-symb)))
-
-(defn run-fn [bh fn- possible-inputs]
- (doseq [input possible-inputs]
-   (.consume bh (apply fn- input))))
