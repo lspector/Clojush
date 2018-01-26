@@ -5,7 +5,8 @@
 
 
 {:benchmarks
- [{:fn clojush.bench.helpers/process-generation-deserialize
+ [{:name :process-generation
+   :fn clojush.bench.helpers/process-generation-deserialize
    :args [:state/process-generation-input]
    :apply true
    :options [{:mode :single-shot
@@ -14,7 +15,8 @@
               :threads 1
               :fork 1
               :output-time-unit :s}]}
-  {:fn clojush.interpreter/eval-push
+  {:name :eval-push
+   :fn clojush.interpreter/eval-push
    :args [:state/eval-push-input]
    :apply true
    :options [{:mode :single-shot
@@ -32,17 +34,34 @@
  {:process-generation-input
   {:scope :benchmark
    :trial {:fn clojush.bench.helpers/->process-generation-input
-           :args [:param/process-generation-input-id]}}}
- :eval-push-input
- {:scope :benchmark
-  :trial {:fn clojush.bench.helpers/->eval-push-input
-          :args [:param/eval-push-input-id]}}
+           :args [:param/process-generation-input-id]}}
+  :eval-push-input
+  {:scope :benchmark
+   :trial {:fn clojush.bench.helpers/->eval-push-input
+           :args [:param/eval-push-input-id]}}}
  :params
  {:eval-push-input-id
-  ["0a885c30-aab2-4119-ab3e-f764895464a0"
-   "0bac9069-6b32-4aea-9794-155701db021d"
-   "1d9c2334-0541-4a6a-8eab-a5e5a9d553b5"]
+  ["488010c8-db89-459a-9773-098cfc82127e-new"
+   "5aa1ff81-4eec-4f62-a13f-05ce8545edf4-new"
+   "74518e3d-9625-46c8-8ecb-88a3c6e31e55-new"]
+   ;"78f24894-8ac5-4d04-a798-e81d48dc4286-new"
+   ;"97176d9f-69c0-49be-8c6c-ae853a0483b2-new"
+   ;"f6f3ceba-0c8d-4d21-8f99-5b2b0dcc1cee-new"]
   :process-generation-input-id
-  ["48e05242-51b4-4929-8e62-5c168af75524"
-   "a1d08373-5fc4-4145-afb7-dcc85a8aa399"
-   "e7076240-5947-4d3d-823f-0ea983c9f60c"]}}
+  ["472eb4cc-3037-459a-a8e3-cd08e9cf58cb-new"
+   "6eae1319-2cd6-4075-991b-b817b872acce-new"
+   "712d841f-6467-49aa-8728-f39a47b23818-new"]}}
+   ;"7a638739-8f7b-4509-908e-7da53b12a482-new"
+   ;"87dfecef-82a6-4008-8835-3a8d5058feba-new"
+   ;"892336be-dd16-4e2f-a382-9cf3bc46dd5d-new"
+   ;"8fcb4fa7-ad2c-4f8f-99a6-3d612ff42dc0-new"
+   ;"9fb4a24d-40cc-40ad-8727-6dd2251f8e24-new"
+   ;"aa8cfe57-a64e-4bc1-ba2d-14ae0da75458-new"
+   ;"bf47455e-c0ca-4c61-b280-ac57ec91a561-new"
+   ;"c3885c9a-c3e0-4207-a000-09871358caa5-new"
+   ;"c676a3db-5440-4da5-ad7f-09ebf5df4408-new"
+   ;"d30253ad-ca3b-4763-bd75-158ccb9c5664-new"
+   ;"d8b7b860-8c03-4444-a81a-54ddf79bee05-new"
+   ;"e57f1635-e0ed-4e00-ad32-0592a6d34614-new"
+   ;"f885ed46-d021-4dd2-8bd0-57416f84025d-new"
+   ;"ff4b8b91-3b66-43dd-bb4d-b1a293f5d837-new"]}}

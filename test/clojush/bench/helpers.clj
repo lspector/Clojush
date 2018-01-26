@@ -6,10 +6,8 @@
      creates profiles (using jmh.core/run {:compile-path \"target/classes\"})
    * Add generation number to sample file so we can see what generations are slow"
   (:require [clojure.java.io :as io]
-            [taoensso.nippy :as nippy]
 
-            [clojush.core]
-            [clojush.pushgp.pushgp :refer [process-generation]]))
+            [clojush.core]))
 
 (def sampled-functions
   [{:fn-var #'clojush.interpreter/eval-push
@@ -50,6 +48,14 @@
     ":parent-selection" ":leaky-lexicase"
     ":lexicase-leakage" "0.1"))
 
+
+; all records that might be serialized should have be added here. Otherwise fast-serialization will fail
+; in deserializing them.
+(def serialize-classes
+  [(class (clojush.individual/make-individual))])
+
+
+
 (defn fn-str [fn-var]
   (str (:ns (meta fn-var))
        "__"
@@ -74,18 +80,38 @@
            (println ~label (str s#)))
          r#))))
 
+
+(def conf (org.nustaq.serialization.FSTConfiguration/createDefaultConfiguration))
+(.registerClass conf (into-array java.lang.Class serialize-classes))
+
 ;  from https://gist.github.com/orendon/e38ac86dcd4c64cadad8fd5c749452b7
+;  but using fast-serialization.
 (defn serialize-obj [object file]
   (with-open [fos (java.io.FileOutputStream. file)]
-    (with-open [outp (java.io.ObjectOutputStream. fos)]
+    (with-open [outp (org.nustaq.serialization.FSTObjectOutput.  fos conf)]
       (time-labeled (str "Wrote " (.getPath file))
                     (.writeObject outp object)))))
 
+
 (defn deserialize-obj [file]
   (with-open [fis (java.io.FileInputStream. file)]
-    (with-open [inp (java.io.ObjectInputStream. fis)]
+    (with-open [inp (org.nustaq.serialization.FSTObjectInput. fis conf)]
       (time-labeled (str "Read " (.getPath file))
                     (.readObject inp)))))
+
+;; use something like this if need to convert all the saved files to a new format
+;(defn convert []
+;  (doseq [{:keys [fn-var]} sampled-functions]
+;    (println "doing fn" fn-var)
+;    (doseq [name (.list (sample-dir fn-var))]
+;      (println "doing" name)
+;      (let [o (deserialize-obj-old (sample-file fn-var name))
+;            new-f (sample-file fn-var (str name "-new"))]
+;        (println "saving")
+;        (serialize-obj o new-f)))))
+
+
+
 
 (defn save-sample
   [fn-symbol inputs]
@@ -124,6 +150,7 @@
 
 (def ->eval-push-input (partial ->input #'clojush.interpreter/eval-push))
 (def ->process-generation-input (partial ->input #'clojush.pushgp.pushgp/process-generation))
+
 
 (def f (:deserialize-inputs (nth sampled-functions 1)))
 (defn process-generation-deserialize [& xs]

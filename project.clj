@@ -18,7 +18,8 @@
                  [prismatic/plumbing "0.5.4"]
                  [lein-jmh "0.2.5"]
                  [jmh-clojure "0.2.1"]
-                 [clojure-future-spec "1.9.0-beta4"]]
+                 [clojure-future-spec "1.9.0-beta4"]
+                 [de.ruedigermoeller/fst "2.57"]]
 
 
   :plugins [[lein-codox "0.9.1"]

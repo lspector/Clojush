@@ -97,7 +97,8 @@ We could improve the process in a number of ways:
   fork multiple times, as the different levels.
 * Take samples from more than one configuration, to understand how changes affect different types of runs.
 * Record generation number for each sample, so we can see how things improve at different points in the run.
-* Use faster serialization library to cut down on the time it takes to load the files.
+* Stop using `lein-jmh` and use `clojure-jmh` library directly, so we can remove some of the code duplication
+  in `jmh.edn`. 
 
 #### Running existing benchmarks
 
@@ -151,7 +152,7 @@ Run it without any warmup and with some large number of iterations and then see 
 easiest way to do this is to extract out the time per iteration with something like this and plot the values:
 
 ```bash
-lein trampoline jmh "{:status true}"  2> /dev/null | sed -ln 's/Iteration.*: \(.*\) ms\/op/\1/p'
+lein trampoline jmh "{:status true :select [:bechmark-name]}"  2> /dev/null | sed -ln 's/Iteration.*: \(.*\) ms\/op/\1/p'
 ```
 
 
