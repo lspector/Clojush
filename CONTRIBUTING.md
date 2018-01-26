@@ -96,7 +96,6 @@ We could improve the process in a number of ways:
 * Implement the multi level formula for the ratios and execute each benchmark in multiple forks, and then in each
   fork multiple times, as the different levels.
 * Take samples from more than one configuration, to understand how changes affect different types of runs.
-* Record generation number for each sample, so we can see how things improve at different points in the run.
 * Stop using `lein-jmh` and use `clojure-jmh` library directly, so we can remove some of the code duplication
   in `jmh.edn`. 
 

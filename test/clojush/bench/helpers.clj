@@ -36,6 +36,7 @@
        novelty-archive])}])
 
 ; The args are taken from a configuration that performed well for Lee Spector
+; https://push-language.hampshire.edu/t/improving-profiling-clojush-performance/904/19
 (def call-main
   (partial clojush.core/-main
     "clojush.problems.software.replace-space-with-newline"
@@ -46,8 +47,8 @@
     ":meta-error-categories" "[:case-stagnation :autoconstruction-blindness]"
     ":print-history" "true"
     ":parent-selection" ":leaky-lexicase"
-    ":lexicase-leakage" "0.1"))
-
+    ":lexicase-leakage" "0.1"
+    ":max-generations" "5000"))
 
 ; all records that might be serialized should have be added here. Otherwise fast-serialization will fail
 ; in deserializing them.
@@ -113,11 +114,11 @@
 
 
 
-
+(def generation-i (atom 0))
 
 (defn save-sample
   [fn-symbol inputs]
-  (let [f (sample-file fn-symbol (java.util.UUID/randomUUID))]
+  (let [f (sample-file fn-symbol (str @generation-i "-" (java.util.UUID/randomUUID)))]
     (io/make-parents f)
     (serialize-obj inputs f)))
 
@@ -130,6 +131,8 @@
                                identity))]
    [fn-var
     (fn [& inputs]
+      (when (= fn-var #'clojush.pushgp.pushgp/process-generation)
+        (reset! generation-i (nth inputs 3)))
       (when (< (rand) save-prob)
         (save-sample fn-var (serialize-inputs-fn inputs)))
       (apply fn-original inputs))]))
