@@ -104,11 +104,13 @@
 ;  (doseq [{:keys [fn-var]} sampled-functions]
 ;    (println "doing fn" fn-var)
 ;    (doseq [name (.list (sample-dir fn-var))]
-;      (println "doing" name)
-;      (let [o (deserialize-obj-old (sample-file fn-var name))
-;            new-f (sample-file fn-var (str name "-new"))]
-;        (println "saving")
-;        (serialize-obj o new-f)))))
+;      (when (not (clojure.string/ends-with? name "new"))
+;        (println "doing" name)
+;        (let [new-f (sample-file fn-var (str name "-new"))]
+;          (when (not (.exists new-f))
+;            (println "saving")
+;            (serialize-obj (deserialize-obj-old (sample-file fn-var name)) new-f)))))))
+
 
 
 
