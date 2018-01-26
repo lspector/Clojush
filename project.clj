@@ -52,5 +52,5 @@
   ;; faster without defaults
   ;; https://plot.ly/~SaulShanabrook/11/?share_key=pNTJGA4S58MA29Uqskbr6j
   ;; https://push-language.hampshire.edu/t/improving-profiling-clojush-performance-results/904/13?u=saulshanabrook
-  :jvm-opts ^:replace []
+  :jvm-opts ^:replace [] ;"-Xverify:none" speeds up startup time
   :main clojush.core)

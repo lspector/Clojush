@@ -1,13 +1,18 @@
 (ns clojush.bench.helpers
-  "Tools to save samples for benchmarks and run them.
-
-   TODO:
-   * Change from using lein-jmh to custom runner that automatically
-     creates profiles (using jmh.core/run {:compile-path \"target/classes\"})
-   * Add generation number to sample file so we can see what generations are slow"
+  "Tools to save samples for benchmarks and run them."
   (:require [clojure.java.io :as io]
-
-            [clojush.core]))
+            [clojush.pushgp.pushgp]
+            [clj-random.core]
+            [clojush.individual]
+            [clojush.interpreter]
+            [clojush.core]
+            [clojure.walk]
+            [clojush.pushstate]
+            [clojush.pushgp.report])
+  (:import (org.nustaq.serialization FSTObjectInput FSTObjectOutput FSTConfiguration)
+           (java.util UUID)
+           (java.io File FileOutputStream FileInputStream)
+           (org.uncommons.maths.random RepeatableRNG)))
 
 (def sampled-functions
   [{:fn-var #'clojush.interpreter/eval-push
@@ -20,9 +25,9 @@
     ; instead of the objects themselves
     :serialize-inputs
     (fn [rand-gens pop-agents child-agents generation novelty-archive]
-      [(vec (map #(.getSeed %) rand-gens))
-       (vec (map deref pop-agents))
-       (vec (map deref child-agents))
+      [(into-array (map (fn [^RepeatableRNG rng] (.getSeed rng)) rand-gens))
+       (into-array (map deref pop-agents))
+       (into-array (map deref child-agents))
        generation
        novelty-archive])
     ;; then, before each execution, we want to deserialize them,
@@ -30,7 +35,7 @@
     :deserialize-inputs
     (fn [rand-gens pop-agents child-agents generation novelty-archive]
       [(vec (map clj-random.core/make-mersennetwister-rng rand-gens))
-       (vec (map agent pop-agents))
+       (mapv agent pop-agents)
        (vec (map agent child-agents))
        generation
        novelty-archive])}])
@@ -53,8 +58,8 @@
 ; all records that might be serialized should have be added here. Otherwise fast-serialization will fail
 ; in deserializing them.
 (def serialize-classes
-  [(class (clojush.individual/make-individual))])
-
+  [(class (clojush.individual/make-individual))
+   clojush.pushstate.PushState])
 
 
 (defn fn-str [fn-var]
@@ -82,21 +87,21 @@
          r#))))
 
 
-(def conf (org.nustaq.serialization.FSTConfiguration/createDefaultConfiguration))
-(.registerClass conf (into-array java.lang.Class serialize-classes))
+(def ^FSTConfiguration conf (FSTConfiguration/createDefaultConfiguration))
+(.registerClass conf (into-array Class serialize-classes))
 
 ;  from https://gist.github.com/orendon/e38ac86dcd4c64cadad8fd5c749452b7
 ;  but using fast-serialization.
-(defn serialize-obj [object file]
-  (with-open [fos (java.io.FileOutputStream. file)]
-    (with-open [outp (org.nustaq.serialization.FSTObjectOutput.  fos conf)]
+(defn serialize-obj [object ^File file]
+  (with-open [fos (FileOutputStream. file)]
+    (with-open [outp (FSTObjectOutput. fos conf)]
       (time-labeled (str "Wrote " (.getPath file))
                     (.writeObject outp object)))))
 
 
-(defn deserialize-obj [file]
-  (with-open [fis (java.io.FileInputStream. file)]
-    (with-open [inp (org.nustaq.serialization.FSTObjectInput. fis conf)]
+(defn deserialize-obj [^File  file]
+  (with-open [fis (FileInputStream. file)]
+    (with-open [inp (FSTObjectInput. fis conf)]
       (time-labeled (str "Read " (.getPath file))
                     (.readObject inp)))))
 
@@ -118,7 +123,7 @@
 
 (defn save-sample
   [fn-symbol inputs]
-  (let [f (sample-file fn-symbol (str @generation-i "-" (java.util.UUID/randomUUID)))]
+  (let [f (sample-file fn-symbol (str @generation-i "-" (UUID/randomUUID)))]
     (io/make-parents f)
     (serialize-obj inputs f)))
 
