@@ -51,7 +51,7 @@
         ci (/ (math/sqrt ci-num-in)
               denom)]
     (str (format "%.2f" r)
-         " +/- "
+         " ± (95%) "
          (format "%.2f" ci))))
 
 (s/fdef ratio
