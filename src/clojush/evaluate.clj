@@ -423,7 +423,7 @@
                          0
                          1)))
                 (vec (repeat (count (:errors ind)) 1)))
-              (if (and (:parent1-errors ind) (:parent2-errors ind))
+              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
                 (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
                                              (:errors ind)
                                              (:parent1-errors ind)
@@ -448,6 +448,19 @@
                          (= e (max p1e p2e)) 4
                          :else 5)))
                 (vec (repeat (count (:errors ind)) 6)))
+              (if (and (:parent1-errors ind) (:parent2-errors ind))
+                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                             (:errors ind)
+                                             (:parent1-errors ind)
+                                             (:parent2-errors ind))]
+                       (cond 
+                         (zero? e) 6
+                         (< e (min p1e p2e)) 0
+                         (= e (min p1e p2e)) 1
+                         (< e (max p1e p2e)) 2
+                         (= e (max p1e p2e)) 3
+                         :else 4)))
+                (vec (repeat (count (:errors ind)) 5)))
               ;
               (= cat :error-neglect)
               #_(if (and (:parent1-errors ind) (:parent2-errors ind))
