@@ -1,5 +1,5 @@
 (ns clojush.bench.helpers
-  "Tools to save samples for benchmarks and run them."
+  "Tools to save samples for benchmarks and to run them."
   (:require [clojure.java.io :as io]
             [clojush.pushgp.pushgp]
             [clj-random.core]
@@ -13,6 +13,16 @@
            (java.util UUID)
            (java.io File FileOutputStream FileInputStream)
            (org.uncommons.maths.random RepeatableRNG)))
+
+
+(defn process-generation-deserialize-inputs
+  [rand-gens pop-agents child-agents generation novelty-archive]
+  [(vec (map clj-random.core/make-mersennetwister-rng rand-gens))
+   (mapv agent pop-agents)
+   (vec (map agent child-agents))
+   generation
+   novelty-archive])
+
 
 (def sampled-functions
   [{:fn-var #'clojush.interpreter/eval-push
@@ -31,14 +41,10 @@
        generation
        novelty-archive])
     ;; then, before each execution, we want to deserialize them,
-    ;; so that each execution get's its own new version
-    :deserialize-inputs
-    (fn [rand-gens pop-agents child-agents generation novelty-archive]
-      [(vec (map clj-random.core/make-mersennetwister-rng rand-gens))
-       (mapv agent pop-agents)
-       (vec (map agent child-agents))
-       generation
-       novelty-archive])}])
+    ;; so that each execution get's its own new version.
+    ;; Right now this key isn't used, we just use the function directly
+    ; to create a function to benchmark, but eventually we will create that automatically with a macro.
+    :deserialize-inputs process-generation-deserialize-inputs}])
 
 ; The args are taken from a configuration that performed well for Lee Spector
 ; https://push-language.hampshire.edu/t/improving-profiling-clojush-performance/904/19
@@ -78,6 +84,7 @@
     (str id)))
 
 (defmacro time-labeled
+  "Executes the body, then prints the label + the time it took to execute it to stderr"
   [label & body]
   `(let [s# (new java.io.StringWriter)]
      (binding [*out* s#]
@@ -162,8 +169,7 @@
 (def ->process-generation-input (partial ->input #'clojush.pushgp.pushgp/process-generation))
 
 
-(def f (:deserialize-inputs (nth sampled-functions 1)))
 (defn process-generation-deserialize [& xs]
-  (let [inputs (time-labeled "Setup inputs" (apply f xs))]
+  (let [inputs (time-labeled "Deserialize inputs" (apply process-generation-deserialize-inputs xs))]
     (with-out-str
       (apply clojush.pushgp.pushgp/process-generation inputs))))

@@ -40,56 +40,59 @@ you should run the benchmarks!
 
 #### Design
 
-The goal of the benchmarks in this codebase is to help us assess how changes to the codebase will effect the time it
-takes to execute a run. Right now, we have decided to use the RSWN problem with autoconstruction as the representative
-problem (see `clojush.bench.helpers/call-main` for the full args used).
+Benchmarks are meant to measure how fast our code runs.
+Currently, we use a particular configuration of the RSWN problem with autoconstruction to serve as a representative
+sample of how we like to run out code
+(see `clojush.bench.helpers/call-main` for the full args).
 
-To make this more concrete, we want to know the mean time it takes to execute a run before and after some code change.
-The ["Rigorous Benchmarking in Reasonable Time" (Klibera, Jones)](https://kar.kent.ac.uk/33611/7/paper.pdf) gives us
-a statistical framework for assessing the certainty of a certain performance change. It gives an estimator for the
-ratio of the new mean time to the old mean time, with a confidence interval, without any assumptions about the underlying
-distributions of the times. They give a formula that generalizes to multiple sampling levels, but we only implement
+But how do we know if it's fast? Well we have a baseline of current performance and we want to understand how some change
+would affect that performance.
+The ["Rigorous Benchmarking in Reasonable Time" (Klibera, Jones) paper](https://kar.kent.ac.uk/33611/7/paper.pdf) gives us
+a statistical framework for assessing the certainty of a performance change. It gives an estimator for the
+ratio of the new mean time to the old mean time, with a confidence interval, without assuming anything about the underlying
+distributions. They give a formula that generalizes to multiple sampling levels, but we only implement
 the limit case of just one sampling level in `clojush.bench.compare/ratio`. This is sufficient to be a useful starting
 place for us.
 
-So what should we actually be benchmarking? The most accurate and easiest choice would be to execute a full run.
-However, this is just too time intensive, as one run easily takes hours and we would need likely at least 10 to 
+So what should we actually be benchmarking? The most obvious and simplest choice would be to execute a bunch
+of full runs, before and after any change, and time them.
+However, this is just too time intensive, as one run easily takes ~~hours~~ days and we would need likely at least 5 to 
 get any sense of a change. We would likely need more, to get a reliable measure of the performance difference, because
-each run is stochastic and the running time varies greatly. Not only because some runs finish earlier than others,
+each run is so random and the running time varies greatly. Not only because some runs finish earlier than others,
 but also because each generation itself takes a varying amount of time, depending on the characteristics of the population.
 
 So, instead of comparing the performance of a whole run between code changes, we instead choose a smaller part of the
-run, and compare the performance of this part, given the same initial data. The largest chunk we measure is the 
+run, and compare the performance of this part, given the it's same initial data. The largest chunk we measure is the 
 `clojush.pushgp.pushgp/process-generation` function, which processes a whole generation. By saving the input
-to this function and executing it on both code bases, we can see how they would perform on that certain generation.
+to this function and executing it on different code bases, we can see how they would perform on that certain generation.
 
 We can also profile other functions, like `clojush.interpreter/eval-push`, to see how their performance changes
-in isolation. This is helpful if we are working on just optimizing one functions. We can iterate on the code
+in isolation. This is helpful if we are working on just optimizing one function. We can iterate on the code
 and just run the benchmarks against that function, before running them on the total generations, to see the overall change.
 
-This technique has been successfull so far, because it allows us to execute our benchmarks in a reasonable amnount of
-time (<30 mins) and the times have a small enough varience that we can get a very precise estimate of the speedup.
+This technique has been successful so far, because it allows us to execute our benchmarks in a reasonable amount of
+time (<xxx mins) and the times have a small enough variance that we can get a very precise estimate of the speedup.
 
 
 #### Implementation
 
 How do we actually execute the benchmarks? We use the [lein-jmh](https://github.com/jgpc42/lein-jmh) library
-that wraps the Java Microbenchmark Harness (JMH). This allows us to easily run each benchmarked function in it's own
+that wraps the [Java Microbenchmark Harness (JMH)](http://openjdk.java.net/projects/code-tools/jmh/).
+This allows us to easily run each benchmarked function in it's own
 process and do some number of warmup runs.
+
+
+How do we get inputs to run the benchmarked functions on? We sample them from a run and serialize them to disk.
+We sample some (configurable) percentage of all calls, because we don't need to take all of them. But as long
+as our sampled run goes to completion, then the ones that are saved are representative of the average call during
+a run.
 
 The use of mutable state and globals adds a few pain points, but we are able to work around them. In order to make
 sure the globals are setup properly (like with the right push functions and such), we start
-a run in each provess before executing any benchmarks and stop it right after it sets the globals. Also, some functions
+a run in each process before executing any benchmarks and stop it right after it sets the globals. Also, some functions
 (like `clojush.pushgp.pushgp/process-generation`) take mutable inputs (agents, RNG). Since we execute this function
-multiple times on the same inputs, we actually serialize them with just their immutable parts extracted, and then
+multiple times on the same inputs, we actually serialize them with just their immutable parts extracted, and 
 before each execution we re-wrap them in mutable containers.
-
-When we sample from the inputs, we serialize those using Java's built in serializer. We sample some (configurable)
-percentage of all calls.
-
-The benchmarks should be run on a machine that doesn't have other work going on, ideally not a laptop.
-If you need a machine, you should talk to Saul about running them on `deucalon` (a machine at Hampshire).
-
 
 We could improve the process in a number of ways:
 
@@ -101,25 +104,29 @@ We could improve the process in a number of ways:
 
 #### Running existing benchmarks
 
+The benchmarks should be run on a machine that doesn't have other work going on, ideally not a laptop.
+If you need a machine, you should talk to Saul about running them on `deucalon` (a machine at Hampshire).
+
+
 First, generate the sample inputs:
 
 ```bash
 lein benchmark-sample
 ```
 
-This saves the inputs for each benchmarked function in `./bench-inputs/<function name>/<random id>`.
+They are saved into `./bench-inputs/<function name>/<generation number>-<random id>`.
 
-Then, you should edit the `params` in `jmh.edn` to match the id generated for each sampled functions.
+Then, you should edit the `params` in `jmh.edn` to match the names of a couple samples, for each function.
 
 Finally, you can run the benchmarks:
 
 ```bash
-lein benchmark '{:status true}'
+lein benchmark  # optionally with '{:status true}'
 ```
 
-When they finish, it should output some EDN that has the results. Save that to a file.
+When they finish, it should output some EDN that has the statistical results. Save that to a file (say `old.edn`).
 
-Then, run the benchmarks again with your code changes and save that to another file. Then you can 
+Then, run the benchmarks again with your code changes and save that to another file (`new.edn`). Then you can 
 compare the performance between the two with:
 
 ```bash
@@ -134,20 +141,23 @@ execution is faster.
 
 If you are trying to improve the performance of a certain function, you should create a benchmark for it.
 
-First, add a map to the `clojush.bench.helpers/sampled-functions` at least the keys `:fn-var` and `:save-prob`, 
+First, add a map to `clojush.bench.helpers/sampled-functions` with at least the keys `:fn-var` and `:save-prob`, 
 which correspond to the var of the function and the probability you want to save a sample of the inputs when you are
 executing it.
 
 Then run `lein benchmark-sample` to gather samples for the file.
 
 Then add it to the `jmh.edn` file. Create a new item in `:benchmarks`, mirroring the existing ones in there.
-If the function is normally executed concurrently during a run (like `eval-push`), set the `:threads` to be close
+If the function is normally executed concurrently (like `eval-push`), set the `:threads` to be close
 to the number of CPUs on your benchmarking machine.
 
-You have to decide how many times the function should be run together and times. This is the `:count` key in `:measurement`
-and `:warmup`. If it takes < 1ms to execute the function, you should make this greater than 1, so that the overhead from
-the timing code doesn't overwhelm the function time. How do you decide how much warmup the function needs?
-Run it without any warmup and with some large number of iterations and then see when the time per iteration changes. The
+You have to decide how many times the function should be executed per iteration,`:count`, and the number of iterations to run, `:iterations`.
+The time per iteration should be > 1ms so the timing code doesn't add too much to the total time. The number of iterations
+to run just affects how long it will take and how precise you want the CI of the change to be. It needs to be at least 5
+to be able to compare between runs.
+
+You also have to decide how many iterations of warmup you want.
+Run it without any warmups and with some large number of iterations and then see when the time per iteration changes. The
 easiest way to do this is to extract out the time per iteration with something like this and plot the values:
 
 ```bash
