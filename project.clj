@@ -17,7 +17,7 @@
                  [cheshire "5.7.1"]
                  [prismatic/plumbing "0.5.4"]]
 
-  ; different paths per profile
+  ; different compiled classes per profile
   :target-path "target/%s"
   :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
