@@ -16,7 +16,7 @@
 
 (def sampled-functions
   [{:fn-var #'clojush.interpreter/eval-push
-    :save-prob (/ 1 5000000)}
+    :save-prob (/ 1 10000000)}
 
 
    {:fn-var #'clojush.pushgp.pushgp/process-generation
@@ -167,4 +167,3 @@
   (let [inputs (time-labeled "Setup inputs" (apply f xs))]
     (with-out-str
       (apply clojush.pushgp.pushgp/process-generation inputs))))
-

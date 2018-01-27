@@ -15,20 +15,28 @@
                  ;; https://mvnrepository.com/artifact/org.apache.commons/commons-math3
                  [org.apache.commons/commons-math3 "3.2"]
                  [cheshire "5.7.1"]
-                 [prismatic/plumbing "0.5.4"]
-                 [lein-jmh "0.2.5"]
-                 [jmh-clojure "0.2.1"]
-                 [clojure-future-spec "1.9.0-beta4"]
-                 [de.ruedigermoeller/fst "2.57"]]
+                 [prismatic/plumbing "0.5.4"]]
 
-
+  ; different paths per profile
+  :target-path "target/%s"
   :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
             [lein-gorilla "0.4.0"]
             [cider/cider-nrepl "0.15.1"]
-            [lein-cloverage "1.0.6"]
-            [lein-jmh "0.2.5"]]
-  :profiles {:text {:plugins [[venantius/ultra "0.5.1"]]}}
+            [lein-cloverage "1.0.6"]]
+  :aliases {"benchmark" ["with-profile" "benchmark" "trampoline" "jmh"]
+            "benchmark-sample" ["with-profile" "benchmark" "trampoline" "run"]
+            "benchmark-compare" ["with-profile" "compare" "trampoline" "run"]}
+
+  :profiles {:text {:plugins [[venantius/ultra "0.5.1"]]}
+             :benchmark {:main clojush.bench.helpers/sample
+                         :aot [clojush.bench.helpers]
+                         :dependencies [[de.ruedigermoeller/fst "2.57"]]
+                         :plugins [[lein-jmh "0.2.5"]]}
+             :compare {:main clojush.bench.compare
+                       :dependencies [[lein-jmh "0.2.5"]
+                                      [jmh-clojure "0.2.1"]
+                                      [clojure-future-spec "1.9.0-beta4"]]}}
   :codox {:source-uri "http://github.com/lspector/Clojush/blob/master/{filepath}#L{line}"
           :namespaces [#"^(?!clojush\.problems)"]
           :output-path "doc"
@@ -52,5 +60,5 @@
   ;; faster without defaults
   ;; https://plot.ly/~SaulShanabrook/11/?share_key=pNTJGA4S58MA29Uqskbr6j
   ;; https://push-language.hampshire.edu/t/improving-profiling-clojush-performance-results/904/13?u=saulshanabrook
-  :jvm-opts ^:replace [] ;"-Xverify:none" speeds up startup time
+  :jvm-opts ^:replace []
   :main clojush.core)

@@ -104,7 +104,7 @@ We could improve the process in a number of ways:
 First, generate the sample inputs:
 
 ```bash
-lein run -m clojush.bench.helpers/sample
+lein benchmark-sample
 ```
 
 This saves the inputs for each benchmarked function in `./bench-inputs/<function name>/<random id>`.
@@ -114,7 +114,7 @@ Then, you should edit the `params` in `jmh.edn` to match the id generated for ea
 Finally, you can run the benchmarks:
 
 ```bash
-lein jmh '{:status true}'
+lein benchmark '{:status true}'
 ```
 
 When they finish, it should output some EDN that has the results. Save that to a file.
@@ -123,7 +123,7 @@ Then, run the benchmarks again with your code changes and save that to another f
 compare the performance between the two with:
 
 ```bash
-lein run -m clojush.bench.compare old.edn new.edn
+lein benchmark-compare old.edn new.edn
 ```
 
 This shows you, for each function and sample input, the ratio of the means of the execution time
@@ -138,7 +138,7 @@ First, add a map to the `clojush.bench.helpers/sampled-functions` at least the k
 which correspond to the var of the function and the probability you want to save a sample of the inputs when you are
 executing it.
 
-Then run `lein run -m clojush.bench.helpers/sample` to gather samples for the file.
+Then run `lein benchmark-sample` to gather samples for the file.
 
 Then add it to the `jmh.edn` file. Create a new item in `:benchmarks`, mirroring the existing ones in there.
 If the function is normally executed concurrently during a run (like `eval-push`), set the `:threads` to be close
@@ -151,7 +151,7 @@ Run it without any warmup and with some large number of iterations and then see 
 easiest way to do this is to extract out the time per iteration with something like this and plot the values:
 
 ```bash
-lein trampoline jmh "{:status true :select [:bechmark-name]}"  2> /dev/null | sed -ln 's/Iteration.*: \(.*\) ms\/op/\1/p'
+lein benchmark "{:status true :select [:bechmark-name]}"  2> /dev/null | sed -ln 's/Iteration.*: \(.*\) ms\/op/\1/p'
 ```
 
 
