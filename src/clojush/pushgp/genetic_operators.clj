@@ -1092,6 +1092,21 @@ programs encoded by genomes g1 and g2."
            (not (zero? c2-diff))
            (not= c1-diff c2-diff)))))
 
+(defn four-generation-reproductive-difference-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)
+        child1 (produce-child-genome-by-autoconstruction g g argmap)
+        child2 (produce-child-genome-by-autoconstruction child1 g g argmap)
+        child3 (produce-child-genome-by-autoconstruction child2 g g argmap)
+        c1-diff (sequence-similarity g child1)
+        c2-diff (sequence-similarity g child2)
+        c3-diff (sequence-similarity g child3)]
+    (assoc ind :diversifying
+      (and (not (zero? c1-diff))
+           (not (zero? c2-diff))
+           (not (zero? c3-diff))
+           (distinct? c1-diff c2-diff c3-diff)))))
+
 (defn use-mate-diversifying?
   [ind argmap]
   (let [g (:genome ind)
@@ -1218,6 +1233,7 @@ programs encoded by genomes g1 and g2."
                 :three-gens-size-and-instruction three-gens-size-and-instruction-diversifying?
                 :diffmeans diffmeans-diversifying?
                 :minimal-reproductive-difference minimal-reproductive-difference-diversifying?
+                :four-generation-reproductive-difference four-generation-reproductive-difference-diversifying?
                 :use-mate use-mate-diversifying?
                 :use-mate-differently use-mate-differently-diversifying?
                 :si-and-mate-use si-and-mate-use-diversifying?
