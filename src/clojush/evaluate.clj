@@ -517,7 +517,7 @@
                          (= e (max p1e p2e)) 4
                          :else 5)))
                 (vec (repeat (count (:errors ind)) 6)))
-              (if (and (:parent1-errors ind)
+              #_(if (and (:parent1-errors ind)
                        (:parent2-errors ind))
                 (if (or (= (:errors ind) (:parent1-errors ind))
                         (= (:errors ind) (:parent2-errors ind)))
@@ -528,6 +528,40 @@
                                                (:parent2-errors ind))]
                          (cond 
                            (zero? e) 0
+                           (< e (min p1e p2e)) 1
+                           (and (not= p1e p2e) (= e (min p1e p2e))) 2
+                           (< e (max p1e p2e)) 3
+                           (= e (max p1e p2e)) 4
+                           :else 5))))
+                (vec (repeat (count (:errors ind)) 6)))
+              #_(if (and (:parent1-errors ind)
+                       (:parent2-errors ind))
+                (if (or (= (:errors ind) (:parent1-errors ind))
+                        (= (:errors ind) (:parent2-errors ind)))
+                  (vec (repeat (count (:errors ind)) 7))
+                  (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                               (:errors ind)
+                                               (:parent1-errors ind)
+                                               (:parent2-errors ind))]
+                         (cond 
+                           ;(zero? e) 0
+                           (< e (min p1e p2e)) 1
+                           (and (not= p1e p2e) (= e (min p1e p2e))) 2
+                           (< e (max p1e p2e)) 3
+                           (= e (max p1e p2e)) 4
+                           :else 5))))
+                (vec (repeat (count (:errors ind)) 6)))
+              (if (and (:parent1-errors ind)
+                       (:parent2-errors ind))
+                (if (or (= (:errors ind) (:parent1-errors ind))
+                        (= (:errors ind) (:parent2-errors ind)))
+                  (vec (repeat (count (:errors ind)) 7))
+                  (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                               (:errors ind)
+                                               (:parent1-errors ind)
+                                               (:parent2-errors ind))]
+                         (cond 
+                           (zero? e) 1
                            (< e (min p1e p2e)) 1
                            (and (not= p1e p2e) (= e (min p1e p2e))) 2
                            (< e (max p1e p2e)) 3
