@@ -579,7 +579,7 @@
                                                (:parent2-errors ind))]
                          (cond 
                            (or (zero? e) (< e (min p1e p2e))) 0
-                           (some #{e} #{p1e p2e}) 3
+                           (some #{e} [p1e p2e]) 3
                            (< e (max p1e p2e)) 1
                            :else 2))))
                 (vec (repeat (count (:errors ind)) 4)))
