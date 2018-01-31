@@ -412,3 +412,26 @@
             top-val (nth sorted halfway)]
            (mean [bottom-val top-val])))))
 
+
+(defn nested-parens
+ [pattern prog]
+ (let [contents (re-seq pattern prog)
+       coll (concat (map first contents))
+       coll1 (if (nil? contents)
+               nil
+               (reduce concat (for [content contents]
+                                (nested-parens pattern (subs (first content) 1 (- (.length (first content)) 1))))))
+       coll (concat coll coll1)]
+   coll))
+
+
+(defn tagspace-initialization
+  [prog num-tags state]
+  (let [single-instrs (string/split (string/replace prog #"[\(\)]" "") #" ")
+        list-instrs (nested-parens #"(?=\()(?:(?=.*?\((?!.*?\1)(.*\)(?!.*\2).*))(?=.*?\)(?!.*?\2)(.*)).)+?.*?(?=\1)[^(]*(?=\2$)" prog)
+        contents (concat single-instrs list-instrs)]
+    (assoc state :tag (reduce merge (for [pair (zipmap contents (range 0 num-tags (quot num-tags (count contents))))]
+                                      (assoc (or (:tag state) (sorted-map))
+                                                      (second pair)
+                                                      (first pair)))))))
+
