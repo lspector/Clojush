@@ -11,7 +11,7 @@
             [clojush.pushgp.report])
   (:import (org.nustaq.serialization FSTObjectInput FSTObjectOutput FSTConfiguration)
            (java.util UUID)
-           (java.io File FileOutputStream FileInputStream)
+           (java.io File FileOutputStream FileInputStream StringWriter)
            (org.uncommons.maths.random RepeatableRNG)))
 
 
@@ -84,9 +84,9 @@
     (str id)))
 
 (defmacro time-labeled
-  "Executes the body, then prints the label + the time it took to execute it to stderr"
+  "Executes the body, then prints the label + the time it took to execute the body to stderr"
   [label & body]
-  `(let [s# (new java.io.StringWriter)]
+  `(let [s# (new StringWriter)]
      (binding [*out* s#]
        (let [r# (time ~@body)]
          (binding [*out* *err*]
