@@ -98,16 +98,15 @@
    Returns the behaviors, a list of the outputs of the program on the inputs."
   [program cases]
   (flatten
-   (doall
-    (for [[input output] cases]
-      (let [final-state (run-push program
-                                  (->> (make-push-state)
-                                       (push-item input :input)
-                                       (push-item "" :output)
-                                       (tagspace-initialization (str program) 100)))
-            printed-result (stack-ref :output 0 final-state)
-            int-result (stack-ref :integer 0 final-state)]
-        (vector printed-result int-result))))))
+    (let [state-with-tags (tagspace-initialization (str program) 1000 (make-push-state))]      
+      (doall
+       (for [[input output] cases]
+         (let [final-state (run-push program
+                                     (->> (push-item input :input state-with-tags)
+                                          (push-item "" :output)))
+               printed-result (stack-ref :output 0 final-state)
+               int-result (stack-ref :integer 0 final-state)]
+           (vector printed-result int-result)))))))
 
 (defn replace-space-with-newline-errors-from-behaviors
   "Takes a list of behaviors across the list of cases and finds the error
