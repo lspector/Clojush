@@ -116,7 +116,12 @@ lein benchmark-sample
 
 They are saved into `./bench-inputs/<function name>/<generation number>-<random id>`.
 
-Then, you should edit the `params` in `jmh.edn` to match the names of a couple samples, for each function.
+Then, you should edit the `params` in `jmh.edn` to match the names of a couple samples, for each function. To list
+a random three IDs, you can run:
+
+```bash
+ls Clojush/bench-inputs/<function name>/ | sort -R | tail -3
+```
 
 Finally, you can run the benchmarks:
 
@@ -134,7 +139,7 @@ lein benchmark-compare old.edn new.edn
 ```
 
 This shows you, for each function and sample input, the ratio of the means of the execution time
-of the new to the old. It also has a 95% CI. If this is below 1.0, then this means the new
+of the new to the old. If this is below 1.0, then this means the new
 execution is faster.
 
 #### Benchmarking new functions

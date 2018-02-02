@@ -7,7 +7,7 @@
             [clojure.future :refer :all]
             [clojure.spec.test.alpha :as stest]))
 
-(def CI 0.95)
+(def CI 0.99)
 
 (defn- sq
   [x]
@@ -21,7 +21,7 @@
 
 (defn ratio
   "Returns the ratio of the of the new mean to the old mean
-   with the 95% CI
+   with the 99% CI
 
   Uses the formula from the 'Quantifying Performance Changes with Effect Size Confidence Intervals'
   paper (6.2)
@@ -51,7 +51,7 @@
         ci (/ (math/sqrt ci-num-in)
               denom)]
     (str (format "%.2f" r)
-         " ±(95%) "
+         " ±(99%) "
          (format "%.2f" ci))))
 
 (s/fdef ratio
@@ -87,7 +87,7 @@
   Compares the benchmarks results saved in `old filename` to those in `new filename`.
   It prints out the ratio of the new to the old means, with a 95% CI for each benchmark
   in both files."
-  (let [keys #{:name :params :samples :fn}]
+  (let [keys [:name :fn :params :samples]]
     (->> [old-filename new-filename]
       ;; makes two maps of {keys -> {:mean ...}}
       (map (comp (partial into {})
@@ -98,5 +98,7 @@
       ;; calculates mean ratio and CI of new/old
       (apply merge-with ratio)
       (map (fn [[ks r]] (assoc ks :mean-ratio r)))
+      ;; sort rows by keys in order
+      (sort-by :fn)
       (format-table (conj keys :mean-ratio))
       println)))

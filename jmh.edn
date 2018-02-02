@@ -10,24 +10,24 @@
    :args [:state/process-generation-input]
    :apply true
    :options [{:mode :single-shot
-              :measurement 5
-              :warmup 5
+              :warmup 1
+              :measurement 2
               :threads 1
-              :fork 1
+              :fork 3
               :output-time-unit :s}]}
   {:name :eval-push
    :fn clojush.interpreter/eval-push
    :args [:state/eval-push-input]
    :apply true
    :options [{:mode :single-shot
-              :measurement
-              {:count 100
-               :iterations 50}
               :warmup
               {:count 100
                :iterations 50}
+              :measurement
+              {:count 100
+               :iterations 50}
               :threads 20
-              :fork 1
+              :fork 3
               :output-time-unit :ms}]}]
 
  :states
@@ -41,27 +41,14 @@
            :args [:param/eval-push-input-id]}}}
  :params
  {:eval-push-input-id
-  ["135-341a1d39-1ca0-427a-aced-cb656155f37a"
+  ["1369-09420c81-0e78-4322-8823-2c5d14c4ac3b"
    "28-f1c99415-90ee-4b77-aa79-0a7c87162c8c"
-   "90-3600fd56-f5cf-4459-a223-d70610407497"
-   "147-f3297452-941c-41eb-9544-6bcbb979c59a"
-   "41-6613395f-87ce-49bb-b4e0-8d4027ddfe12"]
-   ;"f6f3ceba-0c8d-4d21-8f99-5b2b0dcc1cee-new"]
+   "1045-922d31ff-fe14-454c-831e-e8ca9ada0e02"
+   "2391-26d2d62a-fa34-4d4d-9fb8-ea1b14d530fc"
+   "4250-bb5ac8bc-586e-49ab-8e8c-069f17934949"]
   :process-generation-input-id
-  ["472eb4cc-3037-459a-a8e3-cd08e9cf58cb-new"
-   "6eae1319-2cd6-4075-991b-b817b872acce-new"
-   "712d841f-6467-49aa-8728-f39a47b23818-new"]}}
-   ;"7a638739-8f7b-4509-908e-7da53b12a482-new"
-   ;"87dfecef-82a6-4008-8835-3a8d5058feba-new"
-   ;"892336be-dd16-4e2f-a382-9cf3bc46dd5d-new"
-   ;"8fcb4fa7-ad2c-4f8f-99a6-3d612ff42dc0-new"
-   ;"9fb4a24d-40cc-40ad-8727-6dd2251f8e24-new"
-   ;"aa8cfe57-a64e-4bc1-ba2d-14ae0da75458-new"
-   ;"bf47455e-c0ca-4c61-b280-ac57ec91a561-new"
-   ;"c3885c9a-c3e0-4207-a000-09871358caa5-new"
-   ;"c676a3db-5440-4da5-ad7f-09ebf5df4408-new"
-   ;"d30253ad-ca3b-4763-bd75-158ccb9c5664-new"
-   ;"d8b7b860-8c03-4444-a81a-54ddf79bee05-new"
-   ;"e57f1635-e0ed-4e00-ad32-0592a6d34614-new"
-   ;"f885ed46-d021-4dd2-8bd0-57416f84025d-new"
-   ;"ff4b8b91-3b66-43dd-bb4d-b1a293f5d837-new"]}}
+  ["3714-33fc8276-c3d3-4405-931b-4f087df5a415"
+   "1085-c785a344-19ed-45cc-9972-8042e2618079"
+   "3483-9316a199-11e3-44e8-aaea-a8ab1ca87cb1"
+   "3777-b28b22df-9be3-4573-b32a-3958c0c5ebd0"
+   "2423-5b6c7298-dc2b-43c1-8266-929730311695"]}}
