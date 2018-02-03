@@ -30,19 +30,18 @@
 (def argmap
   {:error-function (fn [individual]
                      (assoc individual
-                            :errors
-                            (doall
-                              (for [input (range 10)]
-                                (let [state (run-push (:program individual)
-                                                      (push-item input :input
-                                                                 (push-item input :integer
-                                                                            (tagspace-initialization (str (:program individual)) 100 (make-push-state)))))
-                                      top-int (top-item :integer state)]
-                                  (if (number? top-int)
-                                    (abs (- top-int 
-                                            (- (* input input input) 
-                                               (* 2 input input) input)))
-                                    1000))))))
+                            :errors (let [state-with-tags (tagspace-initialization (str (:program individual)) 100 (make-push-state))]
+                                      (doall
+                                        (for [input (range 10)]
+                                          (let [state (run-push (:program individual)
+                                                                (push-item input :input
+                                                                           (push-item input :integer state-with-tags)))
+                                                top-int (top-item :integer state)]
+                                            (if (number? top-int)
+                                              (abs (- top-int 
+                                                      (- (* input input input) 
+                                                         (* 2 input input) input)))
+                                              1000)))))))
    :atom-generators (list (fn [] (lrand-int 10))
                           'in1
                           'integer_div
