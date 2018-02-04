@@ -76,16 +76,15 @@
     ([individual data-cases] ;; data-cases should be :train or :test
      (the-actual-vector-average-error-function individual data-cases false))
     ([individual data-cases print-outputs]
-     (let [behavior (atom '())
+     (let [state-with-tags (tagspace-initialization (str (:program individual)) 1000 (make-push-state))
+           behavior (atom '())
            errors (doall
                    (for [[input1 correct-output] (case data-cases
                                                    :train train-cases
                                                    :test test-cases
                                                    [])]
                      (let [final-state (run-push (:program individual)
-                                                 (->> (make-push-state)
-                                                      (push-item input1 :input)
-                                                      (tagspace-initialization (str (:program individual)) 1000)))
+                                                 (push-item input1 :input state-with-tags))
                            result (top-item :float final-state)]
                        (when print-outputs
                          (let [res-str (if (float? result)
