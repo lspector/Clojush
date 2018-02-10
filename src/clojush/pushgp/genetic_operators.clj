@@ -1003,7 +1003,8 @@ programs encoded by genomes g1 and g2."
         gc2a-diff (diff c2 gc2a)
         gc2b-diff (diff c2 gc2b)]
     (assoc ind :diversifying
-      (and (not (some #{gc1a-diff} [gc2a-diff gc2b-diff]))
+      (and (not (some #{0} [gc1a-diff gc1b-diff gc2a-diff gc2b-diff]))
+           (not (some #{gc1a-diff} [gc2a-diff gc2b-diff]))
            (not (some #{gc1b-diff} [gc2a-diff gc2b-diff]))
            (not (some #{gc2a-diff} [gc1a-diff gc1b-diff]))
            (not (some #{gc2b-diff} [gc1a-diff gc1b-diff]))))))
