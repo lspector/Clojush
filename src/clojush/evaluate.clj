@@ -741,7 +741,7 @@
                          (= e (max p1e p2e)) 2
                          :else 3)))
                 (vec (repeat (count (:errors ind)) 3)))
-              (if (:parent1-errors ind)
+              #_(if (:parent1-errors ind)
                 (vec (for [[e p1e] (mapv #(vector %1 %2)
                                          (:errors ind)
                                          (:parent1-errors ind))]
@@ -751,6 +751,16 @@
                          (= e p1e) 2
                          :else 3)))
                 (vec (repeat (count (:errors ind)) 3)))
+              (if (:parent1-errors ind)
+                (vec (for [[e p1e] (mapv #(vector %1 %2)
+                                         (:errors ind)
+                                         (:parent1-errors ind))]
+                       (cond 
+                         (zero? e) 0
+                         (< e p1e) 1
+                         (= e p1e) 3
+                         :else 2)))
+                (vec (repeat (count (:errors ind)) 2)))
               ;
               (= cat :error-neglect)
               #_(if (and (:parent1-errors ind) (:parent2-errors ind))
