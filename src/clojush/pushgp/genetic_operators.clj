@@ -621,6 +621,34 @@ given by uniform-deletion-rate."
                                   (:ancestors ind)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform combination
+
+(defn uniform-combination
+  "Returns child genome created through crossover of two parents. Each gene in parent1
+  is considered in turn, and depending on some probability, may be preceded or followed
+  by the corresponding element from parent2 (which will wrap if it is too short).
+  Probability is given by uniform-combination-rate."
+  [parent1 parent2
+   {:keys [uniform-combination-rate maintain-ancestors]
+    :as argmap}]
+  (let [combination-rate (number uniform-combination-rate)
+        new-genome (vec
+                    (apply concat
+                           (mapv (fn [g1 g2]
+                                   (if (< (lrand) combination-rate)
+                                     (lshuffle [g1 g2])
+                                     [g1]))
+                                 (:genome parent1)
+                                 (cycle (:genome parent2)))))]
+    (make-individual :genome new-genome
+                     :history (:history parent1)
+                     :age ((age-combining-function argmap) parent1 parent2 new-genome)
+                     :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome parent1) (:ancestors parent1))
+                                  (:ancestors parent1)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; uniform combination and deletion
 
 (defn uniform-combination-and-deletion
@@ -630,7 +658,7 @@ given by uniform-deletion-rate."
   element of the genome may possibly be deleted. Probabilities are given by 
   uniform-combination-and-deletion-rate."
   [parent1 parent2 
-   {:keys [uniform-combination-and-deletion-rate maintain-ancestors atom-generators] 
+   {:keys [uniform-combination-and-deletion-rate maintain-ancestors]
     :as argmap}]
   (let [combination-rate (number uniform-combination-and-deletion-rate)
         deletion-rate (if (zero? combination-rate)

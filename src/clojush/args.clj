@@ -151,11 +151,14 @@
 
           :uniform-addition-and-deletion-rate 0.01
           ;; The probability, per gene, for additions in the first phase, and deletions in the second
-          ;; phase, of uniform-addition-and-deletion.
+          ;; phase (calculated for size-neutrality), of uniform-addition-and-deletion.
+
+          :uniform-combination-rate 0.01
+          ;; The probability, per gene, for combinations during uniform-combination
 
           :uniform-combination-and-deletion-rate 0.01
           ;; The probability, per gene, for combinations in the first phase, and deletions in
-          ;; the second phase, of uniform-combination-and-deletion.
+          ;; the second phase (calculated for size-neutrality), of uniform-combination-and-deletion.
 
           :uniform-silence-mutation-rate 0.1
           ;; The probability of each :silent being switched during uniform silent mutation.
