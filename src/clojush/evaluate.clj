@@ -174,6 +174,45 @@
                                  sum (reduce + (mapv * improvements weights))]
                              (- sum)))))))
               ;
+              (= cat :case-gens-since-improvement)
+              (if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :case-gens-since-improvement"))
+                (let [huge 1000000]
+                  (if (empty? (rest (:history ind)))
+                    (vec (repeat (count (:errors ind)) huge))
+                    (vec (for [case-history (apply map list (:history ind))]
+                           (if (zero? (first case-history))
+                             (- huge)  ;; solved, improvement doesn't matter
+                             (let [improved? (mapv (fn [[newer-error older-error]]
+                                                     (< newer-error older-error))
+                                                   (partition 2 1 case-history))
+                                   gens (take-while not improved?)]
+                               (if (= (count gens)
+                                      (count improved?))
+                                 huge
+                                 (count gens)))))))))
+              (= cat :case-gens-since-change)
+              (if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :case-gens-since-change"))
+                (let [huge 1000000]
+                  (if (empty? (rest (:history ind)))
+                    (vec (repeat (count (:errors ind)) huge))
+                    (vec (for [case-history (apply map list (:history ind))]
+                           (if (zero? (first case-history))
+                             (- huge)  ;; solved, improvement doesn't matter
+                             (let [changed? (mapv (fn [[newer-error older-error]]
+                                                    (not= newer-error older-error))
+                                                  (partition 2 1 case-history))
+                                   gens (take-while not changed?)]
+                               (if (= (count gens)
+                                      (count changed?))
+                                 huge
+                                 (count gens)))))))))
+              ;
               (= cat :case-sibling-uniformity)
               (if (empty? (:parent-uuids ind))
                 (vec (repeat (count (:errors ind)) 1))
