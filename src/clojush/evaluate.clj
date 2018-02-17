@@ -63,7 +63,18 @@
                   (if (or (empty? hist)
                           (apply = hist))
                     1000000
-                    (count (take-while #(= % (first hist)) (rest hist))))))
+                    (dec (count (take-while #(= % (first hist)) (rest hist)))))))
+              ;
+              (= cat :gens-since-error-change)
+              (if (not (:print-history argmap))
+                (throw 
+                  (Exception. 
+                    ":print-history must be true for :gens-since-total-error-change"))
+                (let [hist (:history ind)]
+                  (if (or (empty? hist)
+                          (apply = hist))
+                    1000000
+                    (dec (count (take-while #(= % (first hist)) (rest hist)))))))
               ;
               (= cat :gens-since-total-error-improvement)
               (if (not (:print-history argmap))
