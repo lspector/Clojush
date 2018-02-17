@@ -256,8 +256,8 @@
                                                      (second)
                                                      (nth case-index)))))
                                      siblings)
-                               0
-                               1)))))))
+                               1
+                               2)))))))
               ;
               (= cat :case-family-non-improvement)
               (if (not (:print-history argmap))
@@ -286,8 +286,47 @@
                                                   (second)
                                                   (nth case-index)))))
                                      siblings)
-                               0
-                               1)))))))
+                               1
+                               2)))))))
+              ;
+              (= cat :case-family-non-improvement-or-uniformity)
+              (if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :case-family-non-improvement"))
+                (if (or (empty? (:parent-uuids ind))
+                        (empty? (rest (:history ind))))
+                  (vec (repeat (count (:errors ind)) 1))
+                  (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                                  (first (:parent-uuids %)))
+                                               (not (empty? (rest (:history %))))) ; new random sibs don't count
+                                         evaluated-population)]
+                    (vec (for [case-index (range (count (:errors ind)))]
+                           (if (zero? (nth (:errors ind) case-index)) ;; solved
+                             0 
+                             (if 
+                               (some (fn [sib]
+                                       (or (zero? (-> (:history sib) ;; sib solved
+                                                      (first)
+                                                      (nth case-index)))
+                                           (< (-> (:history sib) ;; sib error better than mom's
+                                                  (first)
+                                                  (nth case-index))
+                                              (-> (:history sib)
+                                                  (second)
+                                                  (nth case-index)))))
+                                     siblings)
+                               1
+                               (if (some (fn [sib]
+                                           (not= (-> (:history sib) ;; sib error different than mom's
+                                                     (first)
+                                                     (nth case-index))
+                                                 (-> (:history sib)
+                                                     (second)	
+                                                     (nth case-index))))
+                                         siblings)
+                                 2
+                                 3))))))))
               ;
               (= cat :case-family-certainty)
               (if (not (:print-history argmap))
