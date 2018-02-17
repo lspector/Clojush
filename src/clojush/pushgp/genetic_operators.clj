@@ -8,14 +8,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; local utilities
 
-(defn number
+(defn random-element-or-identity-if-not-a-collection
   "If given a number, returns it. If given a collection, returns a member of the collection.
   Intended for allowing arguments to genetic operators, such as mutation rates, to take
   collections in addition to single values"
-  [number-or-numbers]
-  (if (number? number-or-numbers)
-    number-or-numbers
-    (lrand-nth number-or-numbers)))
+  [thing-or-collection]
+  (if (coll? thing-or-collection)
+    (lrand-nth thing-or-collection)
+    thing-or-collection))
 
 (declare produce-child-genome-by-autoconstruction) ;; forward declaration for grain size calculations
 
@@ -207,22 +207,22 @@
                atom-generators]
         :as argmap}]
   (let [uniform-mutation-rate 
-        (number uniform-mutation-rate)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-rate)
         
         uniform-mutation-constant-tweak-rate 
-        (number uniform-mutation-constant-tweak-rate)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-constant-tweak-rate)
         
         uniform-mutation-float-gaussian-standard-deviation 
-        (number uniform-mutation-float-gaussian-standard-deviation)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-float-gaussian-standard-deviation)
         
         uniform-mutation-int-gaussian-standard-deviation 
-        (number uniform-mutation-int-gaussian-standard-deviation)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-int-gaussian-standard-deviation)
         
         uniform-mutation-tag-gaussian-standard-deviation 
-        (number uniform-mutation-tag-gaussian-standard-deviation)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-tag-gaussian-standard-deviation)
         
         uniform-mutation-string-char-change-rate 
-        (number uniform-mutation-string-char-change-rate)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-string-char-change-rate)
     
         string-tweak (fn [st]
                        (apply str (map (fn [c]
@@ -287,7 +287,7 @@
    mutated it will be replaced with a random instruction."
   [ind {:keys [uniform-mutation-rate maintain-ancestors atom-generators]
         :as argmap}]
-  (let [uniform-mutation-rate (number uniform-mutation-rate)
+  (let [uniform-mutation-rate (random-element-or-identity-if-not-a-collection uniform-mutation-rate)
         instruction-mutator (fn [token]
                               (assoc token
                                 :instruction
@@ -317,10 +317,10 @@
                maintain-ancestors atom-generators]
         :as argmap}]
   (let [uniform-mutation-constant-tweak-rate 
-        (number uniform-mutation-constant-tweak-rate)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-constant-tweak-rate)
         
         uniform-mutation-int-gaussian-standard-deviation 
-        (number uniform-mutation-int-gaussian-standard-deviation)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-int-gaussian-standard-deviation)
         
         constant-mutator (fn [token]
                            (let [const (:instruction token)]
@@ -355,10 +355,10 @@
                maintain-ancestors atom-generators]
         :as argmap}]
   (let [uniform-mutation-constant-tweak-rate 
-        (number uniform-mutation-constant-tweak-rate)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-constant-tweak-rate)
         
         uniform-mutation-float-gaussian-standard-deviation
-        (number uniform-mutation-float-gaussian-standard-deviation)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-float-gaussian-standard-deviation)
         
         constant-mutator (fn [token]
                            (let [const (:instruction token)]
@@ -391,10 +391,10 @@
                maintain-ancestors atom-generators]
         :as argmap}]
   (let [uniform-mutation-rate 
-        (number uniform-mutation-rate)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-rate)
         
         uniform-mutation-tag-gaussian-standard-deviation
-        (number uniform-mutation-tag-gaussian-standard-deviation)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-tag-gaussian-standard-deviation)
          
         constant-mutator (fn [token]
                            (let [const (:instruction token)]
@@ -425,10 +425,10 @@
                maintain-ancestors atom-generators]
         :as argmap}]
   (let [uniform-mutation-rate 
-        (number uniform-mutation-rate)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-rate)
         
         uniform-mutation-string-char-change-rate
-        (number uniform-mutation-string-char-change-rate)
+        (random-element-or-identity-if-not-a-collection uniform-mutation-string-char-change-rate)
         
         string-tweak (fn [st]
                        (apply str (map (fn [c]
@@ -465,7 +465,7 @@
   [ind {:keys [uniform-mutation-constant-tweak-rate 
                maintain-ancestors atom-generators]
         :as argmap}]
-  (let [uniform-mutation-constant-tweak-rate (number uniform-mutation-constant-tweak-rate)
+  (let [uniform-mutation-constant-tweak-rate (random-element-or-identity-if-not-a-collection uniform-mutation-constant-tweak-rate)
         constant-mutator (fn [token]
                            (let [const (:instruction token)]
                              (if (or (= const true) (= const false)) 
@@ -497,8 +497,8 @@
         :as argmap}]
   (if (not (some #{:close} epigenetic-markers))
     ind
-    (let [uniform-close-mutation-rate (number uniform-close-mutation-rate)
-          close-increment-rate (number close-increment-rate)
+    (let [uniform-close-mutation-rate (random-element-or-identity-if-not-a-collection uniform-close-mutation-rate)
+          close-increment-rate (random-element-or-identity-if-not-a-collection close-increment-rate)
           close-mutator (fn [instr-map]
                           (let [closes (get instr-map :close 0)]
                             (assoc instr-map :close
@@ -530,7 +530,7 @@
         :as argmap}]
   (if (not (some #{:silent} epigenetic-markers))
     ind
-    (let [uniform-silence-mutation-rate (number uniform-silence-mutation-rate)
+    (let [uniform-silence-mutation-rate (random-element-or-identity-if-not-a-collection uniform-silence-mutation-rate)
           silent-mutator (fn [instr-map]
                            (let [silent (get instr-map :silent false)]
                              (assoc instr-map :silent
@@ -553,7 +553,7 @@
   "Returns the individual with each element of its genome possibly deleted, with probability
 given by uniform-deletion-rate."
   [ind {:keys [uniform-deletion-rate maintain-ancestors] :as argmap}]
-  (let [rate (number uniform-deletion-rate)
+  (let [rate (random-element-or-identity-if-not-a-collection uniform-deletion-rate)
         new-genome (vec (filter identity
                                 (mapv #(if (< (lrand) rate) nil %)
                                       (:genome ind))))]
@@ -572,7 +572,7 @@ given by uniform-deletion-rate."
   "Returns the individual with each element of its genome possibly preceded or followed by
   a new gene, with probability given by uniform-addition-rate."
   [ind {:keys [uniform-addition-rate maintain-ancestors atom-generators] :as argmap}]
-  (let [rate (number uniform-addition-rate)
+  (let [rate (random-element-or-identity-if-not-a-collection uniform-addition-rate)
         new-genome (vec (apply concat
                                (mapv #(if (< (lrand) rate)
                                         (lshuffle [% 
@@ -598,7 +598,7 @@ given by uniform-deletion-rate."
   uniform-addition-and-deletion-rate."
   [ind {:keys [uniform-addition-and-deletion-rate maintain-ancestors atom-generators] 
         :as argmap}]
-  (let [addition-rate (number uniform-addition-and-deletion-rate)
+  (let [addition-rate (random-element-or-identity-if-not-a-collection uniform-addition-and-deletion-rate)
         deletion-rate (if (zero? addition-rate)
                         0
                         (/ 1 (+ (/ 1 addition-rate) 1)))
@@ -631,7 +631,7 @@ given by uniform-deletion-rate."
   [parent1 parent2
    {:keys [uniform-combination-rate maintain-ancestors]
     :as argmap}]
-  (let [combination-rate (number uniform-combination-rate)
+  (let [combination-rate (random-element-or-identity-if-not-a-collection uniform-combination-rate)
         new-genome (vec
                     (apply concat
                            (mapv (fn [g1 g2]
@@ -660,7 +660,7 @@ given by uniform-deletion-rate."
   [parent1 parent2 
    {:keys [uniform-combination-and-deletion-rate maintain-ancestors]
     :as argmap}]
-  (let [combination-rate (number uniform-combination-and-deletion-rate)
+  (let [combination-rate (random-element-or-identity-if-not-a-collection uniform-combination-and-deletion-rate)
         deletion-rate (if (zero? combination-rate)
                         0
                         (/ 1 (+ (/ 1 combination-rate) 1)))
@@ -691,8 +691,8 @@ given by uniform-deletion-rate."
    used in ULTRA."
   [parent1 parent2 {:keys [alternation-rate alignment-deviation
                            max-points maintain-ancestors] :as argmap}]
-  (let [alternation-rate (number alternation-rate)
-        alignment-deviation (number alignment-deviation)
+  (let [alternation-rate (random-element-or-identity-if-not-a-collection alternation-rate)
+        alignment-deviation (random-element-or-identity-if-not-a-collection alignment-deviation)
         s1 (:genome parent1)
         s2 (:genome parent2)
         new-genome (loop [i 0
