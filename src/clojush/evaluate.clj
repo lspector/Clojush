@@ -54,6 +54,10 @@
               (= cat :novelty) :novelty ; Keyword will be replaced later,
               ;                         ; needs entire population to compute novelty
               ;
+              (= cat :amorphousness)
+              (- 1 (double (/ (count-parens (:program ind)) 
+                              (count-points (:program ind))))) ;Number of (open) parens / points
+              ;
               (= cat :gens-since-total-error-change)
               (if (not (:print-history argmap))
                 (throw 
@@ -445,7 +449,7 @@
                              (if (some #{latest} (set olders))
                                2
                                1)))))))
-              #_(if (not (:print-history argmap))
+              (if (not (:print-history argmap))
                 (throw
                   (Exception.
                     ":print-history must be true for :repeated-errors"))
@@ -494,7 +498,7 @@
                            (if (some #{latest} (set olders))
                              2
                              0))))))
-              (if (not (:print-history argmap))
+              #_(if (not (:print-history argmap))
                 (throw
                   (Exception.
                     ":print-history must be true for :repeated-errors"))
@@ -1177,7 +1181,4 @@
                            :normalized-error ne
                            :history (if print-history (cons e (:history i)) (:history i)))]
         new-ind))))
-
-
-
 
