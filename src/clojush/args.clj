@@ -210,6 +210,10 @@
           :autoconstructive-decay 0.0
           ;; The rate for random gene deletions after autoconstruction.
           
+          :autoconstructive-clone-decay :same
+          ;; The rate for random gene deletions after cloning in autoconstruction. If this is
+          ;; :same then the value for :autoconstructive-decay is used.
+          
           :autoconstructive-parent-decay 0.0
           ;; The rate for random gene deletions in parent genomes used for autoconstruction.
 
@@ -266,7 +270,7 @@
           :parent-selection :lexicase
           ;; The parent selection method. Options include :tournament, :lexicase, :epsilon-lexicase,
           ;; :elitegroup-lexicase, :uniform, :leaky-lexicase, :random-threshold-lexicase,
-          ;; :novelty-search
+          ;; :random-toggle-lexicase, :randomly-truncated-lexicase, :novelty-search
 
           :epsilon-lexicase-epsilon nil
           ;; When parent-selection is :epsilon-lexicase,
@@ -281,6 +285,14 @@
           ;; The probability that each filtering step in random threshold lexicase selection will 
           ;; allow candidates with errors equal to or better than a randomly chosen threshold to 
           ;; survive, rather than just the best.
+          
+          :random-toggle-lexicase-probability 1
+          ;; The probability that each filtering step in random toggle lexicase selection will 
+          ;; allow just the best to survive, rather than all individuals in the pool.
+          
+          :randomly-truncated-lexicase-probability 1
+          ;; The probability that an application of randomly-truncated-lexicase-selection
+          ;; will consider only a random subset of the test cases, rather than all of them.
 
           :lexicase-leakage 0.1
           ;; If using leaky lexicase selection, the probability that a selection event will return
@@ -291,6 +303,11 @@
           ;; selection, the probability that each step of the lexicase selection process will
           ;; "slip" and return a random candidate from the current pool, rather than continuing 
           ;; to filter the pool.
+          
+          :sort-meta-errors-for-lexicase :random
+          ;; If using lexicase selection, determines how meta-errors will be sorted among
+          ;; the actual errors. Options are :random (errors and meta-errors are shuffled 
+          ;; together), :first (meta-errors come first), or :last (meta-errors come last).
 
           :tournament-size 7
           ;; If using tournament selection, the size of the tournaments.
