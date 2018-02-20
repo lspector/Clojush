@@ -1029,7 +1029,7 @@ programs encoded by genomes g1 and g2."
         gc2b-diff (diff c2 gc2b)
         gc2c-diff (diff c2 gc2c)]
     (assoc ind :diversifying
-      (and ;(not (some #{0} [gc1a-diff gc1b-diff gc2a-diff gc2b-diff]))
+      (and ;(not (some zero? [gc1a-diff gc1b-diff gc1c-diff gc2a-diff gc2b-diff gc2c-diff]))
            (not (some #{gc1a-diff} [gc2a-diff gc2b-diff gc2c-diff]))
            (not (some #{gc1b-diff} [gc2a-diff gc2b-diff gc2c-diff]))
            (not (some #{gc1c-diff} [gc2a-diff gc2b-diff gc2c-diff]))
