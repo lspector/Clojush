@@ -1037,6 +1037,26 @@ programs encoded by genomes g1 and g2."
            (not (some #{gc2a-diff} [gc1a-diff gc1b-diff]))
            (not (some #{gc2b-diff} [gc1a-diff gc1b-diff]))))))
 
+(defn minimal-two-x-two-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)
+        make-child #(produce-child-genome-by-autoconstruction % g g argmap)
+        diff #(expressed-difference %1 %2 argmap)
+        c1 (make-child g)
+        c2 (make-child g)
+        gc1a (make-child c1)
+        gc1b (make-child c1)
+        gc2a (make-child c2)
+        gc2b (make-child c2)
+        gc1a-diff (diff c1 gc1a)
+        gc1b-diff (diff c1 gc1b)
+        gc2a-diff (diff c2 gc2a)
+        gc2b-diff (diff c2 gc2b)
+        gc-diffs [gc1a-diff gc1b-diff gc2a-diff gc2b-diff]]
+    (assoc ind :diversifying
+      (and (not (some zero? gc-diffs))
+           (> (count (distinct gc-diffs)) 1)))))
+
 (defn two-x-three-diversifying?
   [ind argmap]
   (let [g (:genome ind)
@@ -1327,6 +1347,7 @@ programs encoded by genomes g1 and g2."
                 :three-gens-same-inputs-diff-diffs three-gens-same-inputs-diff-diffs-diversifying?
                 :four-gens-same-inputs-diff-diffs four-gens-same-inputs-diff-diffs-diversifying?
                 :two-x-two two-x-two-diversifying?
+                :minimal-two-x-two minimal-two-x-two-diversifying?
                 :two-x-three two-x-three-diversifying?
                 :three-gens-some-diff-diffs three-gens-some-diff-diffs-diversifying?
                 :size-and-instruction size-and-instruction-diversifying?
