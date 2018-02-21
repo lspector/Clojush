@@ -1,0 +1,40 @@
+#PBS -N RSWN-tourney
+#PBS -l nodes=1:ppn=4
+#PBS -l mem=4GB
+#PBS -q una
+#PBS -M thelmuth@hamilton.edu
+#PBS -m bea        
+#PBS -j oe         
+#PBS -l walltime=03:00:00 
+#PBS -r y
+#PBS -o /home/thelmuth/Results/HPC-files/
+#PBS -t 0-99
+# This last line is the range of the number of jobs to start, inclusive
+
+# Depends on your shell. Uncomment the one you need. Bash uncommented by default
+NP=`cat $PBS_NODEFILE | wc -l`  # Bash syntax
+#setenv NP `cat $PBS_NODEFILE | wc -l` # tcsh/csh syntax
+
+NAMESPACE="replace-space-with-newline"
+SELECTION="tournament"
+
+DIRECTORY="/home/thelmuth/Results/parent-selection-v2/$SELECTION/$NAMESPACE"
+
+PUSHARGS=":parent-selection :$SELECTION"
+
+PROBLEM="clojush.problems.software.$NAMESPACE"
+
+# NOTES:
+#  - It would be nice to make sure a directory doesn't exist before running this, to not overwrite results
+
+echo "Changing to directory $PBS_O_WORKDIR"
+cd $PBS_O_WORKDIR            
+echo -n "Executing program at: "
+date
+echo ""
+mkdir -p $DIRECTORY
+time lein run $PROBLEM $PUSHARGS > "$DIRECTORY/log$PBS_ARRAYID.txt"
+echo ""
+echo -n "Finished program at: "
+date
+echo ""
