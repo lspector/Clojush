@@ -208,7 +208,7 @@
                                                (iterate (partial * (- 1 improvement-discount)) 1))
                                  sum (reduce + (mapv * improvements weights))]
                              (- sum)))))))
-              #_(if (not (:print-history argmap))
+              (if (not (:print-history argmap))
                 (throw
                   (Exception.
                     ":print-history must be true for :case-stagnation"))
@@ -228,7 +228,7 @@
                                                (iterate (partial * (- 1 improvement-discount)) 1))
                                  sum (reduce + (mapv * improvements weights))]
                              (- sum)))))))
-              (if (not (:print-history argmap))
+              #_(if (not (:print-history argmap))
                 (throw
                   (Exception.
                     ":print-history must be true for :case-stagnation"))
