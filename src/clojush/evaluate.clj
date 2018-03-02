@@ -981,7 +981,7 @@
                          (= e p1e) 3
                          :else 2)))
                 (vec (repeat (count (:errors ind)) 2)))
-              #_(if (:parent1-errors ind)
+              (if (:parent1-errors ind)
                 (vec (for [[e p1e] (mapv #(vector %1 %2)
                                          (:errors ind)
                                          (:parent1-errors ind))]
@@ -1030,7 +1030,7 @@
                          (some #{e} [p1e p2e]) 3
                          :else 4)))
                 (vec (repeat (count (:errors ind)) 4)))
-              (if (and (:parent1-errors ind)
+              #_(if (and (:parent1-errors ind)
                        (:parent2-errors ind))
                 (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
                                              (:errors ind)
