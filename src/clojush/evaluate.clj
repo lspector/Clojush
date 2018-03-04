@@ -1249,6 +1249,14 @@
                     0))
                 1)
               ;
+              (= cat :inherited-errors)
+              (if (and (:parent1-errors ind)
+                       (:parent2-errors ind)
+                       (not= (:errors ind) (:parent1-errors ind))
+                       (not= (:errors ind) (:parent2-errors ind)))
+                0
+                1)
+              ;
               :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
       (assoc ind :meta-errors (vec (flatten (mapv meta-error-fn meta-error-categories)))))))
 
