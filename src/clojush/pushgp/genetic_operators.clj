@@ -1304,6 +1304,24 @@ programs encoded by genomes g1 and g2."
     (assoc ind :diversifying 
       (not (empty? (clojure.set/difference child-instructions parent-instructions))))))
 
+(defn lost-instruction-diversifying?
+  [ind {:keys [parent1-genome parent2-genome] :as argmap}]
+  (let [set-diff clojure.set/difference
+        child-instructions (set (map :instruction (:genome ind)))
+        parent1-instructions (set (map :instruction parent1-genome))
+        parent2-instructions (set (map :instruction parent2-genome))]
+    (assoc ind :diversifying 
+      (and (not (empty? (set-diff parent1-instructions child-instructions)))
+           (not (empty? (set-diff parent2-instructions child-instructions)))))))
+
+(defn different-instructions-diversifying?
+  [ind {:keys [parent1-genome parent2-genome] :as argmap}]
+  (assoc ind :diversifying 
+    (and (not= (set (map :instruction (:genome ind)))
+               (set (map :instruction parent1-genome)))
+         (not= (set (map :instruction (:genome ind)))
+               (set (map :instruction parent2-genome))))))
+
 (defn new-size-diversifying?
   [ind {:keys [parent1-genome parent2-genome] :as argmap}]
   (let [child-size (count (:genome ind))]
@@ -1366,8 +1384,10 @@ programs encoded by genomes g1 and g2."
                 :not-a-clone not-a-clone-diversifying?
                 :minimum-genetic-difference minimum-genetic-difference-diversifying?
                 :different-errors different-errors-diversifying?
-                :new-instruction-diversifying new-instruction-diversifying?
-                :new-size-diversifying new-size-diversifying?
+                :new-instruction new-instruction-diversifying?
+                :lost-instruction lost-instruction-diversifying?
+                :different-instructions different-instructions-diversifying?
+                :new-size new-size-diversifying?
                 :checks-autoconstructing checks-autoconstructing-diversifying?
                 :autoconstruction-aware autoconstruction-aware-diversifying?
                 :none (fn [ind argmap] i))
