@@ -123,7 +123,6 @@
     (println ";;******************************")
     (println ";;Automatic tags used to intialize the tagspace:")
     (println "Auto-tags:" (keys (get (tagspace-initialization (str (:program best)) 100 (make-push-state)) :tag)))
-    (println (get (tagspace-initialization (str (:program best)) 100 (make-push-state)) :tag))
     (printf ";; -*- Digits problem report - generation %s\n" generation)(flush)
     (println "Test total error for best:" best-total-test-error)
     (println (format "Test mean error for best: %.5f" (double (/ best-total-test-error (count best-test-errors)))))

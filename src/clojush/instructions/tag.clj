@@ -58,8 +58,11 @@
           ((if @global-pop-when-tagging pop-item (fn [type state] state))
                source-type
                (assoc state :tag (assoc (or (:tag state) (sorted-map))
-                                        the-tag 
-                                        (first (source-type state)))))))
+                                        the-tag
+                                        (let [code (str (first (source-type state)))]
+                                          (if (re-find #"return_" code)
+                                            (str "environment_begin " code " environment_end")
+                                            code)))))))
       ;; if it's of the form untag_<number>: REMOVE TAG ASSOCIATION
       (= (first iparts) "untag")
       (if (empty? (:tag state))

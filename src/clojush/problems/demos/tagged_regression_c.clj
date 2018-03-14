@@ -9,7 +9,8 @@
         [clojush.random]
         [clojush.interpreter]
         [clojure.math.numeric-tower]
-        [clojush.instructions.tag])
+        [clojush.instructions.tag]
+        [clojush.instructions.environment])
   (:require [clojure.string :as string]
             [local-file]))
 
@@ -26,6 +27,18 @@
 
 
 ;; http://www.drregex.com/2017/11/match-nested-brackets-with-regex-new.html
+
+
+(defn custom-report
+  "Custom generational report."
+  [best population generation error-function report-simplifications]
+  (let [state-with-tags (tagspace-initialization (str (:program best)) 100 (make-push-state))]
+    (println ";;******************************")
+    (println ";;Automatic tags used to intialize the tagspace:")
+    (println "Auto-tags:" (keys (get state-with-tags :tag)))
+    (println ";;******************************")
+    ))
+
 
 (def argmap
   {:error-function (fn [individual]
@@ -50,8 +63,10 @@
                           'integer_sub
                           (tag-instruction-erc [:integer :exec] 100)
                           (untag-instruction-erc 100)
-                          (tagged-instruction-erc 100))
+                          (tagged-instruction-erc 100)
+                          (registered-for-stacks [:environment]))
    :tag-limit 100
+   :problem-specific-report custom-report
    :parent-selection :tournament
    :tournament-size 3
    :genetic-operator-probabilities {:alternation 0.5

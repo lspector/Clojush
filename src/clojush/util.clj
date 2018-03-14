@@ -433,5 +433,8 @@
     (assoc state :tag (reduce merge (for [pair (zipmap contents (range 0 num-tags (quot num-tags (count contents))))]
                                       (assoc (or (:tag state) (sorted-map))
                                                       (second pair)
-                                                      (first pair)))))))
+                                                      (let [code (first pair)]
+                                                        (if (re-find #"return_" code)
+                                                          (str "environment_begin " code " environment_end")
+                                                          code))))))))
 
