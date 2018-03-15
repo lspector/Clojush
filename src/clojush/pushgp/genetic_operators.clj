@@ -1346,6 +1346,14 @@ programs encoded by genomes g1 and g2."
                      (= (:instruction instruction-map) 'genome_if_autoconstructing))))
           (:genome ind))))
 
+(defn contains-genesis-diversifying?
+  [ind argmap]
+  (assoc ind :diversifying
+    (some (fn [instruction-map]
+            (and (not (:silent instruction-map))
+                 (= (:instruction instruction-map) 'genome_genesis)))
+          (:genome ind))))
+
 (defn diversifying?
   "Returns ind with :diversifying set to true if it staisfies all test
   specified in (:autoconstructive-diversification-test argmap), or false
@@ -1390,6 +1398,7 @@ programs encoded by genomes g1 and g2."
                 :new-size new-size-diversifying?
                 :checks-autoconstructing checks-autoconstructing-diversifying?
                 :autoconstruction-aware autoconstruction-aware-diversifying?
+                :contains-genesis contains-genesis-diversifying?
                 :none (fn [ind argmap] i))
               i
               argmap)

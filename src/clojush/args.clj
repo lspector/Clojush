@@ -570,7 +570,8 @@
                                             genome_autoconstructing
                                             genome_if_autoconstructing
                                             genome_gene_genome_instruction
-                                            genome_if_gene_genome_instruction))
+                                            genome_if_gene_genome_instruction
+                                            genome_genesis))
                     :uniform (into (registered-for-stacks
                                      (if (:autoconstructive-environments @push-argmap)
                                        [:integer :boolean :exec :float :tag :environment]

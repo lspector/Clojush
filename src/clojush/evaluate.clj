@@ -371,6 +371,29 @@
                                1
                                2)))))))
               ;
+              (= cat :case-scaled-error-plus-change)
+              #_(if (and (:parent1-errors ind)
+                       (:parent2-errors ind))
+                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                             (:errors ind)
+                                             (:parent1-errors ind)
+                                             (:parent2-errors ind))]
+                       (+ (* e 1000000) (- e (min p1e p2e)))))
+                  (:errors ind))
+              (if (and (:parent1-errors ind)
+                       (:parent2-errors ind))
+                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                             (:errors ind)
+                                             (:parent1-errors ind)
+                                             (:parent2-errors ind))]
+                       (+ (* e 1000000) 
+                          (#(cond 
+                              (neg? %) -1
+                              (pos? %) 1
+                              :else 0)
+                            (- e (min p1e p2e))))))
+                (mapv #(* % 1000000) (:errors ind)))
+              ;
               (= cat :case-family-non-improvement)
               (if (not (:print-history argmap))
                 (throw
