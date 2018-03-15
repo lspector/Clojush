@@ -1254,12 +1254,13 @@
                 0
                 1)
               ;
-              (= cat :static-size)
-              (if (:parent1-genome ind)
-                (if (= (count (:genome ind))
-                       (count (:parent1-genome ind)))
-                  1
-                  0)
+              (= cat :no-genesis)
+              (if (some (fn [instruction-map]
+                          (and (not (:silent instruction-map))
+                               (some #{(:instruction instruction-map)}
+                                     #{'genome_genesis})))
+                        (:genome ind))
+                0
                 1)
               ;
               (= cat :static-instruction-set)
