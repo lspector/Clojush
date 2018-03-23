@@ -16,6 +16,7 @@
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
+        clojush.instructions.environment
         [clojure.math numeric-tower]
         ))
 
@@ -32,7 +33,7 @@
             'in1
             ;;; end input instructions
             )
-          (registered-for-stacks [:integer :boolean :string :char :exec :print])))
+          (registered-for-stacks [:integer :boolean :string :char :exec :print :environment])))
 
 (defn my-rand-long
   "replaces rand-int when need longs"
