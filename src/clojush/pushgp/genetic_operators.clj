@@ -796,7 +796,10 @@ given by uniform-deletion-rate."
                (or (re-seq #"in\d+" (name instruction)) ;; from input-output
                    (re-seq #"in_dm" (name instruction)) ;; from digital-multiplier
                    (some #{instruction}
-                         '(a0 a1 a2 d0 d1 d2 d3 d4 d5 d6 d7)))))] ;; from mux problems
+                         '(a0 a1 a2 d0 d1 d2 d3 d4 d5 d6 d7)) ;; from mux problems
+                   (some #{instruction}
+                         '(file_readline file_readchar file_EOF file_begin)) ;; from word-stats
+                   )))]
     (mapv (fn [instruction-map]
             (cond 
               (input-instruction? (:instruction instruction-map))

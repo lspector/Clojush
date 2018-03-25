@@ -632,10 +632,32 @@
                              0))))))
               ;
               (= cat :error-favoritism)
-              (if (and (:parent1-errors ind) (:parent2-errors ind))
+              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
                 (math/abs (- (sequence-similarity (:errors ind) (:parent1-errors ind))
                              (sequence-similarity (:errors ind) (:parent2-errors ind))))
                 1.0)
+              #_(let [p1e (:parent1-errors ind)
+                    p2e (:parent2-errors ind)
+                    e (:errors ind)]
+                (if (and p1e p2e)
+                  (let [p1-shortfall (count (filter #(apply > %) (map list e p1e)))
+                        p2-shortfall (count (filter #(apply > %) (map list e p2e)))]
+                    (Math/abs (- p1-shortfall p2-shortfall)))
+                  (count e)))
+              (if (and (:parent1-errors ind) (:parent2-errors ind))
+                (let [all (map list
+                               (:errors ind)
+                               (:parent1-errors ind)
+                               (:parent2-errors ind))
+                      diff-parents (filter (fn [[e p1e p2e]] (not= p1e p2e)) all)
+                      from-p1 (count (filter (fn [[e p1e p2e]] (= e p1e)) diff-parents))
+                      from-p2 (count (filter (fn [[e p1e p2e]] (= e p2e)) diff-parents))]
+                  (if (empty? diff-parents)
+                    0
+                    (/ (Math/abs (- from-p1 from-p2))
+                       (count diff-parents))))
+                1)
+              
               ;
               (= cat :case-error-neglect)
               #_(if (and (:parent1-errors ind) (:parent2-errors ind))
