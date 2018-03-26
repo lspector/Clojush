@@ -16,7 +16,6 @@
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
-        clojush.instructions.environment
         [clojure.math numeric-tower]
         ))
 
@@ -33,7 +32,7 @@
             'in1
             ;;; end input instructions
             )
-          (registered-for-stacks [:integer :boolean :string :char :exec :print :environment])))
+          (registered-for-stacks [:integer :boolean :string :char :exec :print])))
 
 (defn my-rand-long
   "replaces rand-int when need longs"
@@ -122,8 +121,12 @@
   (let [best-test-errors (:test-errors (error-function best :test))
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
-    (println ";;Automatic tags used to intialize the tagspace:")
-    (println "Auto-tags:" (keys (get (tagspace-initialization (str (:program best)) 100 (make-push-state)) :tag)))
+    (println ";;Automatic tags used to intialize the tagspace (for best program only):")
+    (println "Auto-tags:" (keys (get (tagspace-initialization (str (:program best)) 1000 (make-push-state)) :tag)))
+    (println ";;Tagspce-Utilization of whole population: " (doall (for [ind population]
+                                                                    (intial-tagspace-utilization (str (:program ind)) (tagspace-initialization (str (:program ind)) 1000 (make-push-state))))))
+    (println ";;Total Error of whole Population: " (doall (for [ind population]
+                                                           (apply +' (:errors ind)))))
     (printf ";; -*- Digits problem report - generation %s\n" generation)(flush)
     (println "Test total error for best:" best-total-test-error)
     (println (format "Test mean error for best: %.5f" (double (/ best-total-test-error (count best-test-errors)))))

@@ -430,11 +430,40 @@
   (let [single-instrs (string/split (string/replace prog #"[\(\)]" "") #" ")
         list-instrs (nested-parens #"(?=\()(?:(?=.*?\((?!.*?\1)(.*\)(?!.*\2).*))(?=.*?\)(?!.*?\2)(.*)).)+?.*?(?=\1)[^(]*(?=\2$)" prog)
         contents (concat single-instrs list-instrs)]
-    (assoc state :tag (reduce merge (for [pair (zipmap contents (range 0 num-tags (quot num-tags (count contents))))]
+    (assoc state :tag (reduce merge (for [pair (zipmap (shuffle contents) (range 0 num-tags (max 1 (quot num-tags (count contents)))))]
                                       (assoc (or (:tag state) (sorted-map))
                                                       (second pair)
                                                       (let [code (first pair)]
                                                         (if (re-find #"return_" code)
                                                           (str "environment_begin " code " environment_end")
                                                           code))))))))
+
+
+(defn closest-tag
+  "Returns the closest match to the given tag
+   in the given list."
+  [tag tag-list]
+  (loop [associations tag-list]
+    (if (or (empty? (rest associations))
+            (<= tag (first associations)))
+      (first associations)
+      (recur (rest associations)))))
+
+(defn intial-tagspace-utilization
+ [prog state]
+ (let [init-tags (keys (get state :tag))
+       prog-tagspace (re-seq #"\w*tag[ged]*_\w+" prog)
+       curr-tags init-tags
+       result (for [instr prog-tagspace]
+                (let [tag (Integer. (re-find #"\d+" instr))]
+                  (if (= "tag_" (subs instr 0 4))
+                    (if (some #(= tag %) init-tags) 
+                      (remove #{tag} init-tags))
+                    (conj curr-tags tag))
+                  (if (= "untag_" (subs instr 0 6))
+                    (remove #{tag} curr-tags))
+                  (if (= "tagged_" (subs instr 0 7))
+                    (if (some #(= (closest-tag tag curr-tags) %) init-tags)
+                      tag))))]
+   (list (count (filter identity result)) (count init-tags))))
 

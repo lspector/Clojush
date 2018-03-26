@@ -61,7 +61,7 @@
                                         the-tag
                                         (let [code (str (first (source-type state)))]
                                           (if (re-find #"return_" code)
-                                            (str "environment_begin " code " environment_end")
+                                            (str "environment_begin " code " return_tagspace environment_end")
                                             code)))))))
       ;; if it's of the form untag_<number>: REMOVE TAG ASSOCIATION
       (= (first iparts) "untag")

@@ -4,6 +4,7 @@
         [clojush.pushstate]
         [clojush.interpreter]
         [clojush.random]
+        clojush.instructions.tag
         [clojure.math.numeric-tower]))
 
 ; Problem: Take the input string, remove the last 2 characters, and then concat this result with itself.
@@ -50,6 +51,23 @@
 #_(println (run-push '(string_dup string_length 2 integer_sub string_take string_dup string_concat)
                      (push-item "abcde" :string (make-push-state))))
 
+(defn custom-report
+  "Custom generational report."
+  [best population generation error-function report-simplifications]
+  (let [best-test-errors (:errors (error-function best))
+        best-total-test-error (apply +' best-test-errors)]
+    (println ";;******************************")
+    (println ";;Automatic tags used to intialize the tagspace:")
+    (println ";;Tagspce-Utilization of whole population: " (doall (for [ind population]
+                                                                    (intial-tagspace-utilization (str (:program ind)) (tagspace-initialization (str (:program ind)) 100 (make-push-state))))))
+    (println ";;Total Error of whole Population: " (doall (for [ind population]
+                                                           (apply +' (:errors ind)))))
+    (println "Auto-tags:" (keys (get (tagspace-initialization (str (:program best)) 100 (make-push-state)) :tag)))
+    (printf ";; -*- Digits problem report - generation %s\n" generation)(flush)
+    )) 
+
+
+
 ; Define the arguments
 (def argmap
  {:error-function (fn [individual]
@@ -89,14 +107,19 @@
                          'integer_dup
                          'integer_swap
                          'integer_stackdepth
+                         (tag-instruction-erc [:integer :boolean :string :char :exec] 1000)
+                         (tagged-instruction-erc 1000)
                          (fn [] (lrand-int 10))
                          (fn [] (apply str (repeatedly (+ 1 (lrand-int 9))
                                                        #(lrand-nth (str "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                                                         "abcdefghijklmnopqrstuvwxyz"
                                                                         "0123456789"))))))
+  
   :population-size 500
   :max-generations 200
   :epigenetic-markers []
+  :problem-specific-report custom-report
+  :report-simplifications 0
   :genetic-operator-probabilities {:alternation 0.5
                                    :uniform-mutation 0.5}
   :uniform-mutation-constant-tweak-rate 0.8

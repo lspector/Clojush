@@ -12,6 +12,7 @@
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
+        clojush.instructions.environment
         [clojure.math numeric-tower]
         ))
 
@@ -29,7 +30,7 @@
             'in1
             ;;; end input instructions
             )
-          (registered-for-stacks [:integer :boolean :exec :string :print])))
+          (registered-for-stacks [:integer :boolean :exec :string :print :environment])))
 
 
 ;; A list of data domains for the problem. Each domain is a vector containing
