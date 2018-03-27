@@ -22,11 +22,13 @@
   time in random order."
   [pop argmap]
   (loop [survivors pop
-         cases (shuffle-cases pop argmap)]
+         cases (if-let [provided-cases (:cases argmap)]
+                 provided-cases
+                 (shuffle-cases pop argmap))]
     (if (or (empty? cases)
             (empty? (rest survivors))
             (< (lrand) (:lexicase-slippage argmap)))
-      (lrand-nth survivors)
+      (with-meta (lrand-nth survivors) {:cases cases})
       (let [min-err-for-case (apply min (map #(nth % (first cases))
                                              (map :errors survivors)))]
         (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
