@@ -351,7 +351,8 @@
                (doall (map frequencies (apply map vector (map :errors population))))))
     (when (some #{parent-selection} 
                 #{:lexicase :elitegroup-lexicase :leaky-lexicase :epsilon-lexicase 
-                  :random-threshold-lexicase}) 
+                  :random-threshold-lexicase :random-toggle-lexicase 
+                  :randomly-truncated-lexicase}) 
           (lexicase-report population argmap))
     (when (= total-error-method :ifs) (implicit-fitness-sharing-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
@@ -613,5 +614,4 @@
     (println "\n;;******************************")
     (println ";; Problem-Specific Report of Simplified Solution")
     (problem-specific-report simplified-best [] generation error-function report-simplifications)))
-
 

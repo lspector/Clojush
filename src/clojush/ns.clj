@@ -14,5 +14,6 @@
      (use '(clojush.pushgp breed genetic-operators pushgp report))
      (use '(clojush.pushgp.selection 
              selection preselection tournament lexicase epsilon-lexicase 
-             elitegroup-lexicase random-threshold-lexicase implicit-fitness-sharing))))
+             elitegroup-lexicase random-threshold-lexicase random-toggle-lexicase 
+             randomly-truncated-lexicase implicit-fitness-sharing))))
 
