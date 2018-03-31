@@ -42,6 +42,7 @@
 
 (def argmap
   {:error-function (fn [individual]
+                     (let [stacks-depth (atom (zipmap push-types (repeat 0)))]
                      (assoc individual
                             :errors (let [state-with-tags (tagspace-initialization (str (:program individual)) 100 (make-push-state))]
                                       (doall
@@ -50,11 +51,15 @@
                                                                 (push-item input :input
                                                                            (push-item input :integer state-with-tags)))
                                                 top-int (top-item :integer state)]
+                                            (doseq [[k v] (:max-stack-depth state)] (swap! stacks-depth update k #(max % v)))
                                             (if (number? top-int)
                                               (abs (- top-int 
                                                       (- (* input input input) 
                                                          (* 2 input input) input)))
-                                              1000)))))))
+                                              1000)))))
+                            :stacks-info @stacks-depth)
+                      ;(println (:uuid individual), @stacks-depth)
+                      ))
    :atom-generators (list (fn [] (lrand-int 10))
                           'in1
                           'integer_div
@@ -72,4 +77,5 @@
    :genetic-operator-probabilities {:alternation 0.5
                                     :uniform-mutation 0.4
                                     :uniform-close-mutation 0.1}
+   :meta-error-categories [:max-stacks-depth]
    })

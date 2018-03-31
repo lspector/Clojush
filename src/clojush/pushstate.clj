@@ -60,7 +60,15 @@
   "Returns a copy of the state with the value pushed on the named stack. This is a utility,
    not for use in Push programs."
   [value type state]
-  (assoc state type (cons value (type state))))
+  (let [new-state  (if (some #{type} [:integer :float :boolean :char :string :zip :vector_integer :vector_float :vector_boolean :vector_string])
+                     (assoc-in state [:max-stack-depth type] (if (contains? state :max-stack-depth)
+                                                               (if (contains? (:max-stack-depth state) type)
+                                                                   (max (get-in state [:max-stack-depth type]) (inc (count (type state))))
+                                                                   1)
+                                           1))
+                         state)] 
+    (assoc new-state type (cons value (type new-state)))))
+  
 
 (defn top-item
   "Returns the top item of the type stack in state. Returns :no-stack-item if called on
@@ -93,6 +101,13 @@
   "Returns a copy of the state with the specified stack popped. This is a utility,
    not for use as an instruction in Push programs."
   [type state]
+;  (let [new-state  (if (some #{type} [:integer :float :boolean :char :string :zip :vector_integer :vector_float :vector_boolean :vector_string])
+;                     (if (contains? state :max-stack-depth)
+;                         (if (contains? (:max-stack-depth state) type)
+;                             (update-in state [:max-stack-depth type] #(max 0 (dec %)))
+;                             (assoc-in state [:max-stack-depth type] 0))
+;                           (assoc-in state [:max-stack-depth type] 0))
+;                         state)] 
   (update state type rest))
 
 (defn end-environment

@@ -10,7 +10,7 @@
 
 (def push-types '(:exec :code :integer :float :boolean :char :string :zip
                   :vector_integer :vector_float :vector_boolean :vector_string
-                  :input :output :auxiliary :tag :return :environment :genome))
+                  :input :output :auxiliary :tag :return :environment :genome :max-stack-depth))
 ;; The list of stacks used by the Push interpreter
 
 

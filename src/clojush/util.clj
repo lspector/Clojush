@@ -467,3 +467,10 @@
                       tag))))]
    (list (count (filter identity result)) (count init-tags))))
 
+
+
+(defn stacks-depth
+  [state]
+  (let [new-state (dissoc state :tag :return :environment:genome)]
+       (for [key (keys new-state)]
+            (count (get new-state key)))))

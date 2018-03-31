@@ -15,7 +15,8 @@
 (ns clojush.problems.software.digits-c
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
-        clojush.instructions.tag
+        ;clojush.instructions.tag
+        ;clojush.instructions.environment
         [clojure.math numeric-tower]
         ))
 
@@ -26,8 +27,8 @@
             ;;; end constants
             (fn [] (- (lrand-int 21) 10))
             ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :string :char :exec] 1000)
-            (tagged-instruction-erc 1000)
+            ;(tag-instruction-erc [:integer :boolean :string :char :exec] 1000)
+            ;(tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
@@ -76,24 +77,29 @@
      (the-actual-digits-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
-            state-with-tags (tagspace-initialization (str (:program individual)) 1000 (make-push-state))
+            ;state-with-tags (tagspace-initialization (str (:program individual)) 1000 (make-push-state))
+            stacks-depth (atom (zipmap push-types (repeat 0)))
             errors (doall
                      (for [[input1 correct-output] (case data-cases
                                                      :train train-cases
                                                      :test test-cases
                                                      [])]
                        (let [final-state (run-push (:program individual)
-                                                   (->> (push-item input1 :input state-with-tags)
+                                                   (->> (push-item input1 :input (make-push-state))
                                                      (push-item "" :output)))
                              result (stack-ref :output 0 final-state)]
                          (when print-outputs
                            (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                         ; Record the behavior
+                         ; Update the length of each stack
+                         (doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
+                        
+                         ; Record the behavior              
                          (swap! behavior conj result)
                          ; Error is Levenshtein distance of printed strings
                          (levenshtein-distance correct-output result))))]
+        ;(assoc individual :stacks-info @stacks-depth)
         (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors :stacks-info @stacks-depth)
           (assoc individual :test-errors errors))))))
 
 (defn get-digits-train-and-test
@@ -121,12 +127,12 @@
   (let [best-test-errors (:test-errors (error-function best :test))
         best-total-test-error (apply +' best-test-errors)]
     (println ";;******************************")
-    (println ";;Automatic tags used to intialize the tagspace (for best program only):")
-    (println "Auto-tags:" (keys (get (tagspace-initialization (str (:program best)) 1000 (make-push-state)) :tag)))
-    (println ";;Tagspce-Utilization of whole population: " (doall (for [ind population]
-                                                                    (intial-tagspace-utilization (str (:program ind)) (tagspace-initialization (str (:program ind)) 1000 (make-push-state))))))
-    (println ";;Total Error of whole Population: " (doall (for [ind population]
-                                                           (apply +' (:errors ind)))))
+    ;(println ";;Automatic tags used to intialize the tagspace (for best program only):")
+    ;(println "Auto-tags:" (keys (get (tagspace-initialization (str (:program best)) 1000 (make-push-state)) :tag)))
+    ;(println ";;Tagspce-Utilization of whole population: " (doall (for [ind population]
+    ;                                                                (intial-tagspace-utilization (str (:program ind)) (tagspace-initialization (str (:program ind)) 1000 (make-push-state))))))
+    ;(println ";;Total Error of whole Population: " (doall (for [ind population]
+    ;                                                       (apply +' (:errors ind)))))
     (printf ";; -*- Digits problem report - generation %s\n" generation)(flush)
     (println "Test total error for best:" best-total-test-error)
     (println (format "Test mean error for best: %.5f" (double (/ best-total-test-error (count best-test-errors)))))
@@ -168,5 +174,6 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000
+   :meta-error-categories [:max-stacks-depth]
    })
 

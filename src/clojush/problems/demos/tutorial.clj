@@ -25,42 +25,42 @@
 
 ;; Providing true as a third argument produces a trace of all stacks as it runs:
 
-;(run-push '(1 2 integer_add) 
-;          (make-push-state)
-;          true)          
+(run-push '(1 2 integer_add) 
+          (make-push-state)
+          true)          
           
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of x^3 - 2x^2 - x (problem 5 from the 
 ;; trivial geography chapter) with minimal integer instructions and an 
 ;; input instruction that uses the default input stack
 
-;; (def argmap
-;;   {:error-function (fn [individual]
-;;                      (assoc individual
-;;                             :errors
-;;                             (doall
-;;                              (for [input (range 10)]
-;;                                (let [state (->> (make-push-state)
-;;                                                 (push-item input :integer)
-;;                                                 (push-item input :input)
-;;                                                 (run-push (:program individual)))
-;;                                      top-int (top-item :integer state)]
-;;                                  (if (number? top-int)
-;;                                    (abs (- top-int 
-;;                                            (- (* input input input) 
-;;                                               (* 2 input input)
-;;                                               input)))
-;;                                    1000))))))
-;;    :atom-generators (list (fn [] (lrand-int 10))
-;;                           'in1
-;;                           'integer_div
-;;                           'integer_mult
-;;                           'integer_add
-;;                           'integer_sub)
-;;    :parent-selection :tournament
-;;    :genetic-operator-probabilities {:alternation 0.5
-;;                                     :uniform-mutation 0.5}
-;;    })
+(def argmap
+  {:error-function (fn [individual]
+                     (assoc individual
+                            :errors
+                            (doall
+                             (for [input (range 10)]
+                               (let [state (->> (make-push-state)
+                                                (push-item input :integer)
+                                                (push-item input :input)
+                                                (run-push (:program individual)))
+                                     top-int (top-item :integer state)]
+                                 (if (number? top-int)
+                                   (abs (- top-int 
+                                           (- (* input input input) 
+                                              (* 2 input input)
+                                              input)))
+                                   1000))))))
+   :atom-generators (list (fn [] (lrand-int 10))
+                          'in1
+                          'integer_div
+                          'integer_mult
+                          'integer_add
+                          'integer_sub)
+   :parent-selection :tournament
+   :genetic-operator-probabilities {:alternation 0.5
+                                    :uniform-mutation 0.5}
+   })
 
 ;(pushgp argmap)
 
@@ -123,3 +123,4 @@
 ;;   })
 
 ;(pushgp argmap)
+
