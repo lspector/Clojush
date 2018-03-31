@@ -13,7 +13,7 @@
 (ns clojush.problems.software.replace-space-with-newline-c
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
-        clojush.instructions.tag
+        ;clojush.instructions.tag
         clojure.math.numeric-tower)
     (:require [clojure.string :as string]))
 
@@ -37,8 +37,8 @@
             (fn [] (lrand-nth (concat [\newline \tab] (map char (range 32 127))))) ;Visible character ERC
             (fn [] (replace-space-with-newline-input (lrand-int 21))) ;String ERC
             ;;; end ERCs
-            (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
-            (tagged-instruction-erc 1000)
+            ;(tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
+            ;(tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
@@ -98,12 +98,13 @@
    Returns the behaviors, a list of the outputs of the program on the inputs."
   [program cases]
   (flatten
-    (let [state-with-tags (tagspace-initialization (str program) 1000 (make-push-state))]      
+    (let [state-with-tags nil];(tagspace-initialization (str program) 1000 (make-push-state))]      
       (doall
        (for [[input output] cases]
          (let [final-state (run-push program
-                                     (->> (push-item input :input state-with-tags)
-                                          (push-item "" :output)))
+                                     (->> (make-push-state)
+                                       (push-item input :input)
+                                       (push-item "" :output)))
                printed-result (stack-ref :output 0 final-state)
                int-result (stack-ref :integer 0 final-state)]
            (vector printed-result int-result)))))))

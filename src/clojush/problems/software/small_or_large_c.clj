@@ -11,8 +11,8 @@
 (ns clojush.problems.software.small-or-large-c
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
-        clojush.instructions.tag
-        clojush.instructions.environment
+        ;clojush.instructions.tag
+        ;clojush.instructions.environment
         [clojure.math numeric-tower]
         ))
 
@@ -24,13 +24,13 @@
             ;;; end constants
             (fn [] (- (lrand-int 20001) 10000)) ;Integer ERC [-10000,10000]
             ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :exec] 1000)
-            (tagged-instruction-erc 1000)
+            ;(tag-instruction-erc [:integer :boolean :exec] 1000)
+            ;(tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
             )
-          (registered-for-stacks [:integer :boolean :exec :string :print :environment])))
+          (registered-for-stacks [:integer :boolean :exec :string :print])))
 
 
 ;; A list of data domains for the problem. Each domain is a vector containing
@@ -69,6 +69,7 @@
      (the-actual-small-or-large-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
+            stacks-depth (atom (zipmap push-types (repeat 0)))
             errors (doall
                      (for [[input1 correct-output] (case data-cases
                                                      :train train-cases
@@ -77,17 +78,17 @@
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input1 :input)
-                                                     (push-item "" :output)
-                                                     (tagspace-initialization (str (:program individual)) 1000 )))
+                                                     (push-item "" :output)))
                              result (stack-ref :output 0 final-state)]
                          (when print-outputs
                            (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                         (doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
                          ; Record the behavior
                          (swap! behavior conj result)
                          ; Error is Levenshtein distance of printed strings
                          (levenshtein-distance correct-output result))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors :stacks-info @stacks-depth)
           (assoc individual :test-errors errors))))))
 
 (defn get-small-or-large-train-and-test
@@ -156,4 +157,5 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000
+   :meta-error-categories [:max-stacks-depth]
    })
