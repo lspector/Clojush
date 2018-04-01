@@ -11,7 +11,7 @@
 (ns clojush.problems.software.last-index-of-zero-c
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
-        clojush.instructions.tag
+        ;clojush.instructions.tag
         [clojure.math numeric-tower combinatorics]
         ))
 
@@ -21,8 +21,8 @@
             ^{:generator-label "Random numbers in the range [-50,50]"}
             (fn [] (- (lrand-int 101) 50))
             ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :vector_integer :exec] 1000)
-            (tagged-instruction-erc 1000)
+            ;(tag-instruction-erc [:integer :boolean :vector_integer :exec] 1000)
+            ;(tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
@@ -84,7 +84,8 @@
     ([individual data-cases] ;; data-cases should be :train or :test
      (the-actual-last-index-of-zero-error-function individual data-cases false))
     ([individual data-cases print-outputs]
-      (let [state-with-tags (tagspace-initialization (str (:program individual)) 1000 (make-push-state))
+      (let [stacks-depth (atom (zipmap push-types (repeat 0)))
+            ;state-with-tags (tagspace-initialization (str (:program individual)) 1000 (make-push-state))
             behavior (atom '())
             errors (doall
                      (for [[input correct-output] (case data-cases
@@ -92,12 +93,13 @@
                                                     :test test-cases
                                                     [])]
                        (let [final-state (run-push (:program individual)
-                                                   (push-item input :input state-with-tags))
+                                                   (push-item input :input (make-push-state)))
                              result (top-item :integer final-state)]
                          (when print-outputs
                            (println (format "Correct output: %2d | Program output: %s"
                                             correct-output
                                             (str result))))
+                         (doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
                          ; Record the behavior
                          (swap! behavior conj result)
                          ; Error is absolute distance from correct index
@@ -106,7 +108,7 @@
                            1000000) ; penalty for no return value
                          )))]
         (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors :stacks-info @stacks-depth)
           (assoc individual :test-errors errors))))))
 
 (defn get-last-index-of-zero-train-and-test
@@ -175,4 +177,6 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 1000000
+   :meta-error-categories [:max-stacks-depth]
+   :sort-meta-errors-for-lexicase :last
    })
