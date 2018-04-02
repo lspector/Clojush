@@ -563,7 +563,7 @@
                         :genome)))
       state)))
 
-#_(define-registered
+(define-registered
   genome_two_point_crossover
   ^{:stack-types [:genome]}
   (fn [state]
