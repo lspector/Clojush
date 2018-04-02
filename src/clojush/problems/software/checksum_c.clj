@@ -14,7 +14,7 @@
 ;;
 ;; input stack has the input string
 
-(ns clojush.problems.software.checksum
+(ns clojush.problems.software.checksum-c
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -91,6 +91,7 @@
      (the-actual-checksum-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
+            stacks-depth (atom (zipmap push-types (repeat 0)))
             errors (flatten
                      (doall
                        (for [[input correct-output] (case data-cases
@@ -104,6 +105,7 @@
                                printed-result (stack-ref :output 0 final-state)]
                            (when print-outputs
                              (println (format "Correct output: %-19s | Program output: %-19s" correct-output printed-result)))
+                           (doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
                            ; Record the behavior
                            (swap! behavior conj printed-result)
                            ; Error is Levenshtein distance and, if correct format, distance from correct character
@@ -114,7 +116,7 @@
                                1000) ;penalty for wrong format
                              )))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors :stacks-info @stacks-depth)
           (assoc individual :test-errors errors))))))
 
 (defn get-checksum-train-and-test
@@ -185,4 +187,6 @@
    :final-report-simplifications 5000
    :max-error 1000
    :use-single-thread true
+   :meta-error-categories [:max-stacks-depth]
+   :sort-meta-errors-for-lexicase :last
    })
