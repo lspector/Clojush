@@ -87,10 +87,7 @@
                                (dec num-parents) 
                                (fn []
                                  (loop [re-selections 0
-                                        other (select population 
-                                                      (assoc argmap
-                                                        :cases-to-use
-                                                        (reverse (:cases-used-for-selection (meta first-parent)))))]
+                                        other (select population argmap)]
                                    (if (and (= other first-parent)
                                             (< re-selections 
                                                (:self-mate-avoidance-limit argmap)))
