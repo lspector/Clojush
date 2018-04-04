@@ -262,8 +262,8 @@
                                      (assoc genome
                                        index 
                                        (let [g (nth genome index)]
-                                         (assoc g :close (inc (:close g)))))
-                                     :genome))))
+                                         (assoc g :close (inc (:close g))))))
+                        :genome)))
       state)))
 
 (define-registered
@@ -282,8 +282,8 @@
                                      (assoc genome
                                        index
                                        (let [g (nth genome index)]
-                                         (assoc g :close (max 0 (dec (:close g))))))
-                                     :genome))))
+                                         (assoc g :close (max 0 (dec (:close g)))))))
+                        :genome)))
       state)))
 
 (define-registered
