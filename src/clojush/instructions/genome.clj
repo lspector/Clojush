@@ -15,6 +15,16 @@
 (define-registered genome_shove (with-meta (shover :genome) {:stack-types [:genome :integer]}))
 (define-registered genome_empty (with-meta (emptyer :genome) {:stack-types [:genome :boolean]}))
 
+(defn meta-update
+  [old-genomes new-info new-genome]
+  ;(with-meta new-genome (update-in (meta old-genome) :made-by conj new-info)))
+  (with-meta new-genome
+    (let [old-made-bys (map :made-by (map meta old-genomes))]
+      {:made-by (conj (apply concat (cons (first old-made-bys) 
+                                          (map (partial take 1) ;; to avoid memory explosion
+                                               (rest old-made-bys))))
+                      new-info)})))
+  
 (define-registered
   genome_gene_dup
   ^{:stack-types [:genome :integer]}
@@ -28,8 +38,10 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (into (subvec genome 0 (inc index))
-                              (subvec genome index))
+             (push-item (meta-update [genome]
+                                     ['genome_gene_dup index]
+                                     (into (subvec genome 0 (inc index))
+                                           (subvec genome index)))
                         :genome)))
       state)))
 
@@ -45,13 +57,16 @@
         (->> (pop-item :integer state)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (assoc genome 
-                            index
-                            (random-plush-instruction-map 
-                              @global-atom-generators
-                              {:epigenetic-markers @global-epigenetic-markers
-                               :close-parens-probabilities @global-close-parens-probabilities
-                               :silent-instruction-probability @global-silent-instruction-probability}))
+                          (meta-update 
+                            [genome] 
+                            ['genome_gene_randomize index]
+                            (assoc genome 
+                              index
+                              (random-plush-instruction-map 
+                                @global-atom-generators
+                                {:epigenetic-markers @global-epigenetic-markers
+                                 :close-parens-probabilities @global-close-parens-probabilities
+                                 :silent-instruction-probability @global-silent-instruction-probability})))
                           genome)
                         :genome)))
       state)))
@@ -69,13 +84,16 @@
         (->> (pop-item :integer state)
              (pop-item :integer)
              (pop-item :genome)
-             (push-item (assoc genome
-                          index
-                          (random-plush-instruction-map 
-                            [(nth @global-atom-generators atom-gen)]
-                            {:epigenetic-markers @global-epigenetic-markers
-                             :close-parens-probabilities @global-close-parens-probabilities
-                             :silent-instruction-probability @global-silent-instruction-probability}))
+             (push-item (meta-update 
+                          [genome] 
+                          ['genome_gene_replace index atom-gen]
+                          (assoc genome
+                            index
+                            (random-plush-instruction-map 
+                              [(nth @global-atom-generators atom-gen)]
+                              {:epigenetic-markers @global-epigenetic-markers
+                               :close-parens-probabilities @global-close-parens-probabilities
+                               :silent-instruction-probability @global-silent-instruction-probability})))
                         :genome)))
       state)))
 
@@ -90,8 +108,10 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (into (subvec genome 0 index)
-                              (subvec genome (inc index)))
+             (push-item (meta-update [genome]
+                                     ['genome_gene_delete index]
+                                     (into (subvec genome 0 index)
+                                           (subvec genome (inc index))))
                         :genome)))
       state)))
 
@@ -106,8 +126,10 @@
             distance (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (into (subvec genome distance)
-                              (subvec genome 0 distance))
+             (push-item (meta-update [genome]
+                                     ['genome_rotate distance]
+                                     (into (subvec genome distance)
+                                           (subvec genome 0 distance)))
                         :genome)))
       state)))
 
@@ -125,9 +147,11 @@
             index (mod (stack-ref :integer 0 state) (count source))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (assoc (vec destination)
-                          (min index (count destination))
-                          (nth source index))
+             (push-item (meta-update [source destination] 
+                                     ['genome_gene_copy index]
+                                     (assoc (vec destination)
+                                       (min index (count destination))
+                                       (nth source index)))
                         :genome)))
       state)))
 
@@ -147,17 +171,19 @@
             low-index (apply min indices)
             high-index (apply max indices)]
         (->> (pop-item :integer state)
-          (pop-item :integer)
-          (pop-item :genome)
-          (push-item (loop [i low-index
-                            result destination]
-                       (if (> i high-index)
-                         result
-                         (recur (inc i)
-                                (assoc result
-                                  (min i (count destination))
-                                  (nth source i)))))
-                     :genome)))
+             (pop-item :integer)
+             (pop-item :genome)
+             (push-item (meta-update [source destination] 
+                                     ['genome_gene_copy_range indices]
+                                     (loop [i low-index
+                                            result destination]
+                                       (if (> i high-index)
+                                         result
+                                         (recur (inc i)
+                                                (assoc result
+                                                  (min i (count destination))
+                                                  (nth source i))))))
+                        :genome)))
       state)))
 
 (define-registered
@@ -171,10 +197,12 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (assoc genome
-                          index
-                          (let [g (nth genome index)]
-                            (assoc g :silent (not (:silent g)))))
+             (push-item (meta-update [genome] 
+                                     ['genome_toggle_silent index]
+                                     (assoc genome
+                                       index
+                                       (let [g (nth genome index)]
+                                         (assoc g :silent (not (:silent g))))))
                         :genome)))
       state)))
 
@@ -189,10 +217,12 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (assoc genome
-                          index
-                          (let [g (nth genome index)]
-                            (assoc g :silent true)))
+             (push-item (meta-update [genome] 
+                                     ['genome_silence index]
+                                     (assoc genome
+                                       index
+                                       (let [g (nth genome index)]
+                                         (assoc g :silent true))))
                         :genome)))
       state)))
 
@@ -207,10 +237,12 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (assoc genome
-                          index
-                          (let [g (nth genome index)]
-                            (assoc g :silent false)))
+             (push-item (meta-update [genome] 
+                                     ['genome_unsilence index]
+                                     (assoc genome
+                                       index
+                                       (let [g (nth genome index)]
+                                         (assoc g :silent false))))
                         :genome)))
       state)))
 
@@ -225,11 +257,13 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (assoc genome
-                          index 
-                          (let [g (nth genome index)]
-                            (assoc g :close (inc (:close g)))))
-                        :genome)))
+             (push-item (meta-update [genome] 
+                                     ['genome_close_inc index]
+                                     (assoc genome
+                                       index 
+                                       (let [g (nth genome index)]
+                                         (assoc g :close (inc (:close g)))))
+                                     :genome))))
       state)))
 
 (define-registered
@@ -243,30 +277,40 @@
             index (mod (stack-ref :integer 0 state) (count genome))]
         (->> (pop-item :integer state)
              (pop-item :genome)
-             (push-item (assoc genome
-                          index
-                          (let [g (nth genome index)]
-                            (assoc g :close (max 0 (dec (:close g))))))
-                        :genome)))
+             (push-item (meta-update [genome]
+                                     ['genome_close_dec index]
+                                     (assoc genome
+                                       index
+                                       (let [g (nth genome index)]
+                                         (assoc g :close (max 0 (dec (:close g))))))
+                                     :genome))))
       state)))
 
 (define-registered
   genome_new
   ^{:stack-types [:genome]}
   (fn [state]
-    (push-item [] :genome state)))
+    (push-item (with-meta [] {:made-by '([genome_new])}) 
+               :genome 
+               state)))
 
 (define-registered
   genome_parent1
   ^{:stack-types [:genome]}
   (fn [state]
-    (push-item (vec (:parent1-genome state)) :genome state)))
+    (push-item (with-meta (vec (:parent1-genome state))
+                 {:made-by '([genome_parent1])})
+               :genome 
+               state)))
 
 (define-registered
   genome_parent2
   ^{:stack-types [:genome]}
   (fn [state]
-    (push-item (vec (:parent2-genome state)) :genome state)))
+    (push-item (with-meta (vec (:parent2-genome state))
+                 {:made-by '([genome_parent2])})
+               :genome 
+               state)))
 
 (define-registered
   autoconstructive_integer_rand 
@@ -287,7 +331,8 @@
   ^{:stack-types [:genome]}
   (fn [state]
     (push-item (if (:autoconstructing state)
-                 (vec (:genome (genesis :no-parent @push-argmap)))
+                 (with-meta (vec (:genome (genesis :no-parent @push-argmap)))
+                   {:made-by '([genome_genesis])})
                  [])
                :genome
                state)))
@@ -303,9 +348,12 @@
         (->> (pop-item :float state)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (:genome (uniform-instruction-mutation
-                                          {:genome genome :dummy true :age -1}
-                                          (merge @push-argmap {:uniform-mutation-rate rate}))))
+                          (meta-update 
+                            [genome] 
+                            ['genome_uniform_instruction_mutation rate]
+                            (vec (:genome (uniform-instruction-mutation
+                                            {:genome genome :dummy true :age -1}
+                                            (merge @push-argmap {:uniform-mutation-rate rate})))))
                           genome)
                         :genome)))
       state)))
@@ -323,11 +371,14 @@
              (pop-item :float)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (:genome (uniform-integer-mutation
-                                          {:genome genome :dummy true :age -1}
-                                          (merge @push-argmap
-                                                 {:uniform-mutation-constant-tweak-rate rate
-                                                  :uniform-mutation-int-gaussian-standard-deviation stdev}))))
+                          (meta-update
+                            [genome]
+                            ['genome_uniform_integer_mutation rate stdev]
+                            (vec (:genome (uniform-integer-mutation
+                                            {:genome genome :dummy true :age -1}
+                                            (merge @push-argmap
+                                                   {:uniform-mutation-constant-tweak-rate rate
+                                                    :uniform-mutation-int-gaussian-standard-deviation stdev})))))
                           genome)
                         :genome)))
       state)))
@@ -345,12 +396,15 @@
              (pop-item :float)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (:genome 
-                                 (uniform-float-mutation
-                                   {:genome genome :dummy true :age -1}
-                                   (merge @push-argmap
-                                          {:uniform-mutation-constant-tweak-rate rate
-                                           :uniform-mutation-float-gaussian-standard-deviation stdev}))))
+                          (meta-update
+                            [genome]
+                            ['genome_uniform_float_mutation rate stdev]
+                            (vec (:genome 
+                                   (uniform-float-mutation
+                                     {:genome genome :dummy true :age -1}
+                                     (merge @push-argmap
+                                            {:uniform-mutation-constant-tweak-rate rate
+                                           :uniform-mutation-float-gaussian-standard-deviation stdev})))))
                           genome)
                         :genome)))
       state)))
@@ -368,11 +422,14 @@
              (pop-item :float)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (:genome (uniform-tag-mutation
-                                          {:genome genome :dummy true :age -1}
-                                          (merge @push-argmap 
-                                                 {:uniform-mutation-rate rate
-                                                  :uniform-mutation-tag-gaussian-standard-deviation stdev}))))
+                          (meta-update
+                            [genome]
+                            ['genome_uniform_tag_mutation rate stdev]
+                            (vec (:genome (uniform-tag-mutation
+                                            {:genome genome :dummy true :age -1}
+                                            (merge @push-argmap 
+                                                   {:uniform-mutation-rate rate
+                                                    :uniform-mutation-tag-gaussian-standard-deviation stdev})))))
                           genome)
                         :genome)))
       state)))
@@ -390,11 +447,14 @@
              (pop-item :float)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (:genome (uniform-string-mutation
-                                          {:genome genome :dummy true :age -1}
-                                          (merge @push-argmap 
-                                                 {:uniform-mutation-rate rate1
-                                                  :uniform-mutation-string-char-change-rate rate2}))))
+                          (meta-update
+                            [genome]
+                            ['genome_uniform_string_mutation rate1 rate2]
+                            (vec (:genome (uniform-string-mutation
+                                            {:genome genome :dummy true :age -1}
+                                            (merge @push-argmap 
+                                                   {:uniform-mutation-rate rate1
+                                                    :uniform-mutation-string-char-change-rate rate2})))))
                           genome)
                         :genome)))
       state)))
@@ -410,9 +470,12 @@
         (->> (pop-item :float state)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (:genome (uniform-boolean-mutation
-                                          {:genome genome :dummy true :age -1}
-                                          (merge @push-argmap {:uniform-mutation-rate rate}))))
+                          (meta-update
+                            [genome]
+                            ['genome_uniform_boolean_mutation rate]
+                            (vec (:genome (uniform-boolean-mutation
+                                            {:genome genome :dummy true :age -1}
+                                            (merge @push-argmap {:uniform-mutation-rate rate})))))
                           genome)
                         :genome)))
       state)))
@@ -430,11 +493,14 @@
              (pop-item :float)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (:genome (uniform-close-mutation
-                                          {:genome genome :dummy true :age -1}
-                                          (merge @push-argmap
-                                                 {:uniform-close-mutation-rate rate1
-                                                  :close-increment-rate rate2}))))
+                          (meta-update
+                            [genome]
+                            ['genome_uniform_close_mutation rate1 rate2]
+                            (vec (:genome (uniform-close-mutation
+                                            {:genome genome :dummy true :age -1}
+                                            (merge @push-argmap
+                                                   {:uniform-close-mutation-rate rate1
+                                                    :close-increment-rate rate2})))))
                           genome)
                         :genome)))
       state)))
@@ -450,9 +516,12 @@
         (->> (pop-item :float state)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (:genome (uniform-silence-mutation
-                                          {:genome genome :dummy true :age -1}
-                                          (merge @push-argmap {:uniform-silence-mutation-rate rate}))))
+                          (meta-update
+                            [genome]
+                            ['genome_uniform_silence_mutation rate]
+                            (vec (:genome (uniform-silence-mutation
+                                            {:genome genome :dummy true :age -1}
+                                            (merge @push-argmap {:uniform-silence-mutation-rate rate})))))
                           genome)
                         :genome)))
       state)))
@@ -468,9 +537,12 @@
         (->> (pop-item :float state)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (:genome (uniform-deletion
-                                          {:genome genome :dummy true :age -1}
-                                          (merge @push-argmap {:uniform-deletion-rate rate}))))
+                          (meta-update
+                            [genome]
+                            ['genome_uniform_deletion rate]
+                            (vec (:genome (uniform-deletion
+                                            {:genome genome :dummy true :age -1}
+                                            (merge @push-argmap {:uniform-deletion-rate rate})))))
                           genome)
                         :genome)))
       state)))
@@ -486,11 +558,14 @@
         (->> (pop-item :float state)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (take (int (/ (:max-points @push-argmap) 4))
-                                     (:genome (uniform-addition
-                                                {:genome genome :dummy true :age -1}
-                                                (merge @push-argmap 
-                                                       {:uniform-addition-rate rate})))))
+                          (meta-update
+                            [genome]
+                            ['genome_uniform_addition rate]
+                            (vec (take (int (/ (:max-points @push-argmap) 4))
+                                       (:genome (uniform-addition
+                                                  {:genome genome :dummy true :age -1}
+                                                  (merge @push-argmap 
+                                                         {:uniform-addition-rate rate}))))))
                           genome)
                         :genome)))
       state)))
@@ -506,11 +581,14 @@
         (->> (pop-item :float state)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (take (int (/ (:max-points @push-argmap) 4))
-                                     (:genome (uniform-addition-and-deletion
-                                                {:genome genome :dummy true :age -1}
-                                                (merge @push-argmap 
-                                                       {:uniform-addition-and-deletion-rate rate})))))
+                          (meta-update
+                            [genome]
+                            ['genome_uniform_addition_and_deletion rate]
+                            (vec (take (int (/ (:max-points @push-argmap) 4))
+                                       (:genome (uniform-addition-and-deletion
+                                                  {:genome genome :dummy true :age -1}
+                                                  (merge @push-argmap 
+                                                         {:uniform-addition-and-deletion-rate rate}))))))
                           genome)
                         :genome)))
       state)))
@@ -528,12 +606,15 @@
              (pop-item :genome)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (take (int (/ (:max-points @push-argmap) 4))
-                                     (:genome (uniform-combination-and-deletion
-                                                {:genome genome1 :dummy true :age -1}
-                                                {:genome genome2 :dummy true :age -1}
-                                                (merge @push-argmap 
-                                                       {:uniform-combination-and-deletion-rate rate})))))
+                          (meta-update
+                            [genome1 genome2]
+                            ['genome_uniform_combination_and_deletion rate]
+                            (vec (take (int (/ (:max-points @push-argmap) 4))
+                                       (:genome (uniform-combination-and-deletion
+                                                  {:genome genome1 :dummy true :age -1}
+                                                  {:genome genome2 :dummy true :age -1}
+                                                  (merge @push-argmap 
+                                                         {:uniform-combination-and-deletion-rate rate}))))))
                           genome1)
                         :genome)))
       state)))
@@ -553,17 +634,20 @@
              (pop-item :genome)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (:genome (alternation
-                                          {:genome genome1 :dummy true :age -1}
-                                          {:genome genome2 :dummy true :age -1}
-                                          (merge @push-argmap
-                                                 {:alternation-rate rate
-                                                  :alignment-deviation dev}))))
+                          (meta-update
+                            [genome1 genome2]
+                            ['genome_alternation rate dev]
+                            (vec (:genome (alternation
+                                            {:genome genome1 :dummy true :age -1}
+                                            {:genome genome2 :dummy true :age -1}
+                                            (merge @push-argmap
+                                                   {:alternation-rate rate
+                                                    :alignment-deviation dev})))))
                           genome1)
                         :genome)))
       state)))
 
-#_(define-registered
+(define-registered
   genome_two_point_crossover
   ^{:stack-types [:genome]}
   (fn [state]
@@ -573,10 +657,13 @@
         (->> (pop-item :genome state)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (:genome (two-point-crossover
-                                          {:genome genome1 :dummy true :age -1}
-                                          {:genome genome2 :dummy true :age -1}
-                                          @push-argmap)))
+                          (meta-update
+                            [genome1 genome2]
+                            ['genome_two_point_crossover]
+                            (vec (:genome (two-point-crossover
+                                            {:genome genome1 :dummy true :age -1}
+                                            {:genome genome2 :dummy true :age -1}
+                                            @push-argmap))))
                           genome1)
                         :genome)))
       state)))
@@ -591,10 +678,13 @@
         (->> (pop-item :genome state)
              (pop-item :genome)
              (push-item (if (:autoconstructing state)
-                          (vec (:genome (uniform-crossover
-                                          {:genome genome1 :dummy true :age -1}
-                                          {:genome genome2 :dummy true :age -1}
-                                          @push-argmap)))
+                          (meta-update
+                            [genome1 genome2]
+                            ['genome_uniform_crossover]
+                            (vec (:genome (uniform-crossover
+                                            {:genome genome1 :dummy true :age -1}
+                                            {:genome genome2 :dummy true :age -1}
+                                            @push-argmap))))
                           genome1)
                         :genome)))
       state)))

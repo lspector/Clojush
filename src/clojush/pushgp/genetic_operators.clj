@@ -836,7 +836,7 @@ the resulting top genome."
                                     (assoc :parent2-genome parent2-genome)
                                     (assoc :autoconstructing true))))]
      (if (or (seq? run-result) (vector? run-result))
-       (vec run-result)
+       (with-meta (vec run-result) (meta run-result))
        []))))
 
 (defn expressed-program-sequence-from-genome
@@ -1230,6 +1230,28 @@ programs encoded by genomes g1 and g2."
            (not (zero? c3-diff))
            (distinct? c1-diff c2-diff c3-diff)))))
 
+(defn makes-children-differently-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)
+        child1 (produce-child-genome-by-autoconstruction g g argmap)
+        child2 (produce-child-genome-by-autoconstruction child1 g g argmap)]
+    ;(println "1:" (:made-by (meta child1)))
+    ;(println "2:" (:made-by (meta child2)))
+    (assoc ind :diversifying
+      (not= (:made-by (meta child1))
+            (:made-by (meta child2))))))
+
+(defn children-make-children-differently-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)
+        child1 (produce-child-genome-by-autoconstruction g g argmap)
+        child2 (produce-child-genome-by-autoconstruction child1 g g argmap)
+        gc1 (produce-child-genome-by-autoconstruction child1 g g argmap)
+        gc2 (produce-child-genome-by-autoconstruction child2 g g argmap)]
+    (assoc ind :diversifying
+      (not= (:made-by (meta gc1))
+            (:made-by (meta gc2))))))
+
 (defn use-mate-diversifying?
   [ind argmap]
   (let [g (:genome ind)
@@ -1386,6 +1408,8 @@ programs encoded by genomes g1 and g2."
                 :diffmeans diffmeans-diversifying?
                 :minimal-reproductive-difference minimal-reproductive-difference-diversifying?
                 :four-generation-reproductive-difference four-generation-reproductive-difference-diversifying?
+                :makes-children-differently makes-children-differently-diversifying?
+                :children-make-children-differently children-make-children-differently-diversifying?
                 :use-mate use-mate-diversifying?
                 :use-mate-differently use-mate-differently-diversifying?
                 :si-and-mate-use si-and-mate-use-diversifying?
