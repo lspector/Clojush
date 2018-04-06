@@ -1234,7 +1234,7 @@ programs encoded by genomes g1 and g2."
   [ind argmap]
   (let [g (:genome ind)
         child1 (produce-child-genome-by-autoconstruction g g argmap)
-        child2 (produce-child-genome-by-autoconstruction child1 g g argmap)]
+        child2 (produce-child-genome-by-autoconstruction g g argmap)]
     ;(println "1:" (:made-by (meta child1)))
     ;(println "2:" (:made-by (meta child2)))
     (assoc ind :diversifying
@@ -1245,7 +1245,7 @@ programs encoded by genomes g1 and g2."
   [ind argmap]
   (let [g (:genome ind)
         child1 (produce-child-genome-by-autoconstruction g g argmap)
-        child2 (produce-child-genome-by-autoconstruction child1 g g argmap)
+        child2 (produce-child-genome-by-autoconstruction g g argmap)
         gc1 (produce-child-genome-by-autoconstruction child1 g g argmap)
         gc2 (produce-child-genome-by-autoconstruction child2 g g argmap)]
     (assoc ind :diversifying
