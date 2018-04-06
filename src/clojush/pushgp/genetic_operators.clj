@@ -1252,6 +1252,18 @@ programs encoded by genomes g1 and g2."
       (not= (:made-by (meta gc1))
             (:made-by (meta gc2))))))
 
+(defn three-children-make-children-differently-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)
+        child1 (produce-child-genome-by-autoconstruction g g argmap)
+        child2 (produce-child-genome-by-autoconstruction g g argmap)
+        child3 (produce-child-genome-by-autoconstruction g g argmap)
+        gc1 (produce-child-genome-by-autoconstruction child1 g g argmap)
+        gc2 (produce-child-genome-by-autoconstruction child2 g g argmap)
+        gc3 (produce-child-genome-by-autoconstruction child3 g g argmap)]
+    (assoc ind :diversifying
+      (apply distinct? (map :made-by (map meta [gc1 gc2 gc3]))))))
+
 (defn use-mate-diversifying?
   [ind argmap]
   (let [g (:genome ind)
@@ -1410,6 +1422,7 @@ programs encoded by genomes g1 and g2."
                 :four-generation-reproductive-difference four-generation-reproductive-difference-diversifying?
                 :makes-children-differently makes-children-differently-diversifying?
                 :children-make-children-differently children-make-children-differently-diversifying?
+                :three-children-make-children-differently three-children-make-children-differently-diversifying?
                 :use-mate use-mate-diversifying?
                 :use-mate-differently use-mate-differently-diversifying?
                 :si-and-mate-use si-and-mate-use-diversifying?
