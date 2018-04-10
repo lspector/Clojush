@@ -46,7 +46,7 @@
               (= cat :size) (count (:genome ind))
               ;(= cat :compressibility) 555 ;;TMH fix later
               ;
-              (= cat :max-stacks-depth) (apply max (vals (:stacks-info ind)))
+              (= cat :max-stacks-depth) (vals (:stacks-info ind))
               ;
               (= cat :total-error) (:total-error ind)
               (= cat :unsolved-cases) (count (filter #(> % error-threshold) 

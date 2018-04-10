@@ -87,7 +87,8 @@
     ([individual data-cases] ;; data-cases should be :train or :test
      (the-actual-double-letters-error-function individual data-cases false))
     ([individual data-cases print-outputs]
-      (let [state-with-tags (tagspace-initialization (str (:program individual)) 1000 (make-push-state)) 
+      (let [stacks-depth (atom (zipmap push-types (repeat 0)))
+            ;state-with-tags (tagspace-initialization (str (:program individual)) 1000 (make-push-state)) 
             behavior (atom '())
             errors (doall
                      (for [[input correct-output] (case data-cases
@@ -95,17 +96,19 @@
                                                     :test test-cases
                                                     [])]
                        (let [final-state (run-push (:program individual)
-                                                   (->> (push-item input :input state-with-tags)
+                                                   (->> (push-item input :input (make-push-state))
                                                      (push-item "" :output)))
                              printed-result (stack-ref :output 0 final-state)]
                          (when print-outputs
                            (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str printed-result))))
+                         
+                         (doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
                          ; Record the behavior
                          (swap! behavior conj printed-result)
                          ; Error is Levenshtein distance
                          (levenshtein-distance correct-output printed-result))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors :stacks-info @stacks-depth)
           (assoc individual :test-errors errors))))))
 
 (defn get-double-letters-train-and-test
@@ -175,4 +178,6 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000
+   :meta-error-categories [:max-stacks-depth]
+   :sort-meta-errors-for-lexicase :last
    })
