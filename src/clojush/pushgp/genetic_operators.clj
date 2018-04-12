@@ -1235,11 +1235,18 @@ programs encoded by genomes g1 and g2."
   (let [g (:genome ind)
         child1 (produce-child-genome-by-autoconstruction g g argmap)
         child2 (produce-child-genome-by-autoconstruction g g argmap)]
-    ;(println "1:" (:made-by (meta child1)))
-    ;(println "2:" (:made-by (meta child2)))
     (assoc ind :diversifying
       (not= (:made-by (meta child1))
             (:made-by (meta child2))))))
+
+(defn makes-three-children-differently-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)
+        child1 (produce-child-genome-by-autoconstruction g g argmap)
+        child2 (produce-child-genome-by-autoconstruction g g argmap)
+        child3 (produce-child-genome-by-autoconstruction g g argmap)]
+    (assoc ind :diversifying
+      (apply distinct? (map :made-by (map meta [child1 child2 child3]))))))
 
 (defn children-make-children-differently-diversifying?
   [ind argmap]
@@ -1421,6 +1428,7 @@ programs encoded by genomes g1 and g2."
                 :minimal-reproductive-difference minimal-reproductive-difference-diversifying?
                 :four-generation-reproductive-difference four-generation-reproductive-difference-diversifying?
                 :makes-children-differently makes-children-differently-diversifying?
+                :makes-three-children-differently makes-three-children-differently-diversifying?
                 :children-make-children-differently children-make-children-differently-diversifying?
                 :three-children-make-children-differently three-children-make-children-differently-diversifying?
                 :use-mate use-mate-diversifying?
