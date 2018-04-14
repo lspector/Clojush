@@ -823,7 +823,9 @@ the resulting top genome."
    (produce-child-genome-by-autoconstruction 
      parent1-genome parent1-genome parent2-genome argmap))
   ([genome-to-run parent1-genome parent2-genome argmap]
-   (let [run-result (top-item :genome
+   (let [parent1-genome (with-meta parent1-genome {})
+         parent2-genome (with-meta parent2-genome {})
+         run-result (top-item :genome
                               (run-push
                                 (translate-plush-genome-to-push-program
                                   {:genome
