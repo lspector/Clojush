@@ -1287,6 +1287,56 @@ programs encoded by genomes g1 and g2."
                  (sequence-similarity c-made-by gc-made-by)
                  (sequence-similarity gc-made-by ggc-made-by)))))
 
+(defn symbolic-reproductive-change-changes-diversifying?
+  [ind argmap]
+  (let [symbolic #(filter (comp not number?) %)
+        g (:genome ind)
+        c (produce-child-genome-by-autoconstruction g g argmap)
+        c-made-by (symbolic (flatten (:made-by (meta c))))
+        gc (produce-child-genome-by-autoconstruction c g g argmap)
+        gc-made-by (symbolic (flatten (:made-by (meta gc))))
+        ggc (produce-child-genome-by-autoconstruction gc g g argmap)
+        ggc-made-by (symbolic (flatten (:made-by (meta ggc))))]
+    (assoc ind :diversifying
+      (distinct? 1 
+                 (sequence-similarity c-made-by gc-made-by)
+                 (sequence-similarity gc-made-by ggc-made-by)))))
+
+(defn symbolic-reproductive-change-diversifying?
+  [ind argmap]
+  (let [symbolic #(filter (comp not number?) %)
+        g (:genome ind)
+        c (produce-child-genome-by-autoconstruction g g argmap)
+        c-made-by (symbolic (flatten (:made-by (meta c))))
+        gc (produce-child-genome-by-autoconstruction c g g argmap)
+        gc-made-by (symbolic (flatten (:made-by (meta gc))))]
+    (assoc ind :diversifying
+      (not= c-made-by gc-made-by))))
+
+(defn reproductive-change-changes-differently-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)
+        c (produce-child-genome-by-autoconstruction g g argmap)
+        c2 (produce-child-genome-by-autoconstruction g g argmap)
+        c-made-by (flatten (:made-by (meta c)))
+        c2-made-by (flatten (:made-by (meta c2)))
+        gc (produce-child-genome-by-autoconstruction c g g argmap)
+        gc2 (produce-child-genome-by-autoconstruction c2 g g argmap)
+        gc-made-by (flatten (:made-by (meta gc)))
+        gc2-made-by (flatten (:made-by (meta gc2)))
+        ggc (produce-child-genome-by-autoconstruction gc g g argmap)
+        ggc2 (produce-child-genome-by-autoconstruction gc2 g g argmap)
+        ggc-made-by (flatten (:made-by (meta ggc)))
+        ggc2-made-by (flatten (:made-by (meta ggc2)))
+        mbsim-c-gc (sequence-similarity c-made-by gc-made-by)
+        mbsim-c2-gc2 (sequence-similarity c2-made-by gc2-made-by)
+        mbsim-gc-ggc (sequence-similarity gc-made-by ggc-made-by)
+        mbsim-gc2-ggc2 (sequence-similarity gc2-made-by ggc2-made-by)]
+    (assoc ind :diversifying
+      (and (distinct? 1 mbsim-c-gc mbsim-gc-ggc)
+           (distinct? 1 mbsim-c2-gc2 mbsim-gc2-ggc2)
+           (distinct? mbsim-gc-ggc mbsim-gc2-ggc2)))))
+
 (defn use-mate-diversifying?
   [ind argmap]
   (let [g (:genome ind)
@@ -1447,7 +1497,9 @@ programs encoded by genomes g1 and g2."
                 :makes-three-children-differently makes-three-children-differently-diversifying?
                 :children-make-children-differently children-make-children-differently-diversifying?
                 :three-children-make-children-differently three-children-make-children-differently-diversifying?
+                :symbolic-reproductive-change-changes symbolic-reproductive-change-changes-diversifying?
                 :reproductive-change-changes reproductive-change-changes-diversifying?
+                :reproductive-change-changes-differently reproductive-change-changes-differently-diversifying?
                 :use-mate use-mate-diversifying?
                 :use-mate-differently use-mate-differently-diversifying?
                 :si-and-mate-use si-and-mate-use-diversifying?
