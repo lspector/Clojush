@@ -1498,6 +1498,7 @@ programs encoded by genomes g1 and g2."
                 :children-make-children-differently children-make-children-differently-diversifying?
                 :three-children-make-children-differently three-children-make-children-differently-diversifying?
                 :symbolic-reproductive-change-changes symbolic-reproductive-change-changes-diversifying?
+                :symbolic-reproductive-change symbolic-reproductive-change-diversifying?
                 :reproductive-change-changes reproductive-change-changes-diversifying?
                 :reproductive-change-changes-differently reproductive-change-changes-differently-diversifying?
                 :use-mate use-mate-diversifying?
