@@ -1313,6 +1313,16 @@ programs encoded by genomes g1 and g2."
     (assoc ind :diversifying
       (not= c-made-by gc-made-by))))
 
+(defn reproductive-change-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)
+        c (produce-child-genome-by-autoconstruction g g argmap)
+        c-made-by (:made-by (meta c))
+        gc (produce-child-genome-by-autoconstruction c g g argmap)
+        gc-made-by (:made-by (meta gc))]
+    (assoc ind :diversifying
+      (not= c-made-by gc-made-by))))
+
 (defn symbolic-reproductive-divergence-diversifying?
   [ind argmap]
   (let [symbolic #(filter (comp not number?) %)
@@ -1520,6 +1530,7 @@ programs encoded by genomes g1 and g2."
                 :three-children-make-children-differently three-children-make-children-differently-diversifying?
                 :symbolic-reproductive-change-changes symbolic-reproductive-change-changes-diversifying?
                 :symbolic-reproductive-change symbolic-reproductive-change-diversifying?
+                :reproductive-change reproductive-change-diversifying?
                 :symbolic-reproductive-divergence symbolic-reproductive-divergence-diversifying?
                 :reproductive-divergence reproductive-divergence-diversifying?
                 :reproductive-change-changes reproductive-change-changes-diversifying?
