@@ -370,6 +370,43 @@
                                      siblings)
                                1
                                2)))))))
+                            ;
+              (= cat :case-appropriate-family-uniformity)
+              (if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :case-family-uniformity"))
+                (if (or (empty? (:parent-uuids ind))
+                        (empty? (rest (:history ind))))
+                  (vec (repeat (count (:errors ind)) 1))
+                  (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                                  (first (:parent-uuids %)))
+                                               (not (empty? (rest (:history %))))) ; new random sibs don't count
+                                         evaluated-population)]
+                    (vec (for [case-index (range (count (:errors ind)))]
+                           (if (zero? (nth (second (:history ind)) case-index)) 
+                             (if ;; mom solved, error for any child to be different
+                               (some (fn [sib]
+                                       (not= (-> (:history sib) ;; sib error different than mom's
+                                                 (first)
+                                                 (nth case-index))
+                                             (-> (:history sib)
+                                                 (second)
+                                                 (nth case-index))))
+                                     siblings)
+                               1
+                               0)
+                             (if ;; mom unsolved, error if there's not a different child
+                               (some (fn [sib]
+                                       (not= (-> (:history sib) ;; sib error different than mom's
+                                                 (first)
+                                                 (nth case-index))
+                                             (-> (:history sib)
+                                                 (second)
+                                                 (nth case-index))))
+                                     siblings)
+                               0
+                               1)))))))
               ;
               (= cat :case-scaled-error-plus-change)
               #_(if (and (:parent1-errors ind)
@@ -1391,4 +1428,5 @@
                            :normalized-error ne
                            :history (if print-history (cons e (:history i)) (:history i)))]
         new-ind))))
+
 
