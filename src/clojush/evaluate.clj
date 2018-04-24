@@ -370,12 +370,40 @@
                                      siblings)
                                1
                                2)))))))
-                            ;
-              (= cat :case-appropriate-family-uniformity)
+              ;
+              (= cat :mom-doesnt-change-behavior)
               (if (not (:print-history argmap))
                 (throw
                   (Exception.
                     ":print-history must be true for :case-family-uniformity"))
+                (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                                (first (:parent-uuids %)))
+                                             (not (empty? (rest (:history %))))) ; new random sibs don't count
+                                       evaluated-population)]
+                  (vec (for [case-index (range (count (:errors ind)))]
+                         (if (zero? (nth (:errors ind) case-index)) 
+                           0 ;; solved
+                           (if (or (empty? (:parent-uuids ind))
+                                   (empty? (rest (:history ind))))
+                             2 ;; not solved, no mom who might have produced diff behaviors
+                             (if 
+                               (some (fn [sib]
+                                       (not= (-> (:history sib) ;; sib error different than mom's
+                                                 (first)
+                                                 (nth case-index))
+                                             (-> (:history sib)
+                                                 (second)
+                                                 (nth case-index))))
+                                     siblings)
+                               1 ;; not solved, mom did produce diff behaviors
+                               3 ;; not solved, mom didn't produce diff behaviors
+                               )))))))
+              ;
+              (= cat :case-appropriate-family-uniformity)
+              (if (not (:print-history argmap))
+                (throw
+                  (Exception.
+                    ":print-history must be true for :case-appropriate-family-uniformity"))
                 (if (or (empty? (:parent-uuids ind))
                         (empty? (rest (:history ind))))
                   (vec (repeat (count (:errors ind)) 1))
