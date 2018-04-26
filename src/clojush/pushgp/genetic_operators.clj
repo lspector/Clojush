@@ -1368,6 +1368,31 @@ programs encoded by genomes g1 and g2."
            (distinct? 1 mbsim-c2-gc2 mbsim-gc2-ggc2)
            (distinct? mbsim-gc-ggc mbsim-gc2-ggc2)))))
 
+(defn symbolic-reproductive-change-changes-differently-diversifying?
+  [ind argmap]
+  (let [symbolic #(filter (comp not number?) %)
+        g (:genome ind)
+        c (produce-child-genome-by-autoconstruction g g argmap)
+        c2 (produce-child-genome-by-autoconstruction g g argmap)
+        c-made-by (symbolic (flatten (:made-by (meta c))))
+        c2-made-by (symbolic (flatten (:made-by (meta c2))))
+        gc (produce-child-genome-by-autoconstruction c g g argmap)
+        gc2 (produce-child-genome-by-autoconstruction c2 g g argmap)
+        gc-made-by (symbolic (flatten (:made-by (meta gc))))
+        gc2-made-by (symbolic (flatten (:made-by (meta gc2))))
+        ggc (produce-child-genome-by-autoconstruction gc g g argmap)
+        ggc2 (produce-child-genome-by-autoconstruction gc2 g g argmap)
+        ggc-made-by (symbolic (flatten (:made-by (meta ggc))))
+        ggc2-made-by (symbolic (flatten (:made-by (meta ggc2))))
+        mbsim-c-gc (sequence-similarity c-made-by gc-made-by)
+        mbsim-c2-gc2 (sequence-similarity c2-made-by gc2-made-by)
+        mbsim-gc-ggc (sequence-similarity gc-made-by ggc-made-by)
+        mbsim-gc2-ggc2 (sequence-similarity gc2-made-by ggc2-made-by)]
+    (assoc ind :diversifying
+      (and (distinct? 1 mbsim-c-gc mbsim-gc-ggc)
+           (distinct? 1 mbsim-c2-gc2 mbsim-gc2-ggc2)
+           (distinct? mbsim-gc-ggc mbsim-gc2-ggc2)))))
+
 (defn use-mate-diversifying?
   [ind argmap]
   (let [g (:genome ind)
@@ -1529,6 +1554,7 @@ programs encoded by genomes g1 and g2."
                 :children-make-children-differently children-make-children-differently-diversifying?
                 :three-children-make-children-differently three-children-make-children-differently-diversifying?
                 :symbolic-reproductive-change-changes symbolic-reproductive-change-changes-diversifying?
+                :symbolic-reproductive-change-changes-differently symbolic-reproductive-change-changes-differently-diversifying?
                 :symbolic-reproductive-change symbolic-reproductive-change-diversifying?
                 :reproductive-change reproductive-change-diversifying?
                 :symbolic-reproductive-divergence symbolic-reproductive-divergence-diversifying?
