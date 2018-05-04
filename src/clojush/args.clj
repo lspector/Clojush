@@ -666,7 +666,119 @@
                                                 ;genome_uniform_combination_and_deletion
                                                 ;genome_alternation
                                                 ;genome_uniform_crossover
-                                                )))]
+                                                ))
+                    :gene-oriented-non-recombinative 
+                    (into (registered-for-stacks
+                            (if (:autoconstructive-environments @push-argmap)
+                              [:integer :boolean :exec :float :tag :environment]
+                              [:integer :boolean :exec :float :tag]))
+                          '(genome_pop
+                             genome_dup
+                             genome_swap
+                             genome_rot
+                             genome_flush
+                             genome_eq
+                             genome_stackdepth
+                             genome_yank
+                             genome_yankdup
+                             genome_shove
+                             genome_empty
+                             genome_gene_dup
+                             genome_gene_randomize
+                             genome_gene_replace
+                             genome_gene_delete
+                             genome_rotate
+                             ;genome_gene_copy
+                             ;genome_gene_copy_range
+                             genome_toggle_silent
+                             genome_silence
+                             genome_unsilence
+                             genome_instruction_eq
+                             genome_gene_close
+                             genome_gene_silent
+                             genome_close_inc
+                             genome_close_dec
+                             genome_new
+                             genome_parent1
+                             genome_parent2
+                             autoconstructive_integer_rand
+                             autoconstructive_boolean_rand
+                             genome_autoconstructing
+                             genome_if_autoconstructing
+                             genome_gene_genome_instruction
+                             genome_if_gene_genome_instruction
+                             genome_genesis
+                             ;;genome_uniform_instruction_mutation
+                             ;;genome_uniform_integer_mutation
+                             ;;genome_uniform_float_mutation
+                             ;;genome_uniform_tag_mutation
+                             ;;genome_uniform_string_mutation
+                             ;;genome_uniform_boolean_mutation
+                             ;;genome_uniform_close_mutation
+                             ;;genome_uniform_silence_mutation
+                             ;;genome_uniform_deletion
+                             ;;genome_uniform_addition
+                             ;;genome_uniform_addition_and_deletion
+                             ;genome_uniform_combination_and_deletion
+                             ;genome_alternation
+                             ;genome_uniform_crossover
+                             ))
+                    :uniform-non-recombinative 
+                    (into (registered-for-stacks
+                            (if (:autoconstructive-environments @push-argmap)
+                              [:integer :boolean :exec :float :tag :environment]
+                              [:integer :boolean :exec :float :tag]))
+                          '(genome_pop
+                             genome_dup
+                             genome_swap
+                             genome_rot
+                             genome_flush
+                             genome_eq
+                             genome_stackdepth
+                             genome_yank
+                             genome_yankdup
+                             genome_shove
+                             genome_empty
+                             ;;genome_gene_dup
+                             ;;genome_gene_randomize
+                             ;;genome_gene_replace
+                             ;;genome_gene_delete
+                             ;;genome_rotate
+                             ;genome_gene_copy
+                             ;genome_gene_copy_range
+                             ;;genome_toggle_silent
+                             ;;genome_silence
+                             ;;genome_unsilence
+                             ;;genome_instruction_eq
+                             ;;genome_gene_close
+                             ;;genome_gene_silent
+                             ;;genome_close_inc
+                             ;;genome_close_dec
+                             genome_new
+                             genome_parent1
+                             genome_parent2
+                             autoconstructive_integer_rand
+                             autoconstructive_boolean_rand
+                             genome_autoconstructing
+                             genome_if_autoconstructing
+                             genome_gene_genome_instruction
+                             genome_if_gene_genome_instruction
+                             genome_genesis
+                             genome_uniform_instruction_mutation
+                             genome_uniform_integer_mutation
+                             genome_uniform_float_mutation
+                             genome_uniform_tag_mutation
+                             genome_uniform_string_mutation
+                             genome_uniform_boolean_mutation
+                             genome_uniform_close_mutation
+                             genome_uniform_silence_mutation
+                             genome_uniform_deletion
+                             genome_uniform_addition
+                             genome_uniform_addition_and_deletion
+                             ;genome_uniform_combination_and_deletion
+                             ;genome_alternation
+                             ;genome_uniform_crossover
+                             )))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     (swap! push-argmap assoc
