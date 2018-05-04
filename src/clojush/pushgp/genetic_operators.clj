@@ -1366,7 +1366,9 @@ programs encoded by genomes g1 and g2."
     (assoc ind :diversifying
       (and (distinct? 1 mbsim-c-gc mbsim-gc-ggc)
            (distinct? 1 mbsim-c2-gc2 mbsim-gc2-ggc2)
-           (distinct? mbsim-gc-ggc mbsim-gc2-ggc2)))))
+           ;(distinct? mbsim-gc-ggc mbsim-gc2-ggc2)
+           (distinct? (- mbsim-c-gc mbsim-gc-ggc)
+                      (- mbsim-c2-gc2 mbsim-gc2-ggc2))))))
 
 (defn symbolic-reproductive-change-changes-differently-diversifying?
   [ind argmap]
@@ -1391,7 +1393,9 @@ programs encoded by genomes g1 and g2."
     (assoc ind :diversifying
       (and (distinct? 1 mbsim-c-gc mbsim-gc-ggc)
            (distinct? 1 mbsim-c2-gc2 mbsim-gc2-ggc2)
-           (distinct? mbsim-gc-ggc mbsim-gc2-ggc2)))))
+           ;(distinct? mbsim-gc-ggc mbsim-gc2-ggc2)
+           (distinct? (- mbsim-c-gc mbsim-gc-ggc)
+                      (- mbsim-c2-gc2 mbsim-gc2-ggc2))))))
 
 (defn use-mate-diversifying?
   [ind argmap]
