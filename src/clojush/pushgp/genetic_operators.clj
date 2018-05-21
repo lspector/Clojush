@@ -1241,6 +1241,17 @@ programs encoded by genomes g1 and g2."
       (not= (:made-by (meta child1))
             (:made-by (meta child2))))))
 
+(defn symbolic-makes-children-differently-diversifying?
+  [ind argmap]
+  (let [symbolic-made-by #(filter (comp not number?) 
+                                  (flatten (:made-by (meta %))))
+        g (:genome ind)
+        child1 (produce-child-genome-by-autoconstruction g g argmap)
+        child2 (produce-child-genome-by-autoconstruction g g argmap)]
+    (assoc ind :diversifying
+      (not= (symbolic-made-by child1)
+            (symbolic-made-by child2)))))
+
 (defn makes-three-children-differently-diversifying?
   [ind argmap]
   (let [g (:genome ind)
@@ -1249,6 +1260,17 @@ programs encoded by genomes g1 and g2."
         child3 (produce-child-genome-by-autoconstruction g g argmap)]
     (assoc ind :diversifying
       (apply distinct? (map :made-by (map meta [child1 child2 child3]))))))
+
+(defn symbolic-makes-three-children-differently-diversifying?
+  [ind argmap]
+  (let [symbolic-made-by #(filter (comp not number?) 
+                                  (flatten (:made-by (meta %))))
+        g (:genome ind)
+        child1 (produce-child-genome-by-autoconstruction g g argmap)
+        child2 (produce-child-genome-by-autoconstruction g g argmap)
+        child3 (produce-child-genome-by-autoconstruction g g argmap)]
+    (assoc ind :diversifying
+      (apply distinct? (map symbolic-made-by [child1 child2 child3])))))
 
 (defn children-make-children-differently-diversifying?
   [ind argmap]
@@ -1261,6 +1283,19 @@ programs encoded by genomes g1 and g2."
       (not= (:made-by (meta gc1))
             (:made-by (meta gc2))))))
 
+(defn symbolic-children-make-children-differently-diversifying?
+  [ind argmap]
+  (let [symbolic-made-by #(filter (comp not number?) 
+                                  (flatten (:made-by (meta %))))
+        g (:genome ind)
+        child1 (produce-child-genome-by-autoconstruction g g argmap)
+        child2 (produce-child-genome-by-autoconstruction g g argmap)
+        gc1 (produce-child-genome-by-autoconstruction child1 g g argmap)
+        gc2 (produce-child-genome-by-autoconstruction child2 g g argmap)]
+    (assoc ind :diversifying
+      (not= (symbolic-made-by gc1)
+            (symbolic-made-by gc2)))))
+
 (defn three-children-make-children-differently-diversifying?
   [ind argmap]
   (let [g (:genome ind)
@@ -1272,6 +1307,20 @@ programs encoded by genomes g1 and g2."
         gc3 (produce-child-genome-by-autoconstruction child3 g g argmap)]
     (assoc ind :diversifying
       (apply distinct? (map :made-by (map meta [gc1 gc2 gc3]))))))
+
+(defn symbolic-three-children-make-children-differently-diversifying?
+  [ind argmap]
+  (let [symbolic-made-by #(filter (comp not number?) 
+                                  (flatten (:made-by (meta %))))
+        g (:genome ind)
+        child1 (produce-child-genome-by-autoconstruction g g argmap)
+        child2 (produce-child-genome-by-autoconstruction g g argmap)
+        child3 (produce-child-genome-by-autoconstruction g g argmap)
+        gc1 (produce-child-genome-by-autoconstruction child1 g g argmap)
+        gc2 (produce-child-genome-by-autoconstruction child2 g g argmap)
+        gc3 (produce-child-genome-by-autoconstruction child3 g g argmap)]
+    (assoc ind :diversifying
+      (apply distinct? (map symbolic-made-by [gc1 gc2 gc3])))))
 
 (defn reproductive-change-changes-diversifying?
   [ind argmap]
@@ -1554,9 +1603,13 @@ programs encoded by genomes g1 and g2."
                 :minimal-reproductive-difference minimal-reproductive-difference-diversifying?
                 :four-generation-reproductive-difference four-generation-reproductive-difference-diversifying?
                 :makes-children-differently makes-children-differently-diversifying?
+                :symbolic-makes-children-differently symbolic-makes-children-differently-diversifying?
                 :makes-three-children-differently makes-three-children-differently-diversifying?
+                :symbolic-makes-three-children-differently symbolic-makes-three-children-differently-diversifying?
                 :children-make-children-differently children-make-children-differently-diversifying?
+                :symbolic-children-make-children-differently symbolic-children-make-children-differently-diversifying?
                 :three-children-make-children-differently three-children-make-children-differently-diversifying?
+                :symbolic-three-children-make-children-differently symbolic-three-children-make-children-differently-diversifying?
                 :symbolic-reproductive-change-changes symbolic-reproductive-change-changes-diversifying?
                 :symbolic-reproductive-change-changes-differently symbolic-reproductive-change-changes-differently-diversifying?
                 :symbolic-reproductive-change symbolic-reproductive-change-diversifying?
