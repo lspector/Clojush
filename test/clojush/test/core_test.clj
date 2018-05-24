@@ -1,5 +1,4 @@
-;; this tests the full CLI process to make sure it outputs the same thing
-;; it uses
+;; this tests the full CLI process to make sure it outputs the same to stdout
 (ns clojush.test.core-test
   (:require [clojure.test :refer :all]
             [clojure.string :as string]
@@ -34,7 +33,6 @@
    clojush.globals/timer-atom
    clojush.globals/timing-map
    clojush.globals/solution-rates
-   clojush.globals/elitegroups
    clojush.globals/elitegroups
    clojush.globals/epsilons-for-epsilon-lexicase
    clojush.globals/selection-counts

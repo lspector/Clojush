@@ -15,16 +15,30 @@
                  ;; https://mvnrepository.com/artifact/org.apache.commons/commons-math3
                  [org.apache.commons/commons-math3 "3.2"]
                  [cheshire "5.7.1"]
-                 [prismatic/plumbing "0.5.4"]
-                 [criterium "0.4.4"]
-                 [net.totakke/libra "0.1.0"]]
+                 [prismatic/plumbing "0.5.4"]]
+
+  ; different compiled classes per profile
+  :target-path "target/%s"
   :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
             [lein-gorilla "0.4.0"]
             [cider/cider-nrepl "0.15.1"]
-            [lein-cloverage "1.0.6"]
-            [net.totakke/lein-libra "0.1.0"]]
-  :profiles {:text {:plugins [[venantius/ultra "0.5.1"]]}}
+            [lein-cloverage "1.0.6"]]
+  :aliases {"benchmark" ["with-profile" "+benchmark" "trampoline" "jmh"]
+            "benchmark-sample" ["with-profile" "+benchmark" "trampoline" "run"]
+            "benchmark-compare" ["with-profile" "+compare" "trampoline" "run"]}
+
+  :profiles {:text {:plugins [[venantius/ultra "0.5.1"]]}
+             :benchmark {:main clojush.bench.helpers/sample
+                         :aot [clojush.bench.helpers]
+                         :dependencies [[de.ruedigermoeller/fst "2.57"]]
+                         :plugins [[lein-jmh "0.2.5"]]
+                         ; increase stack size to deal with deserializing nested objects
+                         :jvm-opts ["-Xss4m"]}
+             :compare {:main clojush.bench.compare
+                       :dependencies [[lein-jmh "0.2.5"]
+                                      [jmh-clojure "0.2.1"]
+                                      [clojure-future-spec "1.9.0-beta4"]]}}
   :codox {:source-uri "http://github.com/lspector/Clojush/blob/master/{filepath}#L{line}"
           :namespaces [#"^(?!clojush\.problems)"]
           :output-path "doc"
@@ -32,7 +46,6 @@
   :ultra {:repl         false
           :stacktraces  false
           :tests        true}
-  :libra {:bench-paths ["test/clojush/bench"]}
   :repositories [["releases" {:url "https://clojars.org/repo"
                               :username :env
                               :sign-releases false

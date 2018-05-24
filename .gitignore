@@ -25,3 +25,4 @@ clojush.iml
 .gorilla-port
 /clojush/
 .ipynb_checkpoints/
+bench-inputs

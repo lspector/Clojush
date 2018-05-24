@@ -1,0 +1,54 @@
+;; see the sample file jmh.edn for more examples:
+;; https://github.com/jgpc42/jmh-clojure/blob/master/resources/sample.jmh.edn
+;; also refer to the Java example files for more documentation
+;; http://hg.openjdk.java.net/code-tools/jmh/file/default/jmh-samples/src/main/java/org/openjdk/jmh/samples/
+
+
+{:benchmarks
+ [{:name :process-generation
+   :fn clojush.bench.helpers/process-generation-deserialize
+   :args [:state/process-generation-input]
+   :apply true
+   :options [{:mode :single-shot
+              :warmup 1
+              :measurement 2
+              :threads 1
+              :fork 3
+              :output-time-unit :s}]}
+  {:name :eval-push
+   :fn clojush.interpreter/eval-push
+   :args [:state/eval-push-input]
+   :apply true
+   :options [{:mode :single-shot
+              :warmup
+              {:count 100
+               :iterations 50}
+              :measurement
+              {:count 100
+               :iterations 50}
+              :threads 20
+              :fork 3
+              :output-time-unit :ms}]}]
+
+ :states
+ {:process-generation-input
+  {:scope :benchmark
+   :trial {:fn clojush.bench.helpers/->process-generation-input
+           :args [:param/process-generation-input-id]}}
+  :eval-push-input
+  {:scope :benchmark
+   :trial {:fn clojush.bench.helpers/->eval-push-input
+           :args [:param/eval-push-input-id]}}}
+ :params
+ {:eval-push-input-id
+  ["1369-09420c81-0e78-4322-8823-2c5d14c4ac3b"
+   "28-f1c99415-90ee-4b77-aa79-0a7c87162c8c"
+   "1045-922d31ff-fe14-454c-831e-e8ca9ada0e02"
+   "2391-26d2d62a-fa34-4d4d-9fb8-ea1b14d530fc"
+   "4250-bb5ac8bc-586e-49ab-8e8c-069f17934949"]
+  :process-generation-input-id
+  ["3714-33fc8276-c3d3-4405-931b-4f087df5a415"
+   "1085-c785a344-19ed-45cc-9972-8042e2618079"
+   "3483-9316a199-11e3-44e8-aaea-a8ab1ca87cb1"
+   "3777-b28b22df-9be3-4573-b32a-3958c0c5ebd0"
+   "2423-5b6c7298-dc2b-43c1-8266-929730311695"]}}
