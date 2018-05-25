@@ -3,7 +3,8 @@
             [clj-random.core :as random]
             [clojure.repl :as repl]
             [clojush.pushgp.record :as r])
-  (:use [clojush args globals util pushstate random individual evaluate simplification translate]
+  (:use [clojush args globals util pushstate random individual evaluate meta-errors
+         simplification translate]
         [clojush.instructions boolean code common numbers random-instructions string char vectors
          tag zip environment input-output genome]
         [clojush.pushgp breed report]
@@ -237,3 +238,4 @@
            (if (nil? next-novelty-archive)
              return-val
              (recur (inc generation) next-novelty-archive))))))))
+
