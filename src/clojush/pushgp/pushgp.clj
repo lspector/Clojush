@@ -89,9 +89,8 @@
   (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
   ;; compute meta-errors in a second pass, passing evaluated population
   (dorun (map #((if use-single-thread swap! send)
-                %1 evaluate-individual-meta-errors (mapv deref pop-agents) %2 argmap)
-              pop-agents
-              rand-gens))
+                %1 evaluate-individual-meta-errors (mapv deref pop-agents) argmap)
+              pop-agents))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
 
 (defn produce-new-offspring

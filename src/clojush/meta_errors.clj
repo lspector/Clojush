@@ -19,11 +19,9 @@
   :rand (a random floating-point value)
   :rand-bit (randomly 0 or 1)
   :age (minimize genealogical age of program)"
-  [ind evaluated-population rand-gen
+  [ind evaluated-population
    {:keys [meta-error-categories error-threshold improvement-discount] :as argmap}]
-  (random/with-rng 
-    rand-gen
-    (let [meta-error-fn 
+  (let [meta-error-fn 
           (fn [cat]
             (cond
               (fn? cat) (cat ind argmap)
@@ -1360,5 +1358,5 @@
                 1)
               ;
               :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
-      (assoc ind :meta-errors (vec (flatten (mapv meta-error-fn meta-error-categories)))))))
+      (assoc ind :meta-errors (vec (flatten (mapv meta-error-fn meta-error-categories))))))
 
