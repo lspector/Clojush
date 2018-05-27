@@ -7,1356 +7,783 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; calculate meta-errors
 
+(defn meta-error-fn-from-keyword
+  "Takes a keyword and returns the meta-error function with the corresponding name."
+  [k]
+  (var-get (get (ns-publics 'clojush.meta-errors) 
+                (read-string (str (name k) "-meta-error")))))
+
 (defn evaluate-individual-meta-errors
   "Calculates one meta-error for each meta-error category provided. Each
-  meta-error-category should either be a keyword for a built-in meta category
-  or a function that takes an individual and an argmap and returns a meta error value.
-  The built-in meta categories include:
-  :size (minimize size of program)
-  :compressibility (minimize ammount a program compresses compared to itself)
-  :total-error (minimize total error)
-  :unsolved-cases (maximize number of cases with zero error)
-  :rand (a random floating-point value)
-  :rand-bit (randomly 0 or 1)
-  :age (minimize genealogical age of program)"
-  [ind evaluated-population
-   {:keys [meta-error-categories error-threshold improvement-discount] :as argmap}]
-  (let [meta-error-fn 
-          (fn [cat]
-            (cond
-              (fn? cat) (cat ind argmap)
-              (= cat :size) (count (:genome ind))
-              ;(= cat :compressibility) 555 ;;TMH fix later
-              (= cat :total-error) (:total-error ind)
-              (= cat :unsolved-cases) (count (filter #(> % error-threshold) 
-                                                     (:errors ind)))
-              (= cat :rand) (lrand)
-              (= cat :rand-bit) (lrand-nth [0 1])
-              (= cat :age) (:age ind)
-              (= cat :novelty) :novelty ; Keyword will be replaced later,
-              ;                         ; needs entire population to compute novelty
-              ;
-              (= cat :amorphousness)
-              (- 1 (double (/ (count-parens (:program ind)) 
-                              (count-points (:program ind))))) ;Number of (open) parens / points
-              ;
-              (= cat :gens-since-total-error-change)
-              (if (not (:print-history argmap))
-                (throw 
-                  (Exception. 
-                    ":print-history must be true for :gens-since-total-error-change"))
-                (let [hist (mapv (partial reduce +) (:history ind))]
-                  (if (or (empty? hist)
-                          (apply = hist))
-                    1000000
-                    (dec (count (take-while #(= % (first hist)) (rest hist)))))))
-              ;
-              (= cat :gens-since-error-change)
-              (if (not (:print-history argmap))
-                (throw 
-                  (Exception. 
-                    ":print-history must be true for :gens-since-total-error-change"))
-                (let [hist (:history ind)]
-                  (if (or (empty? hist)
-                          (apply = hist))
-                    1000000
-                    (dec (count (take-while #(= % (first hist)) (rest hist)))))))
-              ;
-              (= cat :gens-since-total-error-improvement)
-              (if (not (:print-history argmap))
-                (throw 
-                  (Exception. 
-                    ":print-history must be true for :gens-since-total-error-improvement"))
-                (let [diffs (mapv (fn [[a b]] (- a b)) 
-                                  (partition 2 1 (mapv (partial reduce +) 
-                                                       (:history ind))))]
-                  (if (or (empty? diffs)
-                          (not (some neg? diffs)))
-                    1000000
-                    (count (take-while #(>= % 0) diffs)))))
-              ;
-              (= cat :total-error-improvement-ratio)
-              (if (not (:print-history argmap))
-                (throw 
-                  (Exception. 
-                    ":print-history must be true for :total-error-improvement-ratio"))
-                (let [diffs (mapv (fn [[a b]] (- a b)) 
-                                  (partition 2 1 (mapv (partial reduce +) 
-                                                       (:history ind))))]
-                  (if (empty? diffs)
-                    1000000
-                    (- 1 (/ (count (filter neg? diffs))
-                            (count diffs))))))
-              ;
-              (= cat :total-error-new-best-ratio)
-              (if (not (:print-history argmap))
-                (throw 
-                  (Exception. 
-                    ":print-history must be true for :total-error-new-best-ratio"))
-                (let [hist (mapv (partial reduce +) (:history ind))]
-                  (if (empty? (rest hist))
-                    1000000
-                    (loop [remaining hist
-                           new-best-count 0]
-                      (if (empty? (rest remaining))
-                        (- 1 (/ new-best-count (dec (count hist))))
-                        (recur (rest remaining)
-                               (+ new-best-count
-                                  (if (every? #(> % (first remaining))
-                                              (rest remaining))
-                                    1
-                                    0))))))))
-              ;
-              (= cat :discounted-total-error-new-best-ratio)
-              (if (not (:print-history argmap))
-                (throw 
-                  (Exception. 
-                    ":print-history must be true for :discounted-total-error-new-best-ratio"))
-                (let [hist (mapv (partial reduce +) (:history ind))]
-                  (if (empty? (rest hist))
-                    1000000
-                    (loop [remaining hist
-                           new-best-count 0
-                           scale 1
-                           max-total 0]
-                      (if (empty? (rest remaining))
-                        (- 1.0 (/ new-best-count max-total))
-                        (recur (rest remaining)
-                               (+ new-best-count
-                                  (if (every? #(> % (first remaining))
-                                              (rest remaining))
-                                    (/ 1 scale)
-                                    0))
-                               (* 2.0 scale)
-                               (+ max-total (/ 1 scale))))))))
-              ;
-              (= cat :discounted-total-error-improvement)
-              (if (not (:print-history argmap))
-                (throw 
-                  (Exception. 
-                    ":print-history must be true, :discounted-total-error-improvement-ratio"))
-                (if (empty? (rest (:history ind)))
-                  1000000
-                  (let [diffs (mapv (fn [[a b]] (- a b))
-                                    (partition 2 1 (mapv (partial reduce +) (:history ind))))
-                        improvements (mapv #(if (neg? %) 1.0 0.0) 
-                                           diffs)
-                        persistence 0.5
-                        weights (take (count diffs) 
-                                      (iterate (partial * persistence) 0.5))
-                        sum (reduce + (mapv * improvements weights))]
-                    (if (<= sum 0)
-                      1.0E100
-                      (- 1.0 sum)))))
-              ;
-              (= cat :case-stagnation) ;; formerly :discounted-case-improvements
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-stagnation"))
-                (if (empty? (rest (:history ind)))
-                  (vec (repeat (count (:errors ind)) 1000000))
-                  (vec (for [case-history (apply map list (:history ind))]
-                         (if (zero? (first case-history))
-                           -100000  ;; solved, improvement doesn't matter
-                           (let [improvements (mapv (fn [[newer-error older-error]]
-                                                      (if (< newer-error older-error)
-                                                        1.0
-                                                        (if true ;(= newer-error older-error) ;for now only improvement counts
-                                                          0.0
-                                                          -1.0)))
-                                                    (partition 2 1 case-history))
-                                 weights (take (count improvements)
-                                               (iterate (partial * (- 1 improvement-discount)) 1))
-                                 sum (reduce + (mapv * improvements weights))]
-                             (- sum)))))))
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-stagnation"))
-                (if (empty? (rest (:history ind)))
-                  (vec (repeat (count (:errors ind)) 1000000))
-                  (vec (for [case-history (apply map list (:history ind))]
-                         (if (zero? (first case-history))
-                           -100000  ;; solved, improvement doesn't matter
-                           (let [improvements (mapv (fn [[newer-error older-error]]
-                                                      (if (< newer-error older-error)
-                                                        1.0
-                                                        (if (= newer-error older-error) 
-                                                          0.0
-                                                          -1.0)))
-                                                    (partition 2 1 case-history))
-                                 weights (take (count improvements)
-                                               (iterate (partial * (- 1 improvement-discount)) 1))
-                                 sum (reduce + (mapv * improvements weights))]
-                             (- sum)))))))
-              (if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-stagnation"))
-                (if (empty? (rest (:history ind)))
-                  (vec (repeat (count (:errors ind)) 1000000))
-                  (vec (for [case-history (apply map list (:history ind))]
-                         (if (zero? (first case-history))
-                           -100000  ;; solved, improvement doesn't matter
-                           (let [improvements (mapv (fn [[newer-error older-error]]
-                                                      (if (< newer-error older-error)
-                                                        1.0
-                                                        (if (= newer-error older-error) 
-                                                          -1.0
-                                                          0.0)))
-                                                    (partition 2 1 case-history))
-                                 weights (take (count improvements)
-                                               (iterate (partial * (- 1 improvement-discount)) 1))
-                                 sum (reduce + (mapv * improvements weights))]
-                             (- sum)))))))
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-stagnation"))
-                (if (empty? (rest (:history ind)))
-                  (vec (repeat (count (:errors ind)) 1000000))
-                  (vec (for [case-history (apply map list (:history ind))]
-                         (let [improvements (mapv (fn [[newer-error older-error]]
-                                                    (if (< newer-error older-error)
-                                                      1.0
-                                                      (if (= newer-error older-error) 
-                                                        -1.0
-                                                        0.0)))
-                                                  (partition 2 1 case-history))
-                               weights (take (count improvements)
-                                             (iterate (partial * (- 1 improvement-discount)) 1))
-                               sum (reduce + (mapv * improvements weights))]
-                           (- sum))))))
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-stagnation"))
-                (if (empty? (rest (:history ind)))
-                  (vec (repeat (count (:errors ind)) 1000000))
-                  (vec (for [case-history (apply map list (:history ind))]
-                         (let [improvements (mapv (fn [[newer-error older-error]]
-                                                    (if (or (zero? newer-error)
-                                                            (< newer-error older-error))
-                                                      1.0
-                                                      (if (= newer-error older-error) 
-                                                        -1.0
-                                                        0.0)))
-                                                  (partition 2 1 case-history))
-                               weights (take (count improvements)
-                                             (iterate (partial * (- 1 improvement-discount)) 1))
-                               sum (reduce + (mapv * improvements weights))]
-                           (- sum))))))
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-stagnation"))
-                (if (empty? (rest (:history ind)))
-                  (vec (repeat (count (:errors ind)) 1000000))
-                  (vec (for [case-history (apply map list (:history ind))]
-                         (if (zero? (first case-history))
-                           -100000  ;; solved, improvement doesn't matter
-                           (let [improvements (mapv (fn [[newer-error older-error]]
-                                                      (if (< newer-error older-error)
-                                                        1.0
-                                                        (if (= newer-error older-error) 
-                                                          1.0
-                                                          0.0)))
-                                                    (partition 2 1 case-history))
-                                 weights (take (count improvements)
-                                               (iterate (partial * (- 1 improvement-discount)) 1))
-                                 sum (reduce + (mapv * improvements weights))]
-                             (- sum)))))))
-              ;
-              (= cat :case-gens-since-improvement)
-              (if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-gens-since-improvement"))
-                (let [huge 1000000]
-                  (if (empty? (rest (:history ind)))
-                    (vec (repeat (count (:errors ind)) huge))
-                    (vec (for [case-history (apply map list (:history ind))]
-                           (if (zero? (first case-history))
-                             (- huge)  ;; solved, improvement doesn't matter
-                             (let [improved? (mapv (fn [[newer-error older-error]]
-                                                     (< newer-error older-error))
-                                                   (partition 2 1 case-history))
-                                   gens (take-while not improved?)]
-                               (if (= (count gens)
-                                      (count improved?))
-                                 huge
-                                 (count gens)))))))))
-              (= cat :case-gens-since-change)
-              (if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-gens-since-change"))
-                (let [huge 1000000]
-                  (if (empty? (rest (:history ind)))
-                    (vec (repeat (count (:errors ind)) huge))
-                    (vec (for [case-history (apply map list (:history ind))]
-                           (if (zero? (first case-history))
-                             (- huge)  ;; solved, improvement doesn't matter
-                             (let [changed? (mapv (fn [[newer-error older-error]]
-                                                    (not= newer-error older-error))
-                                                  (partition 2 1 case-history))
-                                   gens (take-while not changed?)]
-                               (if (= (count gens)
-                                      (count changed?))
-                                 huge
-                                 (count gens)))))))))
-              ;
-              (= cat :case-sibling-uniformity)
-              (if (empty? (:parent-uuids ind))
-                (vec (repeat (count (:errors ind)) 1))
-                (let [siblings (filter #(and (= (first (:parent-uuids ind))
-                                                (first (:parent-uuids %)))
-                                             (not (:is-random-replacement %))) ; new random sibs don't count
-                                       evaluated-population)]
-                  (vec (for [case-index (range (count (:errors ind)))]
-                         (if (zero? (nth (:errors ind) case-index)) ;; solved
-                           0 
-                           (if (or (empty? siblings)
-                                   (apply = (mapv #(nth (:errors %) case-index)
-                                                  siblings)))
-                             1
-                             0))))))
-              ;
-              (= cat :case-family-uniformity)
-              (if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-family-uniformity"))
-                (if (or (empty? (:parent-uuids ind))
-                        (empty? (rest (:history ind))))
-                  (vec (repeat (count (:errors ind)) 1))
-                  (let [siblings (filter #(and (= (first (:parent-uuids ind))
-                                                  (first (:parent-uuids %)))
-                                               (not (empty? (rest (:history %))))) ; new random sibs don't count
-                                         evaluated-population)]
-                    (vec (for [case-index (range (count (:errors ind)))]
-                           (if (zero? (nth (:errors ind) case-index)) ;; solved
-                             0 
-                             (if 
-                               (some (fn [sib]
-                                       (or (zero? (-> (:history sib) ;; sib solved
-                                                      (first)
-                                                      (nth case-index)))
-                                           (not= (-> (:history sib) ;; sib error different than mom's
-                                                     (first)
-                                                     (nth case-index))
-                                                 (-> (:history sib)
-                                                     (second)
-                                                     (nth case-index)))))
-                                     siblings)
-                               1
-                               2)))))))
-              ;
-              (= cat :mom-doesnt-change-behavior)
-              (if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-family-uniformity"))
-                (let [siblings (filter #(and (= (first (:parent-uuids ind))
-                                                (first (:parent-uuids %)))
-                                             (not (empty? (rest (:history %))))) ; new random sibs don't count
-                                       evaluated-population)]
-                  (vec (for [case-index (range (count (:errors ind)))]
-                         (if (zero? (nth (:errors ind) case-index)) 
-                           0 ;; solved
-                           (if (or (empty? (:parent-uuids ind))
-                                   (empty? (rest (:history ind))))
-                             2 ;; not solved, no mom who might have produced diff behaviors
-                             (if 
-                               (some (fn [sib]
-                                       (not= (-> (:history sib) ;; sib error different than mom's
-                                                 (first)
-                                                 (nth case-index))
-                                             (-> (:history sib)
-                                                 (second)
-                                                 (nth case-index))))
-                                     siblings)
-                               1 ;; not solved, mom did produce diff behaviors
-                               3 ;; not solved, mom didn't produce diff behaviors
-                               )))))))
-              ;
-              (= cat :case-appropriate-family-uniformity)
-              (if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-appropriate-family-uniformity"))
-                (if (or (empty? (:parent-uuids ind))
-                        (empty? (rest (:history ind))))
-                  (vec (repeat (count (:errors ind)) 1))
-                  (let [siblings (filter #(and (= (first (:parent-uuids ind))
-                                                  (first (:parent-uuids %)))
-                                               (not (empty? (rest (:history %))))) ; new random sibs don't count
-                                         evaluated-population)]
-                    (vec (for [case-index (range (count (:errors ind)))]
-                           (if (zero? (nth (second (:history ind)) case-index)) 
-                             (if ;; mom solved, error for any child to be different
-                               (some (fn [sib]
-                                       (not= (-> (:history sib) ;; sib error different than mom's
-                                                 (first)
-                                                 (nth case-index))
-                                             (-> (:history sib)
-                                                 (second)
-                                                 (nth case-index))))
-                                     siblings)
-                               1
-                               0)
-                             (if ;; mom unsolved, error if there's not a different child
-                               (some (fn [sib]
-                                       (not= (-> (:history sib) ;; sib error different than mom's
-                                                 (first)
-                                                 (nth case-index))
-                                             (-> (:history sib)
-                                                 (second)
-                                                 (nth case-index))))
-                                     siblings)
-                               0
-                               1)))))))
-              ;
-              (= cat :case-scaled-error-plus-change)
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (+ (* e 1000000) (- e (min p1e p2e)))))
-                  (:errors ind))
-              (if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (+' (*' e 1000000) 
-                           (#(cond 
-                               (neg? %) -1
-                               (pos? %) 1
-                               :else 0)
-                             (- e (min p1e p2e))))))
-                (mapv #(*' % 1000000) (:errors ind)))
-              ;
-              (= cat :case-family-non-improvement)
-              (if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-family-non-improvement"))
-                (if (or (empty? (:parent-uuids ind))
-                        (empty? (rest (:history ind))))
-                  (vec (repeat (count (:errors ind)) 1))
-                  (let [siblings (filter #(and (= (first (:parent-uuids ind))
-                                                  (first (:parent-uuids %)))
-                                               (not (empty? (rest (:history %))))) ; new random sibs don't count
-                                         evaluated-population)]
-                    (vec (for [case-index (range (count (:errors ind)))]
-                           (if (zero? (nth (:errors ind) case-index)) ;; solved
-                             0 
-                             (if 
-                               (some (fn [sib]
-                                       (or (zero? (-> (:history sib) ;; sib solved
-                                                      (first)
-                                                      (nth case-index)))
-                                           (< (-> (:history sib) ;; sib error better than mom's
-                                                  (first)
-                                                  (nth case-index))
-                                              (-> (:history sib)
-                                                  (second)
-                                                  (nth case-index)))))
-                                     siblings)
-                               1
-                               2)))))))
-              ;
-              (= cat :case-family-non-improvement-or-uniformity)
-              (if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-family-non-improvement"))
-                (if (or (empty? (:parent-uuids ind))
-                        (empty? (rest (:history ind))))
-                  (vec (repeat (count (:errors ind)) 1))
-                  (let [siblings (filter #(and (= (first (:parent-uuids ind))
-                                                  (first (:parent-uuids %)))
-                                               (not (empty? (rest (:history %))))) ; new random sibs don't count
-                                         evaluated-population)]
-                    (vec (for [case-index (range (count (:errors ind)))]
-                           (if (zero? (nth (:errors ind) case-index)) ;; solved
-                             0 
-                             (if 
-                               (some (fn [sib]
-                                       (or (zero? (-> (:history sib) ;; sib solved
-                                                      (first)
-                                                      (nth case-index)))
-                                           (< (-> (:history sib) ;; sib error better than mom's
-                                                  (first)
-                                                  (nth case-index))
-                                              (-> (:history sib)
-                                                  (second)
-                                                  (nth case-index)))))
-                                     siblings)
-                               1
-                               (if (some (fn [sib]
-                                           (not= (-> (:history sib) ;; sib error different than mom's
-                                                     (first)
-                                                     (nth case-index))
-                                                 (-> (:history sib)
-                                                     (second)	
-                                                     (nth case-index))))
-                                         siblings)
-                                 2
-                                 3))))))))
-              ;
-              (= cat :case-family-certainty)
-              (if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-family-certainty"))
-                (if (or (empty? (:parent-uuids ind))
-                        (empty? (rest (:history ind))))
-                  (vec (repeat (count (:errors ind)) 1))
-                  (let [siblings (filter #(and (= (first (:parent-uuids ind))
-                                                  (first (:parent-uuids %)))
-                                               (not (empty? (rest (:history %))))) ; new random sibs don't count
-                                         evaluated-population)]
-                    (vec (for [case-index (range (count (:errors ind)))]
-                           (if (zero? (nth (:errors ind) case-index)) ;; solved
-                             0 
-                             (/ 1 (count 
-                                    (distinct 
-                                      (for [s siblings] 
-                                        (nth (first (:history s)) 
-                                             case-index)))))))))))
-              ;
-              (= cat :family-uniformity)
-              (if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :family-variation"))
-                (if (or (empty? (:parent-uuids ind))
-                        (empty? (rest (:history ind))))
-                  1
-                  (let [siblings (filter #(and (= (first (:parent-uuids ind))
-                                                  (first (:parent-uuids %)))
-                                               (not (empty? (rest (:history %))))) ; new random sibs don't count
-                                         evaluated-population)]
-                    (if (some (fn [sib]
-                                (not= (first (:history sib))
-                                      (second (:history sib))))
-                              siblings)
-                      0
-                      1))))
-              ;
-              (= cat :repeated-errors)
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :repeated-errors"))
-                (if (or (empty? (rest (:history ind)))
-                        (some #{(first (:history ind))}
-                              (set (rest (:history ind)))))
-                    1
-                    0))
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :repeated-errors"))
-                (if (some #{(first (:history ind))}
-                          (set (rest (:history ind))))
-                    1
-                    0))
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :repeated-errors"))
-                (if (or (empty? (rest (:history ind)))
-                        (some #{(first (:history ind))}
-                              (set (take 3 (rest (:history ind))))))
-                    1
-                    0))
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :repeated-errors"))
-                (if (empty? (rest (:history ind)))
-                  1
-                  (if (some #{(first (:history ind))}
-                            (set (rest (:history ind))))
-                    (/ 1 (inc (count (take-while #(not= % (first (:history ind)))
-                                                 (rest (:history ind))))))
-                    0)))
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :repeated-errors"))
-                (if (empty? (rest (:history ind)))
-                  (vec (repeat (count (:errors ind)) 1))
-                  (vec (for [case-index (range (count (:errors ind)))]
-                         (if (zero? (nth (:errors ind) case-index)) ;; solved
-                           0 
-                           (let [latest (nth (first (:history ind)) case-index)
-                                 olders (map #(nth % case-index) (rest (:history ind)))]
-                             (if (some #{latest} (set olders))
-                               (/ 1 (inc (count (take-while #(not= % latest) olders))))
-                               0)))))))
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :repeated-errors"))
-                (if (empty? (rest (:history ind)))
-                  (vec (repeat (count (:errors ind)) 2))
-                  (vec (for [case-index (range (count (:errors ind)))]
-                         (if (zero? (nth (:errors ind) case-index)) ;; solved
-                           0 
-                           (let [latest (nth (first (:history ind)) case-index)
-                                 olders (map #(nth % case-index) (rest (:history ind)))]
-                             (if (some #{latest} (set olders))
-                               2
-                               1)))))))
-              (if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :repeated-errors"))
-                (if (empty? (rest (:history ind)))
-                  (vec (repeat (count (:errors ind)) 2))
-                  (vec (for [case-index (range (count (:errors ind)))]
-                         (if (zero? (nth (:errors ind) case-index)) ;; solved
-                           0 
-                           (let [latest (nth (first (:history ind)) case-index)
-                                 olders (map #(nth % case-index) (rest (:history ind)))]
-                             (if (some #{latest} (set olders))
-                               3
-                               1)))))))
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :repeated-errors"))
-                (if (empty? (rest (:history ind)))
-                  1
-                  (let [latest (first (:history ind))
-                        olders (rest (:history ind))]
-                    (if (some #{latest} (set olders))
-                      2
-                      0))))
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :repeated-errors"))
-                (if (empty? (rest (:history ind)))
-                  (vec (repeat (count (:errors ind)) 1))
-                  (vec (for [case-index (range (count (:errors ind)))]
-                         (let [latest (nth (first (:history ind)) case-index)
-                               olders (map #(nth % case-index) (rest (:history ind)))]
-                           (if (some #{latest} (set olders))
-                             2
-                             0))))))
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :repeated-errors"))
-                (if (empty? (rest (:history ind)))
-                  (vec (repeat (count (:errors ind)) 1))
-                  (vec (for [case-index (range (count (:errors ind)))]
-                         (let [latest (nth (first (:history ind)) case-index)
-                               olders (map #(nth % case-index) (take 3 (rest (:history ind))))]
-                           (if (some #{latest} (set olders))
-                             2
-                             0))))))
-              #_(if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :repeated-errors"))
-                (if (empty? (rest (:history ind)))
-                  (vec (repeat (count (:errors ind)) 1))
-                  (vec (for [case-index (range (count (:errors ind)))]
-                         (let [latest (nth (first (:history ind)) case-index)
-                               olders (map #(nth % case-index) (rest (:history ind)))]
-                           (if (some #{latest} (set olders))
-                             2
-                             0))))))
-              ;
-              (= cat :error-favoritism)
-              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
-                (math/abs (- (sequence-similarity (:errors ind) (:parent1-errors ind))
-                             (sequence-similarity (:errors ind) (:parent2-errors ind))))
-                1.0)
-              #_(let [p1e (:parent1-errors ind)
-                    p2e (:parent2-errors ind)
-                    e (:errors ind)]
-                (if (and p1e p2e)
-                  (let [p1-shortfall (count (filter #(apply > %) (map list e p1e)))
-                        p2-shortfall (count (filter #(apply > %) (map list e p2e)))]
-                    (Math/abs (- p1-shortfall p2-shortfall)))
-                  (count e)))
-              (if (and (:parent1-errors ind) (:parent2-errors ind))
-                (let [all (map list
-                               (:errors ind)
-                               (:parent1-errors ind)
-                               (:parent2-errors ind))
-                      diff-parents (filter (fn [[e p1e p2e]] (not= p1e p2e)) all)
-                      from-p1 (count (filter (fn [[e p1e p2e]] (= e p1e)) diff-parents))
-                      from-p2 (count (filter (fn [[e p1e p2e]] (= e p2e)) diff-parents))]
-                  (if (empty? diff-parents)
-                    0
-                    (/ (Math/abs (- from-p1 from-p2))
-                       (count diff-parents))))
-                1)
-              
-              ;
-              (= cat :case-error-neglect)
-              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (if (== e (min p1e p2e))
-                         0
-                         1)))
-                (vec (repeat (count (:errors ind)) 1)))
-              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (if (and (not= p1e p2e)
-                                (== e (min p1e p2e)))
-                         0
-                         1)))
-                (vec (repeat (count (:errors ind)) 1)))
-              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (if (< e (max p1e p2e))
-                         0
-                         1)))
-                (vec (repeat (count (:errors ind)) 1)))
-              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (< e (min p1e p2e)) 0
-                         (= e (min p1e p2e)) 1
-                         (< e (max p1e p2e)) 2
-                         (= e (max p1e p2e)) 3
-                         :else 4)))
-                (vec (repeat (count (:errors ind)) 5)))
-              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (= e (min p1e p2e)) 2
-                         (< e (max p1e p2e)) 3
-                         (= e (max p1e p2e)) 4
-                         :else 5)))
-                (vec (repeat (count (:errors ind)) 6)))
-              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 6
-                         (< e (min p1e p2e)) 0
-                         (= e (min p1e p2e)) 1
-                         (< e (max p1e p2e)) 2
-                         (= e (max p1e p2e)) 3
-                         :else 4)))
-                (vec (repeat (count (:errors ind)) 5)))
-              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (< e (min p1e p2e)) 0
-                         (= e (min p1e p2e)) 2
-                         (< e (max p1e p2e)) 1
-                         (= e (max p1e p2e)) 4
-                         :else 3)))
-                (vec (repeat (count (:errors ind)) 5)))
-              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (= e (min p1e p2e)) 3
-                         (< e (max p1e p2e)) 2
-                         (= e (max p1e p2e)) 5
-                         :else 4)))
-                (vec (repeat (count (:errors ind)) 6)))
-              (if (and (:parent1-errors ind) (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (and (not= p1e p2e) (= e (min p1e p2e))) 2
-                         (< e (max p1e p2e)) 3
-                         (= e (max p1e p2e)) 4
-                         :else 5)))
-                (vec (repeat (count (:errors ind)) 6)))
-              ;
-              (= cat :devolution)
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind)
-                       (not= (:errors ind) (:parent1-errors ind))
-                       (not= (:errors ind) (:parent2-errors ind)))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (and (not= p1e p2e) (= e (min p1e p2e))) 2
-                         (< e (max p1e p2e)) 3
-                         (= e (max p1e p2e)) 4
-                         :else 5)))
-                (vec (repeat (count (:errors ind)) 6)))
-              (if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (if (or (= (:errors ind) (:parent1-errors ind))
-                        (= (:errors ind) (:parent2-errors ind)))
-                  (vec (repeat (count (:errors ind)) 7))
-                  (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                               (:errors ind)
-                                               (:parent1-errors ind)
-                                               (:parent2-errors ind))]
-                         (cond 
-                           (zero? e) 0
-                           (< e (min p1e p2e)) 1
-                           (and (not= p1e p2e) (= e (min p1e p2e))) 2
-                           (< e (max p1e p2e)) 3
-                           (= e (max p1e p2e)) 4
-                           :else 5))))
-                (vec (repeat (count (:errors ind)) 6)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (if (or (= (:errors ind) (:parent1-errors ind))
-                        (= (:errors ind) (:parent2-errors ind)))
-                  (vec (repeat (count (:errors ind)) 7))
-                  (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                               (:errors ind)
-                                               (:parent1-errors ind)
-                                               (:parent2-errors ind))]
-                         (cond 
-                           ;(zero? e) 0
-                           (< e (min p1e p2e)) 1
-                           (and (not= p1e p2e) (= e (min p1e p2e))) 2
-                           (< e (max p1e p2e)) 3
-                           (= e (max p1e p2e)) 4
-                           :else 5))))
-                (vec (repeat (count (:errors ind)) 6)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (if (or (= (:errors ind) (:parent1-errors ind))
-                        (= (:errors ind) (:parent2-errors ind)))
-                  (vec (repeat (count (:errors ind)) 7))
-                  (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                               (:errors ind)
-                                               (:parent1-errors ind)
-                                               (:parent2-errors ind))]
-                         (cond 
-                           (zero? e) 1
-                           (< e (min p1e p2e)) 1
-                           (and (not= p1e p2e) (= e (min p1e p2e))) 2
-                           (< e (max p1e p2e)) 3
-                           (= e (max p1e p2e)) 4
-                           :else 5))))
-                (vec (repeat (count (:errors ind)) 6)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (if (or (= (:errors ind) (:parent1-errors ind))
-                        (= (:errors ind) (:parent2-errors ind)))
-                  (vec (repeat (count (:errors ind)) 5))
-                  (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                               (:errors ind)
-                                               (:parent1-errors ind)
-                                               (:parent2-errors ind))]
-                         (cond 
-                           (or (zero? e) (< e (min p1e p2e))) 0
-                           (some #{e} [p1e p2e]) 3
-                           (< e (max p1e p2e)) 1
-                           :else 2))))
-                (vec (repeat (count (:errors ind)) 4)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (and (not= p1e p2e) (= e (min p1e p2e))) 2
-                         (< e (max p1e p2e)) 3
-                         (= e (max p1e p2e)) 4
-                         :else 5)))
-                (vec (repeat (count (:errors ind)) 6)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 1
-                         (< e (min p1e p2e)) 1
-                         (and (not= p1e p2e) (= e (min p1e p2e))) 2
-                         (< e (max p1e p2e)) 3
-                         (= e (max p1e p2e)) 4
-                         :else 5)))
-                (vec (repeat (count (:errors ind)) 6)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (or (zero? e) (< e (min p1e p2e))) 0
-                         (some #{e} [p1e p2e]) 3
-                         (< e (max p1e p2e)) 1
-                         :else 2)))
-                (vec (repeat (count (:errors ind)) 3)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (some #{e} [p1e p2e]) 4
-                         (< e (max p1e p2e)) 2
-                         :else 3)))
-                (vec (repeat (count (:errors ind)) 4)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (some #{e} [p1e p2e]) 3
-                         (< e (max p1e p2e)) 2
-                         :else 4)))
-                (vec (repeat (count (:errors ind)) 4)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 1
-                         (< e (min p1e p2e)) 1
-                         (some #{e} [p1e p2e]) 3
-                         (< e (max p1e p2e)) 2
-                         :else 4)))
-                (vec (repeat (count (:errors ind)) 4)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (< e (max p1e p2e)) 2
-                         :else 3)))
-                (vec (repeat (count (:errors ind)) 3)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (< e (min p1e p2e)) 0
-                         (< e (max p1e p2e)) 1
-                         :else 2)))
-                (vec (repeat (count (:errors ind)) 2)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (= e (min p1e p2e)) 2
-                         (< e (max p1e p2e)) 3
-                         (= e (max p1e p2e)) 4
-                         :else 5)))
-                (vec (repeat (count (:errors ind)) 5)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 1
-                         (< e (min p1e p2e)) 1
-                         (= e (min p1e p2e)) 2
-                         (< e (max p1e p2e)) 3
-                         (= e (max p1e p2e)) 4
-                         :else 5)))
-                (vec (repeat (count (:errors ind)) 5)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (= e (min p1e p2e)) 2
-                         (< e (max p1e p2e)) 3
-                         (= e (max p1e p2e)) 5
-                         :else 4)))
-                (vec (repeat (count (:errors ind)) 5)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (= e (min p1e p2e)) 2
-                         (< e (max p1e p2e)) 2
-                         (= e (max p1e p2e)) 2
-                         :else 3)))
-                (vec (repeat (count (:errors ind)) 3)))
-              #_(if (:parent1-errors ind)
-                (vec (for [[e p1e] (mapv #(vector %1 %2)
-                                         (:errors ind)
-                                         (:parent1-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e p1e) 1
-                         (= e p1e) 2
-                         :else 3)))
-                (vec (repeat (count (:errors ind)) 3)))
-              #_(if (:parent1-errors ind)
-                (vec (for [[e p1e] (mapv #(vector %1 %2)
-                                         (:errors ind)
-                                         (:parent1-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e p1e) 1
-                         (= e p1e) 3
-                         :else 2)))
-                (vec (repeat (count (:errors ind)) 2)))
-              #_(if (:parent1-errors ind)
-                (vec (for [[e p1e] (mapv #(vector %1 %2)
-                                         (:errors ind)
-                                         (:parent1-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e p1e) 1
-                         (= e p1e) 2
-                         :else 2)))
-                (vec (repeat (count (:errors ind)) 2)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (< e (max p1e p2e)) 2
-                         (not (some #{e} [p1e p2e])) 3
-                         :else 4)))
-                (vec (repeat (count (:errors ind)) 4)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         ;(zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (< e (max p1e p2e)) 2
-                         (not (some #{e} [p1e p2e])) 3
-                         :else 4)))
-                (vec (repeat (count (:errors ind)) 4)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         ;(zero? e) 0
-                         (< e (min p1e p2e)) 1
-                         (< e (max p1e p2e)) 2
-                         (some #{e} [p1e p2e]) 3
-                         :else 4)))
-                (vec (repeat (count (:errors ind)) 4)))
-              #_(if (and (:parent1-errors ind)
-                       (:parent2-errors ind))
-                (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                             (:errors ind)
-                                             (:parent1-errors ind)
-                                             (:parent2-errors ind))]
-                       (cond 
-                         (zero? e) 0
-                         (< e (min p1e p2e)) 0
-                         (< e (max p1e p2e)) 1
-                         (some #{e} [p1e p2e]) 2
-                         :else 3)))
-                (vec (repeat (count (:errors ind)) 3)))
-              ;
-              (= cat :error-neglect)
-              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
-                (reduce + (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                                  (:errors ind)
-                                                  (:parent1-errors ind)
-                                                  (:parent2-errors ind))]
-                            (if (and (not= p1e p2e)
-                                     (== e (min p1e p2e)))
-                              0
-                              1)))
-                (count (:errors ind)))
-              #_(if (and (:parent1-errors ind) (:parent2-errors ind))
-                (reduce + (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                                  (:errors ind)
-                                                  (:parent1-errors ind)
-                                                  (:parent2-errors ind))]
-                            (if (< e (max p1e p2e))
-                              0
-                              1)))
-                (count (:errors ind)))
-              (if (and (:parent1-errors ind) (:parent2-errors ind))
-                (reduce + (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
-                                                  (:errors ind)
-                                                  (:parent1-errors ind)
-                                                  (:parent2-errors ind))]
-                            (if (<= e (min p1e p2e))
-                              0
-                              1)))
-                (count (:errors ind)))
-              ;
-              (= cat :case-family-variation)
-              (if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :case-family-variation"))
-                (if (or (empty? (:parent-uuids ind))
-                        (empty? (rest (:history ind))))
-                  (vec (repeat (count (:errors ind)) 1))
-                  (let [siblings (filter #(and (= (first (:parent-uuids ind))
-                                                  (first (:parent-uuids %)))
-                                               (not (empty? (rest (:history %))))) ; new random sibs don't count
-                                         evaluated-population)]
-                    (vec (for [case-index (range (count (:errors ind)))]
-                           (if (zero? (nth (:errors ind) case-index)) ;; solved
-                             0 
-                             (if 
-                               (some (fn [sib] ;; sibling solved
-                                       (zero? (-> (:history sib)
-                                                  (first)
-                                                  (nth case-index))))
-                                     siblings)
-                               0
-                               (if (some (fn [sib] ;; sib error different than mom's
-                                           (not= (-> (:history sib)
-                                                     (first)
-                                                     (nth case-index))
-                                                 (-> (:history sib)
-                                                     (second)
-                                                     (nth case-index))))
-                                         siblings)
-                                 1
-                                 0))))))))
-              ;
-              (= cat :washout-mother)
-              (if (not (:print-history argmap))
-                (throw
-                  (Exception.
-                    ":print-history must be true for :washout-mother"))
-                (if (or (empty? (:parent-uuids ind))
-                        (empty? (rest (:history ind))))
-                  (vec (repeat (count (:errors ind)) 1))
-                  (let [siblings (filter #(and (= (first (:parent-uuids ind))
-                                                  (first (:parent-uuids %)))
-                                               (not (empty? (rest (:history %))))) ; new random sibs don't count
-                                         evaluated-population)]
-                    (vec (for [case-index (range (count (:errors ind)))]
-                           (if (zero? (nth (:errors ind) case-index)) ;; solved
-                             0 
-                             (if 
-                               (some (fn [sib]
-                                       (or (zero? (-> (:history sib)
-                                                      (first)
-                                                      (nth case-index)))
-                                           (< (-> (:history sib)
-                                                  (first)
-                                                  (nth case-index))
-                                              (-> (:history sib)
-                                                  (second)
-                                                  (nth case-index)))))
-                                     siblings)
-                               0
-                               1)))))))
-              ;
-              (= cat :clone-distance)
-              (/ 1 (let [limit 100]
-                     (loop [step 1
-                            genomes (list (:genome ind))]
-                       (if (>= step limit)
-                         step
-                         (let [child (produce-child-genome-by-autoconstruction 
-                                       (first genomes) 
-                                       (first genomes) 
-                                       argmap)]
-                           (if (some #{child} (set genomes))
-                             step
-                             (recur (inc step) (cons child genomes))))))))
-              ;
-              (= cat :reproductive-infidelity)
-              (let [g (:genome ind)]
-                (- 1.0
-                   (sequence-similarity
-                     g
-                     (produce-child-genome-by-autoconstruction g g argmap))))
-              ;
-              (= cat :reproductive-fidelity)
-              (let [g (:genome ind)]
-                (sequence-similarity
-                  g
-                  (produce-child-genome-by-autoconstruction g g argmap)))
-              ;
-              (= cat :reproductive-inconsistency)
-              (let [g (:genome ind)]
-                (- 1.0
-                   (sequence-similarity
-                     (produce-child-genome-by-autoconstruction g g argmap)
-                     (produce-child-genome-by-autoconstruction g g argmap))))
-              ;
-              (= cat :reproductive-consistency)
-              (let [g (:genome ind)]
-                (sequence-similarity
-                  (produce-child-genome-by-autoconstruction g g argmap)
-                  (produce-child-genome-by-autoconstruction g g argmap)))
-              ;
-              (= cat :similarity-to-most-similar-parent)
-              (if (and (:parent1-genome ind) (:parent2-genome ind))
-                (max (sequence-similarity (:genome ind) (:parent1-genome ind))
-                     (sequence-similarity (:genome ind) (:parent2-genome ind)))
-                1.0)
-              ;
-              (= cat :difference-from-most-similar-parent)
-              (- 1.0 (if (and (:parent1-genome ind) (:parent2-genome ind))
-                       (max (sequence-similarity (:genome ind) (:parent1-genome ind))
-                            (sequence-similarity (:genome ind) (:parent2-genome ind)))
-                       0.0))
-              ;
-              (= cat :difference-from-least-similar-parent)
-              (- 1.0 (if (and (:parent1-genome ind) (:parent2-genome ind))
-                       (min (sequence-similarity (:genome ind) (:parent1-genome ind))
-                            (sequence-similarity (:genome ind) (:parent2-genome ind)))
-                       0.0))
-              ;
-              (= cat :difference-from-mate)
-              (- 1.0 (if (:parent2-genome ind)
-                       (sequence-similarity (:genome ind) (:parent2-genome ind))
-                       0.0))
-              ;
-              (= cat :parent2-irrelevance)
-              (if (and (:parent1-genome ind) (:parent2-genome ind))
-                (let [similarity-to-p2 (sequence-similarity (:genome ind) (:parent2-genome ind))
-                      p1-similarity-to-p2 (sequence-similarity (:parent1-genome ind) (:parent2-genome ind))]
-                   (- 1.0 (max 0.0 (- similarity-to-p2 p1-similarity-to-p2))))
-                1.0)
-              ;
-              (= cat :reproductive-convergence)
-              (if (and (:parent1-genome ind) (:parent2-genome ind))
-                (let [g (:genome ind)
-                      child1-genome (produce-child-genome-by-autoconstruction g g argmap)
-                      child2-genome (produce-child-genome-by-autoconstruction g g argmap)]
-                  (max (sequence-similarity g child1-genome)
-                       (sequence-similarity g child2-genome)
-                       (sequence-similarity child1-genome child2-genome)))
-                1.0)
-              (= cat :favoritism)
-              #_(if (and (:parent1-genome ind) (:parent2-genome ind))
-                (math/abs (- (sequence-similarity (:genome ind) (:parent1-genome ind))
-                             (sequence-similarity (:genome ind) (:parent2-genome ind))))
-                1.0)
-              (if (and (:parent1-genome ind) 
-                       (:parent2-genome ind)
-                       (not= (:parent1-genome ind) (:parent2-genome ind)))
-                (/ (math/abs (- (sequence-similarity (:genome ind) (:parent1-genome ind))
-                                (sequence-similarity (:genome ind) (:parent2-genome ind))))
-                   (- 1 (sequence-similarity (:parent1-genome ind) (:parent2-genome ind))))
-                1.0)
-              ;
-              (= cat :autoconstruction-blindness)
-              (if (some (fn [instruction-map]
-                          (and (not (:silent instruction-map))
-                               (some #{(:instruction instruction-map)}
-                                     #{'genome_autoconstructing 'genome_if_autoconstructing})))
-                        (:genome ind))
-                0
-                1)
-              ;
-              (= cat :no-genesis)
-              (if (some (fn [instruction-map]
-                          (and (not (:silent instruction-map))
-                               (some #{(:instruction instruction-map)}
-                                     #{'genome_genesis})))
-                        (:genome ind))
-                0
-                1)
-              ;
-              (= cat :static-instruction-set)
-              (if (:parent1-genome ind)
-                (let [instruction-set (fn [genome]
-                                        (hash-set (keys (frequencies (map :instruction genome)))))]
-                  (if (= (instruction-set (:genome ind))
-                         (instruction-set (:parent1-genome ind)))
-                    1
-                    0))
-                1)
-              ;
-              (= cat :inherited-errors)
-              (if (and (:parent1-errors ind)
-                       (:parent2-errors ind)
-                       (not= (:errors ind) (:parent1-errors ind))
-                       (not= (:errors ind) (:parent2-errors ind)))
-                0
-                1)
-              ;
-              :else (throw (Exception. (str "Unrecognized meta category: " cat)))))]
-      (assoc ind :meta-errors (vec (flatten (mapv meta-error-fn meta-error-categories))))))
+  meta-error-category should either be a function (which must be namespace-qualified
+  if provided in a command-line argument) or a keyword corresponding to a pre-defined 
+  meta-error function. In either case the function should take an individual, an evaluated 
+  population, and an argmap, and it should return a numeric meta error value or collection 
+  of values, for which lower is interpreted as better. For keyword :foo, the corresponding 
+  meta-error function will be clojush.meta-errors/foo-meta-error."
+  [ind evaluated-population argmap]
+  (assoc ind :meta-errors 
+    (vec (flatten 
+           (for [cat (:meta-error-categories argmap)]
+             (if (fn? cat)
+               (cat ind evaluated-population argmap)
+               (let [f (meta-error-fn-from-keyword cat)]
+                 (if (fn? f)
+                   (f ind evaluated-population argmap)
+                   (throw (Exception. (str "Unrecognized meta category: " cat)))))))))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; meta-error functions
+
+(defn size-meta-error
+  [ind evaluated-population argmap]
+  (count (:genome ind)))
+
+; :compressibility ;;TMH fix later
+
+(defn total-error-meta-error
+  [ind evaluated-population argmap]
+  (:total-error ind))
+
+(defn unsolved-cases-meta-error
+  [ind evaluated-population argmap]
+  (count (filter #(> % (:error-threshold argmap)) 
+                 (:errors ind))))
+
+(defn rand-meta-error
+  [ind evaluated-population argmap]
+  (rand))
+
+(defn rand-bit-meta-error
+  [ind evaluated-population argmap]
+  (rand-nth [0 1]))
+
+(defn age-meta-error
+  [ind evaluated-population argmap]
+  (:age ind))
+
+(defn novelty-meta-error
+  [ind evaluated-population argmap]
+  :novelty) ; Keyword replaced later; needs entire population to compute 
+
+(defn amorphousness-meta-error
+  [ind evaluated-population argmap]
+  (- 1 (double (/ (count-parens (:program ind)) 
+                  (count-points (:program ind)))))) ;Number of (open) parens / points
+
+
+(defn gens-since-total-error-change-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw 
+      (Exception. 
+        ":print-history must be true for :gens-since-total-error-change"))
+    (let [hist (mapv (partial reduce +) (:history ind))]
+      (if (or (empty? hist)
+              (apply = hist))
+        1000000
+        (dec (count (take-while #(= % (first hist)) (rest hist))))))))
+
+(defn gens-since-error-change-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw 
+      (Exception. 
+        ":print-history must be true for :gens-since-error-change"))
+    (let [hist (:history ind)]
+      (if (or (empty? hist)
+              (apply = hist))
+        1000000
+        (dec (count (take-while #(= % (first hist)) (rest hist))))))))
+
+(defn gens-since-total-error-improvement-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap)) 
+    (if (not (:print-history argmap))
+      (throw 
+        (Exception. 
+          ":print-history must be true for :gens-since-total-error-improvement"))
+      (let [diffs (mapv (fn [[a b]] (- a b)) 
+                        (partition 2 1 (mapv (partial reduce +) 
+                                             (:history ind))))]
+        (if (or (empty? diffs)
+                (not (some neg? diffs)))
+          1000000
+          (count (take-while #(>= % 0) diffs)))))))
+
+(defn total-error-improvement-ratio-meta-error
+  [ind evaluated-population argmap]  
+  (if (not (:print-history argmap))
+    (throw 
+      (Exception. 
+        ":print-history must be true for :total-error-improvement-ratio"))
+    (let [diffs (mapv (fn [[a b]] (- a b)) 
+                      (partition 2 1 (mapv (partial reduce +) 
+                                           (:history ind))))]
+      (if (empty? diffs)
+        1000000
+        (- 1 (/ (count (filter neg? diffs))
+                (count diffs)))))))
+
+(defn total-error-new-best-ratio-meta-error
+  [ind evaluated-population argmap]  
+  (if (not (:print-history argmap))
+    (throw 
+      (Exception. 
+        ":print-history must be true for :total-error-new-best-ratio"))
+    (let [hist (mapv (partial reduce +) (:history ind))]
+      (if (empty? (rest hist))
+        1000000
+        (loop [remaining hist
+               new-best-count 0]
+          (if (empty? (rest remaining))
+            (- 1 (/ new-best-count (dec (count hist))))
+            (recur (rest remaining)
+                   (+ new-best-count
+                      (if (every? #(> % (first remaining))
+                                  (rest remaining))
+                        1
+                        0)))))))))
+
+(defn discounted-total-error-new-best-ratio-meta-error
+  [ind evaluated-population argmap] 
+  (if (not (:print-history argmap))
+    (throw 
+      (Exception. 
+        ":print-history must be true for :discounted-total-error-new-best-ratio"))
+    (let [hist (mapv (partial reduce +) (:history ind))]
+      (if (empty? (rest hist))
+        1000000
+        (loop [remaining hist
+               new-best-count 0
+               scale 1
+               max-total 0]
+          (if (empty? (rest remaining))
+            (- 1.0 (/ new-best-count max-total))
+            (recur (rest remaining)
+                   (+ new-best-count
+                      (if (every? #(> % (first remaining))
+                                  (rest remaining))
+                        (/ 1 scale)
+                        0))
+                   (* 2.0 scale)
+                   (+ max-total (/ 1 scale)))))))))
+
+(defn discounted-total-error-improvement-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw 
+      (Exception. 
+        ":print-history must be true, :discounted-total-error-improvement-ratio"))
+    (if (empty? (rest (:history ind)))
+      1000000
+      (let [diffs (mapv (fn [[a b]] (- a b))
+                        (partition 2 1 (mapv (partial reduce +) (:history ind))))
+            improvements (mapv #(if (neg? %) 1.0 0.0) 
+                               diffs)
+            persistence 0.5
+            weights (take (count diffs) 
+                          (iterate (partial * persistence) 0.5))
+            sum (reduce + (mapv * improvements weights))]
+        (if (<= sum 0)
+          1.0E100
+          (- 1.0 sum))))))
+
+(defn case-stagnation-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :case-stagnation"))
+    (if (empty? (rest (:history ind)))
+      (vec (repeat (count (:errors ind)) 1000000))
+      (vec (for [case-history (apply map list (:history ind))]
+             (if (zero? (first case-history))
+               -100000  ;; solved, improvement doesn't matter
+               (let [improvements (mapv (fn [[newer-error older-error]]
+                                          (if (< newer-error older-error)
+                                            1.0
+                                            (if (= newer-error older-error) 
+                                              -1.0
+                                              0.0)))
+                                        (partition 2 1 case-history))
+                     weights (take (count improvements)
+                                   (iterate (partial * 
+                                                     (- 1 (:improvement-discount argmap))) 
+                                            1))
+                     sum (reduce + (mapv * improvements weights))]
+                 (- sum))))))))
+
+(defn case-gens-since-improvement-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :case-gens-since-improvement"))
+    (let [huge 1000000]
+      (if (empty? (rest (:history ind)))
+        (vec (repeat (count (:errors ind)) huge))
+        (vec (for [case-history (apply map list (:history ind))]
+               (if (zero? (first case-history))
+                 (- huge)  ;; solved, improvement doesn't matter
+                 (let [improved? (mapv (fn [[newer-error older-error]]
+                                         (< newer-error older-error))
+                                       (partition 2 1 case-history))
+                       gens (take-while not improved?)]
+                   (if (= (count gens)
+                          (count improved?))
+                     huge
+                     (count gens))))))))))
+
+(defn case-gens-since-change-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :case-gens-since-change"))
+    (let [huge 1000000]
+      (if (empty? (rest (:history ind)))
+        (vec (repeat (count (:errors ind)) huge))
+        (vec (for [case-history (apply map list (:history ind))]
+               (if (zero? (first case-history))
+                 (- huge)  ;; solved, improvement doesn't matter
+                 (let [changed? (mapv (fn [[newer-error older-error]]
+                                        (not= newer-error older-error))
+                                      (partition 2 1 case-history))
+                       gens (take-while not changed?)]
+                   (if (= (count gens)
+                          (count changed?))
+                     huge
+                     (count gens))))))))))
+
+(defn case-sibling-uniformity-meta-error
+  [ind evaluated-population argmap]
+  (if (empty? (:parent-uuids ind))
+    (vec (repeat (count (:errors ind)) 1))
+    (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                    (first (:parent-uuids %)))
+                                 (not (:is-random-replacement %))) ; new random sibs don't count
+                           evaluated-population)]
+      (vec (for [case-index (range (count (:errors ind)))]
+             (if (zero? (nth (:errors ind) case-index)) ;; solved
+               0 
+               (if (or (empty? siblings)
+                       (apply = (mapv #(nth (:errors %) case-index)
+                                      siblings)))
+                 1
+                 0)))))))
+
+(defn case-family-uniformity-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :case-family-uniformity"))
+    (if (or (empty? (:parent-uuids ind))
+            (empty? (rest (:history ind))))
+      (vec (repeat (count (:errors ind)) 1))
+      (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                      (first (:parent-uuids %)))
+                                   (not (empty? (rest (:history %))))) ; new random sibs don't count
+                             evaluated-population)]
+        (vec (for [case-index (range (count (:errors ind)))]
+               (if (zero? (nth (:errors ind) case-index)) ;; solved
+                 0 
+                 (if 
+                   (some (fn [sib]
+                           (or (zero? (-> (:history sib) ;; sib solved
+                                          (first)
+                                          (nth case-index)))
+                               (not= (-> (:history sib) ;; sib error different than mom's
+                                         (first)
+                                         (nth case-index))
+                                     (-> (:history sib)
+                                         (second)
+                                         (nth case-index)))))
+                         siblings)
+                   1
+                   2))))))))
+
+(defn mom-doesnt-change-behavior-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :mom-doesnt-change-behavior"))
+    (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                    (first (:parent-uuids %)))
+                                 (not (empty? (rest (:history %))))) ; new random sibs don't count
+                           evaluated-population)]
+      (vec (for [case-index (range (count (:errors ind)))]
+             (if (zero? (nth (:errors ind) case-index)) 
+               0 ;; solved
+               (if (or (empty? (:parent-uuids ind))
+                       (empty? (rest (:history ind))))
+                 2 ;; not solved, no mom who might have produced diff behaviors
+                 (if 
+                   (some (fn [sib]
+                           (not= (-> (:history sib) ;; sib error different than mom's
+                                     (first)
+                                     (nth case-index))
+                                 (-> (:history sib)
+                                     (second)
+                                     (nth case-index))))
+                         siblings)
+                   1 ;; not solved, mom did produce diff behaviors
+                   3 ;; not solved, mom didn't produce diff behaviors
+                   ))))))))
+
+(defn case-appropriate-family-uniformity-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :case-appropriate-family-uniformity"))
+    (if (or (empty? (:parent-uuids ind))
+            (empty? (rest (:history ind))))
+      (vec (repeat (count (:errors ind)) 1))
+      (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                      (first (:parent-uuids %)))
+                                   (not (empty? (rest (:history %))))) ; new random sibs don't count
+                             evaluated-population)]
+        (vec (for [case-index (range (count (:errors ind)))]
+               (if (zero? (nth (second (:history ind)) case-index)) 
+                 (if ;; mom solved, error for any child to be different
+                   (some (fn [sib]
+                           (not= (-> (:history sib) ;; sib error different than mom's
+                                     (first)
+                                     (nth case-index))
+                                 (-> (:history sib)
+                                     (second)
+                                     (nth case-index))))
+                         siblings)
+                   1
+                   0)
+                 (if ;; mom unsolved, error if there's not a different child
+                   (some (fn [sib]
+                           (not= (-> (:history sib) ;; sib error different than mom's
+                                     (first)
+                                     (nth case-index))
+                                 (-> (:history sib)
+                                     (second)
+                                     (nth case-index))))
+                         siblings)
+                   0
+                   1))))))))
+
+(defn case-scaled-error-plus-change-meta-error
+  [ind evaluated-population argmap]
+  (if (and (:parent1-errors ind)
+           (:parent2-errors ind))
+    (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                 (:errors ind)
+                                 (:parent1-errors ind)
+                                 (:parent2-errors ind))]
+           (+' (*' e 1000000) 
+               (#(cond 
+                   (neg? %) -1
+                   (pos? %) 1
+                   :else 0)
+                 (- e (min p1e p2e))))))
+    (mapv #(*' % 1000000) (:errors ind))))
+
+(defn case-family-non-improvement-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :case-family-non-improvement"))
+    (if (or (empty? (:parent-uuids ind))
+            (empty? (rest (:history ind))))
+      (vec (repeat (count (:errors ind)) 1))
+      (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                      (first (:parent-uuids %)))
+                                   (not (empty? (rest (:history %))))) ; new random sibs don't count
+                             evaluated-population)]
+        (vec (for [case-index (range (count (:errors ind)))]
+               (if (zero? (nth (:errors ind) case-index)) ;; solved
+                 0 
+                 (if 
+                   (some (fn [sib]
+                           (or (zero? (-> (:history sib) ;; sib solved
+                                          (first)
+                                          (nth case-index)))
+                               (< (-> (:history sib) ;; sib error better than mom's
+                                      (first)
+                                      (nth case-index))
+                                  (-> (:history sib)
+                                      (second)
+                                      (nth case-index)))))
+                         siblings)
+                   1
+                   2))))))))
+
+(defn case-family-non-improvement-or-uniformity-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :case-family-non-improvement-or-uniformity"))
+    (if (or (empty? (:parent-uuids ind))
+            (empty? (rest (:history ind))))
+      (vec (repeat (count (:errors ind)) 1))
+      (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                      (first (:parent-uuids %)))
+                                   (not (empty? (rest (:history %))))) ; new random sibs don't count
+                             evaluated-population)]
+        (vec (for [case-index (range (count (:errors ind)))]
+               (if (zero? (nth (:errors ind) case-index)) ;; solved
+                 0 
+                 (if 
+                   (some (fn [sib]
+                           (or (zero? (-> (:history sib) ;; sib solved
+                                          (first)
+                                          (nth case-index)))
+                               (< (-> (:history sib) ;; sib error better than mom's
+                                      (first)
+                                      (nth case-index))
+                                  (-> (:history sib)
+                                      (second)
+                                      (nth case-index)))))
+                         siblings)
+                   1
+                   (if (some (fn [sib]
+                               (not= (-> (:history sib) ;; sib error different than mom's
+                                         (first)
+                                         (nth case-index))
+                                     (-> (:history sib)
+                                         (second)	
+                                         (nth case-index))))
+                             siblings)
+                     2
+                     3)))))))))
+
+(defn case-family-certainty-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :case-family-certainty"))
+    (if (or (empty? (:parent-uuids ind))
+            (empty? (rest (:history ind))))
+      (vec (repeat (count (:errors ind)) 1))
+      (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                      (first (:parent-uuids %)))
+                                   (not (empty? (rest (:history %))))) ; new random sibs don't count
+                             evaluated-population)]
+        (vec (for [case-index (range (count (:errors ind)))]
+               (if (zero? (nth (:errors ind) case-index)) ;; solved
+                 0 
+                 (/ 1 (count 
+                        (distinct 
+                          (for [s siblings] 
+                            (nth (first (:history s)) 
+                                 case-index))))))))))))
+
+(defn family-uniformity-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :family-uniformity"))
+    (if (or (empty? (:parent-uuids ind))
+            (empty? (rest (:history ind))))
+      1
+      (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                      (first (:parent-uuids %)))
+                                   (not (empty? (rest (:history %))))) ; new random sibs don't count
+                             evaluated-population)]
+        (if (some (fn [sib]
+                    (not= (first (:history sib))
+                          (second (:history sib))))
+                  siblings)
+          0
+          1)))))
+
+(defn repeated-errors-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :repeated-errors"))
+    (if (empty? (rest (:history ind)))
+      (vec (repeat (count (:errors ind)) 2))
+      (vec (for [case-index (range (count (:errors ind)))]
+             (if (zero? (nth (:errors ind) case-index)) ;; solved
+               0 
+               (let [latest (nth (first (:history ind)) case-index)
+                     olders (map #(nth % case-index) (rest (:history ind)))]
+                 (if (some #{latest} (set olders))
+                   3
+                   1))))))))
+
+(defn error-favoritism-meta-error
+  [ind evaluated-population argmap]
+  (if (and (:parent1-errors ind) (:parent2-errors ind))
+    (let [all (map list
+                   (:errors ind)
+                   (:parent1-errors ind)
+                   (:parent2-errors ind))
+          diff-parents (filter (fn [[e p1e p2e]] (not= p1e p2e)) all)
+          from-p1 (count (filter (fn [[e p1e p2e]] (= e p1e)) diff-parents))
+          from-p2 (count (filter (fn [[e p1e p2e]] (= e p2e)) diff-parents))]
+      (if (empty? diff-parents)
+        0
+        (/ (Math/abs (- from-p1 from-p2))
+           (count diff-parents))))
+    1))
+
+(defn case-error-neglect-meta-error
+  [ind evaluated-population argmap]
+  (if (and (:parent1-errors ind) (:parent2-errors ind))
+    (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                 (:errors ind)
+                                 (:parent1-errors ind)
+                                 (:parent2-errors ind))]
+           (cond 
+             (zero? e) 0
+             (< e (min p1e p2e)) 1
+             (and (not= p1e p2e) (= e (min p1e p2e))) 2
+             (< e (max p1e p2e)) 3
+             (= e (max p1e p2e)) 4
+             :else 5)))
+    (vec (repeat (count (:errors ind)) 6))))
+
+(defn devolution-meta-error
+  [ind evaluated-population argmap]
+  (if (and (:parent1-errors ind)
+           (:parent2-errors ind))
+    (if (or (= (:errors ind) (:parent1-errors ind))
+            (= (:errors ind) (:parent2-errors ind)))
+      (vec (repeat (count (:errors ind)) 7))
+      (vec (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                   (:errors ind)
+                                   (:parent1-errors ind)
+                                   (:parent2-errors ind))]
+             (cond 
+               (zero? e) 0
+               (< e (min p1e p2e)) 1
+               (and (not= p1e p2e) (= e (min p1e p2e))) 2
+               (< e (max p1e p2e)) 3
+               (= e (max p1e p2e)) 4
+               :else 5))))
+    (vec (repeat (count (:errors ind)) 6))))
+
+(defn error-neglect-meta-error
+  [ind evaluated-population argmap]
+  (if (and (:parent1-errors ind) (:parent2-errors ind))
+    (reduce + (for [[e p1e p2e] (mapv #(vector %1 %2 %3)
+                                      (:errors ind)
+                                      (:parent1-errors ind)
+                                      (:parent2-errors ind))]
+                (if (<= e (min p1e p2e))
+                  0
+                  1)))
+    (count (:errors ind))))
+
+(defn case-family-variation-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :case-family-variation"))
+    (if (or (empty? (:parent-uuids ind))
+            (empty? (rest (:history ind))))
+      (vec (repeat (count (:errors ind)) 1))
+      (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                      (first (:parent-uuids %)))
+                                   (not (empty? (rest (:history %))))) ; new random sibs don't count
+                             evaluated-population)]
+        (vec (for [case-index (range (count (:errors ind)))]
+               (if (zero? (nth (:errors ind) case-index)) ;; solved
+                 0 
+                 (if 
+                   (some (fn [sib] ;; sibling solved
+                           (zero? (-> (:history sib)
+                                      (first)
+                                      (nth case-index))))
+                         siblings)
+                   0
+                   (if (some (fn [sib] ;; sib error different than mom's
+                               (not= (-> (:history sib)
+                                         (first)
+                                         (nth case-index))
+                                     (-> (:history sib)
+                                         (second)
+                                         (nth case-index))))
+                             siblings)
+                     1
+                     0)))))))))
+
+(defn washout-mother-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :washout-mother"))
+    (if (or (empty? (:parent-uuids ind))
+            (empty? (rest (:history ind))))
+      (vec (repeat (count (:errors ind)) 1))
+      (let [siblings (filter #(and (= (first (:parent-uuids ind))
+                                      (first (:parent-uuids %)))
+                                   (not (empty? (rest (:history %))))) ; new random sibs don't count
+                             evaluated-population)]
+        (vec (for [case-index (range (count (:errors ind)))]
+               (if (zero? (nth (:errors ind) case-index)) ;; solved
+                 0 
+                 (if 
+                   (some (fn [sib]
+                           (or (zero? (-> (:history sib)
+                                          (first)
+                                          (nth case-index)))
+                               (< (-> (:history sib)
+                                      (first)
+                                      (nth case-index))
+                                  (-> (:history sib)
+                                      (second)
+                                      (nth case-index)))))
+                         siblings)
+                   0
+                   1))))))))
+
+(defn clone-distance-meta-error
+  [ind evaluated-population argmap]
+  (/ 1 (let [limit 100]
+         (loop [step 1
+                genomes (list (:genome ind))]
+           (if (>= step limit)
+             step
+             (let [child (produce-child-genome-by-autoconstruction 
+                           (first genomes) 
+                           (first genomes) 
+                           argmap)]
+               (if (some #{child} (set genomes))
+                 step
+                 (recur (inc step) 
+                        (cons child genomes)))))))))
+
+(defn reproductive-infidelity-meta-error
+  [ind evaluated-population argmap]
+  (let [g (:genome ind)]
+    (- 1.0
+       (sequence-similarity
+         g
+         (produce-child-genome-by-autoconstruction g g argmap)))))
+
+(defn reproductive-fidelity-meta-error
+  [ind evaluated-population argmap]
+  (let [g (:genome ind)]
+    (sequence-similarity
+      g
+      (produce-child-genome-by-autoconstruction g g argmap))))
+
+(defn reproductive-inconsistency-meta-error
+  [ind evaluated-population argmap]
+  (let [g (:genome ind)]
+    (- 1.0
+       (sequence-similarity
+         (produce-child-genome-by-autoconstruction g g argmap)
+         (produce-child-genome-by-autoconstruction g g argmap)))))
+
+(defn reproductive-consistency-meta-error
+  [ind evaluated-population argmap]
+  (let [g (:genome ind)]
+    (sequence-similarity
+      (produce-child-genome-by-autoconstruction g g argmap)
+      (produce-child-genome-by-autoconstruction g g argmap))))
+
+(defn similarity-to-most-similar-parent-meta-error
+  [ind evaluated-population argmap]
+  (if (and (:parent1-genome ind) (:parent2-genome ind))
+    (max (sequence-similarity (:genome ind) (:parent1-genome ind))
+         (sequence-similarity (:genome ind) (:parent2-genome ind)))
+    1.0))
+
+(defn difference-from-most-similar-parent-meta-error
+  [ind evaluated-population argmap]
+  (- 1.0 (if (and (:parent1-genome ind) (:parent2-genome ind))
+           (max (sequence-similarity (:genome ind) (:parent1-genome ind))
+                (sequence-similarity (:genome ind) (:parent2-genome ind)))
+           0.0)))
+
+(defn difference-from-least-similar-parent-meta-error
+  [ind evaluated-population argmap]
+  (- 1.0 (if (and (:parent1-genome ind) (:parent2-genome ind))
+           (min (sequence-similarity (:genome ind) (:parent1-genome ind))
+                (sequence-similarity (:genome ind) (:parent2-genome ind)))
+           0.0)))
+
+(defn difference-from-mate-meta-error
+  [ind evaluated-population argmap]
+  (- 1.0 (if (:parent2-genome ind)
+           (sequence-similarity (:genome ind) (:parent2-genome ind))
+           0.0)))
+
+(defn parent2-irrelevance-meta-error
+  [ind evaluated-population argmap]
+  (if (and (:parent1-genome ind) (:parent2-genome ind))
+    (let [similarity-to-p2 (sequence-similarity (:genome ind) (:parent2-genome ind))
+          p1-similarity-to-p2 (sequence-similarity (:parent1-genome ind) (:parent2-genome ind))]
+      (- 1.0 (max 0.0 (- similarity-to-p2 p1-similarity-to-p2))))
+    1.0))
+
+(defn reproductive-convergence-meta-error
+  [ind evaluated-population argmap]
+  (if (and (:parent1-genome ind) (:parent2-genome ind))
+    (let [g (:genome ind)
+          child1-genome (produce-child-genome-by-autoconstruction g g argmap)
+          child2-genome (produce-child-genome-by-autoconstruction g g argmap)]
+      (max (sequence-similarity g child1-genome)
+           (sequence-similarity g child2-genome)
+           (sequence-similarity child1-genome child2-genome)))
+    1.0))
+
+(defn favoritism-meta-error
+  [ind evaluated-population argmap]
+  (if (and (:parent1-genome ind) 
+           (:parent2-genome ind)
+           (not= (:parent1-genome ind) (:parent2-genome ind)))
+    (/ (math/abs (- (sequence-similarity (:genome ind) (:parent1-genome ind))
+                    (sequence-similarity (:genome ind) (:parent2-genome ind))))
+       (- 1 (sequence-similarity (:parent1-genome ind) (:parent2-genome ind))))
+    1.0))
+
+(defn autoconstruction-blindness-meta-error
+  [ind evaluated-population argmap]
+  (if (some (fn [instruction-map]
+              (and (not (:silent instruction-map))
+                   (some #{(:instruction instruction-map)}
+                         #{'genome_autoconstructing 'genome_if_autoconstructing})))
+            (:genome ind))
+    0
+    1))
+
+(defn no-genesis-meta-error
+  [ind evaluated-population argmap]
+  (if (some (fn [instruction-map]
+              (and (not (:silent instruction-map))
+                   (some #{(:instruction instruction-map)}
+                         #{'genome_genesis})))
+            (:genome ind))
+    0
+    1))
+
+(defn static-instruction-set-meta-error
+  [ind evaluated-population argmap]
+  (if (:parent1-genome ind)
+    (let [instruction-set (fn [genome]
+                            (hash-set (keys (frequencies (map :instruction genome)))))]
+      (if (= (instruction-set (:genome ind))
+             (instruction-set (:parent1-genome ind)))
+        1
+        0))
+    1))
+
+(defn inherited-errors-meta-error
+  [ind evaluated-population argmap]
+  (if (and (:parent1-errors ind)
+           (:parent2-errors ind)
+           (not= (:errors ind) (:parent1-errors ind))
+           (not= (:errors ind) (:parent2-errors ind)))
+    0
+    1))
