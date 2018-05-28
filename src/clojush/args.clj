@@ -327,8 +327,16 @@
           ;; normalization.
 
           :meta-error-categories []
-          ;; A vector containing meta-error categories that can be used for parent selection, but
-          ;; do not affect total error. See clojush.evaluate for options.
+          ;; A vector containing meta-error categories that can be used for parent selection, 
+          ;; but that do not affect total error or the determination of whether an individual 
+          ;; is considered to be a solution. Each meta-error-category should either be a function 
+          ;; (which must be namespace-qualified if provided in a command-line argument) or a 
+          ;; keyword corresponding to a pre-defined meta-error function. In either case the 
+          ;; function should take an individual, an evaluated population, and an argmap, and
+          ;; it should return a numeric meta error value or collection of values, for which 
+          ;; lower is interpreted as better. For keyword :foo, the corresponding meta-error 
+          ;; function will be clojush.meta-errors/foo-meta-error. See clojush.meta-errors for 
+          ;; the current options for pre-defined meta-error functions.
           
           :improvement-discount 0.5
           ;; The factor by successively older improvements are discounted when calculating
