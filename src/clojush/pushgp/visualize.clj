@@ -17,11 +17,14 @@
             (map vector 
                  (iterate inc 0) 
                  (map (partial * scale-y) 
-                      (:best-total-error-history @viz-data-atom)))]
+                      (map (partial apply +)
+                           (:history-of-errors-of-best @viz-data-atom))))]
       (q/fill 0)
       (q/rect (* gen scale-x) (- 1000 (* err scale-y) scale-y) scale-x scale-y))))
 
 (defn start-visualization []
+  (reset! viz-data-atom {:generation 0
+                         :history-of-errors-of-best []})
   (q/sketch
     :size [1000 1000]
     :draw visualize))

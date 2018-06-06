@@ -541,8 +541,9 @@
                                       log-fitnesses-for-all-cases json-log-program-strings))
     (when print-edn-logs 
       (edn-print population generation edn-log-filename edn-keys edn-additional-keys))
-    (when visualize ;; Visualization
-      (swap! viz-data-atom update-in [:best-total-error-history] conj (:total-error best))
+    ;; Visualization -- update viz-data-atom here ()
+    (when visualize 
+      (swap! viz-data-atom update-in [:history-of-errors-of-best] conj (:errors best))
       (swap! viz-data-atom assoc :generation generation))
     (cond (and exit-on-success
                (or (<= (:total-error best) error-threshold)
@@ -601,8 +602,6 @@
                                  :problem-specific-report
                                  :random-seed)))))
   (when (:visualize push-argmap) ;; Visualization
-    (reset! viz-data-atom {:generation 0
-                           :best-total-error-history []})
     ;; Require conditionally (dynamically), avoiding unintended Quil sketch launch
     (require 'clojush.pushgp.visualize)))  
 
