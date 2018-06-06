@@ -603,7 +603,8 @@
   (when (:visualize push-argmap) ;; Visualization
     (reset! viz-data-atom {:generation 0
                            :best-total-error-history []})
-    (require 'clojush.pushgp.visualize)))
+    ;; Require conditionally (dynamically), avoiding unintended Quil sketch launch
+    (require 'clojush.pushgp.visualize)))  
 
 
 (defn final-report
