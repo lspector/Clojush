@@ -541,7 +541,7 @@
                                       log-fitnesses-for-all-cases json-log-program-strings))
     (when print-edn-logs 
       (edn-print population generation edn-log-filename edn-keys edn-additional-keys))
-    ;; Visualization -- update viz-data-atom here ()
+    ;; Visualization -- update viz-data-atom here
     (when visualize 
       (swap! viz-data-atom update-in [:history-of-errors-of-best] conj (:errors best))
       (swap! viz-data-atom assoc :generation generation))

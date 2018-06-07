@@ -473,6 +473,7 @@
           
           :visualize false
           ;; When true, graphics will be displayed to indicate system progress.
+          ;; See the comments in src/clojush/pushgp/visualize.clj
 
           ;;----------------------------------------
           ;; Arguments related to printing JSON, EDN, CSV, and remote recording
