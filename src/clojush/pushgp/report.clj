@@ -305,8 +305,8 @@
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
-           print-edn-logs edn-keys edn-log-filename edn-additional-keys]
-           
+           print-edn-logs edn-keys edn-log-filename edn-additional-keys
+           visualize]
     :as argmap}]
   (r/generation-data! [:population]
     (map #(dissoc % :program) population))
@@ -541,6 +541,10 @@
                                       log-fitnesses-for-all-cases json-log-program-strings))
     (when print-edn-logs 
       (edn-print population generation edn-log-filename edn-keys edn-additional-keys))
+    ;; Visualization -- update viz-data-atom here
+    (when visualize 
+      (swap! viz-data-atom update-in [:history-of-errors-of-best] conj (:errors best))
+      (swap! viz-data-atom assoc :generation generation))
     (cond (and exit-on-success
                (or (<= (:total-error best) error-threshold)
                    (:success best))) [:success best]
@@ -596,7 +600,10 @@
                                  :atom-generators
                                  :error-function
                                  :problem-specific-report
-                                 :random-seed))))))
+                                 :random-seed)))))
+  (when (:visualize push-argmap) ;; Visualization
+    ;; Require conditionally (dynamically), avoiding unintended Quil sketch launch
+    (require 'clojush.pushgp.visualize)))  
 
 
 (defn final-report
