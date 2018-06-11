@@ -25,6 +25,7 @@
             ;;; end ERCs
             (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
             (tagged-instruction-erc 1000)
+            (registered-for-type "return_")
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
@@ -178,6 +179,7 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000
-   :meta-error-categories [:max-stacks-depth]
-   :sort-meta-errors-for-lexicase :last
+   :use-single-thread true
+   ;:meta-error-categories [:max-stacks-depth]
+   ;:sort-meta-errors-for-lexicase :last
    })
