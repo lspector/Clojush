@@ -1,7 +1,8 @@
 (ns clojush.instructions.tag
   (:use [clojush.pushstate]
         [clojush.globals]
-        [clojush.random])
+        [clojush.random]
+        [clojush.util])
   (:require [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -24,6 +25,17 @@
             (<= tag (ffirst associations)))
       (first associations)
       (recur (rest associations)))))
+
+(defn modifed-closest-association
+  "Returns the key-val pair for the closest match to the given tag
+   in the given state."
+  [tag state]
+  (let [threshold (* 0.25 (- (apply max (keys (:tag state))) (apply min (keys (:tag state)))))]
+    (loop [associations (conj (vec (:tag state)) (first (:tag state)))] ;; conj does wrap
+      (if (<= (- (ffirst associations) tag) threshold)
+        (first associations)
+        (if (not (empty? (rest associations)))
+          (recur (rest associations)))))))
 
 (defn handle-tag-instruction
   "Executes the tag instruction i in the state. Tag instructions take one of
@@ -68,7 +80,7 @@
       (if (empty? (:tag state))
         state
         (let [the-tag (read-string (nth iparts 1))]
-          (assoc state :tag (dissoc (:tag state) (first (closest-association the-tag state))))))
+          (assoc state :tag (dissoc (:tag state) (first (modifed-closest-association the-tag state))))))
       ;; if it's return_tag_<type>_<number>: Push
       ;; (item_from_<type>_stack tag_<type>_<number>) onto the return stack. Pop the
       ;; item if @global-pop-when-tagging
@@ -91,20 +103,20 @@
         (cond ;; it's tagged_code_<number>
               (= (nth iparts 1) "code") 
               (let [the-tag (read-string (nth iparts 2))]
-                (push-item (second (closest-association the-tag state)) :code state))
+                (push-item (second (modifed-closest-association the-tag state)) :code state))
               ;; it's tagged_when_<number>
               (= (nth iparts 1) "when") 
               (if (empty? (:boolean state))
                 state
                 (if (= true (first (:boolean state)))
                   (let [the-tag (read-string (nth iparts 2))]
-                    (push-item (second (closest-association the-tag state))
+                    (push-item (second (modifed-closest-association the-tag state))
                                :exec (pop-item :boolean state)))
                   (pop-item :boolean state)))
               ;; else it's just tagged_<number>, result->exec
               :else
               (let [the-tag (read-string (nth iparts 1))]
-                (push-item (second (closest-association the-tag state)) :exec state)))))))
+                (push-item (second (modifed-closest-association the-tag state)) :exec state)))))))
 
 (defn tag-instruction-erc
   "Returns a function which, when called on no arguments, returns a symbol of the form
