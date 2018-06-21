@@ -525,14 +525,8 @@
           ;; external record
           )))
 
-(defn load-push-argmap
-  [argmap]
-  (doseq [[argkey argval] argmap]
-    (assert (contains? @push-argmap argkey)
-            (str "Argument key " argkey " is not a recognized argument to pushgp."))
-    (swap! push-argmap assoc argkey argval))
-  (swap! push-argmap assoc :run-uuid (java.util.UUID/randomUUID))
-  ;; Augmentation for autoconstruction
+(defn augment-for-autoconstruction
+  []
   (when (:autoconstructive @push-argmap)
     (if (= :revertable (:autoconstuctive @push-argmap))
       (swap! push-argmap assoc :genetic-operator-probabilities 
@@ -828,7 +822,16 @@
              :atom-generators (remove #(= % 'autoconstructive_boolean_rand)
                                       (:atom-generators @push-argmap))))
     (swap! push-argmap assoc
-           :replace-child-that-exceeds-size-limit-with :empty))
+           :replace-child-that-exceeds-size-limit-with :empty)))
+
+(defn load-push-argmap
+  [argmap]
+  (doseq [[argkey argval] argmap]
+    (assert (contains? @push-argmap argkey)
+            (str "Argument key " argkey " is not a recognized argument to pushgp."))
+    (swap! push-argmap assoc argkey argval))
+  (swap! push-argmap assoc :run-uuid (java.util.UUID/randomUUID))
+  (augment-for-autoconstruction)
   (when (> (:tag-enrichment @push-argmap) 0)
     (let [types (:tag-enrichment-types @push-argmap)
           use-type #(some #{%} types)]
