@@ -861,7 +861,9 @@
                                  (ns-publics 'clojush.globals))]
      (if (contains? @push-argmap (keyword (.substring (name gname) (count "global-"))))
        (reset! @gatom (get @push-argmap (keyword (.substring (str gname) (count "global-")))))
-       (throw (Exception. (str "globals.clj definition " gname " has no matching argument in push-argmap. Only such definitions should use the prefix 'global-'."))))))
+       (throw (Exception. (str "globals.clj definition " gname 
+                               " has no matching argument in push-argmap. "
+                               "Only such definitions should use the prefix 'global-'."))))))
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
