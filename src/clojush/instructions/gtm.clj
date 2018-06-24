@@ -24,6 +24,19 @@
      :tapes (vec (repeat num-tapes {:position 0 :contents (sorted-map)}))
      :trace []}))
 
+(defn ensure-instruction-map
+  "If instr-map is a hash map, returns it unchanged; otherwise returns a default 
+  instruction map."
+  [instr-map]
+  (merge {:instruction 'exec_noop
+          :close 0
+          :silent false
+          :random-insertion false
+          :uuid (java.util.UUID/randomUUID)}
+         (if (map? instr-map)
+           instr-map
+           {})))
+
 (defn load-tape
   "Returns the provided Push state but with the indicated tape in its GTM initialized 
   to contain the provided genome."
@@ -32,24 +45,12 @@
             [:gtm :tapes tape-index :contents]
             (into (sorted-map)
                   (zipmap (iterate inc 0)
-                          genome))))
+                          (map ensure-instruction-map genome)))))
 
 (defn dump-tape
   "Returns the genome recorded on the specified tape in the GTM of the provided Push state."
   [push-state tape-index]
   (vec (vals (:contents (get (:tapes (:gtm push-state)) tape-index)))))
-
-(defn ensure-instruction-map
-  "If instr-map is a hash map, returns it unchanged; otherwise returns a default 
-  instruction map."
-  [instr-map]
-  (if (map? instr-map)
-    instr-map
-    {:instruction 'exec_noop
-     :close 0
-     :silent false
-     :random-insertion false
-     :uuid (java.util.UUID/randomUUID)}))
 
 (defn trace
   "Returns push-state with trace-info added to the trace recorded in its GTM."
@@ -75,7 +76,7 @@
       (trace 'gtm_tape0
              (-> state
                  (assoc-in [:gtm :secondary] (:primary (:gtm state)))
-                 (assoc-in [:gtm :primary 0])))
+                 (assoc-in [:gtm :primary] 0)))
       state)))
 
 (define-registered ;; set primary to tape1, secondary to prior primary
@@ -86,7 +87,7 @@
       (trace 'gtm_tape1
              (-> state
                  (assoc-in [:gtm :secondary] (:primary (:gtm state)))
-                 (assoc-in [:gtm :primary 1])))
+                 (assoc-in [:gtm :primary] 1)))
       state)))
 
 (define-registered ;; set primary to tape2, secondary to prior primary
@@ -97,7 +98,20 @@
       (trace 'gtm_tape2
              (-> state
                  (assoc-in [:gtm :secondary] (:primary (:gtm state)))
-                 (assoc-in [:gtm :primary 2])))
+                 (assoc-in [:gtm :primary] 2)))
+      state)))
+
+(define-registered ;; swaps primary and secondary
+  gtm_secondary
+  ^{:stack-types [:gtm]}
+  (fn [state]
+    (if (:gtm state)
+      (trace 'gtm_secondary
+             (let [p (:primary (:gtm state))
+                   s (:secondary (:gtm state))]
+               (-> state
+                   (assoc-in [:gtm :secondary] p)
+                   (assoc-in [:gtm :primary] s))))
       state)))
 
 
@@ -143,6 +157,21 @@
                  (assoc-in state [:gtm :tapes primary :contents primary-position] 
                            secondary-instr-map))
           state))
+      state)))
+
+(define-registered ;; push boolean from whether primary tape is blank at current position
+  gtm_blank
+  ^{:stack-types [:gtm :boolean]}
+  (fn [state]
+    (if (:gtm state)
+      (let [primary (:primary (:gtm state))
+            primary-tape (get (:tapes (:gtm state)) primary)]
+        (trace 'gtm_blank
+               (push-item (if (get (:contents primary-tape) (:position primary-tape))
+                            false
+                            true)
+                          :boolean 
+                          state)))
       state)))
 
 (define-registered ;; push primary tape's instruction to code stack
@@ -246,7 +275,8 @@
 
 ;; some tests
 
-(let [genome (random-plush-genome 10 [1 'exec_noop 'integer_add]
+;; load and dump a random program
+#_(let [genome (random-plush-genome 10 [1 'exec_noop 'integer_add]
                                   {:epigenetic-markers [:close :silent]})]
   (println "Before:" genome)
   (println "After loading and dumping:"
@@ -254,4 +284,86 @@
                                  1
                                  genome)
                       1)))
+
+;; use namespaces for following tests
+(do 
+  (use 'clojush.interpreter)
+  (use 'clojush.instructions.code)
+  (use 'clojush.instructions.boolean)
+  (use 'clojush.instructions.random-instructions))
+
+;; uniform crossover
+#_(let [g0 (random-plush-genome 20 [0])
+      g1 (random-plush-genome 20 [1])
+      pgm '(gtm_tape0              ;; initial source is tape0
+             exec_y                ;; repeatedly
+             (gtm_tape2            ;;   set destination to tape2
+               gtm_copy            ;;   copy a gene
+               gtm_tape0 gtm_right ;;   move all heads to right
+               gtm_tape1 gtm_right ;;
+               gtm_tape2 gtm_right ;;
+               boolean_rand        ;;   make next source randomly tape0 or tape1
+               exec_if gtm_tape0 gtm_tape1))
+      run-pgm #(run-push pgm %)]
+  (println "g0:" g0)(newline)
+  (println "g1:" g1)(newline)
+  (println "result:"
+           (-> (make-push-state)
+               (init-gtm 3)
+               (load-tape 0 g0)
+               (load-tape 1 g1)
+               (run-pgm)
+               (dump-tape 2))))
+
+;; back and forth on one parent
+#_(let [g [{:instruction 1}{:instruction 2}{:instruction 3}]
+      pgm '(true                  ;; top boolean indicates if moving right
+             exec_y               ;; repeatedly
+             (gtm_tape0           ;;   source is tape0
+               gtm_tape2          ;;   destination is tape2
+               gtm_copy           ;;   copy a gene
+               gtm_right          ;;   move destination to right
+               gtm_tape0          ;;   advance source in current direction
+               exec_if
+               (true gtm_right)
+               (false gtm_left)
+               gtm_blank          ;;   if blank, reverse and move twice
+               exec_if
+               (exec_if false true
+                        exec_if
+                        (true gtm_right gtm_right)
+                        (false gtm_left gtm_left))
+               ()))
+      run-pgm #(run-push pgm %)]
+  (println "g:" g)(newline)
+  (println "result:"
+           (-> (make-push-state)
+               (init-gtm 3)
+               (load-tape 0 g)
+               (run-pgm)
+               (dump-tape 2))))
+
+;; following test requires global-atom-generators to be set
+#_(reset! global-atom-generators [1 2 3])
+
+;; 50% uniform mutation
+#_(let [g (vec (repeat 20 {:instruction 0}))
+      pgm '(gtm_tape0                 ;; source is tape0
+             gtm_tape2                ;; destination is tape2
+             exec_y                   ;; repeatedly
+             (boolean_rand            ;;   randomly either
+               exec_if                ;;
+               (100 code_rand         ;;     set instruction randomly
+                 gtm_set_instruction)
+               gtm_copy               ;;     or copy it
+               gtm_tape0 gtm_right    ;;   in either case advance both tapes
+               gtm_tape2 gtm_right))
+      run-pgm #(run-push pgm %)]
+  (println "g:" g)(newline)
+  (println "result:"
+           (-> (make-push-state)
+               (init-gtm 3)
+               (load-tape 0 g)
+               (run-pgm)
+               (dump-tape 2))))
 
