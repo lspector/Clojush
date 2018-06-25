@@ -101,7 +101,7 @@
                  (assoc-in [:gtm :primary] 2)))
       state)))
 
-(define-registered ;; swaps primary and secondary
+(define-registered ;; swap primary and secondary
   gtm_secondary
   ^{:stack-types [:gtm]}
   (fn [state]
@@ -159,7 +159,7 @@
           state))
       state)))
 
-(define-registered ;; push boolean from whether primary tape is blank at current position
+(define-registered ;; push boolean indicating whether primary tape is blank at current position
   gtm_blank
   ^{:stack-types [:gtm :boolean]}
   (fn [state]
