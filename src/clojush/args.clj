@@ -184,7 +184,7 @@
           :autoconstructive false
           ;; If true, then :genetic-operator-probabilities will be {:autoconstruction 1.0},
           ;; :epigenetic-markers will be [:close :silent], and :atom-generators will include
-          ;; everything in (registered-for-stacks [:integer :boolean :exec :genome :float]). Also sets
+          ;; instructions specified via :autoconstructive-genome-instructions. Also sets
           ;; :replace-child-that-exceeds-size-limit-with to :empty. Also, empty-genome individuals
           ;; will not be selected as parents. You will probably also want to provide a high value
           ;; for :max-generations. If :autoconstructive is :revertable, rather than true, then
