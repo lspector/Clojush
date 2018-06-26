@@ -236,6 +236,11 @@
           ;; :atom-generators for autoconstruction. If negative then autoconstructive_boolean_rand
           ;; will not be in :atom-generators at all.
           
+          :autoconstructive-code-rand-atom-enrichment 0
+          ;; The number of extra instances of autoconstructive_code_rand_atom to include in
+          ;; :atom-generators for autoconstruction. If negative then autoconstructive_code_rand_atom
+          ;; will not be in :atom-generators at all.
+          
           :autoconstructive-tag-types [:integer :boolean :exec :float :char :string :code]
           ;; The types for tag-related instructions that will be included in the atom-generators
           ;; when :autoconstructive is true.
@@ -810,6 +815,9 @@
                                   gtm_set_silent
                                   gtm_close
                                   gtm_set_close
+                                  autoconstructive_integer_rand
+                                  autoconstructive_boolean_rand
+                                  autoconstructive_code_rand_atom
                                   )))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
@@ -852,6 +860,14 @@
     (if (neg? (:autoconstructive-boolean-rand-enrichment @push-argmap))
       (swap! push-argmap assoc
              :atom-generators (remove #(= % 'autoconstructive_boolean_rand)
+                                      (:atom-generators @push-argmap))))
+    (dotimes [n (:autoconstructive-code-rand-atom-enrichment @push-argmap)]
+      (swap! push-argmap assoc
+             :atom-generators (conj (:atom-generators @push-argmap)
+                                    'autoconstructive_code_rand_atom)))
+    (if (neg? (:autoconstructive-code-rand-atom-enrichment @push-argmap))
+      (swap! push-argmap assoc
+             :atom-generators (remove #(= % 'autoconstructive_code_rand_atom)
                                       (:atom-generators @push-argmap))))
     ;;
     ;; specify that too-big children will be replaced with empty genomes

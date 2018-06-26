@@ -811,6 +811,9 @@ given by uniform-deletion-rate."
               (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
               (assoc instruction-map :instruction 'boolean_rand)
               ;
+              (= (:instruction instruction-map) 'autoconstructive_code_rand_atom)
+              (assoc instruction-map :instruction 'code_rand_atom)
+              ;
               :else
               instruction-map))
          genome)))
