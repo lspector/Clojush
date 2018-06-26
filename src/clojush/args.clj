@@ -791,7 +791,26 @@
                              ;genome_uniform_combination_and_deletion
                              ;genome_alternation
                              ;genome_uniform_crossover
-                             )))]
+                             ))
+                    :gtm (into (registered-for-stacks
+                            (if (:autoconstructive-environments @push-argmap)
+                              [:integer :boolean :exec :float :tag :code :environment]
+                              [:integer :boolean :exec :float :tag :code]))
+                               '(gtm_tape0
+                                  gtm_tape1
+                                  gtm_tape2
+                                  gtm_secondary
+                                  gtm_left
+                                  gtm_right
+                                  gtm_copy
+                                  gtm_blank
+                                  gtm_instruction
+                                  gtm_set_instruction
+                                  gtm_silent
+                                  gtm_set_silent
+                                  gtm_close
+                                  gtm_set_close
+                                  )))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     ;;
