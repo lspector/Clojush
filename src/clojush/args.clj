@@ -184,7 +184,8 @@
           :autoconstructive false
           ;; If true, then :genetic-operator-probabilities will be {:autoconstruction 1.0},
           ;; :epigenetic-markers will be [:close :silent], and :atom-generators will include
-          ;; instructions specified via :autoconstructive-genome-instructions. Also sets
+          ;; instructions specified via :autoconstructive-genome-instructions, and other settings
+          ;; specified in augment-for-autoconstruction. Also sets
           ;; :replace-child-that-exceeds-size-limit-with to :empty. Also, empty-genome individuals
           ;; will not be selected as parents. You will probably also want to provide a high value
           ;; for :max-generations. If :autoconstructive is :revertable, rather than true, then
@@ -528,11 +529,17 @@
 (defn augment-for-autoconstruction
   []
   (when (:autoconstructive @push-argmap)
+    ;;
+    ;; handle :revertable
     (if (= :revertable (:autoconstuctive @push-argmap))
       (swap! push-argmap assoc :genetic-operator-probabilities 
              {[:make-next-operator-revertable :autoconstruction] 1.0})
       (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0}))
+    ;;
+    ;; set :epigenetic-markers
     (swap! push-argmap assoc :epigenetic-markers [:close :silent])
+    ;;
+    ;; add autoconstructive-specific instructions (:genome or :gtm)
     (doseq [instr (case (:autoconstructive-genome-instructions @push-argmap)
                     :all (registered-for-stacks
                            (if (:autoconstructive-environments @push-argmap)
@@ -787,6 +794,8 @@
                              )))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
+    ;;
+    ;; include ERCs for floats, integers, and booleans
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
                                   (fn [] (lrand))))
@@ -796,6 +805,8 @@
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
                                   (fn [] (lrand-nth [true false]))))
+    ;;
+    ;; include instructions for using tags
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
                                   (tag-instruction-erc
@@ -806,6 +817,8 @@
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
                                   (tagged-instruction-erc 10000)))
+    ;;
+    ;; enrich autoconstructive rand instructions
     (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
       (swap! push-argmap assoc
              :atom-generators (conj (:atom-generators @push-argmap)
@@ -821,6 +834,8 @@
       (swap! push-argmap assoc
              :atom-generators (remove #(= % 'autoconstructive_boolean_rand)
                                       (:atom-generators @push-argmap))))
+    ;;
+    ;; specify that too-big children will be replaced with empty genomes
     (swap! push-argmap assoc
            :replace-child-that-exceeds-size-limit-with :empty)))
 
