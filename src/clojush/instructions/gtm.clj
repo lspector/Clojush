@@ -174,6 +174,20 @@
                           state)))
       state)))
 
+(define-registered ;; make primary tape is blank at current position
+  gtm_erase
+  ^{:stack-types [:gtm]}
+  (fn [state]
+    (if (:gtm state)
+      (let [primary (:primary (:gtm state))
+            primary-tape (get (:tapes (:gtm state)) primary)
+            primary-position (:position primary-tape)]
+        (trace 'gtm_erase
+               (assoc-in state
+                         [:gtm :tapes primary :contents]
+                         (dissoc (:contents primary-tape) primary-position))))
+      state)))
+
 (define-registered ;; push primary tape's instruction to code stack
   gtm_instruction
   ^{:stack-types [:gtm :code]}
