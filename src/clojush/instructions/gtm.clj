@@ -1,5 +1,5 @@
 (ns clojush.instructions.gtm  
-  (:use [clojush pushstate globals args random util])
+  (:use [clojush pushstate globals random util])
   (:require [clojure.math.numeric-tower :as math]))
 
 ;; All GTM instructions are no-ops on Push states that lack a GTM.
@@ -380,4 +380,5 @@
                (load-tape 0 g)
                (run-pgm)
                (dump-tape 2))))
+
 

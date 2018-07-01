@@ -1,6 +1,6 @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
-        clojush.instructions.tag
+        [clojush.instructions tag gtm]
         [clojure.math.numeric-tower])
   (:import (org.apache.commons.math3.stat.inference TTest))
   (:require [clojure.string :as string]))
@@ -828,18 +828,29 @@ the resulting top genome."
   ([genome-to-run parent1-genome parent2-genome argmap]
    (let [parent1-genome (with-meta parent1-genome {})
          parent2-genome (with-meta parent2-genome {})
-         run-result (top-item :genome
-                              (run-push
-                                (translate-plush-genome-to-push-program
-                                  {:genome
-                                   (process-genome-for-autoconstruction genome-to-run)}
-                                  argmap)
-                                (-> (->> (make-push-state)
-                                         (push-item parent2-genome :genome)
-                                         (push-item parent1-genome :genome))
-                                    (assoc :parent1-genome parent1-genome)
-                                    (assoc :parent2-genome parent2-genome)
-                                    (assoc :autoconstructing true))))]
+         run-result (let [program-to-run 
+                          (translate-plush-genome-to-push-program
+                            {:genome
+                             (process-genome-for-autoconstruction genome-to-run)}
+                            argmap)]
+                      (if (= :autoconstructive-genome-instructions :gtm)
+                        (let [run-pgm #(run-push program-to-run %)
+                              result-gtm (-> (make-push-state)
+                                             (init-gtm 3)
+                                             (load-tape 0 parent1-genome)
+                                             (load-tape 1 parent2-genome)
+                                             (run-pgm))]
+                            (with-meta (dump-tape result-gtm 2)
+                              {:made-by (:trace result-gtm)}))
+                        (top-item :genome
+                                  (run-push
+                                    program-to-run
+                                    (-> (->> (make-push-state)
+                                             (push-item parent2-genome :genome)
+                                             (push-item parent1-genome :genome))
+                                        (assoc :parent1-genome parent1-genome)
+                                        (assoc :parent2-genome parent2-genome)
+                                        (assoc :autoconstructing true))))))]
      (if (or (seq? run-result) (vector? run-result))
        (with-meta (vec run-result) (meta run-result))
        []))))
