@@ -820,16 +820,16 @@ the resulting top genome."
                             {:genome
                              (process-genome-for-autoconstruction genome-to-run)}
                             argmap)]
-                      (if (= :autoconstructive-genome-instructions :gtm)
+                      (if (= (:autoconstructive-genome-instructions argmap) :gtm)
                         (let [run-pgm #(run-push program-to-run %)
-                              result-gtm (-> (make-push-state)
-                                             (init-gtm 3)
-                                             (load-tape 0 parent1-genome)
-                                             (load-tape 1 parent2-genome)
-                                             (assoc :autoconstructing true)
-                                             (run-pgm))]
-                            (with-meta (dump-tape result-gtm 2)
-                              {:made-by (:trace result-gtm)}))
+                              after-gtm (-> (make-push-state)
+                                            (init-gtm 3)
+                                            (load-tape 1 parent1-genome)
+                                            (load-tape 2 parent2-genome)
+                                            (assoc :autoconstructing true)
+                                            (run-pgm))]
+                            (with-meta (dump-tape after-gtm 0)
+                              {:made-by (:trace (:gtm after-gtm))}))
                         (top-item :genome
                                   (run-push
                                     program-to-run
@@ -1704,4 +1704,5 @@ programs encoded by genomes g1 and g2."
                            :grain-size (compute-grain-size [] argmap)
                            :ancestors ()
                            :is-random-replacement true))))))
+
 

@@ -804,7 +804,6 @@
                                '(gtm_tape0
                                   gtm_tape1
                                   gtm_tape2
-                                  gtm_secondary
                                   gtm_left
                                   gtm_right
                                   gtm_copy

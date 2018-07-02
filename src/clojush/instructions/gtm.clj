@@ -2,6 +2,10 @@
   (:use [clojush pushstate globals random util])
   (:require [clojure.math.numeric-tower :as math]))
 
+;; All tapes except 0 are read-only.
+
+;; The head on tape 0 auto-advances to the right after writing.
+
 ;; All GTM instructions are no-ops on Push states that lack a GTM.
 
 ;; Instructions that read from a tape are no-ops if the head is over a blank.
@@ -19,8 +23,7 @@
   [push-state num-tapes]
   (assoc push-state 
     :gtm
-    {:primary 0
-     :secondary 0
+    {:active 0
      :tapes (vec (repeat num-tapes {:position 0 :contents (sorted-map)}))
      :trace []}))
 
@@ -63,138 +66,122 @@
 ;; gtm (genetic turing machine) instructions
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Instructions for moving GTM control from tape to tape. There is always a "primary"
-;; tape, to which most other instructions refer implicitly. When the primary tape is
-;; changed, the prior primary is remembered as the "secondary" tape; the gtm_copy 
-;; refers to both, copying an item from the secondary to the primary.
+;; Instructions for moving GTM control from tape to tape. There is always an "active"
+;; tape, to which some instructions refer implicitly. 
 
-(define-registered ;; set primary to tape0, secondary to prior primary
+(define-registered ;; set active to tape0
   gtm_tape0
   ^{:stack-types [:gtm]}
   (fn [state]
     (if (:gtm state)
       (trace 'gtm_tape0
              (-> state
-                 (assoc-in [:gtm :secondary] (:primary (:gtm state)))
-                 (assoc-in [:gtm :primary] 0)))
+                 (assoc-in [:gtm :active] 0)))
       state)))
 
-(define-registered ;; set primary to tape1, secondary to prior primary
+(define-registered ;; set active to tape1
   gtm_tape1
   ^{:stack-types [:gtm]}
   (fn [state]
     (if (:gtm state)
       (trace 'gtm_tape1
              (-> state
-                 (assoc-in [:gtm :secondary] (:primary (:gtm state)))
-                 (assoc-in [:gtm :primary] 1)))
+                 (assoc-in [:gtm :active] 1)))
       state)))
 
-(define-registered ;; set primary to tape2, secondary to prior primary
+(define-registered ;; set active to tape2
   gtm_tape2
   ^{:stack-types [:gtm]}
   (fn [state]
     (if (:gtm state)
       (trace 'gtm_tape2
              (-> state
-                 (assoc-in [:gtm :secondary] (:primary (:gtm state)))
-                 (assoc-in [:gtm :primary] 2)))
+                 (assoc-in [:gtm :active] 2)))
       state)))
-
-(define-registered ;; swap primary and secondary
-  gtm_secondary
-  ^{:stack-types [:gtm]}
-  (fn [state]
-    (if (:gtm state)
-      (trace 'gtm_secondary
-             (let [p (:primary (:gtm state))
-                   s (:secondary (:gtm state))]
-               (-> state
-                   (assoc-in [:gtm :secondary] p)
-                   (assoc-in [:gtm :primary] s))))
-      state)))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Instructions for moving the read/write head on the primary tape.
 
-(define-registered ;; move head on primary tape to the left
+(define-registered ;; move head on active tape to the left
   gtm_left
   ^{:stack-types [:gtm]}
   (fn [state]
     (if (:gtm state)
       (trace 'gtm_left
-             (update-in state [:gtm :tapes (:primary (:gtm state)) :position] dec))
+             (update-in state [:gtm :tapes (:active (:gtm state)) :position] dec))
       state)))
 
-(define-registered ;; move head on primary tape to the right
+(define-registered ;; move head on active tape to the right
   gtm_right
   ^{:stack-types [:gtm]}
   (fn [state]
     (if (:gtm state)
       (trace 'gtm_right
-             (update-in state [:gtm :tapes (:primary (:gtm state)) :position] inc))
+             (update-in state [:gtm :tapes (:active (:gtm state)) :position] inc))
       state)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Instructions for reading/writing to tapes.
 
-(define-registered ;; copy from secondary to primary
+(define-registered ;; copy from active to tape 0
   gtm_copy
   ^{:stack-types [:gtm]}
   (fn [state]
-    (if (:gtm state)
-      (let [primary (:primary (:gtm state))
-            primary-tape (get (:tapes (:gtm state)) primary)
-            primary-position (:position primary-tape)
-            secondary (:secondary (:gtm state))
-            secondary-tape (get (:tapes (:gtm state)) secondary)
-            secondary-position (:position secondary-tape)
-            secondary-instr-map (get (:contents secondary-tape) secondary-position)]
-        (if secondary-instr-map
+    (if (and (:gtm state)
+             (not (zero? (:active (:gtm state)))))
+      (let [destination-tape (get (:tapes (:gtm state)) 0)
+            destination-position (:position destination-tape)
+            source (:active (:gtm state))
+            source-tape (get (:tapes (:gtm state)) source)
+            source-position (:position source-tape)
+            source-instr-map (get (:contents source-tape) source-position)]
+        (if source-instr-map
           (trace 'gtm_copy
-                 (assoc-in state [:gtm :tapes primary :contents primary-position] 
-                           secondary-instr-map))
+                 (-> state
+                     (assoc-in [:gtm :tapes 0 :contents destination-position] 
+                               source-instr-map)
+                     (update-in [:gtm :tapes 0 :position] inc)))
           state))
       state)))
 
-(define-registered ;; push boolean indicating whether primary tape is blank at current position
+(define-registered ;; push boolean indicating whether active tape is blank at current position
   gtm_blank
   ^{:stack-types [:gtm :boolean]}
   (fn [state]
     (if (:gtm state)
-      (let [primary (:primary (:gtm state))
-            primary-tape (get (:tapes (:gtm state)) primary)]
+      (let [active (:active (:gtm state))
+            active-tape (get (:tapes (:gtm state)) active)]
         (trace 'gtm_blank
-               (push-item (if (get (:contents primary-tape) (:position primary-tape))
+               (push-item (if (get (:contents active-tape) (:position active-tape))
                             false
                             true)
                           :boolean 
                           state)))
       state)))
 
-(define-registered ;; make primary tape is blank at current position
+(define-registered ;; make tape 0 blank at current position
   gtm_erase
   ^{:stack-types [:gtm]}
   (fn [state]
-    (if (:gtm state)
-      (let [primary (:primary (:gtm state))
-            primary-tape (get (:tapes (:gtm state)) primary)
-            primary-position (:position primary-tape)]
+    (if (and (:gtm state)
+             (not (zero? (:active (:gtm state)))))
+      (let [write-tape (get (:tapes (:gtm state)) 0)
+            write-position (:position write-tape)]
         (trace 'gtm_erase
-               (assoc-in state
-                         [:gtm :tapes primary :contents]
-                         (dissoc (:contents primary-tape) primary-position))))
+               (-> state
+                   (assoc-in [:gtm :tapes 0 :contents]
+                             (dissoc (:contents write-tape) write-position))
+                   (update-in [:gtm :tapes 0 :position] inc))))
       state)))
 
-(define-registered ;; push primary tape's instruction to code stack
+(define-registered ;; push active tape's instruction to code stack
   gtm_instruction
   ^{:stack-types [:gtm :code]}
   (fn [state]
     (if (:gtm state)
-      (let [primary-tape (get (:tapes (:gtm state)) (:primary (:gtm state)))
-            instr-map (get (:contents primary-tape) (:position primary-tape))]
+      (let [active-tape (get (:tapes (:gtm state)) (:active (:gtm state)))
+            instr-map (get (:contents active-tape) (:position active-tape))]
         (if instr-map
           (trace 'gtm_instruction
                  (push-item (:instruction instr-map) :code state))
@@ -208,27 +195,27 @@
     (if (and (:gtm state)
              (not (empty? (:code state)))
              (not (empty? (ensure-list (stack-ref :code 0 state)))))
-      (let [primary (:primary (:gtm state))
-            primary-tape (get (:tapes (:gtm state)) primary)
-            primary-position (:position primary-tape)
-            primary-contents (:contents primary-tape)
-            primary-instr-map (ensure-instruction-map 
-                                (get primary-contents primary-position))
+      (let [write-tape (get (:tapes (:gtm state)) 0)
+            write-position (:position write-tape)
+            write-contents (:contents write-tape)
+            write-instr-map (ensure-instruction-map 
+                              (get write-contents write-position))
             new-instr (first (flatten (ensure-list (stack-ref :code 0 state))))]
         (trace 'gtm_set_instruction
-               (assoc-in (pop-item :code state) 
-                         [:gtm :tapes primary :contents primary-position]
-                         (assoc primary-instr-map :instruction new-instr))))
+               (-> (pop-item :code state)
+                   (assoc-in [:gtm :tapes 0 :contents write-position]
+                             (assoc write-instr-map :instruction new-instr))
+                   (update-in [:gtm :tapes 0 :position] inc))))
       state)))
 
-(define-registered ;; push primary tape's silent marker to boolean stack
+(define-registered ;; push active tape's silent marker to boolean stack
   gtm_silent
   ^{:stack-types [:gtm :boolean]}
   (fn [state]
     (if (:gtm state)
-      (let [primary (:primary (:gtm state))
-            primary-tape (get (:tapes (:gtm state)) primary)
-            instr-map (get (:contents primary-tape) (:position primary-tape))]
+      (let [active (:active (:gtm state))
+            active-tape (get (:tapes (:gtm state)) active)
+            instr-map (get (:contents active-tape) (:position active-tape))]
         (if instr-map
           (trace 'gtm_silent
                  (push-item (:silent instr-map) :boolean state))
@@ -241,27 +228,27 @@
   (fn [state]
     (if (and (:gtm state)
              (not (empty? (:boolean state))))
-      (let [primary (:primary (:gtm state))
-            primary-tape (get (:tapes (:gtm state)) primary)
-            primary-position (:position primary-tape)
-            primary-contents (:contents primary-tape)
-            primary-instr-map (ensure-instruction-map 
-                                (get primary-contents primary-position))
+      (let [write-tape (get (:tapes (:gtm state)) 0)
+            write-position (:position write-tape)
+            write-contents (:contents write-tape)
+            write-instr-map (ensure-instruction-map 
+                              (get write-contents write-position))
             new-silent (stack-ref :boolean 0 state)]
         (trace 'gtm_set_silent
-               (assoc-in (pop-item :boolean state)
-                         [:gtm :tapes primary :contents primary-position]
-                         (assoc primary-instr-map :silent new-silent))))
+               (-> (pop-item :boolean state)
+                   (assoc-in [:gtm :tapes 0 :contents write-position]
+                             (assoc write-instr-map :silent new-silent))
+                   (update-in [:gtm :tapes 0 :position] inc))))
       state)))
 
-(define-registered ;; push primary tape's close marker to integer stack
+(define-registered ;; push active tape's close marker to integer stack
   gtm_close
   ^{:stack-types [:gtm :integer]}
   (fn [state]
     (if (:gtm state)
-      (let [primary (:primary (:gtm state))
-            primary-tape (get (:tapes (:gtm state)) primary)
-            instr-map (get (:contents primary-tape) (:position primary-tape))]
+      (let [active (:active (:gtm state))
+            active-tape (get (:tapes (:gtm state)) active)
+            instr-map (get (:contents active-tape) (:position active-tape))]
         (if instr-map
           (trace 'gtm_close
                  (push-item (:close instr-map) :integer state))
@@ -274,111 +261,104 @@
   (fn [state]
     (if (and (:gtm state)
              (not (empty? (:integer state))))
-      (let [primary (:primary (:gtm state))
-            primary-tape (get (:tapes (:gtm state)) primary)
-            primary-position (:position primary-tape)
-            primary-contents (:contents primary-tape)
-            primary-instr-map (ensure-instruction-map 
-                                (get primary-contents primary-position))
+      (let [write-tape (get (:tapes (:gtm state)) 0)
+            write-position (:position write-tape)
+            write-contents (:contents write-tape)
+            write-instr-map (ensure-instruction-map 
+                              (get write-contents write-position))
             new-close (math/abs (stack-ref :integer 0 state))]
         (trace 'gtm_set_close
-               (assoc-in (pop-item :integer state)
-                         [:gtm :tapes primary :contents primary-position]
-                         (assoc primary-instr-map :close new-close))))
+               (-> (pop-item :integer state)
+                   (assoc-in [:gtm :tapes 0 :contents write-position]
+                             (assoc write-instr-map :close new-close))
+                   (update-in [:gtm :tapes 0 :position] inc))))
       state)))
 
 ;; some tests
 
 ;; load and dump a random program
 #_(let [genome (random-plush-genome 10 [1 'exec_noop 'integer_add]
-                                  {:epigenetic-markers [:close :silent]})]
-  (println "Before:" genome)
-  (println "After loading and dumping:"
-           (dump-tape (load-tape (init-gtm (make-push-state) 3)
-                                 1
-                                 genome)
-                      1)))
+                                    {:epigenetic-markers [:close :silent]})]
+    (println "Before:" genome)
+    (println "After loading and dumping:"
+             (dump-tape (load-tape (init-gtm (make-push-state) 3)
+                                   1
+                                   genome)
+                        1)))
 
 ;; use namespaces for following tests
-(do 
-  (use 'clojush.interpreter)
-  (use 'clojush.instructions.code)
-  (use 'clojush.instructions.boolean)
-  (use 'clojush.instructions.random-instructions))
+#_(do 
+    (use 'clojush.interpreter)
+    (use 'clojush.instructions.code)
+    (use 'clojush.instructions.boolean)
+    (use 'clojush.instructions.random-instructions))
 
 ;; uniform crossover
-#_(let [g0 (random-plush-genome 20 [0])
-      g1 (random-plush-genome 20 [1])
-      pgm '(gtm_tape0              ;; initial source is tape0
-             exec_y                ;; repeatedly
-             (gtm_tape2            ;;   set destination to tape2
-               gtm_copy            ;;   copy a gene
-               gtm_tape0 gtm_right ;;   move all heads to right
-               gtm_tape1 gtm_right ;;
-               gtm_tape2 gtm_right ;;
-               boolean_rand        ;;   make next source randomly tape0 or tape1
-               exec_if gtm_tape0 gtm_tape1))
-      run-pgm #(run-push pgm %)]
-  (println "g0:" g0)(newline)
-  (println "g1:" g1)(newline)
-  (println "result:"
-           (-> (make-push-state)
-               (init-gtm 3)
-               (load-tape 0 g0)
-               (load-tape 1 g1)
-               (run-pgm)
-               (dump-tape 2))))
+#_(let [g1 (random-plush-genome 20 [0])
+        g2 (random-plush-genome 20 [1])
+        pgm '(gtm_tape1              ;; initial source is tape1
+               exec_y                ;; repeatedly
+               (gtm_copy            ;;   copy a gene
+                 gtm_tape1 gtm_right ;;   move all heads to right
+                 gtm_tape2 gtm_right ;;
+                 boolean_rand        ;;   make next source randomly tape1 or tape2
+                 exec_if gtm_tape1 gtm_tape2))
+        run-pgm #(run-push pgm %)]
+    (println "g1:" g1)(newline)
+    (println "g2:" g2)(newline)
+    (println "result:"
+             (-> (make-push-state)
+                 (init-gtm 3)
+                 (load-tape 1 g1)
+                 (load-tape 2 g2)
+                 (assoc :autoconstructing true)
+                 (run-pgm)
+                 (dump-tape 0))))
 
 ;; back and forth on one parent
 #_(let [g [{:instruction 1}{:instruction 2}{:instruction 3}]
-      pgm '(true                  ;; top boolean indicates if moving right
-             exec_y               ;; repeatedly
-             (gtm_tape0           ;;   source is tape0
-               gtm_tape2          ;;   destination is tape2
-               gtm_copy           ;;   copy a gene
-               gtm_right          ;;   move destination to right
-               gtm_tape0          ;;   advance source in current direction
-               exec_if
-               (true gtm_right)
-               (false gtm_left)
-               gtm_blank          ;;   if blank, reverse and move twice
-               exec_if
-               (exec_if false true
-                        exec_if
-                        (true gtm_right gtm_right)
-                        (false gtm_left gtm_left))
-               ()))
-      run-pgm #(run-push pgm %)]
-  (println "g:" g)(newline)
-  (println "result:"
-           (-> (make-push-state)
-               (init-gtm 3)
-               (load-tape 0 g)
-               (run-pgm)
-               (dump-tape 2))))
+        pgm '(true                  ;; top boolean indicates if moving right
+               gtm_tape1           ;;   source is tape1
+               exec_y               ;; repeatedly
+               ( gtm_copy           ;;   copy a gene
+                 exec_if
+                 (true gtm_right)
+                 (false gtm_left)
+                 gtm_blank          ;;   if blank, reverse and move twice
+                 exec_if
+                 (exec_if false true
+                          exec_if
+                          (true gtm_right gtm_right)
+                          (false gtm_left gtm_left))
+                 ()))
+        run-pgm #(run-push pgm %)]
+    (println "g:" g)(newline)
+    (println "result:"
+             (-> (make-push-state)
+                 (init-gtm 3)
+                 (load-tape 1 g)
+                 (run-pgm)
+                 (dump-tape 0))))
 
 ;; following test requires global-atom-generators to be set
 #_(reset! global-atom-generators [1 2 3])
 
 ;; 50% uniform mutation
 #_(let [g (vec (repeat 20 {:instruction 0}))
-      pgm '(gtm_tape0                 ;; source is tape0
-             gtm_tape2                ;; destination is tape2
-             exec_y                   ;; repeatedly
-             (boolean_rand            ;;   randomly either
-               exec_if                ;;
-               (100 code_rand         ;;     set instruction randomly
-                 gtm_set_instruction)
-               gtm_copy               ;;     or copy it
-               gtm_tape0 gtm_right    ;;   in either case advance both tapes
-               gtm_tape2 gtm_right))
-      run-pgm #(run-push pgm %)]
-  (println "g:" g)(newline)
-  (println "result:"
-           (-> (make-push-state)
-               (init-gtm 3)
-               (load-tape 0 g)
-               (run-pgm)
-               (dump-tape 2))))
-
+        pgm '(gtm_tape1                           ;; source is tape1
+               exec_y                             ;; repeatedly
+               (boolean_rand                      ;;   randomly either
+                 exec_if                          ;;
+                 (100 code_rand                   ;;     set instruction randomly
+                      gtm_set_instruction)
+                 gtm_copy                         ;;     or copy it
+                 gtm_tape1 gtm_right))
+        run-pgm #(run-push pgm %)]
+    (println "g:" g)(newline)
+    (println "result:"
+             (-> (make-push-state)
+                 (init-gtm 3)
+                 (load-tape 1 g)
+                 (run-pgm)
+                 (dump-tape 0))))
 
