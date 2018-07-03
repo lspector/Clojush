@@ -141,7 +141,8 @@
                  (-> state
                      (assoc-in [:gtm :tapes 0 :contents destination-position] 
                                source-instr-map)
-                     (update-in [:gtm :tapes 0 :position] inc)))
+                     (update-in [:gtm :tapes 0 :position] inc)
+                     (update-in [:gtm :tapes source :position] inc)))
           state))
       state)))
 
@@ -153,11 +154,14 @@
       (let [active (:active (:gtm state))
             active-tape (get (:tapes (:gtm state)) active)]
         (trace 'gtm_blank
-               (push-item (if (get (:contents active-tape) (:position active-tape))
-                            false
-                            true)
-                          :boolean 
-                          state)))
+               (update-in
+                 (push-item (if (get (:contents active-tape) (:position active-tape))
+                              false
+                              true)
+                            :boolean 
+                            state)
+                 [:gtm :tapes active :position]
+                 inc)))
       state)))
 
 (define-registered ;; make tape 0 blank at current position
@@ -180,11 +184,15 @@
   ^{:stack-types [:gtm :code]}
   (fn [state]
     (if (:gtm state)
-      (let [active-tape (get (:tapes (:gtm state)) (:active (:gtm state)))
+      (let [active (:active (:gtm state))
+            active-tape (get (:tapes (:gtm state)) active)
             instr-map (get (:contents active-tape) (:position active-tape))]
         (if instr-map
           (trace 'gtm_instruction
-                 (push-item (:instruction instr-map) :code state))
+                 (update-in
+                   (push-item (:instruction instr-map) :code state)
+                   [:gtm :tapes active :position]
+                   inc))
           state))
       state)))
 
@@ -218,7 +226,10 @@
             instr-map (get (:contents active-tape) (:position active-tape))]
         (if instr-map
           (trace 'gtm_silent
-                 (push-item (:silent instr-map) :boolean state))
+                 (update-in
+                   (push-item (:silent instr-map) :boolean state)
+                   [:gtm :tapes active :position]
+                   inc))
           state))
       state)))
 
@@ -251,7 +262,10 @@
             instr-map (get (:contents active-tape) (:position active-tape))]
         (if instr-map
           (trace 'gtm_close
-                 (push-item (:close instr-map) :integer state))
+                 (update-in
+                   (push-item (:close instr-map) :integer state)
+                   [:gtm :tapes active :position]
+                   inc))
           state))
       state)))
 
@@ -299,8 +313,6 @@
         pgm '(gtm_tape1              ;; initial source is tape1
                exec_y                ;; repeatedly
                (gtm_copy            ;;   copy a gene
-                 gtm_tape1 gtm_right ;;   move all heads to right
-                 gtm_tape2 gtm_right ;;
                  boolean_rand        ;;   make next source randomly tape1 or tape2
                  exec_if gtm_tape1 gtm_tape2))
         run-pgm #(run-push pgm %)]
@@ -318,19 +330,19 @@
 ;; back and forth on one parent
 #_(let [g [{:instruction 1}{:instruction 2}{:instruction 3}]
         pgm '(true                  ;; top boolean indicates if moving right
-               gtm_tape1           ;;   source is tape1
+               gtm_tape1            ;;   source is tape1
                exec_y               ;; repeatedly
                ( gtm_copy           ;;   copy a gene
                  exec_if
-                 (true gtm_right)
-                 (false gtm_left)
+                 true
+                 (false gtm_left gtm_left)
                  gtm_blank          ;;   if blank, reverse and move twice
                  exec_if
                  (exec_if false true
                           exec_if
-                          (true gtm_right gtm_right)
-                          (false gtm_left gtm_left))
-                 ()))
+                          (true gtm_right)
+                          (false gtm_left gtm_left gtm_left))
+                 gtm_left))
         run-pgm #(run-push pgm %)]
     (println "g:" g)(newline)
     (println "result:"
@@ -352,7 +364,7 @@
                  (100 code_rand                   ;;     set instruction randomly
                       gtm_set_instruction)
                  gtm_copy                         ;;     or copy it
-                 gtm_tape1 gtm_right))
+                 ))
         run-pgm #(run-push pgm %)]
     (println "g:" g)(newline)
     (println "result:"
@@ -361,4 +373,5 @@
                  (load-tape 1 g)
                  (run-pgm)
                  (dump-tape 0))))
+
 
