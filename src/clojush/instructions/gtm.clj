@@ -3,21 +3,20 @@
   (:require [clojure.math.numeric-tower :as math]))
 
 
-;; Single, two-track tape with single head position.
+;; Single, three-track tape (0, 1, 2).
 
-;; Only read/write to one track.
+;; Single position, with possible delay for tracks 1 and 2.
 
-;; Second track accessed only via gene/component swaps at current location.
+;; Only read/write/dub to track 0.
 
-;; Read/write by component or all components together.
-
-;; Read (but not swap) no-ops over blanks, write creates an instruction-map 
-;; (gene) under the head if none existed previously, with default instruction
-;; exec_noop, silent false, and close 0.
+;; Read/write by component or all components together; dub only all together.
+ 
+;; Read no-ops over blanks, write creates an instruction-map (gene) under
+;; the head if none existed previously, with default instruction exec_noop,
+;; silent false, and close 0.
 
 ;; All GTM instructions are no-ops on Push states that lack a GTM. 
 
-;; ....“insert” versions of all of the write instructions, which add whole cells, across both tracks. And gtm_delete along with the existing gtm_erase.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; gtm (genetic turing machine) utilities
@@ -28,9 +27,9 @@
   (assoc push-state 
     :gtm
     {:position 0
-     :tracks (vec (repeat 2 (sorted-map)))
-     :trace []
-     :skew 0}))
+     :delay 0
+     :tracks (vec (repeat 3 (sorted-map)))
+     :trace []}))
 
 (defn ensure-instruction-map
   "If instr-map is a hash map, returns it unchanged; otherwise returns a default 
@@ -93,89 +92,78 @@
       state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Instructions for changing the skew
+;; Instructions to change the delay
 
-(define-registered ;; skew to the left
-  gtm_skew_left
+(define-registered ;; increment delay
+  gtm_inc_delay
   ^{:stack-types [:gtm]}
   (fn [state]
     (if (:gtm state)
-      (trace 'gtm_skew_left
-             (update-in state [:gtm :skew] dec))
+      (trace 'gtm_inc_delay
+             (update-in state [:gtm :delay] inc))
       state)))
 
-(define-registered ;; skew to the right
-  gtm_skew_right
+(define-registered ;; decrement delay
+  gtm_dec_delay
   ^{:stack-types [:gtm]}
   (fn [state]
     (if (:gtm state)
-      (trace 'gtm_skew_right
-             (update-in state [:gtm :skew] inc))
+      (trace 'gtm_dec_delay
+             (update-in state [:gtm :delay] dec))
       state)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Instructions for swapping genes between tracks
+;; Instructions for copying information between tracks
 
-(define-registered ;; swap genes at current position between tracks 0 and 1
-  gtm_swap_all
+(define-registered ;; dub gene at current position from track 1 (with delay) to track 0
+  gtm_dub1
   ^{:stack-types [:gtm]}
   (fn [state]
     (if (:gtm state)
-      (trace 'gtm_swap_all
+      (trace 'gtm_dub1
              (let [pos (:position (:gtm state))
-                   skew (:skew (:gtm state))]
+                   delay (:delay (:gtm state))]
                (-> state
                    (assoc-in [:gtm :tracks 0 pos]
-                             (get-in state [:gtm :tracks 1 (+ pos skew)]))
-                   (assoc-in [:gtm :tracks 1 (+ pos skew)]
-                             (get-in state [:gtm :tracks 0 pos])))))
+                             (get-in state [:gtm :tracks 1 (- pos delay)])))))
       state)))
 
-(define-registered ;; swap instructions at current position between tracks 0 and 1
-  gtm_swap_instruction
+(define-registered ;; dub gene at current position from track 2 (with delay) to track 0
+  gtm_dub2
   ^{:stack-types [:gtm]}
   (fn [state]
     (if (:gtm state)
-      (trace 'gtm_swap_instruction
+      (trace 'gtm_dub2
              (let [pos (:position (:gtm state))
-                   skew (:skew (:gtm state))]
+                   delay (:delay (:gtm state))]
                (-> state
-                   (assoc-in [:gtm :tracks 0 pos :instruction]
-                             (get-in state [:gtm :tracks 1 (+ pos skew) :instruction]))
-                   (assoc-in [:gtm :tracks 1 (+ pos skew) :instruction]
-                             (get-in state [:gtm :tracks 0 pos :instruction])))))
+                   (assoc-in [:gtm :tracks 0 pos]
+                             (get-in state [:gtm :tracks 2 (- pos delay)])))))
       state)))
 
-(define-registered ;; swap silent markers at current position between tracks 0 and 1
-  gtm_swap_silent
+(define-registered ;; bounce track 0 to track 1
+  gtm_bounce1
   ^{:stack-types [:gtm]}
   (fn [state]
     (if (:gtm state)
-      (trace 'gtm_swap_silent
-             (let [pos (:position (:gtm state))
-                   skew (:skew (:gtm state))]
-               (-> state
-                   (assoc-in [:gtm :tracks 0 pos :silent]
-                             (get-in state [:gtm :tracks 1 (+ pos skew) :silent]))
-                   (assoc-in [:gtm :tracks 1 (+ pos skew) :silent]
-                             (get-in state [:gtm :tracks 0 pos :silent])))))
+      (trace 'gtm_bounce1
+             (assoc-in state
+                       [:gtm :tracks 1]
+                       (get-in state [:gtm :tracks 0])))
       state)))
 
-(define-registered ;; swap close markers at current position between tracks 0 and 1
-  gtm_swap_close
+(define-registered ;; bounce track 0 to track 2
+  gtm_bounce2
   ^{:stack-types [:gtm]}
   (fn [state]
     (if (:gtm state)
-      (trace 'gtm_swap_close
-             (let [pos (:position (:gtm state))
-                   skew (:skew (:gtm state))]
-               (-> state
-                   (assoc-in [:gtm :tracks 0 pos :close]
-                             (get-in state [:gtm :tracks 1 (+ pos skew) :close]))
-                   (assoc-in [:gtm :tracks 1 (+ pos skew) :close]
-                             (get-in state [:gtm :tracks 0 pos :close])))))
+      (trace 'gtm_bounce2
+             (assoc-in state
+                       [:gtm :tracks 2]
+                       (get-in state [:gtm :tracks 0])))
       state)))
-
+                   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Instructions for reading/writing to track 0
 
@@ -214,9 +202,10 @@
             instr-map (get-in state [:gtm :tracks 0 pos])]
         (if instr-map
           (trace 'gtm_read_all
-                 (push-item (:instruction instr-map) :code state)
-                 (push-item (:silent instr-map) :boolean state)
-                 (push-item (:close instr-map) :integer state))
+                 (->> state
+                      (push-item (:instruction instr-map) :code)
+                      (push-item (:silent instr-map) :boolean)
+                      (push-item (:close instr-map) :integer)))
           state))
       state)))
 
@@ -236,14 +225,15 @@
             new-silent (stack-ref :boolean 0 state)
             new-close (math/abs (stack-ref :integer 0 state))]
         (trace 'gtm_write_all
-               (-> (pop-item :code state)
-                   (pop-item :boolean state)
-                   (pop-item :integer state)
-                   (assoc-in [:gtm :tracks 0 pos]
-                             (-> write-instr-map
-                                 (assoc :instruction new-instr)
-                                 (assoc :silent new-silent)
-                                 (assoc :close new-close))))))
+               (assoc-in (->> state
+                              (pop-item :code)
+                              (pop-item :boolean)
+                              (pop-item :integer))
+                         [:gtm :tracks 0 pos]
+                         (-> write-instr-map
+                             (assoc :instruction new-instr)
+                             (assoc :silent new-silent)
+                             (assoc :close new-close)))))
       state)))
 
 (define-registered ;; push instruction to code stack
@@ -327,7 +317,7 @@
       (let [pos (:position (:gtm state))
             write-instr-map (ensure-instruction-map 
                               (get-in state [:gtm :tracks 0 pos]))
-            new-close (math/abs (stack-ref :integer 0 state))]
+            new-close (int (math/abs (keep-number-reasonable (stack-ref :integer 0 state))))]
         (trace 'gtm_write_close
                (-> (pop-item :integer state)
                    (assoc-in [:gtm :tracks 0 pos]
@@ -347,7 +337,7 @@
                        1)))
 
 ;; use namespaces for following tests
-(do 
+#_(do 
     (use 'clojush.interpreter)
     (use 'clojush.instructions.code)
     (use 'clojush.instructions.boolean)
@@ -360,8 +350,8 @@
       pgm '(exec_y                
              (boolean_rand
                exec_if 
-               gtm_swap_all 
-               exec_noop
+               gtm_dub1 
+               gtm_dub2
                gtm_right))
         run-pgm #(run-push pgm %)]
     (println "g1:" g1)(newline)
@@ -369,14 +359,14 @@
     (println "result:"
              (-> (make-push-state)
                  (init-gtm)
-                 (load-track 0 g1)
-                 (load-track 1 g2)
+                 (load-track 1 g1)
+                 (load-track 2 g2)
                  (assoc :autoconstructing true)
                  (run-pgm)
                  (dump-track 0))))
 
 ;; following test requires global-atom-generators to be set
-#_(reset! global-atom-generators [1 2 3])
+(reset! global-atom-generators [1 2 3])
 
 ;; 50% uniform mutation
 #_(let [g (vec (repeat 20 {:instruction 0}))
@@ -385,50 +375,99 @@
                exec_if 
                (100 code_rand
                     gtm_write_instruction)
-               exec_noop
+               gtm_dub1
                gtm_right))
         run-pgm #(run-push pgm %)]
     (println "g:" g)(newline)
     (println "result:"
              (-> (make-push-state)
                  (init-gtm)
-                 (load-track 0 g)
+                 (load-track 1 g)
                  (run-pgm)
                  (dump-track 0))))
 
 
 ;; following test requires higher evalpush-limit to get to the end
 
-(reset! global-evalpush-limit 1000)
+#_(reset! global-evalpush-limit 1000)
 
 ;; alternation without alignment deviation
-(let [g1 (mapv #(do {:instruction %}) (range 20))
+#_(let [g1 (mapv #(do {:instruction %}) (range 20))
       g2 (mapv #(do {:instruction %}) (map #(+ % 100) (range 20)))
       pgm '(true ;; true if taking from track 1
              exec_y  
              (exec_if
-               (true gtm_swap_all)
-               false
+               (true gtm_dub1)
+               (false gtm_dub2)
                gtm_right
                integer_rand 3 integer_mod 0 integer_eq
                exec_if ;; alternate
                boolean_not
                exec_noop
                ))
-        run-pgm #(run-push pgm %)]
-    (println "g1:" g1)(newline)
-    (println "g2:" g2)(newline)
-    (println "result:"
-             (-> (make-push-state)
-                 (init-gtm)
-                 (load-track 0 g1)
-                 (load-track 1 g2)
-                 (run-pgm)
-                 (dump-track 0))))
+      run-pgm #(run-push pgm %)]
+  (println "g1:" g1)(newline)
+  (println "g2:" g2)(newline)
+  (println "result:"
+           (map :instruction (-> (make-push-state)
+                                 (init-gtm)
+                                 (load-track 1 g1)
+                                 (load-track 2 g2)
+                                 (run-pgm)
+                                 (dump-track 0)))))
 
 
-;; alternation with alignment deviation -- not yet
+;; alternation with alignment deviation
+
+#_(let [g1 (mapv #(do {:instruction %}) (range 20))
+      g2 (mapv #(do {:instruction %}) (map #(+ % 100) (range 20)))
+      pgm '(true ;; true if taking from track 1
+             exec_y  
+             (exec_if
+               (true gtm_dub1)
+               (false gtm_dub2)
+               gtm_right
+               ;; possibly alternate
+               integer_rand 3 integer_mod 0 integer_eq exec_if
+               ;; alternating
+               (boolean_not ;; switch track source
+                 ;; possibly deviate
+                 boolean_rand exec_if 
+                 ;; deviating, randomly left or right
+                 (boolean_rand exec_if gtm_inc_delay gtm_dec_delay)
+                 exec_noop) ;; not deviating
+               exec_noop)) ;; not alternating
+      run-pgm #(run-push pgm %)]
+  (println "g1:" g1)(newline)
+  (println "g2:" g2)(newline)
+  (println "result:"
+           (map :instruction (-> (make-push-state)
+                                 (init-gtm)
+                                 (load-track 1 g1)
+                                 (load-track 2 g2)
+                                 (run-pgm)
+                                 (dump-track 0)))))
+
+;; uniform mutation by addition and deletion (UMAD) with add rate 1/2 and delete rate 1/3 
+#_(let [g (mapv #(do {:instruction %}) (map #(+ % 100) (range 20)))
+      pgm '(exec_y ;; addition loop
+             (boolean_rand 
+               exec_if ;; decide whether to add
+               (100 code_rand gtm_write_instruction gtm_inc_delay) ;; do addition
+               gtm_dub1 gtm_right                                  ;; or just copy
+               ;; end addition when hit a blank
+               gtm_dub1 gtm_blank exec_if exec_pop exec_noop)
+             exec_y ;; deletion loop
+             (integer_rand 3 integer_mod 0 integer_eq exec_if gtm_erase exec_noop gtm_left))
+      run-pgm #(run-push pgm %)]
+  (println "g:" g)(newline)
+  (println "result:"
+           (map :instruction (-> (make-push-state)
+                                 (init-gtm)
+                                 (load-track 1 g)
+                                 (run-pgm)
+                                 (dump-track 0)))))
 
 
-;; UMAD -- not yet
+
 

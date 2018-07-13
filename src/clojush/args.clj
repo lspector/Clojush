@@ -801,19 +801,24 @@
                             (if (:autoconstructive-environments @push-argmap)
                               [:integer :boolean :exec :float :tag :code :environment]
                               [:integer :boolean :exec :float :tag :code]))
-                               '(gtm_tape0
-                                  gtm_tape1
-                                  gtm_tape2
-                                  gtm_left
+                               '(gtm_left
                                   gtm_right
-                                  gtm_copy
+                                  gtm_inc_delay
+                                  gtm_dec_delay
+                                  gtm_dub1
+                                  gtm_dub2
+                                  ;gtm_bounce1
+                                  ;gtm_bounce2
                                   gtm_blank
-                                  gtm_instruction
-                                  gtm_set_instruction
-                                  gtm_silent
-                                  gtm_set_silent
-                                  gtm_close
-                                  gtm_set_close
+                                  gtm_erase
+                                  gtm_read_all
+                                  gtm_write_all
+                                  gtm_read_instruction
+                                  gtm_write_instruction
+                                  gtm_read_silent
+                                  gtm_write_silent
+                                  gtm_read_close
+                                  gtm_write_close
                                   autoconstructive_integer_rand
                                   autoconstructive_boolean_rand
                                   autoconstructive_code_rand_atom
@@ -916,4 +921,6 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
+
 

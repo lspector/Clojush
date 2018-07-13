@@ -823,12 +823,12 @@ the resulting top genome."
                       (if (= (:autoconstructive-genome-instructions argmap) :gtm)
                         (let [run-pgm #(run-push program-to-run %)
                               after-gtm (-> (make-push-state)
-                                            (init-gtm 3)
-                                            (load-tape 1 parent1-genome)
-                                            (load-tape 2 parent2-genome)
+                                            (init-gtm)
+                                            (load-track 1 parent1-genome)
+                                            (load-track 2 parent2-genome)
                                             (assoc :autoconstructing true)
                                             (run-pgm))]
-                            (with-meta (dump-tape after-gtm 0)
+                            (with-meta (dump-track after-gtm 0)
                               {:made-by (:trace (:gtm after-gtm))}))
                         (top-item :genome
                                   (run-push
@@ -1704,5 +1704,4 @@ programs encoded by genomes g1 and g2."
                            :grain-size (compute-grain-size [] argmap)
                            :ancestors ()
                            :is-random-replacement true))))))
-
 
