@@ -126,7 +126,8 @@
                    delay (:delay (:gtm state))]
                (-> state
                    (assoc-in [:gtm :tracks 0 pos]
-                             (get-in state [:gtm :tracks 1 (- pos delay)])))))
+                             (get-in state [:gtm :tracks 1 (- pos delay)]))
+                   (update-in [:gtm :position] inc))))
       state)))
 
 (define-registered ;; dub gene at current position from track 2 (with delay) to track 0
@@ -139,7 +140,8 @@
                    delay (:delay (:gtm state))]
                (-> state
                    (assoc-in [:gtm :tracks 0 pos]
-                             (get-in state [:gtm :tracks 2 (- pos delay)])))))
+                             (get-in state [:gtm :tracks 2 (- pos delay)]))
+                   (update-in [:gtm :position] inc))))
       state)))
 
 (define-registered ;; bounce track 0 to track 1
@@ -165,16 +167,46 @@
       state)))
                    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Instructions for reading/writing to track 0
+;; Instructions for reading/writing
 
-(define-registered ;; push boolean indicating whether blank at current position
-  gtm_blank
+(define-registered ;; push boolean indicating whether track 0 is blank at current position
+  gtm_blank0
   ^{:stack-types [:gtm :boolean]}
   (fn [state]
     (if (:gtm state)
-      (trace 'gtm_blank
+      (trace 'gtm_blank0
              (let [pos (:position (:gtm state))]
                (push-item (if (get-in state [:gtm :tracks 0 pos])
+                            false
+                            true)
+                          :boolean 
+                          state)))
+      state)))
+
+(define-registered ;; push boolean indicating whether track 1 is blank at delayed position
+  gtm_blank1
+  ^{:stack-types [:gtm :boolean]}
+  (fn [state]
+    (if (:gtm state)
+      (trace 'gtm_blank1
+             (let [pos (:position (:gtm state))
+                   delay (:delay (:gtm state))]
+               (push-item (if (get-in state [:gtm :tracks 1 (- pos delay)])
+                            false
+                            true)
+                          :boolean 
+                          state)))
+      state)))
+
+(define-registered ;; push boolean indicating whether track 2 is blank at delayed position
+  gtm_blank2
+  ^{:stack-types [:gtm :boolean]}
+  (fn [state]
+    (if (:gtm state)
+      (trace 'gtm_blank2
+             (let [pos (:position (:gtm state))
+                   delay (:delay (:gtm state))]
+               (push-item (if (get-in state [:gtm :tracks 2 (- pos delay)])
                             false
                             true)
                           :boolean 
@@ -188,9 +220,11 @@
     (if (:gtm state)
       (trace 'gtm_erase
              (let [pos (:position (:gtm state))]
-               (assoc-in state
-                         [:gtm :tracks 0]
-                         (dissoc (get-in state [:gtm :tracks 0]) pos))))
+               (-> state
+                   (assoc-in [:gtm :tracks 0]
+                             (dissoc (get-in state [:gtm :tracks 0]) pos))
+                   ;(update-in [:gtm :position] inc)
+                   )))
       state)))
 
 (define-registered ;; push all components to stacks
@@ -225,15 +259,17 @@
             new-silent (stack-ref :boolean 0 state)
             new-close (math/abs (stack-ref :integer 0 state))]
         (trace 'gtm_write_all
-               (assoc-in (->> state
-                              (pop-item :code)
-                              (pop-item :boolean)
-                              (pop-item :integer))
-                         [:gtm :tracks 0 pos]
-                         (-> write-instr-map
-                             (assoc :instruction new-instr)
-                             (assoc :silent new-silent)
-                             (assoc :close new-close)))))
+               (-> (->> state
+                        (pop-item :code)
+                        (pop-item :boolean)
+                        (pop-item :integer))
+                   (assoc-in [:gtm :tracks 0 pos]
+                             (-> write-instr-map
+                                 (assoc :instruction new-instr)
+                                 (assoc :silent new-silent)
+                                 (assoc :close new-close)))
+                   (update-in [:gtm :position] inc)
+                   )))
       state)))
 
 (define-registered ;; push instruction to code stack
@@ -263,7 +299,9 @@
         (trace 'gtm_write_instruction
                (-> (pop-item :code state)
                    (assoc-in [:gtm :tracks 0 pos]
-                             (assoc write-instr-map :instruction new-instr)))))
+                             (assoc write-instr-map :instruction new-instr))
+                   (update-in [:gtm :position] inc)
+                   )))
       state)))
 
 (define-registered ;; push silent marker to boolean stack
@@ -292,7 +330,9 @@
         (trace 'gtm_write_silent
                (-> (pop-item :boolean state)
                    (assoc-in [:gtm :tracks 0 pos]
-                             (assoc write-instr-map :silent new-silent)))))
+                             (assoc write-instr-map :silent new-silent))
+                   (update-in [:gtm :position] inc)
+                   )))
       state)))
 
 (define-registered ;; push close marker to integer stack
@@ -317,11 +357,67 @@
       (let [pos (:position (:gtm state))
             write-instr-map (ensure-instruction-map 
                               (get-in state [:gtm :tracks 0 pos]))
-            new-close (int (math/abs (keep-number-reasonable (stack-ref :integer 0 state))))]
+            new-close (let [c (min 100 (max -100 (stack-ref :integer 0 state)))] ;;*** HACK
+                        (if (< c 0) (- c) c))]
         (trace 'gtm_write_close
                (-> (pop-item :integer state)
                    (assoc-in [:gtm :tracks 0 pos]
-                             (assoc write-instr-map :close new-close)))))
+                             (assoc write-instr-map :close new-close))
+                   (update-in [:gtm :position] inc)
+                   )))
+      state)))
+
+(define-registered 
+  exec_k_when_autoconstructing
+  ^{:stack-types [:exec]
+    :parentheses 2}
+  (fn [state]
+    (if (and (:autoconstructing state)
+             (not (empty? (rest (:exec state)))))
+      (push-item (first (:exec state))
+                 :exec
+                 (pop-item :exec (pop-item :exec state)))
+      state)))
+
+(define-registered 
+  exec_s_when_autoconstructing
+  ^{:stack-types [:exec]
+    :parentheses 3}
+  (fn [state]
+    (if (and (:autoconstructing state)
+             (not (empty? (rest (rest (:exec state))))))
+      (let [stk (:exec state)
+            x (first stk)
+            y (first (rest stk))
+            z (first (rest (rest stk)))]
+        (if (<= (count-points (list y z)) @global-max-points)
+          (push-item x
+                     :exec
+                     (push-item z
+                                :exec
+                                (push-item (list y z)
+                                           :exec
+                                           (pop-item :exec 
+                                                     (pop-item :exec 
+                                                               (pop-item :exec state))))))
+          state))
+      state)))
+
+(define-registered 
+  exec_y_when_autoconstructing
+  ^{:stack-types [:exec]
+    :parentheses 1}
+  (fn [state]
+    (if (and (:autoconstructing state)
+             (not (empty? (:exec state))))
+      (let [new-item (list 'exec_y (first (:exec state)))]
+        (if (<= (count-points new-item) @global-max-points)
+          (push-item (first (:exec state))
+                     :exec
+                     (push-item new-item
+                                :exec
+                                (pop-item :exec state)))
+          state))
       state)))
 
 ;; some tests
@@ -342,17 +438,23 @@
     (use 'clojush.instructions.code)
     (use 'clojush.instructions.boolean)
     (use 'clojush.instructions.numbers)
-    (use 'clojush.instructions.random-instructions))
+    (use 'clojush.instructions.random-instructions)
+    (use 'clojush.instructions.genome))
+
+
+;; following tests require higher evalpush-limit to get to the end
+
+#_(reset! global-evalpush-limit 10000)
+
 
 ;; uniform crossover
-#_(let [g1 (random-plush-genome 20 [0])
-      g2 (random-plush-genome 20 [1])
+#_(let [g1 (repeat 20 {:instruction 0})
+      g2 (repeat 20 {:instruction 1})
       pgm '(exec_y                
              (boolean_rand
                exec_if 
                gtm_dub1 
-               gtm_dub2
-               gtm_right))
+               gtm_dub2))
         run-pgm #(run-push pgm %)]
     (println "g1:" g1)(newline)
     (println "g2:" g2)(newline)
@@ -366,30 +468,28 @@
                  (dump-track 0))))
 
 ;; following test requires global-atom-generators to be set
-(reset! global-atom-generators [1 2 3])
+#_(reset! global-atom-generators [1 2 3])
 
 ;; 50% uniform mutation
 #_(let [g (vec (repeat 20 {:instruction 0}))
       pgm '(exec_y                
              (boolean_rand
                exec_if 
-               (100 code_rand
-                    gtm_write_instruction)
-               gtm_dub1
-               gtm_right))
+               (code_rand_atom
+                 gtm_write_instruction
+                 gtm_blank1 exec_when exec_flush)
+               gtm_dub1))
         run-pgm #(run-push pgm %)]
     (println "g:" g)(newline)
     (println "result:"
              (-> (make-push-state)
                  (init-gtm)
                  (load-track 1 g)
+                 (assoc :autoconstructing true)
                  (run-pgm)
                  (dump-track 0))))
 
 
-;; following test requires higher evalpush-limit to get to the end
-
-#_(reset! global-evalpush-limit 1000)
 
 ;; alternation without alignment deviation
 #_(let [g1 (mapv #(do {:instruction %}) (range 20))
@@ -399,11 +499,9 @@
              (exec_if
                (true gtm_dub1)
                (false gtm_dub2)
-               gtm_right
                integer_rand 3 integer_mod 0 integer_eq
-               exec_if ;; alternate
+               exec_when ;; alternate
                boolean_not
-               exec_noop
                ))
       run-pgm #(run-push pgm %)]
   (println "g1:" g1)(newline)
@@ -426,17 +524,14 @@
              (exec_if
                (true gtm_dub1)
                (false gtm_dub2)
-               gtm_right
                ;; possibly alternate
-               integer_rand 3 integer_mod 0 integer_eq exec_if
+               integer_rand 3 integer_mod 0 integer_eq exec_when
                ;; alternating
                (boolean_not ;; switch track source
                  ;; possibly deviate
-                 boolean_rand exec_if 
+                 boolean_rand exec_when 
                  ;; deviating, randomly left or right
-                 (boolean_rand exec_if gtm_inc_delay gtm_dec_delay)
-                 exec_noop) ;; not deviating
-               exec_noop)) ;; not alternating
+                 (boolean_rand exec_if gtm_inc_delay gtm_dec_delay))))
       run-pgm #(run-push pgm %)]
   (println "g1:" g1)(newline)
   (println "g2:" g2)(newline)
@@ -451,14 +546,13 @@
 ;; uniform mutation by addition and deletion (UMAD) with add rate 1/2 and delete rate 1/3 
 #_(let [g (mapv #(do {:instruction %}) (map #(+ % 100) (range 20)))
       pgm '(exec_y ;; addition loop
-             (boolean_rand 
-               exec_if ;; decide whether to add
-               (100 code_rand gtm_write_instruction gtm_inc_delay) ;; do addition
-               gtm_dub1 gtm_right                                  ;; or just copy
+             (boolean_rand exec_if ;; decide whether to add
+               (code_rand_atom gtm_write_instruction gtm_inc_delay) ;; do addition
+               gtm_dub1                                            ;; or just copy
                ;; end addition when hit a blank
-               gtm_dub1 gtm_blank exec_if exec_pop exec_noop)
+               gtm_blank1 exec_when exec_pop)
              exec_y ;; deletion loop
-             (integer_rand 3 integer_mod 0 integer_eq exec_if gtm_erase exec_noop gtm_left))
+             (integer_rand 3 integer_mod 0 integer_eq exec_when gtm_erase gtm_left))
       run-pgm #(run-push pgm %)]
   (println "g:" g)(newline)
   (println "result:"
@@ -467,7 +561,5 @@
                                  (load-track 1 g)
                                  (run-pgm)
                                  (dump-track 0)))))
-
-
 
 
