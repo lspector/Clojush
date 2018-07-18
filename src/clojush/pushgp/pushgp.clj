@@ -36,16 +36,21 @@
   "Makes the population of agents containing the initial random individuals in the population.
    Argument is a push argmap"
   [{:keys [use-single-thread population-size
-           max-genome-size-in-initial-program atom-generators]
+           max-genome-size-in-initial-program atom-generators genome-representation]
     :as argmap}]
   (let [population-agents (vec (repeatedly population-size
                                            #(make-individual
-                                              :genome (strip-random-insertion-flags
-                                                        (random-plush-genome
-                                                          max-genome-size-in-initial-program
-                                                          atom-generators
-                                                          argmap))
-                                              :genetic-operators :random)))]
+                                             :genome (case genome-representation
+                                                       :plush (strip-random-insertion-flags
+                                                               (random-plush-genome
+                                                                max-genome-size-in-initial-program
+                                                                atom-generators
+                                                                argmap))
+                                                       :plushi (random-plushi-genome
+                                                                max-genome-size-in-initial-program
+                                                                atom-generators
+                                                                argmap))
+                                             :genetic-operators :random)))]
     (mapv #(if use-single-thread
              (atom %)
              (agent % :error-handler agent-error-handler))

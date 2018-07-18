@@ -46,6 +46,10 @@
           ;; The limit for the number of point (instruction) evaluations to
           ;; execute during the run.
 
+          :genome-representation :plush
+          ;; The representation for the genomes used for initialiation and inheritance.
+          ;; Options include :plush and :plushi
+          
           :max-points 200
           ;; Maximum size of push programs and push code, as counted by points
           ;; in the program. 1/4 this limit is used as the limit for sizes of
@@ -263,6 +267,14 @@
           ;; If true, each Plush instruction map will have a UUID attached to it. If the
           ;; gene has a "parent gene", it will also have the UUID of its parent.
 
+          ;;----------------------------------------
+          ;; Arguments related to Plushi representaion
+          ;;----------------------------------------
+
+          :plushi-close-probability 0.25
+          ;; Probability of choosing a :close (meta-) instruction when generating
+          ;; Plushi genomes
+          
           ;;----------------------------------------
           ;; Arguments related to parent selection
           ;;----------------------------------------

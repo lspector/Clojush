@@ -39,6 +39,18 @@
         (recur (inc parens)
                (rest probabilities))))))
 
+(defn generate-instruction
+  "Generates a random instruction from the list of atom generators, ensuring
+  that ERCs are executed to produce elements."
+  [atom-generators]
+  (let [element (lrand-nth atom-generators)]
+    (if (fn? element)
+      (let [fn-element (element)]
+        (if (fn? fn-element)
+          (fn-element)
+          fn-element))
+      element)))
+
 (defn random-plush-instruction-map
   "Returns a random instruction map given the atom-generators and the required
    epigenetic-markers."
@@ -57,13 +69,7 @@
       (zipmap markers
               (map (fn [marker]
                      (case marker
-                       :instruction (let [element (lrand-nth atom-generators)]
-                                      (if (fn? element)
-                                        (let [fn-element (element)]
-                                          (if (fn? fn-element)
-                                            (fn-element)
-                                            fn-element))
-                                        element))
+                       :instruction (generate-instruction atom-generators)
                        :close (random-closes close-parens-probabilities)
                        :silent (if (< (lrand) silent-instruction-probability)
                                  true
@@ -89,6 +95,36 @@
     (random-plush-genome-with-size (inc (lrand-int max-genome-size))
                                    atom-generators
                                    argmap)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; random plushi genome generator
+
+(defn random-plushi-instruction
+  "Returns a random Plushi instruction. :close will appear more often than
+  other instructions at a rate of :plushi-close-probability"
+  [atom-generators {:keys [plushi-close-probability]}]
+  (if (< (lrand) plushi-close-probability)
+    :close
+    (generate-instruction atom-generators)))
+
+(defn random-plushi-genome-with-size
+  "Returns a random Plushi genome containing the given number of points."
+  [genome-size atom-generators argmap]
+  (vec (repeatedly genome-size
+                   #(random-plushi-instruction
+                     atom-generators
+                     argmap))))
+
+; TMH NOTE: Might need to adjust sizes, since :close instructions will be present
+(defn random-plushi-genome
+  "Returns a random Plushi genome with size limited by max-genome-size.
+  argmap must contain a :plushi-close-probability key."
+  [max-genome-size atom-generators argmap]
+  (random-plushi-genome-with-size (inc (lrand-int max-genome-size))
+                                  atom-generators
+                                  argmap))
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random Push code generator
