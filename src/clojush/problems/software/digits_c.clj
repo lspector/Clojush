@@ -15,7 +15,7 @@
 (ns clojush.problems.software.digits-c
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
-        ;clojush.instructions.tag
+        clojush.instructions.tag
         ;clojush.instructions.environment
         [clojure.math numeric-tower]
         ))
@@ -27,8 +27,10 @@
             ;;; end constants
             (fn [] (- (lrand-int 21) 10))
             ;;; end ERCs
+            'end_tag
+            (tagwrap-instruction-erc 100)
             ;(tag-instruction-erc [:integer :boolean :string :char :exec] 1000)
-            ;(tagged-instruction-erc 1000)
+            (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
@@ -77,7 +79,7 @@
      (the-actual-digits-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
-            ;state-with-tags (tagspace-initialization (str (:program individual)) 1000 (make-push-state))
+            state-with-tags (tagspace-initialization-heritable (str (:program individual)) (make-push-state))
             stacks-depth (atom (zipmap push-types (repeat 0)))
             errors (doall
                      (for [[input1 correct-output] (case data-cases
@@ -85,7 +87,7 @@
                                                      :test test-cases
                                                      [])]
                        (let [final-state (run-push (:program individual)
-                                                   (->> (push-item input1 :input (make-push-state))
+                                                   (->> (push-item input1 :input state-with-tags)
                                                      (push-item "" :output)))
                              result (stack-ref :output 0 final-state)]
                          (when print-outputs

@@ -438,6 +438,60 @@
                                                           (str "environment_begin " code " environment_end")
                                                           code))))))))
 
+;; Helper functions for hertiable tagspace intiliazation
+
+(def pattern #"(?=\()(?:(?=.*?\((?!.*?\1)(.*\)(?!.*\2).*))(?=.*?\)(?!.*?\2)(.*)).)+?.*?(?=\1)[^(]*(?=\2$)")
+
+(defn preprocess_tagged_code
+  [fragment]
+  (if (count (rest (nested-parens pattern fragment)))
+  (let [fragment (string/replace (subs fragment 1)  #" \(\d+" "")
+  fragment (string/replace fragment  #" \)" "")]
+  (str "(" fragment " )"))
+))
+
+(defn re-pos [re s]
+        (loop [m (re-matcher re s)
+               res {}]
+          (if (.find m)
+            (recur m (assoc res (.start m) (.group m)))
+            res)))
+
+(defn make-balanced
+  [expr]
+    (let [re-poses (re-pos #"[\(\)]" expr)
+    stack (atom ())]
+      (for [index (sort (keys re-poses))]
+        (cond
+          (= (get re-poses index) "(") (swap! stack conj index)
+          (= (get re-poses index) ")") (if (not (empty? @stack))(swap! stack pop))
+        :else nil
+))))
+
+(defn preprocess-tagspace ;; to handle the case when there are more begin_tag instructions than end_tag instructons.
+  [expr]
+  (let [indices (last (make-balanced expr))
+    exprr (string/split expr #"")]
+    (string/join "" (keep-indexed #(if (not (some #{%1} indices)) %2) exprr))
+))
+
+
+(defn tagspace-initialization-heritable
+  [prog state]
+  (let [prog (string/replace prog #"[\(]" "<")
+    prog (string/replace prog #"[\)]" ">")
+    prog (string/replace prog #"begin_tag_" "(")
+    prog (string/replace prog #"tag_end" ")")
+    list-instrs (nested-parens pattern (preprocess-tagspace prog))]
+    (assoc state :tag (reduce merge (for [fragment list-instrs]
+      (let [fragment (preprocess_tagged_code fragment)
+        fragments (string/split fragment #" ")]
+        (assoc (or (:tag state) (sorted-map))
+          (Integer/parseInt (re-find #"\d+" fragment))
+          (let [code (str "(" (string/join " " (drop-last (drop 1 fragments))) ")")]
+            (if (re-find #"return_" code)
+              (str "environment_begin " code " environment_end")
+              code)))))))))
 
 (defn closest-tag
   "Returns the closest match to the given tag

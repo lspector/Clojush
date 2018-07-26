@@ -44,7 +44,7 @@
   {:error-function (fn [individual]
                      (let [stacks-depth (atom (zipmap push-types (repeat 0)))]
                      (assoc individual
-                            :errors (let [state-with-tags (tagspace-initialization (str (:program individual)) 100 (make-push-state))]
+                            :errors (let [state-with-tags (tagspace-initialization-heritable (str (:program individual)) (make-push-state))]
                                       (doall
                                         (for [input (range 10)]
                                           (let [state (run-push (:program individual)
@@ -66,10 +66,13 @@
                           'integer_mult
                           'integer_add
                           'integer_sub
-                          (tag-instruction-erc [:integer :exec] 100)
-                          (untag-instruction-erc 100)
+                          'end_tag
+                          (tagwrap-instruction-erc 100)
+                          ;(tag-instruction-erc [:integer :exec] 100)
+                          ;(untag-instruction-erc 100)
                           (tagged-instruction-erc 100)
-                          (registered-for-stacks [:environment]))
+                          ;(registered-for-stacks [:environment])
+                          )
    :tag-limit 100
    :problem-specific-report custom-report
    :parent-selection :tournament

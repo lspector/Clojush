@@ -14,7 +14,8 @@
        (or
          (.startsWith (name i) "tag")
          (.startsWith (name i) "untag")
-         (.startsWith (name i) "return_tag_"))))
+         (.startsWith (name i) "return_tag_")
+         (.startsWith (name i) "begin_tag_"))))
 
 (defn closest-association
   "Returns the key-val pair for the closest match to the given tag
@@ -30,9 +31,9 @@
   "Returns the key-val pair for the closest match to the given tag
    in the given state."
   [tag state]
-  (let [threshold (* 0.25 (- (apply max (keys (:tag state))) (apply min (keys (:tag state)))))]
+  (let [threshold 250] ;(* 0.25 (- (apply max (keys (:tag state))) (apply min (keys (:tag state)))))]
     (loop [associations (conj (vec (:tag state)) (first (:tag state)))] ;; conj does wrap
-      (if (<= (- (ffirst associations) tag) threshold)
+      (if (<= (mod (- (ffirst associations) tag) 1000) threshold)
         (first associations)
         (if (not (empty? (rest associations)))
           (recur (rest associations)))))))
@@ -61,6 +62,11 @@
   [i state]
   (let [iparts (string/split (name i) #"_")]
     (cond
+      ;; if it's of the form begin_tag_<number>: Do nothing
+      (= (first iparts) "begin")
+      state
+   
+      
       ;; if it's of the form tag_<type>_<number>: CREATE TAG/VALUE ASSOCIATION
       (= (first iparts) "tag") 
       (let [source-type (read-string (str ":" (nth iparts 1)))
@@ -80,7 +86,7 @@
       (if (empty? (:tag state))
         state
         (let [the-tag (read-string (nth iparts 1))]
-          (assoc state :tag (dissoc (:tag state) (first (modifed-closest-association the-tag state))))))
+          (assoc state :tag (dissoc (:tag state) (first (closest-association the-tag state))))))
       ;; if it's return_tag_<type>_<number>: Push
       ;; (item_from_<type>_stack tag_<type>_<number>) onto the return stack. Pop the
       ;; item if @global-pop-when-tagging
@@ -103,20 +109,20 @@
         (cond ;; it's tagged_code_<number>
               (= (nth iparts 1) "code") 
               (let [the-tag (read-string (nth iparts 2))]
-                (push-item (second (modifed-closest-association the-tag state)) :code state))
+                (push-item (second (closest-association the-tag state)) :code state))
               ;; it's tagged_when_<number>
               (= (nth iparts 1) "when") 
               (if (empty? (:boolean state))
                 state
                 (if (= true (first (:boolean state)))
                   (let [the-tag (read-string (nth iparts 2))]
-                    (push-item (second (modifed-closest-association the-tag state))
+                    (push-item (second (closest-association the-tag state))
                                :exec (pop-item :boolean state)))
                   (pop-item :boolean state)))
               ;; else it's just tagged_<number>, result->exec
               :else
               (let [the-tag (read-string (nth iparts 1))]
-                (push-item (second (modifed-closest-association the-tag state)) :exec state)))))))
+                (push-item (second (closest-association the-tag state)) :exec state)))))))
 
 (defn tag-instruction-erc
   "Returns a function which, when called on no arguments, returns a symbol of the form
@@ -136,6 +142,26 @@
     (fn [] (symbol (str "untag_"
                         (str (lrand-int limit))))))
   ([] (untag-instruction-erc @global-tag-limit)))
+
+
+;; tagging code inside begin_tag_<number> ... end_tag
+
+(defn tagwrap-instruction-erc
+  "Returns a function which, when called on no arguments, returns a symbol of the form
+   begin_tag_<number> where number is in the range from 0 to the specified limit (exclusive)."
+  ([limit]
+    (fn [] (symbol (str "begin_tag_"
+                        (str (lrand-int limit))))))
+  ([] (tagwrap-instruction-erc @global-tag-limit)))
+
+(define-registered
+  end_tag
+  ^{:stack-types [:tag]}
+  (fn [state]
+      state))
+
+;;
+
   
 (defn tagged-instruction-erc
   "Returns a function which, when called on no arguments, returns a symbol of the form
