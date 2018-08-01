@@ -28,6 +28,7 @@
    :genesis {:fn genesis :parents 1} ;; the parent will be ignored
    :make-next-operator-revertable {:fn nil :parents 0}
    :autoconstruction {:fn autoconstruction :parents 2}
+   :plushi-uniform-addition-and-deletion {:fn plushi-uniform-addition-and-deletion :parents 1}
    })
 
 (defn revert-too-big-child
