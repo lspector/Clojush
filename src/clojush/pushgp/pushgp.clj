@@ -47,7 +47,8 @@
                                                                 atom-generators
                                                                 argmap))
                                                        :plushi (random-plushi-genome
-                                                                max-genome-size-in-initial-program
+                                                                (* 1.165
+                                                                   max-genome-size-in-initial-program)
                                                                 atom-generators
                                                                 argmap))
                                              :genetic-operators :random)))]
