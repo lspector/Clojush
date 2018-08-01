@@ -1,6 +1,6 @@
 
 (ns clojush.random
-  (:use [clojush globals translate])
+  (:use [clojush globals translate pushstate])
   (:require [clj-random.core :as random]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -103,9 +103,16 @@
   "Returns a random Plushi instruction. :close will appear more often than
   other instructions at a rate of :plushi-close-probability"
   [atom-generators {:keys [plushi-close-probability]}]
-  (if (< (lrand) plushi-close-probability)
-    :close
-    (generate-instruction atom-generators)))
+  (let [plushi-prob (if (number? plushi-close-probability)
+                      plushi-close-probability
+                      (/ (apply + (filter identity ; This will look up each atom generator in the instruction table and
+                                                   ; get the number of parentheses it requires
+                                          (map (comp :parentheses meta @instruction-table)
+                                               atom-generators)))
+                         (count atom-generators)))]
+    (if (< (lrand) plushi-prob)
+      :close
+      (generate-instruction atom-generators))))
 
 (defn random-plushi-genome-with-size
   "Returns a random Plushi genome containing the given number of points."
