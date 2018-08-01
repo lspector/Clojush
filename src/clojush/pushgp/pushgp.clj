@@ -158,7 +158,9 @@
   [rand-gens pop-agents child-agents generation novelty-archive]
   (r/new-generation! generation)
   (println "Processing generation:" generation) (flush)
-  (population-translate-plush-to-push pop-agents @push-argmap)
+  (case (:genome-representation @push-argmap)
+    :plush (population-translate-plush-to-push pop-agents @push-argmap)
+    :plushi (population-translate-plushi-to-push pop-agents @push-argmap))
   (timer @push-argmap :reproduction)
   (print "Computing errors... ") (flush)
   (compute-errors pop-agents rand-gens @push-argmap)

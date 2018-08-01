@@ -176,5 +176,19 @@
 
 (defn translate-plushi-to-plush
   "Translates Plushi genome into a Plush genome."
-  [{:keys [genome]} argmap]
-  (reduce plushi-gene-to-plush-gene [] genome))
+  [{:keys [genome]}]
+  (apply list
+         (reduce plushi-gene-to-plush-gene [] genome)))
+
+(defn population-translate-plushi-to-push
+  "Converts the population of Plushi genomes into Push programs."
+  [pop-agents {:keys [use-single-thread] :as argmap}]
+  (dorun (map #((if use-single-thread swap! send)
+                    %
+                    (fn [i] (assoc i
+                                   :program
+                                   (translate-plush-genome-to-push-program
+                                    {:genome (translate-plushi-to-plush i)}
+                                    argmap))))
+              pop-agents))
+  (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
