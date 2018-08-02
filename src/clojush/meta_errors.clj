@@ -62,6 +62,10 @@
   [ind evaluated-population argmap]
   (:age ind))
 
+(defn newborn-meta-error
+  [ind evaluated-population argmap]
+  (if (zero? (:age ind)) 1 0))
+
 (defn novelty-meta-error
   [ind evaluated-population argmap]
   :novelty) ; Keyword replaced later; needs entire population to compute 
