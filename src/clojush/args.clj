@@ -515,7 +515,8 @@
           :csv-columns [:generation :location :total-error :push-program-size]
           ;; The columns to include in a printed CSV beyond the generation and individual. Options
           ;; include: [:generation :location :parent-uuids :genetic-operators :push-program-size
-          ;; :plush-genome-size :push-program :plush-genome :total-error :test-case-errors]
+          ;; :plush-genome-size :push-program :plush-genome :genome-closes :push-paren-locations
+          ;; :total-error :test-case-errors]
 
           :edn-keys [:uuid :parent-uuids :genetic-operators :program :genome :total-error :errors]
           ;; Keys from clojush.individual.individual that should be included.

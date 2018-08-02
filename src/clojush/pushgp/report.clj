@@ -79,13 +79,20 @@
   "Prints a csv of the population, with each individual's fitness and size.
    If log-fitnesses-for-all-cases is true, it also prints the value
    of each fitness case."
-  [population generation {:keys [csv-log-filename csv-columns]}]
+  [population generation {:keys [csv-log-filename csv-columns genome-representation]}]
   (let [columns (vec
+                 (map
+                  (fn [col] (if (= col :genome-closes)
+                              (if (= genome-representation :plush)
+                                :plush-genome-closes
+                                :plushi-genome-closes)
+                              col))
                   (concat [:uuid]
                           (filter #(some #{%} csv-columns)
                                   [:generation :location :parent-uuids :genetic-operators 
                                    :push-program-size :plush-genome-size :push-program 
-                                   :plush-genome :total-error :is-random-replacement])))]
+                                   :plush-genome :total-error :is-random-replacement
+                                   :genome-closes :push-paren-locations]))))]
     (when (zero? generation)
       (with-open [csv-file (io/writer csv-log-filename :append false)]
         (csv/write-csv csv-file
@@ -94,9 +101,9 @@
                                          (map #(str "TC" %)
                                               (range (count (:errors (first population)))))))))))
     (with-open [csv-file (io/writer csv-log-filename :append true)]
-      (csv/write-csv 
+      (csv/write-csv
         csv-file
-        (map-indexed 
+        (map-indexed
           (fn [location individual]
             (concat (map (assoc (into {} individual)
                            :generation generation
@@ -117,8 +124,27 @@
                            :plush-genome-size (count (:genome individual))
                            :plush-genome (if (empty? (:genome individual))
                                            "()"
-                                           (not-lazy (:genome individual))))
-                         ; This is a map of an individual
+                                           (not-lazy (:genome individual)))
+                           :plush-genome-closes (if (empty? (:genome individual))
+                                                  "()"
+                                                  (not-lazy (map :close (:genome individual))))
+                           :plushi-genome-closes (if (empty? (:genome individual))
+                                                   "()"
+                                                   (not-lazy (map (fn [instr]
+                                                                    (if (= instr :close)
+                                                                      1
+                                                                      0))
+                                                                  (:genome individual))))
+                           :push-paren-locations (if (empty? (:genome individual))
+                                                   ""
+                                                   (apply str
+                                                          (not-lazy
+                                                           (map #(case %
+                                                                   :open "("
+                                                                   :close ")"
+                                                                   "-")
+                                                                (list-to-open-close-sequence (:program individual))))))
+                           ) ; This is a map of an individual
                          columns)
                     (when (some #{:test-case-errors} csv-columns)
                       (:errors individual))))
