@@ -357,7 +357,7 @@
       (let [pos (:position (:gtm state))
             write-instr-map (ensure-instruction-map 
                               (get-in state [:gtm :tracks 0 pos]))
-            new-close (let [c (min 100 (max -100 (stack-ref :integer 0 state)))] ;;*** HACK
+            new-close (let [c (stack-ref :integer 0 state)]
                         (if (< c 0) (- c) c))]
         (trace 'gtm_write_close
                (-> (pop-item :integer state)

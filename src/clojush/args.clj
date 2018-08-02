@@ -801,8 +801,6 @@
                                          (if (:autoconstructive-environments @push-argmap)
                                            [:integer :boolean :exec :float :tag :code :environment]
                                            [:integer :boolean :exec :float :tag :code]))]
-                           (concat by-type
-                                   (take (* 1 (count by-type)) ;;*** HACK
                                          (cycle
                                            '(gtm_left
                                               gtm_right
@@ -810,8 +808,8 @@
                                               gtm_dec_delay
                                               gtm_dub1
                                               gtm_dub2
-                                              ;gtm_bounce1
-                                              ;gtm_bounce2
+                                              gtm_bounce1
+                                              gtm_bounce2
                                               gtm_blank0
                                               gtm_blank1
                                               gtm_blank2
@@ -832,8 +830,8 @@
                                               exec_k_when_autoconstructing
                                               exec_s_when_autoconstructing
                                               exec_y_when_autoconstructing
-                                              ))))))]
-      (when true ;; (not (some #{instr} (:atom-generators @push-argmap))) ;;*** HACK
+                                              ))))]
+      (when true (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     ;;
     ;; include ERCs for floats, integers, and booleans
