@@ -544,7 +544,7 @@
     ;; set :epigenetic-markers
     (swap! push-argmap assoc :epigenetic-markers [:close :silent])
     ;;
-    ;; add autoconstructive-specific instructions (:genome or :gtm)
+    ;; add autoconstructive-specific instructions (:genome, :gtm, or :gca)
     (doseq [instr (case (:autoconstructive-genome-instructions @push-argmap)
                     :all (registered-for-stacks
                            (if (:autoconstructive-environments @push-argmap)
@@ -829,7 +829,8 @@
                               exec_k_when_autoconstructing
                               exec_s_when_autoconstructing
                               exec_y_when_autoconstructing
-                              )))]
+                              ))
+                    :gca [])]
       (when true (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     ;;
