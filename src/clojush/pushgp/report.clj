@@ -127,14 +127,16 @@
                                            (not-lazy (:genome individual)))
                            :plush-genome-closes (if (empty? (:genome individual))
                                                   "()"
-                                                  (not-lazy (map :close (:genome individual))))
+                                                  (apply str
+                                                         (not-lazy (map :close (:genome individual)))))
                            :plushi-genome-closes (if (empty? (:genome individual))
                                                    "()"
-                                                   (not-lazy (map (fn [instr]
-                                                                    (if (= instr :close)
-                                                                      1
-                                                                      0))
-                                                                  (:genome individual))))
+                                                   (apply str
+                                                          (not-lazy (map (fn [instr]
+                                                                           (if (= instr :close)
+                                                                             1
+                                                                             0))
+                                                                         (:genome individual)))))
                            :push-paren-locations (if (empty? (:genome individual))
                                                    ""
                                                    (apply str
