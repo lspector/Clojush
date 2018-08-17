@@ -11,7 +11,7 @@
 (def push-types '(:exec :code :integer :float :boolean :char :string :zip
                   :vector_integer :vector_float :vector_boolean :vector_string
                   :input :output :auxiliary :tag :return :environment :genome
-                  :gtm))
+                  :gtm :gca))
 ;; The list of stacks and non-stack storage types used by the Push interpreter
 
 
