@@ -830,7 +830,21 @@
                                   exec_s_when_autoconstructing
                                   exec_y_when_autoconstructing
                                   ))
-                    :gca [])]
+                    :gca (into (registered-for-stacks
+                                 (if (:autoconstructive-environments @push-argmap)
+                                   [:integer :boolean :exec :float :tag :code :environment]
+                                   [:integer :boolean :exec :float :tag :code]))
+                               '(GCA_left
+                                  GCA_center
+                                  GCA_right
+                                  GCA_maybe
+                                  GCA_random
+                                  GCA_mate
+                                  GCA_self
+                                  GCA_silent
+                                  GCA_erase
+                                  GCA_dup_left
+                                  GCA_dup_right)))]
       (when true (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     ;;
