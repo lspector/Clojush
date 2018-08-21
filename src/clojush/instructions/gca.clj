@@ -2,6 +2,17 @@
   (:use [clojush pushstate globals random util])
   (:require [clojure.math.numeric-tower :as math]))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; gca (genetic cellular automaton) utilities
+
+
+(defn run-gca
+  "Runs the provided GCA with the provided genomes, and returns the resulting genome."
+  [gca genome1 genome2]
+  )
+
+
 GCA_left (takes/stores boolean, matches if = silent) 
 GCA_center (takes/stores boolean, matches if = silent) 
 GCA_right (takes/stores boolean, matches if = silent) 
