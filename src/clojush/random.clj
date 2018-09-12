@@ -122,7 +122,7 @@
                      atom-generators
                      argmap))))
 
-; TMH NOTE: Might need to adjust sizes, since :close instructions will be present
+; NOTE: Might need to adjust genome sizes, since :close instructions will be present
 (defn random-plushy-genome
   "Returns a random Plushy genome with size limited by max-genome-size.
   argmap must contain a :plushy-close-probability key."
@@ -131,7 +131,15 @@
                                   atom-generators
                                   argmap))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; random genome gene generator
 
+(defn random-genome-gene
+  "Creates a single gene, whose form is dependent on the type of genome being used."
+  [atom-generators {:keys [genome-representation] :as argmap}]
+  (case genome-representation
+    :plush (random-plush-instruction-map atom-generators argmap)
+    :plushy (random-plushy-instruction atom-generators argmap)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random Push code generator

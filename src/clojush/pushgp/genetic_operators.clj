@@ -144,7 +144,8 @@
 ;; reproduction
 
 (defn reproduction
-  "Returns parent"
+  "Returns parent.
+  Works with Plushy genomes."
   [ind argmap]
   ind)
 
@@ -152,12 +153,20 @@
 ;; genesis
 
 (defn genesis
-  "Ignores the provided parent and returns a new, random individual, with age 0."
-  [ind {:keys [maintain-ancestors max-genome-size-in-initial-program atom-generators]
+  "Ignores the provided parent and returns a new, random individual, with age 0.
+  Works with Plushy genomes."
+  [ind {:keys [maintain-ancestors max-genome-size-in-initial-program atom-generators
+               genome-representation]
         :as argmap}]
-  (let [genome (random-plush-genome max-genome-size-in-initial-program 
-                                    atom-generators 
-                                    argmap)]
+  (let [genome (case genome-representation
+                 :plush (random-plush-genome max-genome-size-in-initial-program
+                                             atom-generators
+                                             argmap)
+                 :plushy (random-plushy-genome
+                          (* 1.165
+                             max-genome-size-in-initial-program)
+                          atom-generators
+                          argmap))]
     (make-individual :genome genome
                      :history (:history ind)
                      :age 0
@@ -182,29 +191,29 @@
 
 (defn tag-gaussian-tweak
   "Tweaks the tag with Gaussian noise."
-  [instr-map uniform-mutation-tag-gaussian-standard-deviation]
-  (let [instr (:instruction instr-map)
-        tagparts (string/split (name instr) #"_")
+  [instr uniform-mutation-tag-gaussian-standard-deviation]
+  (let [tagparts (string/split (name instr) #"_")
         tag-num (read-string (last tagparts))
         new-tag-num (mod (round (perturb-with-gaussian-noise 
                                   uniform-mutation-tag-gaussian-standard-deviation tag-num))
                          @global-tag-limit)
         new-instr (symbol (apply str (interpose "_" (concat (butlast tagparts) 
                                                             (list (str new-tag-num))))))]
-    (assoc instr-map :instruction new-instr)))
+    new-instr))
 
 (defn uniform-mutation
   "Uniformly mutates individual. For each token in the genome, there is
    uniform-mutation-rate probability of being mutated. If a token is to be
    mutated, it has a uniform-mutation-constant-tweak-rate probability of being
    mutated using a constant mutator (which varies depending on the type of the
-   token), and otherwise is replaced with a random instruction."
+   token), and otherwise is replaced with a random instruction.
+   Works with Plushy genomes."
   [ind {:keys [uniform-mutation-rate uniform-mutation-constant-tweak-rate
                uniform-mutation-float-gaussian-standard-deviation
                uniform-mutation-int-gaussian-standard-deviation
                uniform-mutation-tag-gaussian-standard-deviation
                uniform-mutation-string-char-change-rate maintain-ancestors
-               atom-generators]
+               atom-generators genome-representation]
         :as argmap}]
   (let [uniform-mutation-rate 
         (random-element-or-identity-if-not-a-collection uniform-mutation-rate)
@@ -233,36 +242,45 @@
                                            c))
                                        st)))
         instruction-mutator (fn [token]
-                              (assoc token
-                                     :instruction
-                                     (:instruction 
-                                       (first (random-plush-genome 1 atom-generators argmap)))))
+                              (case genome-representation
+                                     :plush (assoc token
+                                                   :instruction
+                                                   (:instruction
+                                                    (random-plush-instruction-map atom-generators argmap)))
+                                     :plushy (random-plushy-instruction atom-generators argmap)))
         constant-mutator (fn [token]
-                           (let [const (:instruction token)]
-                             (if (tag-instruction? const)
-                               (tag-gaussian-tweak token 
-                                                   uniform-mutation-tag-gaussian-standard-deviation)
-                               (assoc token
-                                      :instruction
-                                      (cond
-                                        ;; float
-                                        (float? const) 
-                                        (perturb-with-gaussian-noise 
-                                          uniform-mutation-float-gaussian-standard-deviation const)
-                                        ;; integer
-                                        (integer? const) 
-                                        (round (perturb-with-gaussian-noise 
-                                                 uniform-mutation-int-gaussian-standard-deviation const))
-                                        ;; string
-                                        (string? const) 
-                                        (string-tweak const)
-                                        ;; boolean
-                                        (or (= const true) (= const false)) 
-                                        ;; anything else
-                                        (lrand-nth [true false])
-                                        :else 
-                                        (:instruction 
-                                          (first (random-plush-genome 1 atom-generators argmap))))))))
+                           (let [const (case genome-representation
+                                         :plush (:instruction token)
+                                         :plushy token)
+                                 new-const
+                                 (cond
+                                   ;; tag
+                                   (tag-instruction? const)
+                                   (tag-gaussian-tweak const
+                                                       uniform-mutation-tag-gaussian-standard-deviation)
+                                   ;; float
+                                   (float? const) 
+                                   (perturb-with-gaussian-noise 
+                                    uniform-mutation-float-gaussian-standard-deviation const)
+                                   ;; integer
+                                   (integer? const) 
+                                   (round (perturb-with-gaussian-noise 
+                                           uniform-mutation-int-gaussian-standard-deviation const))
+                                   ;; string
+                                   (string? const) 
+                                   (string-tweak const)
+                                   ;; boolean
+                                   (or (= const true) (= const false)) 
+                                   (lrand-nth [true false])
+                                   ;; anything else
+                                   :else
+                                   (case genome-representation
+                                     :plush (:instruction 
+                                             (random-plush-instruction-map atom-generators argmap))
+                                     :plushy (random-plushy-instruction atom-generators argmap)))]
+                             (case genome-representation
+                               :plush (assoc token :instruction new-const)
+                               :plushy new-const)))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
                           (if (< (lrand) uniform-mutation-constant-tweak-rate)
@@ -386,9 +404,10 @@
 
 (defn uniform-tag-mutation
   "Uniformly mutates individual. For each tag instruction in the genome, there is
-   uniform-mutation-rate probability of being mutated."
+   uniform-mutation-rate probability of being mutated.
+   Works with Plushy genomes."
   [ind {:keys [uniform-mutation-rate uniform-mutation-tag-gaussian-standard-deviation
-               maintain-ancestors atom-generators]
+               maintain-ancestors atom-generators genome-representation]
         :as argmap}]
   (let [uniform-mutation-rate 
         (random-element-or-identity-if-not-a-collection uniform-mutation-rate)
@@ -397,10 +416,15 @@
         (random-element-or-identity-if-not-a-collection uniform-mutation-tag-gaussian-standard-deviation)
          
         constant-mutator (fn [token]
-                           (let [const (:instruction token)]
+                           (let [const (case genome-representation
+                                         :plush (:instruction token)
+                                         :plushy token)]
                              (if (tag-instruction? const)
-                               (tag-gaussian-tweak token 
-                                                   uniform-mutation-tag-gaussian-standard-deviation)
+                               (case genome-representation
+                                 :plush (assoc token :instruction (tag-gaussian-tweak const
+                                                                                      uniform-mutation-tag-gaussian-standard-deviation))
+                                 :plushy (tag-gaussian-tweak const
+                                                             uniform-mutation-tag-gaussian-standard-deviation))
                                token)))
         token-mutator (fn [token]
                         (if (< (lrand) uniform-mutation-rate)
@@ -551,7 +575,8 @@
 
 (defn uniform-deletion
   "Returns the individual with each element of its genome possibly deleted, with probability
-given by uniform-deletion-rate."
+given by uniform-deletion-rate.
+  Works with Plushy genomes."
   [ind {:keys [uniform-deletion-rate maintain-ancestors] :as argmap}]
   (let [rate (random-element-or-identity-if-not-a-collection uniform-deletion-rate)
         new-genome (vec (filter identity
@@ -570,13 +595,14 @@ given by uniform-deletion-rate."
 
 (defn uniform-addition
   "Returns the individual with each element of its genome possibly preceded or followed by
-  a new gene, with probability given by uniform-addition-rate."
+  a new gene, with probability given by uniform-addition-rate.
+  Works with Plushy genomes."
   [ind {:keys [uniform-addition-rate maintain-ancestors atom-generators] :as argmap}]
   (let [rate (random-element-or-identity-if-not-a-collection uniform-addition-rate)
         new-genome (vec (apply concat
                                (mapv #(if (< (lrand) rate)
                                         (lshuffle [% 
-                                                   (random-plush-instruction-map
+                                                   (random-genome-gene
                                                      atom-generators argmap)])
                                         [%])
                                      (:genome ind))))]
@@ -595,7 +621,8 @@ given by uniform-deletion-rate."
   "Returns the individual after two passes of mutation. In the first pass, each element of 
   its genome may possibly be preceded or followed by a new gene. In the second pass, each
   element of the genome may possibly be deleted. Probabilities are given by 
-  uniform-addition-and-deletion-rate."
+  uniform-addition-and-deletion-rate.
+  Works with Plushy genomes."
   [ind {:keys [uniform-addition-and-deletion-rate maintain-ancestors atom-generators] 
         :as argmap}]
   (let [addition-rate (random-element-or-identity-if-not-a-collection uniform-addition-and-deletion-rate)
@@ -605,7 +632,7 @@ given by uniform-deletion-rate."
         after-addition (vec (apply concat
                                    (mapv #(if (< (lrand) addition-rate)
                                             (lshuffle [% 
-                                                       (random-plush-instruction-map
+                                                       (random-genome-gene
                                                          atom-generators argmap)])
                                             [%])
                                          (:genome ind))))
@@ -627,7 +654,8 @@ given by uniform-deletion-rate."
   "Returns child genome created through crossover of two parents. Each gene in parent1
   is considered in turn, and depending on some probability, may be preceded or followed
   by the corresponding element from parent2 (which will wrap if it is too short).
-  Probability is given by uniform-combination-rate."
+  Probability is given by uniform-combination-rate.
+  Works with Plushy genomes."
   [parent1 parent2
    {:keys [uniform-combination-rate maintain-ancestors]
     :as argmap}]
@@ -656,7 +684,8 @@ given by uniform-deletion-rate."
   of its genome may possibly be preceded or followed by the corresponding element from
   parent 2's genome (which will wrap if it is too short). In the second pass, each
   element of the genome may possibly be deleted. Probabilities are given by 
-  uniform-combination-and-deletion-rate."
+  uniform-combination-and-deletion-rate.
+  Works with Plushy genomes."
   [parent1 parent2 
    {:keys [uniform-combination-and-deletion-rate maintain-ancestors]
     :as argmap}]
@@ -688,7 +717,8 @@ given by uniform-deletion-rate."
 
 (defn alternation
   "Uniformly alternates between the two parents using a similar method to that
-   used in ULTRA."
+   used in ULTRA.
+  Works with Plushy genomes."
   [parent1 parent2 {:keys [alternation-rate alignment-deviation
                            max-points maintain-ancestors] :as argmap}]
   (let [alternation-rate (random-element-or-identity-if-not-a-collection alternation-rate)
@@ -726,7 +756,8 @@ given by uniform-deletion-rate."
 (defn two-point-crossover
   "Crossover of two parents. Each parent will have two points randomly selected, and
    the code between the two points in the first parent will be replaced by the
-   code between the two points in the second parent."
+   code between the two points in the second parent.
+   Works with Plushy genomes."
   [parent1 parent2 {:keys [maintain-ancestors] :as argmap}]
   (let [genome1 (:genome parent1)
         genome2 (:genome parent2)
@@ -756,7 +787,8 @@ given by uniform-deletion-rate."
 
 (defn uniform-crossover
   "Uniform crossover of two parents. At each index in the child, an instruction
-   will be taken from one of the two parents at random."
+   will be taken from one of the two parents at random.
+   Works with Plushy genomes."
   [parent1 parent2 {:keys [maintain-ancestors] :as argmap}]
   (if (> (count (:genome parent1)) (count (:genome parent2)))
     (recur parent2 parent1 argmap)
@@ -1702,37 +1734,3 @@ programs encoded by genomes g1 and g2."
                            :grain-size (compute-grain-size [] argmap)
                            :ancestors ()
                            :is-random-replacement true))))))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Plushy uniform addition and deletion (UMAD)
-
-(defn plushy-uniform-addition-and-deletion
-  "Plushy version.
-  Returns the individual after two passes of mutation. In the first pass, each element of 
-  its genome may possibly be preceded or followed by a new gene. In the second pass, each
-  element of the genome may possibly be deleted. Probabilities are given by 
-  uniform-addition-and-deletion-rate."
-  [ind {:keys [uniform-addition-and-deletion-rate maintain-ancestors atom-generators] 
-        :as argmap}]
-  (let [addition-rate (random-element-or-identity-if-not-a-collection uniform-addition-and-deletion-rate)
-        deletion-rate (if (zero? addition-rate)
-                        0
-                        (/ 1 (+ (/ 1 addition-rate) 1)))
-        after-addition (vec (apply concat
-                                   (mapv #(if (< (lrand) addition-rate)
-                                            (lshuffle [% 
-                                                       (random-plushy-instruction
-                                                        atom-generators argmap)])
-                                            [%])
-                                         (:genome ind))))
-        new-genome (vec (filter identity
-                                (mapv #(if (< (lrand) deletion-rate) nil %)
-                                      after-addition)))]
-    (make-individual :genome new-genome
-                     :history (:history ind)
-                     :age (inc (:age ind))
-                     :grain-size (compute-grain-size new-genome ind argmap)
-                     :ancestors (if maintain-ancestors
-                                  (cons (:genome ind) (:ancestors ind))
-                                  (:ancestors ind)))))
