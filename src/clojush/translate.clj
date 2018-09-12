@@ -164,21 +164,26 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Plushy translation
 
-(defn plushy-gene-to-plush-gene
-  "Used when reducing a Plushy genome to a Plush genome. Takes the Plush
-  genome so far and the next Plushy instruction."
-  [plush instruction]
-  (if (= instruction :close)
-    (if (empty? plush)
-      plush
-      (update-in plush [(dec (count plush)) :close] inc))
-    (conj plush {:instruction instruction :close 0})))
-
 (defn translate-plushy-to-plush
   "Translates Plushy genome into a Plush genome."
   [{:keys [genome]}]
-  (apply list
-         (reduce plushy-gene-to-plush-gene [] genome)))
+  (loop [genome genome
+         plush []]
+    (cond
+      (empty? genome) (apply list plush)
+      ;; :skip ignores the next gene
+      (= (first genome) :skip) (recur (drop 2 genome)
+                                      plush)
+      ;; if plush is empty, can't increment :close marker, so skip
+      (and (empty? plush)
+           (= (first genome) :close)) (recur (rest genome)
+                                             plush)
+      ;; :close adds to the close count of the previous gene
+      (= (first genome) :close) (recur (rest genome)
+                                       (update-in plush [(dec (count plush)) :close] inc))
+      ;; otherwise, just make a new instruction
+      :else (recur (rest genome)
+                   (conj plush {:instruction (first genome) :close 0})))))
 
 (defn population-translate-plushy-to-push
   "Converts the population of Plushy genomes into Push programs."
