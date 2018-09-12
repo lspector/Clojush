@@ -162,11 +162,11 @@
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Plushi translation
+;; Plushy translation
 
-(defn plushi-gene-to-plush-gene
-  "Used when reducing a Plushi genome to a Plush genome. Takes the Plush
-  genome so far and the next Plushi instruction."
+(defn plushy-gene-to-plush-gene
+  "Used when reducing a Plushy genome to a Plush genome. Takes the Plush
+  genome so far and the next Plushy instruction."
   [plush instruction]
   (if (= instruction :close)
     (if (empty? plush)
@@ -174,21 +174,21 @@
       (update-in plush [(dec (count plush)) :close] inc))
     (conj plush {:instruction instruction :close 0})))
 
-(defn translate-plushi-to-plush
-  "Translates Plushi genome into a Plush genome."
+(defn translate-plushy-to-plush
+  "Translates Plushy genome into a Plush genome."
   [{:keys [genome]}]
   (apply list
-         (reduce plushi-gene-to-plush-gene [] genome)))
+         (reduce plushy-gene-to-plush-gene [] genome)))
 
-(defn population-translate-plushi-to-push
-  "Converts the population of Plushi genomes into Push programs."
+(defn population-translate-plushy-to-push
+  "Converts the population of Plushy genomes into Push programs."
   [pop-agents {:keys [use-single-thread] :as argmap}]
   (dorun (map #((if use-single-thread swap! send)
                     %
                     (fn [i] (assoc i
                                    :program
                                    (translate-plush-genome-to-push-program
-                                    {:genome (translate-plushi-to-plush i)}
+                                    {:genome (translate-plushy-to-plush i)}
                                     argmap))))
               pop-agents))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE

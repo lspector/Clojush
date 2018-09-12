@@ -97,37 +97,37 @@
                                    argmap)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; random plushi genome generator
+;; random plushy genome generator
 
-(defn random-plushi-instruction
-  "Returns a random Plushi instruction. :close will appear more often than
-  other instructions at a rate of :plushi-close-probability"
-  [atom-generators {:keys [plushi-close-probability]}]
-  (let [plushi-prob (if (number? plushi-close-probability)
-                      plushi-close-probability
+(defn random-plushy-instruction
+  "Returns a random Plushy instruction. :close will appear more often than
+  other instructions at a rate of :plushy-close-probability"
+  [atom-generators {:keys [plushy-close-probability]}]
+  (let [plushy-prob (if (number? plushy-close-probability)
+                      plushy-close-probability
                       (/ (apply + (filter identity ; This will look up each atom generator in the instruction table and
                                                    ; get the number of parentheses it requires
                                           (map (comp :parentheses meta @instruction-table)
                                                atom-generators)))
                          (count atom-generators)))]
-    (if (< (lrand) plushi-prob)
+    (if (< (lrand) plushy-prob)
       :close
       (generate-instruction atom-generators))))
 
-(defn random-plushi-genome-with-size
-  "Returns a random Plushi genome containing the given number of points."
+(defn random-plushy-genome-with-size
+  "Returns a random Plushy genome containing the given number of points."
   [genome-size atom-generators argmap]
   (vec (repeatedly genome-size
-                   #(random-plushi-instruction
+                   #(random-plushy-instruction
                      atom-generators
                      argmap))))
 
 ; TMH NOTE: Might need to adjust sizes, since :close instructions will be present
-(defn random-plushi-genome
-  "Returns a random Plushi genome with size limited by max-genome-size.
-  argmap must contain a :plushi-close-probability key."
+(defn random-plushy-genome
+  "Returns a random Plushy genome with size limited by max-genome-size.
+  argmap must contain a :plushy-close-probability key."
   [max-genome-size atom-generators argmap]
-  (random-plushi-genome-with-size (inc (lrand-int max-genome-size))
+  (random-plushy-genome-with-size (inc (lrand-int max-genome-size))
                                   atom-generators
                                   argmap))
 

@@ -1705,10 +1705,10 @@ programs encoded by genomes g1 and g2."
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Plushi uniform addition and deletion (UMAD)
+;; Plushy uniform addition and deletion (UMAD)
 
-(defn plushi-uniform-addition-and-deletion
-  "Plushi version.
+(defn plushy-uniform-addition-and-deletion
+  "Plushy version.
   Returns the individual after two passes of mutation. In the first pass, each element of 
   its genome may possibly be preceded or followed by a new gene. In the second pass, each
   element of the genome may possibly be deleted. Probabilities are given by 
@@ -1722,7 +1722,7 @@ programs encoded by genomes g1 and g2."
         after-addition (vec (apply concat
                                    (mapv #(if (< (lrand) addition-rate)
                                             (lshuffle [% 
-                                                       (random-plushi-instruction
+                                                       (random-plushy-instruction
                                                         atom-generators argmap)])
                                             [%])
                                          (:genome ind))))

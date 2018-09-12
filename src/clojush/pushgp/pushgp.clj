@@ -46,7 +46,7 @@
                                                                 max-genome-size-in-initial-program
                                                                 atom-generators
                                                                 argmap))
-                                                       :plushi (random-plushi-genome
+                                                       :plushy (random-plushy-genome
                                                                 (* 1.165
                                                                    max-genome-size-in-initial-program)
                                                                 atom-generators
@@ -160,7 +160,7 @@
   (println "Processing generation:" generation) (flush)
   (case (:genome-representation @push-argmap)
     :plush (population-translate-plush-to-push pop-agents @push-argmap)
-    :plushi (population-translate-plushi-to-push pop-agents @push-argmap))
+    :plushy (population-translate-plushy-to-push pop-agents @push-argmap))
   (timer @push-argmap :reproduction)
   (print "Computing errors... ") (flush)
   (compute-errors pop-agents rand-gens @push-argmap)

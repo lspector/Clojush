@@ -85,7 +85,7 @@
                   (fn [col] (if (= col :genome-closes)
                               (if (= genome-representation :plush)
                                 :plush-genome-closes
-                                :plushi-genome-closes)
+                                :plushy-genome-closes)
                               col))
                   (concat [:uuid]
                           (filter #(some #{%} csv-columns)
@@ -129,7 +129,7 @@
                                                   "()"
                                                   (apply str
                                                          (not-lazy (map :close (:genome individual)))))
-                           :plushi-genome-closes (if (empty? (:genome individual))
+                           :plushy-genome-closes (if (empty? (:genome individual))
                                                    "()"
                                                    (apply str
                                                           (not-lazy (map (fn [instr]

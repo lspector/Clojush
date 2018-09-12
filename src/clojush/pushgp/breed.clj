@@ -28,7 +28,7 @@
    :genesis {:fn genesis :parents 1} ;; the parent will be ignored
    :make-next-operator-revertable {:fn nil :parents 0}
    :autoconstruction {:fn autoconstruction :parents 2}
-   :plushi-uniform-addition-and-deletion {:fn plushi-uniform-addition-and-deletion :parents 1}
+   :plushy-uniform-addition-and-deletion {:fn plushy-uniform-addition-and-deletion :parents 1}
    })
 
 (defn revert-too-big-child
@@ -50,7 +50,7 @@
     :random (make-individual 
               :genome (case genome-representation
                         :plush (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
-                        :plushi (random-plushi-genome (* 1.165 max-genome-size-in-initial-program) atom-generators argmap))
+                        :plushy (random-plushy-genome (* 1.165 max-genome-size-in-initial-program) atom-generators argmap))
               :genetic-operators :random)))
 
 (defn revert-to-parent-if-worse
