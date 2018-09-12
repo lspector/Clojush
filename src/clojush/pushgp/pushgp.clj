@@ -6,7 +6,7 @@
   (:use [clojush args globals util pushstate random individual evaluate meta-errors
          simplification translate]
         [clojush.instructions boolean code common numbers random-instructions string char vectors
-         tag zip environment input-output genome]
+         tag zip environment input-output genome gtm]
         [clojush.pushgp breed report]
         [clojush.pushgp.selection
          selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty]

@@ -27,22 +27,26 @@
   (mod (abs n) number-of-data-bits))
 
 (define-registered a ;; push an address bit, indexed by an integer
-                   (fn [state] 
-                     (if (not (empty? (:integer state)))
-                       (push-item (nth (first (:auxiliary state))
-                                       (valid-address-index (first (:integer state))))
-                                  :boolean
-                                  (pop-item :integer state))
-                       state)))
+  (fn [state] 
+    (if (:autoconstructing state)
+      state
+      (if (not (empty? (:integer state)))
+        (push-item (nth (first (:auxiliary state))
+                        (valid-address-index (first (:integer state))))
+                   :boolean
+                   (pop-item :integer state))
+        state))))
 
 (define-registered d ;; push a data bit, indexed by an integer
-                   (fn [state] 
-                     (if (not (empty? (:integer state)))
-                       (push-item (nth (second (:auxiliary state))
-                                       (valid-data-index (first (:integer state))))
-                                  :boolean
-                                  (pop-item :integer state))
-                       state)))
+  (fn [state] 
+    (if (:autoconstructing state)
+      state
+      (if (not (empty? (:integer state)))
+        (push-item (nth (second (:auxiliary state))
+                        (valid-data-index (first (:integer state))))
+                   :boolean
+                   (pop-item :integer state))
+        state))))
 
 (defn int->bits-unmemoized
   [i num-bits]
@@ -96,3 +100,4 @@
                                     :uniform-mutation 0.45}
    :parent-selection :tournament
    })
+

@@ -33,52 +33,60 @@
   file_readchar
   ^{:stack-types [:char]}
   (fn [state]
-    (let [file (top-item :input state)
-          first-char (first file)
-          inp-result (push-item (apply str (rest file))
-                                :input
-                                (pop-item :input state))]
-      (if (= file "")
-        state
-        (push-item first-char
-                   :char
-                   inp-result)))))
+    (if (:autoconstructing state)
+      state
+      (let [file (top-item :input state)
+            first-char (first file)
+            inp-result (push-item (apply str (rest file))
+                                  :input
+                                  (pop-item :input state))]
+        (if (= file "")
+          state
+          (push-item first-char
+                     :char
+                     inp-result))))))
 
 (define-registered
   file_readline
   ^{:stack-types [:string]}
   (fn [state]
-    (let [file (top-item :input state)
-          index (inc (.indexOf file "\n"))
-          has-no-newline (= 0 index)
-          inp-result (push-item (if has-no-newline
-                                  ""
-                                  (subs file index))
-                                :input
-                                (pop-item :input state))]
-      (if (= file "")
-        state
-        (if has-no-newline
-          (push-item file :string inp-result)
-          (push-item (subs file 0 index)
-                     :string
-                     inp-result))))))
+    (if (:autoconstructing state)
+      state
+      (let [file (top-item :input state)
+            index (inc (.indexOf file "\n"))
+            has-no-newline (= 0 index)
+            inp-result (push-item (if has-no-newline
+                                    ""
+                                    (subs file index))
+                                  :input
+                                  (pop-item :input state))]
+        (if (= file "")
+          state
+          (if has-no-newline
+            (push-item file :string inp-result)
+            (push-item (subs file 0 index)
+                       :string
+                       inp-result)))))))
 
 (define-registered
   file_EOF
   ^{:stack-types [:boolean]}
   (fn [state]
-    (let [file (top-item :input state)
-          result (empty? file)]
-      (push-item result :boolean state))))
+    (if (:autoconstructing state)
+      state
+      (let [file (top-item :input state)
+            result (empty? file)]
+        (push-item result :boolean state)))))
 
 (define-registered
   file_begin
   ^{:stack-types [:input]}
   (fn [state]
-    (push-item (stack-ref :input 1 state)
-               :input
-               (pop-item :input state))))
+    (if (:autoconstructing state)
+      state
+      (push-item (stack-ref :input 1 state)
+                 :input
+                 (pop-item :input state)))))
 
 ; Atom generators
 (def word-stats-atom-generators
@@ -295,3 +303,4 @@
    :error-threshold 0.02
    :max-error 10000
    })
+

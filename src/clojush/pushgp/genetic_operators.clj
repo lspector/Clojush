@@ -1,6 +1,6 @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
-        clojush.instructions.tag
+        [clojush.instructions tag gtm]
         [clojure.math.numeric-tower])
   (:import (org.apache.commons.math3.stat.inference TTest))
   (:require [clojure.string :as string]))
@@ -822,30 +822,20 @@ given by uniform-deletion-rate.
   "Replaces input instructions with noops and  autoconstructive_<type>_rand
   with <type>_rand."
   [genome]
-  (let [input-instruction? 
-        (fn [instruction]
-          (and (symbol? instruction)
-               (or (re-seq #"in\d+" (name instruction)) ;; from input-output
-                   (re-seq #"in_dm" (name instruction)) ;; from digital-multiplier
-                   (some #{instruction}
-                         '(a0 a1 a2 d0 d1 d2 d3 d4 d5 d6 d7)) ;; from mux problems
-                   (some #{instruction}
-                         '(file_readline file_readchar file_EOF file_begin)) ;; from word-stats
-                   )))]
-    (mapv (fn [instruction-map]
-            (cond 
-              (input-instruction? (:instruction instruction-map))
-              (assoc instruction-map :instruction 'code_noop)
-              ;
-              (= (:instruction instruction-map) 'autoconstructive_integer_rand)
-              (assoc instruction-map :instruction 'integer_rand)
-              ;
-              (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
-              (assoc instruction-map :instruction 'boolean_rand)
-              ;
-              :else
-              instruction-map))
-         genome)))
+  (mapv (fn [instruction-map]
+          (cond 
+            (= (:instruction instruction-map) 'autoconstructive_integer_rand)
+            (assoc instruction-map :instruction 'integer_rand)
+            ;
+            (= (:instruction instruction-map) 'autoconstructive_boolean_rand)
+            (assoc instruction-map :instruction 'boolean_rand)
+            ;
+            (= (:instruction instruction-map) 'autoconstructive_code_rand_atom)
+            (assoc instruction-map :instruction 'code_rand_atom)
+            ;
+            :else
+            instruction-map))
+        genome))
 
 (defn produce-child-genome-by-autoconstruction
   "Runs the program expressed by parent1-genome with both parent genomes
@@ -857,18 +847,30 @@ the resulting top genome."
   ([genome-to-run parent1-genome parent2-genome argmap]
    (let [parent1-genome (with-meta parent1-genome {})
          parent2-genome (with-meta parent2-genome {})
-         run-result (top-item :genome
-                              (run-push
-                                (translate-plush-genome-to-push-program
-                                  {:genome
-                                   (process-genome-for-autoconstruction genome-to-run)}
-                                  argmap)
-                                (-> (->> (make-push-state)
-                                         (push-item parent2-genome :genome)
-                                         (push-item parent1-genome :genome))
-                                    (assoc :parent1-genome parent1-genome)
-                                    (assoc :parent2-genome parent2-genome)
-                                    (assoc :autoconstructing true))))]
+         run-result (let [program-to-run 
+                          (translate-plush-genome-to-push-program
+                            {:genome
+                             (process-genome-for-autoconstruction genome-to-run)}
+                            argmap)]
+                      (if (= (:autoconstructive-genome-instructions argmap) :gtm)
+                        (let [run-pgm #(run-push program-to-run %)
+                              after-gtm (-> (make-push-state)
+                                            (init-gtm)
+                                            (load-track 1 parent1-genome)
+                                            (load-track 2 parent2-genome)
+                                            (assoc :autoconstructing true)
+                                            (run-pgm))]
+                            (with-meta (dump-track after-gtm 0)
+                              {:made-by (:trace (:gtm after-gtm))}))
+                        (top-item :genome
+                                  (run-push
+                                    program-to-run
+                                    (-> (->> (make-push-state)
+                                             (push-item parent2-genome :genome)
+                                             (push-item parent1-genome :genome))
+                                        (assoc :parent1-genome parent1-genome)
+                                        (assoc :parent2-genome parent2-genome)
+                                        (assoc :autoconstructing true))))))]
      (if (or (seq? run-result) (vector? run-result))
        (with-meta (vec run-result) (meta run-result))
        []))))

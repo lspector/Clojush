@@ -188,7 +188,8 @@
           :autoconstructive false
           ;; If true, then :genetic-operator-probabilities will be {:autoconstruction 1.0},
           ;; :epigenetic-markers will be [:close :silent], and :atom-generators will include
-          ;; everything in (registered-for-stacks [:integer :boolean :exec :genome :float]). Also sets
+          ;; instructions specified via :autoconstructive-genome-instructions, and other settings
+          ;; specified in augment-for-autoconstruction. Also sets
           ;; :replace-child-that-exceeds-size-limit-with to :empty. Also, empty-genome individuals
           ;; will not be selected as parents. You will probably also want to provide a high value
           ;; for :max-generations. If :autoconstructive is :revertable, rather than true, then
@@ -237,6 +238,11 @@
           :autoconstructive-boolean-rand-enrichment 0
           ;; The number of extra instances of autoconstructive_boolean_rand to include in
           ;; :atom-generators for autoconstruction. If negative then autoconstructive_boolean_rand
+          ;; will not be in :atom-generators at all.
+          
+          :autoconstructive-code-rand-atom-enrichment 0
+          ;; The number of extra instances of autoconstructive_code_rand_atom to include in
+          ;; :atom-generators for autoconstruction. If negative then autoconstructive_code_rand_atom
           ;; will not be in :atom-generators at all.
           
           :autoconstructive-tag-types [:integer :boolean :exec :float :char :string :code]
@@ -541,20 +547,20 @@
           ;; external record
           )))
 
-(defn load-push-argmap
-  [argmap]
-  (doseq [[argkey argval] argmap]
-    (assert (contains? @push-argmap argkey)
-            (str "Argument key " argkey " is not a recognized argument to pushgp."))
-    (swap! push-argmap assoc argkey argval))
-  (swap! push-argmap assoc :run-uuid (java.util.UUID/randomUUID))
-  ;; Augmentation for autoconstruction
+(defn augment-for-autoconstruction
+  []
   (when (:autoconstructive @push-argmap)
+    ;;
+    ;; handle :revertable
     (if (= :revertable (:autoconstuctive @push-argmap))
       (swap! push-argmap assoc :genetic-operator-probabilities 
              {[:make-next-operator-revertable :autoconstruction] 1.0})
       (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0}))
+    ;;
+    ;; set :epigenetic-markers
     (swap! push-argmap assoc :epigenetic-markers [:close :silent])
+    ;;
+    ;; add autoconstructive-specific instructions (:genome or :gtm)
     (doseq [instr (case (:autoconstructive-genome-instructions @push-argmap)
                     :all (registered-for-stacks
                            (if (:autoconstructive-environments @push-argmap)
@@ -806,9 +812,44 @@
                              ;genome_uniform_combination_and_deletion
                              ;genome_alternation
                              ;genome_uniform_crossover
-                             )))]
-      (when (not (some #{instr} (:atom-generators @push-argmap)))
+                             ))
+                    :gtm (let [by-type (registered-for-stacks
+                                         (if (:autoconstructive-environments @push-argmap)
+                                           [:integer :boolean :exec :float :tag :code :environment]
+                                           [:integer :boolean :exec :float :tag :code]))]
+                           '(gtm_left
+                              gtm_right
+                              gtm_inc_delay
+                              gtm_dec_delay
+                              gtm_dub1
+                              gtm_dub2
+                              gtm_bounce1
+                              gtm_bounce2
+                              gtm_blank0
+                              gtm_blank1
+                              gtm_blank2
+                              gtm_erase
+                              gtm_read_all
+                              gtm_write_all
+                              gtm_read_instruction
+                              gtm_write_instruction
+                              gtm_read_silent
+                              gtm_write_silent
+                              gtm_read_close
+                              gtm_write_close
+                              autoconstructive_integer_rand
+                              autoconstructive_boolean_rand
+                              autoconstructive_code_rand_atom
+                              genome_autoconstructing
+                              genome_if_autoconstructing
+                              exec_k_when_autoconstructing
+                              exec_s_when_autoconstructing
+                              exec_y_when_autoconstructing
+                              )))]
+      (when true (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
+    ;;
+    ;; include ERCs for floats, integers, and booleans
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
                                   (fn [] (lrand))))
@@ -818,6 +859,8 @@
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
                                   (fn [] (lrand-nth [true false]))))
+    ;;
+    ;; include instructions for using tags
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
                                   (tag-instruction-erc
@@ -828,6 +871,8 @@
     (swap! push-argmap assoc
            :atom-generators (conj (:atom-generators @push-argmap)
                                   (tagged-instruction-erc 10000)))
+    ;;
+    ;; enrich autoconstructive rand instructions
     (dotimes [n (:autoconstructive-integer-rand-enrichment @push-argmap)]
       (swap! push-argmap assoc
              :atom-generators (conj (:atom-generators @push-argmap)
@@ -843,8 +888,27 @@
       (swap! push-argmap assoc
              :atom-generators (remove #(= % 'autoconstructive_boolean_rand)
                                       (:atom-generators @push-argmap))))
+    (dotimes [n (:autoconstructive-code-rand-atom-enrichment @push-argmap)]
+      (swap! push-argmap assoc
+             :atom-generators (conj (:atom-generators @push-argmap)
+                                    'autoconstructive_code_rand_atom)))
+    (if (neg? (:autoconstructive-code-rand-atom-enrichment @push-argmap))
+      (swap! push-argmap assoc
+             :atom-generators (remove #(= % 'autoconstructive_code_rand_atom)
+                                      (:atom-generators @push-argmap))))
+    ;;
+    ;; specify that too-big children will be replaced with empty genomes
     (swap! push-argmap assoc
-           :replace-child-that-exceeds-size-limit-with :empty))
+           :replace-child-that-exceeds-size-limit-with :empty)))
+
+(defn load-push-argmap
+  [argmap]
+  (doseq [[argkey argval] argmap]
+    (assert (contains? @push-argmap argkey)
+            (str "Argument key " argkey " is not a recognized argument to pushgp."))
+    (swap! push-argmap assoc argkey argval))
+  (swap! push-argmap assoc :run-uuid (java.util.UUID/randomUUID))
+  (augment-for-autoconstruction)
   (when (> (:tag-enrichment @push-argmap) 0)
     (let [types (:tag-enrichment-types @push-argmap)
           use-type #(some #{%} types)]
@@ -874,7 +938,9 @@
                                  (ns-publics 'clojush.globals))]
      (if (contains? @push-argmap (keyword (.substring (name gname) (count "global-"))))
        (reset! @gatom (get @push-argmap (keyword (.substring (str gname) (count "global-")))))
-       (throw (Exception. (str "globals.clj definition " gname " has no matching argument in push-argmap. Only such definitions should use the prefix 'global-'."))))))
+       (throw (Exception. (str "globals.clj definition " gname 
+                               " has no matching argument in push-argmap. "
+                               "Only such definitions should use the prefix 'global-'."))))))
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))

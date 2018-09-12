@@ -327,6 +327,13 @@
   (fn [state] (push-item false :boolean state)))
 
 (define-registered
+  autoconstructive_code_rand_atom 
+  ;; pushes exec_noop, but is replaced with code_rand_atom during 
+  ;; nondetermistic autoconstruction
+  ^{:stack-types [:genome :code]} 
+  (fn [state] (push-item 'exec_noop :code state)))
+
+(define-registered
   genome_genesis
   ^{:stack-types [:genome]}
   (fn [state]
