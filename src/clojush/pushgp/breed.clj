@@ -40,14 +40,16 @@
    In future, may implement :delete, which deletes some of the instructions
    in a parent."
   [parent child {:keys [replace-child-that-exceeds-size-limit-with atom-generators
-                        max-genome-size-in-initial-program max-points]
+                        max-genome-size-in-initial-program max-points genome-representation]
                  :as argmap}]
   (case replace-child-that-exceeds-size-limit-with
     :parent parent
     :empty (make-individual :genome [] :genetic-operators :empty)
     :truncate (assoc child :genome (vec (take (/ max-points 4) (:genome child))))
     :random (make-individual 
-              :genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
+              :genome (case genome-representation
+                        :plush (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
+                        :plushy (random-plushy-genome (* 1.165 max-genome-size-in-initial-program) atom-generators argmap))
               :genetic-operators :random)))
 
 (defn revert-to-parent-if-worse
@@ -128,7 +130,7 @@
    and performs them to create a new individual. Uses recursive helper function
    even with a single operator by putting that operator in a vector."
   [operator population location rand-gen 
-   {:keys [max-points
+   {:keys [max-points genome-representation
            track-instruction-maps] :as argmap}]
   (let [first-parent (select population argmap)
         operator-vector (if (sequential? operator) operator (vector operator))
@@ -139,7 +141,10 @@
         (assoc child :genetic-operators operator)
 
       (> (count (:genome child))
-         (/ max-points 4))
+         (* (/ max-points 4)
+            (if (= genome-representation :plush)
+              1
+              1.165)))
       (as-> c (revert-too-big-child first-parent c argmap))
 
       track-instruction-maps

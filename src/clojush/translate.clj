@@ -161,3 +161,39 @@
               pop-agents))
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Plushy translation
+
+(defn translate-plushy-to-plush
+  "Translates Plushy genome into a Plush genome."
+  [{:keys [genome]}]
+  (loop [genome genome
+         plush []]
+    (cond
+      (empty? genome) (apply list plush)
+      ;; :skip ignores the next gene
+      (= (first genome) :skip) (recur (drop 2 genome)
+                                      plush)
+      ;; if plush is empty, can't increment :close marker, so skip
+      (and (empty? plush)
+           (= (first genome) :close)) (recur (rest genome)
+                                             plush)
+      ;; :close adds to the close count of the previous gene
+      (= (first genome) :close) (recur (rest genome)
+                                       (update-in plush [(dec (count plush)) :close] inc))
+      ;; otherwise, just make a new instruction
+      :else (recur (rest genome)
+                   (conj plush {:instruction (first genome) :close 0})))))
+
+(defn population-translate-plushy-to-push
+  "Converts the population of Plushy genomes into Push programs."
+  [pop-agents {:keys [use-single-thread] :as argmap}]
+  (dorun (map #((if use-single-thread swap! send)
+                    %
+                    (fn [i] (assoc i
+                                   :program
+                                   (translate-plush-genome-to-push-program
+                                    {:genome (translate-plushy-to-plush i)}
+                                    argmap))))
+              pop-agents))
+  (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE

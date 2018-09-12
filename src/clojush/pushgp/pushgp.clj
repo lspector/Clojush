@@ -36,16 +36,22 @@
   "Makes the population of agents containing the initial random individuals in the population.
    Argument is a push argmap"
   [{:keys [use-single-thread population-size
-           max-genome-size-in-initial-program atom-generators]
+           max-genome-size-in-initial-program atom-generators genome-representation]
     :as argmap}]
   (let [population-agents (vec (repeatedly population-size
                                            #(make-individual
-                                              :genome (strip-random-insertion-flags
-                                                        (random-plush-genome
-                                                          max-genome-size-in-initial-program
-                                                          atom-generators
-                                                          argmap))
-                                              :genetic-operators :random)))]
+                                             :genome (case genome-representation
+                                                       :plush (strip-random-insertion-flags
+                                                               (random-plush-genome
+                                                                max-genome-size-in-initial-program
+                                                                atom-generators
+                                                                argmap))
+                                                       :plushy (random-plushy-genome
+                                                                (* 1.165
+                                                                   max-genome-size-in-initial-program)
+                                                                atom-generators
+                                                                argmap))
+                                             :genetic-operators :random)))]
     (mapv #(if use-single-thread
              (atom %)
              (agent % :error-handler agent-error-handler))
@@ -152,7 +158,9 @@
   [rand-gens pop-agents child-agents generation novelty-archive]
   (r/new-generation! generation)
   (println "Processing generation:" generation) (flush)
-  (population-translate-plush-to-push pop-agents @push-argmap)
+  (case (:genome-representation @push-argmap)
+    :plush (population-translate-plush-to-push pop-agents @push-argmap)
+    :plushy (population-translate-plushy-to-push pop-agents @push-argmap))
   (timer @push-argmap :reproduction)
   (print "Computing errors... ") (flush)
   (compute-errors pop-agents rand-gens @push-argmap)
