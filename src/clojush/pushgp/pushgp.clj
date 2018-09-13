@@ -128,12 +128,20 @@
   [argmap]
   (let [prob-map (:genetic-operator-probabilities argmap)]
     (doseq [gen-op (keys prob-map)]
-      (if (sequential? gen-op)
+      (if (sequential? gen-op) ; gen-op will be sequential if it is an operator pipeline
         (doseq [g gen-op]
           (assert (contains? genetic-operators g)
-                  (str "Unrecognized genetic operator: " g " in " gen-op)))
-        (assert (contains? genetic-operators gen-op)
-                (str "Unrecognized genetic operator: " gen-op))))
+                  (str "Unrecognized genetic operator: " g " in " gen-op))
+          (when (= (:genome-representation argmap) :plushy)
+            (assert (:works-with-plushy (get genetic-operators g))
+                    (str "You are using Plushy genomes with a genetic operator that does not support Plushy genomes: " g)))
+          )
+        (do
+          (assert (contains? genetic-operators gen-op)
+                  (str "Unrecognized genetic operator: " gen-op))
+          (when (= (:genome-representation argmap) :plushy)
+            (assert (:works-with-plushy (get genetic-operators gen-op))
+                    (str "You are using Plushy genomes with a genetic operator that does not support Plushy genomes: " gen-op))))))
     (assert (< 0.99999
                (apply + (vals prob-map))
                1.00001)
