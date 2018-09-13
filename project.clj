@@ -1,4 +1,4 @@
-(defproject clojush "3.14.0"
+(defproject clojush "3.14.0-1-SNAPSHOT"
   :description "The Push programming language and the PushGP genetic programming
                 system implemented in Clojure. See http://pushlanguage.com"
   :license {:name "Eclipse Public License"
