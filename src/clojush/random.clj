@@ -1,4 +1,3 @@
-
 (ns clojush.random
   (:use [clojush globals translate pushstate])
   (:require [clj-random.core :as random]))
@@ -111,7 +110,7 @@
                          (count atom-generators)))]
     (if (< (lrand) plushy-prob)
       :close
-      (generate-instruction atom-generators))))
+      (random-atom atom-generators))))
 
 (defn random-plushy-genome-with-size
   "Returns a random Plushy genome containing the given number of points."
