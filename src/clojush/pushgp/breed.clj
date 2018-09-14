@@ -7,27 +7,27 @@
 ; A map of genetic operator keywords to maps containing the genetic operator
 ; functions and number of parents
 (def genetic-operators
-  {:reproduction {:fn reproduction :parents 1 :works-with-plushy true}
-   :alternation {:fn alternation :parents 2 :works-with-plushy true}
-   :two-point-crossover {:fn two-point-crossover :parents 2 :works-with-plushy true}
-   :uniform-crossover {:fn uniform-crossover :parents 2 :works-with-plushy true}
-   :uniform-mutation {:fn uniform-mutation :parents 1 :works-with-plushy true}
-   :uniform-instruction-mutation {:fn uniform-instruction-mutation :parents 1}
-   :uniform-integer-mutation {:fn uniform-integer-mutation :parents 1}
-   :uniform-float-mutation {:fn uniform-float-mutation :parents 1}
-   :uniform-tag-mutation {:fn uniform-tag-mutation :parents 1 :works-with-plushy true}
-   :uniform-string-mutation {:fn uniform-string-mutation :parents 1}
-   :uniform-boolean-mutation {:fn uniform-boolean-mutation :parents 1}
-   :uniform-close-mutation {:fn uniform-close-mutation :parents 1}
-   :uniform-silence-mutation {:fn uniform-silence-mutation :parents 1}
-   :uniform-deletion {:fn uniform-deletion :parents 1 :works-with-plushy true}
-   :uniform-addition {:fn uniform-addition :parents 1 :works-with-plushy true}
-   :uniform-addition-and-deletion {:fn uniform-addition-and-deletion :parents 1 :works-with-plushy true}
-   :uniform-combination {:fn uniform-combination :parents 2 :works-with-plushy true}
-   :uniform-combination-and-deletion {:fn uniform-combination-and-deletion :parents 2 :works-with-plushy true}
-   :genesis {:fn genesis :parents 1 :works-with-plushy true} ;; the parent will be ignored
-   :make-next-operator-revertable {:fn nil :parents 0 :works-with-plushy true}
-   :autoconstruction {:fn autoconstruction :parents 2}
+  {:reproduction {:fn reproduction :parents 1 :works-with-plushy true :works-with-plush true}
+   :alternation {:fn alternation :parents 2 :works-with-plushy true :works-with-plush true}
+   :two-point-crossover {:fn two-point-crossover :parents 2 :works-with-plushy true :works-with-plush true}
+   :uniform-crossover {:fn uniform-crossover :parents 2 :works-with-plushy true :works-with-plush true}
+   :uniform-mutation {:fn uniform-mutation :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-instruction-mutation {:fn uniform-instruction-mutation :parents 1 :works-with-plush true}
+   :uniform-integer-mutation {:fn uniform-integer-mutation :parents 1 :works-with-plush true}
+   :uniform-float-mutation {:fn uniform-float-mutation :parents 1 :works-with-plush true}
+   :uniform-tag-mutation {:fn uniform-tag-mutation :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-string-mutation {:fn uniform-string-mutation :parents 1 :works-with-plush true}
+   :uniform-boolean-mutation {:fn uniform-boolean-mutation :parents 1 :works-with-plush true}
+   :uniform-close-mutation {:fn uniform-close-mutation :parents 1 :works-with-plush true}
+   :uniform-silence-mutation {:fn uniform-silence-mutation :parents 1 :works-with-plush true}
+   :uniform-deletion {:fn uniform-deletion :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-addition {:fn uniform-addition :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-addition-and-deletion {:fn uniform-addition-and-deletion :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-combination {:fn uniform-combination :parents 2 :works-with-plushy true :works-with-plush true}
+   :uniform-combination-and-deletion {:fn uniform-combination-and-deletion :parents 2 :works-with-plushy true :works-with-plush true}
+   :genesis {:fn genesis :parents 1 :works-with-plushy true :works-with-plush true} ;; the parent will be ignored
+   :make-next-operator-revertable {:fn nil :parents 0 :works-with-plushy true :works-with-plush true}
+   :autoconstruction {:fn autoconstruction :parents 2 :works-with-plush true}
    })
 
 (defn revert-too-big-child
