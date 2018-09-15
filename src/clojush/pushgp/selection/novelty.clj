@@ -86,14 +86,10 @@
 
 (defn assign-novelty-to-individual
   "Calculates the novelty of the individual based on the behaviors in the population
-   and in the novelty-archive. Returns the individual with the :novelty key set, and
-   if :novelty is a meta-error-category, also sets that."
+   and in the novelty-archive. Returns the individual with the :novelty key set."
   [individual behavior-sparseness]
-  (let [novelty (get behavior-sparseness (:behaviors individual))
-        novelty-inverse (/ 1 (inc novelty))]
-    (assoc individual
-           :novelty novelty
-           :meta-errors (replace {:novelty novelty-inverse} (:meta-errors individual)))))
+  (let [novelty (get behavior-sparseness (:behaviors individual))]
+    (assoc individual :novelty novelty)))
 
 (defn calculate-novelty
   "Calculates novelty for each individual in the population with respect to the
@@ -125,3 +121,37 @@
     (reduce (fn [i1 i2] (if (> (:novelty i1) (:novelty i2)) i1 i2))
             tournament-set)))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Novelty-by-case for novelty meta-errors
+
+
+(defn novelty-difference
+  "Counts how many individuals in the population have the same behavior"
+  [behavior pop-behaviors-on-case]
+  (count (filter #(= behavior %) pop-behaviors-on-case)))
+
+(defn assign-novelty-by-case-to-individual
+  "Calculates the novelty of each individual on each test case. Returns the
+  individual with the :novelty-by-case key set."
+  [ind novelty-archive pop]
+  (let [behaviors (:behaviors ind)
+        pop-behaviors (concat (map :behaviors pop)
+                              (map :behaviors novelty-archive))
+        case-behavior-vector (apply map list pop-behaviors)
+        novelty-by-case (map novelty-difference ;#(novelty-difference %1 %2)
+                                     behaviors
+                                     case-behavior-vector)]
+    (assoc ind :novelty-by-case novelty-by-case)))
+
+(defn calculate-lex-novelty
+  "Take a population of agents, derefs them, and calculates novelty of each
+  individual (based on how many individuals have the same result for x test"
+  [pop-agents novelty-archive {:keys [use-single-thread] :as argmap}]
+  (print "Calculating novelty by case...") (flush)
+  (dorun (map #((if use-single-thread swap! send) %
+                assign-novelty-by-case-to-individual
+                novelty-archive (map deref pop-agents))
+              pop-agents))
+  (when-not use-single-thread (apply await pop-agents))
+  (println "Done calculating novelty by case."))
