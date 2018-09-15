@@ -10,8 +10,11 @@
 (defn meta-error-fn-from-keyword
   "Takes a keyword and returns the meta-error function with the corresponding name."
   [k]
-  (var-get (get (ns-publics 'clojush.meta-errors) 
-                (read-string (str (name k) "-meta-error")))))
+  (try
+    (var-get (get (ns-publics 'clojush.meta-errors)
+                     (read-string (str (name k) "-meta-error"))))
+    (catch NullPointerException e
+      (throw (NullPointerException. (str "No meta-error function for keyword " k))))))
 
 (defn evaluate-individual-meta-errors
   "Calculates one meta-error for each meta-error category provided. Each
@@ -67,8 +70,15 @@
   (if (zero? (:age ind)) 1 0))
 
 (defn novelty-meta-error
+  "Novelty was calculated earlier and stored in each individual.
+  Note that we need to invert novelty, since it is calculated as a value to maximize."
   [ind evaluated-population argmap]
-  :novelty) ; Keyword replaced later; needs entire population to compute 
+  (/ 1 (inc (:novelty ind))))
+
+(defn novelty-by-case-meta-error
+  "Novelty-by-case was calculated earlier and stored in each individual."
+  [ind evaluated-population argmap]
+  (:novelty-by-case ind))
 
 (defn amorphousness-meta-error
   [ind evaluated-population argmap]
