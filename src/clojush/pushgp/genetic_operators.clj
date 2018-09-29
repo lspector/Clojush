@@ -1,6 +1,7 @@
 (ns clojush.pushgp.genetic-operators
   (:use [clojush util random individual globals interpreter translate pushstate]
         [clojush.instructions tag gtm]
+        [clojush.pushgp.selection.selection]
         [clojure.math.numeric-tower])
   (:import (org.apache.commons.math3.stat.inference TTest))
   (:require [clojure.string :as string]))
@@ -1736,3 +1737,4 @@ programs encoded by genomes g1 and g2."
                            :grain-size (compute-grain-size [] argmap)
                            :ancestors ()
                            :is-random-replacement true))))))
+
