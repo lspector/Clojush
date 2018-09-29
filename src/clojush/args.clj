@@ -98,6 +98,7 @@
                                            :uniform-addition-and-deletion 0.0
                                            :uniform-combination-and-deletion 0.0
                                            :genesis 0.0
+                                           :gene-selection 0.0
                                            }
           ;; The map supplied to :genetic-operator-probabilities should contain genetic operators
           ;; that sum to 1.0. All available genetic operators are defined in clojush.pushgp.breed.
@@ -184,6 +185,10 @@
           :tag-enrichment-types [:integer :boolean :exec :float :char :string :code]
           ;; The types for tag-related instructions that will be included in the atom-generators
           ;; when :tag-enrichment is greater than 0.
+          
+          :gene-selection-rate 1.0
+          ;; When using gene-selection, the probability of selecting a new parent when moving
+          ;; to the next gene.
 
           :autoconstructive false
           ;; If true, then :genetic-operator-probabilities will be {:autoconstruction 1.0},
@@ -944,4 +949,5 @@
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
+
 

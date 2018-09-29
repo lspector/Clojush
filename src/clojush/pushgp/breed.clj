@@ -28,6 +28,7 @@
    :genesis {:fn genesis :parents 1 :works-with-plushy true :works-with-plush true} ;; the parent will be ignored
    :make-next-operator-revertable {:fn nil :parents 0 :works-with-plushy true :works-with-plush true}
    :autoconstruction {:fn autoconstruction :parents 2 :works-with-plush true}
+   :gene-selection {:fn gene-selection :parents 1 :works-with-plushy true :works-with-plush true}
    })
 
 (defn revert-too-big-child
@@ -99,7 +100,8 @@
           op-fn (:fn (get genetic-operators operator))
           child (assoc (apply op-fn (vec (concat (vector first-parent) 
                                                  other-parents 
-                                                 (vector argmap))))
+                                                 (vector (assoc argmap 
+                                                           :population population)))))
                        :parent-uuids (vec (concat (:parent-uuids first-parent)
                                                   (map :uuid other-parents))))]
       (recur (rest op-list)
@@ -164,4 +166,5 @@
           (perform-genetic-operator (first (first vectored-go-probabilities)) 
                                     population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
+
 
