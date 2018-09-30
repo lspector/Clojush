@@ -819,21 +819,25 @@ given by uniform-deletion-rate.
 
 (defn gene-selection
   "Takes each gene from a selected parent, with re-selection for each gene with probability
-  gene-selection-rate. Then subjects the result to uniform-addition-and-deletion."
-  [initial-parent {:keys [gene-selection-rate population] :as argmap}]
-  (uniform-addition-and-deletion 
-    (assoc initial-parent 
-      :genome (loop [parent-genome (:genome initial-parent)
-                     index 0
-                     child-genome []]
-                (if (> (inc index) (count parent-genome))
-                  child-genome
-                  (recur (if (>= gene-selection-rate (lrand))
-                           (:genome (select population argmap))
-                           parent-genome)
-                         (inc index)
-                         (conj child-genome (nth parent-genome index))))))
-    argmap))
+  gene-selection-rate."
+  [initial-parent {:keys [gene-selection-rate population maintain-ancestors] :as argmap}]
+  (let [new-genome (loop [parent-genome (:genome initial-parent)
+                          index 0
+                          child-genome []]
+                     (if (> (inc index) (count parent-genome))
+                       child-genome
+                       (recur (if (>= gene-selection-rate (lrand))
+                                (:genome (select population argmap))
+                                parent-genome)
+                              (inc index)
+                              (conj child-genome (nth parent-genome index)))))]
+    (make-individual :genome new-genome
+                     :history (:history initial-parent)
+                     :age (inc (:age initial-parent))
+                     :grain-size (compute-grain-size new-genome initial-parent argmap)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome initial-parent) (:ancestors initial-parent))
+                                  (:ancestors initial-parent)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; autoconstuction
