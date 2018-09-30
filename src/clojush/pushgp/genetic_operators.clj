@@ -821,12 +821,13 @@ given by uniform-deletion-rate.
   "Takes each gene from a selected parent, with re-selection for each gene with probability
   gene-selection-rate."
   [initial-parent {:keys [gene-selection-rate population maintain-ancestors] :as argmap}]
-  (let [new-genome (loop [parent-genome (:genome initial-parent)
+  (let [rate (random-element-or-identity-if-not-a-collection gene-selection-rate)
+        new-genome (loop [parent-genome (:genome initial-parent)
                           index 0
                           child-genome []]
                      (if (> (inc index) (count parent-genome))
                        child-genome
-                       (recur (if (>= gene-selection-rate (lrand))
+                       (recur (if (>= rate (lrand))
                                 (:genome (select population argmap))
                                 parent-genome)
                               (inc index)
