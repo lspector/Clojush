@@ -128,7 +128,12 @@
                            :plush-genome-closes (if (empty? (:genome individual))
                                                   "()"
                                                   (apply str
-                                                         (not-lazy (map :close (:genome individual)))))
+                                                         (not-lazy
+                                                          (map (fn [closes]
+                                                                 (if (<= closes 9)
+                                                                   closes
+                                                                   (str "<" closes ">")))
+                                                               (map :close (:genome individual))))))
                            :plushy-genome-closes (if (empty? (:genome individual))
                                                    "()"
                                                    (apply str
