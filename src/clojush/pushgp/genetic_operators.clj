@@ -819,19 +819,26 @@ given by uniform-deletion-rate.
 
 (defn gene-selection
   "Takes each gene from a selected parent, with re-selection for each gene with probability
-  gene-selection-rate."
+  abs(gene-selection-rate). Negative values for gene-selection-rate mean that indexing will
+  run backwards from the ends of programs."
   [initial-parent {:keys [gene-selection-rate population maintain-ancestors] :as argmap}]
   (let [rate (random-element-or-identity-if-not-a-collection gene-selection-rate)
         new-genome (loop [parent-genome (:genome initial-parent)
                           index 0
                           child-genome []]
                      (if (> (inc index) (count parent-genome))
-                       child-genome
-                       (recur (if (>= rate (lrand))
+                       (if (pos? rate) 
+                         child-genome
+                         (reverse child-genome))
+                       (recur (if (>= (Math/abs (float rate)) (lrand))
                                 (:genome (select population argmap))
                                 parent-genome)
                               (inc index)
-                              (conj child-genome (nth parent-genome index)))))]
+                              (conj child-genome 
+                                    (nth parent-genome 
+                                         (if (pos? rate)
+                                           index
+                                           (- (count parent-genome) (inc index))))))))]
     (make-individual :genome new-genome
                      :history (:history initial-parent)
                      :age (inc (:age initial-parent))
