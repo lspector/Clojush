@@ -24,6 +24,16 @@
                                           (map (partial take 1) ;; to avoid memory explosion
                                                (rest old-made-bys))))
                       new-info)})))
+
+(defn random-gene
+  []
+  (case (:genome-representation @push-argmap)
+    :plush (random-plush-instruction-map 
+             @global-atom-generators
+             {:epigenetic-markers @global-epigenetic-markers
+              :close-parens-probabilities @global-close-parens-probabilities
+              :silent-instruction-probability @global-silent-instruction-probability})
+    :plushy (random-plushy-instruction @global-atom-generators @push-argmap)))
   
 (define-registered
   genome_gene_dup
@@ -62,11 +72,7 @@
                             ['genome_gene_randomize index]
                             (assoc genome 
                               index
-                              (random-plush-instruction-map 
-                                @global-atom-generators
-                                {:epigenetic-markers @global-epigenetic-markers
-                                 :close-parens-probabilities @global-close-parens-probabilities
-                                 :silent-instruction-probability @global-silent-instruction-probability})))
+                              (random-gene)))
                           genome)
                         :genome)))
       state)))
@@ -89,11 +95,15 @@
                           ['genome_gene_replace index atom-gen]
                           (assoc genome
                             index
-                            (random-plush-instruction-map 
-                              [(nth @global-atom-generators atom-gen)]
-                              {:epigenetic-markers @global-epigenetic-markers
-                               :close-parens-probabilities @global-close-parens-probabilities
-                               :silent-instruction-probability @global-silent-instruction-probability})))
+                            (let [new-plush-gene
+                                  (random-plush-instruction-map 
+                                    [(nth @global-atom-generators atom-gen)]
+                                    {:epigenetic-markers @global-epigenetic-markers
+                                     :close-parens-probabilities @global-close-parens-probabilities
+                                     :silent-instruction-probability @global-silent-instruction-probability})]
+                              (case (:genome-representation @push-argmap)
+                                :plush new-plush-gene
+                                :plushy (:instruction new-plush-gene)))))
                         :genome)))
       state)))
 
@@ -797,4 +807,103 @@
                    :exec
                    (pop-item :exec (pop-item :exec (pop-item :integer (pop-item :genome state))))))
       state)))
+
+(define-registered 
+  genome_append_parent1
+  ^{:stack-types [:genome :integer]}  
+  (fn [state]
+    (if (not (empty? (rest (:integer state))))
+      (let [genome (if (empty? (:genome state))
+                     []
+                     (stack-ref :genome 0 state))
+            length (count genome)
+            start (stack-ref :integer 1 state)
+            end (stack-ref :integer 0 state)
+            source (:parent1-genome state)
+            max-length (int (/ @global-max-points 4))]
+        (if (>= (+ length (Math/abs (float (- start end))))
+                max-length) ;; if too big, do nothing
+          state 
+          (->> (pop-item :integer state)
+               (pop-item :integer)
+               (pop-item :genome)
+               (push-item 
+                 (meta-update [genome]
+                              ['genome_gene_append_parent1 start end]
+                              (loop [appended genome
+                                     index start]
+                                (if (= index end)
+                                  appended
+                                  (recur (into appended 
+                                               [(if (< -1 index (count source))
+                                                  (nth source index)
+                                                  (random-gene))])
+                                         (if (> index end)
+                                           (dec index)
+                                           (inc index))))))         
+                 :genome))))
+      state)))
+
+(define-registered 
+  genome_append_parent2
+  ^{:stack-types [:genome :integer]}  
+  (fn [state]
+    (if (not (empty? (rest (:integer state))))
+      (let [genome (if (empty? (:genome state))
+                     []
+                     (stack-ref :genome 0 state))
+            length (count genome)
+            start (stack-ref :integer 1 state)
+            end (stack-ref :integer 0 state)
+            source (:parent2-genome state)
+            max-length (int (/ @global-max-points 4))]
+        (if (>= (+ length (Math/abs (float (- start end))))
+                max-length) ;; if too big, do nothing
+          state 
+          (->> (pop-item :integer state)
+               (pop-item :integer)
+               (pop-item :genome)
+               (push-item 
+                 (meta-update [genome]
+                              ['genome_gene_append_parent1 start end]
+                              (loop [appended genome
+                                     index start]
+                                (if (= index end)
+                                  appended
+                                  (recur (into appended 
+                                               [(if (< -1 index (count source))
+                                                  (nth source index)
+                                                  (random-gene))])
+                                         (if (> index end)
+                                           (dec index)
+                                           (inc index))))))
+                 :genome))))
+      state)))
+
+(define-registered
+  genome_parent1_length
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (push-item (count (:parent1-genome state))
+               :integer 
+               state)))
+
+(define-registered
+  genome_parent2_length
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (push-item (count (:parent2-genome state))
+               :integer 
+               state)))
+
+(define-registered
+  genome_length
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (if (empty? (:genome state))
+      state
+      (push-item (count (stack-ref :genome 0 state))
+                 :integer 
+               state))))
+
 

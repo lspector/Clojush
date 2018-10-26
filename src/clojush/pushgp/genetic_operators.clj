@@ -899,9 +899,11 @@ the resulting top genome."
                         (top-item :genome
                                   (run-push
                                     program-to-run
-                                    (-> (->> (make-push-state)
-                                             (push-item parent2-genome :genome)
-                                             (push-item parent1-genome :genome))
+                                    (-> (if (= (:autoconstructive-genome-instructions argmap) :appending)
+                                          (make-push-state)
+                                          (->> (make-push-state)
+                                               (push-item parent2-genome :genome)
+                                               (push-item parent1-genome :genome)))
                                         (assoc :parent1-genome parent1-genome)
                                         (assoc :parent2-genome parent2-genome)
                                         (assoc :autoconstructing true))))))]
