@@ -817,8 +817,8 @@
                      []
                      (stack-ref :genome 0 state))
             length (count genome)
-            start (stack-ref :integer 1 state)
-            end (stack-ref :integer 0 state)
+            start (+ length (stack-ref :integer 1 state))
+            end (+ length (stack-ref :integer 0 state))
             source (:parent1-genome state)
             max-length (int (/ @global-max-points 4))]
         (if (>= (+ length (Math/abs (float (- start end))))
@@ -853,8 +853,8 @@
                      []
                      (stack-ref :genome 0 state))
             length (count genome)
-            start (stack-ref :integer 1 state)
-            end (stack-ref :integer 0 state)
+            start (+ length (stack-ref :integer 1 state))
+            end (+ length (stack-ref :integer 0 state))
             source (:parent2-genome state)
             max-length (int (/ @global-max-points 4))]
         (if (>= (+ length (Math/abs (float (- start end))))
@@ -905,5 +905,3 @@
       (push-item (count (stack-ref :genome 0 state))
                  :integer 
                state))))
-
-
