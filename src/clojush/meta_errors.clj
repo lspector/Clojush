@@ -793,7 +793,7 @@
         0))
     1))
 
-#_(defn inherited-errors-meta-error
+(defn inherited-errors-meta-error
   [ind evaluated-population argmap]
   (if (and (:parent1-errors ind)
            (:parent2-errors ind)
@@ -802,7 +802,7 @@
     0
     1))
 
-(defn inherited-errors-meta-error
+#_(defn inherited-errors-meta-error
   [ind evaluated-population argmap]
   (if (and (:parent1-errors ind)
            (:parent2-errors ind))
@@ -830,7 +830,7 @@
           (:errors ind) 
           (:parent1-errors ind)
           (:parent2-errors ind))
-    (vec (repeat (count (:errors ind)) 0))))
+    (vec (repeat (count (:errors ind)) 1))))
 
 (defn case-inherited-non-zero-errors-meta-error
   [ind evaluated-population argmap]
@@ -843,4 +843,4 @@
           (:errors ind) 
           (:parent1-errors ind)
           (:parent2-errors ind))
-    (vec (repeat (count (:errors ind)) 0))))
+    (vec (repeat (count (:errors ind)) 1))))
