@@ -832,3 +832,15 @@
           (:parent2-errors ind))
     (vec (repeat (count (:errors ind)) 0))))
 
+(defn case-inherited-non-zero-errors-meta-error
+  [ind evaluated-population argmap]
+  (if (and (:parent1-errors ind)
+           (:parent2-errors ind))
+    (mapv #(if (and (not (zero? %1))
+                    (some #{%1} [%2 %3]))
+             1 
+             0)
+          (:errors ind) 
+          (:parent1-errors ind)
+          (:parent2-errors ind))
+    (vec (repeat (count (:errors ind)) 0))))
