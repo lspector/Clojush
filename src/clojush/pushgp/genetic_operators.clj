@@ -1453,6 +1453,19 @@ programs encoded by genomes g1 and g2."
     (assoc ind :diversifying
       (not= c-made-by c2-made-by))))
 
+(defn three-way-symbolic-reproductive-divergence-diversifying?
+  [ind argmap]
+  (let [symbolic #(filter (comp not number?) %)
+        g (:genome ind)
+        c (produce-child-genome-by-autoconstruction g g argmap)
+        c2 (produce-child-genome-by-autoconstruction g g argmap)
+        c3 (produce-child-genome-by-autoconstruction g g argmap)
+        c-made-by (symbolic (flatten (:made-by (meta c))))
+        c2-made-by (symbolic (flatten (:made-by (meta c2))))
+        c3-made-by (symbolic (flatten (:made-by (meta c3))))]
+    (assoc ind :diversifying
+      (not= c-made-by c2-made-by c3-made-by))))
+
 (defn reproductive-divergence-diversifying?
   [ind argmap]
   (let [g (:genome ind)
@@ -1462,6 +1475,18 @@ programs encoded by genomes g1 and g2."
         c2-made-by (flatten (:made-by (meta c2)))]
     (assoc ind :diversifying
       (not= c-made-by c2-made-by))))
+
+(defn three-way-reproductive-divergence-diversifying?
+  [ind argmap]
+  (let [g (:genome ind)
+        c (produce-child-genome-by-autoconstruction g g argmap)
+        c2 (produce-child-genome-by-autoconstruction g g argmap)
+        c3 (produce-child-genome-by-autoconstruction g g argmap)
+        c-made-by (flatten (:made-by (meta c)))
+        c2-made-by (flatten (:made-by (meta c2)))
+        c3-made-by (flatten (:made-by (meta c3)))]
+    (assoc ind :diversifying
+      (not= c-made-by c2-made-by c3-made-by))))
 
 (defn reproductive-change-changes-differently-diversifying?
   [ind argmap]
