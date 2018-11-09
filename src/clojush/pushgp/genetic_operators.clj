@@ -1464,7 +1464,7 @@ programs encoded by genomes g1 and g2."
         c2-made-by (symbolic (flatten (:made-by (meta c2))))
         c3-made-by (symbolic (flatten (:made-by (meta c3))))]
     (assoc ind :diversifying
-      (not= c-made-by c2-made-by c3-made-by))))
+      (distinct? c-made-by c2-made-by c3-made-by))))
 
 (defn reproductive-divergence-diversifying?
   [ind argmap]
@@ -1486,7 +1486,7 @@ programs encoded by genomes g1 and g2."
         c2-made-by (flatten (:made-by (meta c2)))
         c3-made-by (flatten (:made-by (meta c3)))]
     (assoc ind :diversifying
-      (not= c-made-by c2-made-by c3-made-by))))
+      (distinct? c-made-by c2-made-by c3-made-by))))
 
 (defn reproductive-change-changes-differently-diversifying?
   [ind argmap]
