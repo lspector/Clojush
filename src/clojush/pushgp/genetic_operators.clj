@@ -1711,6 +1711,8 @@ programs encoded by genomes g1 and g2."
                 :reproductive-change reproductive-change-diversifying?
                 :symbolic-reproductive-divergence symbolic-reproductive-divergence-diversifying?
                 :reproductive-divergence reproductive-divergence-diversifying?
+                :three-way-symbolic-reproductive-divergence symbolic-reproductive-divergence-diversifying?
+                :three-way-reproductive-divergence reproductive-divergence-diversifying?
                 :reproductive-change-changes reproductive-change-changes-diversifying?
                 :reproductive-change-changes-differently reproductive-change-changes-differently-diversifying?
                 :use-mate use-mate-diversifying?
