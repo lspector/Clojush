@@ -367,6 +367,10 @@
           :improvement-discount 0.5
           ;; The factor by successively older improvements are discounted when calculating
           ;; improvement-related meta-errors.
+          
+          :error-change-recency-limit 5
+          ;; The number of generations within which an error change must have occurred to 
+          ;; have a :no-recent-error-change meta-error value of zero.
 
           :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population
           ;; size that is retained before breeding. If 0 < decimation-ratio < 1, decimation

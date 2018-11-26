@@ -110,6 +110,35 @@
         1000000
         (dec (count (take-while #(= % (first hist)) (rest hist))))))))
 
+#_(defn no-recent-error-change-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw 
+      (Exception. 
+        ":print-history must be true for :no-recent-error-change"))
+    (let [hist (:history ind)
+          limit (:error-change-recency-limit argmap)]
+      (if (and (>= (count hist) limit)
+               (apply = (take limit hist)))
+        1
+        0))))
+
+(defn no-recent-error-change-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw 
+      (Exception. 
+        ":print-history must be true for :no-recent-error-change"))
+    (let [hist (:history ind)
+          limit (:error-change-recency-limit argmap)]
+      (if (< (count hist) limit)
+        1
+        (if (apply = (take limit hist))
+          2
+          0)))))
+
+
+
 (defn gens-since-total-error-improvement-meta-error
   [ind evaluated-population argmap]
   (if (not (:print-history argmap)) 
@@ -844,3 +873,4 @@
           (:parent1-errors ind)
           (:parent2-errors ind))
     (vec (repeat (count (:errors ind)) 1))))
+
