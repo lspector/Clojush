@@ -124,7 +124,32 @@
           2
           0)))))
 
+(defn lineage-redundancy-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :lineage-redundancy"))
+    (let [hist (:history ind)]
+      (if (< (count hist) 2)
+        1/2
+        (- 1 (/ (count (distinct hist))
+                (count hist)))))))
 
+(defn redundant-lineage-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :redundant-lineage"))
+    (let [hist (:history ind)]
+      (if (< (count hist) 2)
+        0
+        (if (> (/ (count (distinct hist))
+                  (count hist))
+               1/2)
+          0
+          1)))))
 
 (defn gens-since-total-error-improvement-meta-error
   [ind evaluated-population argmap]
@@ -860,4 +885,3 @@
           (:parent1-errors ind)
           (:parent2-errors ind))
     (vec (repeat (count (:errors ind)) 1))))
-
