@@ -1003,6 +1003,13 @@ programs encoded by genomes g1 and g2."
       (and (not= pgm parent1-pgm)
            (not= pgm parent2-pgm)))))
 
+(defn not-empty-diversifying?
+  [ind argmap]
+  (assoc ind :diversifying
+         (not (empty? (translate-plush-genome-to-push-program 
+                       {:genome (:genome ind)} 
+                       argmap)))))
+
 (defn minimum-genetic-difference-diversifying?
   [ind {:keys [parent1-genome parent2-genome]}]
   (let [g (:genome ind)]
@@ -1759,6 +1766,7 @@ programs encoded by genomes g1 and g2."
                 :doesnt-clone-genetically doesnt-clone-genetically-diversifying?
                 :child-doesnt-clone child-doesnt-clone-diversifying?
                 :not-a-clone not-a-clone-diversifying?
+                :not-empty :not-empty-diversifying?
                 :minimum-genetic-difference minimum-genetic-difference-diversifying?
                 :different-errors different-errors-diversifying?
                 :new-instruction new-instruction-diversifying?
