@@ -151,6 +151,19 @@
           0
           1)))))
 
+(defn repeating-lineage-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :repeating-lineage"))
+    (let [hist (:history ind)]
+      (if (< (count hist) 2)
+        0
+        (if (apply distinct? hist)
+          0
+          1)))))
+
 (defn gens-since-total-error-improvement-meta-error
   [ind evaluated-population argmap]
   (if (not (:print-history argmap)) 
