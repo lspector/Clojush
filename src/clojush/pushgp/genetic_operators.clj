@@ -1003,6 +1003,36 @@ programs encoded by genomes g1 and g2."
            (and (not= pgm parent1-pgm)
                 (not= pgm parent2-pgm)))))
 
+(defn lineage-behavior-diversifying?
+  [ind argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :lineage-behavior diversification test"))
+    (assoc ind :diversifying
+           (let [hist (:parent1-history argmap)]
+             (or (< (count hist) 2)
+                 (apply distinct? hist))))))
+
+(defn new-errors-diversifying?
+  [ind argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :new-errors diversification test"))
+    (let [errs (or (:errors ind)
+                   (do
+                     (swap! evaluations-count inc)
+                     (:errors ((:error-function argmap)
+                               {:genome (:genome ind)
+                                :program (translate-plush-genome-to-push-program
+                                          {:genome (:genome ind)}
+                                          argmap)}))))]
+      (assoc ind :diversifying
+             (let [hist (:parent1-history argmap)]
+               (or (< (count hist) 2)
+                   (not (some #{errs} hist))))))))
+
 (defn not-empty-diversifying?
   [ind argmap]
   (do ;#(do (println %) %)
@@ -1766,9 +1796,11 @@ programs encoded by genomes g1 and g2."
                 :doesnt-clone-genetically doesnt-clone-genetically-diversifying?
                 :child-doesnt-clone child-doesnt-clone-diversifying?
                 :not-a-clone not-a-clone-diversifying?
+                :lineage-behavior lineage-behavior-diversifying?
                 :not-empty not-empty-diversifying?
                 :minimum-genetic-difference minimum-genetic-difference-diversifying?
                 :different-errors different-errors-diversifying?
+                :new-errors new-errors-diversifying?
                 :new-instruction new-instruction-diversifying?
                 :lost-instruction lost-instruction-diversifying?
                 :different-instructions different-instructions-diversifying?
@@ -1811,7 +1843,9 @@ programs encoded by genomes g1 and g2."
                                    (assoc :parent1-genome parent1-genome)
                                    (assoc :parent2-genome parent2-genome)
                                    (assoc :parent1-errors (:errors parent1))
-                                   (assoc :parent2-errors (:errors parent2))))]
+                                   (assoc :parent2-errors (:errors parent2))
+                                   (assoc :parent1-history (:history parent1))
+                                   (assoc :parent2-history (:history parent2))))]
     (if (:diversifying checked)
       (assoc (make-individual :genome child-genome
                               :errors (:errors checked)
