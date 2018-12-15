@@ -1035,10 +1035,8 @@ programs encoded by genomes g1 and g2."
 
 (defn not-empty-diversifying?
   [ind argmap]
-  (do ;#(do (println %) %)
   (assoc ind :diversifying
          (not (empty? (translate-plush-genome-to-push-program ind argmap)))))
-)
 
 (defn minimum-genetic-difference-diversifying?
   [ind {:keys [parent1-genome parent2-genome]}]
