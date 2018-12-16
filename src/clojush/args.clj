@@ -860,10 +860,10 @@
                                                  [:integer :boolean :exec :float :tag :code :environment]
                                                  [:integer :boolean :exec :float :tag :code]))]
                                  '(genome_append_parent1
-                                    genome_append_parent2
+                                    ;genome_append_parent2
                                     genome_length
                                     genome_parent1_length
-                                    genome_parent2_length
+                                    ;genome_parent2_length
                                     autoconstructive_integer_rand
                                     autoconstructive_boolean_rand
                                     genome_autoconstructing
