@@ -1033,6 +1033,26 @@ programs encoded by genomes g1 and g2."
                (or (< (count hist) 2)
                    (not (some #{errs} hist))))))))
 
+(defn at-least-half-new-errors-diversifying?
+  [ind argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :at-least-halfnew-errors diversification test"))
+    (let [errs (or (:errors ind)
+                   (do
+                     (swap! evaluations-count inc)
+                     (:errors ((:error-function argmap)
+                               {:genome (:genome ind)
+                                :program (translate-plush-genome-to-push-program
+                                          {:genome (:genome ind)}
+                                          argmap)}))))]
+      (assoc ind :diversifying
+             (let [hist (:parent1-history argmap)]
+               (or (< (count hist) 2)
+                   (>= (* 2 (count (distinct (conj hist errs))))
+                       (count (conj hist errs)))))))))
+
 (defn not-empty-diversifying?
   [ind argmap]
   (assoc ind :diversifying
@@ -1799,6 +1819,7 @@ programs encoded by genomes g1 and g2."
                 :minimum-genetic-difference minimum-genetic-difference-diversifying?
                 :different-errors different-errors-diversifying?
                 :new-errors new-errors-diversifying?
+                :at-least-half-new-errors at-least-half-new-errors-diversifying?
                 :new-instruction new-instruction-diversifying?
                 :lost-instruction lost-instruction-diversifying?
                 :different-instructions different-instructions-diversifying?
