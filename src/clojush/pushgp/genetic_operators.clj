@@ -1029,9 +1029,7 @@ programs encoded by genomes g1 and g2."
                                           {:genome (:genome ind)}
                                           argmap)}))))]
       (assoc ind :diversifying
-             (let [hist (:parent1-history argmap)]
-               (or (< (count hist) 2)
-                   (not (some #{errs} hist))))))))
+             (not (some #{errs} (:parent1-history argmap)))))))
 
 (defn at-least-half-new-errors-diversifying?
   [ind argmap]
@@ -1049,9 +1047,8 @@ programs encoded by genomes g1 and g2."
                                           argmap)}))))]
       (assoc ind :diversifying
              (let [hist (:parent1-history argmap)]
-               (or (< (count hist) 2)
-                   (>= (* 2 (count (distinct (conj hist errs))))
-                       (count (conj hist errs)))))))))
+               (>= (* 2 (count (distinct (conj hist errs))))
+                   (count (conj hist errs))))))))
 
 (defn not-empty-diversifying?
   [ind argmap]
