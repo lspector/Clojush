@@ -115,7 +115,8 @@
 
 (defn produce-new-offspring
   [pop-agents child-agents rand-gens
-   {:keys [decimation-ratio population-size decimation-tournament-size use-single-thread]}]
+   {:keys [decimation-ratio population-size decimation-tournament-size use-single-thread]
+    :as argmap}]
   (let [pop (if (>= decimation-ratio 1)
               (vec (doall (map deref pop-agents)))
               (decimate (vec (doall (map deref pop-agents)))
@@ -128,7 +129,7 @@
       ((if use-single-thread swap! send)
        (nth child-agents i)
        breed
-       i (nth rand-gens i) pop @push-argmap)))
+       i (nth rand-gens i) pop argmap)))
   (when-not use-single-thread (apply await child-agents))) ;; SYNCHRONIZE
 
 (defn install-next-generation
@@ -222,8 +223,8 @@
           (= outcome :continue) (let [next-novelty-archive
                                       (list-concat novelty-archive
                                                    (select-individuals-for-novelty-archive
-                                                     (map deref pop-agents)
-                                                     @push-argmap))]
+                                                    (map deref pop-agents)
+                                                    @push-argmap))]
                                   (timer @push-argmap :report)
                                   (println "\nProducing offspring...") (flush)
                                   (produce-new-offspring pop-agents
