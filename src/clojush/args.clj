@@ -435,6 +435,12 @@
           ;; The number of neighbors to consider when calculating the sparseness with
           ;; regard to the nearest neighbors. Paper claims it is "robust to modest variation."
 
+          :selection-delay false
+          ;; If truthy should be a positive integer d, and all parents will be selected by
+          ;; with :uniform selection, but each generation for which (mod generation d) is 0
+          ;; the population will be replaced with the results of repeated selection from 
+          ;; an archive of all individuals produced since the previous time this was done.  
+
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
           ;;----------------------------------------
@@ -565,7 +571,7 @@
     ;;
     ;; handle :revertable
     (if (= :revertable (:autoconstuctive @push-argmap))
-      (swap! push-argmap assoc :genetic-operator-probabilities 
+      (swap! push-argmap assoc :genetic-operator-probabilities
              {[:make-next-operator-revertable :autoconstruction] 1.0})
       (swap! push-argmap assoc :genetic-operator-probabilities {:autoconstruction 1.0}))
     ;;
@@ -713,7 +719,7 @@
                                                 ;genome_alternation
                                                 ;genome_uniform_crossover
                                                 ))
-                    :gene-oriented-non-recombinative 
+                    :gene-oriented-non-recombinative
                     (into (registered-for-stacks
                             (if (:autoconstructive-environments @push-argmap)
                               [:integer :boolean :exec :float :tag :environment]
@@ -769,7 +775,7 @@
                              ;genome_alternation
                              ;genome_uniform_crossover
                              ))
-                    :uniform-non-recombinative 
+                    :uniform-non-recombinative
                     (into (registered-for-stacks
                             (if (:autoconstructive-environments @push-argmap)
                               [:integer :boolean :exec :float :tag :environment]
@@ -856,8 +862,7 @@
                               genome_if_autoconstructing
                               exec_k_when_autoconstructing
                               exec_s_when_autoconstructing
-                              exec_y_when_autoconstructing
-                              ))
+                              exec_y_when_autoconstructing))
                     :appending (let [by-type (registered-for-stacks
                                                (if (:autoconstructive-environments @push-argmap)
                                                  [:integer :boolean :exec :float :tag :code :environment]
@@ -939,7 +944,7 @@
           use-type #(some #{%} types)]
       (swap! push-argmap assoc
              :atom-generators
-             (let [tag-instructions 
+             (let [tag-instructions
                    (concat [(tag-instruction-erc types 10000)
                             (untag-instruction-erc 10000)
                             (tagged-instruction-erc 10000)
@@ -963,10 +968,9 @@
                                  (ns-publics 'clojush.globals))]
      (if (contains? @push-argmap (keyword (.substring (name gname) (count "global-"))))
        (reset! @gatom (get @push-argmap (keyword (.substring (str gname) (count "global-")))))
-       (throw (Exception. (str "globals.clj definition " gname 
+       (throw (Exception. (str "globals.clj definition " gname
                                " has no matching argument in push-argmap. "
                                "Only such definitions should use the prefix 'global-'."))))))
   ([argmap]
    (load-push-argmap argmap)
    (reset-globals)))
-

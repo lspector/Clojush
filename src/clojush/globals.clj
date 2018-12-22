@@ -84,6 +84,9 @@
 (def max-age (atom 0))
 ;; Used for age-mediated-parent-selection
 
+(def delay-archive (atom []))
+;; used for selection-delay
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The globals below may be reset by arguments to pushgp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
