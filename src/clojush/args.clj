@@ -439,8 +439,9 @@
           ;; If  this is truthy, then it should be a positive integer d, and all parents 
           ;; will be selected with :uniform selection, but also, in each generation for 
           ;; which (mod generation d) is 0, before producing offspring, the population  
-          ;; will be replaced with the results of repeated selection from an archive of 
-          ;; all individuals that have been produced since the previous time this was done.  
+          ;; will be replaced with the results of repeated selection (using the specified
+          ;; :parent-selection method) from an archive of all individuals that have been 
+          ;; produced since the previous time this was done.  
 
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
