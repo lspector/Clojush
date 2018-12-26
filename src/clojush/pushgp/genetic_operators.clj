@@ -1718,6 +1718,36 @@ programs encoded by genomes g1 and g2."
              (not= errs (take (count errs) (:parent2-errors argmap))))))
     (assoc ind :diversifying true)))
 
+(defn new-errors-prospective-when-necessary-diversifying?
+  [ind argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :new-errors-prospective-when-necessary diversification test"))
+    (let [errs (or (:errors ind)
+                   (do
+                     (swap! evaluations-count inc)
+                     (:errors ((:error-function argmap)
+                               {:genome (:genome ind)
+                                :program (translate-plush-genome-to-push-program
+                                          {:genome (:genome ind)}
+                                          argmap)}))))]
+      (assoc ind :diversifying
+             (if (not (empty? (:parent1-history argmap)))
+               (not (some #{errs} (:parent1-history argmap)))
+               (let [g (:genome ind)
+                     c (produce-child-genome-by-autoconstruction g g argmap)]
+                 (if (empty? c)
+                   false
+                   (not= errs
+                         (do
+                           (swap! evaluations-count inc)
+                           ((:error-function argmap)
+                            {:genome c
+                             :program (translate-plush-genome-to-push-program
+                                       {:genome c}
+                                       argmap)}))))))))))
+
 (defn new-instruction-diversifying?
   [ind {:keys [parent1-genome parent2-genome] :as argmap}]
   (let [child-instructions (set (map :instruction (:genome ind)))
@@ -1836,6 +1866,7 @@ programs encoded by genomes g1 and g2."
                 :minimum-genetic-difference minimum-genetic-difference-diversifying?
                 :different-errors different-errors-diversifying?
                 :new-errors new-errors-diversifying?
+                :new-errors-prospective-when-necessary new-errors-prospective-when-necessary-diversifying?
                 :enough-new-errors enough-new-errors-diversifying?
                 :at-least-half-new-errors at-least-half-new-errors-diversifying?
                 :new-instruction new-instruction-diversifying?
