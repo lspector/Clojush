@@ -32,4 +32,3 @@
         (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)
                        survivors)
                (rest cases))))))
-

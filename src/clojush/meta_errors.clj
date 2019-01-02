@@ -69,6 +69,12 @@
   [ind evaluated-population argmap]
   (if (zero? (:age ind)) 1 0))
 
+(defn empty-genome-meta-error
+  [ind evaluated-population argmap]
+  (if (empty? (:genome ind))
+    1
+    0))
+
 (defn novelty-meta-error
   "Novelty was calculated earlier and stored in each individual.
   Note that we need to invert novelty, since it is calculated as a value to maximize."
