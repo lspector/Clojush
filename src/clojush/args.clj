@@ -440,8 +440,8 @@
           ;; will be selected with :uniform selection, but also, in each generation for 
           ;; which (mod generation d) is 0, before producing offspring, the population  
           ;; will be replaced with the results of repeated selection (using the specified
-          ;; :parent-selection method) from an archive of all individuals that have been 
-          ;; produced since the previous time this was done.  
+          ;; :parent-selection method) from an archive of all of the individuals that have  
+          ;; been produced since the previous time this was done.  
 
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
@@ -870,14 +870,15 @@
                                                  [:integer :boolean :exec :float :tag :code :environment]
                                                  [:integer :boolean :exec :float :tag :code]))]
                                  '(genome_append_parent1
-                                    genome_append_parent2
-                                    genome_length
-                                    genome_parent1_length
-                                    genome_parent2_length
-                                    autoconstructive_integer_rand
-                                    autoconstructive_boolean_rand
-                                    genome_autoconstructing
-                                    genome_if_autoconstructing)))]
+                                   genome_append_parent2
+                                   genome_append_random
+                                   genome_length
+                                   genome_parent1_length
+                                   genome_parent2_length
+                                   autoconstructive_integer_rand
+                                   autoconstructive_boolean_rand
+                                   genome_autoconstructing
+                                   genome_if_autoconstructing)))]
       (when true (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     ;;

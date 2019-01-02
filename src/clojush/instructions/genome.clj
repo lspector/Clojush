@@ -829,7 +829,7 @@
                (pop-item :genome)
                (push-item 
                  (meta-update [genome]
-                              ['genome_gene_append_parent1 start end]
+                              ['genome_append_parent1 start end]
                               (loop [appended genome
                                      index start]
                                 (if (= index end)
@@ -865,7 +865,7 @@
                (pop-item :genome)
                (push-item 
                  (meta-update [genome]
-                              ['genome_gene_append_parent1 start end]
+                              ['genome_append_parent1 start end]
                               (loop [appended genome
                                      index start]
                                 (if (= index end)
@@ -878,6 +878,28 @@
                                            (dec index)
                                            (inc index))))))
                  :genome))))
+      state)))
+
+(define-registered
+  genome_append_random
+  ^{:stack-types [:genome :integer]}
+  (fn [state]
+    (if (not (empty? (:integer state)))
+      (let [genome (if (empty? (:genome state))
+                     []
+                     (stack-ref :genome 0 state))
+            length (count genome)
+            num-to-add (Math/abs (float (stack-ref :integer 0 state)))
+            max-length (int (/ @global-max-points 4))]
+        (if (>= (+ length num-to-add) max-length) ;; if too big, do nothing
+          state
+          (->> (pop-item :integer state)
+               (pop-item :genome)
+               (push-item
+                (meta-update [genome]
+                             ['genome_append_random num-to-add]
+                             (vec (concat genome (repeatedly (int num-to-add) #(random-gene)))))
+                :genome))))
       state)))
 
 (define-registered
