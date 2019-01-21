@@ -898,9 +898,17 @@
            (:parent2-errors ind))
     (mapv #(if (and (not (zero? %1))
                     (some #{%1} [%2 %3]))
-             1 
+             1
              0)
-          (:errors ind) 
+          (:errors ind)
           (:parent1-errors ind)
           (:parent2-errors ind))
     (vec (repeat (count (:errors ind)) 1))))
+
+(defn case-error-frequency-meta-error
+  [ind evaluated-population argmap]
+  (mapv (fn [e i]
+          (count (filter #(= e (nth (:errors %) i))
+                         evaluated-population)
+                 (:errors ind)
+                 (iterate inc 0)))))
