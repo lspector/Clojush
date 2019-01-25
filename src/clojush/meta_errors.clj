@@ -909,6 +909,6 @@
   [ind evaluated-population argmap]
   (mapv (fn [e i]
           (count (filter #(= e (nth (:errors %) i))
-                         evaluated-population)
-                 (:errors ind)
-                 (iterate inc 0)))))
+                         evaluated-population)))
+        (:errors ind)
+        (iterate inc 0)))
