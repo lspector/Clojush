@@ -249,6 +249,12 @@
               (apply list-concat (doall (map all-items lst)))
               ())))
 
+(defn remove-one
+  "Returns sequence s without the first instance of item."
+  [item s]
+  (let [[without-item with-item] (split-with #(not (= item %)) s)]
+    (concat without-item (rest with-item))))
+
 (defn list-to-open-close-sequence
   [lst]
   (if (seq? lst)

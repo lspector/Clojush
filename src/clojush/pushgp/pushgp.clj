@@ -183,7 +183,8 @@
 (defn process-generation
   "Processes the generation, returning [new novelty archive, return val],
    where new novelty archive will be nil if we are done."
-  [rand-gens pop-agents child-agents generation novelty-archive]
+  [rand-gens pop-agents child-agents generation novelty-archive 
+   {:keys [population-size use-single-thread] :as argmap}]
   (r/new-generation! generation)
   (println "Processing generation:" generation)
   (case (:genome-representation @push-argmap)
@@ -193,6 +194,20 @@
   (println "Computing errors... ")
   (compute-errors pop-agents rand-gens novelty-archive @push-argmap)
   (println "Done computing errors.")
+  (if (:preserve-frontier argmap)
+    (println "Preserving frontier... ")
+    (loop [preserved 0
+           new-frontier []
+           candidates (concat @frontier (map deref pop-agents))]
+      (if (= preserved population-size)
+        (do (dotimes [i population-size]
+              ((if use-single-thread swap! send) (nth pop-agents i) #(nth new-frontier i)))
+            (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
+            (reset! frontier new-frontier))
+        (let [to-preserve (select candidates argmap)]
+          (recur (inc preserved)
+                 (conj new-frontier to-preserve)
+                 (remove-one to-preserve candidates))))))
   (timer @push-argmap :fitness)
   ;; calculate solution rates if necessary for historically-assessed hardness
   (calculate-hah-solution-rates pop-agents @push-argmap)
@@ -229,7 +244,7 @@
                                     (when-not (:use-single-thread @push-argmap (apply await pop-agents))) ;; SYNCHRONIZE
                                     (swap! delay-archive concat (map deref pop-agents))
                                     (when (zero? (mod generation del))
-                                      (println "Performing delayed selection from archive of size: " 
+                                      (println "Performing delayed selection from archive of size: "
                                                (count @delay-archive))
                                       (flush)
                                       (doseq [a pop-agents]
@@ -281,7 +296,7 @@
               novelty-archive '()]
          (let [[next-novelty-archive return-val]
                (process-generation rand-gens pop-agents child-agents
-                                   generation novelty-archive)]
+                                   generation novelty-archive @push-argmap)]
            (if (nil? next-novelty-archive)
              return-val
              (recur (inc generation) next-novelty-archive))))))))

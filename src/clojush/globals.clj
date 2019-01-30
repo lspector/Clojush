@@ -87,6 +87,9 @@
 (def delay-archive (atom []))
 ;; used for selection-delay
 
+(def frontier (atom []))
+;; used for preserve-frontier
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The globals below may be reset by arguments to pushgp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

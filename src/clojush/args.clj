@@ -443,6 +443,12 @@
           ;; :parent-selection method) from an archive of all of the individuals that have  
           ;; been produced since the previous time this was done.  
 
+         :preserve-frontier false
+          ;; If truthy, then each child population will be the product of a frontier-preservation
+          ;; process in which individuals are repeatedly selected, without re-selection
+          ;; from the concatenation of the parent population and the children that were
+          ;; produced by the genetic operators.
+         
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
           ;;----------------------------------------
