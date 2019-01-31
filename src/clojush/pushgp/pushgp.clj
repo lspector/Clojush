@@ -194,14 +194,14 @@
   (println "Computing errors... ")
   (compute-errors pop-agents rand-gens novelty-archive @push-argmap)
   (println "Done computing errors.")
-  (if (:preserve-frontier argmap)
+  (when (:preserve-frontier argmap)
     (println "Preserving frontier... ")
     (loop [preserved 0
            new-frontier []
            candidates (concat @frontier (map deref pop-agents))]
       (if (= preserved population-size)
         (do (dotimes [i population-size]
-              ((if use-single-thread swap! send) (nth pop-agents i) #(nth new-frontier i)))
+              ((if use-single-thread swap! send) (nth pop-agents i) (fn [_] (nth new-frontier i))))
             (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
             (reset! frontier new-frontier))
         (let [to-preserve (select candidates argmap)]
