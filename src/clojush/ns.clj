@@ -18,12 +18,3 @@
              elitegroup-lexicase random-threshold-lexicase random-toggle-lexicase 
              randomly-truncated-lexicase implicit-fitness-sharing))))
 
-(run-push '(0 in1 integer_eq
-              exec_if ()
-              (1 in1 integer_eq
-                 exec_if (1)
-                 (2 in1 integer_eq
-                    exec_if (1 1)
-                    (1 1 in1 2 integer_sub exec_do*times
-                       (integer_dup 2 integer_yankdup integer_add)))))
-          (push-item 0 :input (make-push-state)))

@@ -844,6 +844,31 @@
                  :genome))))
       state)))
 
+(define-registered
+  genome_append1_parent1
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (if (not (empty? (:integer state)))
+      (let [genome (if (empty? (:genome state))
+                     []
+                     (stack-ref :genome 0 state))
+            length (count genome)
+            source-index (+ length (stack-ref :integer 0 state))
+            source (:parent1-genome state)
+            max-length (int (/ @global-max-points 4))]
+        (if (>= (inc length) max-length) ;; if too big, do nothing
+          state
+          (->> (pop-item :integer state)
+               (pop-item :genome)
+               (push-item
+                (meta-update [genome]
+                             ['genome_append1_parent1 source-index]
+                             (into genome [(if (< -1 source-index (count source))
+                                             (nth source source-index)
+                                             (random-gene))]))
+                :genome))))
+      state)))
+
 (define-registered 
   genome_append_parent2
   ^{:stack-types [:genome :integer]}  
@@ -881,6 +906,31 @@
       state)))
 
 (define-registered
+  genome_append1_parent2
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (if (not (empty? (:integer state)))
+      (let [genome (if (empty? (:genome state))
+                     []
+                     (stack-ref :genome 0 state))
+            length (count genome)
+            source-index (+ length (stack-ref :integer 0 state))
+            source (:parent2-genome state)
+            max-length (int (/ @global-max-points 4))]
+        (if (>= (inc length) max-length) ;; if too big, do nothing
+          state
+          (->> (pop-item :integer state)
+               (pop-item :genome)
+               (push-item
+                (meta-update [genome]
+                             ['genome_append1_parent2 source-index]
+                             (into genome [(if (< -1 source-index (count source))
+                                             (nth source source-index)
+                                             (random-gene))]))
+                :genome))))
+      state)))
+
+(define-registered
   genome_append_random
   ^{:stack-types [:genome :integer]}
   (fn [state]
@@ -902,6 +952,24 @@
                 :genome))))
       state)))
 
+(define-registered
+  genome_append1_random
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (let [genome (if (empty? (:genome state))
+                   []
+                   (stack-ref :genome 0 state))
+          length (count genome)
+          max-length (int (/ @global-max-points 4))]
+      (if (>= (inc length) max-length) ;; if too big, do nothing
+        state
+        (->> (pop-item :genome state)
+             (push-item
+              (meta-update [genome]
+                           ['genome_append1_random]
+                           (vec (conj genome (random-gene))))
+              :genome))))))
+    
 (define-registered
   genome_parent1_length
   ^{:stack-types [:genome :integer]}
