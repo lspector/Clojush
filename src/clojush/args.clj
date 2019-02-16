@@ -589,185 +589,185 @@
     ;; add autoconstructive-specific instructions (:genome or :gtm)
     (doseq [instr (case (:autoconstructive-genome-instructions @push-argmap)
                     :all (registered-for-stacks
-                           (if (:autoconstructive-environments @push-argmap)
-                             [:integer :boolean :exec :genome :float :tag :environment]
-                             [:integer :boolean :exec :genome :float :tag]))
+                          (if (:autoconstructive-environments @push-argmap)
+                            [:integer :boolean :exec :genome :float :tag :environment]
+                            [:integer :boolean :exec :genome :float :tag]))
                     :gene-oriented (into (registered-for-stacks
-                                           (if (:autoconstructive-environments @push-argmap)
-                                             [:integer :boolean :exec :float :tag :environment]
-                                             [:integer :boolean :exec :float :tag]))
+                                          (if (:autoconstructive-environments @push-argmap)
+                                            [:integer :boolean :exec :float :tag :environment]
+                                            [:integer :boolean :exec :float :tag]))
                                          '(genome_pop
-                                            genome_dup
-                                            genome_swap
-                                            genome_rot
-                                            genome_flush
-                                            genome_eq
-                                            genome_stackdepth
-                                            genome_yank
-                                            genome_yankdup
-                                            genome_shove
-                                            genome_empty
-                                            genome_gene_dup
-                                            genome_gene_randomize
-                                            genome_gene_replace
-                                            genome_gene_delete
-                                            genome_rotate
-                                            genome_gene_copy
-                                            genome_gene_copy_range
-                                            genome_toggle_silent
-                                            genome_silence
-                                            genome_unsilence
-                                            genome_instruction_eq
-                                            genome_gene_close
-                                            genome_gene_silent
-                                            genome_close_inc
-                                            genome_close_dec
-                                            genome_new
-                                            genome_parent1
-                                            genome_parent2
-                                            autoconstructive_integer_rand
-                                            autoconstructive_boolean_rand
-                                            genome_autoconstructing
-                                            genome_if_autoconstructing
-                                            genome_gene_genome_instruction
-                                            genome_if_gene_genome_instruction
-                                            genome_genesis))
+                                           genome_dup
+                                           genome_swap
+                                           genome_rot
+                                           genome_flush
+                                           genome_eq
+                                           genome_stackdepth
+                                           genome_yank
+                                           genome_yankdup
+                                           genome_shove
+                                           genome_empty
+                                           genome_gene_dup
+                                           genome_gene_randomize
+                                           genome_gene_replace
+                                           genome_gene_delete
+                                           genome_rotate
+                                           genome_gene_copy
+                                           genome_gene_copy_range
+                                           genome_toggle_silent
+                                           genome_silence
+                                           genome_unsilence
+                                           genome_instruction_eq
+                                           genome_gene_close
+                                           genome_gene_silent
+                                           genome_close_inc
+                                           genome_close_dec
+                                           genome_new
+                                           genome_parent1
+                                           genome_parent2
+                                           autoconstructive_integer_rand
+                                           autoconstructive_boolean_rand
+                                           genome_autoconstructing
+                                           genome_if_autoconstructing
+                                           genome_gene_genome_instruction
+                                           genome_if_gene_genome_instruction
+                                           genome_genesis))
                     :uniform (into (registered-for-stacks
-                                     (if (:autoconstructive-environments @push-argmap)
-                                       [:integer :boolean :exec :float :tag :environment]
-                                       [:integer :boolean :exec :float :tag]))
+                                    (if (:autoconstructive-environments @push-argmap)
+                                      [:integer :boolean :exec :float :tag :environment]
+                                      [:integer :boolean :exec :float :tag]))
                                    '(genome_pop
-                                      genome_dup
-                                      genome_swap
-                                      genome_rot
-                                      genome_flush
-                                      genome_eq
-                                      genome_stackdepth
-                                      genome_yank
-                                      genome_yankdup
-                                      genome_shove
-                                      genome_empty
-                                      genome_rotate
-                                      genome_new
-                                      genome_parent1
-                                      genome_parent2
-                                      autoconstructive_integer_rand
-                                      autoconstructive_boolean_rand
-                                      genome_autoconstructing
-                                      genome_if_autoconstructing
-                                      genome_uniform_instruction_mutation
-                                      genome_uniform_integer_mutation
-                                      genome_uniform_float_mutation
-                                      genome_uniform_tag_mutation
-                                      genome_uniform_string_mutation
-                                      genome_uniform_boolean_mutation
-                                      genome_uniform_close_mutation
-                                      genome_uniform_silence_mutation
-                                      genome_uniform_deletion
-                                      genome_uniform_addition
-                                      genome_uniform_addition_and_deletion
-                                      genome_uniform_combination_and_deletion
-                                      genome_genesis
-                                      genome_alternation
-                                      genome_uniform_crossover
-                                      genome_gene_genome_instruction
-                                      genome_if_gene_genome_instruction))
+                                     genome_dup
+                                     genome_swap
+                                     genome_rot
+                                     genome_flush
+                                     genome_eq
+                                     genome_stackdepth
+                                     genome_yank
+                                     genome_yankdup
+                                     genome_shove
+                                     genome_empty
+                                     genome_rotate
+                                     genome_new
+                                     genome_parent1
+                                     genome_parent2
+                                     autoconstructive_integer_rand
+                                     autoconstructive_boolean_rand
+                                     genome_autoconstructing
+                                     genome_if_autoconstructing
+                                     genome_uniform_instruction_mutation
+                                     genome_uniform_integer_mutation
+                                     genome_uniform_float_mutation
+                                     genome_uniform_tag_mutation
+                                     genome_uniform_string_mutation
+                                     genome_uniform_boolean_mutation
+                                     genome_uniform_close_mutation
+                                     genome_uniform_silence_mutation
+                                     genome_uniform_deletion
+                                     genome_uniform_addition
+                                     genome_uniform_addition_and_deletion
+                                     genome_uniform_combination_and_deletion
+                                     genome_genesis
+                                     genome_alternation
+                                     genome_uniform_crossover
+                                     genome_gene_genome_instruction
+                                     genome_if_gene_genome_instruction))
                     :non-recombinative (into (registered-for-stacks
-                                               (if (:autoconstructive-environments @push-argmap)
-                                                 [:integer :boolean :exec :float :tag :environment]
-                                                 [:integer :boolean :exec :float :tag]))
+                                              (if (:autoconstructive-environments @push-argmap)
+                                                [:integer :boolean :exec :float :tag :environment]
+                                                [:integer :boolean :exec :float :tag]))
                                              '(genome_pop
-                                                genome_dup
-                                                genome_swap
-                                                genome_rot
-                                                genome_flush
-                                                genome_eq
-                                                genome_stackdepth
-                                                genome_yank
-                                                genome_yankdup
-                                                genome_shove
-                                                genome_empty
-                                                genome_gene_dup
-                                                genome_gene_randomize
-                                                genome_gene_replace
-                                                genome_gene_delete
-                                                genome_rotate
+                                               genome_dup
+                                               genome_swap
+                                               genome_rot
+                                               genome_flush
+                                               genome_eq
+                                               genome_stackdepth
+                                               genome_yank
+                                               genome_yankdup
+                                               genome_shove
+                                               genome_empty
+                                               genome_gene_dup
+                                               genome_gene_randomize
+                                               genome_gene_replace
+                                               genome_gene_delete
+                                               genome_rotate
                                                 ;genome_gene_copy
                                                 ;genome_gene_copy_range
-                                                genome_toggle_silent
-                                                genome_silence
-                                                genome_unsilence
-                                                genome_instruction_eq
-                                                genome_gene_close
-                                                genome_gene_silent
-                                                genome_close_inc
-                                                genome_close_dec
-                                                genome_new
-                                                genome_parent1
-                                                genome_parent2
-                                                autoconstructive_integer_rand
-                                                autoconstructive_boolean_rand
-                                                genome_autoconstructing
-                                                genome_if_autoconstructing
-                                                genome_gene_genome_instruction
-                                                genome_if_gene_genome_instruction
-                                                genome_genesis
-                                                genome_uniform_instruction_mutation
-                                                genome_uniform_integer_mutation
-                                                genome_uniform_float_mutation
-                                                genome_uniform_tag_mutation
-                                                genome_uniform_string_mutation
-                                                genome_uniform_boolean_mutation
-                                                genome_uniform_close_mutation
-                                                genome_uniform_silence_mutation
-                                                genome_uniform_deletion
-                                                genome_uniform_addition
-                                                genome_uniform_addition_and_deletion
+                                               genome_toggle_silent
+                                               genome_silence
+                                               genome_unsilence
+                                               genome_instruction_eq
+                                               genome_gene_close
+                                               genome_gene_silent
+                                               genome_close_inc
+                                               genome_close_dec
+                                               genome_new
+                                               genome_parent1
+                                               genome_parent2
+                                               autoconstructive_integer_rand
+                                               autoconstructive_boolean_rand
+                                               genome_autoconstructing
+                                               genome_if_autoconstructing
+                                               genome_gene_genome_instruction
+                                               genome_if_gene_genome_instruction
+                                               genome_genesis
+                                               genome_uniform_instruction_mutation
+                                               genome_uniform_integer_mutation
+                                               genome_uniform_float_mutation
+                                               genome_uniform_tag_mutation
+                                               genome_uniform_string_mutation
+                                               genome_uniform_boolean_mutation
+                                               genome_uniform_close_mutation
+                                               genome_uniform_silence_mutation
+                                               genome_uniform_deletion
+                                               genome_uniform_addition
+                                               genome_uniform_addition_and_deletion
                                                 ;genome_uniform_combination_and_deletion
                                                 ;genome_alternation
                                                 ;genome_uniform_crossover
-                                                ))
+                                               ))
                     :gene-oriented-non-recombinative
                     (into (registered-for-stacks
-                            (if (:autoconstructive-environments @push-argmap)
-                              [:integer :boolean :exec :float :tag :environment]
-                              [:integer :boolean :exec :float :tag]))
+                           (if (:autoconstructive-environments @push-argmap)
+                             [:integer :boolean :exec :float :tag :environment]
+                             [:integer :boolean :exec :float :tag]))
                           '(genome_pop
-                             genome_dup
-                             genome_swap
-                             genome_rot
-                             genome_flush
-                             genome_eq
-                             genome_stackdepth
-                             genome_yank
-                             genome_yankdup
-                             genome_shove
-                             genome_empty
-                             genome_gene_dup
-                             genome_gene_randomize
-                             genome_gene_replace
-                             genome_gene_delete
-                             genome_rotate
+                            genome_dup
+                            genome_swap
+                            genome_rot
+                            genome_flush
+                            genome_eq
+                            genome_stackdepth
+                            genome_yank
+                            genome_yankdup
+                            genome_shove
+                            genome_empty
+                            genome_gene_dup
+                            genome_gene_randomize
+                            genome_gene_replace
+                            genome_gene_delete
+                            genome_rotate
                              ;genome_gene_copy
                              ;genome_gene_copy_range
-                             genome_toggle_silent
-                             genome_silence
-                             genome_unsilence
-                             genome_instruction_eq
-                             genome_gene_close
-                             genome_gene_silent
-                             genome_close_inc
-                             genome_close_dec
-                             genome_new
-                             genome_parent1
-                             genome_parent2
-                             autoconstructive_integer_rand
-                             autoconstructive_boolean_rand
-                             genome_autoconstructing
-                             genome_if_autoconstructing
-                             genome_gene_genome_instruction
-                             genome_if_gene_genome_instruction
-                             genome_genesis
+                            genome_toggle_silent
+                            genome_silence
+                            genome_unsilence
+                            genome_instruction_eq
+                            genome_gene_close
+                            genome_gene_silent
+                            genome_close_inc
+                            genome_close_dec
+                            genome_new
+                            genome_parent1
+                            genome_parent2
+                            autoconstructive_integer_rand
+                            autoconstructive_boolean_rand
+                            genome_autoconstructing
+                            genome_if_autoconstructing
+                            genome_gene_genome_instruction
+                            genome_if_gene_genome_instruction
+                            genome_genesis
                              ;;genome_uniform_instruction_mutation
                              ;;genome_uniform_integer_mutation
                              ;;genome_uniform_float_mutation
@@ -782,23 +782,23 @@
                              ;genome_uniform_combination_and_deletion
                              ;genome_alternation
                              ;genome_uniform_crossover
-                             ))
+                            ))
                     :uniform-non-recombinative
                     (into (registered-for-stacks
-                            (if (:autoconstructive-environments @push-argmap)
-                              [:integer :boolean :exec :float :tag :environment]
-                              [:integer :boolean :exec :float :tag]))
+                           (if (:autoconstructive-environments @push-argmap)
+                             [:integer :boolean :exec :float :tag :environment]
+                             [:integer :boolean :exec :float :tag]))
                           '(genome_pop
-                             genome_dup
-                             genome_swap
-                             genome_rot
-                             genome_flush
-                             genome_eq
-                             genome_stackdepth
-                             genome_yank
-                             genome_yankdup
-                             genome_shove
-                             genome_empty
+                            genome_dup
+                            genome_swap
+                            genome_rot
+                            genome_flush
+                            genome_eq
+                            genome_stackdepth
+                            genome_yank
+                            genome_yankdup
+                            genome_shove
+                            genome_empty
                              ;;genome_gene_dup
                              ;;genome_gene_randomize
                              ;;genome_gene_replace
@@ -814,92 +814,114 @@
                              ;;genome_gene_silent
                              ;;genome_close_inc
                              ;;genome_close_dec
-                             genome_new
-                             genome_parent1
-                             genome_parent2
-                             autoconstructive_integer_rand
-                             autoconstructive_boolean_rand
-                             genome_autoconstructing
-                             genome_if_autoconstructing
-                             genome_gene_genome_instruction
-                             genome_if_gene_genome_instruction
-                             genome_genesis
-                             genome_uniform_instruction_mutation
-                             genome_uniform_integer_mutation
-                             genome_uniform_float_mutation
-                             genome_uniform_tag_mutation
-                             genome_uniform_string_mutation
-                             genome_uniform_boolean_mutation
-                             genome_uniform_close_mutation
-                             genome_uniform_silence_mutation
-                             genome_uniform_deletion
-                             genome_uniform_addition
-                             genome_uniform_addition_and_deletion
+                            genome_new
+                            genome_parent1
+                            genome_parent2
+                            autoconstructive_integer_rand
+                            autoconstructive_boolean_rand
+                            genome_autoconstructing
+                            genome_if_autoconstructing
+                            genome_gene_genome_instruction
+                            genome_if_gene_genome_instruction
+                            genome_genesis
+                            genome_uniform_instruction_mutation
+                            genome_uniform_integer_mutation
+                            genome_uniform_float_mutation
+                            genome_uniform_tag_mutation
+                            genome_uniform_string_mutation
+                            genome_uniform_boolean_mutation
+                            genome_uniform_close_mutation
+                            genome_uniform_silence_mutation
+                            genome_uniform_deletion
+                            genome_uniform_addition
+                            genome_uniform_addition_and_deletion
                              ;genome_uniform_combination_and_deletion
                              ;genome_alternation
                              ;genome_uniform_crossover
-                             ))
+                            ))
                     :gtm (let [by-type (registered-for-stacks
-                                         (if (:autoconstructive-environments @push-argmap)
-                                           [:integer :boolean :exec :float :tag :code :environment]
-                                           [:integer :boolean :exec :float :tag :code]))]
-                           '(gtm_left
-                              gtm_right
-                              gtm_inc_delay
-                              gtm_dec_delay
-                              gtm_dub1
-                              gtm_dub2
-                              gtm_bounce1
-                              gtm_bounce2
-                              gtm_blank0
-                              gtm_blank1
-                              gtm_blank2
-                              gtm_erase
-                              gtm_read_all
-                              gtm_write_all
-                              gtm_read_instruction
-                              gtm_write_instruction
-                              gtm_read_silent
-                              gtm_write_silent
-                              gtm_read_close
-                              gtm_write_close
-                              autoconstructive_integer_rand
-                              autoconstructive_boolean_rand
-                              autoconstructive_code_rand_atom
-                              genome_autoconstructing
-                              genome_if_autoconstructing
-                              exec_k_when_autoconstructing
-                              exec_s_when_autoconstructing
-                              exec_y_when_autoconstructing))
-                    :appending (let [by-type (registered-for-stacks
-                                               (if (:autoconstructive-environments @push-argmap)
-                                                 [:integer :boolean :exec :float :tag :code :environment]
-                                                 [:integer :boolean :exec :float :tag :code]))]
-                                 '(genome_append_parent1
-                                   genome_append_parent2
-                                   genome_append_random
-                                   genome_length
-                                   genome_parent1_length
-                                   genome_parent2_length
+                                        (if (:autoconstructive-environments @push-argmap)
+                                          [:integer :boolean :exec :float :tag :code :environment]
+                                          [:integer :boolean :exec :float :tag :code]))]
+                           (into by-type
+                                 '(gtm_left
+                                   gtm_right
+                                   gtm_inc_delay
+                                   gtm_dec_delay
+                                   gtm_dub1
+                                   gtm_dub2
+                                   gtm_bounce1
+                                   gtm_bounce2
+                                   gtm_blank0
+                                   gtm_blank1
+                                   gtm_blank2
+                                   gtm_erase
+                                   gtm_read_all
+                                   gtm_write_all
+                                   gtm_read_instruction
+                                   gtm_write_instruction
+                                   gtm_read_silent
+                                   gtm_write_silent
+                                   gtm_read_close
+                                   gtm_write_close
                                    autoconstructive_integer_rand
                                    autoconstructive_boolean_rand
+                                   autoconstructive_code_rand_atom
                                    genome_autoconstructing
-                                   genome_if_autoconstructing))
+                                   genome_if_autoconstructing
+                                   exec_k_when_autoconstructing
+                                   exec_s_when_autoconstructing
+                                   exec_y_when_autoconstructing)))
+                    :appending (let [by-type (registered-for-stacks
+                                              (if (:autoconstructive-environments @push-argmap)
+                                                [:integer :boolean :exec :float :tag :code :environment]
+                                                [:integer :boolean :exec :float :tag :code]))]
+                                 (into by-type
+                                       '(genome_append_parent1
+                                         genome_append_parent2
+                                         genome_append_random
+                                         genome_length
+                                         genome_parent1_length
+                                         genome_parent2_length
+                                         autoconstructive_integer_rand
+                                         autoconstructive_boolean_rand
+                                         genome_autoconstructing
+                                         genome_if_autoconstructing)))
                     :appending1 (let [by-type (registered-for-stacks
                                                (if (:autoconstructive-environments @push-argmap)
                                                  [:integer :boolean :exec :float :tag :code :environment]
                                                  [:integer :boolean :exec :float :tag :code]))]
-                                 '(genome_append1_parent1
-                                   genome_append1_parent2
-                                   genome_append1_random
-                                   genome_length
-                                   genome_parent1_length
-                                   genome_parent2_length
-                                   autoconstructive_integer_rand
-                                   autoconstructive_boolean_rand
-                                   genome_autoconstructing
-                                   genome_if_autoconstructing)))]
-      (when true (not (some #{instr} (:atom-generators @push-argmap)))
+                                  (into by-type
+                                        '(genome_append1_parent1
+                                          genome_append1_parent2
+                                          genome_append1_random
+                                          genome_length
+                                          genome_parent1_length
+                                          genome_parent2_length
+                                          autoconstructive_integer_rand
+                                          autoconstructive_boolean_rand
+                                          genome_autoconstructing
+                                          genome_if_autoconstructing)))
+                    :dubstep (let [by-type (registered-for-stacks
+                                            (if (:autoconstructive-environments @push-argmap)
+                                              [:integer :boolean :exec :float :tag :code :environment]
+                                              [:integer :boolean :exec :float :tag :code]))]
+                               (into by-type
+                                     '(genome_dub1
+                                       genome_dub2
+                                       genome_step1
+                                       genome_step2
+                                       genome_back1
+                                       genome_back2
+                                       genome_append1_random
+                                       genome_length
+                                       genome_parent1_length
+                                       genome_parent2_length
+                                       autoconstructive_integer_rand
+                                       autoconstructive_boolean_rand
+                                       genome_autoconstructing
+                                       genome_if_autoconstructing))))]
+      (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     ;;
     ;; include ERCs for floats, integers, and booleans
