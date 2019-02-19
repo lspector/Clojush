@@ -846,7 +846,7 @@
 
 (define-registered
   genome_append1_parent1
-  ^{:stack-types [:genome]}
+  ^{:stack-types [:genome :integer]}
   (fn [state]
     (if (not (empty? (:integer state)))
       (let [genome (if (empty? (:genome state))
@@ -907,7 +907,7 @@
 
 (define-registered
   genome_append1_parent2
-  ^{:stack-types [:genome]}
+  ^{:stack-types [:genome :integer]}
   (fn [state]
     (if (not (empty? (:integer state)))
       (let [genome (if (empty? (:genome state))
@@ -995,3 +995,79 @@
       (push-item (count (stack-ref :genome 0 state))
                  :integer 
                state))))
+
+(define-registered
+  genome_dub1
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (let [offset1 (or (:offset1 state) 0)
+          genome (if (empty? (:genome state))
+                   []
+                   (stack-ref :genome 0 state))
+          length (count genome)
+          source-index (+ length offset1)
+          source (:parent1-genome state)
+          max-length (int (/ @global-max-points 4))]
+      (if (>= (inc length) max-length) ;; if too big, do nothing
+        state
+        (assoc (->> (pop-item :genomes state)
+                    (push-item
+                     (meta-update [genome]
+                                  ['genome_dub1]
+                                  (into genome [(if (< -1 source-index (count source))
+                                                  (nth source source-index)
+                                                  (random-gene))]))
+                     :genome))
+               :offset1 offset1)))))
+
+(define-registered
+  genome_dub2
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (let [offset2 (or (:offset2 state) 0)
+          genome (if (empty? (:genome state))
+                   []
+                   (stack-ref :genome 0 state))
+          length (count genome)
+          source-index (+ length offset2)
+          source (:parent2-genome state)
+          max-length (int (/ @global-max-points 4))]
+      (if (>= (inc length) max-length) ;; if too big, do nothing
+        state
+        (assoc (->> (pop-item :genomes state)
+                    (push-item
+                     (meta-update [genome]
+                                  ['genome_dub2]
+                                  (into genome [(if (< -1 source-index (count source))
+                                                  (nth source source-index)
+                                                  (random-gene))]))
+                     :genome))
+               :offset2 offset2)))))
+
+(define-registered
+  genome_step1
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (let [offset1 (or (:offset1 state) 0)]
+      (assoc state :offset1 (inc offset1)))))
+
+(define-registered
+  genome_step2
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (let [offset2 (or (:offset2 state) 0)]
+      (assoc state :offset2 (inc offset2)))))
+
+(define-registered
+  genome_back1
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (let [offset1 (or (:offset1 state) 0)]
+      (assoc state :offset1 (dec offset1)))))
+
+(define-registered
+  genome_back2
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (let [offset2 (or (:offset2 state) 0)]
+      (assoc state :offset2 (dec offset2)))))
