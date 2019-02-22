@@ -204,9 +204,12 @@
               ((if use-single-thread swap! send) (nth pop-agents i) (fn [_] (nth new-frontier i))))
             (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
             (reset! frontier new-frontier))
-        (let [to-preserve (select candidates argmap)]
+        (let [to-preserve (select candidates argmap)
+              without-meta-errors (update-in to-preserve
+                                             [:errors]
+                                             #(drop-last (count (:meta-errors to-preserve)) %))]
           (recur (inc preserved)
-                 (conj new-frontier to-preserve)
+                 (conj new-frontier without-meta-errors)
                  (remove-one to-preserve candidates))))))
   (timer @push-argmap :fitness)
   ;; calculate solution rates if necessary for historically-assessed hardness
