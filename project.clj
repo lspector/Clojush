@@ -19,13 +19,13 @@
                  [criterium "0.4.4"]
                  [net.totakke/libra "0.1.1"]
                  [quil "2.8.0"]]
-  :plugins [[lein-codox "0.9.1"]
+  :plugins [[lein-codox "0.10.6"]
             [lein-shell "0.5.0"]
             [lein-gorilla "0.4.0"]
-            [cider/cider-nrepl "0.18.0"]
-            [lein-cloverage "1.0.6"]
-            [net.totakke/lein-libra "0.1.0"]]
-  :profiles {:text {:plugins [[venantius/ultra "0.5.1"]]}}
+            [cider/cider-nrepl "0.21.1"]
+            [lein-cloverage "1.0.13"]
+            [net.totakke/lein-libra "0.1.2"]]
+  :profiles {:text {:plugins [[venantius/ultra "0.5.4"]]}}
   :codox {:source-uri "http://github.com/lspector/Clojush/blob/master/{filepath}#L{line}"
           :namespaces [#"^(?!clojush\.problems)"]
           :output-path "doc"
