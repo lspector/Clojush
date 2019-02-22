@@ -1,10 +1,12 @@
 ;; winkler01.clj
 ;; Bill Tozier, bill@vagueinnovation.com
+;; updated February 20, 2019
 ;;
 ;; This is code for running Tozier's variant on Winkler's Zeros-and-Ones puzzle:
-;;   For any positive (non-zero) integer input, return a strictly positive integer which
-;;   when multiplied by the input value produces a result which contains only the
-;;   digits 0 and 1 (in base 10 notation)
+;;   For any positive (non-zero) integer input, return a
+;;   strictly positive integer which when multiplied by
+;;   the input value produces a result which contains only
+;;   the digits 0 and 1 (in base 10 notation)
 ;;
 ;; Input and output are given as integers using the integer stack.
 
@@ -20,11 +22,11 @@
 
 (defn proportion-not-01
     "Returns the proportion of digits in the argument integer which are not 0 or 1"
-    [num] 
+    [num]
       (let [counts (frequencies (re-seq #"\d" (str num)))]
-      (- 1 
-         (/ (+ (get counts "0" 0) 
-               (get counts "1" 0)) 
+      (- 1
+         (/ (+ (get counts "0" 0)
+               (get counts "1" 0))
             (count-digits num)))))
 
 
@@ -53,7 +55,7 @@
                                (* input result-output)
                                "N/A")))
                 (if (and (number? result-output) (pos? result-output))
-                  (proportion-not-01 (* input result-output))
+                  (double (proportion-not-01 (* input result-output)))
                   100)
                 ))))))
 
@@ -67,7 +69,7 @@
     (assoc individual
            :errors
            (doall
-            (for [input (range 1 number-test-cases)]
+            (for [input (range 18 (+ 18 number-test-cases))]
               (let [final-state (run-push (:program individual)
                                           (push-item input :input
                                                      (make-push-state)))
@@ -77,7 +79,8 @@
                                (* input result-output)
                                "N/A")))
                 (if (and (number? result-output) (pos? result-output))
-                  (proportion-not-01 (kill-trailing-zeros (* input result-output)))
+                  (double (proportion-not-01
+                    (kill-trailing-zeros (* input result-output))))
                   100)
                 ))))))
 
@@ -89,9 +92,9 @@
   ([num]
     (prime-factors num 2 ()))
   ([num k acc]
-    (if (= 1 num)      
+    (if (= 1 num)
       acc
-      (if (= 0 (rem num k))        
+      (if (= 0 (rem num k))
         (recur (quot num k) k (cons k acc))
         (recur num (inc k) acc)))))
 
@@ -99,7 +102,7 @@
 (defn prime-factors-as-sorted-vector
   "Return the argument's prime factors as a sorted vector of integers; if the argument is 0, it returns (0); if the argument is negative, it returns the factors of the positive number with -1 added to the list;"
   [num]
-  (cond 
+  (cond
     (pos? num) (into [] (sort (prime-factors num)))
     (neg? num) (into [] (cons -1 (sort (prime-factors (abs num)))))
     :else [0]
@@ -128,16 +131,21 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (winkler-error-function-02 44) ;; change the error function to follow along...
+  {:error-function (winkler-error-function-02 70) ;; change the error function to follow along...
    :atom-generators winkler-atom-generators
    :max-points 1000
-   :print-csv-logs true
-   :csv-columns [:generation :location :parent-uuids :genetic-operators :push-program-size :push-program :total-error :test-case-errors]
-   :csv-log-filename "log.csv"
-   :max-genome-size-in-initial-program 500
-   :evalpush-limit 1000
+   :max-genome-size-in-initial-program 1000
+   :evalpush-limit 2000
    :population-size 1000
-   :max-generations 1000
-   :parent-selection :lexicase 
-   :final-report-simplifications 1000
+   :max-generations 5000
+   :parent-selection :lexicase
+   :meta-error-categories [:novelty]
+   :individuals-for-novelty-archive-per-generation 1
+   :genetic-operator-probabilities {:alternation 0.4
+                                    :uniform-mutation 0.6
+                                    }
+   :alternation-rate 0.05
+   :uniform-mutation-rate 0.05
+   :report-simplifications 0
+   :final-report-simplifications 5000
    })
