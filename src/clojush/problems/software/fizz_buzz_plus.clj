@@ -105,7 +105,19 @@
 
 
 (def all-cases
-  (fizz-buzz-plus-training-cases 2000 2100 [2 3 4 5 7]))
+  (concat
+    (fizz-buzz-plus-training-cases 2000 2100 [2 3 4 5 7])
+    [(fizz-buzz-plus-training-case 1111111 239 4649)
+     (fizz-buzz-plus-training-case 1111111 4649 239)
+     (fizz-buzz-plus-training-case 1111112 239 4649)
+     (fizz-buzz-plus-training-case 1111112 138889 7)
+     (fizz-buzz-plus-training-case 1111112 138889 8)
+     (fizz-buzz-plus-training-case 11111111111 21649 513239)
+     (fizz-buzz-plus-training-case 11111111111 513239 21649)
+     (fizz-buzz-plus-training-case 11111111111 513238 21649)
+     (fizz-buzz-plus-training-case 11111111111 513239 21648)
+     (fizz-buzz-plus-training-case 22 22 22)
+     ]))
 
 (println all-cases)
 
@@ -119,7 +131,7 @@
    :max-points 1000
    :max-genome-size-in-initial-program 1000
    :evalpush-limit 1000
-   :population-size 500
+   :population-size 1000
    :max-generations 5000
    :parent-selection :lexicase
    :meta-error-categories [:novelty]
