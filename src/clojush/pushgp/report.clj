@@ -589,6 +589,10 @@
           (>= @point-evaluations-count max-point-evaluations) [:failure best]
           :else [:continue best])))
 
+(defn remove-function-values [argmap]
+  (into {} (filter (fn [[k v]] (not (fn? v)))
+    (dissoc argmap :random-seed :atom-generators))))
+
 (defn initial-report
   "Prints the initial report of a PushGP run."
   [{:keys [problem-specific-initial-report] :as push-argmap}]
@@ -632,12 +636,7 @@
     ;; The edn log is overwritten if it exists
     (with-open [w (io/writer (:edn-log-filename push-argmap) :append false)]
       (.write w "#clojush/run")
-      (.write w (prn-str (dissoc push-argmap
-                                 ;; These keys have functions
-                                 :atom-generators
-                                 :error-function
-                                 :problem-specific-report
-                                 :random-seed)))))
+      (.write w (prn-str (remove-function-values push-argmap)))))
   (when (:visualize push-argmap) ;; Visualization
     ;; Require conditionally (dynamically), avoiding unintended Quil sketch launch
     (require 'clojush.pushgp.visualize)))  
