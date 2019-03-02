@@ -84,8 +84,10 @@
     ([individual data-cases] ;; data-cases should be :train or :test
      (the-actual-last-index-of-zero-error-function individual data-cases false))
     ([individual data-cases print-outputs]
-      (let [stacks-depth (atom (zipmap push-types (repeat 0)))
+      (let [;stacks-depth (atom (zipmap push-types (repeat 0)))
             ;state-with-tags (tagspace-initialization (str (:program individual)) 1000 (make-push-state))
+            reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
+            repetition-metric (atom ())
             behavior (atom '())
             errors (doall
                      (for [[input correct-output] (case data-cases
@@ -99,7 +101,12 @@
                            (println (format "Correct output: %2d | Program output: %s"
                                             correct-output
                                             (str result))))
-                         (doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
+                         ;(doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
+                         (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
+                                              (do
+                                                (swap! reuse-metric conj (first metrics))
+                                              (swap! repetition-metric conj (last metrics))))
+                         
                          ; Record the behavior
                          (swap! behavior conj result)
                          ; Error is absolute distance from correct index
@@ -108,7 +115,7 @@
                            1000000) ; penalty for no return value
                          )))]
         (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors :stacks-info @stacks-depth)
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric)
           (assoc individual :test-errors errors))))))
 
 (defn get-last-index-of-zero-train-and-test

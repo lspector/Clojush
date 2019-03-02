@@ -528,3 +528,148 @@
   (let [new-state (dissoc state :tag :return :environment:genome)]
        (for [key (keys new-state)]
             (count (get new-state key)))))
+
+
+
+; The functions to calculate modularity metrics
+(defn exp [x n]
+     (if (zero? n) 1
+         (*' x (exp x (dec n)))))
+
+(defn parenthetic-contents
+  "Generate parenthesized contents in string as pairs (level, contents)."
+  [expr]
+  (let [result (atom ())
+        stack (atom ())
+        lookout-start (atom -1)
+        lookout-end (atom -1)]
+    (do
+      (doseq [index (range (count expr))]
+        (cond
+          (= (get expr index) \() (do
+                                    (swap! stack conj index)
+                                    (reset! lookout-end index)
+                                    (if (and (> @lookout-start 0) (> @lookout-end @lookout-start) (> (count (string/split (subs expr (+ @lookout-start 1) @lookout-end) #" ")) 0))
+                                      (doseq [x (string/split (subs expr (+ @lookout-start 1) @lookout-end) #" ")]
+                                        (swap! result conj (list 1 x)))))
+          (and (= (get expr index) \)) (not (empty? @stack))) 
+          (let [start (first @stack)
+                _ (swap! stack pop)]
+            (do
+              (if (= (count @stack) 1)
+                (reset! lookout-start index))
+              (swap! result conj (list (count @stack) (subs expr (inc start) index)))))
+          ;:else nil
+          ))
+      (doseq [x (string/split (subs (string/join (drop-last expr)) (+ @lookout-start 1)) #" ")]
+        (swap! result conj (list 1 x)))
+      (map (fn [x] (nth x 1))(filter (fn [x] (and (= (nth x 0) 1) (not= (nth x 1) "")))(reverse @result)))
+      )))
+
+(defn all-continuous-seqs
+  [expr]
+  (let [seqs (atom ())
+        dups (for [[id freq] (frequencies expr)  ;; get the frequencies, destructure
+                   :when (> freq 1)]            ;; this is the filter condition
+               id) ]
+    (do
+      (doseq [dup dups]
+        (swap! seqs conj (vector dup)))
+      (let [expr (distinct expr)]
+        (doseq [i (range 1 (inc (count expr)))
+                j (range (inc (- (count expr) i)))]
+          (swap! seqs conj (subvec (vec expr) j (+ j i))))
+      )
+      (sort @seqs)
+    @seqs)))
+
+(defn mod-metrics
+  [exec-trace meta-trace]
+  (let [exec-trace (reverse exec-trace)
+        meta-trace (reverse meta-trace)
+        actual-exec-trace (doall (parenthetic-contents (str exec-trace)))
+        metadata-trace (map (fn [x] (if (seq? x)
+                                      (loop [f (first x) 
+                                             l (last x)]
+                                        (if (not (or (seq? f) (seq? l)))
+                                          (vector f l)
+                                          (recur (if (seq? f)
+                                                   (first f)
+                                                   f)
+                                                 (if (seq? l)
+                                                   (last l)
+                                                   l))))
+                                      (vector x x))) meta-trace)
+        vocab-length (count (distinct (filter (fn [x] (= (first x) (last x))) metadata-trace)))
+        len (count metadata-trace)
+        seqs (atom ())
+        m-trace (atom metadata-trace)
+        reuse (atom 0)
+        repetition (atom 0)
+        i (atom 1)]
+    ;(prn actual-exec-trace)
+    ;(println metadata-trace)
+    (while (<= @i (count @m-trace))
+      (let [j (atom 0)]
+        (while (< @j (count @m-trace))
+          (do
+            (let [m (first (nth @m-trace @j))
+                n (last (nth @m-trace @j))
+              temp (atom ())]
+          (if (= (- n m) @i)
+            (do
+              (doseq [k (range (inc @i))]
+                (if (and (< @j (dec (count @m-trace))) (>= (nth (nth @m-trace (inc @j)) 0) m) (<= (nth (nth @m-trace (inc @j)) 1) n) (not= (nth @m-trace (inc @j)) (nth @m-trace @j)))
+                (let [f (nth @m-trace (inc @j))]
+                  (reset! m-trace (doall (keep-indexed #(if (not= %1 (inc @j)) %2) @m-trace)))
+                  (swap! temp conj f)
+                  )
+                )
+              )
+              (let [_ (reset! temp (sort-by first @temp))
+                    local-modules (all-continuous-seqs (vec @temp))
+                    local-modules (remove #(= % (vec @temp)) local-modules)]
+               (swap! seqs concat local-modules)
+                )
+            )
+          ))
+            (swap! j inc)
+        )
+       )
+        (swap! i inc)
+      ))
+    (swap! seqs concat (remove #(= % (vec @m-trace)) (all-continuous-seqs (vec @m-trace))))
+    ;(prn @seqs)
+    (let [freq-temp (frequencies @seqs)
+          freq-temp (remove #(= (last %) 1) freq-temp)]
+      ;(println freq-temp)
+      (doseq [elem freq-temp]        
+          (swap! reuse + (* (inc (-(nth (last (first elem)) 1) (nth (first (first elem)) 0))) (exp 2 (last elem)) ))
+          )
+      )
+    
+    (if (> vocab-length 50)
+      (reset! reuse (/ @reuse (float (exp 2 (- vocab-length 50)))))
+      (reset! reuse (*' @reuse (float (exp 2 (- 50 vocab-length))))))
+    (let [mapping (zipmap metadata-trace actual-exec-trace)
+          _ (swap! seqs distinct)
+          modules-temp (map (fn [x] (vals (select-keys mapping x))) @seqs)
+          modules-temp (map (fn [x] (string/join " " x)) modules-temp)
+          modules-temp (map (fn [x] (string/replace x #"[()]" "")) modules-temp)
+          freq-temp (frequencies modules-temp)
+          unique-instrs (count (distinct (apply concat (for [elem freq-temp]        
+           (string/split (first elem) #" ")))))
+          freq-temp (remove #(= (last %) 1) freq-temp)
+          ]
+      ;(prn freq-temp)
+      ;(prn unique-instrs)
+      (reset! repetition (reduce + (for [elem freq-temp]        
+           (*' (count (string/split (first elem) #" ")) (exp 2 (last elem))))))
+         (if (> unique-instrs 50)
+      (reset! repetition (/ @repetition (float (exp 2 (- unique-instrs 50)))))
+      (reset! repetition (*' @repetition (float (exp 2 (- 50 unique-instrs))))))
+         )
+    (list @reuse @repetition)
+  )
+  )
+

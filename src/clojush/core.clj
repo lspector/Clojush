@@ -15,6 +15,29 @@
 ;; PARTICULAR PURPOSE. See the GNU General Public License (http://www.gnu.org/licenses/)
 ;; for more details.
 
+
+(comment
+  ; Uncomment this when you want to calculate reuse and repetition only for some programs
+  (ns clojush.core
+    (:require [clojush.pushgp.record :as r]
+              [clojure.string :as str]
+              [clojure.data.json :as json])
+    (:use [clojush.pushgp pushgp report]
+          [clojush.mod-metrics5 :as mod])
+    (:gen-class))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; main function
+  
+
+  (defn -main
+    [& args]
+    (main-func (read-string (str/replace (first args) #"ThisIsSingleQuote" "'"))))
+
+  )
+
+
 (ns clojush.core
   (:require [clojush.pushgp.record :as r])
   (:use [clojush.pushgp pushgp report])
@@ -46,3 +69,5 @@
       (println "######################################")
       (pushgp params)
       (shutdown-agents))))
+
+

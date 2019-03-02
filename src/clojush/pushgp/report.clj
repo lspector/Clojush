@@ -359,6 +359,11 @@
     (r/generation-data! [:best :individual] (dissoc best :program))
     (println "Best genome:" (print-genome best))
     (println "Best program:" (pr-str (not-lazy (:program best))))
+    ;
+    (println "Reuse for all test cases is" (pr-str (:reuse-info best)))
+    (println "Repetition for all test cases is" (pr-str (:repetition-info best)))
+                                                   
+    ;
     (when (> report-simplifications 0)
       (println "Partial simplification:"
                (pr-str (not-lazy (:program (r/generation-data! [:best :individual-simplified]

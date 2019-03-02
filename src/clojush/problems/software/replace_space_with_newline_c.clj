@@ -13,7 +13,7 @@
 (ns clojush.problems.software.replace-space-with-newline-c
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
-        ;clojush.instructions.tag
+        clojush.instructions.tag
         clojure.math.numeric-tower)
     (:require [clojure.string :as string]))
 
@@ -37,8 +37,8 @@
             (fn [] (lrand-nth (concat [\newline \tab] (map char (range 32 127))))) ;Visible character ERC
             (fn [] (replace-space-with-newline-input (lrand-int 21))) ;String ERC
             ;;; end ERCs
-            ;(tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
-            ;(tagged-instruction-erc 1000)
+            (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
+            (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
@@ -97,17 +97,24 @@
   "Evaluates the program on the given list of cases.
    Returns the behaviors, a list of the outputs of the program on the inputs."
   [program cases]
-  (flatten
-    (let [state-with-tags nil];(tagspace-initialization (str program) 1000 (make-push-state))]      
-      (doall
-       (for [[input output] cases]
-         (let [final-state (run-push program
-                                     (->> (make-push-state)
-                                       (push-item input :input)
-                                       (push-item "" :output)))
-               printed-result (stack-ref :output 0 final-state)
-               int-result (stack-ref :integer 0 final-state)]
-           (vector printed-result int-result)))))))
+  (let [state-with-tags nil
+        reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
+        repetition-metric (atom ())];(tagspace-initialization (str program) 1000 (make-push-state))]      
+    (list
+      (flatten
+        (doall
+         (for [[input output] cases]
+           (let [final-state (run-push program
+                                       (->> (make-push-state)
+                                         (push-item input :input)
+                                         (push-item "" :output)))
+                 printed-result (stack-ref :output 0 final-state)
+                 int-result (stack-ref :integer 0 final-state)
+                 _ (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
+                                                  (do
+                                                    (swap! reuse-metric conj (first metrics))
+                                                  (swap! repetition-metric conj (last metrics))))]
+             (vector printed-result int-result))))) (doall @reuse-metric) (doall @repetition-metric)))) ; (behaviors reuse repetition)
 
 (defn replace-space-with-newline-errors-from-behaviors
   "Takes a list of behaviors across the list of cases and finds the error
@@ -138,9 +145,9 @@
                  [])
          behaviors (replace-space-with-newline-evaluate-program-for-behaviors (:program individual)
                                                                  cases)
-         errors (replace-space-with-newline-errors-from-behaviors behaviors cases)]
+         errors (replace-space-with-newline-errors-from-behaviors (first behaviors) cases)]
      (cond
-       (= data-cases :train) (assoc individual :behaviors behaviors :errors errors)
+       (= data-cases :train) (assoc individual :behaviors (first behaviors) :errors errors :reuse-info (nth behaviors 1) :repetition-info (last behaviors))
        (= data-cases :test) (assoc individual :test-errors errors)))))
 
 (defn replace-space-with-newline-initial-report

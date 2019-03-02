@@ -24,8 +24,8 @@
             ;;; end constants
             ;;; end ERCs
             (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
-            (tagged-instruction-erc 1000)
-            (registered-for-type "return_")
+            ;(tagged-instruction-erc 1000)
+            ;(registered-for-type "return_")
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
@@ -88,7 +88,9 @@
     ([individual data-cases] ;; data-cases should be :train or :test
      (the-actual-double-letters-error-function individual data-cases false))
     ([individual data-cases print-outputs]
-      (let [stacks-depth (atom (zipmap push-types (repeat 0)))
+      (let [;stacks-depth (atom (zipmap push-types (repeat 0)))
+            reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
+            repetition-metric (atom ())
             ;state-with-tags (tagspace-initialization (str (:program individual)) 1000 (make-push-state)) 
             behavior (atom '())
             errors (doall
@@ -98,18 +100,22 @@
                                                     [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (push-item input :input (make-push-state))
-                                                     (push-item "" :output)))
+                                                     (push-item "" :output)) );true true true)
                              printed-result (stack-ref :output 0 final-state)]
                          (when print-outputs
                            (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str printed-result))))
                          
-                         (doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
+                         ;(doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
+                         ;update the modularity metrics
+                         (let [metrics (mod-metrics (doall (:trace final-state)) (doall (:trace_id final-state)))]
+                               (swap! reuse-metric conj (first metrics))
+                               (swap! repetition-metric conj (last metrics)))
                          ; Record the behavior
                          (swap! behavior conj printed-result)
                          ; Error is Levenshtein distance
                          (levenshtein-distance correct-output printed-result))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors :stacks-info @stacks-depth)
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric)
           (assoc individual :test-errors errors))))))
 
 (defn get-double-letters-train-and-test

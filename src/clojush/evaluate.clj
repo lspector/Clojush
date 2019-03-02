@@ -46,6 +46,8 @@
               (= cat :size) (count (:genome ind))
               ;(= cat :compressibility) 555 ;;TMH fix later
               ;
+              (= cat :tag-usage) (vals (:stacks-info ind))
+              ;
               (= cat :max-stacks-depth) (vals (:stacks-info ind))
               ;
               (= cat :total-error) (:total-error ind)

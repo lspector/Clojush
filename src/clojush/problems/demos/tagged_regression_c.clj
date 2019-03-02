@@ -28,7 +28,7 @@
 
 ;; http://www.drregex.com/2017/11/match-nested-brackets-with-regex-new.html
 
-
+(comment
 (defn custom-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
@@ -39,27 +39,37 @@
     (println ";;******************************")
     ))
 
-
+)
 (def argmap
   {:error-function (fn [individual]
-                     (let [stacks-depth (atom (zipmap push-types (repeat 0)))]
-                     (assoc individual
-                            :errors (let [state-with-tags (tagspace-initialization-heritable (str (:program individual)) (make-push-state))]
-                                      (doall
-                                        (for [input (range 10)]
-                                          (let [state (run-push (:program individual)
-                                                                (push-item input :input
-                                                                           (push-item input :integer state-with-tags)))
-                                                top-int (top-item :integer state)]
-                                            (doseq [[k v] (:max-stack-depth state)] (swap! stacks-depth update k #(max % v)))
-                                            (if (number? top-int)
-                                              (abs (- top-int 
-                                                      (- (* input input input) 
-                                                         (* 2 input input) input)))
-                                              1000)))))
-                            :stacks-info @stacks-depth)
+                     (let [;stacks-depth (atom (zipmap push-types (repeat 0)))
+                           reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
+                           repetition-metric (atom ())]
+                       (assoc individual
+                              :errors (let [;state-with-tags (tagspace-initialization-heritable (str (:program individual)) (make-push-state))
+                                            ]
+                                        (doall
+                                         (for [input (range 10)]
+                                           (let [state (run-push (:program individual)
+                                                                 (push-item input :input
+                                                                            (push-item input :integer (make-push-state))))
+                                                 top-int (top-item :integer state)]
+                                            ;(doseq [[k v] (:max-stack-depth state)] (swap! stacks-depth update k #(max % v)))
+                                            ;update the modularity metrics
+                                             (let [metrics (mod-metrics (:trace state) (:trace_id state))]
+                                               (do
+                                                 (swap! reuse-metric conj (first metrics))
+                                                 (swap! repetition-metric conj (last metrics))))
+                                            ;calculate errors
+                                             (if (number? top-int)
+                                               (abs (- top-int 
+                                                       (- (* input input input) 
+                                                          (* 2 input input) input)))
+                                               1000)))))
+                            ;:stacks-info @stacks-depth
+                              :reuse-info @reuse-metric :repetition-info @repetition-metric)
                       ;(println (:uuid individual), @stacks-depth)
-                      ))
+                       ))
    :atom-generators (list (fn [] (lrand-int 10))
                           'in1
                           'integer_div
@@ -67,18 +77,19 @@
                           'integer_add
                           'integer_sub
                           'end_tag
-                          (tagwrap-instruction-erc 100)
+                          ;(tagwrap-instruction-erc 100)
                           ;(tag-instruction-erc [:integer :exec] 100)
                           ;(untag-instruction-erc 100)
-                          (tagged-instruction-erc 100)
+                          ;(tagged-instruction-erc 100)
                           ;(registered-for-stacks [:environment])
                           )
    :tag-limit 100
-   :problem-specific-report custom-report
+   ;:problem-specific-report custom-report
    :parent-selection :tournament
    :tournament-size 3
    :genetic-operator-probabilities {:alternation 0.5
                                     :uniform-mutation 0.4
                                     :uniform-close-mutation 0.1}
-   :meta-error-categories [:max-stacks-depth]
+   ;:meta-error-categories [:max-stacks-depth]
+   :calculate-mod-metrics true
    })

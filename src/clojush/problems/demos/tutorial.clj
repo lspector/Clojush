@@ -8,7 +8,9 @@
 
 (ns clojush.problems.demos.tutorial
   (:use [clojush.ns]
-        [clojure.math.numeric-tower]))
+        [clojure.math.numeric-tower]
+        [clojush.problems.software.replace-space-with-newline-c :as rswn]
+        [clojush.individual :as individual]))
 
 ;; Get access to all clojush namespaces (except for examples/* and experimental/*)
 
@@ -25,10 +27,32 @@
 
 ;; Providing true as a third argument produces a trace of all stacks as it runs:
 
-(run-push '(1 2 integer_add) 
+(run-push '(exec_dup (exec_swap 1 2))
           (make-push-state)
-          true)          
-          
+          true true true)          
+
+
+(comment
+  ; Some example programs and their exec traces
+prog1 = "(exec_dup (1 2 3 exec_swap 4 5 6))"
+#there is no repetition in the following trace. Hence it should b easier to calclate modularity for this.
+trace1 = "((exec_dup (1 2 3 exec_swap 4 5 6)) exec_dup (1 2 3 exec_swap 4 5 6) 1 2 3 exec_swap 5 4 6 (1 2 3 exec_swap 4 5 6) 1 2 3 exec_swap 5 4 6)"
+
+#example 2
+
+prog2 = "((1 2 exec_swap 3 4) 5 6)"
+trace2 = "(((1 2 exec_swap 3 4) 5 6) (1 2 exec_swap 3 4) 1 2 exec_swap 4 3 5 6)"
+
+#example 3
+prog3 = "(exec_dup (1 2) 3 4)"
+trace3 = "((exec_dup (1 2) 3 4) exec_dup (1 2) 1 2 (1 2) 1 2 3 4)"
+trace_id3 = "((0 (1 2) 3 4) 0 (1 2) 1 2 (1 2) 1 2 3 4)"
+
+prog4 =  "(exec_dup (exec_swap 1 2))"
+trace4 = "((exec_dup (exec_swap 1 2)) exec_dup (exec_swap 1 2) exec_swap 2 1 (exec_swap 1 2) exec_swap 2 1)"
+trace_id4 = "((1 (2 3 4)) 1 (2 3 4) 2 4 3 (2 3 4) 2 4 3)"
+  
+  )
 ;;;;;;;;;;;;
 ;; Integer symbolic regression of x^3 - 2x^2 - x (problem 5 from the 
 ;; trivial geography chapter) with minimal integer instructions and an 
@@ -40,10 +64,10 @@
                             :errors
                             (doall
                              (for [input (range 10)]
-                               (let [state (->> (make-push-state)
+                               (let [state ->> (make-push-state)
                                                 (push-item input :integer)
                                                 (push-item input :input)
-                                                (run-push (:program individual)))
+                                                (run-push (:program individual))
                                      top-int (top-item :integer state)]
                                  (if (number? top-int)
                                    (abs (- top-int 
@@ -60,6 +84,7 @@
    :parent-selection :tournament
    :genetic-operator-probabilities {:alternation 0.5
                                     :uniform-mutation 0.5}
+   :max-generations 1
    })
 
 ;(pushgp argmap)

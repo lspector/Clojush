@@ -10,7 +10,7 @@
 
 (def push-types '(:exec :code :integer :float :boolean :char :string :zip
                   :vector_integer :vector_float :vector_boolean :vector_string
-                  :input :output :auxiliary :tag :return :environment :genome :max-stack-depth))
+                  :input :output :auxiliary :tag :return :environment :genome :max-stack-depth :trace :exec_id :trace_id))
 ;; The list of stacks used by the Push interpreter
 
 
@@ -138,3 +138,6 @@
 
 (def global-parent-selection (atom :lexicase)) 
 ;; The type of parent selection used
+
+(def global-calculate-mod-metrics (atom false))
+;; Whether or not to calculate mod metrics while running modularity metics (reuse and repetition)

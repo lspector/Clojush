@@ -511,6 +511,11 @@
           :label nil
           ;; If set, will send this in the configuration of the run, to the
           ;; external record
+
+          :calculate-mod-metrics false
+          ;; Is true, will calculate modularity metrics (reuse and repetition)
+          ;; as the run proceeds.
+
           )))
 
 (defn load-push-argmap
