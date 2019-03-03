@@ -38,7 +38,7 @@
 (defn register-instruction
   "Add the provided name to the global list of registered instructions."
   [name]
-  (if (some #{name} @registered-instructions)
+  (if false ;;(some #{name} @registered-instructions) ;*****TEMPORARY*****
     (throw (Exception. (str "Duplicate Push instruction defined:" name)))
     (swap! registered-instructions conj name)))
 

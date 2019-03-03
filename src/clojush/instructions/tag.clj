@@ -202,7 +202,7 @@
   ^{:stack-types [:integer :tag :exec]}
   (fn [state]
     (if (not (empty? (:integer state)))
-      (push-item (symbol (str "tagged_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
+      (push-item (symbol (str "tagged_" (mod (#(if (neg? %) (-' %) %) (stack-ref :integer 0 state))
                                              @global-tag-limit)))
                  :exec
                  (pop-item :integer state))
@@ -213,7 +213,7 @@
   ^{:stack-types [:integer :tag :exec]}
   (fn [state]
     (if (not (empty? (:integer state)))
-      (push-item (symbol (str "untag_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
+      (push-item (symbol (str "untag_" (mod (#(if (neg? %) (-' %) %) (stack-ref :integer 0 state))
                                             @global-tag-limit)))
                  :exec
                  (pop-item :integer state))
@@ -224,7 +224,7 @@
   ^{:stack-types [:integer :tag :exec]}
   (fn [state]
     (if (not (empty? (:integer state)))
-      (push-item (symbol (str "tag_exec_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
+      (push-item (symbol (str "tag_exec_" (mod (#(if (neg? %) (-' %) %) (stack-ref :integer 0 state))
                                                @global-tag-limit)))
                  :exec
                  (pop-item :integer state))
@@ -235,7 +235,7 @@
   ^{:stack-types [:integer :tag :exec :code]}
   (fn [state]
     (if (not (empty? (:integer state)))
-      (push-item (symbol (str "tag_code_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
+      (push-item (symbol (str "tag_code_" (mod (#(if (neg? %) (-' %) %) (stack-ref :integer 0 state))
                                                @global-tag-limit)))
                  :exec
                  (pop-item :integer state))
@@ -246,7 +246,7 @@
   ^{:stack-types [:integer :tag :exec]}
   (fn [state]
     (if (not (empty? (:integer state)))
-      (push-item (symbol (str "tag_integer_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
+      (push-item (symbol (str "tag_integer_" (mod (#(if (neg? %) (-' %) %) (stack-ref :integer 0 state))
                                                   @global-tag-limit)))
                  :exec
                  (pop-item :integer state))
@@ -257,7 +257,7 @@
   ^{:stack-types [:integer :tag :exec :float]}
   (fn [state]
     (if (not (empty? (:integer state)))
-      (push-item (symbol (str "tag_float_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
+      (push-item (symbol (str "tag_float_" (mod (#(if (neg? %) (-' %) %) (stack-ref :integer 0 state))
                                                 @global-tag-limit)))
                  :exec
                  (pop-item :integer state))
@@ -268,7 +268,7 @@
   ^{:stack-types [:integer :tag :exec :boolean]}
   (fn [state]
     (if (not (empty? (:integer state)))
-      (push-item (symbol (str "tag_boolean_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
+      (push-item (symbol (str "tag_boolean_" (mod (#(if (neg? %) (-' %) %) (stack-ref :integer 0 state))
                                                   @global-tag-limit)))
                  :exec
                  (pop-item :integer state))
@@ -279,7 +279,7 @@
   ^{:stack-types [:integer :tag :exec :char]}
   (fn [state]
     (if (not (empty? (:integer state)))
-      (push-item (symbol (str "tag_char_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
+      (push-item (symbol (str "tag_char_" (mod (#(if (neg? %) (-' %) %) (stack-ref :integer 0 state))
                                                @global-tag-limit)))
                  :exec
                  (pop-item :integer state))
@@ -290,7 +290,7 @@
   ^{:stack-types [:integer :tag :exec :string]}
   (fn [state]
     (if (not (empty? (:integer state)))
-      (push-item (symbol (str "tag_string_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
+      (push-item (symbol (str "tag_string_" (mod (#(if (neg? %) (-' %) %) (stack-ref :integer 0 state))
                                                  @global-tag-limit)))
                  :exec
                  (pop-item :integer state))
@@ -301,7 +301,7 @@
 ;  ^{:stack-types [:integer :tag :exec :zip]}
 ;  (fn [state]
 ;    (if (not (empty? (:integer state)))
-;      (push-item (symbol (str "tag_zip_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
+;      (push-item (symbol (str "tag_zip_" (mod (#(if (neg? %) (-' %) %) (stack-ref :integer 0 state))
 ;                                              @global-tag-limit)))
 ;                 :exec
 ;                 (pop-item :integer state))
@@ -312,10 +312,9 @@
 ;  ^{:stack-types [:integer :tag :exec :genome]}
 ;  (fn [state]
 ;    (if (not (empty? (:integer state)))
-;      (push-item (symbol (str "tag_genome_" (mod (#(if (neg? %) (- %) %) (stack-ref :integer 0 state))
+;      (push-item (symbol (str "tag_genome_" (mod (#(if (neg? %) (-' %) %) (stack-ref :integer 0 state))
 ;                                                 @global-tag-limit)))
 ;                 :exec
 ;                 (pop-item :integer state))
 ;      state)))
-
 

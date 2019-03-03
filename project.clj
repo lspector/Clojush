@@ -1,31 +1,31 @@
-(defproject clojush "3.10.0-1-SNAPSHOT"
+(defproject clojush "3.19.0-1-SNAPSHOT"
   :description "The Push programming language and the PushGP genetic programming
                 system implemented in Clojure. See http://pushlanguage.com"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojars.etosch/cosmos "1.0.0"]
                  [org.clojure/math.numeric-tower "0.0.4"]
-                 [org.clojure/math.combinatorics "0.1.1"]
-                 [org.clojure/data.csv "0.1.3"]
+                 [org.clojure/math.combinatorics "0.1.4"]
+                 [org.clojure/data.csv "0.1.4"]
                  [local-file "0.1.0"]
-                 [clojure-csv "2.0.1"]
+                 [clojure-csv "2.0.2"]
                  [org.clojure/data.json "0.2.6"]
-                 [clj-random "0.1.7"]
+                 [clj-random "0.1.8"]
                  ;; https://mvnrepository.com/artifact/org.apache.commons/commons-math3
-                 [org.apache.commons/commons-math3 "3.2"]
-                 [cheshire "5.7.1"]
-                 [prismatic/plumbing "0.5.4"]
+                 [org.apache.commons/commons-math3 "3.6.1"]
+                 [cheshire "5.8.1"]
+                 [prismatic/plumbing "0.5.5"]
                  [criterium "0.4.4"]
-                 [net.totakke/libra "0.1.0"]
-                 [org.clojure/data.json "0.2.6"]]
-  :plugins [[lein-codox "0.9.1"]
+                 [net.totakke/libra "0.1.1"]
+                 [quil "2.8.0"]]
+  :plugins [[lein-codox "0.10.6"]
             [lein-shell "0.5.0"]
             [lein-gorilla "0.4.0"]
-            [cider/cider-nrepl "0.15.1"]
-            [lein-cloverage "1.0.6"]
-            [net.totakke/lein-libra "0.1.0"]]
-  :profiles {:text {:plugins [[venantius/ultra "0.5.1"]]}}
+            [cider/cider-nrepl "0.21.1"]
+            [lein-cloverage "1.0.13"]
+            [net.totakke/lein-libra "0.1.2"]]
+  :profiles {:text {:plugins [[venantius/ultra "0.5.4"]]}}
   :codox {:source-uri "http://github.com/lspector/Clojush/blob/master/{filepath}#L{line}"
           :namespaces [#"^(?!clojush\.problems)"]
           :output-path "doc"

@@ -47,6 +47,18 @@
       state)))
 
 (define-registered
+  code_rand_atom
+  ^{:stack-types [:code :random]}
+  (fn [state]
+    (if (empty? @global-atom-generators)
+      (binding [*out* *err*]
+        (println "code_rand_atom: global-atom-generators is empty.")
+        state)
+      (push-item (random-atom @global-atom-generators)
+                 :code
+                 state))))
+
+(define-registered
   string_rand
   ^{:stack-types [:string :random]}
   (fn [state]

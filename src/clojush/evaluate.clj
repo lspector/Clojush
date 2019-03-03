@@ -1,5 +1,5 @@
 (ns clojush.evaluate
-  (:use [clojush util pushstate random globals individual]
+  (:use [clojush util pushstate random globals individual meta-errors]
         clojush.pushgp.genetic-operators)
   (:require [clojure.math.numeric-tower :as math]
             [clj-random.core :as random]))
@@ -21,6 +21,7 @@
     (println (doall (map float @solution-rates)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+<<<<<<< HEAD
 ;; calculate meta-errors
 
 (defn evaluate-individual-meta-errors
@@ -1109,6 +1110,8 @@
       (assoc ind :meta-errors (vec (flatten (mapv meta-error-fn meta-error-categories)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+=======
+>>>>>>> 2912a2d215577102f7270cc7a97c0f4e5a9f1da9
 ;; evaluate individuals
 
 (defn compute-total-error

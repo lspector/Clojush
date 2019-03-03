@@ -64,10 +64,10 @@ trace_id4 = "((1 (2 3 4)) 1 (2 3 4) 2 4 3 (2 3 4) 2 4 3)"
                             :errors
                             (doall
                              (for [input (range 10)]
-                               (let [state ->> (make-push-state)
+                               (let [state (->> (make-push-state)
                                                 (push-item input :integer)
                                                 (push-item input :input)
-                                                (run-push (:program individual))
+                                                (run-push (:program individual)))
                                      top-int (top-item :integer state)]
                                  (if (number? top-int)
                                    (abs (- top-int 

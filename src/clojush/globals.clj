@@ -9,8 +9,9 @@
 
 
 (def push-types '(:exec :code :integer :float :boolean :char :string :zip
-                  :vector_integer :vector_float :vector_boolean :vector_string
-                  :input :output :auxiliary :tag :return :environment :genome :max-stack-depth :trace :exec_id :trace_id))
+                        :vector_integer :vector_float :vector_boolean :vector_string
+                        :input :output :auxiliary :tag :return :environment :genome :max-stack-depth :trace :exec_id :trace_id
+                        :gtm))
 ;; The list of stacks used by the Push interpreter
 
 
@@ -83,6 +84,12 @@
 (def max-age (atom 0))
 ;; Used for age-mediated-parent-selection
 
+(def delay-archive (atom []))
+;; used for selection-delay
+
+(def frontier (atom []))
+;; used for preserve-frontier
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The globals below may be reset by arguments to pushgp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -141,3 +148,12 @@
 
 (def global-calculate-mod-metrics (atom false))
 ;; Whether or not to calculate mod metrics while running modularity metics (reuse and repetition)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; This atom is used to convey information to clojush.pushgp.visualize, but it cannot be 
+;; defined there because it must always be available to clojush.pushgp.report, and we don't
+;; want to :require clojush.pushgp.visualize there unless :visualize is true, since doing so
+;; will require quil.core, which will launch the quil sketch.
+
+(def viz-data-atom (atom {}))
+
+

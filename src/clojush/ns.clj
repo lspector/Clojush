@@ -7,10 +7,11 @@
   []
   '(do
      (use '(clojush 
-             args evaluate globals individual interpreter pushstate random 
+             args evaluate globals individual interpreter meta-errors pushstate random 
              simplification translate util))
      (use '(clojush.instructions 
-             boolean code common numbers random-instructions environment string tag zip))
+             boolean code common numbers random-instructions environment string char vectors 
+             tag zip input-output genome gtm))
      (use '(clojush.pushgp breed genetic-operators pushgp report))
      (use '(clojush.pushgp.selection 
              selection preselection tournament lexicase epsilon-lexicase 

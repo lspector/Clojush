@@ -42,8 +42,12 @@
       (println (name param) "=" (random/seed-to-string val))
       (println (name param) "=" val))))
 
-(defn print-genome [individual]
-  (pr-str (not-lazy (map #(dissoc % :uuid :parent-uuid) (:genome individual)))))
+(defn print-genome
+  [individual argmap]
+  (pr-str (not-lazy
+           (if (= :plush (:genome-representation argmap))
+             (map #(dissoc % :uuid :parent-uuid) (:genome individual))
+             (:genome individual)))))
 
 (defn behavioral-diversity
   "Returns the behavioral diversity of the population, as described by David
@@ -75,13 +79,20 @@
   "Prints a csv of the population, with each individual's fitness and size.
    If log-fitnesses-for-all-cases is true, it also prints the value
    of each fitness case."
-  [population generation {:keys [csv-log-filename csv-columns]}]
+  [population generation {:keys [csv-log-filename csv-columns genome-representation]}]
   (let [columns (vec
+                 (map
+                  (fn [col] (if (= col :genome-closes)
+                              (if (= genome-representation :plush)
+                                :plush-genome-closes
+                                :plushy-genome-closes)
+                              col))
                   (concat [:uuid]
                           (filter #(some #{%} csv-columns)
                                   [:generation :location :parent-uuids :genetic-operators 
                                    :push-program-size :plush-genome-size :push-program 
-                                   :plush-genome :total-error :is-random-replacement])))]
+                                   :plush-genome :total-error :is-random-replacement
+                                   :genome-closes :push-paren-locations]))))]
     (when (zero? generation)
       (with-open [csv-file (io/writer csv-log-filename :append false)]
         (csv/write-csv csv-file
@@ -90,9 +101,9 @@
                                          (map #(str "TC" %)
                                               (range (count (:errors (first population)))))))))))
     (with-open [csv-file (io/writer csv-log-filename :append true)]
-      (csv/write-csv 
+      (csv/write-csv
         csv-file
-        (map-indexed 
+        (map-indexed
           (fn [location individual]
             (concat (map (assoc (into {} individual)
                            :generation generation
@@ -113,8 +124,34 @@
                            :plush-genome-size (count (:genome individual))
                            :plush-genome (if (empty? (:genome individual))
                                            "()"
-                                           (not-lazy (:genome individual))))
-                         ; This is a map of an individual
+                                           (not-lazy (:genome individual)))
+                           :plush-genome-closes (if (empty? (:genome individual))
+                                                  "()"
+                                                  (apply str
+                                                         (not-lazy
+                                                          (map (fn [closes]
+                                                                 (if (<= closes 9)
+                                                                   closes
+                                                                   (str "<" closes ">")))
+                                                               (map :close (:genome individual))))))
+                           :plushy-genome-closes (if (empty? (:genome individual))
+                                                   "()"
+                                                   (apply str
+                                                          (not-lazy (map (fn [instr]
+                                                                           (if (= instr :close)
+                                                                             1
+                                                                             0))
+                                                                         (:genome individual)))))
+                           :push-paren-locations (if (empty? (:genome individual))
+                                                   ""
+                                                   (apply str
+                                                          (not-lazy
+                                                           (map #(case %
+                                                                   :open "("
+                                                                   :close ")"
+                                                                   "-")
+                                                                (list-to-open-close-sequence (:program individual))))))
+                           ) ; This is a map of an individual
                          columns)
                     (when (some #{:test-case-errors} csv-columns)
                       (:errors individual))))
@@ -180,7 +217,7 @@
 (defn lexicase-report
   "This extra report is printed whenever lexicase selection is used."
   [population {:keys [error-function report-simplifications print-errors
-                      print-history meta-error-categories]}]
+                      print-history meta-error-categories] :as argmap}]
                       
   (let [min-error-by-case (apply map
                                  (fn [& args] (apply min args))
@@ -209,7 +246,7 @@
         count-zero-by-case (map #(apply + %) (apply mapv vector pop-zero-by-case))]
         
     (println "--- Lexicase Program with Most Elite Cases Statistics ---")
-    (println "Lexicase best genome:" (print-genome lex-best))
+    (println "Lexicase best genome:" (print-genome lex-best argmap))
     (println "Lexicase best program:" (pr-str (not-lazy (:program lex-best))))
     (when (> report-simplifications 0)
       (println "Lexicase best partial simplification:"
@@ -233,7 +270,7 @@
             (double (/ (count-parens (:program lex-best)) 
                        (count-points (:program lex-best))))) ;Number of (open) parens / points
     (println "--- Lexicase Program with Most Zero Cases Statistics ---")
-    (println "Zero cases best genome:" (print-genome most-zero-cases-best))
+    (println "Zero cases best genome:" (print-genome most-zero-cases-best argmap))
     (println "Zero cases best program:" (pr-str (not-lazy (:program most-zero-cases-best))))
     (when (> report-simplifications 0)
       (println "Zero cases best partial simplification:"
@@ -273,10 +310,10 @@
 
 (defn implicit-fitness-sharing-report
   "This extra report is printed whenever implicit fitness sharing selection is used."
-  [population {:keys [print-errors meta-error-categories]}]
+  [population {:keys [print-errors meta-error-categories] :as argmap}]
   (let [ifs-best (apply min-key :weighted-error population)]
     (println "--- Program with Best Implicit Fitness Sharing Error Statistics ---")
-    (println "IFS best genome:" (print-genome ifs-best))
+    (println "IFS best genome:" (print-genome ifs-best argmap))
     (println "IFS best program:" (pr-str (not-lazy (:program ifs-best))))
     (when print-errors (println "IFS best errors:" (not-lazy (:errors ifs-best))))
     (when (and print-errors (not (empty? meta-error-categories)))
@@ -305,8 +342,8 @@
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
-           print-edn-logs edn-keys edn-log-filename edn-additional-keys]
-           
+           print-edn-logs edn-keys edn-log-filename edn-additional-keys
+           visualize]
     :as argmap}]
   (r/generation-data! [:population]
     (map #(dissoc % :program) population))
@@ -357,7 +394,7 @@
     (when (= total-error-method :ifs) (implicit-fitness-sharing-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
     (r/generation-data! [:best :individual] (dissoc best :program))
-    (println "Best genome:" (print-genome best))
+    (println "Best genome:" (print-genome best argmap))
     (println "Best program:" (pr-str (not-lazy (:program best))))
     ;
     (println "Reuse for all test cases is" (pr-str (:reuse-info best)))
@@ -458,16 +495,16 @@
                (* 1.0 (median grain-sizes)))))
     (println "--- Population Diversity Statistics ---")
     (let [genome-frequency-map (frequencies (map :genome population))]
-      (println "Min copy number of one Plush genome:"
+      (println "Min copy number of one genome:"
         (r/generation-data! [:population-report :min-genome-frequency]
           (apply min (vals genome-frequency-map))))
-      (println "Median copy number of one Plush genome:"
+      (println "Median copy number of one genome:"
         (r/generation-data! [:population-report :median-genome-frequency]
           (median (vals genome-frequency-map))))
-      (println "Max copy number of one Plush genome:"
+      (println "Max copy number of one genome:"
         (r/generation-data! [:population-report :max-genome-frequency]
           (apply max (vals genome-frequency-map))))
-      (println "Genome diversity (% unique Plush genomes):\t" 
+      (println "Genome diversity (% unique genomes):\t" 
         (r/generation-data! [:population-report :percent-genomes-unique]
                (float (/ (count genome-frequency-map) (count population))))))
     (let [frequency-map (frequencies (map :program population))]
@@ -546,12 +583,20 @@
                                       log-fitnesses-for-all-cases json-log-program-strings))
     (when print-edn-logs 
       (edn-print population generation edn-log-filename edn-keys edn-additional-keys))
+    ;; Visualization -- update viz-data-atom here
+    (when visualize 
+      (swap! viz-data-atom update-in [:history-of-errors-of-best] conj (:errors best))
+      (swap! viz-data-atom assoc :generation generation))
     (cond (and exit-on-success
                (or (<= (:total-error best) error-threshold)
                    (:success best))) [:success best]
           (>= generation max-generations) [:failure best]
           (>= @point-evaluations-count max-point-evaluations) [:failure best]
           :else [:continue best])))
+
+(defn remove-function-values [argmap]
+  (into {} (filter (fn [[k v]] (not (fn? v)))
+    (dissoc argmap :random-seed :atom-generators))))
 
 (defn initial-report
   "Prints the initial report of a PushGP run."
@@ -596,12 +641,10 @@
     ;; The edn log is overwritten if it exists
     (with-open [w (io/writer (:edn-log-filename push-argmap) :append false)]
       (.write w "#clojush/run")
-      (.write w (prn-str (dissoc push-argmap
-                                 ;; These keys have functions
-                                 :atom-generators
-                                 :error-function
-                                 :problem-specific-report
-                                 :random-seed))))))
+      (.write w (prn-str (remove-function-values push-argmap)))))
+  (when (:visualize push-argmap) ;; Visualization
+    ;; Require conditionally (dynamically), avoiding unintended Quil sketch launch
+    (require 'clojush.pushgp.visualize)))  
 
 
 (defn final-report
