@@ -299,7 +299,8 @@
          :parent-selection :lexicase
           ;; The parent selection method. Options include :tournament, :lexicase, :epsilon-lexicase,
           ;; :elitegroup-lexicase, :uniform, :leaky-lexicase, :random-threshold-lexicase,
-          ;; :random-toggle-lexicase, :randomly-truncated-lexicase, :novelty-search
+          ;; :random-toggle-lexicase, :randomly-truncated-lexicase, :novelty-search, 
+          ;; :elite-count-tournament-lexicase
          
          :epsilon-lexicase-epsilon nil
           ;; When parent-selection is :epsilon-lexicase,
@@ -337,6 +338,10 @@
           ;; If using lexicase selection, determines how meta-errors will be sorted among
           ;; the actual errors. Options are :random (errors and meta-errors are shuffled 
           ;; together), :first (meta-errors come first), or :last (meta-errors come last).
+         
+         :elite-count-tournament-size 3
+          ;; If using elite-count-tournament-lexicase selection, determines the tournament
+          ;; size for selecting each case.
          
          :tournament-size 7
           ;; If using tournament selection, the size of the tournaments.

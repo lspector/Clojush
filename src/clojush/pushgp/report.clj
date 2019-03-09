@@ -389,7 +389,7 @@
     (when (some #{parent-selection} 
                 #{:lexicase :elitegroup-lexicase :leaky-lexicase :epsilon-lexicase 
                   :random-threshold-lexicase :random-toggle-lexicase 
-                  :randomly-truncated-lexicase}) 
+                  :randomly-truncated-lexicase :elite-count-tournament-lexicase}) 
           (lexicase-report population argmap))
     (when (= total-error-method :ifs) (implicit-fitness-sharing-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
