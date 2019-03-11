@@ -21,7 +21,7 @@
       (lrand-nth survivors)
       (let [case-to-use (let [tournament-set (repeatedly (:elite-count-tournament-size argmap)
                                                          #(lrand-nth cases))]
-                          (apply min-key (partial elite-diversity survivors) tournament-set))
+                          (apply max-key (partial elite-diversity survivors) tournament-set))
             min-err-for-case (apply min (map #(nth % case-to-use)
                                              (map :errors survivors)))]
         (recur (filter #(= (nth (:errors %) case-to-use) min-err-for-case)
