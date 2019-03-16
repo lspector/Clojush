@@ -194,7 +194,9 @@
   (println "Computing errors... ")
   (compute-errors pop-agents rand-gens novelty-archive @push-argmap)
   (println "Done computing errors.")
-  (when (:preserve-frontier argmap)
+  (when (and (:preserve-frontier argmap)
+             (or (not (:autoconstructive argmap))
+                 (> generation 0)))
     (println "Preserving frontier... ")
     (loop [preserved 0
            new-frontier []
