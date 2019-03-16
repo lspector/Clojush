@@ -1892,17 +1892,18 @@ programs encoded by genomes g1 and g2."
                            autoconstructive-clone-probability autoconstructive-decay
                            autoconstructive-parent-decay autoconstructive-clone-decay]
                     :as argmap}]
-  (let [decay (fn [g rate]
-                (if (zero? rate)
-                  g
-                  (vec (filter identity (map #(if (< (lrand) rate) nil %) g)))))
+  (let [decay (fn [g rate-or-rates]
+                (let [rate (random-element-or-identity-if-not-a-collection rate-or-rates)]
+                  (if (zero? rate)
+                    g
+                    (vec (filter identity (map #(if (< (lrand) rate) nil %) g))))))
         parent1-genome (decay (:genome parent1) autoconstructive-parent-decay)
         parent2-genome (decay (:genome parent2) autoconstructive-parent-decay)
         clone (<= (lrand) autoconstructive-clone-probability)
         pre-decay-child-genome (if clone
-                                   parent1-genome
-                                   (produce-child-genome-by-autoconstruction 
-                                     parent1-genome parent2-genome argmap))
+                                 parent1-genome
+                                 (produce-child-genome-by-autoconstruction
+                                  parent1-genome parent2-genome argmap))
         child-genome (if (and clone (not= autoconstructive-clone-decay :same))
                        (decay pre-decay-child-genome autoconstructive-clone-decay)
                        (decay pre-decay-child-genome autoconstructive-decay))
@@ -1946,4 +1947,3 @@ programs encoded by genomes g1 and g2."
                            :grain-size (compute-grain-size [] argmap)
                            :ancestors ()
                            :is-random-replacement true))))))
-
