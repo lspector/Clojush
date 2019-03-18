@@ -1925,21 +1925,23 @@ programs encoded by genomes g1 and g2."
                                            (cons (:genome parent1) (:ancestors parent1))
                                            (:ancestors parent1))
                               :is-random-replacement false)
-        :parent1-genome parent1-genome
-        :parent2-genome parent2-genome
-        :parent1-errors (:errors parent1)
-        :parent2-errors (:errors parent2))
-      (let [new-genome (random-plush-genome 
-                         max-genome-size-in-initial-program atom-generators argmap)
+             :parent1-genome parent1-genome
+             :parent2-genome parent2-genome
+             :parent1-errors (:errors parent1)
+             :parent2-errors (:errors parent2)
+             :diversifying true)
+      (let [new-genome (random-plush-genome
+                        max-genome-size-in-initial-program atom-generators argmap)
             new-checked (diversifying? {:genome new-genome} argmap)]
         (if (:diversifying new-checked)
-          (make-individual :genome new-genome
-                           :errors (:errors new-checked)
-                           :history ()
-                           :age 0
-                           :grain-size (compute-grain-size new-genome argmap)
-                           :ancestors ()
-                           :is-random-replacement true)
+          (assoc (make-individual :genome new-genome
+                                  :errors (:errors new-checked)
+                                  :history ()
+                                  :age 0
+                                  :grain-size (compute-grain-size new-genome argmap)
+                                  :ancestors ()
+                                  :is-random-replacement true)
+                 :diversifying true)
           (make-individual :genome []
                            :errors nil
                            :history ()
