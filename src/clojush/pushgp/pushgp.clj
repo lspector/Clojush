@@ -198,8 +198,15 @@
              (or (not (:autoconstructive argmap))
                  (> generation 0)))
     (println "Preserving frontier... ")
-    (let [raw-candidates (concat @frontier (map deref pop-agents))
-          diversifying-candidates (filter :diversifying raw-candidates)
+    (let [diversifying-children (filter :diversifying (map deref pop-agents))
+          diversifying-frontier (filter :diversifying @frontier)
+          verified-frontier (filter (fn [parent]
+                                      (some (fn [child]
+                                              (= (:parent1-genome child)
+                                                 (:genome parent)))
+                                            diversifying-children))
+                                    diversifying-frontier)
+          diversifying-candidates (concat diversifying-children verified-frontier)
           _ (println "Number of diversifying candidates for frontier preservation:"
                      (count diversifying-candidates))
           filtered-candidates (if (empty? diversifying-candidates)
@@ -207,6 +214,11 @@
                                 (if (< (count diversifying-candidates) (count pop-agents))
                                   (take (count pop-agents) (cycle diversifying-candidates))
                                   diversifying-candidates))]
+      (if (= (count filtered-candidates) (count pop-agents))
+        (do (dotimes [i population-size]
+              ((if use-single-thread swap! send) (nth pop-agents i) (fn [_] (nth filtered-candidates i))))
+            (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
+            (reset! frontier filtered-candidates))
       (loop [preserved 0
              new-frontier []
              candidates filtered-candidates]
@@ -221,7 +233,7 @@
                                                #(drop-last (count (:meta-errors to-preserve)) %))]
             (recur (inc preserved)
                    (conj new-frontier without-meta-errors)
-                   (remove-one to-preserve candidates)))))))
+                   (remove-one to-preserve candidates))))))))
   (timer @push-argmap :fitness)
   ;; calculate solution rates if necessary for historically-assessed hardness
   (calculate-hah-solution-rates pop-agents @push-argmap)
