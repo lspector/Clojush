@@ -236,7 +236,9 @@
                                                  #(drop-last (count (:meta-errors to-preserve)) %))]
               (recur (inc preserved)
                      (conj new-frontier without-meta-errors)
-                     (remove-one to-preserve candidates))))))))
+                     (if (= (:preserve-frontier argmap) :with-replacement)
+                       candidates
+                       (remove-one to-preserve candidates)))))))))
   (timer @push-argmap :fitness)
   ;; calculate solution rates if necessary for historically-assessed hardness
   (calculate-hah-solution-rates pop-agents @push-argmap)

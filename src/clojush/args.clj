@@ -447,7 +447,8 @@
           ;; If truthy, then each child population will be replaced, after its errors have
           ;; been evaluated, with the product of a frontier-preservation process in which
           ;; individuals are repeatedly selected, without re-selection, from the concatenation
-          ;; of the parent population with the collection of evaluated children.
+          ;; of the parent population with the collection of evaluated children. If the value
+          ;; is :with-replacement, then individuals can be selected multiple times.
          
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
