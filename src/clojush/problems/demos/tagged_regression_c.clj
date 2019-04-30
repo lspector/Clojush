@@ -47,19 +47,21 @@
                            repetition-metric (atom ())]
                        (assoc individual
                               :errors (let [;state-with-tags (tagspace-initialization-heritable (str (:program individual)) (make-push-state))
-                                            ]
+                                            ran (rand-nth (range 10))]
                                         (doall
                                          (for [input (range 10)]
                                            (let [state (run-push (:program individual)
                                                                  (push-item input :input
-                                                                            (push-item input :integer (make-push-state))))
-                                                 top-int (top-item :integer state)]
+                                                                            (push-item input :integer (assoc (make-push-state) :calculate-mod-metrics (= input ran)))))
+                                                 top-int (top-item :integer state)
+                                                 ]
                                             ;(doseq [[k v] (:max-stack-depth state)] (swap! stacks-depth update k #(max % v)))
                                             ;update the modularity metrics
-                                             (let [metrics (mod-metrics (:trace state) (:trace_id state))]
-                                               (do
-                                                 (swap! reuse-metric conj (first metrics))
-                                                 (swap! repetition-metric conj (last metrics))))
+                                             (if (= input ran)
+                                               (let [metrics (mod-metrics (:trace state) (:trace_id state))]
+                                                 (do
+                                                   (swap! reuse-metric conj (first metrics))
+                                                   (swap! repetition-metric conj (last metrics)))))
                                             ;calculate errors
                                              (if (number? top-int)
                                                (abs (- top-int 
@@ -67,7 +69,20 @@
                                                           (* 2 input input) input)))
                                                1000)))))
                             ;:stacks-info @stacks-depth
-                              :reuse-info @reuse-metric :repetition-info @repetition-metric)
+                              ;:reuse-info (doall
+                              ;             (let [_ (reset! global-calculate-mod-metrics true)
+                              ;                   state (run-push (:program individual)
+                              ;                                   (push-item (rand-nth (range 10)) :input
+                              ;                                              (push-item (rand-nth (range 10)) :integer (make-push-state))))
+                              ;                   metrics (mod-metrics (:trace state) (:trace_id state))
+                              ;                   _ (reset! global-calculate-mod-metrics false)
+                              ;                   _ (swap! reuse-metric conj (first metrics))
+                              ;                   _ (swap! repetition-metric conj (last metrics))]
+                              ;               @reuse-metric
+                              ;               ))
+                              :reuse-info @reuse-metric 
+                              :repetition-info @repetition-metric
+                              )
                       ;(println (:uuid individual), @stacks-depth)
                        ))
    :atom-generators (list (fn [] (lrand-int 10))
@@ -76,7 +91,7 @@
                           'integer_mult
                           'integer_add
                           'integer_sub
-                          'end_tag
+                          ;'end_tag
                           ;(tagwrap-instruction-erc 100)
                           ;(tag-instruction-erc [:integer :exec] 100)
                           ;(untag-instruction-erc 100)
@@ -90,6 +105,8 @@
    :genetic-operator-probabilities {:alternation 0.5
                                     :uniform-mutation 0.4
                                     :uniform-close-mutation 0.1}
-   ;:meta-error-categories [:max-stacks-depth]
-   :calculate-mod-metrics true
+   :meta-error-categories [:reuse :repetition]
+   ;:calculate-mod-metrics true
+   ;:use-single-thread true
+   
    })

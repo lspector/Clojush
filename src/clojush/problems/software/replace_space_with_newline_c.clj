@@ -37,8 +37,8 @@
             (fn [] (lrand-nth (concat [\newline \tab] (map char (range 32 127))))) ;Visible character ERC
             (fn [] (replace-space-with-newline-input (lrand-int 21))) ;String ERC
             ;;; end ERCs
-            (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
-            (tagged-instruction-erc 1000)
+            ;(tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
+            ;(tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
@@ -97,24 +97,31 @@
   "Evaluates the program on the given list of cases.
    Returns the behaviors, a list of the outputs of the program on the inputs."
   [program cases]
-  (let [state-with-tags nil
-        reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
+  (let [reuse-metric (atom ())       ;the length will be equal to the number of test cases
         repetition-metric (atom ())];(tagspace-initialization (str program) 1000 (make-push-state))]      
     (list
       (flatten
-        (doall
-         (for [[input output] cases]
-           (let [final-state (run-push program
-                                       (->> (make-push-state)
-                                         (push-item input :input)
-                                         (push-item "" :output)))
-                 printed-result (stack-ref :output 0 final-state)
-                 int-result (stack-ref :integer 0 final-state)
-                 _ (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
-                                                  (do
-                                                    (swap! reuse-metric conj (first metrics))
-                                                  (swap! repetition-metric conj (last metrics))))]
-             (vector printed-result int-result))))) (doall @reuse-metric) (doall @repetition-metric)))) ; (behaviors reuse repetition)
+       (let [ran (rand-nth cases)]
+       (doall
+        (for [[input output] cases]
+          (let [;_ (prn "Here is random" ran)
+                ;_ (prn "Here is in-out" [input output])
+                final-state (run-push program
+                                      (->> (assoc (make-push-state) :calculate-mod-metrics (= [input output] ran))
+                                           (push-item input :input)
+                                           (push-item "" :output)))
+                printed-result (stack-ref :output 0 final-state)
+                int-result (stack-ref :integer 0 final-state)
+                _ (if (= [input output] ran) 
+                    (let [;_ (prn (:trace final-state))
+                                                   ;s_ (prn (:trace_id final-state))
+                          metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
+                      (do
+                        (swap! reuse-metric conj (first metrics))
+                        (swap! repetition-metric conj (last metrics)))))
+                ]
+            (vector printed-result int-result)))))) (doall @reuse-metric) (doall @repetition-metric)))) 
+; (behaviors reuse repetition)
 
 (defn replace-space-with-newline-errors-from-behaviors
   "Takes a list of behaviors across the list of cases and finds the error
@@ -213,4 +220,6 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000
+   :meta-error-categories [:reuse :repetition]
+   ;:use-single-thread true
    })

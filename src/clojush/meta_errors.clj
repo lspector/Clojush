@@ -38,11 +38,30 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; meta-error functions
 
+;; might be useful to add these meta-errors:
+;; 
+;;(= cat :tag-usage) (vals (:stacks-info ind))
+;; (= cat :max-stacks-depth) (vals (:stacks-info ind))
+
+
+
 (defn size-meta-error
   [ind evaluated-population argmap]
   (count (:genome ind)))
 
 ; :compressibility ;;TMH fix later
+
+
+; Meta-errors related to modularity:
+(defn reuse-meta-error
+  [ind evaluated-population argmap]
+  (- 0 (mean (:reuse-info ind))))
+
+(defn repetition-meta-error
+  [ind evaluated-population argmap]
+  (mean (:repetition-info ind)))
+
+
 
 (defn total-error-meta-error
   [ind evaluated-population argmap]

@@ -9,7 +9,6 @@
 (ns clojush.problems.demos.tutorial
   (:use [clojush.ns]
         [clojure.math.numeric-tower]
-        [clojush.problems.software.replace-space-with-newline-c :as rswn]
         [clojush.individual :as individual]))
 
 ;; Get access to all clojush namespaces (except for examples/* and experimental/*)
@@ -28,29 +27,30 @@
 ;; Providing true as a third argument produces a trace of all stacks as it runs:
 
 (run-push '(exec_dup (exec_swap 1 2))
-          (make-push-state)
-          true true true)          
+          (assoc (make-push-state) :calculate-mod-metrics true)
+          true true true
+          )          
 
 
 (comment
   ; Some example programs and their exec traces
-prog1 = "(exec_dup (1 2 3 exec_swap 4 5 6))"
-#there is no repetition in the following trace. Hence it should b easier to calclate modularity for this.
-trace1 = "((exec_dup (1 2 3 exec_swap 4 5 6)) exec_dup (1 2 3 exec_swap 4 5 6) 1 2 3 exec_swap 5 4 6 (1 2 3 exec_swap 4 5 6) 1 2 3 exec_swap 5 4 6)"
+;prog1 = "(exec_dup (1 2 3 exec_swap 4 5 6))"
+;#there is no repetition in the following trace. Hence it should b easier to calclate modularity for this.
+;trace1 = "((exec_dup (1 2 3 exec_swap 4 5 6)) exec_dup (1 2 3 exec_swap 4 5 6) 1 2 3 exec_swap 5 4 6 (1 2 3 exec_swap 4 5 6) 1 2 3 exec_swap 5 4 6)"
 
-#example 2
+;#example 2
 
-prog2 = "((1 2 exec_swap 3 4) 5 6)"
-trace2 = "(((1 2 exec_swap 3 4) 5 6) (1 2 exec_swap 3 4) 1 2 exec_swap 4 3 5 6)"
+;prog2 = "((1 2 exec_swap 3 4) 5 6)"
+;trace2 = "(((1 2 exec_swap 3 4) 5 6) (1 2 exec_swap 3 4) 1 2 exec_swap 4 3 5 6)"
 
-#example 3
-prog3 = "(exec_dup (1 2) 3 4)"
-trace3 = "((exec_dup (1 2) 3 4) exec_dup (1 2) 1 2 (1 2) 1 2 3 4)"
-trace_id3 = "((0 (1 2) 3 4) 0 (1 2) 1 2 (1 2) 1 2 3 4)"
+;#example 3
+;prog3 = "(exec_dup (1 2) 3 4)"
+;trace3 = "((exec_dup (1 2) 3 4) exec_dup (1 2) 1 2 (1 2) 1 2 3 4)"
+;trace_id3 = "((0 (1 2) 3 4) 0 (1 2) 1 2 (1 2) 1 2 3 4)"
 
-prog4 =  "(exec_dup (exec_swap 1 2))"
-trace4 = "((exec_dup (exec_swap 1 2)) exec_dup (exec_swap 1 2) exec_swap 2 1 (exec_swap 1 2) exec_swap 2 1)"
-trace_id4 = "((1 (2 3 4)) 1 (2 3 4) 2 4 3 (2 3 4) 2 4 3)"
+;prog4 =  "(exec_dup (exec_swap 1 2))"
+;trace4 = "((exec_dup (exec_swap 1 2)) exec_dup (exec_swap 1 2) exec_swap 2 1 (exec_swap 1 2) exec_swap 2 1)"
+;trace_id4 = "((1 (2 3 4)) 1 (2 3 4) 2 4 3 (2 3 4) 2 4 3)"
   
   )
 ;;;;;;;;;;;;
@@ -85,6 +85,7 @@ trace_id4 = "((1 (2 3 4)) 1 (2 3 4) 2 4 3 (2 3 4) 2 4 3)"
    :genetic-operator-probabilities {:alternation 0.5
                                     :uniform-mutation 0.5}
    :max-generations 1
+   :meta-error-categories [:reuse :repetition]
    })
 
 ;(pushgp argmap)
