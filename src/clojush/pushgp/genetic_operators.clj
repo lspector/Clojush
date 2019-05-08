@@ -169,7 +169,7 @@
                           atom-generators
                           argmap))]
     (make-individual :genome genome
-                     :history (:history ind)
+                     :history ()
                      :age 0
                      :grain-size (compute-grain-size genome argmap)
                      :ancestors (if maintain-ancestors
