@@ -163,12 +163,12 @@
     (throw
      (Exception.
       ":print-history must be true for :resilience"))
-    (let [hist (take 10 (:history ind))]
+    (let [hist (take 20 (:history ind))]
       (if (< (count hist) 2)
         0
         (if (> (/ (count (distinct hist))
                   (count hist))
-               9/10)
+               3/4)
           0
           1)))))
 
