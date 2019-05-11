@@ -157,6 +157,21 @@
           0
           1)))))
 
+(defn resiliance-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :resilience"))
+    (let [hist (take 10 (:history ind))]
+      (if (< (count hist) 2)
+        0
+        (if (> (/ (count (distinct hist))
+                  (count hist))
+               1/2)
+          0
+          1)))))
+
 (defn repeating-lineage-meta-error
   [ind evaluated-population argmap]
   (if (not (:print-history argmap))
