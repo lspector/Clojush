@@ -157,7 +157,7 @@
           0
           1)))))
 
-(defn resiliance-meta-error
+(defn resilience-meta-error
   [ind evaluated-population argmap]
   (if (not (:print-history argmap))
     (throw
