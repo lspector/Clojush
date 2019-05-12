@@ -168,7 +168,7 @@
         0
         (if (> (/ (count (distinct hist))
                   (count hist))
-               2/5)
+               3/5)
           0
           1)))))
 
