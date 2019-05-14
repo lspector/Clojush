@@ -172,6 +172,22 @@
           0
           1)))))
 
+(defn stasis-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :stasis"))
+    (let [hist (:history ind)]
+      (if (< (count hist) 2)
+        0
+        (if (some (fn [[new-err old-err]]
+                    (and (not (zero? old-err))
+                         (not= new-err old-err)))
+                  (map vector (first hist) (second hist)))
+          0
+          1)))))
+
 (defn repeating-lineage-meta-error
   [ind evaluated-population argmap]
   (if (not (:print-history argmap))
