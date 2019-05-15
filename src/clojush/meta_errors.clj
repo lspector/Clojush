@@ -188,6 +188,21 @@
           0
           1)))))
 
+(defn non-improvement-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :stasis"))
+    (let [hist (:history ind)]
+      (if (< (count hist) 2)
+        0
+        (if (some (fn [[new-err old-err]]
+                    (< new-err older-error))
+                  (map vector (first hist) (second hist)))
+          0
+          1)))))
+
 (defn repeating-lineage-meta-error
   [ind evaluated-population argmap]
   (if (not (:print-history argmap))
