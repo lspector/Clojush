@@ -198,7 +198,7 @@
       (if (< (count hist) 2)
         0
         (if (some (fn [[new-err old-err]]
-                    (< new-err older-err))
+                    (< new-err old-err))
                   (map vector (first hist) (second hist)))
           0
           1)))))
