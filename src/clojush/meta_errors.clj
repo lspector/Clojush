@@ -168,7 +168,7 @@
         0
         (if (> (/ (count (distinct hist))
                   (count hist))
-               2/5)
+               3/5)
           0
           1)))))
 
@@ -193,7 +193,7 @@
   (if (not (:print-history argmap))
     (throw
      (Exception.
-      ":print-history must be true for :stasis"))
+      ":print-history must be true for :non-improvement"))
     (let [hist (:history ind)]
       (if (< (count hist) 2)
         0
