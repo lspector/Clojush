@@ -29,6 +29,7 @@
    :make-next-operator-revertable {:fn nil :parents 0 :works-with-plushy true :works-with-plush true}
    :autoconstruction {:fn autoconstruction :parents 2 :works-with-plush true}
    :gene-selection {:fn gene-selection :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-reordering {:fn uniform-reordering :parents 1 :works-with-plushy true :works-with-plush true}
    })
 
 (defn revert-too-big-child

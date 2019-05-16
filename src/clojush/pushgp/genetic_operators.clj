@@ -848,6 +848,30 @@ given by uniform-deletion-rate.
                                   (:ancestors initial-parent)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform reordering
+
+(defn uniform-reordering
+  "Returns the individual with each pair of adjacent genes possibly reordered. For each call,
+  pairs will randomly start with either the odd-indexed or even-indexed genes. The probability
+  that a par will be reordered is given by uniform-reordering-rate.
+  Works with Plushy genomes."
+  [ind {:keys [uniform-reordering-rate maintain-ancestors]
+        :as argmap}]
+  (let [partitioned (partition 2 (concat (if (zero? (rand-int 2)) [] [nil])
+                                         (:genome ind)
+                                         [nil]))
+        rate (random-element-or-identity-if-not-a-collection uniform-reordering-rate)
+        reordered (map #(if (< (rand) rate) (reverse %) %) partitioned)
+        new-genome (vec (filter identity (apply concat reordered)))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; autoconstuction
 
 ;; NOTE: EXPERIMENTAL!
