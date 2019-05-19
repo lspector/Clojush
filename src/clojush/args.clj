@@ -99,7 +99,9 @@
                                           :uniform-combination-and-deletion 0.0
                                           :genesis 0.0
                                           :gene-selection 0.0
-                                          :uniform-reordering 0.0}
+                                          :uniform-reordering 0.0
+                                          :uniform-segment-reordering 0.0
+                                          :uniform-segment-transpose 0.0}
           ;; The map supplied to :genetic-operator-probabilities should contain genetic operators
           ;; that sum to 1.0. All available genetic operators are defined in clojush.pushgp.breed.
           ;; Along with single operators, pipelines (vectors) containing multiple operators are
@@ -169,7 +171,15 @@
           ;; The probability of each :silent being switched during uniform silent mutation.
          
          :uniform-reordering-rate 0.01
-          ;; The probability that a pair of genes will be reordered with uninform-reordering.
+          ;; The probability that a pair of genes will be reordered with uninform-reordering,
+          ;; or that a pair of segments will be transposed with uniform-segment-reordering.
+         
+         :uniform-segmenting-rate 0.01
+          ;; The probability that segmenting for uniform-segment-transposition or 
+          ;; uniform-segment-transposition will occur at each position in the genome.
+         
+         :uniform-transposition-rate 0.01
+           ;; The probability that a segment will be transposed in uniform-segment-transposition.
          
          :replace-child-that-exceeds-size-limit-with :random
           ;; When a child is produced that exceeds the size limit of (max-points / 4), this is
