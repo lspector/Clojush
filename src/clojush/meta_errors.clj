@@ -188,6 +188,22 @@
           0
           1)))))
 
+(defn case-stasis-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :case-stasis"))
+    (if (empty? (rest (:history ind)))
+      (vec (repeat (count (:errors ind)) 0))
+      (vec (for [case-history (apply map list (:history ind))]
+             (if (or (zero? (first case-history))
+                     (and (not (zero? (second case-history)))
+                          (not (= (first case-history)
+                                  (second case-history)))))
+               0
+               1))))))
+
 (defn non-improvement-meta-error
   [ind evaluated-population argmap]
   (if (not (:print-history argmap))
