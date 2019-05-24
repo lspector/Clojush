@@ -904,6 +904,58 @@ given by uniform-deletion-rate.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; uniform segment transposition
 
+(defn uniform-segment-duplication
+  "Returns the individual with each segment possibly duplicated. The probability that a
+  segment will be duplicated is given by uniform-duplication-rate. The probability that 
+  segmenting will occur at each gene is given by uniform-segmenting-rate. 
+  Works with Plushy genomes."
+  [ind {:keys [uniform-duplication-rate uniform-segmenting-rate maintain-ancestors]
+        :as argmap}]
+  (let [segmented (partition-by (fn [_]
+                                  (< (rand)
+                                     (random-element-or-identity-if-not-a-collection
+                                      uniform-segmenting-rate)))
+                                (:genome ind))
+        rate (random-element-or-identity-if-not-a-collection uniform-duplication-rate)
+        new-genome (vec (apply concat (map #(if (< (rand) rate) (concat % %) %) 
+                                           segmented)))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform segment deletion
+
+(defn uniform-segment-deletion
+  "Returns the individual with each segment possibly deleted. The probability that a
+  segment will be deleted is given by uniform-deletion-rate. The probability that 
+  segmenting will occur at each gene is given by uniform-segmenting-rate. 
+  Works with Plushy genomes."
+  [ind {:keys [uniform-deletion-rate uniform-segmenting-rate maintain-ancestors]
+        :as argmap}]
+  (let [segmented (partition-by (fn [_]
+                                  (< (rand)
+                                     (random-element-or-identity-if-not-a-collection
+                                      uniform-segmenting-rate)))
+                                (:genome ind))
+        rate (random-element-or-identity-if-not-a-collection uniform-deletion-rate)
+        new-genome (vec (apply concat (map #(if (< (rand) rate) [] %)
+                                           segmented)))]
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; uniform segment transposition
+
 (defn uniform-segment-transposition
   "Returns the individual with each segment possibly transposed. The probability that a
   segment will be transposed is given by uniform-transposition-rate. The probability that 
@@ -917,7 +969,7 @@ given by uniform-deletion-rate.
                                       uniform-segmenting-rate)))
                                 (:genome ind))
         rate (random-element-or-identity-if-not-a-collection uniform-transposition-rate)
-        new-genome (vec (apply concat (map #(if (< (rand) rate) (reverse %) %) 
+        new-genome (vec (apply concat (map #(if (< (rand) rate) (reverse %) %)
                                            segmented)))]
     (make-individual :genome new-genome
                      :history (:history ind)

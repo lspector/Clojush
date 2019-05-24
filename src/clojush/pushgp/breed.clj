@@ -32,6 +32,8 @@
    :uniform-reordering {:fn uniform-reordering :parents 1 :works-with-plushy true :works-with-plush true}
    :uniform-segment-reordering {:fn uniform-segment-reordering :parents 1 :works-with-plushy true :works-with-plush true}
    :uniform-segment-transposition {:fn uniform-segment-transposition :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-segment-duplication {:fn uniform-segment-duplication :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-segment-deletion {:fn uniform-segment-deletion :parents 1 :works-with-plushy true :works-with-plush true}
    })
 
 (defn revert-too-big-child

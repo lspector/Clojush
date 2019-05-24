@@ -181,6 +181,12 @@
          :uniform-transposition-rate 0.01
            ;; The probability that a segment will be transposed in uniform-segment-transposition.
          
+         :uniform-duplication-rate 0.01
+           ;; The probability that a segment will be duplicated in uniform-segment-duplication.
+         
+         :uniform-deletion-rate 0.01
+           ;; The probability that a segment will be deleted in uniform-segment-deletion.
+         
          :replace-child-that-exceeds-size-limit-with :random
           ;; When a child is produced that exceeds the size limit of (max-points / 4), this is
           ;; used to determine what program to return. Options include :parent, :empty, :random,
