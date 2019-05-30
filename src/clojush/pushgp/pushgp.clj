@@ -179,6 +179,12 @@
       (reset! timer-atom (System/currentTimeMillis))
       (swap! timing-map assoc step (+ current-time-for-step (- @timer-atom start-time))))))
 
+(defn down-sample
+  "performs down-samplig on training cases by returning only a random sub-sample
+   of the training cases"
+  [training-cases down-sample-factor]
+  (take (* down-sample-factor (count training-cases)) (shuffle training-cases)))
+
 (defn process-generation
   "Processes the generation, returning [new novelty archive, return val],
    where new novelty archive will be nil if we are done."
@@ -191,6 +197,8 @@
     :plushy (population-translate-plushy-to-push pop-agents @push-argmap))
   (timer @push-argmap :reproduction)
   (println "Computing errors... ")
+  (swap! push-argmap assoc :sub-training-cases (down-sample (:training-cases @push-argmap) (:down-sample-factor @push-argmap)))
+
   (compute-errors pop-agents rand-gens novelty-archive @push-argmap)
   (println "Done computing errors.")
   (println "Preserving frontier... ")
@@ -329,4 +337,3 @@
            (if (nil? next-novelty-archive)
              return-val
              (recur (inc generation) next-novelty-archive))))))))
-

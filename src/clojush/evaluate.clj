@@ -67,11 +67,13 @@
   ([i error-function rand-gen
     {:keys [reuse-errors print-history total-error-method normalization max-error]
      :as argmap}]
+     
     (random/with-rng rand-gen
       (let [p (:program i)
             evaluated-i (if (or (not reuse-errors)
                                 (nil? (:errors i)))
-                         (error-function i)
+                         (error-function i  (:sub-training-cases argmap) )
+                         ; (error-function i  )
                          i)
             raw-errors (:errors evaluated-i)
             e (vec (if (and reuse-errors (not (nil? (:errors i))))
@@ -98,4 +100,3 @@
                            :normalized-error ne
                            :history (if print-history (cons e (:history i)) (:history i)))]
         new-ind))))
-

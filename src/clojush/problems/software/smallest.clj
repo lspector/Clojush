@@ -68,12 +68,13 @@
     ([individual data-cases] ;; data-cases should be :train or :test
      (the-actual-smallest-error-function individual data-cases false))
     ([individual data-cases print-outputs]
+
       (let [behavior (atom '())
             errors (doall
                      (for [[[input1 input2 input3 input4] out-int] (case data-cases
                                                                      :train train-cases
                                                                      :test test-cases
-                                                                     [])]
+                                                                     data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input4 :input)
@@ -90,9 +91,11 @@
                          (if (= printed-result (str out-int))
                            0
                            1))))]
-        (if (= data-cases :train)
+
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
           (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+          )))))
 
 (defn get-smallest-train-and-test
   "Returns the train and test cases."
@@ -140,6 +143,8 @@
 (def argmap
   {:error-function (make-smallest-error-function-from-cases (first smallest-train-and-test-cases)
                                                             (second smallest-train-and-test-cases))
+   :training-cases (first smallest-train-and-test-cases)
+   :sub-training-cases '()
    :atom-generators smallest-atom-generators
    :max-points 800
    :max-genome-size-in-initial-program 100

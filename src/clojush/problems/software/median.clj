@@ -71,7 +71,7 @@
                      (for [[[input1 input2 input3] out-int] (case data-cases
                                                               :train train-cases
                                                               :test test-cases
-                                                              [])]
+                                                              data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input3 :input)
@@ -137,6 +137,7 @@
 (def argmap
   {:error-function (make-median-error-function-from-cases (first median-train-and-test-cases)
                                                           (second median-train-and-test-cases))
+   :training-cases (first median-train-and-test-cases)
    :atom-generators median-atom-generators
    :max-points 800
    :max-genome-size-in-initial-program 100
