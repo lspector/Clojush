@@ -20,7 +20,7 @@ NP=`cat $PBS_NODEFILE | wc -l`  # Bash syntax
 
 #NAMESPACE="replace-space-with-newline"
 #NAMESPACE="syllables"
-NAMESPACE="smallest"
+NAMESPACE="last-index-of-zero"
 
 SELECTION="lexicase"
 
