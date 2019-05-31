@@ -150,7 +150,7 @@
    :max-genome-size-in-initial-program 100
    :evalpush-limit 200
    :population-size 1000
-   :max-generations 200
+   :max-generations (/ 200  0.1)
    :parent-selection :lexicase
    :epigenetic-markers [:close]
    :genetic-operator-probabilities {:alternation 0.2
