@@ -1,0 +1,121 @@
+#PBS -N Num-IO-tourney
+#PBS -l nodes=1:ppn=8
+#PBS -l mem=20GB
+#PBS -q una
+#PBS -M aabdelha@hamilton.edu
+#PBS -j oe
+#PBS -l walltime=72:00:00
+#PBS -r y
+#PBS -o /usr/local/research/compsci/helmuth/aabdelha/Clojush/results/HPC-files/
+#PBS -t 0-99
+# This last line is the range of the number of jobs to start, inclusive
+
+# NOTE: Directions for use are at the bottom of this file.
+
+
+# Depends on your shell. Uncomment the one you need. Bash uncommented by default
+NP=`cat $PBS_NODEFILE | wc -l`  # Bash syntax
+#setenv NP `cat $PBS_NODEFILE | wc -l` # tcsh/csh syntax
+
+
+#NAMESPACE="replace-space-with-newline"
+#NAMESPACE="syllables"
+NAMESPACE="smallest"
+
+SELECTION="lexicase"
+
+# Results will go to our shared results directory (helmuth). You may have a symlink to this directory called Collab.
+# Make sure the correct subdirectory follows helmuth -- the first subdirectory should be
+# your username (in my case, thelmuth).
+DIRECTORY="/usr/local/research/compsci/helmuth/aabdelha/Clojush/results/HPC-files/$SELECTION/$NAMESPACE"
+
+PUSHARGS=":parent-selection :$SELECTION :print-timings true"
+
+PROBLEM="clojush.problems.software.$NAMESPACE"
+
+LEINCMD="lein with-profiles production trampoline run $PROBLEM $PUSHARGS"
+
+echo "Running on node(s):"
+cat $PBS_NODEFILE
+echo ""
+echo "Changing to directory $PBS_O_WORKDIR"
+cd $PBS_O_WORKDIR
+
+echo "Making directory and copying hpc_launcher.run into it: $DIRECTORY"
+mkdir -p $DIRECTORY
+cp hpc_launcher.run $DIRECTORY
+
+echo -n "Executing program at: "
+date
+echo ""
+
+echo "lein command: $LEINCMD"
+echo ""
+
+### Uncomment these to make results directories available to everyone
+# touch "$DIRECTORY/log$PBS_ARRAYID.txt"
+# chmod -R o+rx $DIRECTORY
+
+time $LEINCMD > "$DIRECTORY/log$PBS_ARRAYID.txt"
+
+echo ""
+echo -n "Finished program at: "
+date
+echo ""
+
+## DIRECTIONS
+# This file is for submitting jobs to Hamilton College's HPC
+# There are parts you will need to edit, and parts you will not. Below should mention most
+# of the parts you need to edit.
+
+## PBS Options
+# You will want to leave most of the PBS options at their defaults.
+# You can/should change:
+# -M - this should be your email address
+# -m - this says you will receive an email when a job begins (b), ends (e), or aborts (a). If you don't want emails, remove this line
+# -o - this is the directory where the HPC log files (not the Clojush log files) will end up. Can be the same place as the Clojush log files if you want.
+# -t - allows you to start multiple jobs with one qsub. This is a range of values that will tell how many jobs to start, in an "array". You likely want to leave this as-is.
+
+## THE BASH SCRIPT
+# The rest of the file is the bash script you want to run in every job.
+# There are some bash variables that have values from qsub/pbs, and those start with PBS.
+# You can edit any parts of the script, but also don't need to edit much to get it to work.
+# Here are the things you'll definitely want to edit:
+# NAMESPACE - this is the string representation of the problem file you want to run
+# SELECTION - I have the script setup to do different parent selection experiments. You'll want to change/remove this.
+# DIRECTORY - this is the directory where your Clojush logs will end up. $PBS_O_HOME is your home directory.
+# PUSHARGS - here you can prescribe any extra push args you want to pass to the run. An example is there with :parent-selection, but you can add more options with argname/value pairs.
+#
+# You probably don't want to edit any of the rest, but can if you want!
+
+## Submitting jobs
+# To submit a job, at the command line use:
+# qsub hpc_launcher.run
+# which submits this file. The top of the file lists a bunch of options passed to
+# the job queue software, PBS. After that, everything else is simply a bash script
+# that will be run for each job you submit.
+
+## MONITORING
+# You can monitor your jobs with the qstat command. There are many useful options; here are a few:
+# -t - lists each job in an "array"/range of jobss, instead of the job as a whole
+# -n - lists which node each job is running on
+# -u USERNAME - lists only jobs submitted by USERNAME
+#
+# You can delete one of your jobs by using:
+# qdel JOBID
+# If your job is an array, you will need:
+# qdel JOBID[]
+#
+# If you want to actually look at how the runs are doing, I recommend using my Clojush-Tools package,
+# which you can get from https://github.com/thelmuth/Clojush-Tools
+# Clone that into a directory called Tools, and then you can use the efficient_mean_fitness_and_solution_counts.py
+# script to gather data about runs. You'll need to edit the script to simply change outputDirectory to point
+# at the directory with your Clojush logs. Then, run:
+#
+# python Tools/efficient_mean_fitness_and_solution_counts.py
+# *note* this uses python 2, not python 3
+#
+# This prints a lot of data about the runs, but the most important ones are Number of Finished Runs and
+# the three lines that follow it, which are different ways of counting what a solution is. You likely just
+# want to look at the last of those three, "Simplified zero error on test set:", which will give you the
+# number of solutions on the unseen test set after automatically simplifying the solution program.
