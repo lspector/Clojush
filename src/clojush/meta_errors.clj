@@ -392,6 +392,27 @@
                      huge
                      (count gens))))))))))
 
+(defn gens-since-change-0-if-solved-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :gens-since-change-0-if-solved"))
+    (let [huge 1000000]
+      (if (empty? (rest (:history ind)))
+        (vec (repeat (count (:errors ind)) huge))
+        (vec (for [case-history (apply map list (:history ind))]
+               (if (zero? (first case-history))
+                 0  ;; solved, error 0
+                 (let [changed? (mapv (fn [[newer-error older-error]]
+                                        (not= newer-error older-error))
+                                      (partition 2 1 case-history))
+                       gens (take-while not changed?)]
+                   (if (= (count gens)
+                          (count changed?))
+                     huge
+                     (count gens))))))))))
+
 (defn case-sibling-uniformity-meta-error
   [ind evaluated-population argmap]
   (if (empty? (:parent-uuids ind))

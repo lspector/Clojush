@@ -909,14 +909,14 @@ given by uniform-deletion-rate.
   segment will be duplicated is given by uniform-duplication-rate. The probability that 
   segmenting will occur at each gene is given by uniform-segmenting-rate. 
   Works with Plushy genomes."
-  [ind {:keys [uniform-duplication-rate uniform-segmenting-rate maintain-ancestors]
+  [ind {:keys [uniform-segment-duplication-rate uniform-segmenting-rate maintain-ancestors]
         :as argmap}]
   (let [segmented (partition-by (fn [_]
                                   (< (rand)
                                      (random-element-or-identity-if-not-a-collection
                                       uniform-segmenting-rate)))
                                 (:genome ind))
-        rate (random-element-or-identity-if-not-a-collection uniform-duplication-rate)
+        rate (random-element-or-identity-if-not-a-collection uniform-segment-duplication-rate)
         new-genome (vec (apply concat (map #(if (< (rand) rate) (concat % %) %) 
                                            segmented)))]
     (make-individual :genome new-genome
@@ -935,14 +935,14 @@ given by uniform-deletion-rate.
   segment will be deleted is given by uniform-deletion-rate. The probability that 
   segmenting will occur at each gene is given by uniform-segmenting-rate. 
   Works with Plushy genomes."
-  [ind {:keys [uniform-deletion-rate uniform-segmenting-rate maintain-ancestors]
+  [ind {:keys [uniform-segment-deletion-rate uniform-segmenting-rate maintain-ancestors]
         :as argmap}]
   (let [segmented (partition-by (fn [_]
                                   (< (rand)
                                      (random-element-or-identity-if-not-a-collection
                                       uniform-segmenting-rate)))
                                 (:genome ind))
-        rate (random-element-or-identity-if-not-a-collection uniform-deletion-rate)
+        rate (random-element-or-identity-if-not-a-collection uniform-segment-deletion-rate)
         new-genome (vec (apply concat (map #(if (< (rand) rate) [] %)
                                            segmented)))]
     (make-individual :genome new-genome
