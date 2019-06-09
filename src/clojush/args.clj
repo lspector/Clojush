@@ -440,6 +440,11 @@
           ;; to consider only individuals with :grain-size equal to or GREATER than the
           ;; chosen :grain-size.
          
+         :knock-off-chip-off-the-old-block false
+          ;; If truthy, then during preselection, if any individual has an error vector that
+          ;; is different than its mother's, then do not allow any individual with errors
+          ;; identical to its mother's to be selected. Requires :print-history to be true.
+         
          :novelty-distance-metric :euclidean
           ;; When using novelty, the distance metric between two behavior vectors
           ;; Options: :manhattan, :euclidean

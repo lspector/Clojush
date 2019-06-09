@@ -67,6 +67,26 @@
                            grain-size-limit))
                 pop)))))
 
+(defn knock-off-chip-off-the-old-block
+  "If (:knock-off-chip-off-the-old-block argmap) is truthy, then if any individual in
+  pop has an error vector that is different from its mother's, then return pop without
+  any individuals with error vectors identical to their mother's. Otherwise return pop 
+  unchanged."
+  [pop argmap]
+  (if (not (:knock-off-chip-off-the-old-block argmap))
+    pop
+    (if (not (:print-history argmap))
+      (throw
+       (Exception.
+        ":print-history must be true for :knock-off-chip-off-the-old-block"))
+      (let [changed (vec (filter #(or (empty? (:history %))
+                                      (not= (:errors %) (second (:history %))))
+                                 pop))]
+        ;(println (count (:history (first pop))) (count pop) (count changed))
+        (if (empty? changed)
+          pop
+          changed)))))
+
 (defn preselect
   "Returns the population pop reduced as appropriate considering the settings for
   age-mediation, screening, selection method, and autoconstruction."
@@ -75,5 +95,6 @@
       (nonempties-for-autoconstruction argmap)
       (age-mediate argmap)
       (screen argmap)
+      (knock-off-chip-off-the-old-block argmap)
       (one-individual-per-error-vector-for-lexicase argmap)))
 
