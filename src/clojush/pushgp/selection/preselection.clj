@@ -1,5 +1,5 @@
 (ns clojush.pushgp.selection.preselection
-  (:use [clojush random]))
+  (:use [clojush random globals]))
 
 (defn one-individual-per-error-vector-for-lexicase
   "When :parent-selection is a lexicase method, returns only one random individual 
@@ -68,10 +68,13 @@
                 pop)))))
 
 (defn knock-off-chip-off-the-old-block
-  "If (:knock-off-chip-off-the-old-block argmap) is truthy, then if any individual in
+  "If (:knock-off-chip-off-the-old-block argmap) is true, then if any individual in
   pop has an error vector that is different from its mother's, then return pop without
   any individuals with error vectors identical to their mother's. Otherwise return pop 
-  unchanged."
+  unchanged. If the value is a vector of the form [diffs outof] then instead of the
+  requirement being that the error vector must be diffrent from its mother's, it is
+  that there must be at least diffs many different error vectors in the most recent
+  outof many."
   [pop argmap]
   (if (not (:knock-off-chip-off-the-old-block argmap))
     pop
@@ -79,13 +82,22 @@
       (throw
        (Exception.
         ":print-history must be true for :knock-off-chip-off-the-old-block"))
-      (let [changed (vec (filter #(or (empty? (:history %))
-                                      (not= (:errors %) (second (:history %))))
-                                 pop))]
-        ;(println (count (:history (first pop))) (count pop) (count changed))
-        (if (empty? changed)
-          pop
-          changed)))))
+      (if (= true  (:knock-off-chip-off-the-old-block argmap))
+        (let [changed (vec (filter #(or (empty? (:history %))
+                                        (not= (:errors %) (second (:history %))))
+                                   pop))]
+          (if (empty? changed)
+            pop
+            changed))
+        (let [diffs (first (:knock-off-chip-off-the-old-block argmap))
+              outof (second (:knock-off-chip-off-the-old-block argmap))
+              changed (vec (filter #(or (< (count (:history %)) (inc outof))
+                                        (>= (count (distinct (take outof (:history %))))
+                                            diffs))
+                                   pop))]
+          (if (empty? changed)
+            pop
+            changed))))))
 
 (defn preselect
   "Returns the population pop reduced as appropriate considering the settings for
@@ -96,5 +108,10 @@
       (age-mediate argmap)
       (screen argmap)
       (knock-off-chip-off-the-old-block argmap)
+      ((fn [subpop argmap]
+         (when (:print-preselection-fraction argmap)
+           (swap! preselection-counts #(conj % (count subpop))))
+         subpop)
+       argmap)
       (one-individual-per-error-vector-for-lexicase argmap)))
-
+    
