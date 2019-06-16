@@ -83,15 +83,14 @@
        (Exception.
         ":print-history must be true for :knock-off-chip-off-the-old-block"))
       (if (= true  (:knock-off-chip-off-the-old-block argmap))
-        (let [changed (vec (filter #(or (empty? (:history %))
-                                        (not= (:errors %) (second (:history %))))
+        (let [changed (vec (filter #(not= (first (:history %)) (second (:history %)))
                                    pop))]
           (if (empty? changed)
             pop
             changed))
         (let [diffs (first (:knock-off-chip-off-the-old-block argmap))
               outof (second (:knock-off-chip-off-the-old-block argmap))
-              changed (vec (filter #(or (< (count (:history %)) (inc outof))
+              changed (vec (filter #(or (< (count (:history %)) outof)
                                         (>= (count (distinct (take outof (:history %))))
                                             diffs))
                                    pop))]
