@@ -95,7 +95,8 @@
                                             diffs))
                                    pop))]
           (if (empty? changed)
-            pop
+            (do (println "Universal violation of knock-off-chip-off-the-old-block constraint.")
+                pop)
             changed))))))
 
 (defn preselect

@@ -130,6 +130,18 @@
           2
           0)))))
 
+;(defn lineage-redundancy-meta-error
+;  [ind evaluated-population argmap]
+;  (if (not (:print-history argmap))
+;    (throw
+;     (Exception.
+;      ":print-history must be true for :lineage-redundancy"))
+;    (let [hist (:history ind)]
+;      (if (< (count hist) 2)
+;        1/2
+;        (- 1 (/ (count (distinct hist))
+;                (count hist)))))))
+
 (defn lineage-redundancy-meta-error
   [ind evaluated-population argmap]
   (if (not (:print-history argmap))
@@ -137,10 +149,9 @@
      (Exception.
       ":print-history must be true for :lineage-redundancy"))
     (let [hist (:history ind)]
-      (if (< (count hist) 2)
-        1/2
-        (- 1 (/ (count (distinct hist))
-                (count hist)))))))
+      (/ (- (count hist) 
+            (count (distinct hist)))
+         (count hist)))))
 
 (defn redundant-lineage-meta-error
   [ind evaluated-population argmap]
