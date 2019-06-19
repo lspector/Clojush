@@ -148,7 +148,9 @@
     (throw
      (Exception.
       ":print-history must be true for :lineage-redundancy"))
-    (let [hist (:history ind)]
+    (let [hist (if (:lineage-redundancy-window argmap)
+                 (take (:lineage-redundancy-window argmap) (:history ind))
+                 (:history ind))]
       (/ (- (count hist) 
             (count (distinct hist)))
          (count hist)))))

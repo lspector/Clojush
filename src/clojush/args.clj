@@ -394,8 +394,13 @@
          :error-change-recency-limit 5
           ;; The number of generations within which an error change must have occurred to 
           ;; have a :no-recent-error-change meta-error value of zero.
+                                
+         :lineage-redundancy-window nil
+          ;; If truthy, should be an integer which will be the number of history elements
+          ;; used to calculate :lineage-redundancy meta-errors.
 
-         :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population
+         :decimation-ratio 1 
+          ;; If >= 1, does nothing. Otherwise, is the percent of the population
           ;; size that is retained before breeding. If 0 < decimation-ratio < 1, decimation
           ;; tournaments will be used to reduce the population to size (* population-size
           ;; decimation-ratio) before breeding.
