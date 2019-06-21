@@ -74,7 +74,8 @@
   unchanged. If the value is a vector of the form [diffs outof] then instead of the
   requirement being that the error vector must be diffrent from its mother's, it is
   that there must be at least diffs many different error vectors in the most recent
-  outof many."
+  outof many. If diffs is :random, then it is chosen randomly from the range from 0
+  to outof."
   [pop argmap]
   (if (not (:knock-off-chip-off-the-old-block argmap))
     pop
@@ -90,6 +91,7 @@
             changed))
         (let [diffs (first (:knock-off-chip-off-the-old-block argmap))
               outof (second (:knock-off-chip-off-the-old-block argmap))
+              diffs  (if (= diffs :random) (inc (lrand-int outof)) diffs)
               changed (vec (filter #(or (< (count (:history %)) outof)
                                         (>= (count (distinct (take outof (:history %))))
                                             diffs))
