@@ -97,7 +97,7 @@
               limit (if (= outof :random) (nth knock-spec 2) nil)
               outof (if (= outof :random) (inc (lrand-int limit)) outof)
               diffs  (if (= diffs :random) (inc (lrand-int outof)) diffs)
-              changed (vec (filter #(or (< (count (:history %)) outof)
+              changed (vec (filter #(or (< (count (:history %)) diffs)
                                         (>= (count (distinct (take outof (:history %))))
                                             diffs))
                                    pop))]
