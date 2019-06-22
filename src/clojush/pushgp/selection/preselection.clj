@@ -77,7 +77,11 @@
   outof many. If diffs is :random, then it is chosen randomly from the range from 1
   to outof. If outof is also :random, then the value should actually be a vector
   of the form [:random :random limit], and outof will be chosen from the range from
-  1 to limit."
+  1 to limit. If the value is of the form [:random :random limit minfrac] then diffs
+  will be chosen randomly from the range of (int (* minfrac outof)) to outof.
+  If the value is of the form [:random :random limit minfrac maxfrac] then diffs
+  will be chosen randomly from the range of (int (* minfrac outof)) to
+  (int (* maxfrac outof))."
   [pop argmap]
   (if (not (:knock-off-chip-off-the-old-block argmap))
     pop
@@ -96,7 +100,15 @@
               outof (second knock-spec)
               limit (if (= outof :random) (nth knock-spec 2) nil)
               outof (if (= outof :random) (inc (lrand-int limit)) outof)
-              diffs  (if (= diffs :random) (inc (lrand-int outof)) diffs)
+              diffs  (if (= diffs :random) 
+                       (inc (if (> (count knock-spec) 3)
+                              (let [mindiff (int (* (nth knock-spec 3) outof))
+                                    maxdiff (if (> (count knock-spec) 4)
+                                              (int (* (nth knock-spec 4) outof))
+                                              outof)]
+                                (+ mindiff (lrand-int (max 1 (- maxdiff mindiff)))))
+                              (lrand-int outof)))
+                       diffs)
               changed (vec (filter #(or (< (count (:history %)) diffs)
                                         (>= (count (distinct (take outof (:history %))))
                                             diffs))
