@@ -81,42 +81,60 @@
   will be chosen randomly from the range of (int (* minfrac outof)) to outof.
   If the value is of the form [:random :random limit minfrac maxfrac] then diffs
   will be chosen randomly from the range of (int (* minfrac outof)) to
-  (int (* maxfrac outof))."
+  (int (* maxfrac outof)). If the first item in (:knock-off-chip-off-the-old-block argmap)
+  is :unsolved, then the remainder are interpreted as above, but only errors
+  that are not solved for a given individual are considered in the filtering."
   [pop argmap]
-  (if (not (:knock-off-chip-off-the-old-block argmap))
-    pop
-    (if (not (:print-history argmap))
-      (throw
-       (Exception.
-        ":print-history must be true for :knock-off-chip-off-the-old-block"))
-      (if (= true  (:knock-off-chip-off-the-old-block argmap))
-        (let [changed (vec (filter #(not= (first (:history %)) (second (:history %)))
-                                   pop))]
-          (if (empty? changed)
-            pop
-            changed))
-        (let [knock-spec (:knock-off-chip-off-the-old-block argmap)
-              diffs (first knock-spec)
-              outof (second knock-spec)
-              limit (if (= outof :random) (nth knock-spec 2) nil)
-              outof (if (= outof :random) (inc (lrand-int limit)) outof)
-              diffs  (if (= diffs :random) 
-                       (inc (if (> (count knock-spec) 3)
-                              (let [mindiff (int (* (nth knock-spec 3) outof))
-                                    maxdiff (if (> (count knock-spec) 4)
-                                              (int (* (nth knock-spec 4) outof))
-                                              outof)]
-                                (+ mindiff (lrand-int (max 1 (- maxdiff mindiff)))))
-                              (lrand-int outof)))
-                       diffs)
-              changed (vec (filter #(or (< (count (:history %)) diffs)
-                                        (>= (count (distinct (take outof (:history %))))
-                                            diffs))
-                                   pop))]
-          (if (empty? changed)
-            (do (println "Universal violation of knock-off-chip-off-the-old-block constraint.")
-                pop)
-            changed))))))
+  (let [knock-spec (:knock-off-chip-off-the-old-block argmap)]
+    (if (not knock-spec)
+      pop
+      (if (not (:print-history argmap))
+        (throw
+         (Exception.
+          ":print-history must be true for :knock-off-chip-off-the-old-block"))
+        (let [knock-spec (if (= true knock-spec) [true] knock-spec)
+              unsolved? (= :unsolved (first knock-spec))
+              knock-spec (if unsolved? (rest knock-spec) knock-spec)
+              filtered-history (if unsolved?
+                                 (fn [ind]
+                                   (let [hist (:history ind)
+                                         keep? (map #(not (zero? %))
+                                                    (first hist))]
+                                     (map (fn [errs]
+                                            (filter identity
+                                                    (map (fn [e k?]
+                                                           (if k? e nil))
+                                                         errs
+                                                         keep?)))
+                                          hist)))
+                                 :history)]
+        (if (= true (first knock-spec))
+          (let [changed (vec (filter #(not= (first (:history %)) (second (:history %)))
+                                     pop))]
+            (if (empty? changed)
+              pop
+              changed))
+          (let [diffs (first knock-spec)
+                outof (second knock-spec)
+                limit (if (= outof :random) (nth knock-spec 2) nil)
+                outof (if (= outof :random) (inc (lrand-int limit)) outof)
+                diffs (if (= diffs :random)
+                        (inc (if (> (count knock-spec) 3)
+                               (let [mindiff (int (* (nth knock-spec 3) outof))
+                                     maxdiff (if (> (count knock-spec) 4)
+                                               (int (* (nth knock-spec 4) outof))
+                                               outof)]
+                                 (+ mindiff (lrand-int (max 1 (- maxdiff mindiff)))))
+                               (lrand-int outof)))
+                        diffs)
+                changed (vec (filter #(or (< (count (:history %)) diffs)
+                                          (>= (count (distinct (take outof (:history %))))
+                                              diffs))
+                                     pop))]
+            (if (empty? changed)
+              (do (println "Universal violation of knock-off-chip-off-the-old-block constraint.")
+                  pop)
+              changed))))))))
 
 (defn preselect
   "Returns the population pop reduced as appropriate considering the settings for
