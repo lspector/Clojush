@@ -114,7 +114,8 @@
                                           hist)))
                                  :history)]
           (if (= true (first knock-spec))
-            (let [changed (vec (filter #(not= (first (:history %)) (second (:history %)))
+            (let [changed (vec (filter #(not= (first (filtered-history %)) 
+                                              (second (filtered-history %)))
                                        pop))]
               (if (empty? changed)
                 pop
@@ -138,8 +139,9 @@
                                    (inc (lrand-int (dec outof)))
                                    (lrand-int outof))))
                           diffs)
-                  changed (vec (filter #(or (< (count (:history %)) diffs)
-                                            (>= (count (distinct (take outof (:history %))))
+                  changed (vec (filter #(or (< (count (filtered-history %)) diffs)
+                                            (>= (count (distinct (take outof 
+                                                                       (filtered-history %))))
                                                 diffs))
                                        pop))]
               (if (empty? changed)
