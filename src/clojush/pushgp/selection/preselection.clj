@@ -84,9 +84,10 @@
   (int (* maxfrac outof)). If the first item in (:knock-off-chip-off-the-old-block argmap)
   is :unsolved, then the remainder are interpreted as above, but only errors
   that are not solved for a given individual are considered in the filtering.
-  If the first item in (:knock-off-chip-off-the-old-block argmap)
-  is :min2, then the remainder are interpreted as above, but the minimum
-  for random values is 2 rather than 1."
+  If it is :unsolved-subset, then only a random subset of those considered
+  with :unsolved will be considered. If the first item in 
+  (:knock-off-chip-off-the-old-block argmap) is :min2, then the remainder are 
+  interpreted as above, but the minimum for random values is 2 rather than 1."
   [pop argmap]
   (let [knock-spec (:knock-off-chip-off-the-old-block argmap)]
     (if (not knock-spec)
@@ -98,23 +99,41 @@
         (let [knock-spec (if (= true knock-spec) [true] knock-spec)
               min2? (= :min2 (first knock-spec))
               knock-spec (if min2? (rest knock-spec) knock-spec)
-              unsolved? (= :unsolved (first knock-spec))
+              unsolved? (or (= :unsolved (first knock-spec))
+                            (= :unsolved-subset (first knock-spec)))
+              subset? (= :unsolved-subset (first knock-spec))
               knock-spec (if unsolved? (rest knock-spec) knock-spec)
-              filtered-history (if unsolved?
-                                 (fn [ind]
-                                   (let [hist (:history ind)
-                                         keep? (map #(not (zero? %))
-                                                    (first hist))]
-                                     (map (fn [errs]
-                                            (filter identity
-                                                    (map (fn [e k?]
-                                                           (if k? e nil))
-                                                         errs
-                                                         keep?)))
-                                          hist)))
-                                 :history)]
+              filtered-history
+              (if unsolved?
+                (fn [ind]
+                  (let [hist (:history ind)
+                        keep? (map #(not (zero? %))
+                                   (first hist))
+                        keep? (if (and subset?
+                                       (> (count (filter identity keep?)) 1))
+                                (let [keep-indices
+                                      (filter identity
+                                              (map (fn [k i]
+                                                     (if k i nil))
+                                                   keep?
+                                                   (iterate inc 0)))
+                                      keep-indices (shuffle keep-indices)
+                                      keep-indices (cons (first keep-indices)
+                                                         (take (rand-int (count keep-indices))
+                                                               (rest keep-indices)))]
+                                  (for [i (range (count keep?))]
+                                    (some #{i} keep-indices)))
+                                keep?)]
+                    (map (fn [errs]
+                           (filter identity
+                                   (map (fn [e k?]
+                                          (if k? e nil))
+                                        errs
+                                        keep?)))
+                         hist)))
+                :history)]
           (if (= true (first knock-spec))
-            (let [changed (vec (filter #(not= (first (filtered-history %)) 
+            (let [changed (vec (filter #(not= (first (filtered-history %))
                                               (second (filtered-history %)))
                                        pop))]
               (if (empty? changed)
@@ -123,7 +142,7 @@
             (let [diffs (first knock-spec)
                   outof (second knock-spec)
                   limit (if (= outof :random) (nth knock-spec 2) nil)
-                  outof (if (= outof :random) 
+                  outof (if (= outof :random)
                           (if min2?
                             (inc (inc (lrand-int (dec limit))))
                             (inc (lrand-int limit)))
@@ -140,7 +159,7 @@
                                    (lrand-int outof))))
                           diffs)
                   changed (vec (filter #(or (< (count (filtered-history %)) diffs)
-                                            (>= (count (distinct (take outof 
+                                            (>= (count (distinct (take outof
                                                                        (filtered-history %))))
                                                 diffs))
                                        pop))]
