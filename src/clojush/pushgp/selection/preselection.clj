@@ -85,7 +85,8 @@
   is :unsolved, then the remainder are interpreted as above, but only errors
   that are not solved for a given individual are considered in the filtering.
   If it is :unsolved-subset, then only a random subset of those considered
-  with :unsolved will be considered. If the first item in 
+  with :unsolved will be considered. If it is :unsolved-single, then only
+  a random single such error. If the first item in 
   (:knock-off-chip-off-the-old-block argmap) is :min2, then the remainder are 
   interpreted as above, but the minimum for random values is 2 rather than 1."
   [pop argmap]
@@ -100,8 +101,10 @@
               min2? (= :min2 (first knock-spec))
               knock-spec (if min2? (rest knock-spec) knock-spec)
               unsolved? (or (= :unsolved (first knock-spec))
-                            (= :unsolved-subset (first knock-spec)))
+                            (= :unsolved-subset (first knock-spec))
+                            (= :unsolved-single (first knock-spec)))
               subset? (= :unsolved-subset (first knock-spec))
+              single? (= :unsolved-single (first knock-spec))
               knock-spec (if unsolved? (rest knock-spec) knock-spec)
               filtered-history
               (if unsolved?
@@ -121,6 +124,15 @@
                                       keep-indices (cons (first keep-indices)
                                                          (take (rand-int (count keep-indices))
                                                                (rest keep-indices)))]
+                                  (for [i (range (count keep?))]
+                                    (some #{i} keep-indices)))
+                                keep?)
+                        keep? (if single?
+                                (let [keep-indices
+                                      (take 1 (shuffle (filter identity
+                                                               (map (fn [k i] (if k i nil))
+                                                                    keep?
+                                                                    (iterate inc 0)))))]
                                   (for [i (range (count keep?))]
                                     (some #{i} keep-indices)))
                                 keep?)]
