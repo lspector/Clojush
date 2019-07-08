@@ -453,6 +453,7 @@
           ;; If truthy, then during preselection, if any individual has an error vector that
           ;; is different than its mother's, then do not allow any individual with errors
           ;; identical to its mother's to be selected. Requires :print-history to be true.
+          ;; See preselection.clj for more options.
 
          :novelty-distance-metric :euclidean
           ;; When using novelty, the distance metric between two behavior vectors

@@ -82,12 +82,9 @@
   If the value is of the form [:random :random limit minfrac maxfrac] then diffs
   will be chosen randomly from the range of (int (* minfrac outof)) to
   (int (* maxfrac outof)). If the first item in (:knock-off-chip-off-the-old-block argmap)
-  is :unsolved, then the remainder are interpreted as above, but only errors
-  that are not solved for a given individual are considered in the filtering.
-  If it is :unsolved-subset, then only a random subset of those considered
-  with :unsolved will be considered. If it is :unsolved-single, then only
-  a random single such error. If the first item in 
-  (:knock-off-chip-off-the-old-block argmap) is :min2, then the remainder are 
+  is :subset, then the remainder are interpreted as above, but only a random subset
+  of errors is considered in the filtering. If it is :single, then only
+  a random single error. If the first item in is :min2, then the remainder are 
   interpreted as above, but the minimum for random values is 2 rather than 1."
   [pop argmap]
   (let [knock-spec (:knock-off-chip-off-the-old-block argmap)]
@@ -100,56 +97,27 @@
         (let [knock-spec (if (= true knock-spec) [true] knock-spec)
               min2? (= :min2 (first knock-spec))
               knock-spec (if min2? (rest knock-spec) knock-spec)
-              unsolved? (or (= :unsolved (first knock-spec))
-                            (= :unsolved-subset (first knock-spec))
-                            (= :unsolved-single (first knock-spec)))
-              subset? (= :unsolved-subset (first knock-spec))
-              single? (= :unsolved-single (first knock-spec))
-              knock-spec (if unsolved? (rest knock-spec) knock-spec)
+              subset? (= :subset (first knock-spec))
+              knock-spec (if subset? (rest knock-spec) knock-spec)
+              single? (= :single (first knock-spec))
+              knock-spec (if single? (rest knock-spec) knock-spec)
               filtered-history
-              (if unsolved?
-                (fn [ind]
-                  (let [hist (:history ind)
-                        keep? (map #(not (zero? %))
-                                   (first hist))
-                        keep? (if (and subset?
-                                       (> (count (filter identity keep?)) 1))
-                                (let [keep-indices
-                                      (filter identity
-                                              (map (fn [k i]
-                                                     (if k i nil))
-                                                   keep?
-                                                   (iterate inc 0)))
-                                      keep-indices (shuffle keep-indices)
-                                      keep-indices (cons (first keep-indices)
-                                                         (take (rand-int (count keep-indices))
-                                                               (rest keep-indices)))]
-                                  (for [i (range (count keep?))]
-                                    (some #{i} keep-indices)))
-                                keep?)
-                        keep? (if single?
-                                (let [keep-indices
-                                      (take 1 (shuffle (filter identity
-                                                               (map (fn [k i] (if k i nil))
-                                                                    keep?
-                                                                    (iterate inc 0)))))]
-                                  (for [i (range (count keep?))]
-                                    (some #{i} keep-indices)))
-                                keep?)]
+              (if (or subset? single?)
+                (let [all (shuffle (range (count (first (:history (first pop))))))
+                      keepers (cons (first all)
+                                    (if single? [] (take (rand (count all)) all)))]
+                  (fn [ind]
                     (map (fn [errs]
-                           (filter identity
-                                   (map (fn [e k?]
-                                          (if k? e nil))
-                                        errs
-                                        keep?)))
-                         hist)))
+                           (for [i keepers] (nth errs i)))
+                         (:history ind))))
                 :history)]
           (if (= true (first knock-spec))
             (let [changed (vec (filter #(not= (first (filtered-history %))
                                               (second (filtered-history %)))
                                        pop))]
               (if (empty? changed)
-                pop
+                (do (println "Universal violation of knock-off-chip-off-the-old-block constraint.")
+                    pop)
                 changed))
             (let [diffs (first knock-spec)
                   outof (second knock-spec)
@@ -179,6 +147,7 @@
                 (do (println "Universal violation of knock-off-chip-off-the-old-block constraint.")
                     pop)
                 changed))))))))
+
 
 (defn preselect
   "Returns the population pop reduced as appropriate considering the settings for
