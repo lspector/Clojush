@@ -94,7 +94,7 @@
         (throw
          (Exception.
           ":print-history must be true for :knock-off-chip-off-the-old-block"))
-        (let [knock-spec (if (= true knock-spec) [true] knock-spec)
+        (let [knock-spec (if (= true knock-spec) [2 2] knock-spec)
               min2? (= :min2 (first knock-spec))
               knock-spec (if min2? (rest knock-spec) knock-spec)
               subset? (= :subset (first knock-spec))
@@ -110,43 +110,40 @@
                     (map (fn [errs]
                            (for [i keepers] (nth errs i)))
                          (:history ind))))
-                :history)]
-          (if (= true (first knock-spec))
-            (let [changed (vec (filter #(not= (first (filtered-history %))
-                                              (second (filtered-history %)))
-                                       pop))]
-              (if (empty? changed)
-                (do (println "Universal violation of knock-off-chip-off-the-old-block constraint.")
-                    pop)
-                changed))
-            (let [diffs (first knock-spec)
-                  outof (second knock-spec)
-                  limit (if (= outof :random) (nth knock-spec 2) nil)
-                  outof (if (= outof :random)
-                          (if min2?
-                            (inc (inc (lrand-int (dec limit))))
-                            (inc (lrand-int limit)))
-                          outof)
-                  diffs (if (= diffs :random)
-                          (inc (if (> (count knock-spec) 3)
-                                 (let [mindiff (int (* (nth knock-spec 3) outof))
-                                       maxdiff (if (> (count knock-spec) 4)
-                                                 (int (* (nth knock-spec 4) outof))
-                                                 outof)]
-                                   (+ mindiff (lrand-int (max 1 (- maxdiff mindiff)))))
-                                 (if min2?
-                                   (inc (lrand-int (dec outof)))
-                                   (lrand-int outof))))
-                          diffs)
-                  changed (vec (filter #(or (< (count (filtered-history %)) diffs)
-                                            (>= (count (distinct (take outof
-                                                                       (filtered-history %))))
-                                                diffs))
-                                       pop))]
-              (if (empty? changed)
-                (do (println "Universal violation of knock-off-chip-off-the-old-block constraint.")
-                    pop)
-                changed))))))))
+                :history)
+              diffs (first knock-spec)
+              outof (second knock-spec)
+              limit (if (= outof :random) (nth knock-spec 2) nil)
+              outof (if (= outof :random)
+                      (if min2?
+                        (inc (inc (lrand-int (dec limit))))
+                        (inc (lrand-int limit)))
+                      outof)
+              diffs (if (= diffs :random)
+                      (inc (if (> (count knock-spec) 3)
+                             (let [mindiff (int (* (nth knock-spec 3) outof))
+                                   maxdiff (if (> (count knock-spec) 4)
+                                             (int (* (nth knock-spec 4) outof))
+                                             outof)]
+                               (+ mindiff (lrand-int (max 1 (- maxdiff mindiff)))))
+                             (if min2?
+                               (inc (lrand-int (dec outof)))
+                               (lrand-int outof))))
+                      diffs)
+              changed (vec (filter (fn [ind]
+                                     (let [hist (filtered-history ind)
+                                           case-hists (apply map list hist)]
+                                       (every? (fn [h]
+                                                 (or (zero? (first h))
+                                                     (< (count h) diffs)
+                                                     (>= (count (distinct (take outof h)))
+                                                         diffs)))
+                                               case-hists)))
+                                   pop))]
+          (if (empty? changed)
+            (do (println "Universal violation of knock-off-chip-off-the-old-block constraint.")
+                pop)
+            changed))))))
 
 
 (defn preselect
