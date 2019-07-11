@@ -131,14 +131,13 @@
                                (lrand-int outof))))
                       diffs)
               changed (vec (filter (fn [ind]
-                                     (let [hist (filtered-history ind)
-                                           case-hists (apply map list hist)]
-                                       (every? (fn [h]
-                                                 (or (zero? (first h))
-                                                     (< (count h) diffs)
-                                                     (>= (count (distinct (take outof h)))
-                                                         diffs)))
-                                               case-hists)))
+                                     (or (< (count (:history ind)) diffs)
+                                         (let [hist (filtered-history ind)
+                                               case-hists (apply map list hist)]
+                                           (some (fn [h]
+                                                   (>= (count (distinct (take outof h)))
+                                                       diffs))
+                                                 case-hists))))
                                    pop))]
           (if (empty? changed)
             (do (println "Universal violation of knock-off-chip-off-the-old-block constraint.")
