@@ -105,11 +105,11 @@
               (if (or subset? single?)
                 (let [all (shuffle (range (count (first (:history (first pop))))))
                       keepers (cons (first all)
-                                    (if single? [] (take (rand (count all)) all)))]
+                                    (if single? [] (take (rand (count all)) (rest all))))]
                   (fn [ind]
-                    (map (fn [errs]
-                           (for [i keepers] (nth errs i)))
-                         (:history ind))))
+                    (mapv (fn [errs]
+                           (vec (for [i keepers] (nth errs i)))
+                         (:history ind)))))
                 :history)
               diffs (first knock-spec)
               outof (second knock-spec)
