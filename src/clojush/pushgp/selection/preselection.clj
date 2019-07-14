@@ -105,7 +105,10 @@
               (if (or subset? single?)
                 (let [all (shuffle (range (count (first (:history (first pop))))))
                       keepers (cons (first all)
-                                    (if single? [] (take (rand (count all)) (rest all))))]
+                                    (if single?
+                                      []
+                                      (vec (take (rand (count all))
+                                                 (rest all)))))]
                   (fn [ind]
                     (mapv (fn [errs]
                            (vec (for [i keepers] (nth errs i)))
@@ -133,7 +136,7 @@
               changed (vec (filter (fn [ind]
                                      (or (< (count (:history ind)) diffs)
                                          (let [hist (filtered-history ind)
-                                               case-hists (apply map list hist)]
+                                               case-hists (apply mapv list hist)]
                                            (some (fn [h]
                                                    (>= (count (distinct (take outof h)))
                                                        diffs))
