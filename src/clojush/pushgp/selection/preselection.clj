@@ -110,9 +110,11 @@
                                       (vec (take (rand (count all))
                                                  (rest all)))))]
                   (fn [ind]
-                    (mapv (fn [errs]
-                           (vec (for [i keepers] (nth errs i)))
-                         (:history ind)))))
+                    (if (empty? (:history ind))
+                      []
+                      (mapv (fn [errs]
+                              (vec (for [i keepers] (nth errs i))))
+                            (:history ind)))))
                 :history)
               diffs (first knock-spec)
               outof (second knock-spec)
