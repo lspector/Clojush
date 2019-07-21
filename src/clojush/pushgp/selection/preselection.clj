@@ -149,7 +149,6 @@
                 pop)
             changed))))))
 
-
 (defn preselect
   "Returns the population pop reduced as appropriate considering the settings for
   age-mediation, screening, selection method, and autoconstruction."
@@ -165,4 +164,3 @@
          subpop)
        argmap)
       (one-individual-per-error-vector-for-lexicase argmap)))
-    
