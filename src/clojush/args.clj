@@ -442,7 +442,7 @@
           ;; will be replaced with the results of repeated selection (using the specified
           ;; :parent-selection method) from an archive of all of the individuals that have  
           ;; been produced since the previous time this was done.  
-
+         
          :preserve-frontier false
           ;; If truthy, then each child population will be replaced, after its errors have
           ;; been evaluated, with the product of a frontier-preservation process in which
@@ -571,12 +571,20 @@
          :label nil
           ;; If set, will send this in the configuration of the run, to the
           ;; external record
-
-          :calculate-mod-metrics false
-          ;; Is true, will calculate modularity metrics (reuse and repetition)
+         
+         :calculate-mod-metrics false
+          ;; If true, will calculate modularity metrics (reuse and repetition)
           ;; as the run proceeds.
-
-          )))
+         
+         :filter-params false
+          ;; If false, no filtering as part of preseelction. Othersie, should be a map with :features and :thresholds as keys.
+          ;; :features contains a list of design values used in preselection. :thresholds contains the list of correspoding 
+          ;; values of thresholds to ne used in preselection.
+          ;; {:features [reuse] thresholds [.6]}. It means that individuals will be filtered on the basis of reuse.
+          ;; DON'T KNOW HOW TO COMBINE BOTH THE MEASURES
+          ;; 
+         
+         )))
 
 (defn augment-for-autoconstruction
   []

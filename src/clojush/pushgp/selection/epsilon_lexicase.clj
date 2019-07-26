@@ -1,5 +1,6 @@
 (ns clojush.pushgp.selection.epsilon-lexicase
-  (:use [clojush random globals util]))
+  (:use [clojush random globals util]
+        [clojush.pushgp.selection.lexicase]))
 
 (defn mad
   "Returns median absolute deviation (MAD)"
@@ -29,7 +30,7 @@
   considered one at a time in random order."
   [pop {:keys [epsilon-lexicase-epsilon epsilon-lexicase-probability] :as argmap}]
   (loop [survivors pop
-         cases (lshuffle (range (count (:errors (first pop)))))]
+         cases (shuffle-cases pop argmap)]
     (if (or (empty? cases)
             (empty? (rest survivors))
             (< (lrand) (:lexicase-slippage argmap)))

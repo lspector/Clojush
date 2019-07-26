@@ -67,11 +67,20 @@
                            grain-size-limit))
                 pop)))))
 
+(defn filter-by-design-values
+  "Select the individuals having top x percent design values."
+  [pop {:keys [filter-params population-size]}]
+  (if (not filter-params)
+    pop
+    (vec (take-last (int (* (first (:thresholds filter-params)) population-size)) (sort-by #(first (:reuse-info %)) pop)))))
+
+
 (defn preselect
   "Returns the population pop reduced as appropriate considering the settings for
   age-mediation, screening, selection method, and autoconstruction."
   [pop argmap]
   (-> pop
+      (filter-by-design-values argmap)
       (nonempties-for-autoconstruction argmap)
       (age-mediate argmap)
       (screen argmap)

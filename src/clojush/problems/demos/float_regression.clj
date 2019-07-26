@@ -8,6 +8,7 @@
 (ns clojush.problems.demos.float-regression
   (:use [clojush.pushgp.pushgp]
         [clojush.random]
+        [clojush.util]
         [clojush.pushstate]
         [clojush.interpreter]))
 
@@ -15,6 +16,7 @@
 ;; Float symbolic regression of x^3 - 2x^2 - x (problem 5 from the 
 ;; trivial geography chapter) with minimal float instructions and an 
 ;; input instruction that uses the auxiliary stack.
+
 
 (def fitness-cases
   (for [input (map float (range 10))]

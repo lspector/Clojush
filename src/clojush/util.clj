@@ -617,18 +617,121 @@
     (list (reverse @result-exec) (reverse @result-meta))))
 
 
-(defn mod-metrics
+
+
+
+(defn local-mods
+  "Given a sequence of instructions, output a list of all possible modules. For instance given [(2 2),(3 3),(4 4)], output the modules [(2 2)], [(3 3)], [(4 4)], [(2 2),(3 3)], [(2 2),(3 3)], [(2 2),(3 3),(4 4)]"
+  [temp]
+  (let  [temp (sort-by first temp)
+         local-modules (all-continuous-seqs (vec temp))]
+    (remove #(= % (vec temp)) local-modules)))
+
+
+(defn mod-metrics1
   [exec-trace meta-trace]
   (let [exec-trace1 (reverse exec-trace)
         meta-trace1 (reverse meta-trace)
-        combined (GetRidOfNonOriginalInstrs exec-trace1 meta-trace1 (apply max (flatten (first meta-trace1))))
+        ;; Since the first element of meta-trace is the list of identifiers of the instruction in the original program, maxid can be calculated as the max of those identifers
+        combined (GetRidOfNonOriginalInstrs exec-trace1 meta-trace1 (if-not (empty? (flatten (first meta-trace1)))
+                                                                      (apply max (flatten (first meta-trace1)))
+                                                                      0))
         exec-trace (first combined)
         meta-trace (last combined)
+        ;;(ins1 (inst2 inst3))  will be converted to ('inst1' 'inst2 inst3')
         actual-exec-trace (doall (map (fn [x] (let [x-str (str x)]
                                                 (if (seq? x)
                                                   (subs x-str 1 (dec (count x-str)))
                                                   x-str)))
-                                      exec-trace))     ;(parenthetic-contents (str exec-trace)))
+                                      exec-trace))
+        ;; (1 (2 3) (4 (5 6) 7)) will be converted to ([1 1] [2 3] [4 7])  
+        metadata-trace (map (fn [x] (if (seq? x)
+                                      (loop [f (first x)
+                                             l (last x)]
+                                        (if (not (or (seq? f) (seq? l)))
+                                          (vector f l)
+                                          (recur (if (seq? f)
+                                                   (first f)
+                                                   f)
+                                                 (if (seq? l)
+                                                   (last l)
+                                                   l))))
+                                      (vector x x))) meta-trace)
+        ;; total number of instructions with distinct identifiers 
+        vocab-length (count (distinct (filter (fn [x] (= (first x) (last x))) metadata-trace)))
+        len (count metadata-trace)
+        seqs (atom ())
+        m-trace (atom metadata-trace)
+        reuse (atom 0)
+        repetition (atom 0)
+        i (atom 0)]
+    (while (< @i (count @m-trace))
+      (do
+        (let [temp (atom ())]
+          (do
+            (reset! m-trace
+                    (reverse (reduce #(let [lst (first %1)
+                                            m (nth lst 0)
+                                            n (nth lst 1)]
+                                        (if (and (not (empty? lst)) (= (- n m) @i) (>= (nth %2 0) m) (<= (nth %2 1) n) (not= lst %2))
+                                          (let [_ (swap! temp conj %2)
+                                                _ (prn @temp)]
+                                            %1)
+                                          (let [_ (if-not (empty? @temp) (swap! seqs concat (local-mods @temp)))
+                                                _  (reset! temp '())]
+                                            (conj %1 %2)))) '() @m-trace)))
+            (let [_ (if-not (empty? @temp) (swap! seqs concat (local-mods @temp)))
+                  _  (reset! temp '())])
+            )
+          )
+        (swap! i inc)))
+    (swap! seqs concat (remove #(= % (vec @m-trace)) (all-continuous-seqs (vec @m-trace))))
+    (let [freq-temp (frequencies @seqs)
+          freq-temp (remove #(= (last %) 1) freq-temp)]
+
+      (doseq [elem freq-temp]
+        (swap! reuse +' (*' (inc (- (nth (last (first elem)) 1) (nth (first (first elem)) 0))) (exp 2 (last elem))))))
+    (reset! reuse (unchecked-float (/ @reuse (exp 2 vocab-length))))
+
+    (let [mapping (zipmap metadata-trace actual-exec-trace)
+          _ (swap! seqs distinct)
+          modules-temp (map (fn [x] (vals (select-keys mapping x))) @seqs)
+          modules-temp (map (fn [x] (string/join " " x)) modules-temp)
+          modules-temp (map (fn [x] (string/replace x #"[()]" "")) modules-temp)
+          freq-temp (frequencies modules-temp)
+          unique-instrs (count (distinct (apply concat (for [elem freq-temp]
+                                                         (string/split (first elem) #" ")))))
+          freq-temp (remove #(= (last %) 1) freq-temp)]
+
+      (reset! repetition (reduce +' (for [elem freq-temp]
+                                      (*' (count (string/split (first elem) #" ")) (exp 2 (last elem))))))
+
+      (reset! repetition (unchecked-float (/ @repetition (exp 2 unique-instrs)))))
+
+    (list @reuse @repetition)))
+
+
+
+
+;; the following implementation is old but correct. 
+(defn mod-metrics
+  [exec-trace meta-trace]
+  (let [;; the lists obtained from program execution are in reverse order
+        exec-trace1 (reverse exec-trace)
+        meta-trace1 (reverse meta-trace)
+        ;; Since the first element of meta-trace is the list of identifiers of the instruction in the original program, maxid can be calculated as the max of those identifers
+        combined (GetRidOfNonOriginalInstrs exec-trace1 meta-trace1 (if-not (empty? (flatten (first meta-trace1)))
+                                                                      (apply max (flatten (first meta-trace1)))
+                                                                      0))
+        exec-trace (first combined)
+        meta-trace (last combined)
+        ;;(ins1 (inst2 inst3))  will be converted to ('inst1' 'inst2 inst3')
+        actual-exec-trace (doall (map (fn [x] (let [x-str (str x)]
+                                                (if (seq? x)
+                                                  (subs x-str 1 (dec (count x-str)))
+                                                  x-str)))
+                                      exec-trace))
+        ;; (1 (2 3) (4 (5 6) 7)) will be converted to ([1 1] [2 3] [4 7])  
         metadata-trace (map (fn [x] (if (seq? x)
                                       (loop [f (first x) 
                                              l (last x)]
@@ -641,6 +744,7 @@
                                                    (last l)
                                                    l))))
                                       (vector x x))) meta-trace)
+        ;; total number of instructions with distinct identifiers 
         vocab-length (count (distinct (filter (fn [x] (= (first x) (last x))) metadata-trace)))
         len (count metadata-trace)
         seqs (atom ())
@@ -648,10 +752,6 @@
         reuse (atom 0)
         repetition (atom 0)
         i (atom 1)]
-    ;(prn exec-trace)
-    ;(prn actual-exec-trace)
-    ;(prn meta-trace)
-    ;(prn metadata-trace)
     (while (<= @i (count @m-trace))
       (let [j (atom 0)]
         (while (< @j (count @m-trace))
@@ -682,18 +782,16 @@
         (swap! i inc)
         ))
     (swap! seqs concat (remove #(= % (vec @m-trace)) (all-continuous-seqs (vec @m-trace))))
-    ;(prn @seqs)
+
     (let [freq-temp (frequencies @seqs)
           freq-temp (remove #(= (last %) 1) freq-temp)]
-      ;(println freq-temp)
+
       (doseq [elem freq-temp]        
         (swap! reuse +' (*' (inc (- (nth (last (first elem)) 1) (nth (first (first elem)) 0))) (math/expt 2 (last elem)) ))
         )
       )
-    
-    ;(if (> vocab-length 50)
     (reset! reuse (unchecked-float (/ @reuse (math/expt 2 vocab-length))))
-      ;(reset! reuse (*' @reuse (float (exp 2 (- 50 vocab-length))))))
+
     (let [mapping (zipmap metadata-trace actual-exec-trace)
           _ (swap! seqs distinct)
           modules-temp (map (fn [x] (vals (select-keys mapping x))) @seqs)
@@ -704,15 +802,14 @@
                                                          (string/split (first elem) #" ")))))
           freq-temp (remove #(= (last %) 1) freq-temp)
           ]
-      ;(prn freq-temp)
-      ;(prn unique-instrs)
+  
       (reset! repetition (reduce +' (for [elem freq-temp]        
                                      (*' (count (string/split (first elem) #" ")) (math/expt 2 (last elem))))))
-         ;(if (> unique-instrs 50)
+      
       (reset! repetition (unchecked-float (/ @repetition (math/expt 2 unique-instrs))))
-      ;(reset! repetition (*' @repetition (float (exp 2 (- 50 unique-instrs))))))
+    
       )
-    ;(prn @reuse @repetition)
+
     (list @reuse @repetition)
     )
   )

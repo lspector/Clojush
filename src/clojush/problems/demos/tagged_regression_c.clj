@@ -28,85 +28,98 @@
 
 ;; http://www.drregex.com/2017/11/match-nested-brackets-with-regex-new.html
 
-(comment
-(defn custom-report
-  "Custom generational report."
-  [best population generation error-function report-simplifications]
-  (let [state-with-tags (tagspace-initialization (str (:program best)) 100 (make-push-state))]
-    (println ";;******************************")
-    (println ";;Automatic tags used to intialize the tagspace:")
-    (println "Auto-tags:" (keys (get state-with-tags :tag)))
-    (println ";;******************************")
-    ))
 
-)
+
+;(define-registered
+;  myfn
+;  ^{:stack-types [:float]}
+;  (fn [state]
+;    (if (not (empty? (:float state)))
+;      (let [item (stack-ref :float 0 state)]
+ ;       (->> (pop-item :float state)
+;             (push-item (keep-number-reasonable (+ (* item item item) 1)) :float)))
+ ;     state)))
+
+;;
+;; Implements (x^3+1)^3 + 1 
+;;
+(def fitness-cases
+  (for [input (range -3.5 4.0 0.5)]
+    [input
+     (let [x-new (+ (* input input input) 1)]
+       (+ (* x-new x-new x-new)
+          1))]))
+
+(def error-func
+  (fn [individual]
+      (assoc individual
+             :errors
+             (doall
+              (for [[input target] fitness-cases]
+                (let [state (run-push (:program individual)
+                                      (push-item input :input
+                                                 (push-item input :float (make-push-state))))
+                      top-float (top-item :float state)]
+                  (if (number? top-float)
+                    (abs (- top-float target))      
+                    1000.0)))))))
+
+
 (def argmap
   {:error-function (fn [individual]
                      (let [;stacks-depth (atom (zipmap push-types (repeat 0)))
                            reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
                            repetition-metric (atom ())]
                        (assoc individual
-                              :errors (let [;state-with-tags (tagspace-initialization-heritable (str (:program individual)) (make-push-state))
-                                            ran (rand-nth (range 10))]
+                              :errors (let [ran (rand-nth (range -3.5 4.0 0.5))]
                                         (doall
-                                         (for [input (range 10)]
-                                           (let [state (run-push (:program individual)
-                                                                 (push-item input :input
-                                                                            (push-item input :integer (assoc (make-push-state) :calculate-mod-metrics (= input ran)))))
-                                                 top-int (top-item :integer state)
+                                         (for [[input target] fitness-cases]
+                                           (let [state (if (= input ran) (run-push (:program (auto-simplify individual
+                                                                                                            error-func
+                                                                                                            50
+                                                                                                            false 100))
+                                                                                   (push-item input :input
+                                                                                              (push-item input :float (assoc (make-push-state) :calculate-mod-metrics (= input ran)))))
+                                                           (run-push (:program individual)
+                                                                     (push-item input :input
+                                                                                (push-item input :float
+                                                                                           (make-push-state)))))
+                                                 top-float (top-item :float state)
                                                  ]
-                                            ;(doseq [[k v] (:max-stack-depth state)] (swap! stacks-depth update k #(max % v)))
-                                            ;update the modularity metrics
                                              (if (= input ran)
                                                (let [metrics (mod-metrics (:trace state) (:trace_id state))]
                                                  (do
                                                    (swap! reuse-metric conj (first metrics))
                                                    (swap! repetition-metric conj (last metrics)))))
                                             ;calculate errors
-                                             (if (number? top-int)
-                                               (abs (- top-int 
-                                                       (- (* input input input) 
-                                                          (* 2 input input) input)))
-                                               1000)))))
-                            ;:stacks-info @stacks-depth
-                              ;:reuse-info (doall
-                              ;             (let [_ (reset! global-calculate-mod-metrics true)
-                              ;                   state (run-push (:program individual)
-                              ;                                   (push-item (rand-nth (range 10)) :input
-                              ;                                              (push-item (rand-nth (range 10)) :integer (make-push-state))))
-                              ;                   metrics (mod-metrics (:trace state) (:trace_id state))
-                              ;                   _ (reset! global-calculate-mod-metrics false)
-                              ;                   _ (swap! reuse-metric conj (first metrics))
-                              ;                   _ (swap! repetition-metric conj (last metrics))]
-                              ;               @reuse-metric
-                              ;               ))
+                                            ; write the regression function here 
+                                             (if (number? top-float)
+                                               ;(abs (- top-int 
+                                               ;        (- (* input input input) 
+                                               ;           (* 2 input input) input)))
+                                               
+                                               (abs (- top-float target))
+                                               ;(let [x-new (+ (* input input) 1)]
+                                               ;  (abs (- top-int 
+                                               ;          (- (* x-new x-new x-new) 
+                                               ;             (* 2 x-new x-new) x-new))))
+                                               1000.0)))))
                               :reuse-info @reuse-metric 
                               :repetition-info @repetition-metric
                               )
-                      ;(println (:uuid individual), @stacks-depth)
                        ))
-   :atom-generators (list (fn [] (lrand-int 10))
-                          'in1
-                          'integer_div
-                          'integer_mult
-                          'integer_add
-                          'integer_sub
-                          ;'end_tag
-                          ;(tagwrap-instruction-erc 100)
-                          ;(tag-instruction-erc [:integer :exec] 100)
-                          ;(untag-instruction-erc 100)
-                          ;(tagged-instruction-erc 100)
-                          ;(registered-for-stacks [:environment])
-                          )
-   :tag-limit 100
-   ;:problem-specific-report custom-report
-   :parent-selection :tournament
-   :tournament-size 3
-   :genetic-operator-probabilities {:alternation 0.5
-                                    :uniform-mutation 0.4
-                                    :uniform-close-mutation 0.1}
-   :meta-error-categories [:reuse :repetition]
-   ;:calculate-mod-metrics true
+   :atom-generators (concat (list (fn [] (lrand 3))
+                                  'in1
+                                  ;'myfn
+                                  )
+                            (registered-for-stacks [:float :exec]))
+   :genetic-operator-probabilities {:uniform-addition-and-deletion 1}
+   :uniform-addition-and-deletion-rate 0.09
+   :parent-selection :epsilon-lexicase
+   ;:sort-meta-errors-for-lexicase :first
+   ;:genetic-operator-probabilities {:alternation 0.5
+   ;                                 :uniform-mutation 0.5}
+   ;:meta-error-categories [:reuse]
+   :filter-params {:features [:reuse] :thresholds [0.75]}
    ;:use-single-thread true
-   
    })

@@ -382,7 +382,7 @@
                                      (truncate (/ (count nums) 2)))
                                 (nth sorted
                                      (truncate (/ (* 3 (count nums)) 4)))))))]
-        
+    
     (when print-error-frequencies-by-case
       (println "Error frequencies by case:" 
                (doall (map frequencies (apply map vector (map :errors population))))))
@@ -390,7 +390,7 @@
                 #{:lexicase :elitegroup-lexicase :leaky-lexicase :epsilon-lexicase 
                   :random-threshold-lexicase :random-toggle-lexicase 
                   :randomly-truncated-lexicase}) 
-          (lexicase-report population argmap))
+      (lexicase-report population argmap))
     (when (= total-error-method :ifs) (implicit-fitness-sharing-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
     (r/generation-data! [:best :individual] (dissoc best :program))
@@ -399,19 +399,20 @@
     ;
     ;(println "Reuse for all test cases is" (pr-str (:reuse-info best)))
     ;(println "Repetition for all test cases is" (pr-str (:repetition-info best)))
-                                                   
+    
     ;
     (when (> report-simplifications 0)
       (println "Partial simplification:"
                (pr-str (not-lazy (:program (r/generation-data! [:best :individual-simplified]
-                                            (auto-simplify best 
-                                                          error-function 
-                                                          report-simplifications 
-                                                          false 
-                                                          1000)))))))
+                                                               (auto-simplify best 
+                                                                              error-function 
+                                                                              report-simplifications 
+                                                                              false 
+                                                                              1000)))))))
     (when print-errors (println "Errors:" (not-lazy (:errors best))))
     (when (and print-errors (not (empty? meta-error-categories)))
       (println "Meta-Errors:" (not-lazy (:meta-errors best))))
+    (println "Mean Reuse:" (mean (:reuse-info best)))
     (println "Total:" (:total-error best))
     (let [mean (r/generation-data! [:best :mean-error] (float (/ (:total-error best)
                                                                  (count (:errors best)))))]
@@ -431,8 +432,8 @@
     (println "Size:" (r/generation-data! [:best :program-size] (count-points (:program best))))
     (printf "Percent parens: %.3f\n"
             (r/generation-data! [:best :percent-parens]
-              (double (/ (count-parens (:program best))
-                         (count-points (:program best)))))) ;Number of (open) parens / points
+                                (double (/ (count-parens (:program best))
+                                           (count-points (:program best)))))) ;Number of (open) parens / points
     (println "--- Population Statistics ---")
     (when print-cosmos-data
       (println "Cosmos Data:" (let [quants (config/quantiles (count population))]
@@ -440,11 +441,11 @@
                                         (map #(:total-error (nth (sort-by :total-error population) %)) 
                                              quants)))))
     (println "Average total errors in population:"
-          (r/generation-data! [:population-report :mean-total-error]
-             (*' 1.0 (mean (map :total-error sorted)))))
+             (r/generation-data! [:population-report :mean-total-error]
+                                 (*' 1.0 (mean (map :total-error sorted)))))
     (println "Median total errors in population:" 
-          (r/generation-data! [:population-report :median-total-error]
-             (median (map :total-error sorted))))
+             (r/generation-data! [:population-report :median-total-error]
+                                 (median (map :total-error sorted))))
     (when print-errors (println "Error averages by case:"
                                 (apply map (fn [& args] (*' 1.0 (mean args)))
                                        (map :errors population))))
@@ -459,73 +460,73 @@
                (apply map (fn [& args] (apply min args))
                       (map :meta-errors population))))
     (println "Average genome size in population (length):"
-          (r/generation-data! [:population-report :mean-genome-size]
-             (*' 1.0 (mean (map count (map :genome sorted))))))
+             (r/generation-data! [:population-report :mean-genome-size]
+                                 (*' 1.0 (mean (map count (map :genome sorted))))))
     (println "Average program size in population (points):"
-          (r/generation-data! [:population-report :mean-program-size]
-             (*' 1.0 (mean (map count-points (map :program sorted))))))
+             (r/generation-data! [:population-report :mean-program-size]
+                                 (*' 1.0 (mean (map count-points (map :program sorted))))))
     (printf "Average percent parens in population: %.3f\n" 
-          (r/generation-data! [:population-report :mean-program-percent-params]
-            (mean (map #(double (/ (count-parens (:program %)) (count-points (:program %)))) sorted))))
+            (r/generation-data! [:population-report :mean-program-percent-params]
+                                (mean (map #(double (/ (count-parens (:program %)) (count-points (:program %)))) sorted))))
     (let [ages (map :age population)]
       (println "Minimum age in population:"
-          (r/generation-data! [:population-report :min-age]
-               (* 1.0 (apply min ages))))
+               (r/generation-data! [:population-report :min-age]
+                                   (* 1.0 (apply min ages))))
       (println "Maximum age in population:"
-          (r/generation-data! [:population-report :max-age]
-               (* 1.0 (apply max ages))))
+               (r/generation-data! [:population-report :max-age]
+                                   (* 1.0 (apply max ages))))
       (println "Average age in population:"
-          (r/generation-data! [:population-report :mean-age]
-               (* 1.0 (mean ages))))
+               (r/generation-data! [:population-report :mean-age]
+                                   (* 1.0 (mean ages))))
       (println "Median age in population:"
-          (r/generation-data! [:population-report :median-age]
-               (* 1.0 (median ages)))))
+               (r/generation-data! [:population-report :median-age]
+                                   (* 1.0 (median ages)))))
     (let [grain-sizes (map :grain-size population)]
       (println "Minimum grain-size in population:"
-          (r/generation-data! [:population-report :min-grain-size]
-               (* 1.0 (apply min grain-sizes))))
+               (r/generation-data! [:population-report :min-grain-size]
+                                   (* 1.0 (apply min grain-sizes))))
       (println "Maximum grain-size in population:"
-          (r/generation-data! [:population-report :max-grain-size]
-               (* 1.0 (apply max grain-sizes))))
+               (r/generation-data! [:population-report :max-grain-size]
+                                   (* 1.0 (apply max grain-sizes))))
       (println "Average grain-size in population:"
-          (r/generation-data! [:population-report :mean-grain-size]
-               (* 1.0 (mean grain-sizes))))
+               (r/generation-data! [:population-report :mean-grain-size]
+                                   (* 1.0 (mean grain-sizes))))
       (println "Median grain-size in population:"
-          (r/generation-data! [:population-report :median-grain-size]
-               (* 1.0 (median grain-sizes)))))
+               (r/generation-data! [:population-report :median-grain-size]
+                                   (* 1.0 (median grain-sizes)))))
     (println "--- Population Diversity Statistics ---")
     (let [genome-frequency-map (frequencies (map :genome population))]
       (println "Min copy number of one genome:"
-        (r/generation-data! [:population-report :min-genome-frequency]
-          (apply min (vals genome-frequency-map))))
+               (r/generation-data! [:population-report :min-genome-frequency]
+                                   (apply min (vals genome-frequency-map))))
       (println "Median copy number of one genome:"
-        (r/generation-data! [:population-report :median-genome-frequency]
-          (median (vals genome-frequency-map))))
+               (r/generation-data! [:population-report :median-genome-frequency]
+                                   (median (vals genome-frequency-map))))
       (println "Max copy number of one genome:"
-        (r/generation-data! [:population-report :max-genome-frequency]
-          (apply max (vals genome-frequency-map))))
+               (r/generation-data! [:population-report :max-genome-frequency]
+                                   (apply max (vals genome-frequency-map))))
       (println "Genome diversity (% unique genomes):\t" 
-        (r/generation-data! [:population-report :percent-genomes-unique]
-               (float (/ (count genome-frequency-map) (count population))))))
+               (r/generation-data! [:population-report :percent-genomes-unique]
+                                   (float (/ (count genome-frequency-map) (count population))))))
     (let [frequency-map (frequencies (map :program population))]
       (println "Min copy number of one Push program:"
-        (r/generation-data! [:population-report :min-program-frequency]
-          (apply min (vals frequency-map))))
+               (r/generation-data! [:population-report :min-program-frequency]
+                                   (apply min (vals frequency-map))))
       (println "Median copy number of one Push program:"
-        (r/generation-data! [:population-report :median-program-frequency]
-          (median (vals frequency-map))))
+               (r/generation-data! [:population-report :median-program-frequency]
+                                   (median (vals frequency-map))))
       (println "Max copy number of one Push program:"
-        (r/generation-data! [:population-report :max-program-frequency]
-          (apply max (vals frequency-map))))
+               (r/generation-data! [:population-report :max-program-frequency]
+                                   (apply max (vals frequency-map))))
       (println "Syntactic diversity (% unique Push programs):\t" 
-        (r/generation-data! [:population-report :percent-programs-unique]
-               (float (/ (count frequency-map) (count population))))))
+               (r/generation-data! [:population-report :percent-programs-unique]
+                                   (float (/ (count frequency-map) (count population))))))
     (println "Total error diversity:\t\t\t\t" 
-        (r/generation-data! [:population-report :percent-total-error-unique]
-             (float (/ (count (distinct (map :total-error population))) (count population)))))
+             (r/generation-data! [:population-report :percent-total-error-unique]
+                                 (float (/ (count (distinct (map :total-error population))) (count population)))))
     (println "Error (vector) diversity:\t\t\t" 
-        (r/generation-data! [:population-report :percent-errors-unique]
-             (float (/ (count (distinct (map :errors population))) (count population)))))
+             (r/generation-data! [:population-report :percent-errors-unique]
+                                 (float (/ (count (distinct (map :errors population))) (count population)))))
     (when (not (nil? (:behaviors (first population))))
       (println "Behavioral diversity:\t\t\t\t" (behavioral-diversity population)))
     (when print-homology-data
@@ -539,7 +540,7 @@
         (println "First quartile: " first-quart-1)
         (println "Median:         " median-1)
         (println "Third quartile: " third-quart-1)))
-        
+    
     (when print-selection-counts
       (println "Selection counts:" 
                (sort > (concat (vals @selection-counts)
@@ -547,8 +548,8 @@
       (reset! selection-counts {}))
     (when autoconstructive
       (println "Number of random replacements for non-diversifying individuals:"
-        (r/generation-data! [:population-report :number-random-replacements]
-               (count (filter :is-random-replacement population)))))
+               (r/generation-data! [:population-report :number-random-replacements]
+                                   (count (filter :is-random-replacement population)))))
     (println "--- Run Statistics ---")
     (println "Number of program evaluations used so far:" @evaluations-count)
     (println "Number of point (instruction) evaluations so far:" point-evaluations-before-report)
