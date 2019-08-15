@@ -9,7 +9,8 @@
          tag zip environment input-output genome gtm]
         [clojush.pushgp breed report]
         [clojush.pushgp.selection
-         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty]
+         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty
+         fitness-proportionate]
         [clojush.experimental.decimation]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -252,6 +253,8 @@
   (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
     (calculate-epsilons-for-epsilon-lexicase pop-agents @push-argmap))
   (timer @push-argmap :other)
+  (when (= (:parent-selection @push-argmap) :fitness-proportionate)
+    (calculate-fitness-proportionate-probabilities pop-agents @push-argmap))
   ;; report and check for success
   (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
                                                      generation @push-argmap)]

@@ -2,7 +2,7 @@
   (:use [clojush globals random]
         [clojush.pushgp.selection preselection tournament lexicase epsilon-lexicase
          elitegroup-lexicase random-threshold-lexicase random-toggle-lexicase 
-         randomly-truncated-lexicase novelty rarified-lexicase]))
+         randomly-truncated-lexicase novelty rarified-lexicase fitness-proportionate]))
 
 (defn select
   "Returns a selected parent."
@@ -26,6 +26,7 @@
                    :novelty-search (novelty-tournament-selection preselected argmap)
                    :uniform (lrand-nth preselected)
                    :rarified-lexicase (rarified-lexicase-selection preselected argmap)
+                   :fitness-proportionate (fitness-proportionate-selection preselected argmap)
                    (throw (Exception. (str "Unrecognized argument for parent-selection: "
                                            parent-selection))))]
     (when print-selection-counts
