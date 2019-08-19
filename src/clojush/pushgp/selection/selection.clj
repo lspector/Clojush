@@ -6,9 +6,12 @@
 
 (defn select
   "Returns a selected parent."
-  [pop {:keys [parent-selection print-selection-counts] :as argmap}]
+  [pop {:keys [parent-selection print-selection-counts case-batch-size] :as argmap}]
   (let [pop-with-meta-errors (map #(update-in % [:errors] (comp vec concat) (:meta-errors %)) pop)
-        preselected (preselect pop-with-meta-errors argmap)
+        pop-with-meta-and-batch-errors (if (= case-batch-size 1)
+                                         pop-with-meta-errors
+                                         (batch-errors pop-with-meta-errors argmap))
+        preselected (preselect pop-with-meta-and-batch-errors argmap)
         selected (case parent-selection
                    :tournament (tournament-selection preselected argmap)
                    :lexicase (lexicase-selection preselected argmap)

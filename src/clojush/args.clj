@@ -337,6 +337,12 @@
           ;; If using lexicase selection, determines how meta-errors will be sorted among
           ;; the actual errors. Options are :random (errors and meta-errors are shuffled 
           ;; together), :first (meta-errors come first), or :last (meta-errors come last).
+
+         :case-batch-size 1
+         ;; When 1, does nothing.
+         ;; When set to integer > 1, sets the batch size for batch lexicase selection.
+         ;; Should work with any parent selection that uses an individual's :errors,
+         ;; such as lexicase, epsilon-lexicase, etc.
          
          :tournament-size 7
           ;; If using tournament selection, the size of the tournaments.
