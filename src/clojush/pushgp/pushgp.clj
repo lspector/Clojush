@@ -233,7 +233,7 @@
             (let [to-preserve (select candidates argmap)
                   without-meta-errors (update-in to-preserve
                                                  [:errors]
-                                                 #(drop-last (count (:meta-errors to-preserve)) %))]
+                                                 #(vec (drop-last (count (:meta-errors to-preserve)) %)))]
               (recur (inc preserved)
                      (conj new-frontier without-meta-errors)
                      (if (= (:preserve-frontier argmap) :with-replacement)

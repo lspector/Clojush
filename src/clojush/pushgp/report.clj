@@ -338,7 +338,7 @@
            problem-specific-report total-error-method
            parent-selection print-homology-data max-point-evaluations
            print-error-frequencies-by-case normalization autoconstructive
-           print-selection-counts exit-on-success
+           print-selection-counts print-preselection-fraction exit-on-success
            ;; The following are for CSV or JSON logs
            print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
@@ -540,6 +540,11 @@
                (sort > (concat (vals @selection-counts)
                                (repeat (- population-size (count @selection-counts)) 0))))
       (reset! selection-counts {}))
+    (when (and print-preselection-fraction
+               (not (empty? @preselection-counts)))
+      (println "Preselection fraction:" (float (/ (/ (reduce + @preselection-counts) population-size)
+                                                  (count @preselection-counts))))
+      (reset! preselection-counts []))
     (when autoconstructive
       (println "Number of random replacements for non-diversifying individuals:"
         (r/generation-data! [:population-report :number-random-replacements]
