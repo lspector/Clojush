@@ -101,7 +101,7 @@
                                           :gene-selection 0.0
                                           :uniform-reordering 0.0
                                           :uniform-segment-reordering 0.0
-                                          :uniform-segment-transpose 0.0}
+                                          :uniform-segment-transposition 0.0}
           ;; The map supplied to :genetic-operator-probabilities should contain genetic operators
           ;; that sum to 1.0. All available genetic operators are defined in clojush.pushgp.breed.
           ;; Along with single operators, pipelines (vectors) containing multiple operators are
