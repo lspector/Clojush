@@ -80,7 +80,7 @@
                      (for [[[input1 input2 input3] correct-output] (case data-cases
                                                                      :train train-cases
                                                                      :test test-cases
-                                                                     [])]
+                                                                     data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input3 :input)
@@ -95,10 +95,11 @@
                          (if (= result correct-output)
                            0
                            1))))]
-        (if (= data-cases :train)
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
           (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
-  
+          )))))
+
 (defn get-compare-string-lengths-train-and-test
   "Returns the train and test cases."
   [data-domains]
@@ -145,6 +146,8 @@
 (def argmap
   {:error-function (make-compare-string-lengths-error-function-from-cases (first compare-string-lengths-train-and-test-cases)
                                                                           (second compare-string-lengths-train-and-test-cases))
+   :training-cases (first compare-string-lengths-train-and-test-cases)
+   :sub-training-cases '()
    :atom-generators csl-atom-generators
    :max-points 1600
    :max-genome-size-in-initial-program 200

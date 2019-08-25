@@ -22,6 +22,10 @@
           ;;----------------------------------------
           ;; Standard GP arguments
           ;;----------------------------------------
+         :batches [] ;; contains batches of indices for test cases
+         :batch-size 16
+         :tourn-size 16
+         :training-cases '()
 
          :error-function (fn [p] '(0))
           ;; Function that takes a program and returns a list of errors.
@@ -98,10 +102,7 @@
                                           :uniform-addition-and-deletion 0.0
                                           :uniform-combination-and-deletion 0.0
                                           :genesis 0.0
-                                          :gene-selection 0.0
-                                          :uniform-reordering 0.0
-                                          :uniform-segment-reordering 0.0
-                                          :uniform-segment-transposition 0.0}
+                                          :gene-selection 0.0}
           ;; The map supplied to :genetic-operator-probabilities should contain genetic operators
           ;; that sum to 1.0. All available genetic operators are defined in clojush.pushgp.breed.
           ;; Along with single operators, pipelines (vectors) containing multiple operators are
@@ -170,23 +171,6 @@
          :uniform-silence-mutation-rate 0.1
           ;; The probability of each :silent being switched during uniform silent mutation.
 
-         :uniform-reordering-rate 0.01
-          ;; The probability that a pair of genes will be reordered with uninform-reordering,
-          ;; or that a pair of segments will be transposed with uniform-segment-reordering.
-
-         :uniform-segmenting-rate 0.01
-          ;; The probability that segmenting for uniform-segment-transposition or 
-          ;; uniform-segment-transposition will occur at each position in the genome.
-
-         :uniform-transposition-rate 0.01
-           ;; The probability that a segment will be transposed in uniform-segment-transposition.
-
-         :uniform-segment-duplication-rate 0.01
-           ;; The probability that a segment will be duplicated in uniform-segment-duplication.
-
-         :uniform-segment-deletion-rate 0.01
-           ;; The probability that a segment will be deleted in uniform-segment-deletion.
-
          :replace-child-that-exceeds-size-limit-with :random
           ;; When a child is produced that exceeds the size limit of (max-points / 4), this is
           ;; used to determine what program to return. Options include :parent, :empty, :random,
@@ -217,7 +201,7 @@
           ;; :replace-child-that-exceeds-size-limit-with to :empty. Also, empty-genome individuals
           ;; will not be selected as parents. You will probably also want to provide a high value
           ;; for :max-generations. If :autoconstructive is :revertable, rather than true, then
-          ;; :genetic-operator-probabilities will be {[:make-next-operator-revertable 
+          ;; :genetic-operator-probabilities will be {[:make-next-operator-revertable
           ;; :autoconstruction] 1.0}.
 
          :autoconstructive-diversification-test :gecco2016
@@ -331,12 +315,12 @@
           ;; the best.
 
          :random-threshold-lexicase-probability 1
-          ;; The probability that each filtering step in random threshold lexicase selection will 
-          ;; allow candidates with errors equal to or better than a randomly chosen threshold to 
+          ;; The probability that each filtering step in random threshold lexicase selection will
+          ;; allow candidates with errors equal to or better than a randomly chosen threshold to
           ;; survive, rather than just the best.
 
          :random-toggle-lexicase-probability 1
-          ;; The probability that each filtering step in random toggle lexicase selection will 
+          ;; The probability that each filtering step in random toggle lexicase selection will
           ;; allow just the best to survive, rather than all individuals in the pool.
 
          :randomly-truncated-lexicase-probability 1
@@ -350,12 +334,12 @@
          :lexicase-slippage 0
           ;; If using lexicase, leaky lexicase, epsilon lexicase, or random threshold lexicase
           ;; selection, the probability that each step of the lexicase selection process will
-          ;; "slip" and return a random candidate from the current pool, rather than continuing 
+          ;; "slip" and return a random candidate from the current pool, rather than continuing
           ;; to filter the pool.
 
          :sort-meta-errors-for-lexicase :random
           ;; If using lexicase selection, determines how meta-errors will be sorted among
-          ;; the actual errors. Options are :random (errors and meta-errors are shuffled 
+          ;; the actual errors. Options are :random (errors and meta-errors are shuffled
           ;; together), :first (meta-errors come first), or :last (meta-errors come last).
 
          :tournament-size 7
@@ -376,15 +360,15 @@
           ;; normalization.
 
          :meta-error-categories []
-          ;; A vector containing meta-error categories that can be used for parent selection, 
-          ;; but that do not affect total error or the determination of whether an individual 
-          ;; is considered to be a solution. Each meta-error-category should either be a function 
-          ;; (which must be namespace-qualified if provided in a command-line argument) or a 
-          ;; keyword corresponding to a pre-defined meta-error function. In either case the 
+          ;; A vector containing meta-error categories that can be used for parent selection,
+          ;; but that do not affect total error or the determination of whether an individual
+          ;; is considered to be a solution. Each meta-error-category should either be a function
+          ;; (which must be namespace-qualified if provided in a command-line argument) or a
+          ;; keyword corresponding to a pre-defined meta-error function. In either case the
           ;; function should take an individual, an evaluated population, and an argmap, and
-          ;; it should return a numeric meta error value or collection of values, for which 
-          ;; lower is interpreted as better. For keyword :foo, the corresponding meta-error 
-          ;; function will be clojush.meta-errors/foo-meta-error. See clojush.meta-errors for 
+          ;; it should return a numeric meta error value or collection of values, for which
+          ;; lower is interpreted as better. For keyword :foo, the corresponding meta-error
+          ;; function will be clojush.meta-errors/foo-meta-error. See clojush.meta-errors for
           ;; the current options for pre-defined meta-error functions.
 
          :improvement-discount 0.5
@@ -392,15 +376,10 @@
           ;; improvement-related meta-errors.
 
          :error-change-recency-limit 5
-          ;; The number of generations within which an error change must have occurred to 
+          ;; The number of generations within which an error change must have occurred to
           ;; have a :no-recent-error-change meta-error value of zero.
-                                
-         :lineage-redundancy-window nil
-          ;; If truthy, should be an integer which will be the number of history elements
-          ;; used to calculate :lineage-redundancy meta-errors.
 
-         :decimation-ratio 1 
-          ;; If >= 1, does nothing. Otherwise, is the percent of the population
+         :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population
           ;; size that is retained before breeding. If 0 < decimation-ratio < 1, decimation
           ;; tournaments will be used to reduce the population to size (* population-size
           ;; decimation-ratio) before breeding.
@@ -411,10 +390,6 @@
          :print-selection-counts false
           ;; If true, keeps track of and prints the number of times each individual was selected
           ;; to be a parent
-
-         :print-preselection-fraction false
-          ;; If true, keeps track of and prints the number of individuals that survive preselection
-          ;; each generation. Does not take into account one-individual-per-error-vector-for-lexicase. 
 
          :self-mate-avoidance-limit 0
           ;; If non-zero, then when multiple parents are required for a genetic operator, an
@@ -449,12 +424,6 @@
           ;; to consider only individuals with :grain-size equal to or GREATER than the
           ;; chosen :grain-size.
 
-         :knock-off-chip-off-the-old-block false
-          ;; If truthy, then during preselection, if any individual has an error vector that
-          ;; is different than its mother's, then do not allow any individual with errors
-          ;; identical to its mother's to be selected. Requires :print-history to be true.
-          ;; See preselection.clj for more options.
-
          :novelty-distance-metric :euclidean
           ;; When using novelty, the distance metric between two behavior vectors
           ;; Options: :manhattan, :euclidean
@@ -471,12 +440,12 @@
           ;; regard to the nearest neighbors. Paper claims it is "robust to modest variation."
 
          :selection-delay false
-          ;; If  this is truthy, then it should be a positive integer d, and all parents 
-          ;; will be selected with :uniform selection, but also, in each generation for 
-          ;; which (mod generation d) is 0, before producing offspring, the population  
+          ;; If  this is truthy, then it should be a positive integer d, and all parents
+          ;; will be selected with :uniform selection, but also, in each generation for
+          ;; which (mod generation d) is 0, before producing offspring, the population
           ;; will be replaced with the results of repeated selection (using the specified
-          ;; :parent-selection method) from an archive of all of the individuals that have  
-          ;; been produced since the previous time this was done.  
+          ;; :parent-selection method) from an archive of all of the individuals that have
+          ;; been produced since the previous time this was done.
 
          :preserve-frontier false
           ;; If truthy, then each child population will be replaced, after its errors have

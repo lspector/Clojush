@@ -81,7 +81,7 @@
                    (for [[input1 correct-output] (case data-cases
                                                    :train train-cases
                                                    :test test-cases
-                                                   [])]
+                                                   data-cases)]
                      (let [final-state (run-push (:program individual)
                                                  (->> (make-push-state)
                                                       (push-item input1 :input)))
@@ -100,9 +100,10 @@
                           1000000.0) ; penalty for no return value
                         4)
                        )))]
-       (if (= data-cases :train)
+       (if (= data-cases :test)
+         (assoc individual :test-errors errors)
          (assoc individual :behaviors @behavior :errors errors)
-         (assoc individual :test-errors errors))))))
+         )))))
 
 (defn get-vector-average-train-and-test
   "Returns the train and test cases."
@@ -150,6 +151,8 @@
 (def argmap
   {:error-function (make-vector-average-error-function-from-cases (first vector-average-train-and-test-cases)
                                                                   (second vector-average-train-and-test-cases))
+   :training-cases (first vector-average-train-and-test-cases)
+   :sub-training-cases '()
    :atom-generators vector-average-atom-generators
    :max-points 1600
    :max-genome-size-in-initial-program 200

@@ -89,7 +89,7 @@
                      (for [[input correct-output] (case data-cases
                                                     :train train-cases
                                                     :test test-cases
-                                                    [])]
+                                                    data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input :input)))
@@ -105,9 +105,10 @@
                            (abs (- result correct-output)) ; distance from correct integer
                            1000000) ; penalty for no return value
                          )))]
-        (if (= data-cases :train)
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
           (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+          )))))
 
 (defn get-last-index-of-zero-train-and-test
   "Returns the train and test cases."
@@ -155,12 +156,14 @@
 (def argmap
   {:error-function (make-last-index-of-zero-error-function-from-cases (first last-index-of-zero-train-and-test-cases)
                                                                       (second last-index-of-zero-train-and-test-cases))
+   :training-cases (first last-index-of-zero-train-and-test-cases)
+   :sub-training-cases '()
    :atom-generators last-index-of-zero-atom-generators
    :max-points 1200
    :max-genome-size-in-initial-program 150
    :evalpush-limit 600
    :population-size 1000
-   :max-generations 300
+   :max-generations (/ 300 0.1)
    :parent-selection :lexicase
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
