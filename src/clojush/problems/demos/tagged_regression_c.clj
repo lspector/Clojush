@@ -68,22 +68,23 @@
 (def argmap
   {:error-function (fn [individual]
                      (let [;stacks-depth (atom (zipmap push-types (repeat 0)))
-                           reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
+                           reuse-metric (atom ())       ;the length will be equal to the number of test cases
                            repetition-metric (atom ())]
                        (assoc individual
                               :errors (let [ran (rand-nth (range -3.5 4.0 0.5))]
                                         (doall
                                          (for [[input target] fitness-cases]
-                                           (let [state (if (= input ran) (run-push (:program (auto-simplify individual
-                                                                                                            error-func
-                                                                                                            50
-                                                                                                            false 100))
-                                                                                   (push-item input :input
-                                                                                              (push-item input :float (assoc (make-push-state) :calculate-mod-metrics (= input ran)))))
-                                                           (run-push (:program individual)
-                                                                     (push-item input :input
-                                                                                (push-item input :float
-                                                                                           (make-push-state)))))
+                                           (let [state (if (= input ran)
+                                                         (run-push (:program (auto-simplify individual
+                                                                                            error-func
+                                                                                            50
+                                                                                            false 100))
+                                                                   (push-item input :input
+                                                                              (push-item input :float (assoc (make-push-state) :calculate-mod-metrics (= input ran)))))
+                                                         (run-push (:program individual)
+                                                                   (push-item input :input
+                                                                              (push-item input :float
+                                                                                         (make-push-state)))))
                                                  top-float (top-item :float state)
                                                  ]
                                              (if (= input ran)
@@ -119,7 +120,8 @@
    ;:sort-meta-errors-for-lexicase :first
    ;:genetic-operator-probabilities {:alternation 0.5
    ;                                 :uniform-mutation 0.5}
-   ;:meta-error-categories [:reuse]
-   :filter-params {:features [:reuse] :thresholds [0.75]}
+   :meta-error-categories [:reuse]
+   ;:filter-params {:features [:reuse] :thresholds [0.9]}
    ;:use-single-thread true
+   :max-generations 500
    })

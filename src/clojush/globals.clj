@@ -100,7 +100,7 @@
 (def global-atom-generators (atom ())) 
 ;; The instructions and literals that may be used in Push programs.
 
-(def global-max-points (atom 100)) 
+(def global-max-points (atom 800)) 
 ;; The maximum size of a Push program. Also, the maximum size of code that can appear on
 ;; the exec or code stacks.
 
@@ -129,7 +129,7 @@
 (def global-top-level-pop-code (atom false)) 
 ;; When true, run-push will pop the code stack after running the program
 
-(def global-evalpush-limit (atom 150)) 
+(def global-evalpush-limit (atom 300)) 
 ;; The number of Push instructions that can be evaluated before stopping evaluation
 
 (def global-evalpush-time-limit (atom 0)) 

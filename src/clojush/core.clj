@@ -23,7 +23,7 @@
               [clojure.string :as str]
               [clojure.data.json :as json])
     (:use [clojush.pushgp pushgp report]
-          [clojush.mod-metrics5 :as mod])
+          [clojush.mod-metrics6 :as mod])
     (:gen-class))
 
 
@@ -35,7 +35,9 @@
     [& args]
     (main-func (read-string (str/replace (first args) #"ThisIsSingleQuote" "'"))))
 
-  )
+
+)
+
 
 
 (ns clojush.core

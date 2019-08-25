@@ -631,7 +631,9 @@
 (defn mod-metrics1
   [exec-trace meta-trace]
   (let [exec-trace1 (reverse exec-trace)
+        ;_ (prn exec-trace)
         meta-trace1 (reverse meta-trace)
+        ;_ (prn meta-trace1)
         ;; Since the first element of meta-trace is the list of identifiers of the instruction in the original program, maxid can be calculated as the max of those identifers
         combined (GetRidOfNonOriginalInstrs exec-trace1 meta-trace1 (if-not (empty? (flatten (first meta-trace1)))
                                                                       (apply max (flatten (first meta-trace1)))
@@ -745,7 +747,7 @@
                                                    l))))
                                       (vector x x))) meta-trace)
         ;; total number of instructions with distinct identifiers 
-        vocab-length (count (distinct (filter (fn [x] (= (first x) (last x))) metadata-trace)))
+        vocab-length (count (distinct (filter (fn [x] (= (first x) (last x))) metadata-trace))) 
         len (count metadata-trace)
         seqs (atom ())
         m-trace (atom metadata-trace)

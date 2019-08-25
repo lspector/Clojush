@@ -27,6 +27,7 @@
 ;; Providing true as a third argument produces a trace of all stacks as it runs:
 
 (run-push '(exec_dup (exec_swap 1 2))
+          ;(make-push-state)
           (assoc (make-push-state) :calculate-mod-metrics true)
           true true true
           )          

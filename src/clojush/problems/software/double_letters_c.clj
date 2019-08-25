@@ -93,27 +93,29 @@
             repetition-metric (atom ())
             ;state-with-tags (tagspace-initialization (str (:program individual)) 1000 (make-push-state)) 
             behavior (atom '())
-            errors (doall
-                     (for [[input correct-output] (case data-cases
-                                                    :train train-cases
-                                                    :test test-cases
-                                                    [])]
-                       (let [final-state (run-push (:program individual)
-                                                   (->> (push-item input :input (make-push-state))
-                                                     (push-item "" :output)) );true true true)
-                             printed-result (stack-ref :output 0 final-state)]
-                         (when print-outputs
-                           (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str printed-result))))
-                         
+            cases (case data-cases
+                    :train train-cases
+                    :test test-cases
+                    data-cases)
+            errors (let [ran (rand-nth cases)]
+                    (doall
+                      (for [[input correct-output] cases]
+                        (let [final-state (run-push (:program individual)
+                                                    (->> (push-item input :input (assoc (make-push-state) :calculate-mod-metrics (= [input correct-output] ran)))
+                                                         (push-item "" :output)) )
+                              printed-result (stack-ref :output 0 final-state)]
+                          (when print-outputs
+                            (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str printed-result))))
+                          
                          ;(doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
                          ;update the modularity metrics
-                         (let [metrics (mod-metrics (doall (:trace final-state)) (doall (:trace_id final-state)))]
-                               (swap! reuse-metric conj (first metrics))
-                               (swap! repetition-metric conj (last metrics)))
+                          (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
+                            (swap! reuse-metric conj (first metrics))
+                            (swap! repetition-metric conj (last metrics)))
                          ; Record the behavior
-                         (swap! behavior conj printed-result)
+                          (swap! behavior conj printed-result)
                          ; Error is Levenshtein distance
-                         (levenshtein-distance correct-output printed-result))))]
+                          (levenshtein-distance correct-output printed-result)))))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric)
           (assoc individual :test-errors errors))))))

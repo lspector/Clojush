@@ -12,58 +12,38 @@
 (defn attach-ids
   [orig ids]
   (loop [x 0
-       result '()]
+         result '()]
     (if (= x (count orig))
       (reverse result)
       (recur (inc x) (let [elem (nth orig x)
-                           elem-id (try 
-                                     (nth ids x)
-                                     (catch Exception e (str "caught yaya exception: " (.getMessage e) elem)))]
-                       
-                         (if (seq? elem)
-                           (conj result (attach-ids elem elem-id))
-                           (conj result (vector elem elem-id)))                  
-)))))
+                           elem-id (nth ids x)]
+                       (if (seq? elem)
+                         (conj result (attach-ids elem elem-id))
+                         (conj result (hash-map :instr elem, :id elem-id))))))))
 
 (defn remove-ids
   "The secoond argument decides whether you want exec stack (0) or the idenifiers (1)."
   [comb y]
   (loop [x 0
-       result '()]
+         result '()]
     (if (= x (count comb))
       (reverse result)
-      (recur (inc x) (let [elem (nth comb x)
-                           ]
+      (recur (inc x) (let [elem (nth comb x)]
                        (if (seq? elem)
                          (conj result (remove-ids elem y))
-                         (conj result (nth elem y))))))))
-
-(defn correct-ids1
-  "Sometimes the instructions can call some other instruction that has not been assinged an id.
-  This function assigns an id to suc instructions. For example, exec_do*while calls exec_while."
-  [comb exec-ids]
-  (doall (map (fn [x] (if (vector? x)
-                        x
-                        (if (seq? x)
-                          (correct-ids1 x exec-ids)
-                          (vector x (try
-                                          (inc (apply max (flatten exec-ids)))
-                                           (catch Exception e (str "caught yaya exception: " (.getMessage e) exec-ids))
-                                           )))))
-              comb
-              )) ) 
+                         (conj result (get elem y))))))))
 
 (defn correct-ids
   "Sometimes the instructions can call some other instruction that has not been assinged an id.
   This function assigns an id to suc instructions. For example, exec_do*while calls exec_while.
   highid ia an atom contaning a high number"
   [comb highid]
-  (doall (map (fn [x] (if (and (vector? x) (not (integer? (first x))) (integer? (second x)))
+  (doall (map (fn [x] (if (and (map? x) (= (set (keys {:instr 23 :id 3})) #{:id :instr}))
                         x
                         (if (seq? x)
                           (correct-ids x (let [_ (swap! highid inc)]
                                            highid))
-                          (vector x @highid))))
+                          (hash-map :instr x, :id @highid))))
               comb)))
 
 (defn execute-instruction
@@ -99,8 +79,9 @@
         ;
         ; Attach identifiers only when the instruction starts with exec_.
         (contains? @instruction-table instruction)  
-        (if (and (or (str/starts-with? (str instruction) "exec_") (str/ends-with? (str instruction) "_exec")) (:calculate-mod-metrics state))
-          (let [;_ (prn "This is not fair1: " (:exec state))
+        (if (and (or (str/starts-with? (str instruction) "exec_") (str/ends-with? (str instruction) "_exec") (str/includes? (str instruction) "_exec_")) (:calculate-mod-metrics state))
+          (let [;_ (prn (str instruction))
+                ;_ (prn "This is not fair1: " (:exec state))
                 ;_ (prn "This is not fair2: " (:exec_id state))
                 ;_ (prn "This is not fair3: " (attach-ids (:exec state) (:exec_id state))) 
                 ]
@@ -182,12 +163,12 @@
                      (let [;_ (if (:calculate-mod-metrics state) (prn exec-top exec-top-id))
                            execution-result (execute-instruction exec-top s)
                             ; Need to use remove-ids() only when the instruction was exec related. Refer execute-instructions for more details.
-                           execution-result (if (and (or (str/starts-with? (str exec-top) "exec_") (str/ends-with? (str exec-top) "_exec")) (:calculate-mod-metrics state) )
+                           execution-result (if (and (or (str/starts-with? (str exec-top) "exec_") (str/ends-with? (str exec-top) "_exec") (str/includes? (str exec-top) "_exec_")) (:calculate-mod-metrics state) )
                                               (let [;_ (prn "This is also not fair: " (:exec execution-result))
                                                     execution-result (assoc execution-result :exec (correct-ids (:exec execution-result) (atom 100000))) ;(atom (apply max (flatten (:exec_id execution-result))))))
                                                      ; do a quick scan of all the instr:id pairs. if id is missing for any instr, give it a new id.
-                                                    execution-result (assoc execution-result :exec_id (remove-ids (:exec execution-result) 1))
-                                                    execution-result (assoc execution-result :exec (remove-ids (:exec execution-result) 0))]
+                                                    execution-result (assoc execution-result :exec_id (remove-ids (:exec execution-result) :id))
+                                                    execution-result (assoc execution-result :exec (remove-ids (:exec execution-result) :instr))]
                                                 execution-result
                                                 )
                                               execution-result
