@@ -22,10 +22,10 @@
           ;;----------------------------------------
           ;; Standard GP arguments
           ;;----------------------------------------
-         :batches [] ;; contains batches of indices for test cases
-         :batch-size 16
-         :tourn-size 16
          :training-cases '()
+         :sub-training-cases '()
+         :down-sample-factor 0.1
+         ;; between 0 and 1
 
          :error-function (fn [p] '(0))
           ;; Function that takes a program and returns a list of errors.
