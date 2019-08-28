@@ -343,6 +343,10 @@
           ;; The probability that an application of randomly-truncated-lexicase-selection
           ;; will consider only a random subset of the test cases, rather than all of them.
 
+         :truncated-lexicase-factor 0.1
+          ;; When using truncated-lexicase for parent selection, gives the proportion
+          ;; of thraining cases to use during selection.
+
          :lexicase-leakage 0.1
           ;; If using leaky lexicase selection, the probability that a selection event will return
           ;; a random (tourny 1) individual from the entire population.
