@@ -355,13 +355,14 @@
         err-fn (if (= total-error-method :rmse) :weighted-error :total-error)
         sorted (sort-by err-fn < population)
         ; err-fn-best (first sorted)
-        err-fn-best (loop [sorted-individuals sorted] (if (and (<= (:total-error (first sorted-individuals)) error-threshold)
-                                                  (> (apply + (:errors (error-function (first sorted-individuals) :train))) error-threshold)
-                                                  (<= (:total-error (second sorted-individuals)) error-threshold))
-                                            (recur (rest sorted-individuals))
-                                            (first sorted-individuals)))
-
-
+        err-fn-best (loop [sorted-individuals sorted]
+                      (if (empty? (rest sorted-individuals))
+                        (first sorted-individuals)
+                        (if (and (<= (:total-error (first sorted-individuals)) error-threshold)
+                                 (> (apply + (:errors (error-function (first sorted-individuals) :train))) error-threshold)
+                                 (<= (:total-error (second sorted-individuals)) error-threshold))
+                          (recur (rest sorted-individuals))
+                          (first sorted-individuals))))
         psr-best (problem-specific-report err-fn-best
                                           population
                                           generation
