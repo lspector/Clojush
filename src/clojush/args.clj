@@ -364,6 +364,10 @@
          ;; Should work with any parent selection that uses an individual's :errors,
          ;; such as lexicase, epsilon-lexicase, etc.
 
+         :batch-aggregation-method :sum
+         ;; Defines how the errors in each batch of batch lexicase are aggregated
+         ;; Options are :sum, :elite (count of non-elite errors)
+         
          :tournament-size 7
           ;; If using tournament selection, the size of the tournaments.
 

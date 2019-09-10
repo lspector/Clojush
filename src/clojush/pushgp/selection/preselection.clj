@@ -171,12 +171,17 @@
 (defn batch-errors-of-individual
   "Takes an individual and batches its errors in the right batches, sums them, and assocs
   to the :errors key."
-  [error-indices case-batch-size ind]
+  [error-indices ind {:keys [case-batch-size batch-aggregation-method] :as argmap}]
   (assoc ind :errors
          (let [ordered-errors (map #(nth (:errors ind) %) error-indices)
                batched-errors (partition case-batch-size ordered-errors)
-               summed-batches (map (partial apply +') batched-errors)]
-           summed-batches)))
+               aggregation-fn (case batch-aggregation-method
+                                :sum +'
+                                :elite nil
+                                nil)
+               aggregated-batches (map (partial apply aggregation-fn) batched-errors)]
+           (println aggregated-batches)
+           aggregated-batches)))
 
 (defn batch-errors
   "Used for batch lexicase (and any other batch-based selection).
@@ -185,5 +190,5 @@
   of the batch sums."
   [pop {:keys [case-batch-size] :as argmap}]
   (let [shuffled-error-indices (lshuffle (range (count (:errors (first pop)))))]
-    (map (partial batch-errors-of-individual shuffled-error-indices case-batch-size)
+    (map #(batch-errors-of-individual shuffled-error-indices % argmap)
          pop)))

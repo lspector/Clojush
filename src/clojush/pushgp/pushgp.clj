@@ -254,6 +254,8 @@
     (let [epsilons (calculate-epsilons-for-epsilon-lexicase (map deref pop-agents) @push-argmap)]
       (println "Epsilons for epsilon lexicase:" epsilons)
       (reset! epsilons-for-epsilon-lexicase epsilons)))
+  (when (= (:batch-aggregate-method @push-argmap) :elite)
+    (calculate-eliteness pop-agents @push-argmap))
   (timer @push-argmap :other)
   ;; report and check for success
   (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
