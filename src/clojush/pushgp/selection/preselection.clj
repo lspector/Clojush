@@ -168,19 +168,49 @@
 ;; Batching for batch-lexicase.
 ;; Not really pre-selection, but seemed like best place for now.
 
+(defn assign-eliteness-to-individual
+  "Given an individual and the minimum error of all individuals on each case,
+  assigns the :eliteness vector and :weighted-error"
+  [ind min-error-on-each-case]
+  (let [eliteness (map #(if (= %1 %2) 0 1)
+                       min-error-on-each-case
+                       (:errors ind))]
+    (assoc ind :eliteness eliteness
+               :weighted-error (apply + eliteness))))
+
+(defn calculate-eliteness
+  "Calculates whether each individual is elite or not on every
+  error value. For each error, sets value in :elite-vector key to
+  0 if elite and 1 if not elite. Also sets :weighted-error key, which
+  can be used in eliteness-based-tournaments."
+  [pop-agents {:keys [use-single-thread] :as argmap}]
+  (let [pop (map deref pop-agents)
+        min-error-on-each-case (map (partial apply min)
+                                    (apply mapv vector ; transpose error vectors into vector of errors per case
+                                           (map :errors pop)))]
+    (dorun
+     (map #((if use-single-thread swap! send)
+            %
+            assign-eliteness-to-individual
+            min-error-on-each-case)
+          pop-agents))
+    (when-not use-single-thread (apply await pop-agents))))
+
+
 (defn batch-errors-of-individual
   "Takes an individual and batches its errors in the right batches, sums them, and assocs
   to the :errors key."
-  [error-indices ind {:keys [case-batch-size batch-aggregation-method] :as argmap}]
+  [error-indices ind {:keys [case-batch-size total-error-method] :as argmap}]
   (assoc ind :errors
-         (let [ordered-errors (map #(nth (:errors ind) %) error-indices)
+         (let [ordered-errors (map #(nth (get ind
+                                              (case total-error-method
+                                                :sum :errors
+                                                :eliteness :eliteness
+                                                nil))
+                                         %)
+                                   error-indices)
                batched-errors (partition case-batch-size ordered-errors)
-               aggregation-fn (case batch-aggregation-method
-                                :sum +'
-                                :elite nil
-                                nil)
-               aggregated-batches (map (partial apply aggregation-fn) batched-errors)]
-           (println aggregated-batches)
+               aggregated-batches (map (partial apply +') batched-errors)]
            aggregated-batches)))
 
 (defn batch-errors
@@ -188,7 +218,7 @@
   Takes errors and places them into random batches of size case-batch-size, and then
   sums each batch. This replaces the :errors in each individual with a new error vector composed
   of the batch sums."
-  [pop {:keys [case-batch-size] :as argmap}]
+  [pop argmap]
   (let [shuffled-error-indices (lshuffle (range (count (:errors (first pop)))))]
     (map #(batch-errors-of-individual shuffled-error-indices % argmap)
          pop)))

@@ -363,10 +363,6 @@
          ;; When set to integer > 1, sets the batch size for batch lexicase selection.
          ;; Should work with any parent selection that uses an individual's :errors,
          ;; such as lexicase, epsilon-lexicase, etc.
-
-         :batch-aggregation-method :sum
-         ;; Defines how the errors in each batch of batch lexicase are aggregated
-         ;; Options are :sum, :elite (count of non-elite errors)
          
          :tournament-size 7
           ;; If using tournament selection, the size of the tournaments.
@@ -374,7 +370,7 @@
          :total-error-method :sum
           ;; The method used to compute total error. Options include :sum (standard), :hah
           ;; (historically-assessed hardness), :rmse (root mean squared error), and :ifs
-          ;; (implicit fitness sharing).
+          ;; (implicit fitness sharing), :eliteness (count of non-elite errors)
 
          :normalization :none
           ;; The method used to normalize the errors to the range [0,1], with 0 being best. Options
