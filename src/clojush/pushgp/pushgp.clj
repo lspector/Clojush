@@ -9,7 +9,7 @@
          tag zip environment input-output genome gtm]
         [clojush.pushgp breed report]
         [clojush.pushgp.selection
-         selection preselection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty]
+         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty eliteness]
         [clojush.experimental.decimation]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -193,10 +193,10 @@
   (println "Computing errors... ")
   (compute-errors pop-agents rand-gens novelty-archive @push-argmap)
   (println "Done computing errors.")
-  (println "Preserving frontier... ")
   (when (and (:preserve-frontier argmap)
              (or (not (:autoconstructive argmap))
                  (> generation 0)))
+    (println "Preserving frontier... ")
     (let [filtered-candidates
           (if (:autoconstructive argmap)
             (let [diversifying-children (filter :diversifying (map deref pop-agents))
