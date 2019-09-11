@@ -16,6 +16,7 @@
 ;; for more details.
 
 
+
 (comment
   ; Uncomment this when you want to calculate reuse and repetition only for some programs
   (ns clojush.core
@@ -36,9 +37,8 @@
     (main-func (read-string (str/replace (first args) #"ThisIsSingleQuote" "'"))))
 
 
+
 )
-
-
 
 (ns clojush.core
   (:require [clojush.pushgp.record :as r])
@@ -71,5 +71,4 @@
       (println "######################################")
       (pushgp params)
       (shutdown-agents))))
-
 

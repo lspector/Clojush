@@ -14,7 +14,7 @@
  [ind prog argmapp]
  (let [error-func (get argmapp :error-function)
         modified-ind (error-func ind :train)]
-   (list (reduce + (:reuse-info modified-ind)) (reduce + (:repetition-info modified-ind)) (count-points (:program ind))  (count-points (:program (auto-simplify-from-program prog error-func 100 false 100))) )
+   (list (reduce + (:reuse-info modified-ind)) (reduce + (:repetition-info modified-ind)) (count-points (:program ind)) (count-points (:program (auto-simplify-from-program prog error-func 100 false 100))) )
   ))
 
 

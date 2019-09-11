@@ -79,7 +79,7 @@
         ;
         ; Attach identifiers only when the instruction starts with exec_.
         (contains? @instruction-table instruction)  
-        (if (and (or (str/starts-with? (str instruction) "exec_") (str/ends-with? (str instruction) "_exec") (str/includes? (str instruction) "_exec_")) (:calculate-mod-metrics state))
+        (if (and (or (str/starts-with? (str instruction) "exec_") (str/ends-with? (str instruction) "_exec") (str/includes? (str instruction) "_exec_") (str/starts-with? (str instruction) "tagged_")) (:calculate-mod-metrics state))
           (let [;_ (prn (str instruction))
                 ;_ (prn "This is not fair1: " (:exec state))
                 ;_ (prn "This is not fair2: " (:exec_id state))
@@ -163,7 +163,7 @@
                      (let [;_ (if (:calculate-mod-metrics state) (prn exec-top exec-top-id))
                            execution-result (execute-instruction exec-top s)
                             ; Need to use remove-ids() only when the instruction was exec related. Refer execute-instructions for more details.
-                           execution-result (if (and (or (str/starts-with? (str exec-top) "exec_") (str/ends-with? (str exec-top) "_exec") (str/includes? (str exec-top) "_exec_")) (:calculate-mod-metrics state) )
+                           execution-result (if (and (or (str/starts-with? (str exec-top) "exec_") (str/ends-with? (str exec-top) "_exec") (str/includes? (str exec-top) "_exec_") (str/starts-with? (str exec-top) "tagged_")) (:calculate-mod-metrics state) )
                                               (let [;_ (prn "This is also not fair: " (:exec execution-result))
                                                     execution-result (assoc execution-result :exec (correct-ids (:exec execution-result) (atom 100000))) ;(atom (apply max (flatten (:exec_id execution-result))))))
                                                      ; do a quick scan of all the instr:id pairs. if id is missing for any instr, give it a new id.
