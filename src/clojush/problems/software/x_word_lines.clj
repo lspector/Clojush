@@ -211,7 +211,7 @@
 (def argmap
   {:error-function (make-x-word-lines-error-function-from-cases (first x-word-lines-train-and-test-cases)
                                                                 (second x-word-lines-train-and-test-cases))
-   :training-cases (first x-word-line-train-and-test-cases)
+   :training-cases (first x-word-lines-train-and-test-cases)
    :sub-training-cases '()
    :atom-generators x-word-lines-atom-generators
    :max-points 3200

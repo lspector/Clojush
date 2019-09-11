@@ -198,7 +198,7 @@
   (timer @push-argmap :reproduction)
   (println "Computing errors... ")
   (swap! push-argmap assoc :sub-training-cases (down-sample (:training-cases @push-argmap) (:down-sample-factor @push-argmap)))
-  (println "Cases for this generation:" (:sub-training-cases @push-argmap))
+  (println "Cases for this generation:" (pr-str (:sub-training-cases @push-argmap)))
 
   (compute-errors pop-agents rand-gens novelty-archive @push-argmap)
   (println "Done computing errors.")
