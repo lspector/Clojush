@@ -9,7 +9,7 @@
          tag zip environment input-output genome gtm]
         [clojush.pushgp breed report]
         [clojush.pushgp.selection
-         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty]
+         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty eliteness]
         [clojush.experimental.decimation]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -193,10 +193,10 @@
   (println "Computing errors... ")
   (compute-errors pop-agents rand-gens novelty-archive @push-argmap)
   (println "Done computing errors.")
-  (println "Preserving frontier... ")
   (when (and (:preserve-frontier argmap)
              (or (not (:autoconstructive argmap))
                  (> generation 0)))
+    (println "Preserving frontier... ")
     (let [filtered-candidates
           (if (:autoconstructive argmap)
             (let [diversifying-children (filter :diversifying (map deref pop-agents))
@@ -249,8 +249,13 @@
   (when (= (:total-error-method @push-argmap) :ifs)
     (calculate-implicit-fitness-sharing pop-agents @push-argmap))
   ;; calculate epsilons for epsilon lexicase selection
-  (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
-    (calculate-epsilons-for-epsilon-lexicase pop-agents @push-argmap))
+  (when (and (= (:parent-selection @push-argmap) :epsilon-lexicase)
+             (= (:case-batch-size @push-argmap) 1)) ; only do this if case-batch-size is 1, since otherwise need to recalculate for every batch.
+    (let [epsilons (calculate-epsilons-for-epsilon-lexicase (map deref pop-agents) @push-argmap)]
+      (println "Epsilons for epsilon lexicase:" epsilons)
+      (reset! epsilons-for-epsilon-lexicase epsilons)))
+  (when (= (:total-error-method @push-argmap) :eliteness)
+    (calculate-eliteness pop-agents @push-argmap))
   (timer @push-argmap :other)
   ;; report and check for success
   (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))

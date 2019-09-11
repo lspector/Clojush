@@ -162,3 +162,34 @@
          subpop)
        argmap)
       (one-individual-per-error-vector-for-lexicase argmap)))
+
+
+;;;;;;;
+;; Batching for batch-lexicase.
+;; Not really pre-selection, but seemed like best place for now.
+
+(defn batch-errors-of-individual
+  "Takes an individual and batches its errors in the right batches, sums them, and assocs
+  to the :errors key."
+  [error-indices ind {:keys [case-batch-size total-error-method] :as argmap}]
+  (assoc ind :errors
+         (let [ordered-errors (map #(nth (get ind
+                                              (case total-error-method
+                                                :sum :errors
+                                                :eliteness :eliteness
+                                                nil))
+                                         %)
+                                   error-indices)
+               batched-errors (partition case-batch-size ordered-errors)
+               aggregated-batches (map (partial apply +') batched-errors)]
+           aggregated-batches)))
+
+(defn batch-errors
+  "Used for batch lexicase (and any other batch-based selection).
+  Takes errors and places them into random batches of size case-batch-size, and then
+  sums each batch. This replaces the :errors in each individual with a new error vector composed
+  of the batch sums."
+  [pop argmap]
+  (let [shuffled-error-indices (lshuffle (range (count (:errors (first pop)))))]
+    (map #(batch-errors-of-individual shuffled-error-indices % argmap)
+         pop)))
