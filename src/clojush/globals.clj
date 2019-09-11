@@ -90,6 +90,8 @@
 (def frontier (atom []))
 ;; used for preserve-frontier
 
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The globals below may be reset by arguments to pushgp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -155,5 +157,11 @@
 ;; will require quil.core, which will launch the quil sketch.
 
 (def viz-data-atom (atom {}))
+
+
+
+(def global-common-tagspace (atom {234 "()"}))
+;; An atom to hold the tagspace values from one individual to another and from one generation
+;;  to another.
 
 

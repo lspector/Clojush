@@ -109,9 +109,10 @@
                           
                          ;(doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
                          ;update the modularity metrics
-                          (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
-                            (swap! reuse-metric conj (first metrics))
-                            (swap! repetition-metric conj (last metrics)))
+                          (if (= [input correct-output] ran)
+                            (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
+                              (swap! reuse-metric conj (first metrics))
+                              (swap! repetition-metric conj (last metrics))))
                          ; Record the behavior
                           (swap! behavior conj printed-result)
                          ; Error is Levenshtein distance

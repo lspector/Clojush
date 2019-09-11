@@ -396,6 +396,7 @@
     (r/generation-data! [:best :individual] (dissoc best :program))
     (println "Best genome:" (print-genome best argmap))
     (println "Best program:" (pr-str (not-lazy (:program best))))
+    (println "Tagspace:" (pr-str (:tagspace best)))
     ;
     ;(println "Reuse for all test cases is" (pr-str (:reuse-info best)))
     ;(println "Repetition for all test cases is" (pr-str (:repetition-info best)))
@@ -659,6 +660,7 @@
   (when print-ancestors-of-solution
     (printf "\nAncestors of solution:\n")
     (prn (:ancestors best)))
+  (println "Tagspace:" (pr-str (:tagspace best)))
   (let [simplified-best (auto-simplify best error-function final-report-simplifications true 500)]
     (println "\n;;******************************")
     (println ";; Problem-Specific Report of Simplified Solution")
