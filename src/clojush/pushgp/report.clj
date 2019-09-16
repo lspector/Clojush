@@ -355,22 +355,27 @@
         err-fn (if (= total-error-method :rmse) :weighted-error :total-error)
         sorted (sort-by err-fn < population)
         ; err-fn-best (first sorted)
-        err-fn-best (loop [sorted-individuals sorted]
-                      (if (empty? (rest sorted-individuals))
-                        (first sorted-individuals)
-                        (if (and (<= (:total-error (first sorted-individuals)) error-threshold)
-                                 (> (apply + (:errors (error-function (first sorted-individuals) :train))) error-threshold)
-                                 (<= (:total-error (second sorted-individuals)) error-threshold))
-                          (recur (rest sorted-individuals))
-                          (first sorted-individuals))))
-        psr-best (problem-specific-report err-fn-best
+        err-fn-best (error-function
+                     (loop [sorted-individuals sorted]
+                       (if (empty? (rest sorted-individuals))
+                         (first sorted-individuals)
+                         (if (and (<= (:total-error (first sorted-individuals)) error-threshold)
+                                  (> (apply + (:errors (error-function (first sorted-individuals) :train))) error-threshold)
+                                  (<= (:total-error (second sorted-individuals)) error-threshold))
+                           (recur (rest sorted-individuals))
+                           (first sorted-individuals))))
+                     :train)
+        total-error-best (assoc err-fn-best
+                                :total-error
+                                (apply +' (:errors err-fn-best)))
+        psr-best (problem-specific-report total-error-best
                                           population
                                           generation
                                           error-function
                                           report-simplifications)
         best (if (= (type psr-best) clojush.individual.individual)
                psr-best
-               err-fn-best)
+               total-error-best)
         standard-deviation (fn [nums]
                              (if (<= (count nums) 1)
                                (str "Cannot find standard deviation of "
@@ -590,13 +595,22 @@
     (when visualize
       (swap! viz-data-atom update-in [:history-of-errors-of-best] conj (:errors best))
       (swap! viz-data-atom assoc :generation generation))
-    (cond (and exit-on-success
-               (or (<= (:total-error best) error-threshold)
-                   (:success best))
-                (<= (apply + (:errors (error-function best :train))) error-threshold)) [:success best]  ;; making sure solutions pass all training cases before success
-          (>= generation max-generations) [:failure best]
-          (>= @point-evaluations-count max-point-evaluations) [:failure best]
-          :else [:continue best])))
+    (cond
+      ; Succeed
+      (and exit-on-success
+           (or (<= (:total-error best) error-threshold)
+               (:success best))
+           (<= (apply + (:errors (error-function best :train))) error-threshold))
+      [:success best]  ;; making sure solutions pass all training cases before success
+      ; Fail max generations
+      (>= generation max-generations)
+      [:failure best]
+      ; Fail max point evaluations
+      (>= @point-evaluations-count max-point-evaluations)
+      [:failure best]
+      ; Continue
+      :else
+      [:continue best])))
 
 (defn remove-function-values [argmap]
   (into {} (filter (fn [[k v]] (not (fn? v)))
