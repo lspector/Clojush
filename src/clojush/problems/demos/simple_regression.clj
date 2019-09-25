@@ -58,8 +58,9 @@
                                  ; 'myfn
                                   )
                             (registered-for-stacks [:float :exec]))
-   :max-generations 1000
+   :max-generations 500
    :parent-selection :epsilon-lexicase
    :genetic-operator-probabilities {:uniform-addition-and-deletion 1}
    :uniform-addition-and-deletion-rate 0.09
+   :use-single-thread true
    })

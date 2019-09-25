@@ -20,16 +20,17 @@
 ; Atom generators
 (def double-letters-atom-generators
   (concat (list
-            \!
+           \!
             ;;; end constants
             ;;; end ERCs
-            (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
-            ;(tagged-instruction-erc 1000)
+           (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
+           (tagged-instruction-erc 1000)
+           (untag-instruction-erc 1000)
             ;(registered-for-type "return_")
             ;;; end tag ERCs
-            'in1
+           'in1
             ;;; end input instructions
-            )
+           )
           (registered-for-stacks [:integer :boolean :string :char :exec :print])))
 
 
@@ -101,9 +102,11 @@
                     (doall
                       (for [[input correct-output] cases]
                         (let [final-state (run-push (:program individual)
-                                                    (->> (push-item input :input (assoc (make-push-state) :calculate-mod-metrics (= [input correct-output] ran)))
+                                                    (->> (push-item input :input (assoc (make-push-state) :tag @global-common-tagspace))
+                                                     ;(push-item input :input (assoc (make-push-state) :calculate-mod-metrics (= [input correct-output] ran)))
                                                          (push-item "" :output)) )
-                              printed-result (stack-ref :output 0 final-state)]
+                              printed-result (stack-ref :output 0 final-state)
+                              _ (reset! global-common-tagspace (get final-state :tag))]
                           (when print-outputs
                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str printed-result))))
                           
@@ -118,7 +121,7 @@
                          ; Error is Levenshtein distance
                           (levenshtein-distance correct-output printed-result)))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric)
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @global-common-tagspace)
           (assoc individual :test-errors errors))))))
 
 (defn get-double-letters-train-and-test

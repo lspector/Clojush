@@ -584,7 +584,7 @@
           ;; DON'T KNOW HOW TO COMBINE BOTH THE MEASURES
           ;; 
 
-        :common-tagspace {234 "()"}
+        :common-tagspace {}
          
          )))
 

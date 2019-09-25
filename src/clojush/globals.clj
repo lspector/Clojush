@@ -160,7 +160,7 @@
 
 
 
-(def global-common-tagspace (atom {234 "()"}))
+(def global-common-tagspace (atom {}))
 ;; An atom to hold the tagspace values from one individual to another and from one generation
 ;;  to another.
 

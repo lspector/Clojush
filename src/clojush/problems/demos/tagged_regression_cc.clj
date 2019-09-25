@@ -56,11 +56,11 @@
                      (let [;stacks-depth (atom (zipmap push-types (repeat 0)))
                            reuse-metric (atom ())       ;the length will be equal to the number of test cases
                            repetition-metric (atom ())
-                           temp-tagspaces (atom ())
+                           ;temp-tagspaces (atom ())
                            ;_ (prn @global-common-tagspace)
                            ]
                        (assoc individual
-                              :tagspace @global-common-tagspace
+                              ;:tagspace @global-common-tagspace
                               ;(let [_ (prn @common-tagspace)]
                               ;  @common-tagspace)
                               :errors (let [ran (rand-nth (range -3.5 4.0 0.5))]
@@ -71,7 +71,7 @@
                                                                             (push-item input :float
                                                                                        (assoc (make-push-state) :tag @global-common-tagspace))))
                                                  top-float (top-item :float state)
-                                                 _ (swap! temp-tagspaces conj (get state :tag))
+                                                 _ (reset! global-common-tagspace (get state :tag))
                                                  ]
                                             ;update common tagsapce
                                              ;(prn (get state :tag))
@@ -82,7 +82,8 @@
                                              (if (number? top-float)
                                                (abs (- top-float target))
                                                1000.0)))))
-                              :temp (reset! global-common-tagspace (rand-nth @temp-tagspaces))
+                              ;:temp (reset! global-common-tagspace (rand-nth @temp-tagspaces))
+                              :tagspace @global-common-tagspace
                               :reuse-info @reuse-metric 
                               :repetition-info @repetition-metric
                               ) 
@@ -90,7 +91,7 @@
    :atom-generators (concat (list (fn [] (lrand 3))
                                   'in1          
                             (tag-instruction-erc [:float :exec] 100)
-                            (untag-instruction-erc 100)
+                            ;(untag-instruction-erc 100)
                             (tagged-instruction-erc 100))
                             (registered-for-stacks [:float :exec]))
    :tag-limit 100
