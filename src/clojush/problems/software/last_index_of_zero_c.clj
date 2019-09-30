@@ -89,31 +89,36 @@
             reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
             repetition-metric (atom ())
             behavior (atom '())
-            errors (doall
-                     (for [[input correct-output] (case data-cases
-                                                    :train train-cases
-                                                    :test test-cases
-                                                    [])]
-                       (let [final-state (run-push (:program individual)
-                                                   (push-item input :input (make-push-state)))
-                             result (top-item :integer final-state)]
-                         (when print-outputs
-                           (println (format "Correct output: %2d | Program output: %s"
-                                            correct-output
-                                            (str result))))
+            cases (case data-cases
+                    :train train-cases
+                    :test test-cases
+                    [])
+            errors (let [ran (rand-nth cases)]
+                    (doall
+                    (for [[input correct-output] cases]
+                      (let [final-state (run-push (:program individual)
+                                                  (push-item input :input 
+                                                             (assoc (make-push-state) :calculate-mod-metrics (= [input correct-output] ran))
+                                                             ))
+                            result (top-item :integer final-state)]
+                        (when print-outputs
+                          (println (format "Correct output: %2d | Program output: %s"
+                                           correct-output
+                                           (str result))))
                          ;(doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
-                         (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
-                                              (do
-                                                (swap! reuse-metric conj (first metrics))
-                                              (swap! repetition-metric conj (last metrics))))
-                         
+                        (if (= [input correct-output] ran)
+                          (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
+                            (do
+                              (swap! reuse-metric conj (first metrics))
+                              (swap! repetition-metric conj (last metrics)))))
+                        
                          ; Record the behavior
-                         (swap! behavior conj result)
+                        (swap! behavior conj result)
                          ; Error is absolute distance from correct index
-                         (if (number? result)
-                           (abs (- result correct-output)) ; distance from correct integer
-                           1000000) ; penalty for no return value
-                         )))]
+                        (if (number? result)
+                          (abs (- result correct-output)) ; distance from correct integer
+                          1000000) ; penalty for no return value
+                        ))))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric)
           (assoc individual :test-errors errors))))))
@@ -184,6 +189,5 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 1000000
-   :meta-error-categories [:max-stacks-depth]
-   :sort-meta-errors-for-lexicase :last
+   :meta-error-categories [:reuse]
    })

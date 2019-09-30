@@ -215,6 +215,6 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 1
-   :meta-error-categories [:reuse :repetition]
+   :meta-error-categories [:reuse]
    ;:use-single-thread true
    })
