@@ -10,10 +10,11 @@
 
 (ns clojush.problems.software.last-index-of-zero-c
   (:use clojush.pushgp.pushgp
-        [clojush pushstate interpreter random util globals]
-        ;clojush.instructions.tag
+        [clojush pushstate interpreter random util globals simplification]
+        clojush.instructions.tag
         [clojure.math numeric-tower combinatorics]
-        ))
+        )
+  (:require [clojush.problems.software.last-index-of-zero :as liz]))
 
 ; Atom generators
 (def last-index-of-zero-atom-generators
@@ -21,8 +22,8 @@
             ^{:generator-label "Random numbers in the range [-50,50]"}
             (fn [] (- (lrand-int 101) 50))
             ;;; end ERCs
-            ;(tag-instruction-erc [:integer :boolean :vector_integer :exec] 1000)
-            ;(tagged-instruction-erc 1000)
+            (tag-instruction-erc [:integer :boolean :vector_integer :exec] 1000)
+            (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
@@ -96,10 +97,18 @@
             errors (let [ran (rand-nth cases)]
                     (doall
                     (for [[input correct-output] cases]
-                      (let [final-state (run-push (:program individual)
-                                                  (push-item input :input 
-                                                             (assoc (make-push-state) :calculate-mod-metrics (= [input correct-output] ran))
-                                                             ))
+                      (let [final-state (if (= [input correct-output] ran)
+                                          (run-push (:program (auto-simplify-lite individual
+                                                                                  (fn [inp] (liz/make-last-index-of-zero-error-function-from-cases inp nil)) ; error-function per test case
+                                                                                  75
+                                                                                  (first liz/last-index-of-zero-train-and-test-cases) ; cases
+                                                                                  false 100))
+                                                    (push-item input :input 
+                                                               (assoc (make-push-state) :calculate-mod-metrics (= [input correct-output] ran))
+                                                               ))
+                                          (run-push (:program individual)
+                                                    (->> (make-push-state)
+                                                         (push-item input :input))))
                             result (top-item :integer final-state)]
                         (when print-outputs
                           (println (format "Correct output: %2d | Program output: %s"

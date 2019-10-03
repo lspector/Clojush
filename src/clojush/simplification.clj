@@ -220,3 +220,64 @@
             (recur (inc step) new-genome new-program new-errors)
             (recur (inc step) genome program errors)))))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; auto-simplification for the purpose of calculating reuse metric
+
+(defn auto-simplify-lite
+  "Auto-simplifies the provided individual."
+  ;([ind error-function steps print? progress-interval]
+  ; (auto-simplify ind error-function steps print? progress-interval false))
+  [ind error-function-per-case steps cases print? progress-interval]
+  (when print? (printf "\nAuto-simplifying with starting size: %s" (count-points (:program ind))))
+  (loop [step 0 program (:program ind) errors (:errors ind) total-errors (:total-error ind)]
+    (when (and print?
+               (or (>= step steps)
+                   (zero? (mod step progress-interval))))
+      (printf "\nstep: %s\nprogram: %s\nerrors: %s\ntotal: %s\nsize: %s\n"
+              step (pr-str (not-lazy program)) (not-lazy errors) total-errors (count-points program))
+      (flush))
+    (if (>= step steps)
+      (make-individual :program program :errors errors :total-error total-errors
+                       :history (:history ind)
+                        ;:ancestors (if maintain-ancestors
+                        ;             (cons (:program ind) (:ancestors ind))
+                        ;             (:ancestors ind))
+                       :genetic-operators :simplification)
+      (let [new-program (if (< (lrand-int 5) 4)
+                            ;; remove a small number of random things
+                          (loop [p program how-many (inc (lrand-int 2))]
+                            (if (or (zero? how-many)
+                                    (<= (count-points p) 1))
+                              p
+                              (recur (remove-code-at-point p (inc (lrand-int (dec (count-points p)))))
+                                     (dec how-many))))
+                            ;; remove single paren pair
+                          (remove-paren-pair program))
+            new-errors (loop [ca 0 ; ca is the index of the case under consideration
+                              result '()]
+                         (if (>= ca (count cases))
+                           (reverse result)
+                           (let [;_ (prn (nth cases ca))
+                                 new-error (first (:errors ((error-function-per-case (list (nth cases ca))) {:program new-program})))]
+                             (if (not= new-error (nth errors ca))
+                               (reverse result)
+                               (recur (inc ca) (conj result new-error))))))
+
+            new-total-errors (compute-total-error new-errors)] ;simplification bases its decision on raw error; HAH-error could also be used here
+        (if (= new-errors errors) ; only keep the simplified program if its error vector is the same as the original program's error vector
+          (recur (inc step) new-program new-errors new-total-errors)
+          (recur (inc step) program errors total-errors))))))
+
+
+(defn auto-simplify-from-program-lite
+  [p error-function error-function-per-case steps cases print? progress-interval]
+  (let [errs (:errors (error-function {:program p}))]
+    (auto-simplify-lite (make-individual :program p
+                                         :errors errs
+                                         :total-error (reduce + errs)
+                                         :genetic-operators :simplification)
+                        error-function-per-case
+                        steps
+                        cases
+                        print?
+                        progress-interval)))
