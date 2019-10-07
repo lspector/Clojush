@@ -83,8 +83,8 @@
                                                      [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
-                                                     (push-item input1 :input)
-                                                     (push-item "" :output)))
+                                                        (push-item input1 :input)
+                                                        (push-item "" :output)))
                              result (stack-ref :output 0 final-state)]
                          (when print-outputs
                            (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
@@ -149,14 +149,16 @@
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
-   :genetic-operator-probabilities {:alternation 0.2
-                                    :uniform-mutation 0.2
-                                    :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
-   :alternation-rate 0.01
-   :alignment-deviation 10
-   :uniform-mutation-rate 0.01
+   :genetic-operator-probabilities {:uniform-addition-and-deletion 1}
+   :uniform-addition-and-deletion-rate 0.09
+   ;:genetic-operator-probabilities {:alternation 0.2
+   ;                                 :uniform-mutation 0.2
+   ;                                 :uniform-close-mutation 0.1
+   ;                                 [:alternation :uniform-mutation] 0.5
+   ;                                 }
+   ;:alternation-rate 0.01
+   ;:alignment-deviation 10
+   ;:uniform-mutation-rate 0.01
    :problem-specific-report digits-report
    :problem-specific-initial-report digits-initial-report
    :report-simplifications 0

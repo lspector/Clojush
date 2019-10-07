@@ -14,11 +14,12 @@
 
 (ns clojush.problems.software.digits-c
   (:use clojush.pushgp.pushgp
-        [clojush pushstate interpreter random util globals]
+        [clojush pushstate interpreter random util globals simplification]
         clojush.instructions.tag
         ;clojush.instructions.environment
         [clojure.math numeric-tower]
-        ))
+        )
+  (:require [clojush.problems.software.digits :as dg]))
 
 ; Atom generators
 (def digits-atom-generators
@@ -28,8 +29,8 @@
             (fn [] (- (lrand-int 21) 10))
             ;;; end ERCs
             'end_tag
-            (tagwrap-instruction-erc 100)
-            ;(tag-instruction-erc [:integer :boolean :string :char :exec] 1000)
+            ;(tagwrap-instruction-erc 100)
+            (tag-instruction-erc [:integer :boolean :string :char :exec] 1000)
             (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
@@ -79,29 +80,48 @@
      (the-actual-digits-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
-            state-with-tags (tagspace-initialization-heritable (str (:program individual)) (make-push-state))
-            stacks-depth (atom (zipmap push-types (repeat 0)))
-            errors (doall
-                     (for [[input1 correct-output] (case data-cases
-                                                     :train train-cases
-                                                     :test test-cases
-                                                     [])]
-                       (let [final-state (run-push (:program individual)
-                                                   (->> (push-item input1 :input state-with-tags)
-                                                     (push-item "" :output)))
-                             result (stack-ref :output 0 final-state)]
-                         (when print-outputs
-                           (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+            ;state-with-tags (tagspace-initialization-heritable (str (:program individual)) (make-push-state))
+            ;stacks-depth (atom (zipmap push-types (repeat 0)))
+            reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
+            repetition-metric (atom ())            
+            cases (case data-cases
+                    :train train-cases
+                    :test test-cases
+                    [])
+            errors (let [ran (rand-nth cases)]
+                     (doall
+                      (for [[input1 correct-output] cases]
+                        (let [final-state (if (= [input1 correct-output] ran)
+                                            (run-push (:program (auto-simplify-lite individual
+                                                                                    (fn [inp] (dg/make-digits-error-function-from-cases inp nil)) ; error-function per test case
+                                                                                    75
+                                                                                    (first dg/digits-train-and-test-cases) ; cases
+                                                                                    false 100))
+                                                      (->>  (push-item input1 :input (assoc (make-push-state) :calculate-mod-metrics (= [input1 correct-output] ran)))
+                                                            (push-item "" :output)))
+                                            (run-push (:program individual)
+                                                      (->>  (push-item input1 :input (make-push-state))
+                                                            (push-item "" :output)))
+                                            )
+                              result (stack-ref :output 0 final-state)]
+                          (when print-outputs
+                            (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
                          ; Update the length of each stack
-                         (doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
-                        
+                        ;(doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
+                          (if (= [input1 correct-output] ran)
+                            (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
+                              (do
+                                (swap! reuse-metric conj (first metrics))
+                                (swap! repetition-metric conj (last metrics)))))
+
+                          
                          ; Record the behavior              
-                         (swap! behavior conj result)
+                          (swap! behavior conj result)
                          ; Error is Levenshtein distance of printed strings
-                         (levenshtein-distance correct-output result))))]
+                          (levenshtein-distance correct-output result)))))]
         ;(assoc individual :stacks-info @stacks-depth)
         (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors :stacks-info @stacks-depth)
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric)
           (assoc individual :test-errors errors))))))
 
 (defn get-digits-train-and-test
@@ -163,19 +183,22 @@
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
-   :genetic-operator-probabilities {:alternation 0.2
-                                    :uniform-mutation 0.2
-                                    :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
-   :alternation-rate 0.01
-   :alignment-deviation 10
-   :uniform-mutation-rate 0.01
+   :genetic-operator-probabilities {:uniform-addition-and-deletion 1}
+   :uniform-addition-and-deletion-rate 0.09
+   ;:genetic-operator-probabilities {:alternation 0.2
+   ;                                 :uniform-mutation 0.2
+   ;                                 :uniform-close-mutation 0.1
+   ;                                 [:alternation :uniform-mutation] 0.5
+   ;                                 }
+   ;:alternation-rate 0.01
+   ;:alignment-deviation 10
+   ;:uniform-mutation-rate 0.01
    :problem-specific-report digits-report
    :problem-specific-initial-report digits-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000
-   :meta-error-categories [:max-stacks-depth]
+   ;:meta-error-categories [:max-stacks-depth]
+   
    })
 

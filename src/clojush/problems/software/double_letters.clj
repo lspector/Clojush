@@ -162,17 +162,17 @@
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
-   :genetic-operator-probabilities {:alternation 0.2
-                                    :uniform-mutation 0.2
-                                    :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
-   :alternation-rate 0.01
-   :alignment-deviation 10
-   :uniform-mutation-rate 0.01
+   :genetic-operator-probabilities {:uniform-addition-and-deletion 1}
+   :uniform-addition-and-deletion-rate 0.09
+   ;:genetic-operator-probabilities {:alternation 0.2
+   ;                                 :uniform-mutation 0.2
+   ;                                 :uniform-close-mutation 0.1
+   ;                                 [:alternation :uniform-mutation] 0.5}
+   ;:alternation-rate 0.01
+   ;:alignment-deviation 10
+   ;:uniform-mutation-rate 0.01
    :problem-specific-report double-letters-report
    :problem-specific-initial-report double-letters-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 5000
-   })
+   :max-error 5000})
