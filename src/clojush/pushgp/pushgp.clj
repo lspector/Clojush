@@ -256,6 +256,9 @@
                                          (fn [_] (select @delay-archive @push-argmap))))
                                       (when-not (:use-single-thread @push-argmap (apply await pop-agents))) ;; SYNCHRONIZE
                                       (reset! delay-archive [])))
+                                  (println "\nUpdating Common Tagspace...")
+                                  (reset! global-common-tagspace (:tagspace best))
+                                  (println (pr-str @global-common-tagspace))
                                   (timer @push-argmap :report)
                                   (println "\nProducing offspring...") (flush)
                                   (produce-new-offspring pop-agents

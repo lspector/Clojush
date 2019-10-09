@@ -12,7 +12,7 @@
 
 (ns clojush.problems.software.double-letters-c
   (:use clojush.pushgp.pushgp
-        [clojush pushstate interpreter random util globals]
+        [clojush pushstate interpreter random util globals individual]
         clojush.instructions.tag
         clojure.math.numeric-tower
         ))
@@ -25,7 +25,7 @@
             ;;; end ERCs
            (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
            (tagged-instruction-erc 1000)
-           (untag-instruction-erc 1000)
+           ;(untag-instruction-erc 1000)
             ;(registered-for-type "return_")
             ;;; end tag ERCs
            'in1
@@ -94,34 +94,35 @@
             repetition-metric (atom ())
             ;state-with-tags (tagspace-initialization (str (:program individual)) 1000 (make-push-state)) 
             behavior (atom '())
+            local-tagspace (atom @global-common-tagspace)
             cases (case data-cases
                     :train train-cases
                     :test test-cases
                     data-cases)
             errors (let [ran (rand-nth cases)]
-                    (doall
+                     (doall
                       (for [[input correct-output] cases]
                         (let [final-state (run-push (:program individual)
-                                                    (->> (push-item input :input (assoc (make-push-state) :tag @global-common-tagspace))
+                                                    (->> (push-item input :input (assoc (make-push-state) :tag @local-tagspace))
                                                      ;(push-item input :input (assoc (make-push-state) :calculate-mod-metrics (= [input correct-output] ran)))
                                                          (push-item "" :output)) )
                               printed-result (stack-ref :output 0 final-state)
-                              _ (reset! global-common-tagspace (get final-state :tag))]
+                              _ (reset! local-tagspace (get final-state :tag))]
                           (when print-outputs
                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str printed-result))))
                           
                          ;(doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
                          ;update the modularity metrics
-                          (if (= [input correct-output] ran)
-                            (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
-                              (swap! reuse-metric conj (first metrics))
-                              (swap! repetition-metric conj (last metrics))))
+                          ;(if (= [input correct-output] ran)
+                          ;  (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
+                          ;    (swap! reuse-metric conj (first metrics))
+                          ;    (swap! repetition-metric conj (last metrics))))
                          ; Record the behavior
                           (swap! behavior conj printed-result)
                          ; Error is Levenshtein distance
                           (levenshtein-distance correct-output printed-result)))))]
         (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @global-common-tagspace)
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @local-tagspace)
           (assoc individual :test-errors errors))))))
 
 (defn get-double-letters-train-and-test

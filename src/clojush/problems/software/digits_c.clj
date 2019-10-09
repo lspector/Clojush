@@ -84,11 +84,12 @@
             ;stacks-depth (atom (zipmap push-types (repeat 0)))
             reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
             repetition-metric (atom ())            
+            local-tagspace (atom @global-common-tagspace)
             cases (case data-cases
                     :train train-cases
                     :test test-cases
                     [])
-            errors (let [ran (rand-nth cases)]
+            errors (let [ran nil];(rand-nth cases)]
                      (doall
                       (for [[input1 correct-output] cases]
                         (let [final-state (if (= [input1 correct-output] ran)
@@ -100,10 +101,12 @@
                                                       (->>  (push-item input1 :input (assoc (make-push-state) :calculate-mod-metrics (= [input1 correct-output] ran)))
                                                             (push-item "" :output)))
                                             (run-push (:program individual)
-                                                      (->>  (push-item input1 :input (make-push-state))
-                                                            (push-item "" :output)))
+                                                      (->> (push-item input1 :input (assoc (make-push-state) :tag @local-tagspace)) 
+                                                       ;(push-item input1 :input (make-push-state))
+                                                           (push-item "" :output)))
                                             )
-                              result (stack-ref :output 0 final-state)]
+                              result (stack-ref :output 0 final-state)
+                               _ (reset! local-tagspace (get final-state :tag))]
                           (when print-outputs
                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
                          ; Update the length of each stack
@@ -121,7 +124,7 @@
                           (levenshtein-distance correct-output result)))))]
         ;(assoc individual :stacks-info @stacks-depth)
         (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric)
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @local-tagspace)
           (assoc individual :test-errors errors))))))
 
 (defn get-digits-train-and-test

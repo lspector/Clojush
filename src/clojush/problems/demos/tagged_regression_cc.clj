@@ -56,6 +56,7 @@
                      (let [;stacks-depth (atom (zipmap push-types (repeat 0)))
                            reuse-metric (atom ())       ;the length will be equal to the number of test cases
                            repetition-metric (atom ())
+                           local-tagspace (atom @global-common-tagspace)
                            ;temp-tagspaces (atom ())
                            ;_ (prn @global-common-tagspace)
                            ]
@@ -69,9 +70,10 @@
                                            (let [state (run-push (:program individual)
                                                                  (push-item input :input
                                                                             (push-item input :float
-                                                                                       (assoc (make-push-state) :tag @global-common-tagspace))))
+                                                                                       (assoc (make-push-state) :tag @local-tagspace))))
                                                  top-float (top-item :float state)
-                                                 _ (reset! global-common-tagspace (get state :tag))
+                                                 ;_ (prn (get state :tag))
+                                                 _ (reset! local-tagspace (get state :tag))
                                                  ]
                                             ;update common tagsapce
                                              ;(prn (get state :tag))
@@ -83,7 +85,8 @@
                                                (abs (- top-float target))
                                                1000.0)))))
                               ;:temp (reset! global-common-tagspace (rand-nth @temp-tagspaces))
-                              :tagspace @global-common-tagspace
+                              ;:tagspace @global-common-tagspace
+                              :tagspace @local-tagspace
                               :reuse-info @reuse-metric 
                               :repetition-info @repetition-metric
                               ) 
