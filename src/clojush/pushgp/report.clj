@@ -264,7 +264,7 @@
     (println "Lexicase best total error:" (:total-error lex-best))
     (println "Lexicase best mean error:" (float (/ (:total-error lex-best)
                                                    (count (:errors lex-best)))))
-    (when print-history (println "Lexicase best history:" (not-lazy (:history lex-best))))
+    ;(when print-history (println "Lexicase best history:" (not-lazy (:history lex-best))))
     (println "Lexicase best size:" (count-points (:program lex-best)))
     (printf "Percent parens: %.3f\n" 
             (double (/ (count-parens (:program lex-best)) 
@@ -293,8 +293,8 @@
     (println "Zero cases best mean error:" 
              (float (/ (:total-error most-zero-cases-best)
                        (count (:errors most-zero-cases-best)))))
-    (when print-history (println "Zero cases best history:" 
-                                 (not-lazy (:history most-zero-cases-best))))
+    ;(when print-history (println "Zero cases best history:" 
+     ;                            (not-lazy (:history most-zero-cases-best))))
     (println "Zero cases best size:" (count-points (:program most-zero-cases-best)))
     (printf "Percent parens: %.3f\n" 
             (double (/ (count-parens (:program most-zero-cases-best)) 
@@ -397,6 +397,7 @@
     (println "Best genome:" (print-genome best argmap))
     (println "Best program:" (pr-str (not-lazy (:program best))))
     (println "Tagspace:" (pr-str (:tagspace best)))
+    (println "Global Tagspace:" (pr-str @global-common-tagspace))
     ;
     ;(println "Reuse for all test cases is" (pr-str (:reuse-info best)))
     ;(println "Repetition for all test cases is" (pr-str (:repetition-info best)))
@@ -428,7 +429,7 @@
       nil)
     (when (= parent-selection :novelty-search)
       (println "Novelty: " (float (:novelty best))))
-    (when print-history (println "History:" (not-lazy (:history best))))
+    ;(when print-history (println "History:" (not-lazy (:history best))))
     (println "Genome size:" (r/generation-data! [:best :genome-size] (count (:genome best))))
     (println "Size:" (r/generation-data! [:best :program-size] (count-points (:program best))))
     (printf "Percent parens: %.3f\n"
@@ -661,6 +662,7 @@
     (printf "\nAncestors of solution:\n")
     (prn (:ancestors best)))
   (println "Tagspace:" (pr-str (:tagspace best)))
+  (println "Global Tagspace:" (pr-str @global-common-tagspace))
   (let [simplified-best (auto-simplify best error-function final-report-simplifications true 500)]
     (println "\n;;******************************")
     (println ";; Problem-Specific Report of Simplified Solution")

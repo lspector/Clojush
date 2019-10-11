@@ -59,43 +59,65 @@
                            local-tagspace (atom @global-common-tagspace)
                            ;temp-tagspaces (atom ())
                            ;_ (prn @global-common-tagspace)
-                           ]
-                       (assoc individual
-                              ;:tagspace @global-common-tagspace
-                              ;(let [_ (prn @common-tagspace)]
-                              ;  @common-tagspace)
-                              :errors (let [ran (rand-nth (range -3.5 4.0 0.5))]
-                                        (doall
-                                         (for [[input target] fitness-cases]
-                                           (let [state (run-push (:program individual)
-                                                                 (push-item input :input
-                                                                            (push-item input :float
-                                                                                       (assoc (make-push-state) :tag @local-tagspace))))
-                                                 top-float (top-item :float state)
+                           errors (let [ran (rand-nth (range -3.5 4.0 0.5))]
+                                    (doall
+                                     (for [[input target] fitness-cases]
+                                       (let [state (run-push (:program individual)
+                                                             (push-item input :input
+                                                                        (push-item input :float
+                                                                                   (assoc (make-push-state) :tag @local-tagspace))))
+                                             top-float (top-item :float state)
                                                  ;_ (prn (get state :tag))
-                                                 _ (reset! local-tagspace (get state :tag))
-                                                 ]
+                                             _ (reset! local-tagspace (get state :tag))]
                                             ;update common tagsapce
                                              ;(prn (get state :tag))
                                              ;(prn @global-common-tagspace)
                                              ;(reset! common-tagspace (assoc (get state :tag) (lrand-int 400) "(integer_dec)"))
                                              ;(reset! common-tagspace (get state :tag))
                                             ;calculate errors 
-                                             (if (number? top-float)
-                                               (abs (- top-float target))
-                                               1000.0)))))
+                                         (if (number? top-float)
+                                           (abs (- top-float target))
+                                           1000.0)))))
+                           _ (if (let [x (vec errors)
+                                       ;_ (prn x)
+                                       y (first (:history individual))
+                                       ;_ (prn y)
+                                       ]
+                                   (if (nil? y)
+                                     true
+                                     (loop [n 0]
+                                       (if (= n (count x))
+                                         false
+                                         (if (> (nth x n) (nth y n))
+                                           true
+                                           (recur (inc n)))))))
+                               (do
+                                 (reset! global-common-tagspace @local-tagspace)
+                                 ;(prn @global-common-tagspace)
+                                 ))
+                           ]
+                       (assoc individual
+                              ;:tagspace @global-common-tagspace
+                              ;(let [_ (prn @common-tagspace)]
+                              ;  @common-tagspace)
+                              :errors errors
+                              ;
+                              ; if errors is better than (first history) in at least one case: 
+                              ;     (reset! global-common-tagspace @local-tagspace)
+                              ;
                               ;:temp (reset! global-common-tagspace (rand-nth @temp-tagspaces))
                               ;:tagspace @global-common-tagspace
                               :tagspace @local-tagspace
+                                          
                               :reuse-info @reuse-metric 
                               :repetition-info @repetition-metric
-                              ) 
+                                          )
                        ))
    :atom-generators (concat (list (fn [] (lrand 3))
                                   'in1          
-                            (tag-instruction-erc [:float :exec] 100)
-                            ;(untag-instruction-erc 100)
-                            (tagged-instruction-erc 100))
+                                  (tag-instruction-erc [:float :exec] 100)
+                            (untag-instruction-erc 100)
+                                  (tagged-instruction-erc 100))
                             (registered-for-stacks [:float :exec]))
    :tag-limit 100
    :genetic-operator-probabilities {:uniform-addition-and-deletion 1}
@@ -108,4 +130,5 @@
    ;:filter-params {:features [:reuse] :thresholds [0.9]}
    :use-single-thread true
    :max-generations 500
+   :print-history true
    })

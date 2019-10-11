@@ -24,18 +24,19 @@
 ; Atom generators
 (def digits-atom-generators
   (concat (list
-            \newline
+           \newline
             ;;; end constants
-            (fn [] (- (lrand-int 21) 10))
+           (fn [] (- (lrand-int 21) 10))
             ;;; end ERCs
-            'end_tag
+           'end_tag
             ;(tagwrap-instruction-erc 100)
-            (tag-instruction-erc [:integer :boolean :string :char :exec] 1000)
-            (tagged-instruction-erc 1000)
+           (tag-instruction-erc [:integer :boolean :string :char :exec] 1000)
+           (tagged-instruction-erc 1000)
+           (untag-instruction-erc 1000)
             ;;; end tag ERCs
-            'in1
+           'in1
             ;;; end input instructions
-            )
+           )
           (registered-for-stacks [:integer :boolean :string :char :exec :print])))
 
 (defn my-rand-long
@@ -106,7 +107,7 @@
                                                            (push-item "" :output)))
                                             )
                               result (stack-ref :output 0 final-state)
-                               _ (reset! local-tagspace (get final-state :tag))]
+                              _ (reset! local-tagspace (get final-state :tag))]
                           (when print-outputs
                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
                          ; Update the length of each stack
@@ -121,7 +122,21 @@
                          ; Record the behavior              
                           (swap! behavior conj result)
                          ; Error is Levenshtein distance of printed strings
-                          (levenshtein-distance correct-output result)))))]
+                          (levenshtein-distance correct-output result)))))
+            _ (if (= data-cases :train)
+               (if (let [x (vec errors)
+                                       ;_ (prn x)
+                        y (first (:history individual))
+                                       ;_ (prn y)
+                        ]
+                    (if (nil? y)
+                      true
+                      (some? (some true? (map #(< %1 %2) x y)))
+                      ))
+                (do
+                  (reset! global-common-tagspace @local-tagspace)
+                                 ;(prn @global-common-tagspace)
+                  )))]
         ;(assoc individual :stacks-info @stacks-depth)
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @local-tagspace)
@@ -202,6 +217,7 @@
    :final-report-simplifications 5000
    :max-error 5000
    ;:meta-error-categories [:max-stacks-depth]
-   
+   :use-single-thread true
+   :print-history true
    })
 
