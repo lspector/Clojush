@@ -131,7 +131,8 @@
                         ]
                     (if (nil? y)
                       true
-                      (some? (some true? (map #(< %1 %2) x y)))
+                      ;(some? (some true? (map #(< %1 %2) x y))) ; child is better than mom on at least one test case; can be worse on others
+                      (every? true? (map #(<= %1 %2) x y))
                       ))
                 (do
                   (reset! global-common-tagspace @local-tagspace)

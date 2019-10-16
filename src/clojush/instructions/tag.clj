@@ -88,26 +88,28 @@
         state
         (let [the-tag (read-string (nth iparts 1))]
           (assoc state :tag (dissoc (:tag state) (first (closest-association the-tag state))))))
+          ; TEMPORARY-ANIL
+          ;(assoc state :tag (dissoc (:tag state) the-tag))))
       ;; if it's return_tag_<type>_<number>: Push
       ;; (item_from_<type>_stack tag_<type>_<number>) onto the return stack. Pop the
       ;; item if @global-pop-when-tagging
-      (and (= (first iparts) "return")
-           (= (second iparts) "tag"))
-      (let [source-type (read-string (str ":" (nth iparts 2)))
-            the-tag (read-string (nth iparts 3))
-            new-tag-instr (symbol (subs (name i) (count "return_")))]
-        (if (empty? (source-type state))
-          state
-          (let [item (list (top-item source-type state) new-tag-instr)]
-            ((if @global-pop-when-tagging pop-item (fn [type state] state))
+          (and (= (first iparts) "return")
+               (= (second iparts) "tag"))
+          (let [source-type (read-string (str ":" (nth iparts 2)))
+                the-tag (read-string (nth iparts 3))
+                new-tag-instr (symbol (subs (name i) (count "return_")))]
+            (if (empty? (source-type state))
+              state
+              (let [item (list (top-item source-type state) new-tag-instr)]
+                ((if @global-pop-when-tagging pop-item (fn [type state] state))
                  source-type
                  (push-item item :return state)))))
       ;; if we get here it must be one of the retrieval forms starting with "tagged_", so 
       ;; we check to see if there are assocations and consider the cases if so
-      :else
-      (if (empty? (:tag state))
-        state ;; no-op if no associations
-        (cond ;; it's tagged_code_<number>
+          :else
+          (if (empty? (:tag state))
+            state ;; no-op if no associations
+            (cond ;; it's tagged_code_<number>
               (= (nth iparts 1) "code") 
               (let [the-tag (read-string (nth iparts 2))]
                 (push-item (second (closest-association the-tag state)) :code state))
