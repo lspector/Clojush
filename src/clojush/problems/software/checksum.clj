@@ -96,7 +96,7 @@
                        (for [[input correct-output] (case data-cases
                                                       :train train-cases
                                                       :test test-cases
-                                                      [])]
+                                                      data-cases)]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item input :input)
@@ -113,9 +113,9 @@
                                (abs (- (int (last correct-output)) (int (last printed-result)))) ;distance from correct last character
                                1000) ;penalty for wrong format
                              )))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors))))))
 
 (defn get-checksum-train-and-test
   "Returns the train and test cases."
@@ -164,6 +164,7 @@
 (def argmap
   {:error-function (make-checksum-error-function-from-cases (first checksum-train-and-test-cases)
                                                             (second checksum-train-and-test-cases))
+   :training-cases (first checksum-train-and-test-cases)
    :atom-generators checksum-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400

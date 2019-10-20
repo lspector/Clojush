@@ -151,7 +151,6 @@
                                                                   (second for-loop-index-train-and-test-cases))
    :training-cases (first for-loop-index-train-and-test-cases)
    :sub-training-cases '()
-   ;:sub_sampled-training-cases (first for-loop-index-train-and-test-cases)
    :atom-generators loop-atom-generators
    :max-points 1200
    :max-genome-size-in-initial-program 150

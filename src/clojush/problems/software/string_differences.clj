@@ -140,7 +140,7 @@
                               (for [[[input1 input2] correct-output] (case data-cases
                                                                        :train train-cases
                                                                        :test test-cases
-                                                                       [])]
+                                                                       data-cases)]
                                 (let [final-state (run-push (:program individual)
                                                             (->> (make-push-state)
                                                               (push-item input2 :input)
@@ -161,9 +161,9 @@
                                     (abs (- (count (re-seq #"(?m)^\d+ \S \S$" correct-output))
                                             (count (re-seq #"(?m)^\d+ \S \S$" result))))
                                     )))))] ;;NOTE: SEE NOTE IN INTRO
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors))))))
 
 (defn get-string-differences-train-and-test
   "Returns the train and test cases."
@@ -211,6 +211,7 @@
 (def argmap
   {:error-function (make-string-differences-error-function-from-cases (first string-differences-train-and-test-cases)
                                                                       (second string-differences-train-and-test-cases))
+   :training-cases (first string-differences-train-and-test-cases)
    :atom-generators string-differences-atom-generators
    :max-points 4000
    :max-genome-size-in-initial-program 500
