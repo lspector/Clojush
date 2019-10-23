@@ -87,9 +87,9 @@
                          (if (= printed-result (str out-int))
                            0
                            1))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors))))))
 
 (defn get-median-train-and-test
   "Returns the train and test cases."
