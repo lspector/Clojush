@@ -149,7 +149,7 @@
   {:error-function (make-for-loop-index-error-function-from-cases (first for-loop-index-train-and-test-cases)
                                                                   (second for-loop-index-train-and-test-cases))
    :atom-generators loop-atom-generators
-   :max-points 600
+   :max-points 1200
    :max-genome-size-in-initial-program 150
    :evalpush-limit 600
    :population-size 1000

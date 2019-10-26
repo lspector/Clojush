@@ -56,7 +56,6 @@
 ;; The data file, which must be in src/clojush/problems/classification/data/:
 (def data-file 
   ;"GAMETES_Epistasis_2-Way_20atts_0.4H_EDM-1_1.txt"
-  ;"a_5000s_2000her_0.1__maf_0.2_EDM-1_01.txt"
   ;"xor_2_a_20s_1600_EDM-1_01.txt"
   "xor_3_a_20s_1600_EDM-1_01.txt"
   ;"xor_4_a_20s_1600_EDM-1_01.txt"
@@ -226,6 +225,6 @@
    ;:autoconstructive-genome-instructions :uniform
    ;:autoconstructive-diversification-test :three-gens-size-and-instruction
    ;:autoconstructive-si-children 2
-   ;:autoconstructive-entropy 0.1
+   ;:autoconstructive-decay 0.1
    })
 

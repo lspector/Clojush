@@ -10,8 +10,9 @@
 
 (def push-types '(:exec :code :integer :float :boolean :char :string :zip
                   :vector_integer :vector_float :vector_boolean :vector_string
-                  :input :output :auxiliary :tag :return :environment :genome))
-;; The list of stacks used by the Push interpreter
+                  :input :output :auxiliary :tag :return :environment :genome
+                  :gtm))
+;; The list of stacks and non-stack storage types used by the Push interpreter
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -79,9 +80,20 @@
 (def selection-counts (atom {})) 
 ;; Used to store the number of selections for each individual, indexed by UUIDs
 
+(def preselection-counts (atom []))
+;; Used to store the numbers of individuals that survive preselection in each
+;; selection event in the current generation. Does not take into account
+;; one-individual-per-error-vector-for-lexicase.
+
 (def min-age (atom 0))
 (def max-age (atom 0))
 ;; Used for age-mediated-parent-selection
+
+(def delay-archive (atom []))
+;; used for selection-delay
+
+(def frontier (atom []))
+;; used for preserve-frontier
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The globals below may be reset by arguments to pushgp
@@ -138,3 +150,13 @@
 
 (def global-parent-selection (atom :lexicase)) 
 ;; The type of parent selection used
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; This atom is used to convey information to clojush.pushgp.visualize, but it cannot be 
+;; defined there because it must always be available to clojush.pushgp.report, and we don't
+;; want to :require clojush.pushgp.visualize there unless :visualize is true, since doing so
+;; will require quil.core, which will launch the quil sketch.
+
+(def viz-data-atom (atom {}))
+
+

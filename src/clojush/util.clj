@@ -20,7 +20,6 @@
      :vector_string (fn [thing] (and (vector? thing) (string? (first thing))))
      :vector_boolean (fn [thing] (and (vector? thing) (or (= (first thing) true) (= (first thing) false))))}))
      
-
 (defn recognize-literal
   "If thing is a literal, return its type -- otherwise return false."
   [thing]
@@ -44,10 +43,25 @@
           (fn [node children] (with-meta children (meta node)))
           root))
 
-(defn ensure-list ;; really make-list-if-not-seq, but close enough for here
+(defn list-concat
+  "Returns a (non-lazy) list of the items that result from calling concat
+  on args."
+  [& args]
+  (apply list (apply concat args)))
+
+(defn not-lazy
+  "Returns lst if it is not a seq, or a non-lazy list of lst if it is."
+  [lst]
+  (if (seq? lst)
+    (apply list lst)
+    lst))
+
+(defn ensure-list
+  "Returns a non-lazy list of the contents of thing if thing is a seq.
+  Returns a list containing thing otherwise."
   [thing]
   (if (seq? thing)
-    thing
+    (not-lazy thing)
     (list thing)))
 
 (defn print-return
@@ -96,8 +110,8 @@
                  total)
           ;;
           :else 
-          (recur (concat (first remaining) 
-                         (rest remaining)) 
+          (recur (list-concat (first remaining) 
+                              (rest remaining)) 
                  (inc total)))))
 
 (defn count-points
@@ -117,8 +131,8 @@
                  (inc total))
           ;;
           :else 
-          (recur (concat (first remaining) 
-                         (rest remaining)) 
+          (recur (list-concat (first remaining) 
+                              (rest remaining)) 
                  (inc total)))))
 
 (defn code-at-point 
@@ -232,23 +246,23 @@
    Recursion in implementation could be improved."
   [lst]
   (cons lst (if (seq? lst)
-              (apply concat (doall (map all-items lst)))
+              (apply list-concat (doall (map all-items lst)))
               ())))
 
-(defn not-lazy
-  "Returns lst if it is not a list, or a non-lazy version of lst if it is."
-  [lst]
-  (if (seq? lst)
-    (apply list lst)
-    lst))
+(defn remove-one
+  "Returns sequence s without the first instance of item."
+  [item s]
+  (let [[without-item with-item] (split-with #(not (= item %)) s)]
+    (concat without-item (rest with-item))))
 
 (defn list-to-open-close-sequence
   [lst]
   (if (seq? lst)
-    (flatten (prewalkseq #(if (seq? %) (concat '(:open) % '(:close)) %) lst))
+    (flatten (prewalkseq #(if (seq? %) (list-concat '(:open) % '(:close)) %) lst))
     lst))
 
 ;(list-to-open-close-sequence '(1 2 (a b (c) ((d)) e)))
+
 
 (defn open-close-sequence-to-list
   [sequence]
@@ -258,16 +272,21 @@
                     closes (count (filter #(= :close %) sequence))]
                 (assert (= opens closes)
                         (str "open-close sequence must have equal numbers of :open and :close; this one does not:\n" sequence))
-                (let [s (str sequence)
+                (let [s (str (not-lazy sequence))
                       l (read-string (string/replace (string/replace s ":open" " ( ") ":close" " ) "))]
-                  ;; there'll be an extra ( ) around l, which we keep if the number of read things is >1
-                  (if (= (count l) 1)
+                  ;; there'll be an extra ( ) around l, which we remove if the number of things is =1 and that thing is a sequence
+                  (if (and (= (count l) 1)
+                           (seq? (first l)))
                     (first l)
                     l)))))
 
 ;(open-close-sequence-to-list '(:open 1 2 :open a b :open c :close :open :open d :close :close e :close :close))
 ;(open-close-sequence-to-list '(:open 1 :close :open 2 :close))
 ;(open-close-sequence-to-list '(:open :open 1 :close :open 2 :close :close))
+;(open-close-sequence-to-list '(1 :open 2 3 :close 4))
+;(open-close-sequence-to-list '(1))
+;(open-close-sequence-to-list '(:close 5 :open))
+;(open-close-sequence-to-list (list-to-open-close-sequence '(5)))
 
 (defn test-and-train-data-from-domains
   "Takes a list of domains and creates a set of (random) train inputs and a set of test
@@ -275,20 +294,25 @@
    be considered a solution unless it is perfect on both the train and test
    cases."
   [domains]
-  (apply mapv concat (map (fn [[input-set n-train n-test]]
-                            (if (fn? input-set)
-                              (vector (repeatedly n-train input-set)
-                                      (repeatedly n-test input-set))
-                              (let [shuffled-inputs (shuffle input-set)
-                                    train-inputs (if (= n-train (count input-set))
-                                                   input-set ; NOTE: input-set is not shuffled if it is the same size as n-train
-                                                   (take n-train shuffled-inputs))
-                                    test-inputs (if (= n-test (count input-set))
-                                                   input-set ; NOTE: input-set is not shuffled if it is the same size as n-test
-                                                   (drop n-train shuffled-inputs))]
-                                (assert (= (+ n-train n-test) (count input-set)) "Sizes of train and test sets don't add up to the size of the input set.")
-                                (vector train-inputs test-inputs))))
-                          domains)))
+  (vec
+    (apply 
+      mapv 
+      concat 
+      (map (fn [[input-set n-train n-test]]
+             (if (fn? input-set)
+               (vector (repeatedly n-train input-set)
+                       (repeatedly n-test input-set))
+               (let [shuffled-inputs (shuffle input-set)
+                     train-inputs (if (= n-train (count input-set))
+                                    input-set ; NOTE: input-set is not shuffled if the same size as n-train
+                                    (take n-train shuffled-inputs))
+                     test-inputs (if (= n-test (count input-set))
+                                   input-set ; NOTE: input-set is not shuffled if the same size as n-test
+                                   (drop n-train shuffled-inputs))]
+                 (assert (= (+ n-train n-test) (count input-set)) 
+                         "Sizes of train and test sets don't add up to the size of the input set.")
+                 (vector train-inputs test-inputs))))
+           domains))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; from https://github.com/KushalP/mailcheck-clj/blob/master/src/mailcheck/levenshtein.clj
@@ -349,7 +373,7 @@
 (defn sequence-similarity
   [sequence1 sequence2]
   "Returns a number between 0 and 1, indicating how similar the sequences are as a normalized,
-  inverted Levenshtein distance, it 1 indicating identity and 0 indicating no similarity."
+  inverted Levenshtein distance, with 1 indicating identity and 0 indicating no similarity."
   (if (and (empty? sequence1) (empty? sequence2))
     1
     (let [dist (levenshtein-distance sequence1 sequence2)
@@ -371,7 +395,7 @@
 (defn mean
   [coll]
   "https://github.com/clojure-cookbook/clojure-cookbook/blob/master/01_primitive-data/1-20_simple-statistics.asciidoc"
-  (let [sum (apply + coll)
+  (let [sum (apply +' coll)
         count (count coll)]
     (if (pos? count)
       (/ sum count)

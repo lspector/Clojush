@@ -1,0 +1,216 @@
+Command line args: clojush.problems.integer-regression.nth-prime :use-single-thread true :max-generations 0 :population-size 5 :csv-log-filename "xxx" :edn-log-filename "xxx" :json-log-filename "xxx" :total-error-method :ifs :normalization :divide-by-max-error
+######################################
+Parameters set at command line or in problem file argmap; may or may not be default:
+atom-generators = (0 #object[xxx] #object[xxx] in1 integer_sub integer_inc boolean_stackdepth boolean_pop exec_yankdup integer_yankdup boolean_swap exec_shove exec_y boolean_yank integer_eq integer_mult boolean_or boolean_empty exec_do*while exec_dup_items boolean_dup_items exec_empty exec_rot exec_dup boolean_flush exec_k boolean_xor integer_gte boolean_dup_times boolean_shove boolean_rot integer_div integer_lte integer_mod exec_do*count integer_rot integer_add integer_shove integer_max integer_stackdepth integer_dup_times boolean_dup exec_dup_times exec_eq integer_yank exec_while integer_min exec_swap integer_dup_items exec_do*range exec_if boolean_invert_first_then_and integer_fromboolean boolean_frominteger boolean_eq integer_flush integer_gt boolean_not exec_do*times exec_pop exec_s integer_lt exec_noop integer_swap integer_dup exec_yank integer_pop integer_empty integer_dec exec_stackdepth boolean_and exec_flush exec_when boolean_invert_second_then_and boolean_yankdup)
+csv-log-filename = xxx
+edn-log-filename = xxx
+error-function = #object[xxx]
+evalpush-limit = 2000
+genetic-operator-probabilities = {:alternation 0.2, :uniform-mutation 0.2, :uniform-close-mutation 0.1, [:alternation :uniform-mutation] 0.5}
+json-log-filename = xxx
+max-generations = 0
+max-genome-size-in-initial-program = 100
+max-points = 2000
+normalization = :divide-by-max-error
+population-size = 5
+total-error-method = :ifs
+use-single-thread = true
+######################################
+Registered instructions: #{code_atom genome_uniform_tag_mutation code_car print_newline integer_sub integer_inc boolean_stackdepth return_exec_pop zip_dup_items integer_tag_string_instruction vector_integer_eq autoconstructive_integer_rand boolean_pop genome_close_inc string_fromchar vector_string_shove zip_yankdup genome_new vector_float_yankdup exec_yankdup vector_integer_shove integer_yankdup string_flush boolean_swap zip_empty exec_shove vector_boolean_yank code_eq exec_y boolean_yank integer_eq genome_silence string_butlast code_contains string_conjchar code_do*count vector_float_last genome_uniform_instruction_mutation genome_pop string_substring integer_mult vector_string_dup_times code_length vector_integer_dup boolean_or code_position boolean_empty zip_fromcode print_vector_string vector_boolean_swap return_frominteger char_dup_items vector_float_pushall char_iswhitespace code_cdr exec_do*vector_integer integer_rand vector_string_replacefirst string_first vector_boolean_first exec_do*while exec_string_iterate string_indexofchar vector_float_replace integer_fromstring code_list code_swap char_frominteger genome_gene_randomize vector_integer_emptyvector vector_string_eq exec_dup_items vector_float_butlast boolean_dup_items genome_uniform_string_mutation exec_empty zip_end? exec_fromzipnode string_shove vector_boolean_pushall zip_insert_left_fromcode exec_rot integer_tag_integer_instruction vector_string_concat vector_float_indexof genome_instruction_eq code_pop vector_string_subvec vector_integer_swap code_subst char_pop return_string_pop zip_yank exec_dup vector_integer_butlast vector_float_rest vector_string_flush boolean_fromfloat code_fromziprights float_sin boolean_flush char_isdigit float_lte exec_fromziproot vector_integer_empty print_code vector_string_stackdepth string_reverse exec_k vector_integer_yank float_frominteger char_rot vector_integer_dup_times print_char integer_tag_boolean_instruction vector_integer_stackdepth vector_boolean_concat boolean_xor integer_gte genome_yankdup vector_float_shove vector_integer_take boolean_dup_times code_quote string_replacefirst return_fromstring exec_fromziplefts vector_integer_yankdup boolean_shove genome_silent_eq float_lt vector_string_dup vector_string_occurrencesof vector_integer_replace zip_branch? vector_float_reverse float_mod vector_float_subvec integer_tag_code_instruction string_last print_boolean boolean_rot vector_string_rest integer_div vector_float_remove integer_tag_exec_instruction integer_fromfloat integer_lte code_fromzipchildren environment_end vector_integer_rot integer_mod string_concat vector_string_butlast genome_swap code_null exec_do*count vector_float_emptyvector vector_string_yankdup integer_tag_float_instruction integer_rot float_yankdup vector_string_rot zip_replace_fromexec genome_uniform_boolean_mutation vector_string_take vector_float_dup_items integer_add vector_integer_occurrencesof integer_shove string_dup_times genome_dup return_code_pop char_swap integer_max return_fromexec code_wrap genome_genesis return_float_pop code_flush genome_yank zip_shove vector_integer_flush vector_integer_subvec vector_boolean_indexof vector_float_pop char_dup_times genome_uniform_silence_mutation genome_uniform_crossover vector_string_remove vector_integer_contains zip_remove code_append vector_float_eq vector_integer_conj string_eq zip_leftmost code_yankdup code_rot integer_stackdepth float_max vector_boolean_set zip_append_child_fromexec zip_next vector_float_conj zip_fromexec code_dup_times float_dup_items string_take zip_left zip_replace_fromcode char_stackdepth return_fromchar genome_eq vector_integer_replacefirst float_stackdepth code_fromziproot integer_dup_times float_fromchar genome_two_point_crossover genome_uniform_combination_and_deletion float_gt boolean_dup float_fromboolean code_fromzipnode genome_rot vector_float_replacefirst vector_boolean_conj exec_dup_times vector_boolean_dup vector_integer_indexof vector_string_swap exec_eq string_emptystring string_swap integer_yank exec_while float_empty print_vector_boolean integer_min exec_swap genome_rotate integer_fromchar vector_string_yank string_stackdepth code_do*range string_replacechar char_allfromstring vector_integer_rest vector_boolean_length char_yank vector_float_empty code_fromfloat genome_parent2 return_fromcode string_pop code_dup_items float_eq integer_untag_instruction integer_dup_items vector_boolean_empty zip_insert_child_fromexec vector_string_last string_nth code_do* return_zip_pop vector_string_pop zip_rot vector_integer_nth exec_do*range vector_integer_dup_items exec_if char_shove zip_down zip_insert_left_fromexec code_frominteger vector_boolean_remove vector_integer_remove boolean_invert_first_then_and genome_flush print_string integer_fromboolean char_yankdup code_do vector_string_first boolean_frominteger string_setchar vector_integer_last char_isletter genome_gene_dup vector_integer_concat print_integer genome_uniform_float_mutation code_map boolean_eq float_gte return_fromfloat genome_gene_copy string_occurrencesofchar string_replacefirstchar print_float boolean_rand integer_flush float_shove string_replace char_dup float_pop char_eq vector_float_nth vector_string_conj integer_gt vector_float_dup_times return_integer_pop genome_gene_replace float_sub vector_integer_length vector_float_set vector_string_indexof vector_boolean_rest code_dup vector_boolean_shove zip_eq float_min boolean_not float_mult float_fromstring genome_unsilence code_if vector_boolean_dup_items vector_integer_pop vector_boolean_last exec_do*times zip_pop zip_rightmost float_dec vector_float_contains genome_gene_copy_range environment_new exec_do*vector_string code_nthcdr string_empty char_empty exec_pop vector_integer_set autoconstructive_boolean_rand genome_uniform_addition_and_deletion vector_float_rot string_yankdup exec_do*vector_float string_removechar code_extract vector_string_replace vector_float_first genome_parent1 return_tagspace char_flush genome_uniform_integer_mutation vector_float_occurrencesof vector_string_emptyvector float_add code_stackdepth exec_s zip_insert_right_fromexec float_dup integer_tag_char_instruction vector_string_nth zip_stackdepth vector_integer_reverse print_vector_integer char_fromfloat code_do*times code_noop zip_swap code_yank integer_lt vector_boolean_eq genome_stackdepth code_fromziplefts noop_open_paren genome_uniform_deletion vector_boolean_dup_times string_containschar string_yank char_rand zip_flush vector_boolean_rot float_swap exec_fromziprights vector_string_pushall vector_string_set vector_boolean_flush exec_noop code_size vector_boolean_stackdepth vector_integer_pushall vector_boolean_reverse integer_swap genome_close_eq string_split vector_boolean_contains string_fromboolean return_boolean_pop vector_float_dup vector_boolean_replace vector_string_dup_items integer_dup vector_boolean_nth vector_string_length genome_uniform_addition string_rest zip_insert_child_fromcode float_tan string_rot string_rand exec_yank string_parse_to_chars integer_pop integer_empty vector_float_flush vector_float_yank noop_delete_prev_paren_pair print_exec zip_append_child_fromcode genome_gene_delete float_dup_times code_empty float_inc zip_right vector_float_length float_rand genome_uniform_close_mutation integer_dec string_contains return_fromboolean vector_float_concat vector_float_stackdepth exec_do*vector_boolean vector_integer_first genome_shove code_rand print_vector_float float_rot return_char_pop vector_string_contains vector_boolean_occurrencesof string_dup_items genome_empty zip_prev genome_toggle_silent vector_string_reverse zip_dup code_cons code_member exec_stackdepth float_flush boolean_and integer_tagged_instruction vector_boolean_butlast string_length float_cos string_frominteger exec_flush vector_string_empty exec_when vector_float_swap genome_close_dec code_insert vector_boolean_pop float_div zip_insert_right_fromcode code_fromboolean vector_boolean_take code_shove environment_begin vector_float_take boolean_invert_second_then_and code_container code_nth vector_boolean_subvec float_yank zip_up vector_boolean_emptyvector vector_boolean_replacefirst genome_alternation zip_dup_times string_fromfloat vector_boolean_yankdup string_dup boolean_yankdup exec_fromzipchildren}
+Starting PushGP run.
+Clojush version = xxx
+GitHub link = xxx
+age-combining-function = :average
+age-mediated-parent-selection = false
+alignment-deviation = 10
+alternation-rate = 0.01
+atom-generators = (0 #object[xxx] #object[xxx] in1 integer_sub integer_inc boolean_stackdepth boolean_pop exec_yankdup integer_yankdup boolean_swap exec_shove exec_y boolean_yank integer_eq integer_mult boolean_or boolean_empty exec_do*while exec_dup_items boolean_dup_items exec_empty exec_rot exec_dup boolean_flush exec_k boolean_xor integer_gte boolean_dup_times boolean_shove boolean_rot integer_div integer_lte integer_mod exec_do*count integer_rot integer_add integer_shove integer_max integer_stackdepth integer_dup_times boolean_dup exec_dup_times exec_eq integer_yank exec_while integer_min exec_swap integer_dup_items exec_do*range exec_if boolean_invert_first_then_and integer_fromboolean boolean_frominteger boolean_eq integer_flush integer_gt boolean_not exec_do*times exec_pop exec_s integer_lt exec_noop integer_swap integer_dup exec_yank integer_pop integer_empty integer_dec exec_stackdepth boolean_and exec_flush exec_when boolean_invert_second_then_and boolean_yankdup)
+autoconstructive = false
+autoconstructive-boolean-rand-enrichment = 0
+autoconstructive-clone-probability = 0.0
+autoconstructive-diffmeans-children = 10
+autoconstructive-diversification-test = :gecco2016
+autoconstructive-entropy = 0.0
+autoconstructive-fotd = false
+autoconstructive-genome-instructions = :all
+autoconstructive-improve-or-diversify = false
+autoconstructive-integer-rand-enrichment = 0
+autoconstructive-si-children = 8
+close-increment-rate = 0.2
+close-parens-probabilities = [0.772 0.206 0.021 0.001]
+csv-columns = [:generation :location :total-error :push-program-size]
+csv-log-filename = xxx
+decimation-ratio = 1
+decimation-tournament-size = 2
+edn-additional-keys = [:generation :location]
+edn-keys = [:uuid :parent-uuids :genetic-operators :program :genome :total-error :errors]
+edn-log-filename = xxx
+epigenetic-markers = [:close]
+epsilon-lexicase-epsilon = nil
+epsilon-lexicase-probability = 1
+error-function = #object[xxx]
+error-threshold = 0
+evalpush-limit = 2000
+evalpush-time-limit = 0
+exit-on-success = true
+final-report-simplifications = 1000
+genetic-operator-probabilities = {:alternation 0.2, :uniform-mutation 0.2, :uniform-close-mutation 0.1, [:alternation :uniform-mutation] 0.5}
+individuals-for-novelty-archive-per-generation = 0
+json-log-filename = xxx
+json-log-program-strings = false
+label = nil
+lexicase-leakage = 0.1
+lexicase-slippage = 0
+log-fitnesses-for-all-cases = false
+maintain-ancestors = false
+max-error = 1000
+max-generations = 0
+max-genome-size-in-initial-program = 100
+max-point-evaluations = 1.0E101
+max-points = 2000
+meta-error-categories = []
+normalization = :divide-by-max-error
+novelty-distance-metric = :euclidean
+novelty-number-of-neighbors-k = 25
+parent-reversion-probability = 1.0
+parent-selection = :lexicase
+pop-when-tagging = true
+population-size = 5
+print-ancestors-of-solution = false
+print-cosmos-data = false
+print-csv-logs = false
+print-edn-logs = false
+print-error-frequencies-by-case = false
+print-errors = true
+print-history = false
+print-homology-data = false
+print-json-logs = false
+print-selection-counts = false
+print-timings = false
+problem-specific-initial-report = #object[xxx]
+problem-specific-report = #object[xxx]
+random-screen = false
+random-seed = 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+record-host = nil
+replace-child-that-exceeds-size-limit-with = :random
+report-simplifications = 100
+return-simplified-on-failure = false
+reuse-errors = true
+self-mate-avoidance-limit = 0
+silent-instruction-probability = 0.2
+tag-limit = 10000
+top-level-pop-code = false
+top-level-push-code = false
+total-error-method = :ifs
+tournament-size = 7
+track-instruction-maps = false
+uniform-addition-and-deletion-rate = 0.01
+uniform-addition-rate = 0.01
+uniform-close-mutation-rate = 0.1
+uniform-combination-and-deletion-rate = 0.01
+uniform-deletion-rate = 0.01
+uniform-mutation-constant-tweak-rate = 0.5
+uniform-mutation-float-gaussian-standard-deviation = 1.0
+uniform-mutation-int-gaussian-standard-deviation = 1
+uniform-mutation-rate = 0.01
+uniform-mutation-string-char-change-rate = 0.1
+uniform-mutation-tag-gaussian-standard-deviation = 100
+uniform-silence-mutation-rate = 0.1
+use-single-thread = true
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Generating initial population...
+Processing generation: 0
+Computing errors... Done computing errors.
+
+Calculating implicit fitness sharing errors...
+Implicit fitness sharing reward per test case (lower means population performs worse):
+(1.9969999999999999 1.995 1.991 1.987 1.979 1.975 1.967 1.963 1.955 1.943 1.939 1.927 1.919 1.915 1.907 1.895 1.883 1.879 1.867 1.859)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 0
+--- Lexicase Program with Most Elite Cases Statistics ---
+Lexicase best genome: ({:close 0, :instruction exec_noop} {:close 0, :instruction boolean_dup} {:close 0, :instruction boolean_invert_second_then_and} {:close 0, :instruction exec_yankdup} {:close 0, :instruction integer_empty} {:close 0, :instruction exec_do*count} {:close 0, :instruction integer_eq} {:close 0, :instruction exec_yank} {:close 0, :instruction exec_k} {:close 0, :instruction boolean_yankdup} {:close 0, :instruction integer_yankdup} {:close 1, :instruction exec_stackdepth} {:close 0, :instruction integer_stackdepth} {:close 0, :instruction boolean_not} {:close 0, :instruction integer_sub} {:close 0, :instruction integer_div} {:close 1, :instruction exec_shove} {:close 0, :instruction boolean_rot} {:close 0, :instruction exec_do*count} {:close 0, :instruction integer_pop} {:close 0, :instruction boolean_stackdepth} {:close 0, :instruction exec_do*range} {:close 0, :instruction integer_swap} {:close 0, :instruction exec_yankdup} {:close 1, :instruction integer_rot} {:close 0, :instruction integer_shove} {:close 0, :instruction boolean_yank} {:close 0, :instruction exec_s} {:close 0, :instruction exec_yankdup} {:close 0, :instruction integer_lte} {:close 1, :instruction exec_k} {:close 1, :instruction integer_fromboolean} {:close 1, :instruction integer_mult} {:close 0, :instruction integer_gte} {:close 1, :instruction exec_noop} {:close 0, :instruction integer_lte} {:close 0, :instruction exec_pop} {:close 2, :instruction integer_dec} {:close 1, :instruction exec_yankdup} {:close 0, :instruction integer_min} {:close 1, :instruction integer_inc} {:close 0, :instruction exec_rot} {:close 0, :instruction integer_pop} {:close 0, :instruction integer_pop} {:close 0, :instruction boolean_and} {:close 0, :instruction integer_eq} {:close 0, :instruction boolean_rot} {:close 0, :instruction boolean_xor} {:close 0, :instruction 0} {:close 0, :instruction tagged_268} {:close 0, :instruction exec_dup_items} {:close 0, :instruction integer_lte} {:close 0, :instruction exec_dup_items} {:close 0, :instruction integer_shove} {:close 0, :instruction exec_do*range} {:close 0, :instruction exec_yank} {:close 0, :instruction exec_yankdup} {:close 0, :instruction integer_empty} {:close 0, :instruction boolean_yankdup} {:close 0, :instruction integer_yank} {:close 0, :instruction exec_if} {:close 0, :instruction tagged_747} {:close 0, :instruction tag_integer_475} {:close 1, :instruction 0} {:close 1, :instruction boolean_flush} {:close 0, :instruction integer_inc} {:close 0, :instruction boolean_invert_second_then_and} {:close 0, :instruction exec_pop} {:close 0, :instruction boolean_dup_times} {:close 0, :instruction integer_mult})
+Lexicase best program: (exec_noop boolean_dup boolean_invert_second_then_and exec_yankdup integer_empty exec_do*count (integer_eq exec_yank exec_k (boolean_yankdup integer_yankdup exec_stackdepth) (integer_stackdepth boolean_not integer_sub integer_div exec_shove () boolean_rot exec_do*count (integer_pop boolean_stackdepth exec_do*range (integer_swap exec_yankdup integer_rot) integer_shove boolean_yank exec_s (exec_yankdup integer_lte exec_k () (integer_fromboolean) integer_mult) (integer_gte exec_noop) (integer_lte exec_pop (integer_dec)) exec_yankdup) integer_min integer_inc) exec_rot (integer_pop integer_pop boolean_and integer_eq boolean_rot boolean_xor 0 tagged_268 exec_dup_items integer_lte exec_dup_items integer_shove exec_do*range (exec_yank exec_yankdup integer_empty boolean_yankdup integer_yank exec_if (tagged_747 tag_integer_475 0) (boolean_flush) integer_inc boolean_invert_second_then_and exec_pop (boolean_dup_times integer_mult))) () ()))
+Lexicase best partial simplification: (exec_noop boolean_dup boolean_invert_second_then_and exec_yankdup integer_empty exec_do*count (integer_eq exec_yank exec_k (boolean_yankdup integer_yankdup exec_stackdepth) (integer_stackdepth boolean_not integer_sub integer_div exec_shove () boolean_rot exec_do*count (integer_pop boolean_stackdepth exec_do*range (integer_swap exec_yankdup integer_rot) integer_shove boolean_yank exec_s (exec_yankdup integer_lte exec_k () (integer_fromboolean) integer_mult) (integer_gte exec_noop) (integer_lte exec_pop (integer_dec)) exec_yankdup) integer_min integer_inc) exec_rot (integer_pop integer_pop boolean_and integer_eq boolean_rot boolean_xor 0 tagged_268 exec_dup_items integer_lte exec_dup_items integer_shove exec_do*range (exec_yank exec_yankdup integer_empty boolean_yankdup integer_yank exec_if (tagged_747 tag_integer_475 0) (boolean_flush) integer_inc boolean_invert_second_then_and exec_pop (boolean_dup_times integer_mult))) () ()))
+Lexicase best errors: [0.001 0.002 0.004 0.006 0.01 0.012 0.016 0.018 0.022 0.028 0.03 0.036 0.04 0.042 0.046 0.052 0.058 0.06 0.066 0.07]
+Lexicase best number of elite cases: 20
+Lexicase best total error: 619
+Lexicase best mean error: 30.95
+Lexicase best size: 90
+Percent parens: 0.222
+--- Lexicase Program with Most Zero Cases Statistics ---
+Zero cases best genome: ({:close 1, :instruction integer_min} {:close 2, :instruction exec_eq} {:close 0, :instruction exec_do*range} {:close 0, :instruction integer_mod} {:close 0, :instruction integer_add} {:close 0, :instruction exec_empty} {:close 0, :instruction boolean_empty} {:close 0, :instruction boolean_xor} {:close 1, :instruction integer_rot} {:close 0, :instruction exec_s} {:close 0, :instruction exec_pop} {:close 0, :instruction integer_inc} {:close 0, :instruction exec_empty} {:close 0, :instruction boolean_rot} {:close 1, :instruction integer_rot} {:close 0, :instruction exec_dup_items} {:close 0, :instruction exec_flush} {:close 0, :instruction integer_dup_items})
+Zero cases best program: (integer_min exec_eq exec_do*range (integer_mod integer_add exec_empty boolean_empty boolean_xor integer_rot) exec_s (exec_pop (integer_inc exec_empty boolean_rot integer_rot) exec_dup_items exec_flush integer_dup_items) () ())
+Zero cases best partial simplification: (integer_min exec_eq exec_do*range (integer_mod integer_add exec_empty boolean_empty boolean_xor integer_rot) exec_s (exec_pop (integer_inc exec_empty boolean_rot integer_rot) exec_dup_items exec_flush integer_dup_items) () ())
+Zero cases best errors: [1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0]
+Zero cases best number of elite cases: 0
+Zero cases best number of zero cases: 0
+Zero cases best total error: 20000
+Zero cases best mean error: 1000.0
+Zero cases best size: 24
+Percent parens: 0.250
+--- Lexicase Population Statistics ---
+Count of elite individuals by case: (1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)
+Population mean number of elite cases: 4.00
+Count of perfect (error zero) individuals by case: (0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+Population mean number of perfect (error zero) cases: 0.00
+--- Program with Best Implicit Fitness Sharing Error Statistics ---
+IFS best genome: ({:close 0, :instruction exec_noop} {:close 0, :instruction boolean_dup} {:close 0, :instruction boolean_invert_second_then_and} {:close 0, :instruction exec_yankdup} {:close 0, :instruction integer_empty} {:close 0, :instruction exec_do*count} {:close 0, :instruction integer_eq} {:close 0, :instruction exec_yank} {:close 0, :instruction exec_k} {:close 0, :instruction boolean_yankdup} {:close 0, :instruction integer_yankdup} {:close 1, :instruction exec_stackdepth} {:close 0, :instruction integer_stackdepth} {:close 0, :instruction boolean_not} {:close 0, :instruction integer_sub} {:close 0, :instruction integer_div} {:close 1, :instruction exec_shove} {:close 0, :instruction boolean_rot} {:close 0, :instruction exec_do*count} {:close 0, :instruction integer_pop} {:close 0, :instruction boolean_stackdepth} {:close 0, :instruction exec_do*range} {:close 0, :instruction integer_swap} {:close 0, :instruction exec_yankdup} {:close 1, :instruction integer_rot} {:close 0, :instruction integer_shove} {:close 0, :instruction boolean_yank} {:close 0, :instruction exec_s} {:close 0, :instruction exec_yankdup} {:close 0, :instruction integer_lte} {:close 1, :instruction exec_k} {:close 1, :instruction integer_fromboolean} {:close 1, :instruction integer_mult} {:close 0, :instruction integer_gte} {:close 1, :instruction exec_noop} {:close 0, :instruction integer_lte} {:close 0, :instruction exec_pop} {:close 2, :instruction integer_dec} {:close 1, :instruction exec_yankdup} {:close 0, :instruction integer_min} {:close 1, :instruction integer_inc} {:close 0, :instruction exec_rot} {:close 0, :instruction integer_pop} {:close 0, :instruction integer_pop} {:close 0, :instruction boolean_and} {:close 0, :instruction integer_eq} {:close 0, :instruction boolean_rot} {:close 0, :instruction boolean_xor} {:close 0, :instruction 0} {:close 0, :instruction tagged_268} {:close 0, :instruction exec_dup_items} {:close 0, :instruction integer_lte} {:close 0, :instruction exec_dup_items} {:close 0, :instruction integer_shove} {:close 0, :instruction exec_do*range} {:close 0, :instruction exec_yank} {:close 0, :instruction exec_yankdup} {:close 0, :instruction integer_empty} {:close 0, :instruction boolean_yankdup} {:close 0, :instruction integer_yank} {:close 0, :instruction exec_if} {:close 0, :instruction tagged_747} {:close 0, :instruction tag_integer_475} {:close 1, :instruction 0} {:close 1, :instruction boolean_flush} {:close 0, :instruction integer_inc} {:close 0, :instruction boolean_invert_second_then_and} {:close 0, :instruction exec_pop} {:close 0, :instruction boolean_dup_times} {:close 0, :instruction integer_mult})
+IFS best program: (exec_noop boolean_dup boolean_invert_second_then_and exec_yankdup integer_empty exec_do*count (integer_eq exec_yank exec_k (boolean_yankdup integer_yankdup exec_stackdepth) (integer_stackdepth boolean_not integer_sub integer_div exec_shove () boolean_rot exec_do*count (integer_pop boolean_stackdepth exec_do*range (integer_swap exec_yankdup integer_rot) integer_shove boolean_yank exec_s (exec_yankdup integer_lte exec_k () (integer_fromboolean) integer_mult) (integer_gte exec_noop) (integer_lte exec_pop (integer_dec)) exec_yankdup) integer_min integer_inc) exec_rot (integer_pop integer_pop boolean_and integer_eq boolean_rot boolean_xor 0 tagged_268 exec_dup_items integer_lte exec_dup_items integer_shove exec_do*range (exec_yank exec_yankdup integer_empty boolean_yankdup integer_yank exec_if (tagged_747 tag_integer_475 0) (boolean_flush) integer_inc boolean_invert_second_then_and exec_pop (boolean_dup_times integer_mult))) () ()))
+IFS best errors: [0.001 0.002 0.004 0.006 0.01 0.012 0.016 0.018 0.022 0.028 0.03 0.036 0.04 0.042 0.046 0.052 0.058 0.06 0.066 0.07]
+IFS best total error: 619
+IFS best mean error: 30.95
+IFS best IFS error: 0.09994837653683436
+IFS best size: 90
+IFS best percent parens: 0.222
+--- Best Program (based on total-error) Statistics ---
+Best genome: ({:close 0, :instruction exec_noop} {:close 0, :instruction boolean_dup} {:close 0, :instruction boolean_invert_second_then_and} {:close 0, :instruction exec_yankdup} {:close 0, :instruction integer_empty} {:close 0, :instruction exec_do*count} {:close 0, :instruction integer_eq} {:close 0, :instruction exec_yank} {:close 0, :instruction exec_k} {:close 0, :instruction boolean_yankdup} {:close 0, :instruction integer_yankdup} {:close 1, :instruction exec_stackdepth} {:close 0, :instruction integer_stackdepth} {:close 0, :instruction boolean_not} {:close 0, :instruction integer_sub} {:close 0, :instruction integer_div} {:close 1, :instruction exec_shove} {:close 0, :instruction boolean_rot} {:close 0, :instruction exec_do*count} {:close 0, :instruction integer_pop} {:close 0, :instruction boolean_stackdepth} {:close 0, :instruction exec_do*range} {:close 0, :instruction integer_swap} {:close 0, :instruction exec_yankdup} {:close 1, :instruction integer_rot} {:close 0, :instruction integer_shove} {:close 0, :instruction boolean_yank} {:close 0, :instruction exec_s} {:close 0, :instruction exec_yankdup} {:close 0, :instruction integer_lte} {:close 1, :instruction exec_k} {:close 1, :instruction integer_fromboolean} {:close 1, :instruction integer_mult} {:close 0, :instruction integer_gte} {:close 1, :instruction exec_noop} {:close 0, :instruction integer_lte} {:close 0, :instruction exec_pop} {:close 2, :instruction integer_dec} {:close 1, :instruction exec_yankdup} {:close 0, :instruction integer_min} {:close 1, :instruction integer_inc} {:close 0, :instruction exec_rot} {:close 0, :instruction integer_pop} {:close 0, :instruction integer_pop} {:close 0, :instruction boolean_and} {:close 0, :instruction integer_eq} {:close 0, :instruction boolean_rot} {:close 0, :instruction boolean_xor} {:close 0, :instruction 0} {:close 0, :instruction tagged_268} {:close 0, :instruction exec_dup_items} {:close 0, :instruction integer_lte} {:close 0, :instruction exec_dup_items} {:close 0, :instruction integer_shove} {:close 0, :instruction exec_do*range} {:close 0, :instruction exec_yank} {:close 0, :instruction exec_yankdup} {:close 0, :instruction integer_empty} {:close 0, :instruction boolean_yankdup} {:close 0, :instruction integer_yank} {:close 0, :instruction exec_if} {:close 0, :instruction tagged_747} {:close 0, :instruction tag_integer_475} {:close 1, :instruction 0} {:close 1, :instruction boolean_flush} {:close 0, :instruction integer_inc} {:close 0, :instruction boolean_invert_second_then_and} {:close 0, :instruction exec_pop} {:close 0, :instruction boolean_dup_times} {:close 0, :instruction integer_mult})
+Best program: (exec_noop boolean_dup boolean_invert_second_then_and exec_yankdup integer_empty exec_do*count (integer_eq exec_yank exec_k (boolean_yankdup integer_yankdup exec_stackdepth) (integer_stackdepth boolean_not integer_sub integer_div exec_shove () boolean_rot exec_do*count (integer_pop boolean_stackdepth exec_do*range (integer_swap exec_yankdup integer_rot) integer_shove boolean_yank exec_s (exec_yankdup integer_lte exec_k () (integer_fromboolean) integer_mult) (integer_gte exec_noop) (integer_lte exec_pop (integer_dec)) exec_yankdup) integer_min integer_inc) exec_rot (integer_pop integer_pop boolean_and integer_eq boolean_rot boolean_xor 0 tagged_268 exec_dup_items integer_lte exec_dup_items integer_shove exec_do*range (exec_yank exec_yankdup integer_empty boolean_yankdup integer_yank exec_if (tagged_747 tag_integer_475 0) (boolean_flush) integer_inc boolean_invert_second_then_and exec_pop (boolean_dup_times integer_mult))) () ()))
+Partial simplification: (exec_noop boolean_dup boolean_invert_second_then_and exec_yankdup integer_empty exec_do*count (integer_eq exec_yank exec_k (boolean_yankdup integer_yankdup exec_stackdepth) (integer_stackdepth boolean_not integer_sub integer_div exec_shove () boolean_rot exec_do*count (integer_pop boolean_stackdepth exec_do*range (integer_swap exec_yankdup integer_rot) integer_shove boolean_yank exec_s (exec_yankdup integer_lte exec_k () (integer_fromboolean) integer_mult) (integer_gte exec_noop) (integer_lte exec_pop (integer_dec)) exec_yankdup) integer_min integer_inc) exec_rot (integer_pop integer_pop boolean_and integer_eq boolean_rot boolean_xor 0 tagged_268 exec_dup_items integer_lte exec_dup_items integer_shove exec_do*range (exec_yank exec_yankdup integer_empty boolean_yankdup integer_yank exec_if (tagged_747 tag_integer_475 0) (boolean_flush) integer_inc boolean_invert_second_then_and exec_pop (boolean_dup_times integer_mult))) () ()))
+Errors: [0.001 0.002 0.004 0.006 0.01 0.012 0.016 0.018 0.022 0.028 0.03 0.036 0.04 0.042 0.046 0.052 0.058 0.06 0.066 0.07]
+Total: 619
+Mean: 30.95
+Normalized error: 0.619
+IFS-error: 0.09994837653683436
+Genome size: 70
+Size: 90
+Percent parens: 0.222
+--- Population Statistics ---
+Average total errors in population: 12251.6
+Median total errors in population: 20000
+Error averages by case: (0.6005999999999999 0.601 0.6018 0.6025999999999999 0.6042 0.605 0.6066 0.6073999999999999 0.6089999999999999 0.6113999999999999 0.6121999999999999 0.6146 0.6162 0.617 0.6185999999999999 0.621 0.6234 0.6242 0.6266 0.6281999999999999)
+Error minima by case: (0.001 0.002 0.004 0.006 0.01 0.012 0.016 0.018 0.022 0.028 0.03 0.036 0.04 0.042 0.046 0.052 0.058 0.06 0.066 0.07)
+Average genome size in population (length): 50.2
+Average program size in population (points): 65.4
+Average percent parens in population: 0.235
+Minimum age in population: 0.0
+Maximum age in population: 0.0
+Average age in population: 0.0
+Median age in population: 0.0
+Minimum grain-size in population: 1.0
+Maximum grain-size in population: 1.0
+Average grain-size in population: 1.0
+Median grain-size in population: 1.0
+--- Population Diversity Statistics ---
+Min copy number of one Plush genome: 1
+Median copy number of one Plush genome: 1
+Max copy number of one Plush genome: 1
+Genome diversity (% unique Plush genomes):	 1.0
+Min copy number of one Push program: 1
+Median copy number of one Push program: 1
+Max copy number of one Push program: 1
+Syntactic diversity (% unique Push programs):	 1.0
+Total error diversity:				 0.6
+Error (vector) diversity:			 0.6
+--- Run Statistics ---
+Number of program evaluations used so far: 5
+Number of point (instruction) evaluations so far: 30562
+--- Timings ---
+Current time: 1xxx milliseconds
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- End of report for generation 0
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+FAILURE

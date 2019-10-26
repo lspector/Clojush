@@ -7,11 +7,11 @@
 
 (defrecord individual [genome program errors behaviors total-error normalized-error weighted-error
                        novelty meta-errors history ancestors uuid parent-uuids genetic-operators
-                       age grain-size])
+                       age grain-size is-random-replacement])
 
 (defn make-individual [& {:keys [genome program errors behaviors total-error normalized-error weighted-error
                                  novelty meta-errors history ancestors uuid parent-uuids
-                                 genetic-operators age grain-size]
+                                 genetic-operators age grain-size is-random-replacement]
                           :or {genome nil
                                program nil
                                errors nil
@@ -28,9 +28,11 @@
                                genetic-operators nil
                                age 0
                                grain-size 1 ; used for random-screen
+                               is-random-replacement false
                                }}]
   (individual. genome program errors behaviors total-error normalized-error weighted-error novelty
-               meta-errors history ancestors uuid parent-uuids genetic-operators age grain-size))
+               meta-errors history ancestors uuid parent-uuids genetic-operators age grain-size
+               is-random-replacement))
 
 (defn printable [thing]
   (letfn [(unlazy [[head & tail]]
@@ -42,10 +44,9 @@
 
 (defn individual-string [i]
   (cons 'individual.
-        (let [k '(:genome :program :errors :behaviors :total-error :normalized-error :weighted-error
-                          :novelty :meta-errors :history :ancestors :uuid :parent-uuids
-                          :genetic-operators :age :grain-size)]
+        (let [k '(:genome :program :errors :behaviors :total-error :normalized-error 
+                          :weighted-error :novelty :meta-errors :history :ancestors :uuid 
+                          :parent-uuids :genetic-operators :age :grain-size 
+                          :is-random-replacement)]
           (interleave k  (map #(printable (get i %)) k)))))
-
-
 

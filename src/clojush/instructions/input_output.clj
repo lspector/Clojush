@@ -50,16 +50,33 @@
 
 (defn handle-input-instruction
   "Allows Push to handle inN instructions, e.g. in2, using things from the input
-   stack. We can tell whether a particular inN instruction is valid if N-1
-   values are on the input stack. Recognizes vectors, simple literals and quoted code."
+  stack. We can tell whether a particular inN instruction is valid if N-1
+  values are on the input stack. Recognizes vectors, simple literals and quoted code."
   [instr state]
-  (let [n (Integer/parseInt (second (first (re-seq #"in(\d+)" (name instr)))))]
-    (if (or (> n (count (:input state)))
-            (< n 1))
-      (throw (Exception. (str "Undefined instruction: " (pr-str instr) "\nNOTE: Likely not same number of items on input stack as input instructions.")))
-      (let [item (stack-ref :input (dec n) state)
-            literal-type (recognize-literal item)]
-        (cond
-          (and (vector? item) (= [] item)) (push-item [] :vector_integer (push-item [] :vector_float (push-item [] :vector_string (push-item [] :vector_boolean state))))
-          (seq? item) (push-item item :exec state)
-          :else (push-item item literal-type state))))))
+  (if (:autoconstructing state)
+    state
+    (let [n (Integer/parseInt (second (first (re-seq #"in(\d+)" (name instr)))))]
+      (if (or (> n (count (:input state)))
+              (< n 1))
+        (throw (Exception. (str "Undefined instruction: " (pr-str instr) 
+                                "\nNOTE: Likely not same number of items on input stack as input instructions.")))
+        (let [item (stack-ref :input (dec n) state)
+              literal-type (recognize-literal item)]
+          (cond
+            (and (vector? item) (= [] item)) 
+            (push-item 
+              [] 
+              :vector_integer (push-item 
+                                [] 
+                                :vector_float (push-item 
+                                                [] 
+                                                :vector_string (push-item 
+                                                                 [] 
+                                                                 :vector_boolean state))))
+            ;
+            (seq? item) 
+            (push-item item :exec state)
+            ;
+            :else 
+            (push-item item literal-type state)))))))
+

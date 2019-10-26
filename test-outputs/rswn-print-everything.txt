@@ -1,0 +1,1744 @@
+Command line args: clojush.problems.software.replace-space-with-newline :json-log-filename "xxx" :log-fitnesses-for-all-cases true :json-log-program-strings true :print-history true :print-error-frequencies-by-case true :use-single-thread true :print-timings true :print-errors false :print-edn-logs true :max-generations 0 :edn-log-filename "xxx" :print-homology-data true :csv-log-filename "xxx" :maintain-ancestors true :print-csv-logs true :print-cosmos-data true :csv-columns [:generation :location :parent-uuids :genetic-operators :push-program-size :plush-genome-size :push-program :plush-genome :total-error :test-case-errors] :population-size 5 :print-json-logs true :edn-additional-keys [:generation :location :push-program-size :plush-genome-size]
+######################################
+Parameters set at command line or in problem file argmap; may or may not be default:
+alignment-deviation = 10
+alternation-rate = 0.01
+atom-generators = (  
+ #object[xxx] #object[xxx] #object[xxx] #object[xxx] in1 print_newline integer_sub integer_inc boolean_stackdepth boolean_pop string_fromchar exec_yankdup integer_yankdup string_flush boolean_swap exec_shove exec_y boolean_yank integer_eq string_butlast string_conjchar string_substring integer_mult boolean_or boolean_empty char_dup_items char_iswhitespace string_first exec_do*while exec_string_iterate string_indexofchar integer_fromstring char_frominteger exec_dup_items boolean_dup_items exec_empty string_shove exec_rot char_pop exec_dup boolean_flush char_isdigit string_reverse exec_k char_rot print_char boolean_xor integer_gte boolean_dup_times string_replacefirst boolean_shove string_last print_boolean boolean_rot integer_div integer_lte integer_mod string_concat exec_do*count integer_rot integer_add integer_shove string_dup_times char_swap integer_max char_dup_times string_eq integer_stackdepth string_take char_stackdepth integer_dup_times boolean_dup exec_dup_times exec_eq string_emptystring string_swap integer_yank exec_while integer_min exec_swap integer_fromchar string_stackdepth string_replacechar char_allfromstring char_yank string_pop integer_dup_items string_nth exec_do*range exec_if char_shove boolean_invert_first_then_and print_string integer_fromboolean char_yankdup boolean_frominteger string_setchar char_isletter print_integer boolean_eq string_occurrencesofchar string_replacefirstchar integer_flush string_replace char_dup char_eq integer_gt boolean_not exec_do*times string_empty char_empty exec_pop string_yankdup string_removechar char_flush exec_s integer_lt string_containschar string_yank exec_noop integer_swap string_split string_fromboolean integer_dup string_rest string_rot exec_yank string_parse_to_chars integer_pop integer_empty print_exec integer_dec string_contains string_dup_items exec_stackdepth boolean_and string_length string_frominteger exec_flush exec_when boolean_invert_second_then_and string_dup boolean_yankdup)
+csv-columns = [:generation :location :parent-uuids :genetic-operators :push-program-size :plush-genome-size :push-program :plush-genome :total-error :test-case-errors]
+csv-log-filename = xxx
+edn-additional-keys = [:generation :location :push-program-size :plush-genome-size]
+edn-log-filename = xxx
+error-function = #object[xxx]
+evalpush-limit = 1600
+final-report-simplifications = 5000
+genetic-operator-probabilities = {:alternation 0.2, :uniform-mutation 0.2, :uniform-close-mutation 0.1, [:alternation :uniform-mutation] 0.5}
+json-log-filename = xxx
+json-log-program-strings = true
+log-fitnesses-for-all-cases = true
+maintain-ancestors = true
+max-error = 5000
+max-generations = 0
+max-genome-size-in-initial-program = 400
+max-points = 3200
+parent-selection = :lexicase
+population-size = 5
+print-cosmos-data = true
+print-csv-logs = true
+print-edn-logs = true
+print-error-frequencies-by-case = true
+print-errors = false
+print-history = true
+print-homology-data = true
+print-json-logs = true
+print-timings = true
+problem-specific-initial-report = #object[xxx]
+problem-specific-report = #object[xxx]
+report-simplifications = 0
+uniform-mutation-rate = 0.01
+use-single-thread = true
+######################################
+Train and test cases:
+Train Case:   0 | Input/Output: ["" ["" 0]]
+Train Case:   1 | Input/Output: ["A" ["A" 1]]
+Train Case:   2 | Input/Output: ["*" ["*" 1]]
+Train Case:   3 | Input/Output: [" " ["\n" 0]]
+Train Case:   4 | Input/Output: ["s" ["s" 1]]
+Train Case:   5 | Input/Output: ["B " ["B\n" 1]]
+Train Case:   6 | Input/Output: ["  " ["\n\n" 0]]
+Train Case:   7 | Input/Output: [" D" ["\nD" 1]]
+Train Case:   8 | Input/Output: ["ef" ["ef" 2]]
+Train Case:   9 | Input/Output: ["!!" ["!!" 2]]
+Train Case:  10 | Input/Output: ["2o" ["2o" 2]]
+Train Case:  11 | Input/Output: ["{I" ["{I" 2]]
+Train Case:  12 | Input/Output: [" F " ["\nF\n" 1]]
+Train Case:  13 | Input/Output: ["T L" ["T\nL" 2]]
+Train Case:  14 | Input/Output: ["4ps" ["4ps" 3]]
+Train Case:  15 | Input/Output: ["q  " ["q\n\n" 1]]
+Train Case:  16 | Input/Output: ["   " ["\n\n\n" 0]]
+Train Case:  17 | Input/Output: ["  e" ["\n\ne" 1]]
+Train Case:  18 | Input/Output: ["hi " ["hi\n" 2]]
+Train Case:  19 | Input/Output: ["@ %" ["@\n%" 2]]
+Train Case:  20 | Input/Output: [" &u" ["\n&u" 2]]
+Train Case:  21 | Input/Output: ["]a$" ["]a$" 3]]
+Train Case:  22 | Input/Output: ["`#w" ["`#w" 3]]
+Train Case:  23 | Input/Output: [" uE " ["\nuE\n" 2]]
+Train Case:  24 | Input/Output: ["  $  " ["\n\n$\n\n" 1]]
+Train Case:  25 | Input/Output: ["#!Dom" ["#!Dom" 5]]
+Train Case:  26 | Input/Output: ["<BDHx" ["<BDHx" 5]]
+Train Case:  27 | Input/Output: ["}iGKk" ["}iGKk" 5]]
+Train Case:  28 | Input/Output: ["G|qdz" ["G|qdz" 5]]
+Train Case:  29 | Input/Output: ["KU9  W" ["KU9\n\nW" 4]]
+Train Case:  30 | Input/Output: ["      9" ["\n\n\n\n\n\n9" 1]]
+Train Case:  31 | Input/Output: ["y+D0V 5" ["y+D0V\n5" 6]]
+Train Case:  32 | Input/Output: ["w`{>] W" ["w`{>]\nW" 6]]
+Train Case:  33 | Input/Output: ["eAt N? " ["eAt\nN?\n" 5]]
+Train Case:  34 | Input/Output: [">13y1 ^" [">13y1\n^" 6]]
+Train Case:  35 | Input/Output: ["{Ad[ 5X" ["{Ad[\n5X" 6]]
+Train Case:  36 | Input/Output: ["w \\=w0VH" ["w\n\\=w0VH" 7]]
+Train Case:  37 | Input/Output: [" S- ':`F" ["\nS-\n':`F" 6]]
+Train Case:  38 | Input/Output: ["\\SOK!]|Q" ["\\SOK!]|Q" 8]]
+Train Case:  39 | Input/Output: ["i q<N\" K" ["i\nq<N\"\nK" 6]]
+Train Case:  40 | Input/Output: ["Y @oh}ONA" ["Y\n@oh}ONA" 8]]
+Train Case:  41 | Input/Output: ["&8Dh =A  " ["&8Dh\n=A\n\n" 6]]
+Train Case:  42 | Input/Output: ["0  .FU-=U" ["0\n\n.FU-=U" 7]]
+Train Case:  43 | Input/Output: ["f @ ZFseB" ["f\n@\nZFseB" 7]]
+Train Case:  44 | Input/Output: ["DN Jfw3<Z" ["DN\nJfw3<Z" 8]]
+Train Case:  45 | Input/Output: ["%O>*  w b" ["%O>*\n\nw\nb" 6]]
+Train Case:  46 | Input/Output: ["  Z,Y~WA7" ["\n\nZ,Y~WA7" 7]]
+Train Case:  47 | Input/Output: ["?H `frX5H7" ["?H\n`frX5H7" 9]]
+Train Case:  48 | Input/Output: ["<F1_y. pp," ["<F1_y.\npp," 9]]
+Train Case:  49 | Input/Output: [" (x( -v  Rc" ["\n(x(\n-v\n\nRc" 7]]
+Train Case:  50 | Input/Output: ["ZP  5=ILZ>Z" ["ZP\n\n5=ILZ>Z" 9]]
+Train Case:  51 | Input/Output: ["9\\:~]#z^) J" ["9\\:~]#z^)\nJ" 10]]
+Train Case:  52 | Input/Output: [" ?) [b)O#^l" ["\n?)\n[b)O#^l" 9]]
+Train Case:  53 | Input/Output: ["jzxO CZ ]#r" ["jzxO\nCZ\n]#r" 9]]
+Train Case:  54 | Input/Output: [" \"7 Zj+U Q+" ["\n\"7\nZj+U\nQ+" 8]]
+Train Case:  55 | Input/Output: ["}D   l1@H7R" ["}D\n\n\nl1@H7R" 8]]
+Train Case:  56 | Input/Output: ["^B\"lN=6cLH " ["^B\"lN=6cLH\n" 10]]
+Train Case:  57 | Input/Output: ["&>SI#3   +6 " ["&>SI#3\n\n\n+6\n" 8]]
+Train Case:  58 | Input/Output: ["3 H   l3`A7," ["3\nH\n\n\nl3`A7," 8]]
+Train Case:  59 | Input/Output: ["tT$4GJSb: c " ["tT$4GJSb:\nc\n" 10]]
+Train Case:  60 | Input/Output: ["i !i !i !i !i" ["i\n!i\n!i\n!i\n!i" 9]]
+Train Case:  61 | Input/Output: ["7a%9\\ @{Mojii8" ["7a%9\\\n@{Mojii8" 13]]
+Train Case:  62 | Input/Output: ["V33j 4[;'  !: " ["V33j\n4[;'\n\n!:\n" 10]]
+Train Case:  63 | Input/Output: [" < r'4%)W x   " ["\n<\nr'4%)W\nx\n\n\n" 8]]
+Train Case:  64 | Input/Output: ["&ionI  ;K fLa " ["&ionI\n\n;K\nfLa\n" 10]]
+Train Case:  65 | Input/Output: ["u+WvJVGGq,E#<5K" ["u+WvJVGGq,E#<5K" 15]]
+Train Case:  66 | Input/Output: ["Ex41cW @r iTD 2" ["Ex41cW\n@r\niTD\n2" 12]]
+Train Case:  67 | Input/Output: ["J.s{  +0V$>m CB" ["J.s{\n\n+0V$>m\nCB" 12]]
+Train Case:  68 | Input/Output: ["_ S? P9\\N^J8HTd" ["_\nS?\nP9\\N^J8HTd" 13]]
+Train Case:  69 | Input/Output: [" z O'6 g%H3A+3r" ["\nz\nO'6\ng%H3A+3r" 12]]
+Train Case:  70 | Input/Output: ["X  }-KC81G47${ " ["X\n\n}-KC81G47${\n" 12]]
+Train Case:  71 | Input/Output: ["] Lz: rsJ[ Lb i" ["]\nLz:\nrsJ[\nLb\ni" 11]]
+Train Case:  72 | Input/Output: ["xiWh c ,Fg Q.)T" ["xiWh\nc\n,Fg\nQ.)T" 12]]
+Train Case:  73 | Input/Output: ["vsl> &(  d + ]~" ["vsl>\n&(\n\nd\n+\n]~" 10]]
+Train Case:  74 | Input/Output: ["%- l~+   Fl;-=cL" ["%-\nl~+\n\n\nFl;-=cL" 12]]
+Train Case:  75 | Input/Output: ["6Y`8h  &l*W B ur" ["6Y`8h\n\n&l*W\nB\nur" 12]]
+Train Case:  76 | Input/Output: [" C1 UlT^g;/ @+ _" ["\nC1\nUlT^g;/\n@+\n_" 12]]
+Train Case:  77 | Input/Output: ["y}fV i 0W    9] 0" ["y}fV\ni\n0W\n\n\n\n9]\n0" 10]]
+Train Case:  78 | Input/Output: ["KYOu []z9sx# 9P +" ["KYOu\n[]z9sx#\n9P\n+" 14]]
+Train Case:  79 | Input/Output: [" !  _1<%WAuY#  ^B" ["\n!\n\n_1<%WAuY#\n\n^B" 12]]
+Train Case:  80 | Input/Output: ["=@Rp/!    $Mh 4o~" ["=@Rp/!\n\n\n\n$Mh\n4o~" 12]]
+Train Case:  81 | Input/Output: [" Ug:.CDe_t,  \\Z,|" ["\nUg:.CDe_t,\n\n\\Z,|" 14]]
+Train Case:  82 | Input/Output: ["$y bC=g@ng < V93CT" ["$y\nbC=g@ng\n<\nV93CT" 15]]
+Train Case:  83 | Input/Output: [" ){3n UE0   ^'xu$ " ["\n){3n\nUE0\n\n\n^'xu$\n" 12]]
+Train Case:  84 | Input/Output: ["5DV%Tx%WDue q 4e !" ["5DV%Tx%WDue\nq\n4e\n!" 15]]
+Train Case:  85 | Input/Output: ["[2A]  Pj]|K 6   Jt" ["[2A]\n\nPj]|K\n6\n\n\nJt" 12]]
+Train Case:  86 | Input/Output: ["ZQ!|I3 B j  fb)nDya" ["ZQ!|I3\nB\nj\n\nfb)nDya" 15]]
+Train Case:  87 | Input/Output: ["| X M>I~ NT jTIMkbL" ["|\nX\nM>I~\nNT\njTIMkbL" 15]]
+Train Case:  88 | Input/Output: ["88888888888888888888" ["88888888888888888888" 20]]
+Train Case:  89 | Input/Output: ["                    " ["\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" 0]]
+Train Case:  90 | Input/Output: ["ssssssssssssssssssss" ["ssssssssssssssssssss" 20]]
+Train Case:  91 | Input/Output: ["1 1 1 1 1 1 1 1 1 1 " ["1\n1\n1\n1\n1\n1\n1\n1\n1\n1\n" 10]]
+Train Case:  92 | Input/Output: [" v v v v v v v v v v" ["\nv\nv\nv\nv\nv\nv\nv\nv\nv\nv" 10]]
+Train Case:  93 | Input/Output: ["Ha Ha Ha Ha Ha Ha Ha" ["Ha\nHa\nHa\nHa\nHa\nHa\nHa" 14]]
+Train Case:  94 | Input/Output: ["x y!x y!x y!x y!x y!" ["x\ny!x\ny!x\ny!x\ny!x\ny!" 15]]
+Train Case:  95 | Input/Output: ["G5G5G5G5G5G5G5G5G5G5" ["G5G5G5G5G5G5G5G5G5G5" 20]]
+Train Case:  96 | Input/Output: [">_=]>_=]>_=]>_=]>_=]" [">_=]>_=]>_=]>_=]>_=]" 20]]
+Train Case:  97 | Input/Output: ["^_^ ^_^ ^_^ ^_^ ^_^ " ["^_^\n^_^\n^_^\n^_^\n^_^\n" 15]]
+Train Case:  98 | Input/Output: ["dKuh{!sQu^DO} M-h#\" " ["dKuh{!sQu^DO}\nM-h#\"\n" 18]]
+Train Case:  99 | Input/Output: ["t$tO/x Q[s H z |JXxN" ["t$tO/x\nQ[s\nH\nz\n|JXxN" 16]]
+Test Case:   0 | Input/Output: [" '" ["\n'" 1]]
+Test Case:   1 | Input/Output: [" F" ["\nF" 1]]
+Test Case:   2 | Input/Output: ["  " ["\n\n" 0]]
+Test Case:   3 | Input/Output: [" ;" ["\n;" 1]]
+Test Case:   4 | Input/Output: ["7 " ["7\n" 1]]
+Test Case:   5 | Input/Output: ["nB" ["nB" 2]]
+Test Case:   6 | Input/Output: ["?q" ["?q" 2]]
+Test Case:   7 | Input/Output: ["jf" ["jf" 2]]
+Test Case:   8 | Input/Output: [": " [":\n" 1]]
+Test Case:   9 | Input/Output: ["e " ["e\n" 1]]
+Test Case:  10 | Input/Output: [" Z" ["\nZ" 1]]
+Test Case:  11 | Input/Output: [" J" ["\nJ" 1]]
+Test Case:  12 | Input/Output: ["/ " ["/\n" 1]]
+Test Case:  13 | Input/Output: ["~'" ["~'" 2]]
+Test Case:  14 | Input/Output: ["[," ["[," 2]]
+Test Case:  15 | Input/Output: ["2 " ["2\n" 1]]
+Test Case:  16 | Input/Output: [" J" ["\nJ" 1]]
+Test Case:  17 | Input/Output: ["  " ["\n\n" 0]]
+Test Case:  18 | Input/Output: ["v]" ["v]" 2]]
+Test Case:  19 | Input/Output: [")." [")." 2]]
+Test Case:  20 | Input/Output: ["  " ["\n\n" 0]]
+Test Case:  21 | Input/Output: [" &" ["\n&" 1]]
+Test Case:  22 | Input/Output: ["$j" ["$j" 2]]
+Test Case:  23 | Input/Output: ["oe" ["oe" 2]]
+Test Case:  24 | Input/Output: ["+(" ["+(" 2]]
+Test Case:  25 | Input/Output: ["` " ["`\n" 1]]
+Test Case:  26 | Input/Output: ["w/" ["w/" 2]]
+Test Case:  27 | Input/Output: ["mC" ["mC" 2]]
+Test Case:  28 | Input/Output: ["]+" ["]+" 2]]
+Test Case:  29 | Input/Output: ["!(" ["!(" 2]]
+Test Case:  30 | Input/Output: ["B " ["B\n" 1]]
+Test Case:  31 | Input/Output: ["(I" ["(I" 2]]
+Test Case:  32 | Input/Output: ["S7" ["S7" 2]]
+Test Case:  33 | Input/Output: ["] " ["]\n" 1]]
+Test Case:  34 | Input/Output: ["r2" ["r2" 2]]
+Test Case:  35 | Input/Output: ["|/" ["|/" 2]]
+Test Case:  36 | Input/Output: ["0 " ["0\n" 1]]
+Test Case:  37 | Input/Output: ["  " ["\n\n" 0]]
+Test Case:  38 | Input/Output: ["- " ["-\n" 1]]
+Test Case:  39 | Input/Output: ["2W" ["2W" 2]]
+Test Case:  40 | Input/Output: ["3 " ["3\n" 1]]
+Test Case:  41 | Input/Output: ["h9" ["h9" 2]]
+Test Case:  42 | Input/Output: ["2 " ["2\n" 1]]
+Test Case:  43 | Input/Output: ["G{" ["G{" 2]]
+Test Case:  44 | Input/Output: [" u" ["\nu" 1]]
+Test Case:  45 | Input/Output: ["Jy" ["Jy" 2]]
+Test Case:  46 | Input/Output: [" c" ["\nc" 1]]
+Test Case:  47 | Input/Output: ["ie." ["ie." 3]]
+Test Case:  48 | Input/Output: [" Y3" ["\nY3" 2]]
+Test Case:  49 | Input/Output: [":s " [":s\n" 2]]
+Test Case:  50 | Input/Output: ["-d " ["-d\n" 2]]
+Test Case:  51 | Input/Output: ["~] " ["~]\n" 2]]
+Test Case:  52 | Input/Output: [" Fh" ["\nFh" 2]]
+Test Case:  53 | Input/Output: ["b /" ["b\n/" 2]]
+Test Case:  54 | Input/Output: ["wHq" ["wHq" 3]]
+Test Case:  55 | Input/Output: [" {;" ["\n{;" 2]]
+Test Case:  56 | Input/Output: [" s " ["\ns\n" 1]]
+Test Case:  57 | Input/Output: ["L 7" ["L\n7" 2]]
+Test Case:  58 | Input/Output: [" a3" ["\na3" 2]]
+Test Case:  59 | Input/Output: ["-+(" ["-+(" 3]]
+Test Case:  60 | Input/Output: ["]< " ["]<\n" 2]]
+Test Case:  61 | Input/Output: ["']`" ["']`" 3]]
+Test Case:  62 | Input/Output: ["b'_" ["b'_" 3]]
+Test Case:  63 | Input/Output: [" ^ " ["\n^\n" 1]]
+Test Case:  64 | Input/Output: ["$ j" ["$\nj" 2]]
+Test Case:  65 | Input/Output: ["6C*" ["6C*" 3]]
+Test Case:  66 | Input/Output: ["6Nc" ["6Nc" 3]]
+Test Case:  67 | Input/Output: [" i(" ["\ni(" 2]]
+Test Case:  68 | Input/Output: ["b J" ["b\nJ" 2]]
+Test Case:  69 | Input/Output: ["jZR" ["jZR" 3]]
+Test Case:  70 | Input/Output: ["*i^" ["*i^" 3]]
+Test Case:  71 | Input/Output: ["h@ " ["h@\n" 2]]
+Test Case:  72 | Input/Output: ["z< " ["z<\n" 2]]
+Test Case:  73 | Input/Output: ["FRn" ["FRn" 3]]
+Test Case:  74 | Input/Output: ["Zaz" ["Zaz" 3]]
+Test Case:  75 | Input/Output: ["!n;" ["!n;" 3]]
+Test Case:  76 | Input/Output: ["b K" ["b\nK" 2]]
+Test Case:  77 | Input/Output: ["50[" ["50[" 3]]
+Test Case:  78 | Input/Output: ["I N" ["I\nN" 2]]
+Test Case:  79 | Input/Output: ["&}i" ["&}i" 3]]
+Test Case:  80 | Input/Output: ["]iY" ["]iY" 3]]
+Test Case:  81 | Input/Output: ["Yy+" ["Yy+" 3]]
+Test Case:  82 | Input/Output: ["OEh" ["OEh" 3]]
+Test Case:  83 | Input/Output: ["\\~k" ["\\~k" 3]]
+Test Case:  84 | Input/Output: ["a9j" ["a9j" 3]]
+Test Case:  85 | Input/Output: ["\"BD" ["\"BD" 3]]
+Test Case:  86 | Input/Output: ["K L" ["K\nL" 2]]
+Test Case:  87 | Input/Output: [" nL" ["\nnL" 2]]
+Test Case:  88 | Input/Output: [")H " [")H\n" 2]]
+Test Case:  89 | Input/Output: [",[ " [",[\n" 2]]
+Test Case:  90 | Input/Output: ["4T;" ["4T;" 3]]
+Test Case:  91 | Input/Output: ["xR!" ["xR!" 3]]
+Test Case:  92 | Input/Output: ["   " ["\n\n\n" 0]]
+Test Case:  93 | Input/Output: ["J+\\" ["J+\\" 3]]
+Test Case:  94 | Input/Output: ["; (" [";\n(" 2]]
+Test Case:  95 | Input/Output: [" *@" ["\n*@" 2]]
+Test Case:  96 | Input/Output: ["SBG" ["SBG" 3]]
+Test Case:  97 | Input/Output: ["&Y3" ["&Y3" 3]]
+Test Case:  98 | Input/Output: ["J k" ["J\nk" 2]]
+Test Case:  99 | Input/Output: ["ako" ["ako" 3]]
+Test Case: 100 | Input/Output: [",dH" [",dH" 3]]
+Test Case: 101 | Input/Output: ["6  " ["6\n\n" 1]]
+Test Case: 102 | Input/Output: ["5f  " ["5f\n\n" 2]]
+Test Case: 103 | Input/Output: ["5f#e" ["5f#e" 4]]
+Test Case: 104 | Input/Output: ["'u2Z" ["'u2Z" 4]]
+Test Case: 105 | Input/Output: [" WHQ" ["\nWHQ" 3]]
+Test Case: 106 | Input/Output: ["Q  j" ["Q\n\nj" 2]]
+Test Case: 107 | Input/Output: ["mD?{" ["mD?{" 4]]
+Test Case: 108 | Input/Output: [" h*/" ["\nh*/" 3]]
+Test Case: 109 | Input/Output: ["^  a" ["^\n\na" 2]]
+Test Case: 110 | Input/Output: ["2kX;" ["2kX;" 4]]
+Test Case: 111 | Input/Output: ["< Fp" ["<\nFp" 3]]
+Test Case: 112 | Input/Output: ["mP[ " ["mP[\n" 3]]
+Test Case: 113 | Input/Output: [" q1 " ["\nq1\n" 2]]
+Test Case: 114 | Input/Output: ["r4~-" ["r4~-" 4]]
+Test Case: 115 | Input/Output: ["y5< " ["y5<\n" 3]]
+Test Case: 116 | Input/Output: ["E =O" ["E\n=O" 3]]
+Test Case: 117 | Input/Output: ["gze[" ["gze[" 4]]
+Test Case: 118 | Input/Output: ["|GIs" ["|GIs" 4]]
+Test Case: 119 | Input/Output: ["[ h " ["[\nh\n" 2]]
+Test Case: 120 | Input/Output: ["t{; " ["t{;\n" 3]]
+Test Case: 121 | Input/Output: ["vh#F" ["vh#F" 4]]
+Test Case: 122 | Input/Output: ["R. E" ["R.\nE" 3]]
+Test Case: 123 | Input/Output: ["j;qz" ["j;qz" 4]]
+Test Case: 124 | Input/Output: ["=a t" ["=a\nt" 3]]
+Test Case: 125 | Input/Output: ["#U,9" ["#U,9" 4]]
+Test Case: 126 | Input/Output: [" |-A" ["\n|-A" 3]]
+Test Case: 127 | Input/Output: [" h H" ["\nh\nH" 2]]
+Test Case: 128 | Input/Output: ["6 m\\" ["6\nm\\" 3]]
+Test Case: 129 | Input/Output: ["=6 -" ["=6\n-" 3]]
+Test Case: 130 | Input/Output: ["  ] " ["\n\n]\n" 1]]
+Test Case: 131 | Input/Output: [" Xg<" ["\nXg<" 3]]
+Test Case: 132 | Input/Output: ["0F@(" ["0F@(" 4]]
+Test Case: 133 | Input/Output: [".,=~" [".,=~" 4]]
+Test Case: 134 | Input/Output: ["wIT " ["wIT\n" 3]]
+Test Case: 135 | Input/Output: ["c^^W" ["c^^W" 4]]
+Test Case: 136 | Input/Output: ["C%%G" ["C%%G" 4]]
+Test Case: 137 | Input/Output: ["3a?8" ["3a?8" 4]]
+Test Case: 138 | Input/Output: [" BN\\" ["\nBN\\" 3]]
+Test Case: 139 | Input/Output: ["<0 \"" ["<0\n\"" 3]]
+Test Case: 140 | Input/Output: ["A  ;" ["A\n\n;" 2]]
+Test Case: 141 | Input/Output: ["WGP " ["WGP\n" 3]]
+Test Case: 142 | Input/Output: ["3 dl" ["3\ndl" 3]]
+Test Case: 143 | Input/Output: ["R  t" ["R\n\nt" 2]]
+Test Case: 144 | Input/Output: ["Kgaa" ["Kgaa" 4]]
+Test Case: 145 | Input/Output: ["l G\"" ["l\nG\"" 3]]
+Test Case: 146 | Input/Output: ["q vG" ["q\nvG" 3]]
+Test Case: 147 | Input/Output: ["W;p-" ["W;p-" 4]]
+Test Case: 148 | Input/Output: [" [M&" ["\n[M&" 3]]
+Test Case: 149 | Input/Output: ["iE4-" ["iE4-" 4]]
+Test Case: 150 | Input/Output: ["Woo%" ["Woo%" 4]]
+Test Case: 151 | Input/Output: [" `+ " ["\n`+\n" 2]]
+Test Case: 152 | Input/Output: [") D+" [")\nD+" 3]]
+Test Case: 153 | Input/Output: ["Z)C " ["Z)C\n" 3]]
+Test Case: 154 | Input/Output: ["Y  A" ["Y\n\nA" 2]]
+Test Case: 155 | Input/Output: ["bD3f" ["bD3f" 4]]
+Test Case: 156 | Input/Output: [" 9 #" ["\n9\n#" 2]]
+Test Case: 157 | Input/Output: ["4[R]" ["4[R]" 4]]
+Test Case: 158 | Input/Output: ["9mFo" ["9mFo" 4]]
+Test Case: 159 | Input/Output: [" k T" ["\nk\nT" 2]]
+Test Case: 160 | Input/Output: [" {MU" ["\n{MU" 3]]
+Test Case: 161 | Input/Output: [" il=" ["\nil=" 3]]
+Test Case: 162 | Input/Output: ["l   " ["l\n\n\n" 1]]
+Test Case: 163 | Input/Output: ["fLXA" ["fLXA" 4]]
+Test Case: 164 | Input/Output: ["c [Y" ["c\n[Y" 3]]
+Test Case: 165 | Input/Output: ["H6z#" ["H6z#" 4]]
+Test Case: 166 | Input/Output: ["wbN \"" ["wbN\n\"" 4]]
+Test Case: 167 | Input/Output: ["G zs " ["G\nzs\n" 3]]
+Test Case: 168 | Input/Output: ["3b/dj" ["3b/dj" 5]]
+Test Case: 169 | Input/Output: ["N.2T " ["N.2T\n" 4]]
+Test Case: 170 | Input/Output: ["aQ=R " ["aQ=R\n" 4]]
+Test Case: 171 | Input/Output: ["P_ -i" ["P_\n-i" 4]]
+Test Case: 172 | Input/Output: ["TkB6 " ["TkB6\n" 4]]
+Test Case: 173 | Input/Output: ["/LlHb" ["/LlHb" 5]]
+Test Case: 174 | Input/Output: ["Cy~jT" ["Cy~jT" 5]]
+Test Case: 175 | Input/Output: ["a5 % " ["a5\n%\n" 3]]
+Test Case: 176 | Input/Output: ["fbf %" ["fbf\n%" 4]]
+Test Case: 177 | Input/Output: ["foR5b" ["foR5b" 5]]
+Test Case: 178 | Input/Output: [" -A  " ["\n-A\n\n" 2]]
+Test Case: 179 | Input/Output: ["SnUa " ["SnUa\n" 4]]
+Test Case: 180 | Input/Output: ["kFJE:" ["kFJE:" 5]]
+Test Case: 181 | Input/Output: ["<b M " ["<b\nM\n" 3]]
+Test Case: 182 | Input/Output: [" j  z" ["\nj\n\nz" 2]]
+Test Case: 183 | Input/Output: ["\\Q 04" ["\\Q\n04" 4]]
+Test Case: 184 | Input/Output: [" |6W " ["\n|6W\n" 3]]
+Test Case: 185 | Input/Output: ["y}3o " ["y}3o\n" 4]]
+Test Case: 186 | Input/Output: ["L&h ]" ["L&h\n]" 4]]
+Test Case: 187 | Input/Output: ["6 l(I" ["6\nl(I" 4]]
+Test Case: 188 | Input/Output: ["h  :x" ["h\n\n:x" 3]]
+Test Case: 189 | Input/Output: [" S^GJ" ["\nS^GJ" 4]]
+Test Case: 190 | Input/Output: ["^ a%*" ["^\na%*" 4]]
+Test Case: 191 | Input/Output: [" !SJ!" ["\n!SJ!" 4]]
+Test Case: 192 | Input/Output: ["$= sd" ["$=\nsd" 4]]
+Test Case: 193 | Input/Output: ["k 9  " ["k\n9\n\n" 2]]
+Test Case: 194 | Input/Output: [" 17 ]" ["\n17\n]" 3]]
+Test Case: 195 | Input/Output: ["//|jc" ["//|jc" 5]]
+Test Case: 196 | Input/Output: ["oQ ;t" ["oQ\n;t" 4]]
+Test Case: 197 | Input/Output: ["_%YBT" ["_%YBT" 5]]
+Test Case: 198 | Input/Output: ["}m  K" ["}m\n\nK" 3]]
+Test Case: 199 | Input/Output: ["&5H3 " ["&5H3\n" 4]]
+Test Case: 200 | Input/Output: ["[ ? b" ["[\n?\nb" 3]]
+Test Case: 201 | Input/Output: ["9%~Sl" ["9%~Sl" 5]]
+Test Case: 202 | Input/Output: ["Xr ~ " ["Xr\n~\n" 3]]
+Test Case: 203 | Input/Output: ["g|!\\1" ["g|!\\1" 5]]
+Test Case: 204 | Input/Output: [" /=X " ["\n/=X\n" 3]]
+Test Case: 205 | Input/Output: ["?, _ " ["?,\n_\n" 3]]
+Test Case: 206 | Input/Output: ["{@zx " ["{@zx\n" 4]]
+Test Case: 207 | Input/Output: ["c+#~_!" ["c+#~_!" 6]]
+Test Case: 208 | Input/Output: ["Iw1x9-" ["Iw1x9-" 6]]
+Test Case: 209 | Input/Output: [">f ^e " [">f\n^e\n" 4]]
+Test Case: 210 | Input/Output: ["texYT9" ["texYT9" 6]]
+Test Case: 211 | Input/Output: ["NU ~H " ["NU\n~H\n" 4]]
+Test Case: 212 | Input/Output: ["   \\  " ["\n\n\n\\\n\n" 1]]
+Test Case: 213 | Input/Output: ["Jn7 ?u" ["Jn7\n?u" 5]]
+Test Case: 214 | Input/Output: [" =U&k4" ["\n=U&k4" 5]]
+Test Case: 215 | Input/Output: ["-px2KI" ["-px2KI" 6]]
+Test Case: 216 | Input/Output: ["Ku H7X" ["Ku\nH7X" 5]]
+Test Case: 217 | Input/Output: ["c e u " ["c\ne\nu\n" 3]]
+Test Case: 218 | Input/Output: ["W*t E^" ["W*t\nE^" 5]]
+Test Case: 219 | Input/Output: ["  H]38" ["\n\nH]38" 4]]
+Test Case: 220 | Input/Output: ["ZHvuqZ" ["ZHvuqZ" 6]]
+Test Case: 221 | Input/Output: ["  nk/J" ["\n\nnk/J" 4]]
+Test Case: 222 | Input/Output: ["&T )Lq" ["&T\n)Lq" 5]]
+Test Case: 223 | Input/Output: [">_5tXd" [">_5tXd" 6]]
+Test Case: 224 | Input/Output: [" .m6_m" ["\n.m6_m" 5]]
+Test Case: 225 | Input/Output: ["uBn=c " ["uBn=c\n" 5]]
+Test Case: 226 | Input/Output: ["|F+ x " ["|F+\nx\n" 4]]
+Test Case: 227 | Input/Output: ["s_&: t" ["s_&:\nt" 5]]
+Test Case: 228 | Input/Output: ["YnOSF " ["YnOSF\n" 5]]
+Test Case: 229 | Input/Output: ["W -Re " ["W\n-Re\n" 4]]
+Test Case: 230 | Input/Output: ["[J$zQ " ["[J$zQ\n" 5]]
+Test Case: 231 | Input/Output: ["1$/cE " ["1$/cE\n" 5]]
+Test Case: 232 | Input/Output: [" YNj^Y" ["\nYNj^Y" 5]]
+Test Case: 233 | Input/Output: ["@M%8IV" ["@M%8IV" 6]]
+Test Case: 234 | Input/Output: ["-@a}r2" ["-@a}r2" 6]]
+Test Case: 235 | Input/Output: ["v2x~  " ["v2x~\n\n" 4]]
+Test Case: 236 | Input/Output: ["*02X D" ["*02X\nD" 5]]
+Test Case: 237 | Input/Output: ["0 ?@A " ["0\n?@A\n" 4]]
+Test Case: 238 | Input/Output: [" ==WL " ["\n==WL\n" 4]]
+Test Case: 239 | Input/Output: ["ujA 4 " ["ujA\n4\n" 4]]
+Test Case: 240 | Input/Output: ["  \\Lm+" ["\n\n\\Lm+" 4]]
+Test Case: 241 | Input/Output: [" o :QR" ["\no\n:QR" 4]]
+Test Case: 242 | Input/Output: ["|<#f w" ["|<#f\nw" 5]]
+Test Case: 243 | Input/Output: [" //?T3" ["\n//?T3" 5]]
+Test Case: 244 | Input/Output: [" P #<\"" ["\nP\n#<\"" 4]]
+Test Case: 245 | Input/Output: [">D!>~]" [">D!>~]" 6]]
+Test Case: 246 | Input/Output: ["Y [ kU" ["Y\n[\nkU" 4]]
+Test Case: 247 | Input/Output: ["Pfoj+k" ["Pfoj+k" 6]]
+Test Case: 248 | Input/Output: ["aRp V " ["aRp\nV\n" 4]]
+Test Case: 249 | Input/Output: ["i'$H/O" ["i'$H/O" 6]]
+Test Case: 250 | Input/Output: ["HO y!+" ["HO\ny!+" 5]]
+Test Case: 251 | Input/Output: ["`s<+ 9" ["`s<+\n9" 5]]
+Test Case: 252 | Input/Output: ["2,1-:6" ["2,1-:6" 6]]
+Test Case: 253 | Input/Output: ["}\\| ?b" ["}\\|\n?b" 5]]
+Test Case: 254 | Input/Output: ["'e] f4" ["'e]\nf4" 5]]
+Test Case: 255 | Input/Output: ["<BkDy " ["<BkDy\n" 5]]
+Test Case: 256 | Input/Output: ["W)  M " ["W)\n\nM\n" 3]]
+Test Case: 257 | Input/Output: ["OsZXO%" ["OsZXO%" 6]]
+Test Case: 258 | Input/Output: ["KDm/=@" ["KDm/=@" 6]]
+Test Case: 259 | Input/Output: ["*+o{zx" ["*+o{zx" 6]]
+Test Case: 260 | Input/Output: ["uOc $?" ["uOc\n$?" 5]]
+Test Case: 261 | Input/Output: ["'oMO 84" ["'oMO\n84" 6]]
+Test Case: 262 | Input/Output: ["4 puz*&" ["4\npuz*&" 6]]
+Test Case: 263 | Input/Output: ["~u^vSF " ["~u^vSF\n" 6]]
+Test Case: 264 | Input/Output: ["k  ,g} " ["k\n\n,g}\n" 4]]
+Test Case: 265 | Input/Output: [" ~ J_~H" ["\n~\nJ_~H" 5]]
+Test Case: 266 | Input/Output: [" 7x  Un" ["\n7x\n\nUn" 4]]
+Test Case: 267 | Input/Output: ["%h_, [\"" ["%h_,\n[\"" 6]]
+Test Case: 268 | Input/Output: ["A!c@1=X" ["A!c@1=X" 7]]
+Test Case: 269 | Input/Output: ["RB*y; 5" ["RB*y;\n5" 6]]
+Test Case: 270 | Input/Output: ["aa Z)Bt" ["aa\nZ)Bt" 6]]
+Test Case: 271 | Input/Output: ["UM3@(d " ["UM3@(d\n" 6]]
+Test Case: 272 | Input/Output: ["X 3JI 9" ["X\n3JI\n9" 5]]
+Test Case: 273 | Input/Output: ["IoAa{+4" ["IoAa{+4" 7]]
+Test Case: 274 | Input/Output: ["*Ds+;n " ["*Ds+;n\n" 6]]
+Test Case: 275 | Input/Output: ["C!e <%^" ["C!e\n<%^" 6]]
+Test Case: 276 | Input/Output: ["2H@(\\* " ["2H@(\\*\n" 6]]
+Test Case: 277 | Input/Output: ["#.  5NO" ["#.\n\n5NO" 5]]
+Test Case: 278 | Input/Output: ["aT^1  P" ["aT^1\n\nP" 5]]
+Test Case: 279 | Input/Output: ["  |ib r" ["\n\n|ib\nr" 4]]
+Test Case: 280 | Input/Output: ["+$} Q)p" ["+$}\nQ)p" 6]]
+Test Case: 281 | Input/Output: [") 4,!L+" [")\n4,!L+" 6]]
+Test Case: 282 | Input/Output: ["  wX<; " ["\n\nwX<;\n" 4]]
+Test Case: 283 | Input/Output: ["[ic  MS" ["[ic\n\nMS" 5]]
+Test Case: 284 | Input/Output: ["ci@r   " ["ci@r\n\n\n" 4]]
+Test Case: 285 | Input/Output: ["  S 8aT" ["\n\nS\n8aT" 4]]
+Test Case: 286 | Input/Output: ["$,}l   " ["$,}l\n\n\n" 4]]
+Test Case: 287 | Input/Output: [" I|FE: " ["\nI|FE:\n" 5]]
+Test Case: 288 | Input/Output: ["6{$ =Y " ["6{$\n=Y\n" 5]]
+Test Case: 289 | Input/Output: ["/j$  5 " ["/j$\n\n5\n" 4]]
+Test Case: 290 | Input/Output: ["tFz5zw7" ["tFz5zw7" 7]]
+Test Case: 291 | Input/Output: ["LQ4^u  " ["LQ4^u\n\n" 5]]
+Test Case: 292 | Input/Output: ["D/F $E|" ["D/F\n$E|" 6]]
+Test Case: 293 | Input/Output: ["WOsZ0:K" ["WOsZ0:K" 7]]
+Test Case: 294 | Input/Output: ["}W+L   " ["}W+L\n\n\n" 4]]
+Test Case: 295 | Input/Output: ["VkE+ 3n" ["VkE+\n3n" 6]]
+Test Case: 296 | Input/Output: [" 3WqM  " ["\n3WqM\n\n" 4]]
+Test Case: 297 | Input/Output: ["YXt< pg" ["YXt<\npg" 6]]
+Test Case: 298 | Input/Output: ["E :XiVZ" ["E\n:XiVZ" 6]]
+Test Case: 299 | Input/Output: ["e? ]\" k" ["e?\n]\"\nk" 5]]
+Test Case: 300 | Input/Output: ["~F!) `k" ["~F!)\n`k" 6]]
+Test Case: 301 | Input/Output: ["mKo b* " ["mKo\nb*\n" 5]]
+Test Case: 302 | Input/Output: [" }KjG8o" ["\n}KjG8o" 6]]
+Test Case: 303 | Input/Output: ["M ]Jw~u" ["M\n]Jw~u" 6]]
+Test Case: 304 | Input/Output: ["F*k cAi" ["F*k\ncAi" 6]]
+Test Case: 305 | Input/Output: ["~ o\\.  " ["~\no\\.\n\n" 4]]
+Test Case: 306 | Input/Output: [" {   Vr" ["\n{\n\n\nVr" 3]]
+Test Case: 307 | Input/Output: ["0[#8&Qy" ["0[#8&Qy" 7]]
+Test Case: 308 | Input/Output: [" IW) Iq" ["\nIW)\nIq" 5]]
+Test Case: 309 | Input/Output: ["'Y\\^LU/" ["'Y\\^LU/" 7]]
+Test Case: 310 | Input/Output: ["T #erMM" ["T\n#erMM" 6]]
+Test Case: 311 | Input/Output: [" ?H|(q7" ["\n?H|(q7" 6]]
+Test Case: 312 | Input/Output: ["  YCH+ " ["\n\nYCH+\n" 4]]
+Test Case: 313 | Input/Output: ["E cu o:" ["E\ncu\no:" 5]]
+Test Case: 314 | Input/Output: [" i\"E/  " ["\ni\"E/\n\n" 4]]
+Test Case: 315 | Input/Output: ["`:p}i  " ["`:p}i\n\n" 5]]
+Test Case: 316 | Input/Output: [" r?q:g%j" ["\nr?q:g%j" 7]]
+Test Case: 317 | Input/Output: ["  CN9!~C" ["\n\nCN9!~C" 6]]
+Test Case: 318 | Input/Output: ["y1EGo3 Y" ["y1EGo3\nY" 7]]
+Test Case: 319 | Input/Output: ["K{.+A9+ " ["K{.+A9+\n" 7]]
+Test Case: 320 | Input/Output: ["{g 9+yU6" ["{g\n9+yU6" 7]]
+Test Case: 321 | Input/Output: ["ie)TY Wx" ["ie)TY\nWx" 7]]
+Test Case: 322 | Input/Output: ["O05 l0mu" ["O05\nl0mu" 7]]
+Test Case: 323 | Input/Output: ["* tT?,^I" ["*\ntT?,^I" 7]]
+Test Case: 324 | Input/Output: ["?$e  UxJ" ["?$e\n\nUxJ" 6]]
+Test Case: 325 | Input/Output: ["3   s | " ["3\n\n\ns\n|\n" 3]]
+Test Case: 326 | Input/Output: [" L +7i6F" ["\nL\n+7i6F" 6]]
+Test Case: 327 | Input/Output: [" o{ 0a 6" ["\no{\n0a\n6" 5]]
+Test Case: 328 | Input/Output: ["Hj ]_a  " ["Hj\n]_a\n\n" 5]]
+Test Case: 329 | Input/Output: [" jU =f)v" ["\njU\n=f)v" 6]]
+Test Case: 330 | Input/Output: [" Js9S Ai" ["\nJs9S\nAi" 6]]
+Test Case: 331 | Input/Output: ["ZTuK9 ~6" ["ZTuK9\n~6" 7]]
+Test Case: 332 | Input/Output: ["n  /AT/~" ["n\n\n/AT/~" 6]]
+Test Case: 333 | Input/Output: ["  *h%N28" ["\n\n*h%N28" 6]]
+Test Case: 334 | Input/Output: ["@\\@eFxE:" ["@\\@eFxE:" 8]]
+Test Case: 335 | Input/Output: ["u; {  H " ["u;\n{\n\nH\n" 4]]
+Test Case: 336 | Input/Output: [" Y C  DW" ["\nY\nC\n\nDW" 4]]
+Test Case: 337 | Input/Output: [" u M lp!" ["\nu\nM\nlp!" 5]]
+Test Case: 338 | Input/Output: ["x}yr   G" ["x}yr\n\n\nG" 5]]
+Test Case: 339 | Input/Output: ["N| R en " ["N|\nR\nen\n" 5]]
+Test Case: 340 | Input/Output: ["<  <ZBef" ["<\n\n<ZBef" 6]]
+Test Case: 341 | Input/Output: [" Q3<2zL~" ["\nQ3<2zL~" 7]]
+Test Case: 342 | Input/Output: ["Q- y!L A" ["Q-\ny!L\nA" 6]]
+Test Case: 343 | Input/Output: ["5 OCUj  " ["5\nOCUj\n\n" 5]]
+Test Case: 344 | Input/Output: ["Xx,W  dv" ["Xx,W\n\ndv" 6]]
+Test Case: 345 | Input/Output: ["yWWEv[P1" ["yWWEv[P1" 8]]
+Test Case: 346 | Input/Output: ["-b3I,   " ["-b3I,\n\n\n" 5]]
+Test Case: 347 | Input/Output: ["o1{ )wJ`" ["o1{\n)wJ`" 7]]
+Test Case: 348 | Input/Output: [":vA7{)$U" [":vA7{)$U" 8]]
+Test Case: 349 | Input/Output: ["\"oWI)O ?" ["\"oWI)O\n?" 7]]
+Test Case: 350 | Input/Output: ["*- /OHTV" ["*-\n/OHTV" 7]]
+Test Case: 351 | Input/Output: ["o<NQP 7 " ["o<NQP\n7\n" 6]]
+Test Case: 352 | Input/Output: ["mK]b 6T*" ["mK]b\n6T*" 7]]
+Test Case: 353 | Input/Output: ["8e|m  & " ["8e|m\n\n&\n" 5]]
+Test Case: 354 | Input/Output: ["i\\p <  3" ["i\\p\n<\n\n3" 5]]
+Test Case: 355 | Input/Output: ["Rl5b\\1$ " ["Rl5b\\1$\n" 7]]
+Test Case: 356 | Input/Output: [" z` }/:)" ["\nz`\n}/:)" 6]]
+Test Case: 357 | Input/Output: ["ip65)VW5" ["ip65)VW5" 8]]
+Test Case: 358 | Input/Output: [" 4]DaIjH" ["\n4]DaIjH" 7]]
+Test Case: 359 | Input/Output: ["A%\"=m+6 " ["A%\"=m+6\n" 7]]
+Test Case: 360 | Input/Output: ["aw1YA Ds" ["aw1YA\nDs" 7]]
+Test Case: 361 | Input/Output: ["c[ /Xk]c" ["c[\n/Xk]c" 7]]
+Test Case: 362 | Input/Output: [" ioVPD9a" ["\nioVPD9a" 7]]
+Test Case: 363 | Input/Output: ["oU=;v*EO" ["oU=;v*EO" 8]]
+Test Case: 364 | Input/Output: ["l_v})4^|" ["l_v})4^|" 8]]
+Test Case: 365 | Input/Output: [" S`@P> A" ["\nS`@P>\nA" 6]]
+Test Case: 366 | Input/Output: ["rS U;nZ6" ["rS\nU;nZ6" 7]]
+Test Case: 367 | Input/Output: [":iznr w_" [":iznr\nw_" 7]]
+Test Case: 368 | Input/Output: ["ZxUQ,Kq*L" ["ZxUQ,Kq*L" 9]]
+Test Case: 369 | Input/Output: [" oxF *q&(" ["\noxF\n*q&(" 7]]
+Test Case: 370 | Input/Output: [" + ep4   " ["\n+\nep4\n\n\n" 4]]
+Test Case: 371 | Input/Output: ["1?$  !lY~" ["1?$\n\n!lY~" 7]]
+Test Case: 372 | Input/Output: ["cd | ==}m" ["cd\n|\n==}m" 7]]
+Test Case: 373 | Input/Output: [" ~PEJc \"p" ["\n~PEJc\n\"p" 7]]
+Test Case: 374 | Input/Output: ["c  zDW: !" ["c\n\nzDW:\n!" 6]]
+Test Case: 375 | Input/Output: [":  </g !n" [":\n\n</g\n!n" 6]]
+Test Case: 376 | Input/Output: ["ukt;@`%% " ["ukt;@`%%\n" 8]]
+Test Case: 377 | Input/Output: ["&<s:^`BP@" ["&<s:^`BP@" 9]]
+Test Case: 378 | Input/Output: ["}(D) M E_" ["}(D)\nM\nE_" 7]]
+Test Case: 379 | Input/Output: ["Dix A e  " ["Dix\nA\ne\n\n" 5]]
+Test Case: 380 | Input/Output: ["G 1r~ y@u" ["G\n1r~\ny@u" 7]]
+Test Case: 381 | Input/Output: ["Nx>#)uI-t" ["Nx>#)uI-t" 9]]
+Test Case: 382 | Input/Output: ["kH imT`p$" ["kH\nimT`p$" 8]]
+Test Case: 383 | Input/Output: [".4 h4R 2 " [".4\nh4R\n2\n" 6]]
+Test Case: 384 | Input/Output: ["v?{qf + !" ["v?{qf\n+\n!" 7]]
+Test Case: 385 | Input/Output: ["c'Gm(;G }" ["c'Gm(;G\n}" 8]]
+Test Case: 386 | Input/Output: ["y  0 hN X" ["y\n\n0\nhN\nX" 5]]
+Test Case: 387 | Input/Output: ["G'J* k& (" ["G'J*\nk&\n(" 7]]
+Test Case: 388 | Input/Output: ["o^\"^   _ " ["o^\"^\n\n\n_\n" 5]]
+Test Case: 389 | Input/Output: ["b=5N:  .," ["b=5N:\n\n.," 7]]
+Test Case: 390 | Input/Output: ["@ \" )Q$$ " ["@\n\"\n)Q$$\n" 6]]
+Test Case: 391 | Input/Output: [" 7z)@ 4| " ["\n7z)@\n4|\n" 6]]
+Test Case: 392 | Input/Output: [",a_BJ>i D" [",a_BJ>i\nD" 8]]
+Test Case: 393 | Input/Output: ["hA.x.!W4@" ["hA.x.!W4@" 9]]
+Test Case: 394 | Input/Output: [" , +B[  3" ["\n,\n+B[\n\n3" 5]]
+Test Case: 395 | Input/Output: ["r  < s .L" ["r\n\n<\ns\n.L" 5]]
+Test Case: 396 | Input/Output: ["^[o1B*y5f" ["^[o1B*y5f" 9]]
+Test Case: 397 | Input/Output: ["Fg?\\ fU' " ["Fg?\\\nfU'\n" 7]]
+Test Case: 398 | Input/Output: [" r8Z|4 W " ["\nr8Z|4\nW\n" 6]]
+Test Case: 399 | Input/Output: ["T! 8M- *`" ["T!\n8M-\n*`" 7]]
+Test Case: 400 | Input/Output: [".,A8I^*fz" [".,A8I^*fz" 9]]
+Test Case: 401 | Input/Output: ["!$C ~ ?CO" ["!$C\n~\n?CO" 7]]
+Test Case: 402 | Input/Output: ["PM h  7U3" ["PM\nh\n\n7U3" 6]]
+Test Case: 403 | Input/Output: ["pZr P?o >" ["pZr\nP?o\n>" 7]]
+Test Case: 404 | Input/Output: ["&^WDh L*U" ["&^WDh\nL*U" 8]]
+Test Case: 405 | Input/Output: ["#UK/Pt ?+" ["#UK/Pt\n?+" 8]]
+Test Case: 406 | Input/Output: ["lP GH'v8A" ["lP\nGH'v8A" 8]]
+Test Case: 407 | Input/Output: [" w~l y,Gf" ["\nw~l\ny,Gf" 7]]
+Test Case: 408 | Input/Output: ["XaQk/ 9>B" ["XaQk/\n9>B" 8]]
+Test Case: 409 | Input/Output: ["MZE71{8\\ " ["MZE71{8\\\n" 8]]
+Test Case: 410 | Input/Output: [" $D]v %&W" ["\n$D]v\n%&W" 7]]
+Test Case: 411 | Input/Output: ["4'JrpAHdr" ["4'JrpAHdr" 9]]
+Test Case: 412 | Input/Output: ["3mfk5 ehB" ["3mfk5\nehB" 8]]
+Test Case: 413 | Input/Output: ["FI?~DF; 4" ["FI?~DF;\n4" 8]]
+Test Case: 414 | Input/Output: ["T Rp#b%|`" ["T\nRp#b%|`" 8]]
+Test Case: 415 | Input/Output: ["3%.:+JgA&" ["3%.:+JgA&" 9]]
+Test Case: 416 | Input/Output: ["&gc#0 ^\\[" ["&gc#0\n^\\[" 8]]
+Test Case: 417 | Input/Output: ["ln' Ii=W#" ["ln'\nIi=W#" 8]]
+Test Case: 418 | Input/Output: [" %Pv3`W_t" ["\n%Pv3`W_t" 8]]
+Test Case: 419 | Input/Output: ["nc Sd v t" ["nc\nSd\nv\nt" 6]]
+Test Case: 420 | Input/Output: [" E(j ?gii" ["\nE(j\n?gii" 7]]
+Test Case: 421 | Input/Output: [" ual;% 74" ["\nual;%\n74" 7]]
+Test Case: 422 | Input/Output: [" ): 7K%=h" ["\n):\n7K%=h" 7]]
+Test Case: 423 | Input/Output: ["DG: V  x_" ["DG:\nV\n\nx_" 6]]
+Test Case: 424 | Input/Output: ["?> }w g^q|" ["?>\n}w\ng^q|" 8]]
+Test Case: 425 | Input/Output: ["02 Q<$qHy9" ["02\nQ<$qHy9" 9]]
+Test Case: 426 | Input/Output: ["Q-8dIOt%E@" ["Q-8dIOt%E@" 10]]
+Test Case: 427 | Input/Output: ["o. j  [E9 " ["o.\nj\n\n[E9\n" 6]]
+Test Case: 428 | Input/Output: [" ;+!dWUOkW" ["\n;+!dWUOkW" 9]]
+Test Case: 429 | Input/Output: ["V  cD7 \" c" ["V\n\ncD7\n\"\nc" 6]]
+Test Case: 430 | Input/Output: [" ?SMw)sJ0]" ["\n?SMw)sJ0]" 9]]
+Test Case: 431 | Input/Output: [" AAD0h Gn%" ["\nAAD0h\nGn%" 8]]
+Test Case: 432 | Input/Output: [" ( F ##?GB" ["\n(\nF\n##?GB" 7]]
+Test Case: 433 | Input/Output: ["fD<U S5?V}" ["fD<U\nS5?V}" 9]]
+Test Case: 434 | Input/Output: ["  W y  RbW" ["\n\nW\ny\n\nRbW" 5]]
+Test Case: 435 | Input/Output: ["V.<`nM [ ," ["V.<`nM\n[\n," 8]]
+Test Case: 436 | Input/Output: ["*1aIb RMb " ["*1aIb\nRMb\n" 8]]
+Test Case: 437 | Input/Output: ["D}cf )T(i " ["D}cf\n)T(i\n" 8]]
+Test Case: 438 | Input/Output: ["e> Q}. AlR" ["e>\nQ}.\nAlR" 8]]
+Test Case: 439 | Input/Output: ["3^G>ou>AJF" ["3^G>ou>AJF" 10]]
+Test Case: 440 | Input/Output: ["n%yb\\?h   " ["n%yb\\?h\n\n\n" 7]]
+Test Case: 441 | Input/Output: [" :I     qs" ["\n:I\n\n\n\n\nqs" 4]]
+Test Case: 442 | Input/Output: ["*b eO? (?i" ["*b\neO?\n(?i" 8]]
+Test Case: 443 | Input/Output: ["?N%. i]!{x" ["?N%.\ni]!{x" 9]]
+Test Case: 444 | Input/Output: ["X.d _]J~'V" ["X.d\n_]J~'V" 9]]
+Test Case: 445 | Input/Output: [">hsfNa ;O " [">hsfNa\n;O\n" 8]]
+Test Case: 446 | Input/Output: ["6 X,K0S `=" ["6\nX,K0S\n`=" 8]]
+Test Case: 447 | Input/Output: ["\"$14= _ T0" ["\"$14=\n_\nT0" 8]]
+Test Case: 448 | Input/Output: [" #\\\"H$k6&|" ["\n#\\\"H$k6&|" 9]]
+Test Case: 449 | Input/Output: ["p^dJ  oC*j" ["p^dJ\n\noC*j" 8]]
+Test Case: 450 | Input/Output: [" q:Z *>%Xp" ["\nq:Z\n*>%Xp" 8]]
+Test Case: 451 | Input/Output: [" kD $o1( n" ["\nkD\n$o1(\nn" 7]]
+Test Case: 452 | Input/Output: ["~n%.wNyc q" ["~n%.wNyc\nq" 9]]
+Test Case: 453 | Input/Output: ["F  MvM q 3" ["F\n\nMvM\nq\n3" 6]]
+Test Case: 454 | Input/Output: ["3p8 T  /Ls" ["3p8\nT\n\n/Ls" 7]]
+Test Case: 455 | Input/Output: ["O2\"WR7w WS" ["O2\"WR7w\nWS" 9]]
+Test Case: 456 | Input/Output: ["   z!\\`F g" ["\n\n\nz!\\`F\ng" 6]]
+Test Case: 457 | Input/Output: ["WOTEg*`6  " ["WOTEg*`6\n\n" 8]]
+Test Case: 458 | Input/Output: ["K  Dyd[@=T" ["K\n\nDyd[@=T" 8]]
+Test Case: 459 | Input/Output: ["C5 bJM\" ~n" ["C5\nbJM\"\n~n" 8]]
+Test Case: 460 | Input/Output: [")h=Pxp4/o9" [")h=Pxp4/o9" 10]]
+Test Case: 461 | Input/Output: ["#R&) [? c\"" ["#R&)\n[?\nc\"" 8]]
+Test Case: 462 | Input/Output: ["ZSn}C[Fz{|" ["ZSn}C[Fz{|" 10]]
+Test Case: 463 | Input/Output: [" nFux-udx*" ["\nnFux-udx*" 9]]
+Test Case: 464 | Input/Output: ["s6oX<  `WW" ["s6oX<\n\n`WW" 8]]
+Test Case: 465 | Input/Output: ["5!/'j A9 e" ["5!/'j\nA9\ne" 8]]
+Test Case: 466 | Input/Output: ["Vvr O&9^ X" ["Vvr\nO&9^\nX" 8]]
+Test Case: 467 | Input/Output: ["!  F  fHz5" ["!\n\nF\n\nfHz5" 6]]
+Test Case: 468 | Input/Output: ["Q9 oNkgi F" ["Q9\noNkgi\nF" 8]]
+Test Case: 469 | Input/Output: ["D g[3 7JZ9" ["D\ng[3\n7JZ9" 8]]
+Test Case: 470 | Input/Output: ["e2t#$3 U  " ["e2t#$3\nU\n\n" 7]]
+Test Case: 471 | Input/Output: ["$cr  @!   " ["$cr\n\n@!\n\n\n" 5]]
+Test Case: 472 | Input/Output: ["/)6l` T  \\" ["/)6l`\nT\n\n\\" 7]]
+Test Case: 473 | Input/Output: [";; \"e M%p|" [";;\n\"e\nM%p|" 8]]
+Test Case: 474 | Input/Output: [" Q1:Yt,Gc{" ["\nQ1:Yt,Gc{" 9]]
+Test Case: 475 | Input/Output: ["+.  47u-W_" ["+.\n\n47u-W_" 8]]
+Test Case: 476 | Input/Output: ["u/VHmSnX4S" ["u/VHmSnX4S" 10]]
+Test Case: 477 | Input/Output: ["NS8]4 |SjF" ["NS8]4\n|SjF" 9]]
+Test Case: 478 | Input/Output: ["\"r nG  L5 " ["\"r\nnG\n\nL5\n" 6]]
+Test Case: 479 | Input/Output: ["`+] t mlv " ["`+]\nt\nmlv\n" 7]]
+Test Case: 480 | Input/Output: [" `'0t S7A9" ["\n`'0t\nS7A9" 8]]
+Test Case: 481 | Input/Output: ["}LvvG ], BH" ["}LvvG\n],\nBH" 9]]
+Test Case: 482 | Input/Output: [" ` C'J#p] Y" ["\n`\nC'J#p]\nY" 8]]
+Test Case: 483 | Input/Output: ["[. v d~n+u`" ["[.\nv\nd~n+u`" 9]]
+Test Case: 484 | Input/Output: ["nNR[*7( W I" ["nNR[*7(\nW\nI" 9]]
+Test Case: 485 | Input/Output: ["P +UZ7sbk= " ["P\n+UZ7sbk=\n" 9]]
+Test Case: 486 | Input/Output: ["yvzRQF+k>1/" ["yvzRQF+k>1/" 11]]
+Test Case: 487 | Input/Output: ["U@ `,# %o  " ["U@\n`,#\n%o\n\n" 7]]
+Test Case: 488 | Input/Output: ["Q}) yV?55 C" ["Q})\nyV?55\nC" 9]]
+Test Case: 489 | Input/Output: ["&Z|~q2  rA " ["&Z|~q2\n\nrA\n" 8]]
+Test Case: 490 | Input/Output: ["A on>  ~!  " ["A\non>\n\n~!\n\n" 6]]
+Test Case: 491 | Input/Output: ["~' 6wa O2k<" ["~'\n6wa\nO2k<" 9]]
+Test Case: 492 | Input/Output: [" vtAsL%vRZU" ["\nvtAsL%vRZU" 10]]
+Test Case: 493 | Input/Output: ["!kfx %De1K2" ["!kfx\n%De1K2" 10]]
+Test Case: 494 | Input/Output: ["k QXFUlyfT " ["k\nQXFUlyfT\n" 9]]
+Test Case: 495 | Input/Output: ["B5%R*mHyww " ["B5%R*mHyww\n" 10]]
+Test Case: 496 | Input/Output: [" }B92IM![/*" ["\n}B92IM![/*" 10]]
+Test Case: 497 | Input/Output: ["R*BA P2w=<u" ["R*BA\nP2w=<u" 10]]
+Test Case: 498 | Input/Output: ["sT Jzhr%au?" ["sT\nJzhr%au?" 10]]
+Test Case: 499 | Input/Output: ["*dV+bgqYU&)" ["*dV+bgqYU&)" 11]]
+Test Case: 500 | Input/Output: ["Q4/b_8 H. Q" ["Q4/b_8\nH.\nQ" 9]]
+Test Case: 501 | Input/Output: ["Z07 (5} Y~ " ["Z07\n(5}\nY~\n" 8]]
+Test Case: 502 | Input/Output: ["wAa oT1 G4>" ["wAa\noT1\nG4>" 9]]
+Test Case: 503 | Input/Output: ["* }#  !` -d" ["*\n}#\n\n!`\n-d" 7]]
+Test Case: 504 | Input/Output: ["K a> M4wJ: " ["K\na>\nM4wJ:\n" 8]]
+Test Case: 505 | Input/Output: ["] 1  k?;(]6" ["]\n1\n\nk?;(]6" 8]]
+Test Case: 506 | Input/Output: ["6l3)@b K~bP" ["6l3)@b\nK~bP" 10]]
+Test Case: 507 | Input/Output: ["p^^GH~ GE{N" ["p^^GH~\nGE{N" 10]]
+Test Case: 508 | Input/Output: ["T^j&E bYJKQ" ["T^j&E\nbYJKQ" 10]]
+Test Case: 509 | Input/Output: [" KO6+<lC %7" ["\nKO6+<lC\n%7" 9]]
+Test Case: 510 | Input/Output: ["Z<% pYG]-a " ["Z<%\npYG]-a\n" 9]]
+Test Case: 511 | Input/Output: ["[r@F@L  L !" ["[r@F@L\n\nL\n!" 8]]
+Test Case: 512 | Input/Output: ["!V|h\" a>( a" ["!V|h\"\na>(\na" 9]]
+Test Case: 513 | Input/Output: ["!@| mh5^ieG" ["!@|\nmh5^ieG" 10]]
+Test Case: 514 | Input/Output: [" $, N7cDCc(" ["\n$,\nN7cDCc(" 9]]
+Test Case: 515 | Input/Output: [" AUGjMQ KtC" ["\nAUGjMQ\nKtC" 9]]
+Test Case: 516 | Input/Output: ["=. D:DvKC W" ["=.\nD:DvKC\nW" 9]]
+Test Case: 517 | Input/Output: ["P3% j  WP'!" ["P3%\nj\n\nWP'!" 8]]
+Test Case: 518 | Input/Output: ["&~ .l, ue  " ["&~\n.l,\nue\n\n" 7]]
+Test Case: 519 | Input/Output: ["oz@ y<8UG O" ["oz@\ny<8UG\nO" 9]]
+Test Case: 520 | Input/Output: ["=$W _m 159F" ["=$W\n_m\n159F" 9]]
+Test Case: 521 | Input/Output: ["  DqKiJtvm " ["\n\nDqKiJtvm\n" 8]]
+Test Case: 522 | Input/Output: ["(J\"w qY XIB" ["(J\"w\nqY\nXIB" 9]]
+Test Case: 523 | Input/Output: ["(m{| 1/  dD" ["(m{|\n1/\n\ndD" 8]]
+Test Case: 524 | Input/Output: ["\"j~  RF \\  " ["\"j~\n\nRF\n\\\n\n" 6]]
+Test Case: 525 | Input/Output: [" b4rblxZ\"<)" ["\nb4rblxZ\"<)" 10]]
+Test Case: 526 | Input/Output: ["( u-6_xBo(u" ["(\nu-6_xBo(u" 10]]
+Test Case: 527 | Input/Output: ["7e I s .n8\\" ["7e\nI\ns\n.n8\\" 8]]
+Test Case: 528 | Input/Output: [" Z h'(v09E;" ["\nZ\nh'(v09E;" 9]]
+Test Case: 529 | Input/Output: [",e g+ +Z v_" [",e\ng+\n+Z\nv_" 8]]
+Test Case: 530 | Input/Output: ["S  \\: H[<lU" ["S\n\n\\:\nH[<lU" 8]]
+Test Case: 531 | Input/Output: ["_a$ + \"Cn*#" ["_a$\n+\n\"Cn*#" 9]]
+Test Case: 532 | Input/Output: [" <[T -x S/Sq" ["\n<[T\n-x\nS/Sq" 9]]
+Test Case: 533 | Input/Output: [" E),`a;\":<h\"" ["\nE),`a;\":<h\"" 11]]
+Test Case: 534 | Input/Output: ["j Lj>xV h{jn" ["j\nLj>xV\nh{jn" 10]]
+Test Case: 535 | Input/Output: ["MeAL#a6z  Sl" ["MeAL#a6z\n\nSl" 10]]
+Test Case: 536 | Input/Output: ["5BwSl &CQ ]6" ["5BwSl\n&CQ\n]6" 10]]
+Test Case: 537 | Input/Output: ["aGm{ R/YQ^ k" ["aGm{\nR/YQ^\nk" 10]]
+Test Case: 538 | Input/Output: ["0$7s^'g  fLs" ["0$7s^'g\n\nfLs" 10]]
+Test Case: 539 | Input/Output: ["K[d <|)k C J" ["K[d\n<|)k\nC\nJ" 9]]
+Test Case: 540 | Input/Output: ["KLVXADKoQcG[" ["KLVXADKoQcG[" 12]]
+Test Case: 541 | Input/Output: [" D Qgv L nux" ["\nD\nQgv\nL\nnux" 8]]
+Test Case: 542 | Input/Output: [" g_ `W<>3 7Q" ["\ng_\n`W<>3\n7Q" 9]]
+Test Case: 543 | Input/Output: ["Z3   u  ..+M" ["Z3\n\n\nu\n\n..+M" 7]]
+Test Case: 544 | Input/Output: ["R$H6@ i#\\U$Y" ["R$H6@\ni#\\U$Y" 11]]
+Test Case: 545 | Input/Output: [" h~![ ( +hj[" ["\nh~![\n(\n+hj[" 9]]
+Test Case: 546 | Input/Output: ["1T n!mp& YN " ["1T\nn!mp&\nYN\n" 9]]
+Test Case: 547 | Input/Output: ["F b0`(X    j" ["F\nb0`(X\n\n\n\nj" 7]]
+Test Case: 548 | Input/Output: ["vG gNcy#j ET" ["vG\ngNcy#j\nET" 10]]
+Test Case: 549 | Input/Output: ["L~XW w   5k'" ["L~XW\nw\n\n\n5k'" 8]]
+Test Case: 550 | Input/Output: ["<6 nm# OF|_0" ["<6\nnm#\nOF|_0" 10]]
+Test Case: 551 | Input/Output: ["69l;q &7\\eaf" ["69l;q\n&7\\eaf" 11]]
+Test Case: 552 | Input/Output: [">TVE< |u <<k" [">TVE<\n|u\n<<k" 10]]
+Test Case: 553 | Input/Output: [" ;{ I\" *e.  " ["\n;{\nI\"\n*e.\n\n" 7]]
+Test Case: 554 | Input/Output: ["z  ,/pS h| s" ["z\n\n,/pS\nh|\ns" 8]]
+Test Case: 555 | Input/Output: ["&}#I12J%b ,s" ["&}#I12J%b\n,s" 11]]
+Test Case: 556 | Input/Output: [" < xX  y@A%r" ["\n<\nxX\n\ny@A%r" 8]]
+Test Case: 557 | Input/Output: ["@LfJ' b(0 1S" ["@LfJ'\nb(0\n1S" 10]]
+Test Case: 558 | Input/Output: ["[[j DDJW_-B{" ["[[j\nDDJW_-B{" 11]]
+Test Case: 559 | Input/Output: ["~Vz:]\\^ymi i" ["~Vz:]\\^ymi\ni" 11]]
+Test Case: 560 | Input/Output: ["E3 ?~'yPE mE" ["E3\n?~'yPE\nmE" 10]]
+Test Case: 561 | Input/Output: ["Vo3 ix^/v+  " ["Vo3\nix^/v+\n\n" 9]]
+Test Case: 562 | Input/Output: ["  E  zs w]9U" ["\n\nE\n\nzs\nw]9U" 7]]
+Test Case: 563 | Input/Output: ["/v{2VPpesyi8" ["/v{2VPpesyi8" 12]]
+Test Case: 564 | Input/Output: ["  =  U  & ~," ["\n\n=\n\nU\n\n&\n~," 5]]
+Test Case: 565 | Input/Output: [" M.:$R3'  IM" ["\nM.:$R3'\n\nIM" 9]]
+Test Case: 566 | Input/Output: ["Y, LR&E8 8S<" ["Y,\nLR&E8\n8S<" 10]]
+Test Case: 567 | Input/Output: ["b1v/ t o0zC " ["b1v/\nt\no0zC\n" 9]]
+Test Case: 568 | Input/Output: ["\\ 5[}:/( iSd" ["\\\n5[}:/(\niSd" 10]]
+Test Case: 569 | Input/Output: ["3AEp[a ]J:p=" ["3AEp[a\n]J:p=" 11]]
+Test Case: 570 | Input/Output: ["| : zcR=*`eU" ["|\n:\nzcR=*`eU" 10]]
+Test Case: 571 | Input/Output: ["8tD)p@x{6? >" ["8tD)p@x{6?\n>" 11]]
+Test Case: 572 | Input/Output: ["i S\"iLV  C#-" ["i\nS\"iLV\n\nC#-" 9]]
+Test Case: 573 | Input/Output: ["fHXH@jEQLAz " ["fHXH@jEQLAz\n" 11]]
+Test Case: 574 | Input/Output: [" w7d9@~DUL  " ["\nw7d9@~DUL\n\n" 9]]
+Test Case: 575 | Input/Output: [" Nd:   >B  W" ["\nNd:\n\n\n>B\n\nW" 6]]
+Test Case: 576 | Input/Output: [" e 66UVt Z[;" ["\ne\n66UVt\nZ[;" 9]]
+Test Case: 577 | Input/Output: ["<7J$ E95)_-&" ["<7J$\nE95)_-&" 11]]
+Test Case: 578 | Input/Output: ["{iwN\\<H~C}  " ["{iwN\\<H~C}\n\n" 10]]
+Test Case: 579 | Input/Output: ["  R  E $gc~ " ["\n\nR\n\nE\n$gc~\n" 6]]
+Test Case: 580 | Input/Output: ["C !]>/GN 9 }" ["C\n!]>/GN\n9\n}" 9]]
+Test Case: 581 | Input/Output: ["ft |frl! _&M" ["ft\n|frl!\n_&M" 10]]
+Test Case: 582 | Input/Output: ["|W * U6M45,x" ["|W\n*\nU6M45,x" 10]]
+Test Case: 583 | Input/Output: ["  IEF -QwA_c" ["\n\nIEF\n-QwA_c" 9]]
+Test Case: 584 | Input/Output: ["$mZ  v2Ff5  " ["$mZ\n\nv2Ff5\n\n" 8]]
+Test Case: 585 | Input/Output: [" q#  &@//\\UF" ["\nq#\n\n&@//\\UF" 9]]
+Test Case: 586 | Input/Output: ["6 K}cZ  U#N6" ["6\nK}cZ\n\nU#N6" 9]]
+Test Case: 587 | Input/Output: ["\\O SCJlFof* " ["\\O\nSCJlFof*\n" 10]]
+Test Case: 588 | Input/Output: ["8J0` 2R=S>t!" ["8J0`\n2R=S>t!" 11]]
+Test Case: 589 | Input/Output: [" 4V ;9ABie 6" ["\n4V\n;9ABie\n6" 9]]
+Test Case: 590 | Input/Output: [" zY6 &AOX?# " ["\nzY6\n&AOX?#\n" 9]]
+Test Case: 591 | Input/Output: ["9\" z U1uSkz_" ["9\"\nz\nU1uSkz_" 10]]
+Test Case: 592 | Input/Output: ["kR   wK&I 78V" ["kR\n\n\nwK&I\n78V" 9]]
+Test Case: 593 | Input/Output: ["0,_9S.F  e  [" ["0,_9S.F\n\ne\n\n[" 9]]
+Test Case: 594 | Input/Output: ["  K`Tqvks% _ " ["\n\nK`Tqvks%\n_\n" 9]]
+Test Case: 595 | Input/Output: [" j}Bdg!@'fs  " ["\nj}Bdg!@'fs\n\n" 10]]
+Test Case: 596 | Input/Output: ["[GIGMS.9N H,O" ["[GIGMS.9N\nH,O" 12]]
+Test Case: 597 | Input/Output: ["]&PW (x,,4' 7" ["]&PW\n(x,,4'\n7" 11]]
+Test Case: 598 | Input/Output: ["K)+. fq   ,[1" ["K)+.\nfq\n\n\n,[1" 9]]
+Test Case: 599 | Input/Output: ["7 /6[?YNGW | " ["7\n/6[?YNGW\n|\n" 10]]
+Test Case: 600 | Input/Output: [" G<$ ?n[q)'o_" ["\nG<$\n?n[q)'o_" 11]]
+Test Case: 601 | Input/Output: ["3G8=g~nvtv n " ["3G8=g~nvtv\nn\n" 11]]
+Test Case: 602 | Input/Output: ["usr  q;u / Hv" ["usr\n\nq;u\n/\nHv" 9]]
+Test Case: 603 | Input/Output: [" F.`DJ,Oe[;93" ["\nF.`DJ,Oe[;93" 12]]
+Test Case: 604 | Input/Output: [" y-Ls6J5  Yne" ["\ny-Ls6J5\n\nYne" 10]]
+Test Case: 605 | Input/Output: ["H*~zvxD/ug@ #" ["H*~zvxD/ug@\n#" 12]]
+Test Case: 606 | Input/Output: ["#M:I9Y},f Q 8" ["#M:I9Y},f\nQ\n8" 11]]
+Test Case: 607 | Input/Output: [" BD4*G3o q5  " ["\nBD4*G3o\nq5\n\n" 9]]
+Test Case: 608 | Input/Output: ["AGe.FB  }D+fb" ["AGe.FB\n\n}D+fb" 11]]
+Test Case: 609 | Input/Output: [" s:;p s? F V8" ["\ns:;p\ns?\nF\nV8" 9]]
+Test Case: 610 | Input/Output: ["l  X xG3K3qe{" ["l\n\nX\nxG3K3qe{" 10]]
+Test Case: 611 | Input/Output: ["  z N* %U ]  " ["\n\nz\nN*\n%U\n]\n\n" 6]]
+Test Case: 612 | Input/Output: ["*v CxFg\"  0~ " ["*v\nCxFg\"\n\n0~\n" 9]]
+Test Case: 613 | Input/Output: ["2. j} zY**|/ " ["2.\nj}\nzY**|/\n" 10]]
+Test Case: 614 | Input/Output: ["p:o~+Y)h7 <RD" ["p:o~+Y)h7\n<RD" 12]]
+Test Case: 615 | Input/Output: ["$C $4%p9lPI  " ["$C\n$4%p9lPI\n\n" 10]]
+Test Case: 616 | Input/Output: ["  I#<.R PhR^ " ["\n\nI#<.R\nPhR^\n" 9]]
+Test Case: 617 | Input/Output: [" dc%xb ao 42 " ["\ndc%xb\nao\n42\n" 9]]
+Test Case: 618 | Input/Output: ["Yoq~V}\".@` 7 " ["Yoq~V}\".@`\n7\n" 11]]
+Test Case: 619 | Input/Output: ["j1zy  4  g K " ["j1zy\n\n4\n\ng\nK\n" 7]]
+Test Case: 620 | Input/Output: ["l X5V`~X5'%  " ["l\nX5V`~X5'%\n\n" 10]]
+Test Case: 621 | Input/Output: ["Z4t0<  4rJ  G" ["Z4t0<\n\n4rJ\n\nG" 9]]
+Test Case: 622 | Input/Output: ["zRYt5w?Y2N{Yl" ["zRYt5w?Y2N{Yl" 13]]
+Test Case: 623 | Input/Output: [" S\"h=;KR2 X5e" ["\nS\"h=;KR2\nX5e" 11]]
+Test Case: 624 | Input/Output: ["r7b7[|@&:|-  " ["r7b7[|@&:|-\n\n" 11]]
+Test Case: 625 | Input/Output: ["^-0G  \"` 5qC]" ["^-0G\n\n\"`\n5qC]" 10]]
+Test Case: 626 | Input/Output: [" ;e(8T  5=z \"" ["\n;e(8T\n\n5=z\n\"" 9]]
+Test Case: 627 | Input/Output: ["|NjxGSa[Ucul%" ["|NjxGSa[Ucul%" 13]]
+Test Case: 628 | Input/Output: ["`.<$ F7mOf@Mh" ["`.<$\nF7mOf@Mh" 12]]
+Test Case: 629 | Input/Output: ["a0M2nm  c td " ["a0M2nm\n\nc\ntd\n" 9]]
+Test Case: 630 | Input/Output: ["oLTjfHnD-u!cu" ["oLTjfHnD-u!cu" 13]]
+Test Case: 631 | Input/Output: ["I2a^j'*:& sLI" ["I2a^j'*:&\nsLI" 12]]
+Test Case: 632 | Input/Output: ["fV,W](1,|37[@" ["fV,W](1,|37[@" 13]]
+Test Case: 633 | Input/Output: [" ' Y<iGO)XW) " ["\n'\nY<iGO)XW)\n" 10]]
+Test Case: 634 | Input/Output: ["  ${N,Fi' ].j" ["\n\n${N,Fi'\n].j" 10]]
+Test Case: 635 | Input/Output: ["'F\"t\\)<v ,6pv" ["'F\"t\\)<v\n,6pv" 12]]
+Test Case: 636 | Input/Output: ["yI!  - ,   ^i" ["yI!\n\n-\n,\n\n\n^i" 7]]
+Test Case: 637 | Input/Output: ["]`p7P?u?; 8 /" ["]`p7P?u?;\n8\n/" 11]]
+Test Case: 638 | Input/Output: ["j s!.;yO  S F" ["j\ns!.;yO\n\nS\nF" 9]]
+Test Case: 639 | Input/Output: ["Vb|\\` (B]q)Uc" ["Vb|\\`\n(B]q)Uc" 12]]
+Test Case: 640 | Input/Output: ["kK ]G%4 T3:%~" ["kK\n]G%4\nT3:%~" 11]]
+Test Case: 641 | Input/Output: ["]M2H|o#kL2oUm" ["]M2H|o#kL2oUm" 13]]
+Test Case: 642 | Input/Output: ["WHD?V38jm   P" ["WHD?V38jm\n\n\nP" 10]]
+Test Case: 643 | Input/Output: ["B- AOzE ;Vq+q" ["B-\nAOzE\n;Vq+q" 11]]
+Test Case: 644 | Input/Output: ["Q+X  aHF2kQ  " ["Q+X\n\naHF2kQ\n\n" 9]]
+Test Case: 645 | Input/Output: ["g{00|T] @|W _" ["g{00|T]\n@|W\n_" 11]]
+Test Case: 646 | Input/Output: ["]! zg <!  B5 " ["]!\nzg\n<!\n\nB5\n" 8]]
+Test Case: 647 | Input/Output: ["b P;Q bLq c5 Z" ["b\nP;Q\nbLq\nc5\nZ" 10]]
+Test Case: 648 | Input/Output: ["Q'yUs <g M)FC5" ["Q'yUs\n<g\nM)FC5" 12]]
+Test Case: 649 | Input/Output: ["en^_$# tGic UX" ["en^_$#\ntGic\nUX" 12]]
+Test Case: 650 | Input/Output: ["=VB   coB HULt" ["=VB\n\n\ncoB\nHULt" 10]]
+Test Case: 651 | Input/Output: ["Ua|/ G1C4U (y(" ["Ua|/\nG1C4U\n(y(" 12]]
+Test Case: 652 | Input/Output: ["p g 7_ <0 m6'l" ["p\ng\n7_\n<0\nm6'l" 10]]
+Test Case: 653 | Input/Output: ["+Fzpx_` f$\"`k8" ["+Fzpx_`\nf$\"`k8" 13]]
+Test Case: 654 | Input/Output: ["I' c~PD|9s/U]/" ["I'\nc~PD|9s/U]/" 13]]
+Test Case: 655 | Input/Output: ["C/p SF9 I I 8Q" ["C/p\nSF9\nI\nI\n8Q" 10]]
+Test Case: 656 | Input/Output: ["  U{~ IC\\- |7R" ["\n\nU{~\nIC\\-\n|7R" 10]]
+Test Case: 657 | Input/Output: ["]ihi>A EWt JNv" ["]ihi>A\nEWt\nJNv" 12]]
+Test Case: 658 | Input/Output: ["uo &8[K|  }B=?" ["uo\n&8[K|\n\n}B=?" 11]]
+Test Case: 659 | Input/Output: ["Hny 73  fX FX`" ["Hny\n73\n\nfX\nFX`" 10]]
+Test Case: 660 | Input/Output: [" h+M7YtqF^$?cI" ["\nh+M7YtqF^$?cI" 13]]
+Test Case: 661 | Input/Output: [" i) i{T->07\"`Y" ["\ni)\ni{T->07\"`Y" 12]]
+Test Case: 662 | Input/Output: [" 08 @  &;YM= U" ["\n08\n@\n\n&;YM=\nU" 9]]
+Test Case: 663 | Input/Output: ["Qm6J\"j yN1 SFm" ["Qm6J\"j\nyN1\nSFm" 12]]
+Test Case: 664 | Input/Output: ["P6 y/0Q1(`: PG" ["P6\ny/0Q1(`:\nPG" 12]]
+Test Case: 665 | Input/Output: ["> v daQbag8~ed" [">\nv\ndaQbag8~ed" 12]]
+Test Case: 666 | Input/Output: ["8=m*-Q!:H `[*7" ["8=m*-Q!:H\n`[*7" 13]]
+Test Case: 667 | Input/Output: ["l,%  YEb} X  0" ["l,%\n\nYEb}\nX\n\n0" 9]]
+Test Case: 668 | Input/Output: ["$j x  7 /{ BVR" ["$j\nx\n\n7\n/{\nBVR" 9]]
+Test Case: 669 | Input/Output: ["PZst % Z;$fp C" ["PZst\n%\nZ;$fp\nC" 11]]
+Test Case: 670 | Input/Output: ["KxVY /V UP3\\P " ["KxVY\n/V\nUP3\\P\n" 11]]
+Test Case: 671 | Input/Output: [" <`[ be{SN7#z " ["\n<`[\nbe{SN7#z\n" 11]]
+Test Case: 672 | Input/Output: ["wP&~   @[ 9 CZ" ["wP&~\n\n\n@[\n9\nCZ" 9]]
+Test Case: 673 | Input/Output: ["P*0F59v^Xp x\\;" ["P*0F59v^Xp\nx\\;" 13]]
+Test Case: 674 | Input/Output: [" a+ s  +< V !l" ["\na+\ns\n\n+<\nV\n!l" 8]]
+Test Case: 675 | Input/Output: [" K&cR|LEg:x!lS" ["\nK&cR|LEg:x!lS" 13]]
+Test Case: 676 | Input/Output: [">Kl9(0f pZ\\ba " [">Kl9(0f\npZ\\ba\n" 12]]
+Test Case: 677 | Input/Output: [" ]9 Zm~)zR]al\"" ["\n]9\nZm~)zR]al\"" 12]]
+Test Case: 678 | Input/Output: ["m Mt^GL z>r!^E" ["m\nMt^GL\nz>r!^E" 12]]
+Test Case: 679 | Input/Output: ["8OW:g ^<t ss f" ["8OW:g\n^<t\nss\nf" 11]]
+Test Case: 680 | Input/Output: ["fJ;A w#}R7*  r" ["fJ;A\nw#}R7*\n\nr" 11]]
+Test Case: 681 | Input/Output: [" 1 qP2 'H y ns" ["\n1\nqP2\n'H\ny\nns" 9]]
+Test Case: 682 | Input/Output: ["r1 #g prQ  5!7" ["r1\n#g\nprQ\n\n5!7" 10]]
+Test Case: 683 | Input/Output: ["S  HrY L4ZE+  " ["S\n\nHrY\nL4ZE+\n\n" 9]]
+Test Case: 684 | Input/Output: ["7isDOQ+ 66:l 6" ["7isDOQ+\n66:l\n6" 12]]
+Test Case: 685 | Input/Output: [" n _G s uOchs#" ["\nn\n_G\ns\nuOchs#" 10]]
+Test Case: 686 | Input/Output: ["&HJ WVm irr_|K" ["&HJ\nWVm\nirr_|K" 12]]
+Test Case: 687 | Input/Output: ["A0apK8~5(/qMl&" ["A0apK8~5(/qMl&" 14]]
+Test Case: 688 | Input/Output: ["dXifS FLAF\"DPi" ["dXifS\nFLAF\"DPi" 13]]
+Test Case: 689 | Input/Output: [" 9z\\ ~{iZ6MlF}" ["\n9z\\\n~{iZ6MlF}" 12]]
+Test Case: 690 | Input/Output: ["Fr< z&?JfKv6HD" ["Fr<\nz&?JfKv6HD" 13]]
+Test Case: 691 | Input/Output: ["S32\"25S3)~w  w" ["S32\"25S3)~w\n\nw" 12]]
+Test Case: 692 | Input/Output: ["87uwg\"SW aj~  " ["87uwg\"SW\naj~\n\n" 11]]
+Test Case: 693 | Input/Output: ["% :^ }E n\\c8hP" ["%\n:^\n}E\nn\\c8hP" 11]]
+Test Case: 694 | Input/Output: ["cJ{)WY.2R!<(~T" ["cJ{)WY.2R!<(~T" 14]]
+Test Case: 695 | Input/Output: ["dot@_ N\"vf03s6" ["dot@_\nN\"vf03s6" 13]]
+Test Case: 696 | Input/Output: ["\\Wq \\)6OQ e  nr" ["\\Wq\n\\)6OQ\ne\n\nnr" 11]]
+Test Case: 697 | Input/Output: ["qwp@ E|g`  'I }" ["qwp@\nE|g`\n\n'I\n}" 11]]
+Test Case: 698 | Input/Output: ["pe>8i`LzW%8-z\"7" ["pe>8i`LzW%8-z\"7" 15]]
+Test Case: 699 | Input/Output: ["{foPkg Z6%?3ZcS" ["{foPkg\nZ6%?3ZcS" 14]]
+Test Case: 700 | Input/Output: ["L'J`Gz;sVwq:bK " ["L'J`Gz;sVwq:bK\n" 14]]
+Test Case: 701 | Input/Output: ["Yu(T K  HB<]o H" ["Yu(T\nK\n\nHB<]o\nH" 11]]
+Test Case: 702 | Input/Output: ["P v    %`$] Qj4" ["P\nv\n\n\n\n%`$]\nQj4" 9]]
+Test Case: 703 | Input/Output: ["`` 54 { m rv+>_" ["``\n54\n{\nm\nrv+>_" 11]]
+Test Case: 704 | Input/Output: ["-Ti t6&h;E];s2 " ["-Ti\nt6&h;E];s2\n" 13]]
+Test Case: 705 | Input/Output: ["\\   pE(R.wi|T~ " ["\\\n\n\npE(R.wi|T~\n" 11]]
+Test Case: 706 | Input/Output: [".9 rg ah qIf+=c" [".9\nrg\nah\nqIf+=c" 12]]
+Test Case: 707 | Input/Output: ["l K_ -? u5*}D9h" ["l\nK_\n-?\nu5*}D9h" 12]]
+Test Case: 708 | Input/Output: ["uElq {m>3/{^j$ " ["uElq\n{m>3/{^j$\n" 13]]
+Test Case: 709 | Input/Output: ["r i& !@SJn3e v." ["r\ni&\n!@SJn3e\nv." 12]]
+Test Case: 710 | Input/Output: ["|V,v ~ c8@rs\"@ " ["|V,v\n~\nc8@rs\"@\n" 12]]
+Test Case: 711 | Input/Output: ["V+Yjq=M W2bD]n~" ["V+Yjq=M\nW2bD]n~" 14]]
+Test Case: 712 | Input/Output: ["&up  dsPn9548i<" ["&up\n\ndsPn9548i<" 13]]
+Test Case: 713 | Input/Output: ["WT ` w7}iB}-0Y " ["WT\n`\nw7}iB}-0Y\n" 12]]
+Test Case: 714 | Input/Output: ["* wf G / I[   ?" ["*\nwf\nG\n/\nI[\n\n\n?" 8]]
+Test Case: 715 | Input/Output: [" Z; C !A: mH kK" ["\nZ;\nC\n!A:\nmH\nkK" 10]]
+Test Case: 716 | Input/Output: ["8  !SD? kEgHp:X" ["8\n\n!SD?\nkEgHp:X" 12]]
+Test Case: 717 | Input/Output: ["cMXkZQ!#=xb7zmf" ["cMXkZQ!#=xb7zmf" 15]]
+Test Case: 718 | Input/Output: ["'g ~00 sew4S71E" ["'g\n~00\nsew4S71E" 13]]
+Test Case: 719 | Input/Output: ["V ZYf9#4 @< 4v!" ["V\nZYf9#4\n@<\n4v!" 12]]
+Test Case: 720 | Input/Output: [";  nn8x'M4 U'Z^" [";\n\nnn8x'M4\nU'Z^" 12]]
+Test Case: 721 | Input/Output: ["eD)R 2<Wuw <p s" ["eD)R\n2<Wuw\n<p\ns" 12]]
+Test Case: 722 | Input/Output: ["cL1\\!sWik{%'` ," ["cL1\\!sWik{%'`\n," 14]]
+Test Case: 723 | Input/Output: ["<;- ZaCY -.Z|&," ["<;-\nZaCY\n-.Z|&," 13]]
+Test Case: 724 | Input/Output: ["Z  X\". d\\t2O6I`" ["Z\n\nX\".\nd\\t2O6I`" 12]]
+Test Case: 725 | Input/Output: ["  ~RP\\L0YnMb  |" ["\n\n~RP\\L0YnMb\n\n|" 11]]
+Test Case: 726 | Input/Output: ["+aeZV`}S[ ? ya " ["+aeZV`}S[\n?\nya\n" 12]]
+Test Case: 727 | Input/Output: ["Y Ao= 'p Y[ VC " ["Y\nAo=\n'p\nY[\nVC\n" 10]]
+Test Case: 728 | Input/Output: ["\"s4/7H IF\\#jk \\" ["\"s4/7H\nIF\\#jk\n\\" 13]]
+Test Case: 729 | Input/Output: ["~8&<g{y[w0Qt*U " ["~8&<g{y[w0Qt*U\n" 14]]
+Test Case: 730 | Input/Output: ["ws?,gA.l*!UJ\"YO" ["ws?,gA.l*!UJ\"YO" 15]]
+Test Case: 731 | Input/Output: ["z. WzKh\\X$zKYB " ["z.\nWzKh\\X$zKYB\n" 13]]
+Test Case: 732 | Input/Output: ["  Pt9  {c= 0 s;" ["\n\nPt9\n\n{c=\n0\ns;" 9]]
+Test Case: 733 | Input/Output: ["?7Q ms* dvBj*@-" ["?7Q\nms*\ndvBj*@-" 13]]
+Test Case: 734 | Input/Output: ["2( 4g g= ;ytI>5" ["2(\n4g\ng=\n;ytI>5" 12]]
+Test Case: 735 | Input/Output: ["~ 907CEh1n  \"  " ["~\n907CEh1n\n\n\"\n\n" 10]]
+Test Case: 736 | Input/Output: ["  97 r[p% l f w" ["\n\n97\nr[p%\nl\nf\nw" 9]]
+Test Case: 737 | Input/Output: ["]x | .O/  4QX+N" ["]x\n|\n.O/\n\n4QX+N" 11]]
+Test Case: 738 | Input/Output: ["7o IwnDN!  R^{!" ["7o\nIwnDN!\n\nR^{!" 12]]
+Test Case: 739 | Input/Output: ["*79c. KI*   LOI" ["*79c.\nKI*\n\n\nLOI" 11]]
+Test Case: 740 | Input/Output: [" uBtp: <: 6HO=V" ["\nuBtp:\n<:\n6HO=V" 12]]
+Test Case: 741 | Input/Output: ["0Bs) ^kg vE D  " ["0Bs)\n^kg\nvE\nD\n\n" 10]]
+Test Case: 742 | Input/Output: ["W _W $ JK M d!d" ["W\n_W\n$\nJK\nM\nd!d" 10]]
+Test Case: 743 | Input/Output: ["de5o<Lq#y ,0eY4" ["de5o<Lq#y\n,0eY4" 14]]
+Test Case: 744 | Input/Output: ["u @/W  s  gn  k" ["u\n@/W\n\ns\n\ngn\n\nk" 8]]
+Test Case: 745 | Input/Output: ["R/.B  WfWK^  sn" ["R/.B\n\nWfWK^\n\nsn" 11]]
+Test Case: 746 | Input/Output: [")' 7ui<jt@>v2[]" [")'\n7ui<jt@>v2[]" 14]]
+Test Case: 747 | Input/Output: ["OvN( 2,e0^ )J=." ["OvN(\n2,e0^\n)J=." 13]]
+Test Case: 748 | Input/Output: ["btIZ6|gr9gXTGRM" ["btIZ6|gr9gXTGRM" 15]]
+Test Case: 749 | Input/Output: ["oX7[.{ % v.N [b" ["oX7[.{\n%\nv.N\n[b" 12]]
+Test Case: 750 | Input/Output: ["z.Du`v 5?<#:1i4" ["z.Du`v\n5?<#:1i4" 14]]
+Test Case: 751 | Input/Output: ["0%  e :AMz  _i3" ["0%\n\ne\n:AMz\n\n_i3" 10]]
+Test Case: 752 | Input/Output: ["D    i!  _8Nz e" ["D\n\n\n\ni!\n\n_8Nz\ne" 8]]
+Test Case: 753 | Input/Output: ["h>F  I , r  _  " ["h>F\n\nI\n,\nr\n\n_\n\n" 7]]
+Test Case: 754 | Input/Output: ["qQMU\\u2 Fv: .jA" ["qQMU\\u2\nFv:\n.jA" 13]]
+Test Case: 755 | Input/Output: ["Z;D^o-DP [ \" V{}" ["Z;D^o-DP\n[\n\"\nV{}" 13]]
+Test Case: 756 | Input/Output: ["`C F n{rn-   J`n" ["`C\nF\nn{rn-\n\n\nJ`n" 11]]
+Test Case: 757 | Input/Output: ["\\J 8_Knf 4<[)+eG" ["\\J\n8_Knf\n4<[)+eG" 14]]
+Test Case: 758 | Input/Output: ["-z &K JuSobDHocy" ["-z\n&K\nJuSobDHocy" 14]]
+Test Case: 759 | Input/Output: ["D^D?|XoJ.ID\\s 25" ["D^D?|XoJ.ID\\s\n25" 15]]
+Test Case: 760 | Input/Output: ["J p_b2   7~W  tS" ["J\np_b2\n\n\n7~W\n\ntS" 10]]
+Test Case: 761 | Input/Output: ["/01?\\\\   MQ,t  d" ["/01?\\\\\n\n\nMQ,t\n\nd" 11]]
+Test Case: 762 | Input/Output: ["J@>'ooY$40)\\0*  " ["J@>'ooY$40)\\0*\n\n" 14]]
+Test Case: 763 | Input/Output: ["?T,7a  Y b:EII (" ["?T,7a\n\nY\nb:EII\n(" 12]]
+Test Case: 764 | Input/Output: [" O\" Co:G@cWmpS*^" ["\nO\"\nCo:G@cWmpS*^" 14]]
+Test Case: 765 | Input/Output: [", =`S@_,R +~ 5 9" [",\n=`S@_,R\n+~\n5\n9" 12]]
+Test Case: 766 | Input/Output: ["c V6d$= z@ '/r7n" ["c\nV6d$=\nz@\n'/r7n" 13]]
+Test Case: 767 | Input/Output: ["p]IAF&F953 XWK8a" ["p]IAF&F953\nXWK8a" 15]]
+Test Case: 768 | Input/Output: ["5SW|  `1:FmyjwV<" ["5SW|\n\n`1:FmyjwV<" 14]]
+Test Case: 769 | Input/Output: ["f \\'HW' iLCoXj+Z" ["f\n\\'HW'\niLCoXj+Z" 14]]
+Test Case: 770 | Input/Output: ["kN'Up E4 + G& hq" ["kN'Up\nE4\n+\nG&\nhq" 12]]
+Test Case: 771 | Input/Output: ["  #e 8w2<C 6v dY" ["\n\n#e\n8w2<C\n6v\ndY" 11]]
+Test Case: 772 | Input/Output: ["{`'&' ^ \"s   [bC" ["{`'&'\n^\n\"s\n\n\n[bC" 11]]
+Test Case: 773 | Input/Output: ["@J<W &08/2or:4){" ["@J<W\n&08/2or:4){" 15]]
+Test Case: 774 | Input/Output: ["`2 ~/m@G$] RKP^ " ["`2\n~/m@G$]\nRKP^\n" 13]]
+Test Case: 775 | Input/Output: ["fj_H>n^NdUu%3YG " ["fj_H>n^NdUu%3YG\n" 15]]
+Test Case: 776 | Input/Output: ["rj&mHW{|]xZ^LH 4" ["rj&mHW{|]xZ^LH\n4" 15]]
+Test Case: 777 | Input/Output: ["xyHc@0GjjogD~ @ " ["xyHc@0GjjogD~\n@\n" 14]]
+Test Case: 778 | Input/Output: ["%B2q$#NWC%w& O_c" ["%B2q$#NWC%w&\nO_c" 15]]
+Test Case: 779 | Input/Output: ["m$DXBG4fa ZVN8\\?" ["m$DXBG4fa\nZVN8\\?" 15]]
+Test Case: 780 | Input/Output: ["nabyY@ Ia?\"VBcOs" ["nabyY@\nIa?\"VBcOs" 15]]
+Test Case: 781 | Input/Output: ["WM-6m4 d)+Z: X ;" ["WM-6m4\nd)+Z:\nX\n;" 13]]
+Test Case: 782 | Input/Output: ["bA J:PZMj H#5 *N" ["bA\nJ:PZMj\nH#5\n*N" 13]]
+Test Case: 783 | Input/Output: ["  .Hu&&uoZZV6\\5k" ["\n\n.Hu&&uoZZV6\\5k" 14]]
+Test Case: 784 | Input/Output: ["+P ,Qw{nc_5 &XbT" ["+P\n,Qw{nc_5\n&XbT" 14]]
+Test Case: 785 | Input/Output: ["5;  ,CFHQ9X( f^-" ["5;\n\n,CFHQ9X(\nf^-" 13]]
+Test Case: 786 | Input/Output: ["8*$D^ 1~(O. N)]L" ["8*$D^\n1~(O.\nN)]L" 14]]
+Test Case: 787 | Input/Output: [" <66 l w;k7!4J r" ["\n<66\nl\nw;k7!4J\nr" 12]]
+Test Case: 788 | Input/Output: ["8aQ8 =v6R[0k% 9 " ["8aQ8\n=v6R[0k%\n9\n" 13]]
+Test Case: 789 | Input/Output: [" ld -<H'Yt &() ," ["\nld\n-<H'Yt\n&()\n," 12]]
+Test Case: 790 | Input/Output: ["qj_>K^9@ IEj:.*x" ["qj_>K^9@\nIEj:.*x" 15]]
+Test Case: 791 | Input/Output: ["{~1b   2.Fx@ )O " ["{~1b\n\n\n2.Fx@\n)O\n" 11]]
+Test Case: 792 | Input/Output: ["#N{ s.Z   o :C  " ["#N{\ns.Z\n\n\no\n:C\n\n" 9]]
+Test Case: 793 | Input/Output: [" oY>bcr8 h =AK)@" ["\noY>bcr8\nh\n=AK)@" 13]]
+Test Case: 794 | Input/Output: [")E! ; W>i5 mWyK " [")E!\n;\nW>i5\nmWyK\n" 12]]
+Test Case: 795 | Input/Output: ["ajxSPuZ \\glG <  " ["ajxSPuZ\n\\glG\n<\n\n" 12]]
+Test Case: 796 | Input/Output: ["J mKOtx q$fj%-  " ["J\nmKOtx\nq$fj%-\n\n" 12]]
+Test Case: 797 | Input/Output: ["x D bo*^/  $rjI};" ["x\nD\nbo*^/\n\n$rjI};" 13]]
+Test Case: 798 | Input/Output: ["#S_^_ 9`S   pjQU3" ["#S_^_\n9`S\n\n\npjQU3" 13]]
+Test Case: 799 | Input/Output: [",  I*Z_p  I<$- &*" [",\n\nI*Z_p\n\nI<$-\n&*" 12]]
+Test Case: 800 | Input/Output: [" UB )r?`'y k),Ll[" ["\nUB\n)r?`'y\nk),Ll[" 14]]
+Test Case: 801 | Input/Output: ["3 26_@ <1; j9| +j" ["3\n26_@\n<1;\nj9|\n+j" 13]]
+Test Case: 802 | Input/Output: ["   j5 $8{Mtc/  rc" ["\n\n\nj5\n$8{Mtc/\n\nrc" 11]]
+Test Case: 803 | Input/Output: ["jR ll[2i ^     x " ["jR\nll[2i\n^\n\n\n\n\nx\n" 9]]
+Test Case: 804 | Input/Output: ["Kff 1DVY{\\#C@Dip6" ["Kff\n1DVY{\\#C@Dip6" 16]]
+Test Case: 805 | Input/Output: [" r/|B E GB I@/s*)" ["\nr/|B\nE\nGB\nI@/s*)" 13]]
+Test Case: 806 | Input/Output: ["   -9U g<|   M&h{" ["\n\n\n-9U\ng<|\n\n\nM&h{" 10]]
+Test Case: 807 | Input/Output: [":]<s ETbKh  }^ZT " [":]<s\nETbKh\n\n}^ZT\n" 13]]
+Test Case: 808 | Input/Output: ["4#*yn = a ` RcRK%" ["4#*yn\n=\na\n`\nRcRK%" 13]]
+Test Case: 809 | Input/Output: ["a VM: Jmeasd\\I;yQ" ["a\nVM:\nJmeasd\\I;yQ" 15]]
+Test Case: 810 | Input/Output: ["W&^ P\\?YO. x9hae'" ["W&^\nP\\?YO.\nx9hae'" 15]]
+Test Case: 811 | Input/Output: ["nUf!   >(Cb ,F(\"E" ["nUf!\n\n\n>(Cb\n,F(\"E" 13]]
+Test Case: 812 | Input/Output: ["bE;U  1i o   A(rN" ["bE;U\n\n1i\no\n\n\nA(rN" 11]]
+Test Case: 813 | Input/Output: ["r20 V>)N Q ) ze =" ["r20\nV>)N\nQ\n)\nze\n=" 12]]
+Test Case: 814 | Input/Output: ["yZx:K  i+^ 6n!d5D" ["yZx:K\n\ni+^\n6n!d5D" 14]]
+Test Case: 815 | Input/Output: [" 6  -51~ $? c =  " ["\n6\n\n-51~\n$?\nc\n=\n\n" 9]]
+Test Case: 816 | Input/Output: ["x|   u'e VD_I?KJ{" ["x|\n\n\nu'e\nVD_I?KJ{" 13]]
+Test Case: 817 | Input/Output: ["0MYp * \" x|rtW  ?" ["0MYp\n*\n\"\nx|rtW\n\n?" 12]]
+Test Case: 818 | Input/Output: ["I,D@ $.  A`lF4 ur" ["I,D@\n$.\n\nA`lF4\nur" 13]]
+Test Case: 819 | Input/Output: ["2F22Y e0%11wO KE{" ["2F22Y\ne0%11wO\nKE{" 15]]
+Test Case: 820 | Input/Output: ["M> qz*8ne^ c: u**" ["M>\nqz*8ne^\nc:\nu**" 14]]
+Test Case: 821 | Input/Output: [",*6L' zRbDjr )< v" [",*6L'\nzRbDjr\n)<\nv" 14]]
+Test Case: 822 | Input/Output: ["V]AGWH0? <U *g FT" ["V]AGWH0?\n<U\n*g\nFT" 14]]
+Test Case: 823 | Input/Output: ["7t 5 Cg8J X7Y. +n" ["7t\n5\nCg8J\nX7Y.\n+n" 13]]
+Test Case: 824 | Input/Output: ["x!   L Ca1q<^=XNz" ["x!\n\n\nL\nCa1q<^=XNz" 13]]
+Test Case: 825 | Input/Output: ["w?1$+X\"'y=c]I4>i_" ["w?1$+X\"'y=c]I4>i_" 17]]
+Test Case: 826 | Input/Output: ["7c? 0K\";} itIqIt9" ["7c?\n0K\";}\nitIqIt9" 15]]
+Test Case: 827 | Input/Output: [" zUc7 *+00 o:6~' " ["\nzUc7\n*+00\no:6~'\n" 13]]
+Test Case: 828 | Input/Output: [" /n k WD   JBR }m" ["\n/n\nk\nWD\n\n\nJBR\n}m" 10]]
+Test Case: 829 | Input/Output: [" 03TF  \"|Y$^'k gE" ["\n03TF\n\n\"|Y$^'k\ngE" 13]]
+Test Case: 830 | Input/Output: ["HI ;?ru/  aVtN^  " ["HI\n;?ru/\n\naVtN^\n\n" 12]]
+Test Case: 831 | Input/Output: [")T*.Mr-|9 *6I.f;$" [")T*.Mr-|9\n*6I.f;$" 16]]
+Test Case: 832 | Input/Output: ["/NRnt\\ 9kC3Umlc{3" ["/NRnt\\\n9kC3Umlc{3" 16]]
+Test Case: 833 | Input/Output: [" mi \"*`rLg8*9jk$z" ["\nmi\n\"*`rLg8*9jk$z" 15]]
+Test Case: 834 | Input/Output: ["7IiR SX  9F2w[uH " ["7IiR\nSX\n\n9F2w[uH\n" 13]]
+Test Case: 835 | Input/Output: ["u Tj9 GQ 5D# m+X " ["u\nTj9\nGQ\n5D#\nm+X\n" 12]]
+Test Case: 836 | Input/Output: ["vo&@Q)*n} 4=OhlUA" ["vo&@Q)*n}\n4=OhlUA" 16]]
+Test Case: 837 | Input/Output: ["SCX }}i+  Cz. h{^" ["SCX\n}}i+\n\nCz.\nh{^" 13]]
+Test Case: 838 | Input/Output: ["J=i'HA';H pH^u*UH" ["J=i'HA';H\npH^u*UH" 16]]
+Test Case: 839 | Input/Output: ["k  lNT |.PI:3{W~i" ["k\n\nlNT\n|.PI:3{W~i" 14]]
+Test Case: 840 | Input/Output: ["nsy45ae j +hl} Z " ["nsy45ae\nj\n+hl}\nZ\n" 13]]
+Test Case: 841 | Input/Output: ["R417T. ~ `  9/6I," ["R417T.\n~\n`\n\n9/6I," 13]]
+Test Case: 842 | Input/Output: ["V Etu9  5 T $aGB " ["V\nEtu9\n\n5\nT\n$aGB\n" 11]]
+Test Case: 843 | Input/Output: ["&|S'3t,mwv;ei n9'" ["&|S'3t,mwv;ei\nn9'" 16]]
+Test Case: 844 | Input/Output: ["a_ U )  _f*g     " ["a_\nU\n)\n\n_f*g\n\n\n\n\n" 8]]
+Test Case: 845 | Input/Output: ["2n +hV /L:, w T t" ["2n\n+hV\n/L:,\nw\nT\nt" 12]]
+Test Case: 846 | Input/Output: ["x7yz?^  diGc@3mQ7" ["x7yz?^\n\ndiGc@3mQ7" 15]]
+Test Case: 847 | Input/Output: ["\\GJ4u Qb>]|!?`f;>" ["\\GJ4u\nQb>]|!?`f;>" 16]]
+Test Case: 848 | Input/Output: ["  XY`alHXs4  U!  " ["\n\nXY`alHXs4\n\nU!\n\n" 11]]
+Test Case: 849 | Input/Output: ["~  '.% eTI  f>: L" ["~\n\n'.%\neTI\n\nf>:\nL" 11]]
+Test Case: 850 | Input/Output: ["PGI- Jmiw  N' >#k" ["PGI-\nJmiw\n\nN'\n>#k" 13]]
+Test Case: 851 | Input/Output: ["7g) RN\\ $ / 6Or2Z" ["7g)\nRN\\\n$\n/\n6Or2Z" 13]]
+Test Case: 852 | Input/Output: ["Yt Vt_R {I%u   um" ["Yt\nVt_R\n{I%u\n\n\num" 12]]
+Test Case: 853 | Input/Output: ["c eaa<J@aDyA?=*O;" ["c\neaa<J@aDyA?=*O;" 16]]
+Test Case: 854 | Input/Output: ["NOi m_BLY>_/Hc}  " ["NOi\nm_BLY>_/Hc}\n\n" 14]]
+Test Case: 855 | Input/Output: [" r0 ( %   I}  w.&" ["\nr0\n(\n%\n\n\nI}\n\nw.&" 9]]
+Test Case: 856 | Input/Output: [",p,WJ  W 3XM I3|C" [",p,WJ\n\nW\n3XM\nI3|C" 13]]
+Test Case: 857 | Input/Output: ["t`  O<3yE$_\\@S;%p" ["t`\n\nO<3yE$_\\@S;%p" 15]]
+Test Case: 858 | Input/Output: [" ?JEN'  s` N4sL\\ " ["\n?JEN'\n\ns`\nN4sL\\\n" 12]]
+Test Case: 859 | Input/Output: ["9arW \"Y D* $$~7o!" ["9arW\n\"Y\nD*\n$$~7o!" 14]]
+Test Case: 860 | Input/Output: ["8?q ;OY  2V %6^=@" ["8?q\n;OY\n\n2V\n%6^=@" 13]]
+Test Case: 861 | Input/Output: ["xxlv.k(V<Q1{M5^   " ["xxlv.k(V<Q1{M5^\n\n\n" 15]]
+Test Case: 862 | Input/Output: [" _\\!7  =m =iYK f\\7" ["\n_\\!7\n\n=m\n=iYK\nf\\7" 13]]
+Test Case: 863 | Input/Output: [" L?m( MP aJB0-IAS_" ["\nL?m(\nMP\naJB0-IAS_" 15]]
+Test Case: 864 | Input/Output: ["ch3EV:Td\\Bg Su7-+ " ["ch3EV:Td\\Bg\nSu7-+\n" 16]]
+Test Case: 865 | Input/Output: ["o/+u(\\ } 1e-@l. Tw" ["o/+u(\\\n}\n1e-@l.\nTw" 15]]
+Test Case: 866 | Input/Output: ["=eh^Jl c;p2N m 0~U" ["=eh^Jl\nc;p2N\nm\n0~U" 15]]
+Test Case: 867 | Input/Output: [")~/!=l6^8A'R*@~j {" [")~/!=l6^8A'R*@~j\n{" 17]]
+Test Case: 868 | Input/Output: [" j  ?  ZQiU~\"_4 =j" ["\nj\n\n?\n\nZQiU~\"_4\n=j" 12]]
+Test Case: 869 | Input/Output: ["6eEjw$9] ?3  &XJ B" ["6eEjw$9]\n?3\n\n&XJ\nB" 14]]
+Test Case: 870 | Input/Output: ["(V;!#ft%J8fb Ok O;" ["(V;!#ft%J8fb\nOk\nO;" 16]]
+Test Case: 871 | Input/Output: ["]!Q&j  iJ u1Bp 7JV" ["]!Q&j\n\niJ\nu1Bp\n7JV" 14]]
+Test Case: 872 | Input/Output: [" )!<F5J  Fi LzS (t" ["\n)!<F5J\n\nFi\nLzS\n(t" 13]]
+Test Case: 873 | Input/Output: ["-De.I z&CC5:? f $ " ["-De.I\nz&CC5:?\nf\n$\n" 14]]
+Test Case: 874 | Input/Output: ["h!+A Vq j\\  >[k C(" ["h!+A\nVq\nj\\\n\n>[k\nC(" 13]]
+Test Case: 875 | Input/Output: ["eK 1  0.tq  <{sQ42" ["eK\n1\n\n0.tq\n\n<{sQ42" 13]]
+Test Case: 876 | Input/Output: ["V P@1  n  c?wKYAuH" ["V\nP@1\n\nn\n\nc?wKYAuH" 13]]
+Test Case: 877 | Input/Output: ["c 6 eyMT1\\vuxUW & " ["c\n6\neyMT1\\vuxUW\n&\n" 14]]
+Test Case: 878 | Input/Output: [" ;/o?$n.0`LH ? Z $" ["\n;/o?$n.0`LH\n?\nZ\n$" 14]]
+Test Case: 879 | Input/Output: ["  4/ qmq  v4 o  nu" ["\n\n4/\nqmq\n\nv4\no\n\nnu" 10]]
+Test Case: 880 | Input/Output: ["~zU\"U](#)j|#|B=/ o" ["~zU\"U](#)j|#|B=/\no" 17]]
+Test Case: 881 | Input/Output: ["it  =iUn% s81{[m2o" ["it\n\n=iUn%\ns81{[m2o" 15]]
+Test Case: 882 | Input/Output: [" Ya0o FYjg9bZRX+.c" ["\nYa0o\nFYjg9bZRX+.c" 16]]
+Test Case: 883 | Input/Output: ["w`Q.P Whqbt d)&x=A" ["w`Q.P\nWhqbt\nd)&x=A" 16]]
+Test Case: 884 | Input/Output: ["t 84$} n  e Fx [kp" ["t\n84$}\nn\n\ne\nFx\n[kp" 12]]
+Test Case: 885 | Input/Output: ["2mv3${  D^L{{ zcDN" ["2mv3${\n\nD^L{{\nzcDN" 15]]
+Test Case: 886 | Input/Output: ["s[\"DM\\Cao;oc[ c   " ["s[\"DM\\Cao;oc[\nc\n\n\n" 14]]
+Test Case: 887 | Input/Output: ["u 5+ g{ E s  mjF! " ["u\n5+\ng{\nE\ns\n\nmjF!\n" 11]]
+Test Case: 888 | Input/Output: ["L&he C~ !M ny4Cp,~" ["L&he\nC~\n!M\nny4Cp,~" 15]]
+Test Case: 889 | Input/Output: ["z , K '&;y+N  jN O" ["z\n,\nK\n'&;y+N\n\njN\nO" 12]]
+Test Case: 890 | Input/Output: ["u5!L PO tM # Lgf f" ["u5!L\nPO\ntM\n#\nLgf\nf" 13]]
+Test Case: 891 | Input/Output: [" 0;]qz_\"_Wg6 y32FQ" ["\n0;]qz_\"_Wg6\ny32FQ" 16]]
+Test Case: 892 | Input/Output: ["bj6a3'@ $ Bv;b@L ," ["bj6a3'@\n$\nBv;b@L\n," 15]]
+Test Case: 893 | Input/Output: ["1\"y,f  H  w$| W$+ " ["1\"y,f\n\nH\n\nw$|\nW$+\n" 12]]
+Test Case: 894 | Input/Output: [">D6my}jx1c %rc|9  " [">D6my}jx1c\n%rc|9\n\n" 15]]
+Test Case: 895 | Input/Output: ["k  e@& wU5 ({@i~]=" ["k\n\ne@&\nwU5\n({@i~]=" 14]]
+Test Case: 896 | Input/Output: ["V  dhvxw y !% ' J " ["V\n\ndhvxw\ny\n!%\n'\nJ\n" 11]]
+Test Case: 897 | Input/Output: [" -E4 uL 17L@jWSu- " ["\n-E4\nuL\n17L@jWSu-\n" 14]]
+Test Case: 898 | Input/Output: [" B+ @ \\QMN ,M\"Cu4x" ["\nB+\n@\n\\QMN\n,M\"Cu4x" 14]]
+Test Case: 899 | Input/Output: ["m* 3&]g f3A!GpkH0d" ["m*\n3&]g\nf3A!GpkH0d" 16]]
+Test Case: 900 | Input/Output: ["[?,4ZY  dFO~E/rx9S" ["[?,4ZY\n\ndFO~E/rx9S" 16]]
+Test Case: 901 | Input/Output: ["2%@o Y0 [ t  )  6a" ["2%@o\nY0\n[\nt\n\n)\n\n6a" 11]]
+Test Case: 902 | Input/Output: ["Y3z2V/  `]Xj`Yh\\. " ["Y3z2V/\n\n`]Xj`Yh\\.\n" 15]]
+Test Case: 903 | Input/Output: ["'%=<X5R  V]X/*APkz" ["'%=<X5R\n\nV]X/*APkz" 16]]
+Test Case: 904 | Input/Output: ["B 5 E 01?B Bi* Fgi" ["B\n5\nE\n01?B\nBi*\nFgi" 13]]
+Test Case: 905 | Input/Output: ["mxY5 g>J`Gza$5L}j=" ["mxY5\ng>J`Gza$5L}j=" 17]]
+Test Case: 906 | Input/Output: ["u _ [hDp  QLVj-G: " ["u\n_\n[hDp\n\nQLVj-G:\n" 13]]
+Test Case: 907 | Input/Output: ["{uO$ `{ElsS4 ,h) ;" ["{uO$\n`{ElsS4\n,h)\n;" 15]]
+Test Case: 908 | Input/Output: ["  `+PvV:hu iSNT$` D" ["\n\n`+PvV:hu\niSNT$`\nD" 15]]
+Test Case: 909 | Input/Output: ["ZY f E  mq  OUdL ^-" ["ZY\nf\nE\n\nmq\n\nOUdL\n^-" 12]]
+Test Case: 910 | Input/Output: ["QNFw~ls2])i X 1  WG" ["QNFw~ls2])i\nX\n1\n\nWG" 15]]
+Test Case: 911 | Input/Output: ["v |K5|0 7i;_ K 7D\\Z" ["v\n|K5|0\n7i;_\nK\n7D\\Z" 15]]
+Test Case: 912 | Input/Output: ["d=SU?l D{E1IC O)41A" ["d=SU?l\nD{E1IC\nO)41A" 17]]
+Test Case: 913 | Input/Output: ["Q 5!x %0)UHU/ }kH`v" ["Q\n5!x\n%0)UHU/\n}kH`v" 16]]
+Test Case: 914 | Input/Output: ["t:t}EzfjC_O$SW> t#`" ["t:t}EzfjC_O$SW>\nt#`" 18]]
+Test Case: 915 | Input/Output: [" ]  h E SK>\\N8jW 4B" ["\n]\n\nh\nE\nSK>\\N8jW\n4B" 13]]
+Test Case: 916 | Input/Output: ["f247E r % i%fVQ ;vp" ["f247E\nr\n%\ni%fVQ\n;vp" 15]]
+Test Case: 917 | Input/Output: ["XOo;OeV 1=UOMJYCS y" ["XOo;OeV\n1=UOMJYCS\ny" 17]]
+Test Case: 918 | Input/Output: ["+YOYh _=>>@H`M kY82" ["+YOYh\n_=>>@H`M\nkY82" 17]]
+Test Case: 919 | Input/Output: ["G&i.l2`1nFc2 q o < " ["G&i.l2`1nFc2\nq\no\n<\n" 15]]
+Test Case: 920 | Input/Output: ["q;H ErKp-W9 1 ;Z /C" ["q;H\nErKp-W9\n1\n;Z\n/C" 15]]
+Test Case: 921 | Input/Output: ["$XP Iy o3%\\ X{U p5M" ["$XP\nIy\no3%\\\nX{U\np5M" 15]]
+Test Case: 922 | Input/Output: [" *@80- [>J~ \"mg+50J" ["\n*@80-\n[>J~\n\"mg+50J" 16]]
+Test Case: 923 | Input/Output: ["n]6NjEc^?  +~ ,\\ =R" ["n]6NjEc^?\n\n+~\n,\\\n=R" 15]]
+Test Case: 924 | Input/Output: ["aBfE*<b >_S_e 7 V'`" ["aBfE*<b\n>_S_e\n7\nV'`" 16]]
+Test Case: 925 | Input/Output: [" S3,d7& F/6Ihj8f;*5" ["\nS3,d7&\nF/6Ihj8f;*5" 17]]
+Test Case: 926 | Input/Output: [" / nj Y%wA N CZuv\"]" ["\n/\nnj\nY%wA\nN\nCZuv\"]" 14]]
+Test Case: 927 | Input/Output: ["vHgYE oHl]q<&(&~UOD" ["vHgYE\noHl]q<&(&~UOD" 18]]
+Test Case: 928 | Input/Output: ["W !\"kIZLWS B+p(:' |" ["W\n!\"kIZLWS\nB+p(:'\n|" 16]]
+Test Case: 929 | Input/Output: ["Q#LHd+ 1xoN ,1 3 & " ["Q#LHd+\n1xoN\n,1\n3\n&\n" 14]]
+Test Case: 930 | Input/Output: ["F(]  ZnDb??eAH[#$oR" ["F(]\n\nZnDb??eAH[#$oR" 17]]
+Test Case: 931 | Input/Output: ["qi1  :\"ez%GMh0$?XKA" ["qi1\n\n:\"ez%GMh0$?XKA" 17]]
+Test Case: 932 | Input/Output: ["sVC xHc [ +J?K X%I!" ["sVC\nxHc\n[\n+J?K\nX%I!" 15]]
+Test Case: 933 | Input/Output: ["+.O89[eSW0>rV7/0DQa" ["+.O89[eSW0>rV7/0DQa" 19]]
+Test Case: 934 | Input/Output: ["2}0s    m=g\"s&Y \\kU" ["2}0s\n\n\n\nm=g\"s&Y\n\\kU" 14]]
+Test Case: 935 | Input/Output: ["V\"ZWZbE<7 <nuo d #H" ["V\"ZWZbE<7\n<nuo\nd\n#H" 16]]
+Test Case: 936 | Input/Output: [":l Ye?s^F ^U^. /r~ " [":l\nYe?s^F\n^U^.\n/r~\n" 15]]
+Test Case: 937 | Input/Output: ["o>p}tu:0}.dj I]   N" ["o>p}tu:0}.dj\nI]\n\n\nN" 15]]
+Test Case: 938 | Input/Output: ["b2Tf  _~ = g' 7!Y/h" ["b2Tf\n\n_~\n=\ng'\n7!Y/h" 14]]
+Test Case: 939 | Input/Output: ["D Jar\"liUKu8Yb3}l  " ["D\nJar\"liUKu8Yb3}l\n\n" 16]]
+Test Case: 940 | Input/Output: [" ^s^ /ZC@yZ cX>GE,O" ["\n^s^\n/ZC@yZ\ncX>GE,O" 16]]
+Test Case: 941 | Input/Output: [" O ea `**o{,=J[<T5 " ["\nO\nea\n`**o{,=J[<T5\n" 15]]
+Test Case: 942 | Input/Output: ["qu m  oi<]5/@5z* m(" ["qu\nm\n\noi<]5/@5z*\nm(" 15]]
+Test Case: 943 | Input/Output: [")~x1(qb* IzO%^0I\"s " [")~x1(qb*\nIzO%^0I\"s\n" 17]]
+Test Case: 944 | Input/Output: ["+Fo~O .HQ)2I cY  6C" ["+Fo~O\n.HQ)2I\ncY\n\n6C" 15]]
+Test Case: 945 | Input/Output: ["[ SIf_Anb aa  _tYn6" ["[\nSIf_Anb\naa\n\n_tYn6" 15]]
+Test Case: 946 | Input/Output: ["* \"n \"\\*Lpv qL_l;{P" ["*\n\"n\n\"\\*Lpv\nqL_l;{P" 16]]
+Test Case: 947 | Input/Output: ["2%D/_H F6 y;B=Z uzi" ["2%D/_H\nF6\ny;B=Z\nuzi" 16]]
+Test Case: 948 | Input/Output: ["vXuWXH~jDy9xf\"n+  &" ["vXuWXH~jDy9xf\"n+\n\n&" 17]]
+Test Case: 949 | Input/Output: ["g!<ER{} k(f!z<Yj2-o" ["g!<ER{}\nk(f!z<Yj2-o" 18]]
+Test Case: 950 | Input/Output: ["\\VSv OEAJl+J.GM  tU" ["\\VSv\nOEAJl+J.GM\n\ntU" 16]]
+Test Case: 951 | Input/Output: ["| S  UfC_D  sr}ib x" ["|\nS\n\nUfC_D\n\nsr}ib\nx" 13]]
+Test Case: 952 | Input/Output: [" KIQ   s    Qk U] 5I" ["\nKIQ\n\n\ns\n\n\n\nQk\nU]\n5I" 10]]
+Test Case: 953 | Input/Output: ["1}.6F'  =O>`:Fp9P T " ["1}.6F'\n\n=O>`:Fp9P\nT\n" 16]]
+Test Case: 954 | Input/Output: [" [1&d `<hm@HYEoT;O  " ["\n[1&d\n`<hm@HYEoT;O\n\n" 16]]
+Test Case: 955 | Input/Output: [" 0 p`RQ.EG:5- >1fE K" ["\n0\np`RQ.EG:5-\n>1fE\nK" 16]]
+Test Case: 956 | Input/Output: ["' s55 ' D:wjd>/ }rxd" ["'\ns55\n'\nD:wjd>/\n}rxd" 16]]
+Test Case: 957 | Input/Output: ["Lo/~'H ' C 2%; s|8^&" ["Lo/~'H\n'\nC\n2%;\ns|8^&" 16]]
+Test Case: 958 | Input/Output: ["EE/]*\"h .! Yoo] =} v" ["EE/]*\"h\n.!\nYoo]\n=}\nv" 16]]
+Test Case: 959 | Input/Output: ["p ]_1%DS#hBAO T OD I" ["p\n]_1%DS#hBAO\nT\nOD\nI" 16]]
+Test Case: 960 | Input/Output: [" B_ Hb  R   Qu=#  ? " ["\nB_\nHb\n\nR\n\n\nQu=#\n\n?\n" 10]]
+Test Case: 961 | Input/Output: ["13 jkZG {UwAPPJ 8%z " ["13\njkZG\n{UwAPPJ\n8%z\n" 16]]
+Test Case: 962 | Input/Output: ["J # 3 Uf_aG \"8*~GcU " ["J\n#\n3\nUf_aG\n\"8*~GcU\n" 15]]
+Test Case: 963 | Input/Output: [">\\nsfWs    -'i 4?i`H" [">\\nsfWs\n\n\n\n-'i\n4?i`H" 15]]
+Test Case: 964 | Input/Output: ["M>XuFe0&}y k]I&i2Z  " ["M>XuFe0&}y\nk]I&i2Z\n\n" 17]]
+Test Case: 965 | Input/Output: ["3b Y(R3y_lHg &$ N3aq" ["3b\nY(R3y_lHg\n&$\nN3aq" 17]]
+Test Case: 966 | Input/Output: ["n< 9>|4*B-_%j J c X4" ["n<\n9>|4*B-_%j\nJ\nc\nX4" 16]]
+Test Case: 967 | Input/Output: ["WQF/I_ *5O]=)j&jL% j" ["WQF/I_\n*5O]=)j&jL%\nj" 18]]
+Test Case: 968 | Input/Output: ["W0-S`bP2  o?\\G8Gs0ti" ["W0-S`bP2\n\no?\\G8Gs0ti" 18]]
+Test Case: 969 | Input/Output: [" ?  }4m8  z+wt UJ.h " ["\n?\n\n}4m8\n\nz+wt\nUJ.h\n" 13]]
+Test Case: 970 | Input/Output: ["Y avaw - :$`aLI0`>5;" ["Y\navaw\n-\n:$`aLI0`>5;" 17]]
+Test Case: 971 | Input/Output: ["n0o l]H OA/#9,wO804K" ["n0o\nl]H\nOA/#9,wO804K" 18]]
+Test Case: 972 | Input/Output: ["R=F=T}<hE9*a D4\"3 i " ["R=F=T}<hE9*a\nD4\"3\ni\n" 17]]
+Test Case: 973 | Input/Output: ["v2I;F pG`%w5N Gt>FD0" ["v2I;F\npG`%w5N\nGt>FD0" 18]]
+Test Case: 974 | Input/Output: ["6.I#lKr|uQvg   3(5DV" ["6.I#lKr|uQvg\n\n\n3(5DV" 17]]
+Test Case: 975 | Input/Output: ["g QVac] .O ^f?&k  3 " ["g\nQVac]\n.O\n^f?&k\n\n3\n" 14]]
+Test Case: 976 | Input/Output: ["I</%nPG p4vD7 lo iXD" ["I</%nPG\np4vD7\nlo\niXD" 17]]
+Test Case: 977 | Input/Output: ["3d)q-qtU8= O=W  iHu7" ["3d)q-qtU8=\nO=W\n\niHu7" 17]]
+Test Case: 978 | Input/Output: [" \\3 3W.c/   SN:MpD \\" ["\n\\3\n3W.c/\n\n\nSN:MpD\n\\" 14]]
+Test Case: 979 | Input/Output: ["D  ktX.p>xW8 e] 9T(z" ["D\n\nktX.p>xW8\ne]\n9T(z" 16]]
+Test Case: 980 | Input/Output: [" jVx{E=PHR ,dn!Gn) Y" ["\njVx{E=PHR\n,dn!Gn)\nY" 17]]
+Test Case: 981 | Input/Output: ["gs[1?5@ %v__sW\"i W}~" ["gs[1?5@\n%v__sW\"i\nW}~" 18]]
+Test Case: 982 | Input/Output: ["^<N< k3{F c*s :$F  ^" ["^<N<\nk3{F\nc*s\n:$F\n\n^" 15]]
+Test Case: 983 | Input/Output: ["}I6ER)dHmP  1I/~s K " ["}I6ER)dHmP\n\n1I/~s\nK\n" 16]]
+Test Case: 984 | Input/Output: ["k\\NqveU 8tJb _{\\%  !" ["k\\NqveU\n8tJb\n_{\\%\n\n!" 16]]
+Test Case: 985 | Input/Output: [" /6 Z @Y7 m>  1/Z d " ["\n/6\nZ\n@Y7\nm>\n\n1/Z\nd\n" 12]]
+Test Case: 986 | Input/Output: [".yTi`}Ie- 8u+[@]Qs`v" [".yTi`}Ie-\n8u+[@]Qs`v" 19]]
+Test Case: 987 | Input/Output: ["? luy'ytL!eb YG*N ,Z" ["?\nluy'ytL!eb\nYG*N\n,Z" 17]]
+Test Case: 988 | Input/Output: ["rQHFe_H v]gG T`&`ci*" ["rQHFe_H\nv]gG\nT`&`ci*" 18]]
+Test Case: 989 | Input/Output: [" M6    7K]R bP?x1q|0" ["\nM6\n\n\n\n7K]R\nbP?x1q|0" 14]]
+Test Case: 990 | Input/Output: ["X7F S>#*J}P_N] m2  1" ["X7F\nS>#*J}P_N]\nm2\n\n1" 16]]
+Test Case: 991 | Input/Output: ["? Y  84TY M8Yp]F =u~" ["?\nY\n\n84TY\nM8Yp]F\n=u~" 15]]
+Test Case: 992 | Input/Output: ["EU.} x+l}&0pyo  XA 6" ["EU.}\nx+l}&0pyo\n\nXA\n6" 16]]
+Test Case: 993 | Input/Output: ["UBCN}8[b~Q X7BDHif ," ["UBCN}8[b~Q\nX7BDHif\n," 18]]
+Test Case: 994 | Input/Output: ["x.27m ek$L tCfL\" 6  " ["x.27m\nek$L\ntCfL\"\n6\n\n" 15]]
+Test Case: 995 | Input/Output: [";~x 6 \"X Jgs.z=5l _l" [";~x\n6\n\"X\nJgs.z=5l\n_l" 16]]
+Test Case: 996 | Input/Output: ["PYP>3Sx G<f B N  U# " ["PYP>3Sx\nG<f\nB\nN\n\nU#\n" 14]]
+Test Case: 997 | Input/Output: ["pf q:{Mx }@fXS^B\"'A " ["pf\nq:{Mx\n}@fXS^B\"'A\n" 17]]
+Test Case: 998 | Input/Output: ["&]r1)` >N)`JnOF 0jih" ["&]r1)`\n>N)`JnOF\n0jih" 18]]
+Test Case: 999 | Input/Output: [" kk P?1 +C  $W4nx} 0" ["\nkk\nP?1\n+C\n\n$W4nx}\n0" 14]]
+;;******************************
+Registered instructions: #{code_atom genome_uniform_tag_mutation code_car print_newline integer_sub integer_inc boolean_stackdepth return_exec_pop zip_dup_items integer_tag_string_instruction vector_integer_eq autoconstructive_integer_rand boolean_pop genome_close_inc string_fromchar vector_string_shove zip_yankdup genome_new vector_float_yankdup exec_yankdup vector_integer_shove integer_yankdup string_flush boolean_swap zip_empty exec_shove vector_boolean_yank code_eq exec_y boolean_yank integer_eq genome_silence string_butlast code_contains string_conjchar code_do*count vector_float_last genome_uniform_instruction_mutation genome_pop string_substring integer_mult vector_string_dup_times code_length vector_integer_dup boolean_or code_position boolean_empty zip_fromcode print_vector_string vector_boolean_swap return_frominteger char_dup_items vector_float_pushall char_iswhitespace code_cdr exec_do*vector_integer integer_rand vector_string_replacefirst string_first vector_boolean_first exec_do*while exec_string_iterate string_indexofchar vector_float_replace integer_fromstring code_list code_swap char_frominteger genome_gene_randomize vector_integer_emptyvector vector_string_eq exec_dup_items vector_float_butlast boolean_dup_items genome_uniform_string_mutation exec_empty zip_end? exec_fromzipnode string_shove vector_boolean_pushall zip_insert_left_fromcode exec_rot integer_tag_integer_instruction vector_string_concat vector_float_indexof genome_instruction_eq code_pop vector_string_subvec vector_integer_swap code_subst char_pop return_string_pop zip_yank exec_dup vector_integer_butlast vector_float_rest vector_string_flush boolean_fromfloat code_fromziprights float_sin boolean_flush char_isdigit float_lte exec_fromziproot vector_integer_empty print_code vector_string_stackdepth string_reverse exec_k vector_integer_yank float_frominteger char_rot vector_integer_dup_times print_char integer_tag_boolean_instruction vector_integer_stackdepth vector_boolean_concat boolean_xor integer_gte genome_yankdup vector_float_shove vector_integer_take boolean_dup_times code_quote string_replacefirst return_fromstring exec_fromziplefts vector_integer_yankdup boolean_shove genome_silent_eq float_lt vector_string_dup vector_string_occurrencesof vector_integer_replace zip_branch? vector_float_reverse float_mod vector_float_subvec integer_tag_code_instruction string_last print_boolean boolean_rot vector_string_rest integer_div vector_float_remove integer_tag_exec_instruction integer_fromfloat integer_lte code_fromzipchildren environment_end vector_integer_rot integer_mod string_concat vector_string_butlast genome_swap code_null exec_do*count vector_float_emptyvector vector_string_yankdup integer_tag_float_instruction integer_rot float_yankdup vector_string_rot zip_replace_fromexec genome_uniform_boolean_mutation vector_string_take vector_float_dup_items integer_add vector_integer_occurrencesof integer_shove string_dup_times genome_dup return_code_pop char_swap integer_max return_fromexec code_wrap genome_genesis return_float_pop code_flush genome_yank zip_shove vector_integer_flush vector_integer_subvec vector_boolean_indexof vector_float_pop char_dup_times genome_uniform_silence_mutation genome_uniform_crossover vector_string_remove vector_integer_contains zip_remove code_append vector_float_eq vector_integer_conj string_eq zip_leftmost code_yankdup code_rot integer_stackdepth float_max vector_boolean_set zip_append_child_fromexec zip_next vector_float_conj zip_fromexec code_dup_times float_dup_items string_take zip_left zip_replace_fromcode char_stackdepth return_fromchar genome_eq vector_integer_replacefirst float_stackdepth code_fromziproot integer_dup_times float_fromchar genome_two_point_crossover genome_uniform_combination_and_deletion float_gt boolean_dup float_fromboolean code_fromzipnode genome_rot vector_float_replacefirst vector_boolean_conj exec_dup_times vector_boolean_dup vector_integer_indexof vector_string_swap exec_eq string_emptystring string_swap integer_yank exec_while float_empty print_vector_boolean integer_min exec_swap genome_rotate integer_fromchar vector_string_yank string_stackdepth code_do*range string_replacechar char_allfromstring vector_integer_rest vector_boolean_length char_yank vector_float_empty code_fromfloat genome_parent2 return_fromcode string_pop code_dup_items float_eq integer_untag_instruction integer_dup_items vector_boolean_empty zip_insert_child_fromexec vector_string_last string_nth code_do* return_zip_pop vector_string_pop zip_rot vector_integer_nth exec_do*range vector_integer_dup_items exec_if char_shove zip_down zip_insert_left_fromexec code_frominteger vector_boolean_remove vector_integer_remove boolean_invert_first_then_and genome_flush print_string integer_fromboolean char_yankdup code_do vector_string_first boolean_frominteger string_setchar vector_integer_last char_isletter genome_gene_dup vector_integer_concat print_integer genome_uniform_float_mutation code_map boolean_eq float_gte return_fromfloat genome_gene_copy string_occurrencesofchar string_replacefirstchar print_float boolean_rand integer_flush float_shove string_replace char_dup float_pop char_eq vector_float_nth vector_string_conj integer_gt vector_float_dup_times return_integer_pop genome_gene_replace float_sub vector_integer_length vector_float_set vector_string_indexof vector_boolean_rest code_dup vector_boolean_shove zip_eq float_min boolean_not float_mult float_fromstring genome_unsilence code_if vector_boolean_dup_items vector_integer_pop vector_boolean_last exec_do*times zip_pop zip_rightmost float_dec vector_float_contains genome_gene_copy_range environment_new exec_do*vector_string code_nthcdr string_empty char_empty exec_pop vector_integer_set autoconstructive_boolean_rand genome_uniform_addition_and_deletion vector_float_rot string_yankdup exec_do*vector_float string_removechar code_extract vector_string_replace vector_float_first genome_parent1 return_tagspace char_flush genome_uniform_integer_mutation vector_float_occurrencesof vector_string_emptyvector float_add code_stackdepth exec_s zip_insert_right_fromexec float_dup integer_tag_char_instruction vector_string_nth zip_stackdepth vector_integer_reverse print_vector_integer char_fromfloat code_do*times code_noop zip_swap code_yank integer_lt vector_boolean_eq genome_stackdepth code_fromziplefts noop_open_paren genome_uniform_deletion vector_boolean_dup_times string_containschar string_yank char_rand zip_flush vector_boolean_rot float_swap exec_fromziprights vector_string_pushall vector_string_set vector_boolean_flush exec_noop code_size vector_boolean_stackdepth vector_integer_pushall vector_boolean_reverse integer_swap genome_close_eq string_split vector_boolean_contains string_fromboolean return_boolean_pop vector_float_dup vector_boolean_replace vector_string_dup_items integer_dup vector_boolean_nth vector_string_length genome_uniform_addition string_rest zip_insert_child_fromcode float_tan string_rot string_rand exec_yank string_parse_to_chars integer_pop integer_empty vector_float_flush vector_float_yank noop_delete_prev_paren_pair print_exec zip_append_child_fromcode genome_gene_delete float_dup_times code_empty float_inc zip_right vector_float_length float_rand genome_uniform_close_mutation integer_dec string_contains return_fromboolean vector_float_concat vector_float_stackdepth exec_do*vector_boolean vector_integer_first genome_shove code_rand print_vector_float float_rot return_char_pop vector_string_contains vector_boolean_occurrencesof string_dup_items genome_empty zip_prev genome_toggle_silent vector_string_reverse zip_dup code_cons code_member exec_stackdepth float_flush boolean_and integer_tagged_instruction vector_boolean_butlast string_length float_cos string_frominteger exec_flush vector_string_empty exec_when vector_float_swap genome_close_dec code_insert vector_boolean_pop float_div zip_insert_right_fromcode code_fromboolean vector_boolean_take code_shove environment_begin vector_float_take boolean_invert_second_then_and code_container code_nth vector_boolean_subvec float_yank zip_up vector_boolean_emptyvector vector_boolean_replacefirst genome_alternation zip_dup_times string_fromfloat vector_boolean_yankdup string_dup boolean_yankdup exec_fromzipchildren}
+Starting PushGP run.
+Clojush version = xxx
+GitHub link = xxx
+age-combining-function = :average
+age-mediated-parent-selection = false
+alignment-deviation = 10
+alternation-rate = 0.01
+atom-generators = (  
+ #object[xxx] #object[xxx] #object[xxx] #object[xxx] in1 print_newline integer_sub integer_inc boolean_stackdepth boolean_pop string_fromchar exec_yankdup integer_yankdup string_flush boolean_swap exec_shove exec_y boolean_yank integer_eq string_butlast string_conjchar string_substring integer_mult boolean_or boolean_empty char_dup_items char_iswhitespace string_first exec_do*while exec_string_iterate string_indexofchar integer_fromstring char_frominteger exec_dup_items boolean_dup_items exec_empty string_shove exec_rot char_pop exec_dup boolean_flush char_isdigit string_reverse exec_k char_rot print_char boolean_xor integer_gte boolean_dup_times string_replacefirst boolean_shove string_last print_boolean boolean_rot integer_div integer_lte integer_mod string_concat exec_do*count integer_rot integer_add integer_shove string_dup_times char_swap integer_max char_dup_times string_eq integer_stackdepth string_take char_stackdepth integer_dup_times boolean_dup exec_dup_times exec_eq string_emptystring string_swap integer_yank exec_while integer_min exec_swap integer_fromchar string_stackdepth string_replacechar char_allfromstring char_yank string_pop integer_dup_items string_nth exec_do*range exec_if char_shove boolean_invert_first_then_and print_string integer_fromboolean char_yankdup boolean_frominteger string_setchar char_isletter print_integer boolean_eq string_occurrencesofchar string_replacefirstchar integer_flush string_replace char_dup char_eq integer_gt boolean_not exec_do*times string_empty char_empty exec_pop string_yankdup string_removechar char_flush exec_s integer_lt string_containschar string_yank exec_noop integer_swap string_split string_fromboolean integer_dup string_rest string_rot exec_yank string_parse_to_chars integer_pop integer_empty print_exec integer_dec string_contains string_dup_items exec_stackdepth boolean_and string_length string_frominteger exec_flush exec_when boolean_invert_second_then_and string_dup boolean_yankdup)
+autoconstructive = false
+autoconstructive-boolean-rand-enrichment = 0
+autoconstructive-clone-probability = 0.0
+autoconstructive-diffmeans-children = 10
+autoconstructive-diversification-test = :gecco2016
+autoconstructive-entropy = 0.0
+autoconstructive-fotd = false
+autoconstructive-genome-instructions = :all
+autoconstructive-improve-or-diversify = false
+autoconstructive-integer-rand-enrichment = 0
+autoconstructive-si-children = 8
+close-increment-rate = 0.2
+close-parens-probabilities = [0.772 0.206 0.021 0.001]
+csv-columns = [:generation :location :parent-uuids :genetic-operators :push-program-size :plush-genome-size :push-program :plush-genome :total-error :test-case-errors]
+csv-log-filename = xxx
+decimation-ratio = 1
+decimation-tournament-size = 2
+edn-additional-keys = [:generation :location :push-program-size :plush-genome-size]
+edn-keys = [:uuid :parent-uuids :genetic-operators :program :genome :total-error :errors]
+edn-log-filename = xxx
+epigenetic-markers = [:close]
+epsilon-lexicase-epsilon = nil
+epsilon-lexicase-probability = 1
+error-function = #object[xxx]
+error-threshold = 0
+evalpush-limit = 1600
+evalpush-time-limit = 0
+exit-on-success = true
+final-report-simplifications = 5000
+genetic-operator-probabilities = {:alternation 0.2, :uniform-mutation 0.2, :uniform-close-mutation 0.1, [:alternation :uniform-mutation] 0.5}
+individuals-for-novelty-archive-per-generation = 0
+json-log-filename = xxx
+json-log-program-strings = true
+label = nil
+lexicase-leakage = 0.1
+lexicase-slippage = 0
+log-fitnesses-for-all-cases = true
+maintain-ancestors = true
+max-error = 5000
+max-generations = 0
+max-genome-size-in-initial-program = 400
+max-point-evaluations = 1.0E101
+max-points = 3200
+meta-error-categories = []
+normalization = :none
+novelty-distance-metric = :euclidean
+novelty-number-of-neighbors-k = 25
+parent-reversion-probability = 1.0
+parent-selection = :lexicase
+pop-when-tagging = true
+population-size = 5
+print-ancestors-of-solution = false
+print-cosmos-data = true
+print-csv-logs = true
+print-edn-logs = true
+print-error-frequencies-by-case = true
+print-errors = false
+print-history = true
+print-homology-data = true
+print-json-logs = true
+print-selection-counts = false
+print-timings = true
+problem-specific-initial-report = #object[xxx]
+problem-specific-report = #object[xxx]
+random-screen = false
+random-seed = 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+record-host = nil
+replace-child-that-exceeds-size-limit-with = :random
+report-simplifications = 0
+return-simplified-on-failure = false
+reuse-errors = true
+self-mate-avoidance-limit = 0
+silent-instruction-probability = 0.2
+tag-limit = 10000
+top-level-pop-code = false
+top-level-push-code = false
+total-error-method = :sum
+tournament-size = 7
+track-instruction-maps = false
+uniform-addition-and-deletion-rate = 0.01
+uniform-addition-rate = 0.01
+uniform-close-mutation-rate = 0.1
+uniform-combination-and-deletion-rate = 0.01
+uniform-deletion-rate = 0.01
+uniform-mutation-constant-tweak-rate = 0.5
+uniform-mutation-float-gaussian-standard-deviation = 1.0
+uniform-mutation-int-gaussian-standard-deviation = 1
+uniform-mutation-rate = 0.01
+uniform-mutation-string-char-change-rate = 0.1
+uniform-mutation-tag-gaussian-standard-deviation = 100
+uniform-silence-mutation-rate = 0.1
+use-single-thread = true
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Generating initial population...
+Processing generation: 0
+Computing errors... Done computing errors.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- Report at generation 0
+;;******************************
+;; -*- Replace Space With Newline problem report - generation 0
+Test total error for best: 19516
+Test mean error for best: 9.75800
+;;------------------------------
+Outputs of best individual on training cases:
+
+| Correct output: ""
+| Program output: ""
+| Correct integer:  0 | Program integer: 0
+
+| Correct output: "A"
+| Program output: ""
+| Correct integer:  1 | Program integer: 0
+
+| Correct output: "*"
+| Program output: ""
+| Correct integer:  1 | Program integer: 0
+
+| Correct output: "\n"
+| Program output: ""
+| Correct integer:  0 | Program integer: 0
+
+| Correct output: "s"
+| Program output: ""
+| Correct integer:  1 | Program integer: 0
+
+| Correct output: "B\n"
+| Program output: ""
+| Correct integer:  1 | Program integer: 0
+
+| Correct output: "\n\n"
+| Program output: ""
+| Correct integer:  0 | Program integer: 0
+
+| Correct output: "\nD"
+| Program output: ""
+| Correct integer:  1 | Program integer: 0
+
+| Correct output: "ef"
+| Program output: ""
+| Correct integer:  2 | Program integer: 0
+
+| Correct output: "!!"
+| Program output: ""
+| Correct integer:  2 | Program integer: 0
+
+| Correct output: "2o"
+| Program output: ""
+| Correct integer:  2 | Program integer: 0
+
+| Correct output: "{I"
+| Program output: ""
+| Correct integer:  2 | Program integer: 0
+
+| Correct output: "\nF\n"
+| Program output: ""
+| Correct integer:  1 | Program integer: 0
+
+| Correct output: "T\nL"
+| Program output: ""
+| Correct integer:  2 | Program integer: 0
+
+| Correct output: "4ps"
+| Program output: ""
+| Correct integer:  3 | Program integer: 0
+
+| Correct output: "q\n\n"
+| Program output: ""
+| Correct integer:  1 | Program integer: 0
+
+| Correct output: "\n\n\n"
+| Program output: ""
+| Correct integer:  0 | Program integer: 0
+
+| Correct output: "\n\ne"
+| Program output: ""
+| Correct integer:  1 | Program integer: 0
+
+| Correct output: "hi\n"
+| Program output: ""
+| Correct integer:  2 | Program integer: 0
+
+| Correct output: "@\n%"
+| Program output: ""
+| Correct integer:  2 | Program integer: 0
+
+| Correct output: "\n&u"
+| Program output: ""
+| Correct integer:  2 | Program integer: 0
+
+| Correct output: "]a$"
+| Program output: ""
+| Correct integer:  3 | Program integer: 0
+
+| Correct output: "`#w"
+| Program output: ""
+| Correct integer:  3 | Program integer: 0
+
+| Correct output: "\nuE\n"
+| Program output: ""
+| Correct integer:  2 | Program integer: 0
+
+| Correct output: "\n\n$\n\n"
+| Program output: ""
+| Correct integer:  1 | Program integer: 0
+
+| Correct output: "#!Dom"
+| Program output: ""
+| Correct integer:  5 | Program integer: 0
+
+| Correct output: "<BDHx"
+| Program output: ""
+| Correct integer:  5 | Program integer: 0
+
+| Correct output: "}iGKk"
+| Program output: ""
+| Correct integer:  5 | Program integer: 0
+
+| Correct output: "G|qdz"
+| Program output: ""
+| Correct integer:  5 | Program integer: 0
+
+| Correct output: "KU9\n\nW"
+| Program output: ""
+| Correct integer:  4 | Program integer: 0
+
+| Correct output: "\n\n\n\n\n\n9"
+| Program output: ""
+| Correct integer:  1 | Program integer: 0
+
+| Correct output: "y+D0V\n5"
+| Program output: ""
+| Correct integer:  6 | Program integer: 0
+
+| Correct output: "w`{>]\nW"
+| Program output: ""
+| Correct integer:  6 | Program integer: 0
+
+| Correct output: "eAt\nN?\n"
+| Program output: ""
+| Correct integer:  5 | Program integer: 0
+
+| Correct output: ">13y1\n^"
+| Program output: ""
+| Correct integer:  6 | Program integer: 0
+
+| Correct output: "{Ad[\n5X"
+| Program output: ""
+| Correct integer:  6 | Program integer: 0
+
+| Correct output: "w\n\\=w0VH"
+| Program output: ""
+| Correct integer:  7 | Program integer: 0
+
+| Correct output: "\nS-\n':`F"
+| Program output: ""
+| Correct integer:  6 | Program integer: 0
+
+| Correct output: "\\SOK!]|Q"
+| Program output: ""
+| Correct integer:  8 | Program integer: 0
+
+| Correct output: "i\nq<N\"\nK"
+| Program output: ""
+| Correct integer:  6 | Program integer: 0
+
+| Correct output: "Y\n@oh}ONA"
+| Program output: ""
+| Correct integer:  8 | Program integer: 0
+
+| Correct output: "&8Dh\n=A\n\n"
+| Program output: ""
+| Correct integer:  6 | Program integer: 0
+
+| Correct output: "0\n\n.FU-=U"
+| Program output: ""
+| Correct integer:  7 | Program integer: 0
+
+| Correct output: "f\n@\nZFseB"
+| Program output: ""
+| Correct integer:  7 | Program integer: 0
+
+| Correct output: "DN\nJfw3<Z"
+| Program output: ""
+| Correct integer:  8 | Program integer: 0
+
+| Correct output: "%O>*\n\nw\nb"
+| Program output: ""
+| Correct integer:  6 | Program integer: 0
+
+| Correct output: "\n\nZ,Y~WA7"
+| Program output: ""
+| Correct integer:  7 | Program integer: 0
+
+| Correct output: "?H\n`frX5H7"
+| Program output: ""
+| Correct integer:  9 | Program integer: 0
+
+| Correct output: "<F1_y.\npp,"
+| Program output: ""
+| Correct integer:  9 | Program integer: 0
+
+| Correct output: "\n(x(\n-v\n\nRc"
+| Program output: ""
+| Correct integer:  7 | Program integer: 0
+
+| Correct output: "ZP\n\n5=ILZ>Z"
+| Program output: ""
+| Correct integer:  9 | Program integer: 0
+
+| Correct output: "9\\:~]#z^)\nJ"
+| Program output: ""
+| Correct integer: 10 | Program integer: 0
+
+| Correct output: "\n?)\n[b)O#^l"
+| Program output: ""
+| Correct integer:  9 | Program integer: 0
+
+| Correct output: "jzxO\nCZ\n]#r"
+| Program output: ""
+| Correct integer:  9 | Program integer: 0
+
+| Correct output: "\n\"7\nZj+U\nQ+"
+| Program output: ""
+| Correct integer:  8 | Program integer: 0
+
+| Correct output: "}D\n\n\nl1@H7R"
+| Program output: ""
+| Correct integer:  8 | Program integer: 0
+
+| Correct output: "^B\"lN=6cLH\n"
+| Program output: ""
+| Correct integer: 10 | Program integer: 0
+
+| Correct output: "&>SI#3\n\n\n+6\n"
+| Program output: ""
+| Correct integer:  8 | Program integer: 0
+
+| Correct output: "3\nH\n\n\nl3`A7,"
+| Program output: ""
+| Correct integer:  8 | Program integer: 0
+
+| Correct output: "tT$4GJSb:\nc\n"
+| Program output: ""
+| Correct integer: 10 | Program integer: 0
+
+| Correct output: "i\n!i\n!i\n!i\n!i"
+| Program output: ""
+| Correct integer:  9 | Program integer: 0
+
+| Correct output: "7a%9\\\n@{Mojii8"
+| Program output: ""
+| Correct integer: 13 | Program integer: 0
+
+| Correct output: "V33j\n4[;'\n\n!:\n"
+| Program output: ""
+| Correct integer: 10 | Program integer: 0
+
+| Correct output: "\n<\nr'4%)W\nx\n\n\n"
+| Program output: ""
+| Correct integer:  8 | Program integer: 0
+
+| Correct output: "&ionI\n\n;K\nfLa\n"
+| Program output: ""
+| Correct integer: 10 | Program integer: 0
+
+| Correct output: "u+WvJVGGq,E#<5K"
+| Program output: ""
+| Correct integer: 15 | Program integer: 0
+
+| Correct output: "Ex41cW\n@r\niTD\n2"
+| Program output: ""
+| Correct integer: 12 | Program integer: 0
+
+| Correct output: "J.s{\n\n+0V$>m\nCB"
+| Program output: ""
+| Correct integer: 12 | Program integer: 0
+
+| Correct output: "_\nS?\nP9\\N^J8HTd"
+| Program output: ""
+| Correct integer: 13 | Program integer: 0
+
+| Correct output: "\nz\nO'6\ng%H3A+3r"
+| Program output: ""
+| Correct integer: 12 | Program integer: 0
+
+| Correct output: "X\n\n}-KC81G47${\n"
+| Program output: ""
+| Correct integer: 12 | Program integer: 0
+
+| Correct output: "]\nLz:\nrsJ[\nLb\ni"
+| Program output: ""
+| Correct integer: 11 | Program integer: 0
+
+| Correct output: "xiWh\nc\n,Fg\nQ.)T"
+| Program output: ""
+| Correct integer: 12 | Program integer: 0
+
+| Correct output: "vsl>\n&(\n\nd\n+\n]~"
+| Program output: ""
+| Correct integer: 10 | Program integer: 0
+
+| Correct output: "%-\nl~+\n\n\nFl;-=cL"
+| Program output: ""
+| Correct integer: 12 | Program integer: 0
+
+| Correct output: "6Y`8h\n\n&l*W\nB\nur"
+| Program output: ""
+| Correct integer: 12 | Program integer: 0
+
+| Correct output: "\nC1\nUlT^g;/\n@+\n_"
+| Program output: ""
+| Correct integer: 12 | Program integer: 0
+
+| Correct output: "y}fV\ni\n0W\n\n\n\n9]\n0"
+| Program output: ""
+| Correct integer: 10 | Program integer: 0
+
+| Correct output: "KYOu\n[]z9sx#\n9P\n+"
+| Program output: ""
+| Correct integer: 14 | Program integer: 0
+
+| Correct output: "\n!\n\n_1<%WAuY#\n\n^B"
+| Program output: ""
+| Correct integer: 12 | Program integer: 0
+
+| Correct output: "=@Rp/!\n\n\n\n$Mh\n4o~"
+| Program output: ""
+| Correct integer: 12 | Program integer: 0
+
+| Correct output: "\nUg:.CDe_t,\n\n\\Z,|"
+| Program output: ""
+| Correct integer: 14 | Program integer: 0
+
+| Correct output: "$y\nbC=g@ng\n<\nV93CT"
+| Program output: ""
+| Correct integer: 15 | Program integer: 0
+
+| Correct output: "\n){3n\nUE0\n\n\n^'xu$\n"
+| Program output: ""
+| Correct integer: 12 | Program integer: 0
+
+| Correct output: "5DV%Tx%WDue\nq\n4e\n!"
+| Program output: ""
+| Correct integer: 15 | Program integer: 0
+
+| Correct output: "[2A]\n\nPj]|K\n6\n\n\nJt"
+| Program output: ""
+| Correct integer: 12 | Program integer: 0
+
+| Correct output: "ZQ!|I3\nB\nj\n\nfb)nDya"
+| Program output: ""
+| Correct integer: 15 | Program integer: 0
+
+| Correct output: "|\nX\nM>I~\nNT\njTIMkbL"
+| Program output: ""
+| Correct integer: 15 | Program integer: 0
+
+| Correct output: "88888888888888888888"
+| Program output: ""
+| Correct integer: 20 | Program integer: 0
+
+| Correct output: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+| Program output: ""
+| Correct integer:  0 | Program integer: 0
+
+| Correct output: "ssssssssssssssssssss"
+| Program output: ""
+| Correct integer: 20 | Program integer: 0
+
+| Correct output: "1\n1\n1\n1\n1\n1\n1\n1\n1\n1\n"
+| Program output: ""
+| Correct integer: 10 | Program integer: 0
+
+| Correct output: "\nv\nv\nv\nv\nv\nv\nv\nv\nv\nv"
+| Program output: ""
+| Correct integer: 10 | Program integer: 0
+
+| Correct output: "Ha\nHa\nHa\nHa\nHa\nHa\nHa"
+| Program output: ""
+| Correct integer: 14 | Program integer: 0
+
+| Correct output: "x\ny!x\ny!x\ny!x\ny!x\ny!"
+| Program output: ""
+| Correct integer: 15 | Program integer: 0
+
+| Correct output: "G5G5G5G5G5G5G5G5G5G5"
+| Program output: ""
+| Correct integer: 20 | Program integer: 0
+
+| Correct output: ">_=]>_=]>_=]>_=]>_=]"
+| Program output: ""
+| Correct integer: 20 | Program integer: 0
+
+| Correct output: "^_^\n^_^\n^_^\n^_^\n^_^\n"
+| Program output: ""
+| Correct integer: 15 | Program integer: 0
+
+| Correct output: "dKuh{!sQu^DO}\nM-h#\"\n"
+| Program output: ""
+| Correct integer: 18 | Program integer: 0
+
+| Correct output: "t$tO/x\nQ[s\nH\nz\n|JXxN"
+| Program output: ""
+| Correct integer: 16 | Program integer: 0
+;;******************************
+Error frequencies by case: ({0 4, 103 1} {169 1, 1000 3, 0 1} {1 4, 103 1} {168 1, 1000 3, 1 1} {1 4, 103 1} {168 1, 1000 3, 1 1} {1 4, 102 1} {169 1, 1000 3, 0 1} {1 4, 102 1} {168 1, 1000 3, 1 1} {2 4, 102 1} {168 1, 1000 3, 1 1} {2 4, 101 1} {169 1, 1000 3, 0 1} {2 4, 102 1} {168 1, 1000 3, 1 1} {2 4, 102 1} {167 1, 1000 3, 2 1} {2 4, 103 1} {167 1, 1000 3, 2 1} {2 4, 102 1} {167 1, 1000 3, 2 1} {2 4, 103 1} {167 1, 1000 3, 2 1} {3 4, 102 1} {168 1, 1000 3, 1 1} {3 4, 102 1} {167 1, 1000 3, 2 1} {3 4, 101 1} {166 1, 1000 3, 3 1} {3 4, 102 1} {168 1, 1000 3, 1 1} {3 4, 101 1} {169 1, 1000 3, 0 1} {3 4, 100 1} {168 1, 1000 3, 1 1} {3 4, 101 1} {167 1, 1000 3, 2 1} {3 4, 102 1} {167 1, 1000 3, 2 1} {3 4, 101 1} {167 1, 1000 3, 2 1} {3 4, 102 1} {166 1, 1000 3, 3 1} {3 4, 102 1} {166 1, 1000 3, 3 1} {4 4, 101 1} {167 1, 1000 3, 2 1} {5 4, 101 1} {168 1, 1000 3, 1 1} {5 4, 101 1} {164 1, 1000 3, 5 1} {5 4, 102 1} {164 1, 1000 3, 5 1} {5 4, 101 1} {164 1, 1000 3, 5 1} {5 4, 102 1} {164 1, 1000 3, 5 1} {6 4, 103 1} {165 1, 1000 3, 4 1} {7 4, 101 1} {168 1, 1000 3, 1 1} {7 4, 102 1} {163 1, 1000 3, 6 1} {7 4, 102 1} {163 1, 1000 3, 6 1} {7 4, 101 1} {164 1, 1000 3, 5 1} {7 4, 100 1} {163 1, 1000 3, 6 1} {7 4, 102 1} {163 1, 1000 3, 6 1} {8 4, 101 1} {162 1, 1000 3, 7 1} {8 4, 102 1} {163 1, 1000 3, 6 1} {8 4, 103 1} {161 1, 1000 3, 8 1} {8 4, 102 1} {163 1, 1000 3, 6 1} {9 4, 100 1} {161 1, 1000 3, 8 1} {9 4, 102 1} {163 1, 1000 3, 6 1} {9 4, 102 1} {162 1, 1000 3, 7 1} {9 4, 100 1} {162 1, 1000 3, 7 1} {9 4, 102 1} {161 1, 1000 3, 8 1} {9 4, 102 1} {163 1, 1000 3, 6 1} {9 4, 101 1} {162 1, 1000 3, 7 1} {10 4, 102 1} {160 1, 1000 3, 9 1} {10 4, 100 1} {160 1, 1000 3, 9 1} {11 4, 98 1} {162 1, 1000 3, 7 1} {11 4, 103 1} {160 1, 1000 3, 9 1} {11 4, 102 1} {159 1, 1000 3, 10 1} {11 4, 100 1} {160 1, 1000 3, 9 1} {11 4, 101 1} {160 1, 1000 3, 9 1} {11 4, 102 1} {161 1, 1000 3, 8 1} {11 4, 101 1} {161 1, 1000 3, 8 1} {11 4, 101 1} {159 1, 1000 3, 10 1} {12 4, 103 1} {161 1, 1000 3, 8 1} {12 4, 101 1} {161 1, 1000 3, 8 1} {12 4, 100 1} {159 1, 1000 3, 10 1} {13 4, 98 1} {160 1, 1000 3, 9 1} {14 4, 98 1} {156 1, 1000 3, 13 1} {14 4, 103 1} {159 1, 1000 3, 10 1} {14 4, 100 1} {161 1, 1000 3, 8 1} {14 4, 99 1} {159 1, 1000 3, 10 1} {15 4, 101 1} {154 1, 1000 3, 15 1} {15 4, 99 1} {157 1, 1000 3, 12 1} {15 4, 101 1} {157 1, 1000 3, 12 1} {15 4, 101 1} {156 1, 1000 3, 13 1} {15 4, 100 1} {157 1, 1000 3, 12 1} {15 4, 101 1} {157 1, 1000 3, 12 1} {15 4, 99 1} {158 1, 1000 3, 11 1} {15 4, 99 1} {157 1, 1000 3, 12 1} {15 4, 99 1} {159 1, 1000 3, 10 1} {16 4, 100 1} {157 1, 1000 3, 12 1} {16 4, 99 1} {157 1, 1000 3, 12 1} {16 4, 99 1} {157 1, 1000 3, 12 1} {17 4, 102 1} {159 1, 1000 3, 10 1} {17 4, 100 1} {155 1, 1000 3, 14 1} {17 4, 100 1} {157 1, 1000 3, 12 1} {17 4, 100 1} {157 1, 1000 3, 12 1} {17 4, 98 1} {155 1, 1000 3, 14 1} {18 4, 99 1} {154 1, 1000 3, 15 1} {18 4, 100 1} {157 1, 1000 3, 12 1} {18 4, 100 1} {154 1, 1000 3, 15 1} {18 4, 102 1} {157 1, 1000 3, 12 1} {19 4, 98 1} {154 1, 1000 3, 15 1} {19 4, 101 1} {154 1, 1000 3, 15 1} {20 4, 102 1} {149 1, 1000 3, 20 1} {20 4, 101 1} {169 1, 1000 3, 0 1} {20 4, 99 1} {149 1, 1000 3, 20 1} {20 4, 100 1} {159 1, 1000 3, 10 1} {20 4, 100 1} {159 1, 1000 3, 10 1} {20 4, 98 1} {155 1, 1000 3, 14 1} {20 4, 100 1} {154 1, 1000 3, 15 1} {20 4, 103 1} {149 1, 1000 3, 20 1} {20 4, 98 1} {149 1, 1000 3, 20 1} {20 4, 98 1} {154 1, 1000 3, 15 1} {20 4, 100 1} {151 1, 1000 3, 18 1} {20 4, 99 1} {153 1, 1000 3, 16 1})
+--- Lexicase Program with Most Elite Cases Statistics ---
+Lexicase best genome: ({:close 0, :instruction string_last} {:close 0, :instruction string_stackdepth} {:close 0, :instruction exec_y} {:close 1, :instruction boolean_or} {:close 0, :instruction boolean_dup_items} {:close 0, :instruction exec_dup_items} {:close 0, :instruction integer_empty} {:close 1, :instruction integer_fromchar} {:close 0, :instruction exec_empty} {:close 1, :instruction string_parse_to_chars} {:close 0, :instruction integer_div} {:close 1, :instruction boolean_rot} {:close 0, :instruction integer_mult} {:close 1, :instruction string_occurrencesofchar} {:close 0, :instruction exec_yankdup} {:close 0, :instruction print_newline} {:close 1, :instruction string_substring} {:close 0, :instruction boolean_stackdepth} {:close 0, :instruction string_concat} {:close 0, :instruction char_iswhitespace} {:close 0, :instruction string_pop} {:close 0, :instruction char_rot} {:close 0, :instruction exec_shove} {:close 0, :instruction integer_yank} {:close 0, :instruction string_last} {:close 0, :instruction exec_while} {:close 0, :instruction string_substring} {:close 0, :instruction boolean_frominteger} {:close 1, :instruction in1} {:close 2, :instruction string_replacechar} {:close 0, :instruction string_dup_items} {:close 0, :instruction integer_min} {:close 0, :instruction string_swap} {:close 0, :instruction boolean_or} {:close 0, :instruction boolean_swap} {:close 0, :instruction exec_string_iterate} {:close 0, :instruction string_reverse} {:close 0, :instruction string_flush} {:close 0, :instruction string_pop} {:close 0, :instruction integer_sub} {:close 1, :instruction tagged_159} {:close 0, :instruction boolean_yank} {:close 0, :instruction print_exec} {:close 1, :instruction exec_while} {:close 0, :instruction boolean_not} {:close 0, :instruction print_string} {:close 0, :instruction char_flush} {:close 1, :instruction boolean_eq} {:close 0, :instruction string_dup_times} {:close 0, :instruction print_boolean} {:close 1, :instruction char_rot} {:close 1, :instruction string_containschar} {:close 0, :instruction string_nth} {:close 1, :instruction exec_shove} {:close 0, :instruction string_empty} {:close 0, :instruction exec_empty} {:close 0, :instruction exec_shove} {:close 0, :instruction string_swap} {:close 0, :instruction char_empty} {:close 1, :instruction string_empty} {:close 0, :instruction exec_swap} {:close 0, :instruction boolean_swap} {:close 0, :instruction string_conjchar} {:close 0, :instruction exec_do*count} {:close 0, :instruction string_dup_items} {:close 0, :instruction integer_fromboolean} {:close 0, :instruction exec_swap} {:close 1, :instruction integer_rot} {:close 0, :instruction string_yank} {:close 0, :instruction \space} {:close 0, :instruction string_containschar} {:close 0, :instruction string_dup} {:close 0, :instruction print_char} {:close 0, :instruction char_eq} {:close 0, :instruction string_fromchar} {:close 0, :instruction exec_dup_items} {:close 0, :instruction integer_flush} {:close 0, :instruction boolean_yankdup} {:close 1, :instruction string_stackdepth} {:close 0, :instruction integer_swap} {:close 0, :instruction string_rot} {:close 1, :instruction exec_when} {:close 0, :instruction exec_empty} {:close 0, :instruction exec_pop} {:close 0, :instruction string_last} {:close 0, :instruction char_rot} {:close 0, :instruction string_yank} {:close 0, :instruction exec_shove} {:close 0, :instruction boolean_eq} {:close 0, :instruction string_pop} {:close 1, :instruction string_rot} {:close 0, :instruction string_frominteger} {:close 1, :instruction exec_yankdup} {:close 0, :instruction exec_do*count} {:close 0, :instruction integer_mult} {:close 1, :instruction string_conjchar} {:close 1, :instruction exec_do*times} {:close 0, :instruction string_yank} {:close 0, :instruction integer_pop} {:close 0, :instruction exec_when} {:close 0, :instruction integer_yank} {:close 0, :instruction integer_mult} {:close 0, :instruction boolean_dup_times} {:close 1, :instruction boolean_not} {:close 1, :instruction integer_fromboolean} {:close 1, :instruction integer_add} {:close 0, :instruction boolean_dup_times} {:close 0, :instruction print_integer} {:close 0, :instruction integer_div} {:close 0, :instruction exec_while} {:close 0, :instruction string_removechar} {:close 1, :instruction char_dup_times} {:close 0, :instruction integer_fromboolean} {:close 1, :instruction exec_do*count} {:close 0, :instruction integer_add} {:close 0, :instruction integer_sub} {:close 0, :instruction string_length} {:close 0, :instruction string_replacefirst} {:close 0, :instruction boolean_dup_items} {:close 0, :instruction integer_sub} {:close 1, :instruction boolean_stackdepth} {:close 2, :instruction integer_fromchar} {:close 0, :instruction exec_empty} {:close 0, :instruction boolean_swap} {:close 0, :instruction exec_shove} {:close 0, :instruction string_empty} {:close 1, :instruction exec_pop} {:close 0, :instruction boolean_not} {:close 0, :instruction exec_empty} {:close 1, :instruction string_replacefirst} {:close 1, :instruction string_last} {:close 1, :instruction boolean_dup_times} {:close 0, :instruction integer_mult} {:close 1, :instruction string_substring} {:close 1, :instruction exec_noop} {:close 0, :instruction string_butlast} {:close 0, :instruction tag_integer_481} {:close 0, :instruction string_yank} {:close 1, :instruction exec_while} {:close 0, :instruction integer_stackdepth} {:close 0, :instruction print_string} {:close 0, :instruction exec_eq} {:close 0, :instruction exec_do*times} {:close 0, :instruction char_allfromstring} {:close 0, :instruction print_string} {:close 0, :instruction integer_div} {:close 0, :instruction integer_yank} {:close 1, :instruction string_replacefirst} {:close 2, :instruction string_containschar} {:close 0, :instruction boolean_invert_first_then_and} {:close 0, :instruction exec_s} {:close 1, :instruction integer_eq} {:close 0, :instruction integer_lte} {:close 0, :instruction string_length} {:close 0, :instruction string_last} {:close 0, :instruction integer_sub} {:close 0, :instruction string_dup} {:close 0, :instruction string_rest} {:close 0, :instruction char_yank} {:close 1, :instruction boolean_xor} {:close 0, :instruction exec_swap} {:close 2, :instruction char_yank} {:close 0, :instruction exec_empty} {:close 0, :instruction string_indexofchar} {:close 0, :instruction boolean_stackdepth} {:close 1, :instruction exec_swap} {:close 0, :instruction exec_shove} {:close 0, :instruction exec_noop} {:close 0, :instruction integer_dup_items} {:close 1, :instruction integer_dup_items} {:close 0, :instruction print_newline} {:close 0, :instruction integer_div} {:close 0, :instruction exec_pop} {:close 1, :instruction integer_dup} {:close 0, :instruction char_isdigit} {:close 0, :instruction exec_yankdup} {:close 2, :instruction tag_integer_923} {:close 2, :instruction boolean_yank} {:close 1, :instruction char_yank} {:close 0, :instruction string_dup} {:close 0, :instruction integer_stackdepth} {:close 1, :instruction exec_dup_items} {:close 0, :instruction string_rot} {:close 0, :instruction string_dup} {:close 0, :instruction integer_yank} {:close 0, :instruction string_conjchar} {:close 1, :instruction boolean_yank} {:close 0, :instruction integer_add} {:close 0, :instruction print_integer} {:close 0, :instruction char_shove} {:close 1, :instruction char_isdigit} {:close 1, :instruction char_dup} {:close 0, :instruction string_nth} {:close 1, :instruction integer_rot} {:close 1, :instruction string_parse_to_chars} {:close 0, :instruction integer_pop} {:close 0, :instruction exec_do*while} {:close 1, :instruction \:} {:close 0, :instruction boolean_not} {:close 0, :instruction string_removechar} {:close 0, :instruction integer_flush} {:close 0, :instruction integer_inc} {:close 1, :instruction exec_while} {:close 0, :instruction boolean_dup_items} {:close 1, :instruction integer_inc} {:close 1, :instruction string_rot} {:close 1, :instruction exec_y} {:close 0, :instruction boolean_pop} {:close 0, :instruction exec_pop} {:close 0, :instruction integer_swap} {:close 1, :instruction exec_s} {:close 0, :instruction boolean_dup_times} {:close 0, :instruction string_dup_times} {:close 0, :instruction integer_rot} {:close 0, :instruction exec_do*while} {:close 0, :instruction char_flush} {:close 0, :instruction in1} {:close 0, :instruction ";nwtQkR  "} {:close 0, :instruction print_boolean} {:close 2, :instruction string_dup_times} {:close 0, :instruction string_shove} {:close 0, :instruction integer_swap} {:close 0, :instruction string_empty} {:close 0, :instruction string_occurrencesofchar} {:close 0, :instruction exec_y} {:close 1, :instruction integer_shove} {:close 0, :instruction string_containschar} {:close 1, :instruction integer_add} {:close 1, :instruction boolean_flush} {:close 0, :instruction char_isdigit} {:close 0, :instruction integer_fromstring} {:close 0, :instruction integer_dup_times} {:close 0, :instruction integer_rot} {:close 0, :instruction integer_shove} {:close 1, :instruction print_exec} {:close 0, :instruction string_parse_to_chars} {:close 1, :instruction string_contains} {:close 0, :instruction string_fromboolean} {:close 0, :instruction "r 7(@L SIph0 "} {:close 1, :instruction exec_pop} {:close 0, :instruction tagged_833} {:close 0, :instruction exec_s} {:close 0, :instruction integer_lte} {:close 0, :instruction string_first} {:close 0, :instruction char_iswhitespace} {:close 2, :instruction integer_max} {:close 0, :instruction print_char} {:close 0, :instruction boolean_yankdup} {:close 1, :instruction char_dup_times} {:close 0, :instruction char_iswhitespace} {:close 0, :instruction integer_min} {:close 0, :instruction char_dup_times} {:close 0, :instruction char_dup_times} {:close 0, :instruction boolean_dup} {:close 1, :instruction boolean_stackdepth} {:close 0, :instruction boolean_dup_items} {:close 0, :instruction exec_when} {:close 1, :instruction char_stackdepth} {:close 0, :instruction string_eq} {:close 2, :instruction integer_fromchar} {:close 0, :instruction string_take} {:close 0, :instruction exec_k} {:close 0, :instruction exec_do*times} {:close 0, :instruction char_isletter} {:close 0, :instruction string_stackdepth} {:close 0, :instruction in1} {:close 0, :instruction boolean_pop} {:close 0, :instruction exec_do*while} {:close 0, :instruction char_flush} {:close 0, :instruction print_char} {:close 0, :instruction tagged_833} {:close 0, :instruction integer_shove} {:close 0, :instruction integer_gte} {:close 1, :instruction string_replacefirst} {:close 0, :instruction boolean_and} {:close 1, :instruction char_dup_times} {:close 0, :instruction string_shove} {:close 1, :instruction char_yankdup} {:close 0, :instruction exec_empty} {:close 0, :instruction exec_do*while} {:close 0, :instruction print_char} {:close 0, :instruction char_shove} {:close 0, :instruction string_shove} {:close 0, :instruction integer_pop} {:close 1, :instruction char_yankdup} {:close 0, :instruction exec_pop} {:close 0, :instruction string_dup_times} {:close 0, :instruction integer_lte} {:close 2, :instruction \newline} {:close 0, :instruction char_flush} {:close 0, :instruction char_allfromstring} {:close 0, :instruction \space} {:close 0, :instruction integer_swap} {:close 0, :instruction char_frominteger} {:close 0, :instruction integer_rot} {:close 1, :instruction in1} {:close 1, :instruction integer_dup_items} {:close 0, :instruction string_nth} {:close 0, :instruction boolean_shove} {:close 0, :instruction char_empty} {:close 1, :instruction boolean_rot} {:close 0, :instruction "S [+{d<"} {:close 0, :instruction string_replace} {:close 0, :instruction exec_empty} {:close 1, :instruction exec_do*while} {:close 0, :instruction integer_lt} {:close 0, :instruction integer_fromboolean} {:close 1, :instruction string_setchar} {:close 0, :instruction string_frominteger} {:close 0, :instruction integer_rot} {:close 0, :instruction exec_do*count} {:close 0, :instruction print_newline} {:close 0, :instruction string_first} {:close 0, :instruction string_dup_times} {:close 0, :instruction integer_dup} {:close 0, :instruction boolean_swap} {:close 0, :instruction \newline} {:close 0, :instruction boolean_yankdup} {:close 0, :instruction char_stackdepth} {:close 0, :instruction print_exec} {:close 0, :instruction boolean_dup} {:close 0, :instruction char_swap} {:close 0, :instruction string_empty} {:close 0, :instruction string_frominteger} {:close 1, :instruction string_length} {:close 0, :instruction exec_yankdup})
+Lexicase best program: (string_last string_stackdepth exec_y (boolean_or) boolean_dup_items exec_dup_items integer_empty integer_fromchar exec_empty string_parse_to_chars integer_div boolean_rot integer_mult string_occurrencesofchar exec_yankdup print_newline string_substring boolean_stackdepth string_concat char_iswhitespace string_pop char_rot exec_shove (integer_yank string_last exec_while (string_substring boolean_frominteger in1) string_replacechar) string_dup_items integer_min string_swap boolean_or boolean_swap exec_string_iterate (string_reverse string_flush string_pop integer_sub tagged_159) boolean_yank print_exec (exec_while () boolean_not print_string char_flush boolean_eq) string_dup_times print_boolean char_rot string_containschar string_nth exec_shove () string_empty exec_empty exec_shove (string_swap char_empty string_empty) exec_swap (boolean_swap string_conjchar exec_do*count (string_dup_items integer_fromboolean exec_swap (integer_rot) (string_yank \space string_containschar string_dup print_char char_eq string_fromchar exec_dup_items integer_flush boolean_yankdup string_stackdepth) integer_swap string_rot exec_when () exec_empty exec_pop (string_last char_rot string_yank exec_shove (boolean_eq string_pop string_rot) string_frominteger exec_yankdup) exec_do*count (integer_mult string_conjchar) exec_do*times () string_yank integer_pop exec_when (integer_yank integer_mult boolean_dup_times boolean_not) integer_fromboolean) integer_add) (boolean_dup_times print_integer integer_div exec_while (string_removechar char_dup_times) integer_fromboolean exec_do*count () integer_add integer_sub string_length string_replacefirst boolean_dup_items integer_sub boolean_stackdepth) integer_fromchar exec_empty boolean_swap exec_shove (string_empty exec_pop () boolean_not exec_empty string_replacefirst) string_last boolean_dup_times integer_mult string_substring exec_noop string_butlast tag_integer_481 string_yank exec_while () integer_stackdepth print_string exec_eq exec_do*times (char_allfromstring print_string integer_div integer_yank string_replacefirst) string_containschar boolean_invert_first_then_and exec_s (integer_eq) (integer_lte string_length string_last integer_sub string_dup string_rest char_yank boolean_xor) (exec_swap (char_yank) () exec_empty string_indexofchar boolean_stackdepth exec_swap () (exec_shove (exec_noop integer_dup_items integer_dup_items) print_newline integer_div exec_pop (integer_dup) char_isdigit exec_yankdup tag_integer_923)) boolean_yank char_yank string_dup integer_stackdepth exec_dup_items string_rot string_dup integer_yank string_conjchar boolean_yank integer_add print_integer char_shove char_isdigit char_dup string_nth integer_rot string_parse_to_chars integer_pop exec_do*while (\:) boolean_not string_removechar integer_flush integer_inc exec_while () boolean_dup_items integer_inc string_rot exec_y () boolean_pop exec_pop (integer_swap exec_s () (boolean_dup_times string_dup_times integer_rot exec_do*while (char_flush in1 ";nwtQkR  " print_boolean string_dup_times)) (string_shove integer_swap string_empty string_occurrencesofchar exec_y (integer_shove) string_containschar integer_add) boolean_flush) char_isdigit integer_fromstring integer_dup_times integer_rot integer_shove print_exec () string_parse_to_chars string_contains string_fromboolean "r 7(@L SIph0 " exec_pop () tagged_833 exec_s (integer_lte string_first char_iswhitespace integer_max) () (print_char boolean_yankdup char_dup_times) char_iswhitespace integer_min char_dup_times char_dup_times boolean_dup boolean_stackdepth boolean_dup_items exec_when (char_stackdepth) string_eq integer_fromchar string_take exec_k (exec_do*times (char_isletter string_stackdepth in1 boolean_pop exec_do*while (char_flush print_char tagged_833 integer_shove integer_gte string_replacefirst) boolean_and char_dup_times) string_shove char_yankdup) (exec_empty exec_do*while (print_char char_shove string_shove integer_pop char_yankdup) exec_pop (string_dup_times integer_lte \newline)) char_flush char_allfromstring \space integer_swap char_frominteger integer_rot in1 integer_dup_items string_nth boolean_shove char_empty boolean_rot "S [+{d<" string_replace exec_empty exec_do*while () integer_lt integer_fromboolean string_setchar string_frominteger integer_rot exec_do*count (print_newline string_first string_dup_times integer_dup boolean_swap \newline boolean_yankdup char_stackdepth print_exec (boolean_dup char_swap string_empty string_frominteger string_length) exec_yankdup))
+Lexicase best number of elite cases: 200
+Lexicase best total error: 1853
+Lexicase best mean error: 9.265
+Lexicase best history: (1853)
+Lexicase best size: 385
+Percent parens: 0.153
+--- Lexicase Program with Most Zero Cases Statistics ---
+Zero cases best genome: ({:close 0, :instruction string_last} {:close 0, :instruction string_stackdepth} {:close 0, :instruction exec_y} {:close 1, :instruction boolean_or} {:close 0, :instruction boolean_dup_items} {:close 0, :instruction exec_dup_items} {:close 0, :instruction integer_empty} {:close 1, :instruction integer_fromchar} {:close 0, :instruction exec_empty} {:close 1, :instruction string_parse_to_chars} {:close 0, :instruction integer_div} {:close 1, :instruction boolean_rot} {:close 0, :instruction integer_mult} {:close 1, :instruction string_occurrencesofchar} {:close 0, :instruction exec_yankdup} {:close 0, :instruction print_newline} {:close 1, :instruction string_substring} {:close 0, :instruction boolean_stackdepth} {:close 0, :instruction string_concat} {:close 0, :instruction char_iswhitespace} {:close 0, :instruction string_pop} {:close 0, :instruction char_rot} {:close 0, :instruction exec_shove} {:close 0, :instruction integer_yank} {:close 0, :instruction string_last} {:close 0, :instruction exec_while} {:close 0, :instruction string_substring} {:close 0, :instruction boolean_frominteger} {:close 1, :instruction in1} {:close 2, :instruction string_replacechar} {:close 0, :instruction string_dup_items} {:close 0, :instruction integer_min} {:close 0, :instruction string_swap} {:close 0, :instruction boolean_or} {:close 0, :instruction boolean_swap} {:close 0, :instruction exec_string_iterate} {:close 0, :instruction string_reverse} {:close 0, :instruction string_flush} {:close 0, :instruction string_pop} {:close 0, :instruction integer_sub} {:close 1, :instruction tagged_159} {:close 0, :instruction boolean_yank} {:close 0, :instruction print_exec} {:close 1, :instruction exec_while} {:close 0, :instruction boolean_not} {:close 0, :instruction print_string} {:close 0, :instruction char_flush} {:close 1, :instruction boolean_eq} {:close 0, :instruction string_dup_times} {:close 0, :instruction print_boolean} {:close 1, :instruction char_rot} {:close 1, :instruction string_containschar} {:close 0, :instruction string_nth} {:close 1, :instruction exec_shove} {:close 0, :instruction string_empty} {:close 0, :instruction exec_empty} {:close 0, :instruction exec_shove} {:close 0, :instruction string_swap} {:close 0, :instruction char_empty} {:close 1, :instruction string_empty} {:close 0, :instruction exec_swap} {:close 0, :instruction boolean_swap} {:close 0, :instruction string_conjchar} {:close 0, :instruction exec_do*count} {:close 0, :instruction string_dup_items} {:close 0, :instruction integer_fromboolean} {:close 0, :instruction exec_swap} {:close 1, :instruction integer_rot} {:close 0, :instruction string_yank} {:close 0, :instruction \space} {:close 0, :instruction string_containschar} {:close 0, :instruction string_dup} {:close 0, :instruction print_char} {:close 0, :instruction char_eq} {:close 0, :instruction string_fromchar} {:close 0, :instruction exec_dup_items} {:close 0, :instruction integer_flush} {:close 0, :instruction boolean_yankdup} {:close 1, :instruction string_stackdepth} {:close 0, :instruction integer_swap} {:close 0, :instruction string_rot} {:close 1, :instruction exec_when} {:close 0, :instruction exec_empty} {:close 0, :instruction exec_pop} {:close 0, :instruction string_last} {:close 0, :instruction char_rot} {:close 0, :instruction string_yank} {:close 0, :instruction exec_shove} {:close 0, :instruction boolean_eq} {:close 0, :instruction string_pop} {:close 1, :instruction string_rot} {:close 0, :instruction string_frominteger} {:close 1, :instruction exec_yankdup} {:close 0, :instruction exec_do*count} {:close 0, :instruction integer_mult} {:close 1, :instruction string_conjchar} {:close 1, :instruction exec_do*times} {:close 0, :instruction string_yank} {:close 0, :instruction integer_pop} {:close 0, :instruction exec_when} {:close 0, :instruction integer_yank} {:close 0, :instruction integer_mult} {:close 0, :instruction boolean_dup_times} {:close 1, :instruction boolean_not} {:close 1, :instruction integer_fromboolean} {:close 1, :instruction integer_add} {:close 0, :instruction boolean_dup_times} {:close 0, :instruction print_integer} {:close 0, :instruction integer_div} {:close 0, :instruction exec_while} {:close 0, :instruction string_removechar} {:close 1, :instruction char_dup_times} {:close 0, :instruction integer_fromboolean} {:close 1, :instruction exec_do*count} {:close 0, :instruction integer_add} {:close 0, :instruction integer_sub} {:close 0, :instruction string_length} {:close 0, :instruction string_replacefirst} {:close 0, :instruction boolean_dup_items} {:close 0, :instruction integer_sub} {:close 1, :instruction boolean_stackdepth} {:close 2, :instruction integer_fromchar} {:close 0, :instruction exec_empty} {:close 0, :instruction boolean_swap} {:close 0, :instruction exec_shove} {:close 0, :instruction string_empty} {:close 1, :instruction exec_pop} {:close 0, :instruction boolean_not} {:close 0, :instruction exec_empty} {:close 1, :instruction string_replacefirst} {:close 1, :instruction string_last} {:close 1, :instruction boolean_dup_times} {:close 0, :instruction integer_mult} {:close 1, :instruction string_substring} {:close 1, :instruction exec_noop} {:close 0, :instruction string_butlast} {:close 0, :instruction tag_integer_481} {:close 0, :instruction string_yank} {:close 1, :instruction exec_while} {:close 0, :instruction integer_stackdepth} {:close 0, :instruction print_string} {:close 0, :instruction exec_eq} {:close 0, :instruction exec_do*times} {:close 0, :instruction char_allfromstring} {:close 0, :instruction print_string} {:close 0, :instruction integer_div} {:close 0, :instruction integer_yank} {:close 1, :instruction string_replacefirst} {:close 2, :instruction string_containschar} {:close 0, :instruction boolean_invert_first_then_and} {:close 0, :instruction exec_s} {:close 1, :instruction integer_eq} {:close 0, :instruction integer_lte} {:close 0, :instruction string_length} {:close 0, :instruction string_last} {:close 0, :instruction integer_sub} {:close 0, :instruction string_dup} {:close 0, :instruction string_rest} {:close 0, :instruction char_yank} {:close 1, :instruction boolean_xor} {:close 0, :instruction exec_swap} {:close 2, :instruction char_yank} {:close 0, :instruction exec_empty} {:close 0, :instruction string_indexofchar} {:close 0, :instruction boolean_stackdepth} {:close 1, :instruction exec_swap} {:close 0, :instruction exec_shove} {:close 0, :instruction exec_noop} {:close 0, :instruction integer_dup_items} {:close 1, :instruction integer_dup_items} {:close 0, :instruction print_newline} {:close 0, :instruction integer_div} {:close 0, :instruction exec_pop} {:close 1, :instruction integer_dup} {:close 0, :instruction char_isdigit} {:close 0, :instruction exec_yankdup} {:close 2, :instruction tag_integer_923} {:close 2, :instruction boolean_yank} {:close 1, :instruction char_yank} {:close 0, :instruction string_dup} {:close 0, :instruction integer_stackdepth} {:close 1, :instruction exec_dup_items} {:close 0, :instruction string_rot} {:close 0, :instruction string_dup} {:close 0, :instruction integer_yank} {:close 0, :instruction string_conjchar} {:close 1, :instruction boolean_yank} {:close 0, :instruction integer_add} {:close 0, :instruction print_integer} {:close 0, :instruction char_shove} {:close 1, :instruction char_isdigit} {:close 1, :instruction char_dup} {:close 0, :instruction string_nth} {:close 1, :instruction integer_rot} {:close 1, :instruction string_parse_to_chars} {:close 0, :instruction integer_pop} {:close 0, :instruction exec_do*while} {:close 1, :instruction \:} {:close 0, :instruction boolean_not} {:close 0, :instruction string_removechar} {:close 0, :instruction integer_flush} {:close 0, :instruction integer_inc} {:close 1, :instruction exec_while} {:close 0, :instruction boolean_dup_items} {:close 1, :instruction integer_inc} {:close 1, :instruction string_rot} {:close 1, :instruction exec_y} {:close 0, :instruction boolean_pop} {:close 0, :instruction exec_pop} {:close 0, :instruction integer_swap} {:close 1, :instruction exec_s} {:close 0, :instruction boolean_dup_times} {:close 0, :instruction string_dup_times} {:close 0, :instruction integer_rot} {:close 0, :instruction exec_do*while} {:close 0, :instruction char_flush} {:close 0, :instruction in1} {:close 0, :instruction ";nwtQkR  "} {:close 0, :instruction print_boolean} {:close 2, :instruction string_dup_times} {:close 0, :instruction string_shove} {:close 0, :instruction integer_swap} {:close 0, :instruction string_empty} {:close 0, :instruction string_occurrencesofchar} {:close 0, :instruction exec_y} {:close 1, :instruction integer_shove} {:close 0, :instruction string_containschar} {:close 1, :instruction integer_add} {:close 1, :instruction boolean_flush} {:close 0, :instruction char_isdigit} {:close 0, :instruction integer_fromstring} {:close 0, :instruction integer_dup_times} {:close 0, :instruction integer_rot} {:close 0, :instruction integer_shove} {:close 1, :instruction print_exec} {:close 0, :instruction string_parse_to_chars} {:close 1, :instruction string_contains} {:close 0, :instruction string_fromboolean} {:close 0, :instruction "r 7(@L SIph0 "} {:close 1, :instruction exec_pop} {:close 0, :instruction tagged_833} {:close 0, :instruction exec_s} {:close 0, :instruction integer_lte} {:close 0, :instruction string_first} {:close 0, :instruction char_iswhitespace} {:close 2, :instruction integer_max} {:close 0, :instruction print_char} {:close 0, :instruction boolean_yankdup} {:close 1, :instruction char_dup_times} {:close 0, :instruction char_iswhitespace} {:close 0, :instruction integer_min} {:close 0, :instruction char_dup_times} {:close 0, :instruction char_dup_times} {:close 0, :instruction boolean_dup} {:close 1, :instruction boolean_stackdepth} {:close 0, :instruction boolean_dup_items} {:close 0, :instruction exec_when} {:close 1, :instruction char_stackdepth} {:close 0, :instruction string_eq} {:close 2, :instruction integer_fromchar} {:close 0, :instruction string_take} {:close 0, :instruction exec_k} {:close 0, :instruction exec_do*times} {:close 0, :instruction char_isletter} {:close 0, :instruction string_stackdepth} {:close 0, :instruction in1} {:close 0, :instruction boolean_pop} {:close 0, :instruction exec_do*while} {:close 0, :instruction char_flush} {:close 0, :instruction print_char} {:close 0, :instruction tagged_833} {:close 0, :instruction integer_shove} {:close 0, :instruction integer_gte} {:close 1, :instruction string_replacefirst} {:close 0, :instruction boolean_and} {:close 1, :instruction char_dup_times} {:close 0, :instruction string_shove} {:close 1, :instruction char_yankdup} {:close 0, :instruction exec_empty} {:close 0, :instruction exec_do*while} {:close 0, :instruction print_char} {:close 0, :instruction char_shove} {:close 0, :instruction string_shove} {:close 0, :instruction integer_pop} {:close 1, :instruction char_yankdup} {:close 0, :instruction exec_pop} {:close 0, :instruction string_dup_times} {:close 0, :instruction integer_lte} {:close 2, :instruction \newline} {:close 0, :instruction char_flush} {:close 0, :instruction char_allfromstring} {:close 0, :instruction \space} {:close 0, :instruction integer_swap} {:close 0, :instruction char_frominteger} {:close 0, :instruction integer_rot} {:close 1, :instruction in1} {:close 1, :instruction integer_dup_items} {:close 0, :instruction string_nth} {:close 0, :instruction boolean_shove} {:close 0, :instruction char_empty} {:close 1, :instruction boolean_rot} {:close 0, :instruction "S [+{d<"} {:close 0, :instruction string_replace} {:close 0, :instruction exec_empty} {:close 1, :instruction exec_do*while} {:close 0, :instruction integer_lt} {:close 0, :instruction integer_fromboolean} {:close 1, :instruction string_setchar} {:close 0, :instruction string_frominteger} {:close 0, :instruction integer_rot} {:close 0, :instruction exec_do*count} {:close 0, :instruction print_newline} {:close 0, :instruction string_first} {:close 0, :instruction string_dup_times} {:close 0, :instruction integer_dup} {:close 0, :instruction boolean_swap} {:close 0, :instruction \newline} {:close 0, :instruction boolean_yankdup} {:close 0, :instruction char_stackdepth} {:close 0, :instruction print_exec} {:close 0, :instruction boolean_dup} {:close 0, :instruction char_swap} {:close 0, :instruction string_empty} {:close 0, :instruction string_frominteger} {:close 1, :instruction string_length} {:close 0, :instruction exec_yankdup})
+Zero cases best program: (string_last string_stackdepth exec_y (boolean_or) boolean_dup_items exec_dup_items integer_empty integer_fromchar exec_empty string_parse_to_chars integer_div boolean_rot integer_mult string_occurrencesofchar exec_yankdup print_newline string_substring boolean_stackdepth string_concat char_iswhitespace string_pop char_rot exec_shove (integer_yank string_last exec_while (string_substring boolean_frominteger in1) string_replacechar) string_dup_items integer_min string_swap boolean_or boolean_swap exec_string_iterate (string_reverse string_flush string_pop integer_sub tagged_159) boolean_yank print_exec (exec_while () boolean_not print_string char_flush boolean_eq) string_dup_times print_boolean char_rot string_containschar string_nth exec_shove () string_empty exec_empty exec_shove (string_swap char_empty string_empty) exec_swap (boolean_swap string_conjchar exec_do*count (string_dup_items integer_fromboolean exec_swap (integer_rot) (string_yank \space string_containschar string_dup print_char char_eq string_fromchar exec_dup_items integer_flush boolean_yankdup string_stackdepth) integer_swap string_rot exec_when () exec_empty exec_pop (string_last char_rot string_yank exec_shove (boolean_eq string_pop string_rot) string_frominteger exec_yankdup) exec_do*count (integer_mult string_conjchar) exec_do*times () string_yank integer_pop exec_when (integer_yank integer_mult boolean_dup_times boolean_not) integer_fromboolean) integer_add) (boolean_dup_times print_integer integer_div exec_while (string_removechar char_dup_times) integer_fromboolean exec_do*count () integer_add integer_sub string_length string_replacefirst boolean_dup_items integer_sub boolean_stackdepth) integer_fromchar exec_empty boolean_swap exec_shove (string_empty exec_pop () boolean_not exec_empty string_replacefirst) string_last boolean_dup_times integer_mult string_substring exec_noop string_butlast tag_integer_481 string_yank exec_while () integer_stackdepth print_string exec_eq exec_do*times (char_allfromstring print_string integer_div integer_yank string_replacefirst) string_containschar boolean_invert_first_then_and exec_s (integer_eq) (integer_lte string_length string_last integer_sub string_dup string_rest char_yank boolean_xor) (exec_swap (char_yank) () exec_empty string_indexofchar boolean_stackdepth exec_swap () (exec_shove (exec_noop integer_dup_items integer_dup_items) print_newline integer_div exec_pop (integer_dup) char_isdigit exec_yankdup tag_integer_923)) boolean_yank char_yank string_dup integer_stackdepth exec_dup_items string_rot string_dup integer_yank string_conjchar boolean_yank integer_add print_integer char_shove char_isdigit char_dup string_nth integer_rot string_parse_to_chars integer_pop exec_do*while (\:) boolean_not string_removechar integer_flush integer_inc exec_while () boolean_dup_items integer_inc string_rot exec_y () boolean_pop exec_pop (integer_swap exec_s () (boolean_dup_times string_dup_times integer_rot exec_do*while (char_flush in1 ";nwtQkR  " print_boolean string_dup_times)) (string_shove integer_swap string_empty string_occurrencesofchar exec_y (integer_shove) string_containschar integer_add) boolean_flush) char_isdigit integer_fromstring integer_dup_times integer_rot integer_shove print_exec () string_parse_to_chars string_contains string_fromboolean "r 7(@L SIph0 " exec_pop () tagged_833 exec_s (integer_lte string_first char_iswhitespace integer_max) () (print_char boolean_yankdup char_dup_times) char_iswhitespace integer_min char_dup_times char_dup_times boolean_dup boolean_stackdepth boolean_dup_items exec_when (char_stackdepth) string_eq integer_fromchar string_take exec_k (exec_do*times (char_isletter string_stackdepth in1 boolean_pop exec_do*while (char_flush print_char tagged_833 integer_shove integer_gte string_replacefirst) boolean_and char_dup_times) string_shove char_yankdup) (exec_empty exec_do*while (print_char char_shove string_shove integer_pop char_yankdup) exec_pop (string_dup_times integer_lte \newline)) char_flush char_allfromstring \space integer_swap char_frominteger integer_rot in1 integer_dup_items string_nth boolean_shove char_empty boolean_rot "S [+{d<" string_replace exec_empty exec_do*while () integer_lt integer_fromboolean string_setchar string_frominteger integer_rot exec_do*count (print_newline string_first string_dup_times integer_dup boolean_swap \newline boolean_yankdup char_stackdepth print_exec (boolean_dup char_swap string_empty string_frominteger string_length) exec_yankdup))
+Zero cases best number of elite cases: 200
+Zero cases best number of zero cases: 6
+Zero cases best total error: 1853
+Zero cases best mean error: 9.265
+Zero cases best history: (1853)
+Zero cases best size: 385
+Percent parens: 0.153
+--- Lexicase Population Statistics ---
+Count of elite individuals by case: (4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1 4 1)
+Population mean number of elite cases: 100.00
+Count of perfect (error zero) individuals by case: (4 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+Population mean number of perfect (error zero) cases: 1.80
+--- Best Program (based on total-error) Statistics ---
+Best genome: ({:close 0, :instruction string_last} {:close 0, :instruction string_stackdepth} {:close 0, :instruction exec_y} {:close 1, :instruction boolean_or} {:close 0, :instruction boolean_dup_items} {:close 0, :instruction exec_dup_items} {:close 0, :instruction integer_empty} {:close 1, :instruction integer_fromchar} {:close 0, :instruction exec_empty} {:close 1, :instruction string_parse_to_chars} {:close 0, :instruction integer_div} {:close 1, :instruction boolean_rot} {:close 0, :instruction integer_mult} {:close 1, :instruction string_occurrencesofchar} {:close 0, :instruction exec_yankdup} {:close 0, :instruction print_newline} {:close 1, :instruction string_substring} {:close 0, :instruction boolean_stackdepth} {:close 0, :instruction string_concat} {:close 0, :instruction char_iswhitespace} {:close 0, :instruction string_pop} {:close 0, :instruction char_rot} {:close 0, :instruction exec_shove} {:close 0, :instruction integer_yank} {:close 0, :instruction string_last} {:close 0, :instruction exec_while} {:close 0, :instruction string_substring} {:close 0, :instruction boolean_frominteger} {:close 1, :instruction in1} {:close 2, :instruction string_replacechar} {:close 0, :instruction string_dup_items} {:close 0, :instruction integer_min} {:close 0, :instruction string_swap} {:close 0, :instruction boolean_or} {:close 0, :instruction boolean_swap} {:close 0, :instruction exec_string_iterate} {:close 0, :instruction string_reverse} {:close 0, :instruction string_flush} {:close 0, :instruction string_pop} {:close 0, :instruction integer_sub} {:close 1, :instruction tagged_159} {:close 0, :instruction boolean_yank} {:close 0, :instruction print_exec} {:close 1, :instruction exec_while} {:close 0, :instruction boolean_not} {:close 0, :instruction print_string} {:close 0, :instruction char_flush} {:close 1, :instruction boolean_eq} {:close 0, :instruction string_dup_times} {:close 0, :instruction print_boolean} {:close 1, :instruction char_rot} {:close 1, :instruction string_containschar} {:close 0, :instruction string_nth} {:close 1, :instruction exec_shove} {:close 0, :instruction string_empty} {:close 0, :instruction exec_empty} {:close 0, :instruction exec_shove} {:close 0, :instruction string_swap} {:close 0, :instruction char_empty} {:close 1, :instruction string_empty} {:close 0, :instruction exec_swap} {:close 0, :instruction boolean_swap} {:close 0, :instruction string_conjchar} {:close 0, :instruction exec_do*count} {:close 0, :instruction string_dup_items} {:close 0, :instruction integer_fromboolean} {:close 0, :instruction exec_swap} {:close 1, :instruction integer_rot} {:close 0, :instruction string_yank} {:close 0, :instruction \space} {:close 0, :instruction string_containschar} {:close 0, :instruction string_dup} {:close 0, :instruction print_char} {:close 0, :instruction char_eq} {:close 0, :instruction string_fromchar} {:close 0, :instruction exec_dup_items} {:close 0, :instruction integer_flush} {:close 0, :instruction boolean_yankdup} {:close 1, :instruction string_stackdepth} {:close 0, :instruction integer_swap} {:close 0, :instruction string_rot} {:close 1, :instruction exec_when} {:close 0, :instruction exec_empty} {:close 0, :instruction exec_pop} {:close 0, :instruction string_last} {:close 0, :instruction char_rot} {:close 0, :instruction string_yank} {:close 0, :instruction exec_shove} {:close 0, :instruction boolean_eq} {:close 0, :instruction string_pop} {:close 1, :instruction string_rot} {:close 0, :instruction string_frominteger} {:close 1, :instruction exec_yankdup} {:close 0, :instruction exec_do*count} {:close 0, :instruction integer_mult} {:close 1, :instruction string_conjchar} {:close 1, :instruction exec_do*times} {:close 0, :instruction string_yank} {:close 0, :instruction integer_pop} {:close 0, :instruction exec_when} {:close 0, :instruction integer_yank} {:close 0, :instruction integer_mult} {:close 0, :instruction boolean_dup_times} {:close 1, :instruction boolean_not} {:close 1, :instruction integer_fromboolean} {:close 1, :instruction integer_add} {:close 0, :instruction boolean_dup_times} {:close 0, :instruction print_integer} {:close 0, :instruction integer_div} {:close 0, :instruction exec_while} {:close 0, :instruction string_removechar} {:close 1, :instruction char_dup_times} {:close 0, :instruction integer_fromboolean} {:close 1, :instruction exec_do*count} {:close 0, :instruction integer_add} {:close 0, :instruction integer_sub} {:close 0, :instruction string_length} {:close 0, :instruction string_replacefirst} {:close 0, :instruction boolean_dup_items} {:close 0, :instruction integer_sub} {:close 1, :instruction boolean_stackdepth} {:close 2, :instruction integer_fromchar} {:close 0, :instruction exec_empty} {:close 0, :instruction boolean_swap} {:close 0, :instruction exec_shove} {:close 0, :instruction string_empty} {:close 1, :instruction exec_pop} {:close 0, :instruction boolean_not} {:close 0, :instruction exec_empty} {:close 1, :instruction string_replacefirst} {:close 1, :instruction string_last} {:close 1, :instruction boolean_dup_times} {:close 0, :instruction integer_mult} {:close 1, :instruction string_substring} {:close 1, :instruction exec_noop} {:close 0, :instruction string_butlast} {:close 0, :instruction tag_integer_481} {:close 0, :instruction string_yank} {:close 1, :instruction exec_while} {:close 0, :instruction integer_stackdepth} {:close 0, :instruction print_string} {:close 0, :instruction exec_eq} {:close 0, :instruction exec_do*times} {:close 0, :instruction char_allfromstring} {:close 0, :instruction print_string} {:close 0, :instruction integer_div} {:close 0, :instruction integer_yank} {:close 1, :instruction string_replacefirst} {:close 2, :instruction string_containschar} {:close 0, :instruction boolean_invert_first_then_and} {:close 0, :instruction exec_s} {:close 1, :instruction integer_eq} {:close 0, :instruction integer_lte} {:close 0, :instruction string_length} {:close 0, :instruction string_last} {:close 0, :instruction integer_sub} {:close 0, :instruction string_dup} {:close 0, :instruction string_rest} {:close 0, :instruction char_yank} {:close 1, :instruction boolean_xor} {:close 0, :instruction exec_swap} {:close 2, :instruction char_yank} {:close 0, :instruction exec_empty} {:close 0, :instruction string_indexofchar} {:close 0, :instruction boolean_stackdepth} {:close 1, :instruction exec_swap} {:close 0, :instruction exec_shove} {:close 0, :instruction exec_noop} {:close 0, :instruction integer_dup_items} {:close 1, :instruction integer_dup_items} {:close 0, :instruction print_newline} {:close 0, :instruction integer_div} {:close 0, :instruction exec_pop} {:close 1, :instruction integer_dup} {:close 0, :instruction char_isdigit} {:close 0, :instruction exec_yankdup} {:close 2, :instruction tag_integer_923} {:close 2, :instruction boolean_yank} {:close 1, :instruction char_yank} {:close 0, :instruction string_dup} {:close 0, :instruction integer_stackdepth} {:close 1, :instruction exec_dup_items} {:close 0, :instruction string_rot} {:close 0, :instruction string_dup} {:close 0, :instruction integer_yank} {:close 0, :instruction string_conjchar} {:close 1, :instruction boolean_yank} {:close 0, :instruction integer_add} {:close 0, :instruction print_integer} {:close 0, :instruction char_shove} {:close 1, :instruction char_isdigit} {:close 1, :instruction char_dup} {:close 0, :instruction string_nth} {:close 1, :instruction integer_rot} {:close 1, :instruction string_parse_to_chars} {:close 0, :instruction integer_pop} {:close 0, :instruction exec_do*while} {:close 1, :instruction \:} {:close 0, :instruction boolean_not} {:close 0, :instruction string_removechar} {:close 0, :instruction integer_flush} {:close 0, :instruction integer_inc} {:close 1, :instruction exec_while} {:close 0, :instruction boolean_dup_items} {:close 1, :instruction integer_inc} {:close 1, :instruction string_rot} {:close 1, :instruction exec_y} {:close 0, :instruction boolean_pop} {:close 0, :instruction exec_pop} {:close 0, :instruction integer_swap} {:close 1, :instruction exec_s} {:close 0, :instruction boolean_dup_times} {:close 0, :instruction string_dup_times} {:close 0, :instruction integer_rot} {:close 0, :instruction exec_do*while} {:close 0, :instruction char_flush} {:close 0, :instruction in1} {:close 0, :instruction ";nwtQkR  "} {:close 0, :instruction print_boolean} {:close 2, :instruction string_dup_times} {:close 0, :instruction string_shove} {:close 0, :instruction integer_swap} {:close 0, :instruction string_empty} {:close 0, :instruction string_occurrencesofchar} {:close 0, :instruction exec_y} {:close 1, :instruction integer_shove} {:close 0, :instruction string_containschar} {:close 1, :instruction integer_add} {:close 1, :instruction boolean_flush} {:close 0, :instruction char_isdigit} {:close 0, :instruction integer_fromstring} {:close 0, :instruction integer_dup_times} {:close 0, :instruction integer_rot} {:close 0, :instruction integer_shove} {:close 1, :instruction print_exec} {:close 0, :instruction string_parse_to_chars} {:close 1, :instruction string_contains} {:close 0, :instruction string_fromboolean} {:close 0, :instruction "r 7(@L SIph0 "} {:close 1, :instruction exec_pop} {:close 0, :instruction tagged_833} {:close 0, :instruction exec_s} {:close 0, :instruction integer_lte} {:close 0, :instruction string_first} {:close 0, :instruction char_iswhitespace} {:close 2, :instruction integer_max} {:close 0, :instruction print_char} {:close 0, :instruction boolean_yankdup} {:close 1, :instruction char_dup_times} {:close 0, :instruction char_iswhitespace} {:close 0, :instruction integer_min} {:close 0, :instruction char_dup_times} {:close 0, :instruction char_dup_times} {:close 0, :instruction boolean_dup} {:close 1, :instruction boolean_stackdepth} {:close 0, :instruction boolean_dup_items} {:close 0, :instruction exec_when} {:close 1, :instruction char_stackdepth} {:close 0, :instruction string_eq} {:close 2, :instruction integer_fromchar} {:close 0, :instruction string_take} {:close 0, :instruction exec_k} {:close 0, :instruction exec_do*times} {:close 0, :instruction char_isletter} {:close 0, :instruction string_stackdepth} {:close 0, :instruction in1} {:close 0, :instruction boolean_pop} {:close 0, :instruction exec_do*while} {:close 0, :instruction char_flush} {:close 0, :instruction print_char} {:close 0, :instruction tagged_833} {:close 0, :instruction integer_shove} {:close 0, :instruction integer_gte} {:close 1, :instruction string_replacefirst} {:close 0, :instruction boolean_and} {:close 1, :instruction char_dup_times} {:close 0, :instruction string_shove} {:close 1, :instruction char_yankdup} {:close 0, :instruction exec_empty} {:close 0, :instruction exec_do*while} {:close 0, :instruction print_char} {:close 0, :instruction char_shove} {:close 0, :instruction string_shove} {:close 0, :instruction integer_pop} {:close 1, :instruction char_yankdup} {:close 0, :instruction exec_pop} {:close 0, :instruction string_dup_times} {:close 0, :instruction integer_lte} {:close 2, :instruction \newline} {:close 0, :instruction char_flush} {:close 0, :instruction char_allfromstring} {:close 0, :instruction \space} {:close 0, :instruction integer_swap} {:close 0, :instruction char_frominteger} {:close 0, :instruction integer_rot} {:close 1, :instruction in1} {:close 1, :instruction integer_dup_items} {:close 0, :instruction string_nth} {:close 0, :instruction boolean_shove} {:close 0, :instruction char_empty} {:close 1, :instruction boolean_rot} {:close 0, :instruction "S [+{d<"} {:close 0, :instruction string_replace} {:close 0, :instruction exec_empty} {:close 1, :instruction exec_do*while} {:close 0, :instruction integer_lt} {:close 0, :instruction integer_fromboolean} {:close 1, :instruction string_setchar} {:close 0, :instruction string_frominteger} {:close 0, :instruction integer_rot} {:close 0, :instruction exec_do*count} {:close 0, :instruction print_newline} {:close 0, :instruction string_first} {:close 0, :instruction string_dup_times} {:close 0, :instruction integer_dup} {:close 0, :instruction boolean_swap} {:close 0, :instruction \newline} {:close 0, :instruction boolean_yankdup} {:close 0, :instruction char_stackdepth} {:close 0, :instruction print_exec} {:close 0, :instruction boolean_dup} {:close 0, :instruction char_swap} {:close 0, :instruction string_empty} {:close 0, :instruction string_frominteger} {:close 1, :instruction string_length} {:close 0, :instruction exec_yankdup})
+Best program: (string_last string_stackdepth exec_y (boolean_or) boolean_dup_items exec_dup_items integer_empty integer_fromchar exec_empty string_parse_to_chars integer_div boolean_rot integer_mult string_occurrencesofchar exec_yankdup print_newline string_substring boolean_stackdepth string_concat char_iswhitespace string_pop char_rot exec_shove (integer_yank string_last exec_while (string_substring boolean_frominteger in1) string_replacechar) string_dup_items integer_min string_swap boolean_or boolean_swap exec_string_iterate (string_reverse string_flush string_pop integer_sub tagged_159) boolean_yank print_exec (exec_while () boolean_not print_string char_flush boolean_eq) string_dup_times print_boolean char_rot string_containschar string_nth exec_shove () string_empty exec_empty exec_shove (string_swap char_empty string_empty) exec_swap (boolean_swap string_conjchar exec_do*count (string_dup_items integer_fromboolean exec_swap (integer_rot) (string_yank \space string_containschar string_dup print_char char_eq string_fromchar exec_dup_items integer_flush boolean_yankdup string_stackdepth) integer_swap string_rot exec_when () exec_empty exec_pop (string_last char_rot string_yank exec_shove (boolean_eq string_pop string_rot) string_frominteger exec_yankdup) exec_do*count (integer_mult string_conjchar) exec_do*times () string_yank integer_pop exec_when (integer_yank integer_mult boolean_dup_times boolean_not) integer_fromboolean) integer_add) (boolean_dup_times print_integer integer_div exec_while (string_removechar char_dup_times) integer_fromboolean exec_do*count () integer_add integer_sub string_length string_replacefirst boolean_dup_items integer_sub boolean_stackdepth) integer_fromchar exec_empty boolean_swap exec_shove (string_empty exec_pop () boolean_not exec_empty string_replacefirst) string_last boolean_dup_times integer_mult string_substring exec_noop string_butlast tag_integer_481 string_yank exec_while () integer_stackdepth print_string exec_eq exec_do*times (char_allfromstring print_string integer_div integer_yank string_replacefirst) string_containschar boolean_invert_first_then_and exec_s (integer_eq) (integer_lte string_length string_last integer_sub string_dup string_rest char_yank boolean_xor) (exec_swap (char_yank) () exec_empty string_indexofchar boolean_stackdepth exec_swap () (exec_shove (exec_noop integer_dup_items integer_dup_items) print_newline integer_div exec_pop (integer_dup) char_isdigit exec_yankdup tag_integer_923)) boolean_yank char_yank string_dup integer_stackdepth exec_dup_items string_rot string_dup integer_yank string_conjchar boolean_yank integer_add print_integer char_shove char_isdigit char_dup string_nth integer_rot string_parse_to_chars integer_pop exec_do*while (\:) boolean_not string_removechar integer_flush integer_inc exec_while () boolean_dup_items integer_inc string_rot exec_y () boolean_pop exec_pop (integer_swap exec_s () (boolean_dup_times string_dup_times integer_rot exec_do*while (char_flush in1 ";nwtQkR  " print_boolean string_dup_times)) (string_shove integer_swap string_empty string_occurrencesofchar exec_y (integer_shove) string_containschar integer_add) boolean_flush) char_isdigit integer_fromstring integer_dup_times integer_rot integer_shove print_exec () string_parse_to_chars string_contains string_fromboolean "r 7(@L SIph0 " exec_pop () tagged_833 exec_s (integer_lte string_first char_iswhitespace integer_max) () (print_char boolean_yankdup char_dup_times) char_iswhitespace integer_min char_dup_times char_dup_times boolean_dup boolean_stackdepth boolean_dup_items exec_when (char_stackdepth) string_eq integer_fromchar string_take exec_k (exec_do*times (char_isletter string_stackdepth in1 boolean_pop exec_do*while (char_flush print_char tagged_833 integer_shove integer_gte string_replacefirst) boolean_and char_dup_times) string_shove char_yankdup) (exec_empty exec_do*while (print_char char_shove string_shove integer_pop char_yankdup) exec_pop (string_dup_times integer_lte \newline)) char_flush char_allfromstring \space integer_swap char_frominteger integer_rot in1 integer_dup_items string_nth boolean_shove char_empty boolean_rot "S [+{d<" string_replace exec_empty exec_do*while () integer_lt integer_fromboolean string_setchar string_frominteger integer_rot exec_do*count (print_newline string_first string_dup_times integer_dup boolean_swap \newline boolean_yankdup char_stackdepth print_exec (boolean_dup char_swap string_empty string_frominteger string_length) exec_yankdup))
+Total: 1853
+Mean: 9.265
+History: (1853)
+Genome size: 326
+Size: 385
+Percent parens: 0.153
+--- Population Statistics ---
+Cosmos Data: {0 1853, 1 17155, 2 101054, 4 110088}
+Average total errors in population: 66240.8
+Median total errors in population: 101054
+Average genome size in population (length): 265.8
+Average program size in population (points): 309.0
+Average percent parens in population: 0.141
+Minimum age in population: 0.0
+Maximum age in population: 0.0
+Average age in population: 0.0
+Median age in population: 0.0
+Minimum grain-size in population: 1.0
+Maximum grain-size in population: 1.0
+Average grain-size in population: 1.0
+Median grain-size in population: 1.0
+--- Population Diversity Statistics ---
+Min copy number of one Plush genome: 1
+Median copy number of one Plush genome: 1
+Max copy number of one Plush genome: 1
+Genome diversity (% unique Plush genomes):	 1.0
+Min copy number of one Push program: 1
+Median copy number of one Push program: 1
+Max copy number of one Push program: 1
+Syntactic diversity (% unique Push programs):	 1.0
+Total error diversity:				 0.8
+Error (vector) diversity:			 0.8
+Behavioral diversity:				 0.8
+--- Population Homology Statistics (all stats reference the sampled population edit distance of programs) ---
+Number of homology samples: 1000
+Average:             0.7497692911028861
+Standard deviation:  0.3786541339901674
+First quartile:  0.9280303
+Median:          0.93663913
+Third quartile:  0.9476584
+--- Run Statistics ---
+Number of program evaluations used so far: 5
+Number of point (instruction) evaluations so far: 283900
+--- Timings ---
+Current time: 1xxx milliseconds
+Total Time:           x.x seconds
+Initialization:       x.x seconds,  x.x%
+Reproduction:         x.x seconds,  x.x%
+Fitness Testing:      x.x seconds, x.x%
+Report:               x.x seconds,  x.x%
+Other:                x.x seconds,  x.x%
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -*- End of report for generation 0
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+FAILURE

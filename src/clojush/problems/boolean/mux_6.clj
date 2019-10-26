@@ -34,8 +34,11 @@
 (defn a
   [i]
   (fn [state] 
-    (push-item (nth (first (:auxiliary state)) i)
-               :boolean state)))
+    (if (:autoconstructing state)
+      state
+      (push-item (nth (first (:auxiliary state)) i)
+                 :boolean 
+                 state))))
 
 (define-registered a0 (with-meta (a 0) {:stack-types [:boolean]}))
 (define-registered a1 (with-meta (a 1) {:stack-types [:boolean]}))
@@ -43,8 +46,11 @@
 (defn d
   [i]
   (fn [state] 
-    (push-item (nth (second (:auxiliary state)) i)
-               :boolean state)))
+    (if (:autoconstructing state)
+      state
+      (push-item (nth (second (:auxiliary state)) i)
+                 :boolean 
+                 state))))
 
 (define-registered d0 (with-meta (d 0) {:stack-types [:boolean]}))
 (define-registered d1 (with-meta (d 1) {:stack-types [:boolean]}))
@@ -82,3 +88,4 @@
                                     :uniform-mutation 0.45}
    :parent-selection :tournament
    })
+

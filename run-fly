@@ -27,7 +27,7 @@ repodir="$rundir/Clojush"
 outputdir="$rundir/output"
 ssh ${fly_user}@fly.hampshire.edu "mkdir -p $rundir"
 
-rsync  \
+rsync --exclude=out -v --progress \
   --recursive \
   --inplace \
   --links \

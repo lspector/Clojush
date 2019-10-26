@@ -32,8 +32,10 @@
 (defn in
   [i]
   (fn [state] 
-    (push-item (nth (stack-ref :auxiliary 1 state) i)
-               :boolean state)))
+    (if (:autoconstructing state)
+      state
+      (push-item (nth (stack-ref :auxiliary 1 state) i)
+                 :boolean state))))
 
 (defn in-symbols
   [num-bits]
@@ -146,3 +148,4 @@
 
 ;; Create the argmap passing the number of bits for the problem
 (define-digital-multiplier 2)
+

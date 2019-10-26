@@ -19,29 +19,36 @@
                                           program-so-far []
                                           rest-program open-close-seq]
                                      (cond
-                                       (nil? rest-program) (apply list program-so-far)
-                                       (= (first rest-program) :open) (if (== open-count pair-to-remove)
-                                                                        (recur (inc open-count)
-                                                                               1
-                                                                               program-so-far
-                                                                               (next rest-program))
-                                                                        (recur (inc open-count)
-                                                                               (inc close-diff)
-                                                                               (conj program-so-far (first rest-program))
-                                                                               (next rest-program)))
-                                       (= (first rest-program) :close) (if (zero? (dec close-diff))
-                                                                         (recur open-count
-                                                                                max-number-magnitude
-                                                                                program-so-far
-                                                                                (next rest-program))
-                                                                         (recur open-count
-                                                                                (dec close-diff)
-                                                                                (conj program-so-far (first rest-program))
-                                                                                (next rest-program)))
-                                       :else (recur open-count
-                                                    close-diff
-                                                    (conj program-so-far (first rest-program))
-                                                    (next rest-program))))]
+                                       (nil? rest-program) 
+                                       (apply list program-so-far)
+                                       ;
+                                       (= (first rest-program) :open) 
+                                       (if (== open-count pair-to-remove)
+                                         (recur (inc open-count)
+                                                1
+                                                program-so-far
+                                                (next rest-program))
+                                         (recur (inc open-count)
+                                                (inc close-diff)
+                                                (conj program-so-far (first rest-program))
+                                                (next rest-program)))
+                                       ;
+                                       (= (first rest-program) :close) 
+                                       (if (zero? (dec close-diff))
+                                         (recur open-count
+                                                max-number-magnitude
+                                                program-so-far
+                                                (next rest-program))
+                                         (recur open-count
+                                                (dec close-diff)
+                                                (conj program-so-far (first rest-program))
+                                                (next rest-program)))
+                                       ;
+                                       :else 
+                                       (recur open-count
+                                              close-diff
+                                              (conj program-so-far (first rest-program))
+                                              (next rest-program))))]
           (open-close-sequence-to-list pair-removed-program))))))
 
 (defn auto-simplify 
@@ -212,3 +219,4 @@
                    (<= (count-points new-program) (count-points program)))
             (recur (inc step) new-genome new-program new-errors)
             (recur (inc step) genome program errors)))))))
+

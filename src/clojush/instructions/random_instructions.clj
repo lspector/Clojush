@@ -47,6 +47,18 @@
       state)))
 
 (define-registered
+  code_rand_atom
+  ^{:stack-types [:code :random]}
+  (fn [state]
+    (if (empty? @global-atom-generators)
+      (binding [*out* *err*]
+        (println "code_rand_atom: global-atom-generators is empty.")
+        state)
+      (push-item (random-atom @global-atom-generators)
+                 :code
+                 state))))
+
+(define-registered
   string_rand
   ^{:stack-types [:string :random]}
   (fn [state]
@@ -55,7 +67,9 @@
                    (+' min-random-string-length
                        (lrand-int (- max-random-string-length
                                      min-random-string-length)))
-                   (fn [] (lrand-nth (concat ["\n" "\t"] (map (comp str char) (range 32 127)))))))
+                   (fn [] (lrand-nth (vec (concat ["\n" "\t"] 
+                                                  (map (comp str char) 
+                                                       (range 32 127))))))))
       :string
       state)))
 
@@ -63,6 +77,8 @@
   char_rand
   ^{:stack-types [:char :random]}
   (fn [state]
-    (push-item (lrand-nth (concat [\newline \tab] (map char (range 32 127))))
+    (push-item (lrand-nth (vec (concat [\newline \tab] 
+                                       (map char (range 32 127)))))
                :char
                state)))
+

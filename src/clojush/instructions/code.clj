@@ -18,8 +18,9 @@
   ^{:stack-types [:code]}
   (fn [state]
     (if (not (empty? (rest (:code state))))
-      (let [new-item (concat (ensure-list (stack-ref :code 0 state))
-                             (ensure-list (stack-ref :code 1 state)))]
+      (let [new-item (not-lazy
+                       (concat (ensure-list (stack-ref :code 0 state))
+                               (ensure-list (stack-ref :code 1 state))))]
         (if (<= (count-points new-item) @global-max-points)
           (push-item new-item
                      :code
@@ -532,36 +533,3 @@
           state))
       state)))
 
-(define-registered
-  environment_new
-  ^{:stack-types [:environment]
-    :parentheses 1}
-  ;; Creates new environment using the top item on the exec stack
-  (fn [state]
-    (if (empty? (:exec state))
-      state
-      (let [new-exec (top-item :exec state)
-            parent-env (pop-item :exec state)]
-        (push-item new-exec
-                   :exec
-                   (assoc (assoc (push-item parent-env :environment state)
-                                 :return '())
-                          :exec '()))))))
-
-(define-registered
-  environment_begin
-  ^{:stack-types [:environment]}
-  ;; Creates new environment using the entire exec stack
-  (fn [state]
-    (assoc (push-item (assoc state :exec '())
-                      :environment state)
-           :return '())))
-
-(define-registered
-  environment_end
-  ^{:stack-types [:environment]}
-  ;; Ends current environment
-  (fn [state]
-    (if (empty? (:environment state))
-      state
-      (end-environment state))))

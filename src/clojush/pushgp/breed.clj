@@ -7,26 +7,33 @@
 ; A map of genetic operator keywords to maps containing the genetic operator
 ; functions and number of parents
 (def genetic-operators
-  {:reproduction {:fn reproduction :parents 1}
-   :alternation {:fn alternation :parents 2}
-   :two-point-crossover {:fn two-point-crossover :parents 2}
-   :uniform-crossover {:fn uniform-crossover :parents 2}
-   :uniform-mutation {:fn uniform-mutation :parents 1}
-   :uniform-instruction-mutation {:fn uniform-instruction-mutation :parents 1}
-   :uniform-integer-mutation {:fn uniform-integer-mutation :parents 1}
-   :uniform-float-mutation {:fn uniform-float-mutation :parents 1}
-   :uniform-tag-mutation {:fn uniform-tag-mutation :parents 1}
-   :uniform-string-mutation {:fn uniform-string-mutation :parents 1}
-   :uniform-boolean-mutation {:fn uniform-boolean-mutation :parents 1}
-   :uniform-close-mutation {:fn uniform-close-mutation :parents 1}
-   :uniform-silence-mutation {:fn uniform-silence-mutation :parents 1}
-   :uniform-deletion {:fn uniform-deletion :parents 1}
-   :uniform-addition {:fn uniform-addition :parents 1}
-   :uniform-addition-and-deletion {:fn uniform-addition-and-deletion :parents 1}
-   :uniform-combination-and-deletion {:fn uniform-combination-and-deletion :parents 2}
-   :genesis {:fn genesis :parents 1} ;; the parent will be ignored
-   :make-next-operator-revertable {:fn nil :parents 0}
-   :autoconstruction {:fn autoconstruction :parents 2}
+  {:reproduction {:fn reproduction :parents 1 :works-with-plushy true :works-with-plush true}
+   :alternation {:fn alternation :parents 2 :works-with-plushy true :works-with-plush true}
+   :two-point-crossover {:fn two-point-crossover :parents 2 :works-with-plushy true :works-with-plush true}
+   :uniform-crossover {:fn uniform-crossover :parents 2 :works-with-plushy true :works-with-plush true}
+   :uniform-mutation {:fn uniform-mutation :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-instruction-mutation {:fn uniform-instruction-mutation :parents 1 :works-with-plush true}
+   :uniform-integer-mutation {:fn uniform-integer-mutation :parents 1 :works-with-plush true}
+   :uniform-float-mutation {:fn uniform-float-mutation :parents 1 :works-with-plush true}
+   :uniform-tag-mutation {:fn uniform-tag-mutation :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-string-mutation {:fn uniform-string-mutation :parents 1 :works-with-plush true}
+   :uniform-boolean-mutation {:fn uniform-boolean-mutation :parents 1 :works-with-plush true}
+   :uniform-close-mutation {:fn uniform-close-mutation :parents 1 :works-with-plush true}
+   :uniform-silence-mutation {:fn uniform-silence-mutation :parents 1 :works-with-plush true}
+   :uniform-deletion {:fn uniform-deletion :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-addition {:fn uniform-addition :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-addition-and-deletion {:fn uniform-addition-and-deletion :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-combination {:fn uniform-combination :parents 2 :works-with-plushy true :works-with-plush true}
+   :uniform-combination-and-deletion {:fn uniform-combination-and-deletion :parents 2 :works-with-plushy true :works-with-plush true}
+   :genesis {:fn genesis :parents 1 :works-with-plushy true :works-with-plush true} ;; the parent will be ignored
+   :make-next-operator-revertable {:fn nil :parents 0 :works-with-plushy true :works-with-plush true}
+   :autoconstruction {:fn autoconstruction :parents 2 :works-with-plush true}
+   :gene-selection {:fn gene-selection :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-reordering {:fn uniform-reordering :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-segment-reordering {:fn uniform-segment-reordering :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-segment-transposition {:fn uniform-segment-transposition :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-segment-duplication {:fn uniform-segment-duplication :parents 1 :works-with-plushy true :works-with-plush true}
+   :uniform-segment-deletion {:fn uniform-segment-deletion :parents 1 :works-with-plushy true :works-with-plush true}
    })
 
 (defn revert-too-big-child
@@ -39,27 +46,32 @@
    In future, may implement :delete, which deletes some of the instructions
    in a parent."
   [parent child {:keys [replace-child-that-exceeds-size-limit-with atom-generators
-                        max-genome-size-in-initial-program max-points]
+                        max-genome-size-in-initial-program max-points genome-representation]
                  :as argmap}]
   (case replace-child-that-exceeds-size-limit-with
     :parent parent
     :empty (make-individual :genome [] :genetic-operators :empty)
     :truncate (assoc child :genome (vec (take (/ max-points 4) (:genome child))))
-    :random (make-individual :genome (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
-                             :genetic-operators :random)
-    ))
+    :random (make-individual 
+              :genome (case genome-representation
+                        :plush (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
+                        :plushy (random-plushy-genome (* 1.165 max-genome-size-in-initial-program) atom-generators argmap))
+              :genetic-operators :random)))
 
 (defn revert-to-parent-if-worse
   "Evaluates child and parent, returning the child if it is at least as good as
    the parent on every test case."
   [child parent rand-gen {:keys [error-function parent-reversion-probability] :as argmap}]
-  (let [evaluated-child (evaluate-individual (assoc child :program (translate-plush-genome-to-push-program child argmap))
-                                             error-function rand-gen argmap)]
+  (let [evaluated-child (evaluate-individual 
+                          (assoc child :program (translate-plush-genome-to-push-program child argmap))
+                          error-function rand-gen argmap)]
     (if (>= (lrand) parent-reversion-probability)
       evaluated-child
       (let [child-errors (:errors evaluated-child)
-            evaluated-parent (evaluate-individual (assoc parent :program (translate-plush-genome-to-push-program parent argmap))
-                                                  error-function rand-gen argmap)
+            evaluated-parent (evaluate-individual 
+                               (assoc parent :program 
+                                 (translate-plush-genome-to-push-program parent argmap))
+                               error-function rand-gen argmap)
             parent-errors (:errors evaluated-parent)]
         (if (reduce #(and %1 %2)
                     (map <= child-errors parent-errors))
@@ -79,20 +91,24 @@
                     operator-list)
           operator (first op-list)
           num-parents (:parents (get genetic-operators operator))
-          other-parents (repeatedly 
-                          (dec num-parents) 
-                          (fn []
-                            (loop [re-selections 0
-                                   other (select population argmap)]
-                              (if (and (= other first-parent)
-                                       (< re-selections (:self-mate-avoidance-limit argmap)))
-                                (recur (inc re-selections)
-                                       (select population argmap))
-                                other))))
+          other-parents (vec (repeatedly 
+                               (dec num-parents) 
+                               (fn []
+                                 (loop [re-selections 0
+                                        other (select population argmap)]
+                                   (if (and (= other first-parent)
+                                            (< re-selections 
+                                               (:self-mate-avoidance-limit argmap)))
+                                     (recur (inc re-selections)
+                                            (select population argmap))
+                                     other)))))
           op-fn (:fn (get genetic-operators operator))
-          child (assoc (apply op-fn (concat (vector first-parent) other-parents (vector argmap)))
-                       :parent-uuids (concat (:parent-uuids first-parent)
-                                             (map :uuid other-parents)))]
+          child (assoc (apply op-fn (vec (concat (vector first-parent) 
+                                                 other-parents 
+                                                 (vector (assoc argmap 
+                                                           :population population)))))
+                       :parent-uuids (vec (concat (:parent-uuids first-parent)
+                                                  (map :uuid other-parents))))]
       (recur (rest op-list)
              (if revertable
                (revert-to-parent-if-worse child first-parent rand-gen argmap)
@@ -121,7 +137,7 @@
    and performs them to create a new individual. Uses recursive helper function
    even with a single operator by putting that operator in a vector."
   [operator population location rand-gen 
-   {:keys [max-points
+   {:keys [max-points genome-representation
            track-instruction-maps] :as argmap}]
   (let [first-parent (select population argmap)
         operator-vector (if (sequential? operator) operator (vector operator))
@@ -132,7 +148,10 @@
         (assoc child :genetic-operators operator)
 
       (> (count (:genome child))
-         (/ max-points 4))
+         (* (/ max-points 4)
+            (if (= genome-representation :plush)
+              1
+              1.165)))
       (as-> c (revert-too-big-child first-parent c argmap))
 
       track-instruction-maps
@@ -149,8 +168,8 @@
                                                    (vec genetic-operator-probabilities))]
         (if (or (= 1 (count vectored-go-probabilities))
                 (<= prob (second (first vectored-go-probabilities))))
-          (perform-genetic-operator (first (first vectored-go-probabilities)) population location rand-gen argmap)
+          (perform-genetic-operator (first (first vectored-go-probabilities)) 
+                                    population location rand-gen argmap)
           (recur (rest vectored-go-probabilities)))))))
-
 
 

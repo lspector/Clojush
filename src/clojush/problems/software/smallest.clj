@@ -141,7 +141,7 @@
   {:error-function (make-smallest-error-function-from-cases (first smallest-train-and-test-cases)
                                                             (second smallest-train-and-test-cases))
    :atom-generators smallest-atom-generators
-   :max-points 400
+   :max-points 800
    :max-genome-size-in-initial-program 100
    :evalpush-limit 200
    :population-size 1000
