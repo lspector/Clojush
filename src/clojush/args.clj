@@ -321,6 +321,10 @@
           ;; :elitegroup-lexicase, :uniform, :leaky-lexicase, :random-threshold-lexicase,
           ;; :random-toggle-lexicase, :randomly-truncated-lexicase, :novelty-search
 
+         :epsilon-lexicase-version :semi-dynamic
+          ;; The version of epsilon-lexicase selection to use.
+          ;; Options: :semi-dynamic (default and recommended), :dynamic, :static
+         
          :epsilon-lexicase-epsilon nil
           ;; When parent-selection is :epsilon-lexicase,
           ;; the value for epsilon. If nil, automatic epsilon lexicase selection will be used.
