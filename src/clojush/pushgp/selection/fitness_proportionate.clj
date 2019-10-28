@@ -33,7 +33,8 @@
     (loop [pop pop
            random-prob (* max-prob (lrand))]
       (let [current-prob (:fitness-proportionate-selection-probability (first pop))]
-        (if (< random-prob current-prob)
+        (if (or (< random-prob current-prob)
+                (empty? (rest pop)))
           (first pop)
           (recur (rest pop)
                  (- random-prob current-prob)))))))
