@@ -2,7 +2,7 @@
   (:use [clojush random]))
 
 (defn down-sample
-  "performs down-samplig on training cases by returning only a random sub-sample
+  "Performs downsampling on training cases by returning only a random subsample
    of the training cases"
   [{:keys [training-cases downsample-factor]}]
   (take (* downsample-factor (count training-cases))
