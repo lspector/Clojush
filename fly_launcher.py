@@ -1,11 +1,15 @@
-import os, stat
+import os, stat, shutil
 
 ##########################################################################
 # Settings
 number_runs = 10
 
-clojush_directory = "/home/thelmuth/Clojush/"
-output_directory = "/home/thelmuth/Results/odd/"
+# Change this to where you want your results to go
+output_directory = "/home/thelmuth/Results/testing-copying2/"
+
+# Don't change these
+clojush_directory = output_directory + "/Clojush"
+starting_directory = os.getcwd()
 
 example_file = "clojush.problems.demos.odd"
 
@@ -44,6 +48,9 @@ description_f = open(description_file_string, "w")
 
 description_f.writelines("COMMAND:\n" + command + "\n\nTRACTOR TITLE:\n" + title_string + "\n\nDESCRIPTION:\n" + description)
 description_f.close()
+
+# Copy this Clojush directory to output directory.
+shutil.copytree(starting_directory, clojush_directory)
 
 # Make alf file
 alf_file_string = output_directory + "clojush_runs.alf"

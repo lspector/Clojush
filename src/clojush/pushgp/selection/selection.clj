@@ -2,17 +2,30 @@
   (:use [clojush globals random]
         [clojush.pushgp.selection preselection tournament lexicase epsilon-lexicase
          elitegroup-lexicase random-threshold-lexicase random-toggle-lexicase 
-         randomly-truncated-lexicase novelty rarified-lexicase fitness-proportionate]))
+         randomly-truncated-lexicase novelty rarified-lexicase subset-tournament
+         fitness-proportionate]))
 
 (defn select
   "Returns a selected parent."
-  [pop {:keys [parent-selection print-selection-counts] :as argmap}]
+  [pop {:keys [parent-selection print-selection-counts case-batch-size epsilon-lexicase-version] :as argmap}]
   (let [pop-with-meta-errors (map #(update-in % [:errors] (comp vec concat) (:meta-errors %)) pop)
-        preselected (preselect pop-with-meta-errors argmap)
+        pop-with-meta-and-batch-errors (if (= case-batch-size 1)
+                                         pop-with-meta-errors
+                                         (batch-errors pop-with-meta-errors argmap))
+        preselected (preselect pop-with-meta-and-batch-errors argmap)
         selected (case parent-selection
                    :tournament (tournament-selection preselected argmap)
                    :lexicase (lexicase-selection preselected argmap)
-                   :epsilon-lexicase (epsilon-lexicase-selection preselected argmap)
+                   :epsilon-lexicase (case epsilon-lexicase-version
+                                       ;; Semi-dynamic or dynamic
+                                       (:semi-dynamic :dynamic)
+                                       (epsilon-lexicase-selection preselected argmap)
+                                       ;; Static epsilon lexicase
+                                       :static
+                                       (static-epsilon-lexicase-selection preselected argmap)
+                                       ;; unrecognized version
+                                       (throw (Exception. (str "Unrecognized argument for :epsilon-lexicase-version"
+                                                               epsilon-lexicase-version))))
                    :elitegroup-lexicase (elitegroup-lexicase-selection preselected argmap)
                    :random-threshold-lexicase (random-threshold-lexicase-selection 
                                                preselected argmap)
@@ -26,6 +39,7 @@
                    :novelty-search (novelty-tournament-selection preselected argmap)
                    :uniform (lrand-nth preselected)
                    :rarified-lexicase (rarified-lexicase-selection preselected argmap)
+                   :subset-tournament (subset-tournament-selection preselected argmap)
                    :fitness-proportionate (fitness-proportionate-selection preselected argmap)
                    (throw (Exception. (str "Unrecognized argument for parent-selection: "
                                            parent-selection))))]

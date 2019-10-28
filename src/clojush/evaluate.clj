@@ -87,7 +87,8 @@
                  (compute-total-error e))
             we (case total-error-method
                  :sum nil
-                 :ifs nil
+                 :ifs nil ; calculated later
+                 :eliteness nil ; calculated later
                  :hah (compute-hah-error e)
                  :rmse (compute-root-mean-square-error e)
                  nil)

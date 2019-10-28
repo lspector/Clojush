@@ -9,7 +9,7 @@
          tag zip environment input-output genome gtm]
         [clojush.pushgp breed report]
         [clojush.pushgp.selection
-         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty
+         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty eliteness
          fitness-proportionate]
         [clojush.experimental.decimation]))
 
@@ -194,10 +194,10 @@
   (println "Computing errors... ")
   (compute-errors pop-agents rand-gens novelty-archive @push-argmap)
   (println "Done computing errors.")
-  (println "Preserving frontier... ")
   (when (and (:preserve-frontier argmap)
              (or (not (:autoconstructive argmap))
                  (> generation 0)))
+    (println "Preserving frontier... ")
     (let [filtered-candidates
           (if (:autoconstructive argmap)
             (let [diversifying-children (filter :diversifying (map deref pop-agents))
@@ -234,7 +234,7 @@
             (let [to-preserve (select candidates argmap)
                   without-meta-errors (update-in to-preserve
                                                  [:errors]
-                                                 #(drop-last (count (:meta-errors to-preserve)) %))]
+                                                 #(vec (drop-last (count (:meta-errors to-preserve)) %)))]
               (recur (inc preserved)
                      (conj new-frontier without-meta-errors)
                      (if (= (:preserve-frontier argmap) :with-replacement)
@@ -250,8 +250,18 @@
   (when (= (:total-error-method @push-argmap) :ifs)
     (calculate-implicit-fitness-sharing pop-agents @push-argmap))
   ;; calculate epsilons for epsilon lexicase selection
-  (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
-    (calculate-epsilons-for-epsilon-lexicase pop-agents @push-argmap))
+  (when (and (= (:parent-selection @push-argmap) :epsilon-lexicase)
+             (= (:epsilon-lexicase-version @push-argmap) :semi-dynamic)
+             (= (:case-batch-size @push-argmap) 1)) ; only do this if case-batch-size is 1, since otherwise need to recalculate for every batch.
+    (let [epsilons (calculate-epsilons-for-epsilon-lexicase (map deref pop-agents) @push-argmap)]
+      (println "Epsilons for epsilon lexicase:" epsilons)
+      (reset! epsilons-for-epsilon-lexicase epsilons)))
+  (when (and (= (:parent-selection @push-argmap) :epsilon-lexicase)
+             (= (:epsilon-lexicase-version @push-argmap) :static))
+    (calculate-fitness-for-static-epsilon-lexicase pop-agents @push-argmap))
+  ;; calculate eliteness when total-error-method necessitates
+  (when (= (:total-error-method @push-argmap) :eliteness)
+    (calculate-eliteness pop-agents @push-argmap))
   (timer @push-argmap :other)
   (when (= (:parent-selection @push-argmap) :fitness-proportionate)
     (calculate-fitness-proportionate-probabilities pop-agents @push-argmap))
@@ -332,4 +342,3 @@
            (if (nil? next-novelty-archive)
              return-val
              (recur (inc generation) next-novelty-archive))))))))
-
