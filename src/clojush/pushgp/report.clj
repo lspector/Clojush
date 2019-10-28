@@ -38,9 +38,11 @@
 
 (defn print-params [push-argmap]
   (doseq [[param val] push-argmap]
-    (if (= param :random-seed)
-      (println (name param) "=" (random/seed-to-string val))
-      (println (name param) "=" val))))
+    (println (name param) "="
+             (cond
+               (= param :random-seed) (random/seed-to-string val)
+               (= param :training-cases) (pr-str val)
+               :else val))))
 
 (defn print-genome
   [individual argmap]
@@ -356,6 +358,11 @@
         sorted (sort-by err-fn < population)
         err-fn-best (if (not= parent-selection :downsampled-lexicase)
                       (first sorted)
+                      ; This tests each individual that passes current generation's subsampled training
+                      ; cases on all training cases, and only treats it as winner if it
+                      ; passes all of those as well. Otherwise, just returns first individual
+                      ; if none pass all subsampled cases, or random individual that passes
+                      ; all subsampled cases but not all training cases.
                       (error-function
                        (loop [sorted-individuals sorted]
                          (if (empty? (rest sorted-individuals))
