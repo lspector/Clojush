@@ -16,7 +16,7 @@
         selected (case parent-selection
                    :tournament (tournament-selection preselected argmap)
                    :lexicase (lexicase-selection preselected argmap)
-                   :downsampled-lexicase (lexicase-selection preselection argmap) ;; just uses lexicase; downsampling happens earlier
+                   :downsampled-lexicase (lexicase-selection preselected argmap) ;; just uses lexicase; downsampling happens earlier
                    :epsilon-lexicase (case epsilon-lexicase-version
                                        ;; Semi-dynamic or dynamic
                                        (:semi-dynamic :dynamic)

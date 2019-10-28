@@ -194,7 +194,7 @@
 
          :uniform-segment-deletion-rate 0.01
            ;; The probability that a segment will be deleted in uniform-segment-deletion.
-         
+
          :replace-child-that-exceeds-size-limit-with :random
           ;; When a child is produced that exceeds the size limit of (max-points / 4), this is
           ;; used to determine what program to return. Options include :parent, :empty, :random,
@@ -327,7 +327,8 @@
          :parent-selection :lexicase
           ;; The parent selection method. Options include :tournament, :lexicase, :epsilon-lexicase,
           ;; :elitegroup-lexicase, :uniform, :leaky-lexicase, :random-threshold-lexicase,
-
+          ;; :random-toggle-lexicase, :randomly-truncated-lexicase, :novelty-search, :downsampled-lexcase
+         
          :epsilon-lexicase-version :semi-dynamic
           ;; The version of epsilon-lexicase selection to use.
           ;; Options: :semi-dynamic (default and recommended), :dynamic, :static
@@ -471,7 +472,7 @@
           ;; is different than its mother's, then do not allow any individual with errors
           ;; identical to its mother's to be selected. Requires :print-history to be true.
           ;; See preselection.clj for more options.
-         
+
          :novelty-distance-metric :euclidean
           ;; When using novelty, the distance metric between two behavior vectors
           ;; Options: :manhattan, :euclidean
