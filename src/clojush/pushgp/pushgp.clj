@@ -10,7 +10,7 @@
         [clojush.pushgp breed report]
         [clojush.pushgp.selection
          selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty eliteness
-         fitness-proportionate]
+         fitness-proportionate downsampled-lexicase]
         [clojush.experimental.decimation]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -180,12 +180,6 @@
       (reset! timer-atom (System/currentTimeMillis))
       (swap! timing-map assoc step (+ current-time-for-step (- @timer-atom start-time))))))
 
-(defn down-sample
-  "performs down-samplig on training cases by returning only a random sub-sample
-   of the training cases"
-  [training-cases down-sample-factor]
-  (take (* down-sample-factor (count training-cases)) (shuffle training-cases)))
-
 (defn process-generation
   "Processes the generation, returning [new novelty archive, return val],
    where new novelty archive will be nil if we are done."
@@ -198,9 +192,12 @@
     :plushy (population-translate-plushy-to-push pop-agents @push-argmap))
   (timer @push-argmap :reproduction)
   (println "Computing errors... ")
-  (swap! push-argmap assoc :sub-training-cases (down-sample (:training-cases @push-argmap) (:down-sample-factor @push-argmap)))
-  (println "Cases for this generation:" (pr-str (:sub-training-cases @push-argmap)))
-
+  ; select cases if using downsampled lexicase
+  (when (= (:parent-selection @push-argmap) :downsampled-lexicase)
+    (swap! push-argmap assoc :sub-training-cases
+           (down-sample @push-argmap))
+    (println "Cases for this generation:" (pr-str (:sub-training-cases @push-argmap))))
+  ; compute errors
   (compute-errors pop-agents rand-gens novelty-archive @push-argmap)
   (println "Done computing errors.")
   (when (and (:preserve-frontier argmap)
@@ -243,7 +240,7 @@
             (let [to-preserve (select candidates argmap)
                   without-meta-errors (update-in to-preserve
                                                  [:errors]
-                                                 #(drop-last (count (:meta-errors to-preserve)) %))]
+                                                 #(vec (drop-last (count (:meta-errors to-preserve)) %)))]
               (recur (inc preserved)
                      (conj new-frontier without-meta-errors)
                      (if (= (:preserve-frontier argmap) :with-replacement)

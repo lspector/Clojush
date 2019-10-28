@@ -22,10 +22,6 @@
           ;;----------------------------------------
           ;; Standard GP arguments
           ;;----------------------------------------
-         :training-cases '()
-         :sub-training-cases '()
-         :down-sample-factor 0.1
-         ;; between 0 and 1
 
          :error-function (fn [p] '(0))
           ;; Function that takes a program and returns a list of errors.
@@ -75,6 +71,14 @@
           ;; When true, children produced through direct reproduction will not be
           ;; re-evaluated but will have the error vector of their parent.
 
+         :training-cases '()
+          ;; The list of training cases (inputs and outputs). Used for some parent
+          ;; selection methods, such as downsampled lexicase.
+
+         :sub-training-cases '()
+          ;; The subsample of the training cases used for downsampled lexicase.
+
+         
           ;;----------------------------------------
           ;; Genetic operator probabilities
           ;;----------------------------------------
@@ -102,7 +106,10 @@
                                           :uniform-addition-and-deletion 0.0
                                           :uniform-combination-and-deletion 0.0
                                           :genesis 0.0
-                                          :gene-selection 0.0}
+                                          :gene-selection 0.0
+                                          :uniform-reordering 0.0
+                                          :uniform-segment-reordering 0.0
+                                          :uniform-segment-transposition 0.0}
           ;; The map supplied to :genetic-operator-probabilities should contain genetic operators
           ;; that sum to 1.0. All available genetic operators are defined in clojush.pushgp.breed.
           ;; Along with single operators, pipelines (vectors) containing multiple operators are
@@ -171,6 +178,23 @@
          :uniform-silence-mutation-rate 0.1
           ;; The probability of each :silent being switched during uniform silent mutation.
 
+         :uniform-reordering-rate 0.01
+          ;; The probability that a pair of genes will be reordered with uninform-reordering,
+          ;; or that a pair of segments will be transposed with uniform-segment-reordering.
+
+         :uniform-segmenting-rate 0.01
+          ;; The probability that segmenting for uniform-segment-transposition or 
+          ;; uniform-segment-transposition will occur at each position in the genome.
+
+         :uniform-transposition-rate 0.01
+           ;; The probability that a segment will be transposed in uniform-segment-transposition.
+
+         :uniform-segment-duplication-rate 0.01
+           ;; The probability that a segment will be duplicated in uniform-segment-duplication.
+
+         :uniform-segment-deletion-rate 0.01
+           ;; The probability that a segment will be deleted in uniform-segment-deletion.
+         
          :replace-child-that-exceeds-size-limit-with :random
           ;; When a child is produced that exceeds the size limit of (max-points / 4), this is
           ;; used to determine what program to return. Options include :parent, :empty, :random,
@@ -303,7 +327,6 @@
          :parent-selection :lexicase
           ;; The parent selection method. Options include :tournament, :lexicase, :epsilon-lexicase,
           ;; :elitegroup-lexicase, :uniform, :leaky-lexicase, :random-threshold-lexicase,
-          ;; :random-toggle-lexicase, :randomly-truncated-lexicase, :novelty-search
 
          :epsilon-lexicase-version :semi-dynamic
           ;; The version of epsilon-lexicase selection to use.
@@ -389,7 +412,12 @@
           ;; The number of generations within which an error change must have occurred to
           ;; have a :no-recent-error-change meta-error value of zero.
 
-         :decimation-ratio 1 ;; If >= 1, does nothing. Otherwise, is the percent of the population
+         :lineage-redundancy-window nil
+          ;; If truthy, should be an integer which will be the number of history elements
+          ;; used to calculate :lineage-redundancy meta-errors.
+
+         :decimation-ratio 1 
+          ;; If >= 1, does nothing. Otherwise, is the percent of the population
           ;; size that is retained before breeding. If 0 < decimation-ratio < 1, decimation
           ;; tournaments will be used to reduce the population to size (* population-size
           ;; decimation-ratio) before breeding.
@@ -400,6 +428,10 @@
          :print-selection-counts false
           ;; If true, keeps track of and prints the number of times each individual was selected
           ;; to be a parent
+
+         :print-preselection-fraction false
+          ;; If true, keeps track of and prints the number of individuals that survive preselection
+          ;; each generation. Does not take into account one-individual-per-error-vector-for-lexicase. 
 
          :self-mate-avoidance-limit 0
           ;; If non-zero, then when multiple parents are required for a genetic operator, an
@@ -434,6 +466,12 @@
           ;; to consider only individuals with :grain-size equal to or GREATER than the
           ;; chosen :grain-size.
 
+         :knock-off-chip-off-the-old-block false
+          ;; If truthy, then during preselection, if any individual has an error vector that
+          ;; is different than its mother's, then do not allow any individual with errors
+          ;; identical to its mother's to be selected. Requires :print-history to be true.
+          ;; See preselection.clj for more options.
+         
          :novelty-distance-metric :euclidean
           ;; When using novelty, the distance metric between two behavior vectors
           ;; Options: :manhattan, :euclidean
@@ -464,6 +502,11 @@
           ;; of the parent population with the collection of evaluated children. If the value
           ;; is :with-replacement, then individuals can be selected multiple times.
 
+         :downsample-factor 1
+          ;; Determines the proportion of cases to use when using downsampled lexicase.
+          ;; When set to 1, has no effect. Should be in the range (0, 1].
+
+         
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
           ;;----------------------------------------
