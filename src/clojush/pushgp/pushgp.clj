@@ -9,7 +9,8 @@
          tag zip environment input-output genome gtm]
         [clojush.pushgp breed report]
         [clojush.pushgp.selection
-         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty eliteness]
+         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty eliteness
+         fitness-proportionate]
         [clojush.experimental.decimation]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -259,13 +260,20 @@
     (calculate-implicit-fitness-sharing pop-agents @push-argmap))
   ;; calculate epsilons for epsilon lexicase selection
   (when (and (= (:parent-selection @push-argmap) :epsilon-lexicase)
+             (= (:epsilon-lexicase-version @push-argmap) :semi-dynamic)
              (= (:case-batch-size @push-argmap) 1)) ; only do this if case-batch-size is 1, since otherwise need to recalculate for every batch.
     (let [epsilons (calculate-epsilons-for-epsilon-lexicase (map deref pop-agents) @push-argmap)]
       (println "Epsilons for epsilon lexicase:" epsilons)
       (reset! epsilons-for-epsilon-lexicase epsilons)))
+  (when (and (= (:parent-selection @push-argmap) :epsilon-lexicase)
+             (= (:epsilon-lexicase-version @push-argmap) :static))
+    (calculate-fitness-for-static-epsilon-lexicase pop-agents @push-argmap))
+  ;; calculate eliteness when total-error-method necessitates
   (when (= (:total-error-method @push-argmap) :eliteness)
     (calculate-eliteness pop-agents @push-argmap))
   (timer @push-argmap :other)
+  (when (= (:parent-selection @push-argmap) :fitness-proportionate)
+    (calculate-fitness-proportionate-probabilities pop-agents @push-argmap))
   ;; report and check for success
   (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
                                                      generation @push-argmap)]
