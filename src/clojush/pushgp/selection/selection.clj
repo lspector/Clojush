@@ -34,6 +34,7 @@
                                             preselected argmap)
                    :randomly-truncated-lexicase (randomly-truncated-lexicase-selection
                                                  preselected argmap)
+                   :truncated-lexicase (truncated-lexicase-selection preselected argmap)
                    :leaky-lexicase (if (< (lrand) (:lexicase-leakage argmap))
                                      (lrand-nth preselected)
                                      (lexicase-selection preselected argmap))
