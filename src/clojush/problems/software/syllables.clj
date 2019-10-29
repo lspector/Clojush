@@ -96,7 +96,7 @@
                        (for [[input correct-output] (case data-cases
                                                       :train train-cases
                                                       :test test-cases
-                                                      [])]
+                                                      data-cases)]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item input :input)
@@ -115,9 +115,9 @@
                                        num-result)) ;distance from correct integer
                                1000)
                              )))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors))))))
 
 (defn get-syllables-train-and-test
   "Returns the train and test cases."
@@ -166,6 +166,8 @@
 (def argmap
   {:error-function (make-syllables-error-function-from-cases (first syllables-train-and-test-cases)
                                                              (second syllables-train-and-test-cases))
+   :training-cases (first syllables-train-and-test-cases)
+   :sub-training-cases '()
    :atom-generators syllables-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400

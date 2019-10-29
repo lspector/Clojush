@@ -136,13 +136,13 @@
    (let [cases (case data-cases
                  :train (first mirror-image-train-and-test-cases)
                  :test (second mirror-image-train-and-test-cases)
-                 [])
+                 data-cases)
          behaviors (mirror-image-evaluate-program-for-behaviors (:program individual)
-                                                                 cases)
+                                                                cases)
          errors (mirror-image-errors-from-behaviors behaviors cases)]
-     (cond
-       (= data-cases :train) (assoc individual :behaviors behaviors :errors errors)
-       (= data-cases :test) (assoc individual :test-errors errors)))))
+     (if (= data-cases :test)
+       (assoc individual :test-errors errors)
+       (assoc individual :behaviors behaviors :errors errors)))))
 
 (defn mirror-image-initial-report
   [argmap]
@@ -183,6 +183,8 @@
 ; Define the argmap
 (def argmap
   {:error-function mirror-image-error-function
+   :training-cases (first mirror-image-train-and-test-cases)
+   :sub-training-cases '()
    :atom-generators mirror-image-atom-generators
    :max-points 1200
    :max-genome-size-in-initial-program 150

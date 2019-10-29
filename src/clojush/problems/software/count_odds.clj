@@ -87,7 +87,7 @@
                      (for [[input1 correct-output] (case data-cases
                                                      :train train-cases
                                                      :test test-cases
-                                                     [])]
+                                                     data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input1 :input)))
@@ -101,9 +101,9 @@
                            (abs (- result correct-output)) ; distance from correct integer
                            1000) ; penalty for no return value
                          )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors))))))
 
 (defn get-count-odds-train-and-test
   "Returns the train and test cases."
@@ -151,6 +151,7 @@
 (def argmap
   {:error-function (make-count-odds-error-function-from-cases (first count-odds-train-and-test-cases)
                                                               (second count-odds-train-and-test-cases))
+   :training-cases (first count-odds-train-and-test-cases)
    :atom-generators count-odds-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250

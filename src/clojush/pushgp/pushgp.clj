@@ -10,7 +10,7 @@
         [clojush.pushgp breed report]
         [clojush.pushgp.selection
          selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty eliteness
-         fitness-proportionate]
+         fitness-proportionate downsampled-lexicase]
         [clojush.experimental.decimation]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -192,6 +192,12 @@
     :plushy (population-translate-plushy-to-push pop-agents @push-argmap))
   (timer @push-argmap :reproduction)
   (println "Computing errors... ")
+  ; select cases if using downsampled lexicase
+  (when (= (:parent-selection @push-argmap) :downsampled-lexicase)
+    (swap! push-argmap assoc :sub-training-cases
+           (down-sample @push-argmap))
+    (println "Cases for this generation:" (pr-str (:sub-training-cases @push-argmap))))
+  ; compute errors
   (compute-errors pop-agents rand-gens novelty-archive @push-argmap)
   (println "Done computing errors.")
   (when (and (:preserve-frontier argmap)

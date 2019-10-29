@@ -16,6 +16,7 @@
         selected (case parent-selection
                    :tournament (tournament-selection preselected argmap)
                    :lexicase (lexicase-selection preselected argmap)
+                   :downsampled-lexicase (lexicase-selection preselected argmap) ;; just uses lexicase; downsampling happens earlier
                    :epsilon-lexicase (case epsilon-lexicase-version
                                        ;; Semi-dynamic or dynamic
                                        (:semi-dynamic :dynamic)
@@ -33,6 +34,7 @@
                                             preselected argmap)
                    :randomly-truncated-lexicase (randomly-truncated-lexicase-selection
                                                  preselected argmap)
+                   :truncated-lexicase (truncated-lexicase-selection preselected argmap)
                    :leaky-lexicase (if (< (lrand) (:lexicase-leakage argmap))
                                      (lrand-nth preselected)
                                      (lexicase-selection preselected argmap))

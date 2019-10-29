@@ -83,7 +83,7 @@
                        (for [[input1 correct-output] (case data-cases
                                                        :train train-cases
                                                        :test test-cases
-                                                       [])]
+                                                       data-cases)]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item input1 :input)))
@@ -106,9 +106,9 @@
                              ; Error 2: Levenshtein distance of strings
                              (levenshtein-distance (str correct-output) (str result))
                              )))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors))))))
 
 (defn get-wallis-pi-train-and-test
   "Returns the train and test cases."
@@ -156,6 +156,7 @@
 (def argmap
   {:error-function (make-wallis-pi-error-function-from-cases (first wallis-pi-train-and-test-cases)
                                                              (second wallis-pi-train-and-test-cases))
+   :training-cases (first wallis-pi-train-and-test-cases)
    :atom-generators wallis-pi-atom-generators
    :max-points 2400
    :max-genome-size-in-initial-program 300

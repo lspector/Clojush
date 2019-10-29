@@ -88,7 +88,7 @@
                      (for [[[input1 input2] correct-output] (case data-cases
                                                               :train train-cases
                                                               :test test-cases
-                                                              [])]
+                                                              data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input2 :input)
@@ -107,9 +107,9 @@
                                (*' 10000 (abs (- (count correct-output) (count result))))) ; penalty of 10000 times difference in sizes of vectors
                            1000000000) ; penalty for no return value
                          )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors))))))
 
 (defn get-vectors-summed-train-and-test
   "Returns the train and test cases."
@@ -157,6 +157,7 @@
 (def argmap
   {:error-function (make-vectors-summed-error-function-from-cases (first vectors-summed-train-and-test-cases)
                                                                   (second vectors-summed-train-and-test-cases))
+   :training-cases (first vectors-summed-train-and-test-cases)
    :atom-generators vectors-summed-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250

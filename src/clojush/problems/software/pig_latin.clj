@@ -102,7 +102,7 @@
                      (for [[input correct-output] (case data-cases
                                                     :train train-cases
                                                     :test test-cases
-                                                    [])]
+                                                    data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input :input)
@@ -115,9 +115,9 @@
                          ; Error is Levenshtein distance for printed string
                          (levenshtein-distance correct-output result)
                          )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors))))))
 
 (defn get-pig-latin-train-and-test
   "Returns the train and test cases."
@@ -166,6 +166,7 @@
 (def argmap
   {:error-function (make-pig-latin-error-function-from-cases (first pig-latin-train-and-test-cases)
                                                              (second pig-latin-train-and-test-cases))
+   :training-cases (first pig-latin-train-and-test-cases)
    :atom-generators pig-latin-atom-generators
    :max-points 4000
    :max-genome-size-in-initial-program 500
