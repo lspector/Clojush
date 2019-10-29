@@ -327,7 +327,8 @@
          :parent-selection :lexicase
           ;; The parent selection method. Options include :tournament, :lexicase, :epsilon-lexicase,
           ;; :elitegroup-lexicase, :uniform, :leaky-lexicase, :random-threshold-lexicase,
-          ;; :random-toggle-lexicase, :randomly-truncated-lexicase, :novelty-search, :downsampled-lexcase
+          ;; :random-toggle-lexicase, :randomly-truncated-lexicase, :truncated-lexicase,
+          ;; :novelty-search, :downsampled-lexcase
 
          :epsilon-lexicase-version :semi-dynamic
           ;; The version of epsilon-lexicase selection to use.
