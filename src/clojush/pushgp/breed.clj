@@ -133,12 +133,13 @@
    even with a single operator by putting that operator in a vector."
   [operator population location rand-gen 
    {:keys [max-points genome-representation
-           track-instruction-maps] :as argmap}]
+           track-instruction-maps use-lineage-tagspaces] :as argmap}]
   (let [first-parent (select population argmap)
         operator-vector (if (sequential? operator) operator (vector operator))
         child (perform-genetic-operator-list operator-vector
                                              (assoc first-parent :parent-uuids (vector (:uuid first-parent)))
-                                             population location rand-gen argmap)]
+                                             population location rand-gen argmap)
+        child (if use-lineage-tagspaces (assoc child :tagspace (:tagspace first-parent)) child)]
     (cond->
         (assoc child :genetic-operators operator)
 

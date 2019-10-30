@@ -87,9 +87,9 @@
       (if (empty? (:tag state))
         state
         (let [the-tag (read-string (nth iparts 1))]
-          (assoc state :tag (dissoc (:tag state) (first (closest-association the-tag state))))))
+          ;(assoc state :tag (dissoc (:tag state) (first (closest-association the-tag state))))))
           ; TEMPORARY-ANIL
-          ;(assoc state :tag (dissoc (:tag state) the-tag))))
+          (assoc state :tag (dissoc (:tag state) the-tag))))
       ;; if it's return_tag_<type>_<number>: Push
       ;; (item_from_<type>_stack tag_<type>_<number>) onto the return stack. Pop the
       ;; item if @global-pop-when-tagging

@@ -10,26 +10,28 @@
 
 (ns clojush.problems.software.small-or-large-c
   (:use clojush.pushgp.pushgp
-        [clojush pushstate interpreter random util globals]
-        ;clojush.instructions.tag
+        [clojush pushstate interpreter random util globals simplification]
+        clojush.instructions.tag
         ;clojush.instructions.environment
         [clojure.math numeric-tower]
-        ))
+        )
+  (:require [clojush.problems.software.small-or-large :as sol]))
 
 ; Atom generators
 (def small-or-large-atom-generators
   (concat (list
-            "small"
-            "large"
+           "small"
+           "large"
             ;;; end constants
-            (fn [] (- (lrand-int 20001) 10000)) ;Integer ERC [-10000,10000]
+           (fn [] (- (lrand-int 20001) 10000)) ;Integer ERC [-10000,10000]
             ;;; end ERCs
-            ;(tag-instruction-erc [:integer :boolean :exec] 1000)
-            ;(tagged-instruction-erc 1000)
+            (tag-instruction-erc [:integer :boolean :exec :string] 1000)
+            (tagged-instruction-erc 1000)
+            (untag-instruction-erc 1000)
             ;;; end tag ERCs
-            'in1
+           'in1
             ;;; end input instructions
-            )
+           )
           (registered-for-stacks [:integer :boolean :exec :string :print])))
 
 
@@ -69,26 +71,71 @@
      (the-actual-small-or-large-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
-            stacks-depth (atom (zipmap push-types (repeat 0)))
-            errors (doall
-                     (for [[input1 correct-output] (case data-cases
-                                                     :train train-cases
-                                                     :test test-cases
-                                                     [])]
-                       (let [final-state (run-push (:program individual)
-                                                   (->> (make-push-state)
-                                                     (push-item input1 :input)
-                                                     (push-item "" :output)))
-                             result (stack-ref :output 0 final-state)]
-                         (when print-outputs
-                           (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                         (doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
-                         ; Record the behavior
-                         (swap! behavior conj result)
+            ;stacks-depth (atom (zipmap push-types (repeat 0)))
+            local-tagspace (case data-cases
+                             :train (atom @global-common-tagspace)
+                             :test (atom (:tagspace individual))
+                             [])
+            reuse-metric (atom ())       
+            repetition-metric (atom ())            
+            cases (case data-cases
+                    :train train-cases
+                    :test test-cases
+                    [])
+            errors (let [ran nil] ;(rand-nth cases)]
+                     (doall
+                      (for [[input1 correct-output] cases]
+                        (let [final-state (if (= [input1 correct-output] ran)
+                                            (run-push (:program (auto-simplify-lite individual
+                                                                                    (fn [inp] (sol/make-small-or-large-error-function-from-cases inp nil)) ; error-function per test case
+                                                                                    75
+                                                                                    (first sol/small-or-large-train-and-test-cases) ; cases
+                                                                                    false 100))
+                                                      (->> (assoc (make-push-state) :calculate-mod-metrics (= [input1 correct-output] ran))
+                                                           (push-item input1 :input)
+                                                           (push-item "" :output)))
+                                            (run-push (:program individual)
+                                                      (->> (assoc (make-push-state) :tag @local-tagspace)
+                                                           (push-item input1 :input)
+                                                           (push-item "" :output)))
+                                            )
+                              result (stack-ref :output 0 final-state)
+                              _ (if (= data-cases :train)
+                                  (reset! local-tagspace (get final-state :tag)))
+                              ]
+                          (when print-outputs
+                            (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
+                        ;(doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
+                          
+                          (if (= [input1 correct-output] ran)
+                            (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
+                              (do
+                                (swap! reuse-metric conj (first metrics))
+                                (swap! repetition-metric conj (last metrics)))))
+
+
+
+                        ; Record the behavior
+                          (swap! behavior conj result)
                          ; Error is Levenshtein distance of printed strings
-                         (levenshtein-distance correct-output result))))]
+                          (levenshtein-distance correct-output result)))))
+            _ (if (= data-cases :train)
+                (if (let [x (vec errors)
+                                       ;_ (prn x)
+                          y (first (:history individual))
+                                       ;_ (prn y)
+                          ]
+                      (if (nil? y)
+                        true
+                        (some? (some true? (map #(< %1 %2) x y))))) ; child is better than mom on at least one test case; can be worse on others
+                      ;   (every? true? (map #(<= %1 %2) x y))))
+                  (do
+                    (reset! global-common-tagspace @local-tagspace)
+                               ;(prn @global-common-tagspace)
+                    )))
+            ]
         (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors :stacks-info @stacks-depth)
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @local-tagspace)
           (assoc individual :test-errors errors))))))
 
 (defn get-small-or-large-train-and-test
@@ -144,18 +191,22 @@
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
-   :genetic-operator-probabilities {:alternation 0.2
-                                    :uniform-mutation 0.2
-                                    :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
-   :alternation-rate 0.01
-   :alignment-deviation 5
-   :uniform-mutation-rate 0.01
+   :genetic-operator-probabilities {:uniform-addition-and-deletion 1}
+   :uniform-addition-and-deletion-rate 0.09
+   ;:genetic-operator-probabilities {:alternation 0.2
+   ;                                 :uniform-mutation 0.2
+   ;                                 :uniform-close-mutation 0.1
+   ;                                 [:alternation :uniform-mutation] 0.5
+   ;                                 }
+   ;:alternation-rate 0.01
+   ;:alignment-deviation 5
+   ;:uniform-mutation-rate 0.01
    :problem-specific-report small-or-large-report
    :problem-specific-initial-report small-or-large-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000
-   :meta-error-categories [:max-stacks-depth]
+   ;:meta-error-categories [:reuse]
+   :use-single-thread true
+   :print-history true
    })

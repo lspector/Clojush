@@ -10,25 +10,27 @@
 ;;
 ;; input stack has the 3 integers
 
-(ns clojush.problems.software.median
+(ns clojush.problems.software.median-c
   (:use clojush.pushgp.pushgp
-        [clojush pushstate interpreter random util globals]
+        [clojush pushstate interpreter random util globals simplification]
         clojush.instructions.tag
         clojure.math.numeric-tower
-        ))
+        )
+  (:require [clojush.problems.software.median :as med]))
 
 ; Atom generators
 (def median-atom-generators
   (concat (list
-            (fn [] (- (lrand-int 201) 100))
-            (tag-instruction-erc [:exec :integer :boolean] 1000)
-            (tagged-instruction-erc 1000)
+           (fn [] (- (lrand-int 201) 100))
+           (tag-instruction-erc [:exec :integer :boolean] 1000)
+           (tagged-instruction-erc 1000)
+           ;(untag-instruction-erc 1000)
             ;;; end ERCs
-            'in1
-            'in2
-            'in3
+           'in1
+           'in2
+           'in3
             ;;; end input instructions
-            )
+           )
           (registered-for-stacks [:integer :boolean :exec :print])))
 
 ;; A list of data domains for the median problem. Each domain is a vector containing
@@ -67,28 +69,69 @@
      (the-actual-median-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
-            errors (doall
-                     (for [[[input1 input2 input3] out-int] (case data-cases
-                                                              :train train-cases
-                                                              :test test-cases
-                                                              [])]
-                       (let [final-state (run-push (:program individual)
-                                                   (->> (make-push-state)
-                                                     (push-item input3 :input)
-                                                     (push-item input2 :input)
-                                                     (push-item input1 :input)
-                                                     (push-item "" :output)))
-                             printed-result (stack-ref :output 0 final-state)]
-                         (when print-outputs
-                           (println (format "Correct output: %-19s | Program output: %-19s" (str out-int) printed-result)))
+            ;local-tagspace (atom @global-common-tagspace)
+            reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
+            repetition-metric (atom ())
+            cases (case data-cases
+                    :train train-cases
+                    :test test-cases
+                    [])
+            errors (let [ran (rand-nth cases)]
+                     (doall
+                      (for [[[input1 input2 input3] out-int] cases]
+                        (let [final-state (if (= [[input1 input2 input3] out-int] ran)
+                                            (run-push (:program (auto-simplify-lite individual
+                                                                                    (fn [inp] (med/make-median-error-function-from-cases inp nil)) ; error-function per test case
+                                                                                    75
+                                                                                    (first med/median-train-and-test-cases) ; cases
+                                                                                    false 100))
+                                                      (->>  (assoc (make-push-state) :calculate-mod-metrics (= [[input1 input2 input3] out-int] ran)) 
+                                                            (push-item input3 :input)
+                                                            (push-item input2 :input)
+                                                            (push-item input1 :input)
+                                                            (push-item "" :output)))
+                                            (run-push (:program individual)
+                                                      (->>  (make-push-state) ;(assoc (make-push-state) :tag @local-tagspace)
+                                                            (push-item input3 :input)
+                                                            (push-item input2 :input)
+                                                            (push-item input1 :input)
+                                                            (push-item "" :output))))
+                              printed-result (stack-ref :output 0 final-state)
+                              ;_ (reset! local-tagspace (get final-state :tag))
+                              ]
+                          (when print-outputs
+                            (println (format "Correct output: %-19s | Program output: %-19s" (str out-int) printed-result)))
+                          
+                          (if (= [[input1 input2 input3] out-int] ran)
+                            (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
+                              (do
+                                (swap! reuse-metric conj (first metrics))
+                                (swap! repetition-metric conj (last metrics)))))
+
+
                          ; Record the behavior
-                         (swap! behavior conj printed-result)
+                          (swap! behavior conj printed-result)
                          ; Each test case is either right or wrong
-                         (if (= printed-result (str out-int))
-                           0
-                           1))))]
+                          (if (= printed-result (str out-int))
+                            0
+                            1)))))
+            ;_ (if false  ;(= data-cases :train)
+            ;    (if (let [x (vec errors)
+            ;                          ; _ (prn x)
+            ;              y (first (:history individual))
+            ;                          ; _ (prn y)
+            ;              ]
+            ;          (if (nil? y)
+            ;            true
+            ;            (some? (some true? (map #(< %1 %2) x y))))) ;child is better than mom on at least one test case; can be worse on others
+            ;        ;     (every? true? (map #(<= %1 %2) x y))))
+            ;      (do
+            ;        ;(reset! global-common-tagspace @local-tagspace)
+            ;                    ; (prn @global-common-tagspace)
+            ;        )))
+            ]
         (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric); :tagspace @local-tagspace)
           (assoc individual :test-errors errors))))))
 
 (defn get-median-train-and-test
@@ -160,4 +203,7 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 1
+   :meta-error-categories [:reuse]
+   ;:use-single-thread true
+   ;:print-history true
    })

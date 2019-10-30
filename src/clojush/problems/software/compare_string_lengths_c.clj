@@ -77,10 +77,19 @@
      (the-actual-csl-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
-            local-tagspace (atom @global-common-tagspace)
+            local-tagspace (case data-cases
+                             :train (if @global-use-lineage-tagspaces
+                                      (atom (:tagspace individual))
+                                      (atom @global-common-tagspace))
+                             :simplify (atom (:tagspace individual))  ; during simplification, the tagspace should not be changed.
+                             :test (atom (:tagspace individual))
+                             [])
+            ; _ (prn "Before:")
+            ; _ (prn @local-tagspace)
             errors (doall
                     (for [[[input1 input2 input3] correct-output] (case data-cases
                                                                     :train train-cases
+                                                                    :simplify train-cases                                                                    
                                                                     :test test-cases
                                                                     [])]
                       (let [final-state (run-push (:program individual)
@@ -89,7 +98,8 @@
                                                        (push-item input2 :input)
                                                        (push-item input1 :input)))
                             result (top-item :boolean final-state)
-                            _ (reset! local-tagspace (get final-state :tag))]
+                            _ (if (= data-cases :train)
+                                (reset! local-tagspace (get final-state :tag)))]
                         (when print-outputs
                           (println (format "Correct output: %5b | Program output: %s" correct-output (str result))))
                          ; Record the behavior
@@ -98,21 +108,22 @@
                         (if (= result correct-output)
                           0
                           1))))
-             _ (if (= data-cases :train)
-                 (if (let [x (vec errors)
-                                       ;_ (prn x)
-                           y (first (:history individual))
+            _ (if (and (= data-cases :train) (not @global-use-lineage-tagspaces))
+                (if (let [x (vec errors)
+                                      ; _ (prn x)
+                          y (first (:history individual))
                                        ;_ (prn y)
-                           ]
-                       (if (nil? y)
-                         true
-                      (some? (some true? (map #(< %1 %2) x y))))) ; child is better than mom on at least one test case; can be worse on others
-                      ;   (every? true? (map #(<= %1 %2) x y))))
-                   (do
-                     (reset! global-common-tagspace @local-tagspace)
+                          ]
+                      (if (nil? y)
+                        true
+                      ;(some? (some true? (map #(< %1 %2) x y))))) ; child is better than mom on at least one test case; can be worse on others
+                        (every? true? (map #(<= %1 %2) x y))))
+                  (do
+                    (reset! global-common-tagspace @local-tagspace)
                                  ;(prn @global-common-tagspace)
-                     )))]
-        (if (= data-cases :train)
+                    )))
+            ]
+        (if (or (= data-cases :train) (= data-cases :simplify))
           (assoc individual :behaviors @behavior :errors errors :tagspace @local-tagspace)
           (assoc individual :test-errors errors))))))
   
@@ -184,6 +195,10 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 1
-   :use-single-thread true
+   ;:use-single-thread true
    :print-history true
+   :use-lineage-tagspaces true
+   :pop-when-tagging false
+   :tag-enrichment-types [:integer :boolean :vector_integer :exec]
+   :tag-enrichment 50
    })

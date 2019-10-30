@@ -83,7 +83,7 @@
       (let [behavior (atom '())
             ;state-with-tags (tagspace-initialization-heritable (str (:program individual)) (make-push-state))
             ;stacks-depth (atom (zipmap push-types (repeat 0)))
-            reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
+            reuse-metric (atom ())       
             repetition-metric (atom ())            
             local-tagspace (atom @global-common-tagspace)
             cases (case data-cases

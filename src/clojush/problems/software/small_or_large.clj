@@ -23,7 +23,7 @@
             ;;; end constants
             (fn [] (- (lrand-int 20001) 10000)) ;Integer ERC [-10000,10000]
             ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :exec] 1000)
+            (tag-instruction-erc [:integer :boolean :exec :string] 1000)
             (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1
@@ -141,14 +141,16 @@
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
-   :genetic-operator-probabilities {:alternation 0.2
-                                    :uniform-mutation 0.2
-                                    :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
-   :alternation-rate 0.01
-   :alignment-deviation 5
-   :uniform-mutation-rate 0.01
+   :genetic-operator-probabilities {:uniform-addition-and-deletion 1}
+   :uniform-addition-and-deletion-rate 0.09
+   ;:genetic-operator-probabilities {:alternation 0.2
+   ;                                 :uniform-mutation 0.2
+   ;                                 :uniform-close-mutation 0.1
+   ;                                 [:alternation :uniform-mutation] 0.5
+   ;                                 }
+   ;:alternation-rate 0.01
+   ;:alignment-deviation 5
+   ;:uniform-mutation-rate 0.01
    :problem-specific-report small-or-large-report
    :problem-specific-initial-report small-or-large-initial-report
    :report-simplifications 0

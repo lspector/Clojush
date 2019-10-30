@@ -583,9 +583,12 @@
           ;; {:features [reuse] thresholds [.6]}. It means that individuals will be filtered on the basis of reuse.
           ;; DON'T KNOW HOW TO COMBINE BOTH THE MEASURES
           ;; 
-
-        :common-tagspace {}
          
+         :common-tagspace {}
+
+         :use-lineage-tagspaces false  
+         ;; if true, the tagspace of parent witll be trasferred to its child. 
+                
          )))
 
 (defn augment-for-autoconstruction
@@ -1009,7 +1012,7 @@
                             (untag-instruction-erc 10000)
                             (tagged-instruction-erc 10000)
                             'integer_tagged_instruction]
-                           (if (use-type :integer) '[integer_tag_exec_instruction] [])
+                           (if (use-type :exec) '[integer_tag_exec_instruction] [])
                            (if (use-type :code) '[integer_tag_code_instruction] [])
                            (if (use-type :integer) '[integer_tag_integer_instruction] [])
                            (if (use-type :float) '[integer_tag_float_instruction] [])

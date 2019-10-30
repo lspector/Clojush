@@ -91,9 +91,16 @@
             reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
             repetition-metric (atom ())
             behavior (atom '())
-            local-tagspace (atom @global-common-tagspace)
+            local-tagspace (case data-cases
+                             :train (if global-use-lineage-tagspaces
+                                      (atom (:tagspace individual))
+                                      (atom @global-common-tagspace))
+                             :simplify (atom (:tagspace individual))  ; during simplification, the tagspace should not be changed.                                
+                             :test (atom (:tagspace individual))
+                             [])
             cases (case data-cases
                     :train train-cases
+                    :simplify train-cases
                     :test test-cases
                     [])
             errors (let [ran nil] ;(rand-nth cases)]
@@ -113,7 +120,8 @@
                                                           ;(make-push-state)
                                                            (push-item input :input))))
                               result (top-item :integer final-state)
-                              _ (reset! local-tagspace (get final-state :tag))]
+                              _ (if (= data-cases :train)
+                                  (reset! local-tagspace (get final-state :tag)))]
                           (when print-outputs
                             (println (format "Correct output: %2d | Program output: %s"
                                              correct-output
@@ -132,21 +140,21 @@
                             (abs (- result correct-output)) ; distance from correct integer
                             1000000) ; penalty for no return value
                           ))))
-             _ (if (= data-cases :train)
-                 (if (let [x (vec errors)
+            _ (if (and (= data-cases :train) (not global-use-lineage-tagspaces))
+                (if (let [x (vec errors)
                                       ; _ (prn x)
-                           y (first (:history individual))
+                          y (first (:history individual))
                                       ; _ (prn y)
-                           ]
-                       (if (nil? y)
-                         true
-                      (some? (some true? (map #(< %1 %2) x y))) )) ;child is better than mom on at least one test case; can be worse on others
-                    ;     (every? true? (map #(<= %1 %2) x y))))
-                   (do
-                     (reset! global-common-tagspace @local-tagspace)
+                          ]
+                      (if (nil? y)
+                        true
+                      ;(some? (some true? (map #(< %1 %2) x y))) )) ;child is better than mom on at least one test case; can be worse on others
+                        (every? true? (map #(<= %1 %2) x y))))
+                  (do
+                    (reset! global-common-tagspace @local-tagspace)
                                 ; (prn @global-common-tagspace)
-                     )))]
-        (if (= data-cases :train)
+                    )))]
+        (if (or (= data-cases :train) (= data-cases :simplify))
           (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @local-tagspace)
           (assoc individual :test-errors errors))))))
 
@@ -219,6 +227,10 @@
    :final-report-simplifications 5000
    :max-error 1000000
    ;:meta-error-categories [:reuse]
-   :use-single-thread true
+   ;:use-single-thread true
    :print-history true
+   :use-lineage-tagspaces true
+   :pop-when-tagging false
+   :tag-enrichment-types [:integer :boolean :vector_integer :exec]
+   :tag-enrichment 50
    })
