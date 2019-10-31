@@ -110,7 +110,8 @@
   ([code state print-steps trace]
     (run-push code state print-steps trace false))
   ([code state print-steps trace save-state-sequence]
-    (let [s (if @global-top-level-push-code (push-item code :code state) state)]
+   (swap! program-executions-count inc)
+   (let [s (if @global-top-level-push-code (push-item code :code state) state)]
       (let [s (push-item (not-lazy code) :exec s)]
         (when print-steps
           (printf "\nState after 0 steps:\n")

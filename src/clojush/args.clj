@@ -42,6 +42,10 @@
          :max-generations 1001
           ;; The maximum number of generations to run GP.
 
+         :max-program-executions 10e100
+          ;; The maximum number of program executions (running on a single case
+          ;; counts once) to run GP.
+
          :max-point-evaluations 10e100
           ;; The limit for the number of point (instruction) evaluations to
           ;; execute during the run.
@@ -1058,7 +1062,7 @@
                             (untag-instruction-erc 10000)
                             (tagged-instruction-erc 10000)
                             'integer_tagged_instruction]
-                           (if (use-type :integer) '[integer_tag_exec_instruction] [])
+                           (if (use-type :exec) '[integer_tag_exec_instruction] [])
                            (if (use-type :code) '[integer_tag_code_instruction] [])
                            (if (use-type :integer) '[integer_tag_integer_instruction] [])
                            (if (use-type :float) '[integer_tag_float_instruction] [])
