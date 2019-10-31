@@ -59,6 +59,9 @@
 (def evaluations-count (atom 0)) 
 ;; Used to count the number of times GP evaluates an individual
 
+(def program-executions-count (atom 0))
+;; Used to count the number of times GP runs a program once
+
 (def point-evaluations-count (atom 0)) 
 ;; Used to count the number of instructions that have been executed
 

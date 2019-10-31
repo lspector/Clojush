@@ -42,6 +42,10 @@
          :max-generations 1001
           ;; The maximum number of generations to run GP.
 
+         :max-program-executions 10e100
+          ;; The maximum number of program executions (running on a single case
+          ;; counts once) to run GP.
+
          :max-point-evaluations 10e100
           ;; The limit for the number of point (instruction) evaluations to
           ;; execute during the run.
