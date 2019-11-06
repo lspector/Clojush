@@ -583,6 +583,10 @@
          :print-homology-data false
           ;; If true, prints the homology statistics.
 
+         :print-lexicase-best-programs false
+          ;; If true, prints the program with most elite cases and program with the
+          ;; most zero errors when using lexicase selection.
+
          :exit-on-success true
           ;; When true, will exit the run when there is an individual with a zero-error vector
 
