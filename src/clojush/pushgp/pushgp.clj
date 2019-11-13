@@ -48,7 +48,7 @@
                                                                 atom-generators
                                                                 argmap))
                                                        :plushy (random-plushy-genome
-                                                                (* 1.165
+                                                                (* plushy-max-genome-size-modifier
                                                                    max-genome-size-in-initial-program)
                                                                 atom-generators
                                                                 argmap))

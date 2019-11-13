@@ -55,7 +55,7 @@
     :random (make-individual 
               :genome (case genome-representation
                         :plush (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
-                        :plushy (random-plushy-genome (* 1.165 max-genome-size-in-initial-program) atom-generators argmap))
+                        :plushy (random-plushy-genome (* plushy-max-genome-size-modifier max-genome-size-in-initial-program) atom-generators argmap))
               :genetic-operators :random)))
 
 (defn revert-to-parent-if-worse
@@ -151,25 +151,72 @@
          (* (/ max-points 4)
             (if (= genome-representation :plush)
               1
-              1.165)))
+              plushy-max-genome-size-modifier)))
       (as-> c (revert-too-big-child first-parent c argmap))
 
       track-instruction-maps
       (update-instruction-map-uuids))))
 
+(defn fibonacci
+  "Used for Fibonacci age gap in ALPS"
+  [n]
+  (loop [n n
+         x 0
+         y 1]
+    (if (<= n 0)
+      y
+      (recur (dec n)
+             y
+             (+' x y)))))
+
+(defn age-limit-of-index
+  "Gives the age limit of parents at this index when using ALPS"
+  [index {:keys [ALPS-number-of-layers ALPS-age-limit-system
+                 max-generations population-size]
+          :as argmap}]
+  (let [layer-size (int (quot population-size ALPS-number-of-layers))
+        layer-num (inc (quot index layer-size))
+        age-limit-fn (case ALPS-age-limit-system
+                       :linear identity
+                       :polynomial #(* % %)
+                       :exponential #(int (Math/pow 2 (dec %)))
+                       :fibonacci fibonacci)
+        age-gap (/ max-generations (age-limit-fn ALPS-number-of-layers))]
+    (* age-gap (age-limit-fn layer-num))))
+
 (defn breed
   "Returns an individual bred from the given population using the given parameters."
   [agt ;necessary since breed is called using swap! or send, even though not used
    location rand-gen population
-   {:keys [genetic-operator-probabilities] :as argmap}]
+   {:keys [genetic-operator-probabilities use-ALPS ALPS-number-of-layers] :as argmap}]
   (random/with-rng rand-gen
-    (let [prob (lrand)]
-      (loop [vectored-go-probabilities (reductions #(assoc %2 1 (+ (second %1) (second %2)))
-                                                   (vec genetic-operator-probabilities))]
-        (if (or (= 1 (count vectored-go-probabilities))
-                (<= prob (second (first vectored-go-probabilities))))
-          (perform-genetic-operator (first (first vectored-go-probabilities)) 
-                                    population location rand-gen argmap)
-          (recur (rest vectored-go-probabilities)))))))
+    (let [pop (if use-ALPS ; We need this filtered population only if using ALPS
+                (filter #(< (:age %)
+                            (age-limit-of-index location argmap))
+                        population)
+                population)]
+      (if (not (empty? pop))
+        (let [prob (lrand)]
+          (loop [vectored-go-probabilities (reductions #(assoc %2 1 (+ (second %1) (second %2)))
+                                                       (vec genetic-operator-probabilities))]
+            (if (or (= 1 (count vectored-go-probabilities))
+                    (<= prob (second (first vectored-go-probabilities))))
+              (perform-genetic-operator (first (first vectored-go-probabilities)) 
+                                        pop location rand-gen argmap)
+              (recur (rest vectored-go-probabilities)))))
+        ; If false, then using ALPS and no individuals are in filtered pop. This
+        ; means that everyone is too old for this layer, and we need a new individual.
+        (make-individual
+         :genome (case (:genome-representation argmap)
+                   :plush (random-plush-genome
+                           (:max-genome-size-in-initial-program argmap)
+                           (:atom-generators argmap)
+                           argmap)
+                   :plushy (random-plushy-genome
+                            (* plushy-max-genome-size-modifier
+                               (:max-genome-size-in-initial-program argmap))
+                            (:atom-generators argmap)
+                            argmap))
+         :genetic-operators :random)))))
 
 
