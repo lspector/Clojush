@@ -156,9 +156,8 @@
 (defn genesis
   "Ignores the provided parent and returns a new, random individual, with age 0.
   Works with Plushy genomes."
-  [ind {:keys [maintain-ancestors max-genome-size-in-initial-program atom-generators
-               genome-representation]
-        :as argmap}]
+  [{:keys [max-genome-size-in-initial-program atom-generators genome-representation]
+    :as argmap}]
   (let [genome (case genome-representation
                  :plush (random-plush-genome max-genome-size-in-initial-program
                                              atom-generators
@@ -171,10 +170,8 @@
     (make-individual :genome genome
                      :history ()
                      :age 0
-                     :grain-size (compute-grain-size genome argmap)
-                     :ancestors (if maintain-ancestors
-                                  (cons (:genome ind) (:ancestors ind))
-                                  (:ancestors ind)))))
+                     :genetic-operators :random
+                     :grain-size (compute-grain-size genome argmap))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; uniform mutation

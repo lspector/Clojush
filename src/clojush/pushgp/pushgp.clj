@@ -7,7 +7,7 @@
          simplification translate]
         [clojush.instructions boolean code common numbers random-instructions string char vectors
          tag zip environment input-output genome gtm]
-        [clojush.pushgp breed report]
+        [clojush.pushgp breed report genetic-operators]
         [clojush.pushgp.selection
          selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty eliteness
          fitness-proportionate downsampled-lexicase]
@@ -40,19 +40,7 @@
            max-genome-size-in-initial-program atom-generators genome-representation]
     :as argmap}]
   (let [population-agents (vec (repeatedly population-size
-                                           #(make-individual
-                                             :genome (case genome-representation
-                                                       :plush (strip-random-insertion-flags
-                                                               (random-plush-genome
-                                                                max-genome-size-in-initial-program
-                                                                atom-generators
-                                                                argmap))
-                                                       :plushy (random-plushy-genome
-                                                                (* plushy-max-genome-size-modifier
-                                                                   max-genome-size-in-initial-program)
-                                                                atom-generators
-                                                                argmap))
-                                             :genetic-operators :random)))]
+                                           #(genesis argmap)))]
     (mapv #(if use-single-thread
              (atom %)
              (agent % :error-handler agent-error-handler))

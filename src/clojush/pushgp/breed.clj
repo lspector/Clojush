@@ -25,7 +25,7 @@
    :uniform-addition-and-deletion {:fn uniform-addition-and-deletion :parents 1 :works-with-plushy true :works-with-plush true}
    :uniform-combination {:fn uniform-combination :parents 2 :works-with-plushy true :works-with-plush true}
    :uniform-combination-and-deletion {:fn uniform-combination-and-deletion :parents 2 :works-with-plushy true :works-with-plush true}
-   :genesis {:fn genesis :parents 1 :works-with-plushy true :works-with-plush true} ;; the parent will be ignored
+   :genesis {:fn genesis :parents 0 :works-with-plushy true :works-with-plush true} ;; the parent will be ignored
    :make-next-operator-revertable {:fn nil :parents 0 :works-with-plushy true :works-with-plush true}
    :autoconstruction {:fn autoconstruction :parents 2 :works-with-plush true}
    :gene-selection {:fn gene-selection :parents 1 :works-with-plushy true :works-with-plush true}
@@ -52,11 +52,7 @@
     :parent parent
     :empty (make-individual :genome [] :genetic-operators :empty)
     :truncate (assoc child :genome (vec (take (/ max-points 4) (:genome child))))
-    :random (make-individual 
-              :genome (case genome-representation
-                        :plush (random-plush-genome max-genome-size-in-initial-program atom-generators argmap)
-                        :plushy (random-plushy-genome (* plushy-max-genome-size-modifier max-genome-size-in-initial-program) atom-generators argmap))
-              :genetic-operators :random)))
+    :random (genesis argmap)))
 
 (defn revert-to-parent-if-worse
   "Evaluates child and parent, returning the child if it is at least as good as
@@ -84,7 +80,7 @@
    child."
   ([operator-list first-parent population location rand-gen argmap]
    (perform-genetic-operator-list operator-list first-parent population location rand-gen argmap
-                                  (list first-parent)))
+                                  (remove nil? (list first-parent))))
   ([operator-list first-parent population location rand-gen argmap parents]
    (if (empty? operator-list)
      (assoc first-parent ; first-parent, in this case, is the child individual
@@ -94,8 +90,7 @@
                    (= (count parents) 1) (inc (:age (first parents)))
                    (= (count parents) 2) ((age-combining-function argmap)
                                           (first parents) (second parents) (:genome first-parent))
-                   :else "Don't know how to combine ages of more than 2 parents.")
-            )
+                   :else "Don't know how to combine ages of more than 2 parents."))
      (let [revertable (= (first operator-list) :make-next-operator-revertable)
            op-list (if revertable
                      (rest operator-list)
@@ -113,11 +108,13 @@
                                      (recur (inc re-selections)
                                             (select population argmap))
                                      other)))))
-           op-fn (:fn (get genetic-operators operator)) ;;This is where to check for Genesis operator (probably right after let, and returning the result of genesis without further consideration)
-           child (apply op-fn (vec (concat (vector first-parent) 
-                                           other-parents 
-                                           (vector (assoc argmap 
-                                                          :population population)))))]
+           op-fn (:fn (get genetic-operators operator))
+           child (apply op-fn (concat (if (nil? first-parent)
+                                        nil
+                                        (vector first-parent))
+                                      other-parents
+                                      (vector (assoc argmap
+                                                     :population population))))]
        (recur (rest op-list)
               (if revertable
                 (revert-to-parent-if-worse child first-parent rand-gen argmap)
@@ -149,7 +146,9 @@
   [operator population location rand-gen 
    {:keys [max-points genome-representation
            track-instruction-maps] :as argmap}]
-  (let [first-parent (select population argmap)
+  (let [first-parent (if (= 0 (:parents (get genetic-operators operator)))
+                       nil
+                       (select population argmap))
         operator-vector (if (sequential? operator) operator (vector operator))
         child (perform-genetic-operator-list operator-vector first-parent
                                              population location rand-gen argmap)]
@@ -215,17 +214,6 @@
               (recur (rest vectored-go-probabilities)))))
         ; If false, then using ALPS and no individuals are in filtered pop. This
         ; means that everyone is too old for this layer, and we need a new individual.
-        (make-individual
-         :genome (case (:genome-representation argmap)
-                   :plush (random-plush-genome
-                           (:max-genome-size-in-initial-program argmap)
-                           (:atom-generators argmap)
-                           argmap)
-                   :plushy (random-plushy-genome
-                            (* plushy-max-genome-size-modifier
-                               (:max-genome-size-in-initial-program argmap))
-                            (:atom-generators argmap)
-                            argmap))
-         :genetic-operators :random)))))
+        (genesis argmap)))))
 
 
