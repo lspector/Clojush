@@ -291,7 +291,6 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -319,7 +318,6 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -357,7 +355,6 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -394,7 +391,6 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -434,7 +430,6 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -475,7 +470,6 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -503,7 +497,6 @@
         new-genome (mapv token-mutator (:genome ind))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -538,7 +531,6 @@
           new-genome (mapv close-mutator (:genome ind))]
       (make-individual :genome new-genome
                        :history (:history ind)
-                       :age (inc (:age ind))
                        :grain-size (compute-grain-size new-genome ind argmap)
                        :ancestors (if maintain-ancestors
                                     (cons (:genome ind) (:ancestors ind))
@@ -565,7 +557,6 @@
           new-genome (mapv silent-mutator (:genome ind))]
       (make-individual :genome new-genome
                        :history (:history ind)
-                       :age (inc (:age ind))
                        :grain-size (compute-grain-size new-genome ind argmap)
                        :ancestors (if maintain-ancestors
                                     (cons (:genome ind) (:ancestors ind))
@@ -585,7 +576,6 @@ given by uniform-deletion-rate.
                                       (:genome ind))))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -609,7 +599,6 @@ given by uniform-deletion-rate.
                                      (:genome ind))))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -642,7 +631,6 @@ given by uniform-deletion-rate.
                                       after-addition)))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -671,7 +659,6 @@ given by uniform-deletion-rate.
                                  (cycle (:genome parent2)))))]
     (make-individual :genome new-genome
                      :history (:history parent1)
-                     :age ((age-combining-function argmap) parent1 parent2 new-genome)
                      :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
@@ -707,7 +694,6 @@ given by uniform-deletion-rate.
                                       after-combination)))]
     (make-individual :genome new-genome
                      :history (:history parent1)
-                     :age ((age-combining-function argmap) parent1 parent2 new-genome)
                      :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
@@ -746,7 +732,6 @@ given by uniform-deletion-rate.
                                 (dec iteration-budget)))))]
     (make-individual :genome new-genome
                      :history (:history parent1)
-                     :age ((age-combining-function argmap) parent1 parent2 new-genome)
                      :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
@@ -772,7 +757,6 @@ given by uniform-deletion-rate.
                                       genome1)))]
     (make-individual :genome new-genome
                      :history (:history parent1)
-                     :age ((age-combining-function argmap) parent1 parent2 new-genome)
                      :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome parent1) (:ancestors parent1))
@@ -808,7 +792,6 @@ given by uniform-deletion-rate.
                                   long-genome)))]
       (make-individual :genome new-genome
                        :history (:history parent1)
-                       :age ((age-combining-function argmap) parent1 parent2 new-genome)
                        :grain-size (compute-grain-size new-genome parent1 parent2 argmap)
                        :ancestors (if maintain-ancestors
                                     (cons (:genome parent1) (:ancestors parent1))
@@ -841,7 +824,6 @@ given by uniform-deletion-rate.
                                            (- (count parent-genome) (inc index))))))))]
     (make-individual :genome new-genome
                      :history (:history initial-parent)
-                     :age (inc (:age initial-parent))
                      :grain-size (compute-grain-size new-genome initial-parent argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome initial-parent) (:ancestors initial-parent))
@@ -865,7 +847,6 @@ given by uniform-deletion-rate.
         new-genome (vec (filter identity (apply concat reordered)))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -895,7 +876,6 @@ given by uniform-deletion-rate.
         new-genome (vec (apply concat (filter identity (apply concat reordered))))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -921,7 +901,6 @@ given by uniform-deletion-rate.
                                            segmented)))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -947,7 +926,6 @@ given by uniform-deletion-rate.
                                            segmented)))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
@@ -973,7 +951,6 @@ given by uniform-deletion-rate.
                                            segmented)))]
     (make-individual :genome new-genome
                      :history (:history ind)
-                     :age (inc (:age ind))
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))

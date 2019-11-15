@@ -82,16 +82,27 @@
   "Recursively applies the genetic operators in operator-list, using
    first-parent as the first parent for each operator call, to create a new
    child."
-  [operator-list first-parent population location rand-gen argmap]
-  (if (empty? operator-list)
-    first-parent
-    (let [revertable (= (first operator-list) :make-next-operator-revertable)
-          op-list (if revertable
-                    (rest operator-list)
-                    operator-list)
-          operator (first op-list)
-          num-parents (:parents (get genetic-operators operator))
-          other-parents (vec (repeatedly 
+  ([operator-list first-parent population location rand-gen argmap]
+   (perform-genetic-operator-list operator-list first-parent population location rand-gen argmap
+                                  (list first-parent)))
+  ([operator-list first-parent population location rand-gen argmap parents]
+   (if (empty? operator-list)
+     (assoc first-parent ; first-parent, in this case, is the child individual
+            :parent-uuids (vec (map :uuid parents))
+            :age (cond
+                   (empty? parents) 0
+                   (= (count parents) 1) (inc (:age (first parents)))
+                   (= (count parents) 2) ((age-combining-function argmap)
+                                          (first parents) (second parents) (:genome first-parent))
+                   :else "Don't know how to combine ages of more than 2 parents.")
+            )
+     (let [revertable (= (first operator-list) :make-next-operator-revertable)
+           op-list (if revertable
+                     (rest operator-list)
+                     operator-list)
+           operator (first op-list)
+           num-parents (:parents (get genetic-operators operator))
+           other-parents (vec (repeatedly 
                                (dec num-parents) 
                                (fn []
                                  (loop [re-selections 0
@@ -102,21 +113,20 @@
                                      (recur (inc re-selections)
                                             (select population argmap))
                                      other)))))
-          op-fn (:fn (get genetic-operators operator))
-          child (assoc (apply op-fn (vec (concat (vector first-parent) 
-                                                 other-parents 
-                                                 (vector (assoc argmap 
-                                                           :population population)))))
-                       :parent-uuids (vec (concat (:parent-uuids first-parent)
-                                                  (map :uuid other-parents))))]
-      (recur (rest op-list)
-             (if revertable
-               (revert-to-parent-if-worse child first-parent rand-gen argmap)
-               child)
-             population
-             location
-             rand-gen
-             argmap))))
+           op-fn (:fn (get genetic-operators operator)) ;;This is where to check for Genesis operator (probably right after let, and returning the result of genesis without further consideration)
+           child (apply op-fn (vec (concat (vector first-parent) 
+                                           other-parents 
+                                           (vector (assoc argmap 
+                                                          :population population)))))]
+       (recur (rest op-list)
+              (if revertable
+                (revert-to-parent-if-worse child first-parent rand-gen argmap)
+                child)
+              population
+              location
+              rand-gen
+              argmap
+              (concat parents other-parents))))))
 
 (defn update-instruction-map-uuids
   "Takes an individual and updates the UUIDs on every instruction-map in its
@@ -141,8 +151,7 @@
            track-instruction-maps] :as argmap}]
   (let [first-parent (select population argmap)
         operator-vector (if (sequential? operator) operator (vector operator))
-        child (perform-genetic-operator-list operator-vector
-                                             (assoc first-parent :parent-uuids (vector (:uuid first-parent)))
+        child (perform-genetic-operator-list operator-vector first-parent
                                              population location rand-gen argmap)]
     (cond->
         (assoc child :genetic-operators operator)
