@@ -342,7 +342,7 @@
            print-errors print-history print-cosmos-data print-timings
            problem-specific-report total-error-method
            parent-selection print-homology-data max-point-evaluations
-           max-program-executions
+           max-program-executions use-ALPS
            print-error-frequencies-by-case normalization autoconstructive
            print-selection-counts print-preselection-fraction exit-on-success
            ;; The following are for CSV or JSON logs
@@ -456,6 +456,7 @@
             (r/generation-data! [:best :percent-parens]
               (double (/ (count-parens (:program best))
                          (count-points (:program best)))))) ;Number of (open) parens / points
+    (println "Age:" (:age best))
     (println "--- Population Statistics ---")
     (when print-cosmos-data
       (println "Cosmos Data:" (let [quants (config/quantiles (count population))]
@@ -491,6 +492,8 @@
           (r/generation-data! [:population-report :mean-program-percent-params]
             (mean (map #(double (/ (count-parens (:program %)) (count-points (:program %)))) sorted))))
     (let [ages (map :age population)]
+      (when use-ALPS
+        (println "Population ages:" ages))
       (println "Minimum age in population:"
           (r/generation-data! [:population-report :min-age]
                (* 1.0 (apply min ages))))

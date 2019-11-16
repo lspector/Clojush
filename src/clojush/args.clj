@@ -516,7 +516,21 @@
           ;; Determines the proportion of cases to use when using downsampled lexicase.
           ;; When set to 1, has no effect. Should be in the range (0, 1].
 
-         
+         :use-ALPS false
+          ;; When true, will enable the Age-Layered Population Structure. This is available
+          ;; with any parent selection technique. With this implementation of ALPS, parents
+          ;; for children of a given layer can be selected from that layer or any layer below
+          ;; it. In other words, each layer has an age limit, and parents of individuals in
+          ;; each layer can be of any age below the age limit.
+
+         :ALPS-number-of-layers 10
+          ;; The number of layers for the population when using ALPS
+
+         :ALPS-age-limit-system :polynomial
+          ;; The age limiting system used for ALPS.
+          ;; Options: :polynomial, :linear, :exponential, :fibonacci
+          ;; :polynomial, the default, is what is used in the first ALPS paper
+
           ;;----------------------------------------
           ;; Arguments related to the Push interpreter
           ;;----------------------------------------
