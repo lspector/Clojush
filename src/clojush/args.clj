@@ -1006,7 +1006,17 @@
                                        autoconstructive_integer_rand
                                        autoconstructive_boolean_rand
                                        genome_autoconstructing
-                                       genome_if_autoconstructing))))]
+                                       genome_if_autoconstructing)))
+                    :umad (into (registered-for-stacks
+                                     (if (:autoconstructive-environments @push-argmap)
+                                       [:integer :boolean :exec :float :tag :environment]
+                                       [:integer :boolean :exec :float :tag]))
+                                   '(genome_parent1
+                                      genome_uniform_deletion
+                                      genome_uniform_addition
+                                      genome_uniform_addition_and_deletion
+                                      ;genome_genesis
+                                      )))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     ;;
