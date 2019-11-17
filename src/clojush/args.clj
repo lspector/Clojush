@@ -1014,9 +1014,7 @@
                                    '(genome_parent1
                                       genome_uniform_deletion
                                       genome_uniform_addition
-                                      genome_uniform_addition_and_deletion
-                                      ;genome_genesis
-                                      )))]
+                                      genome_uniform_addition_and_deletion)))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     ;;
