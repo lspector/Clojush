@@ -224,6 +224,7 @@
   ([code state print-steps trace]
    (run-push code state print-steps trace false))
   ([code state print-steps trace save-state-sequence]
+   (swap! program-executions-count inc)
    (let [s (if @global-top-level-push-code (push-item code :code state) state)]
      (let [s (push-item (not-lazy code) :exec s)
           ;; If calculate-mod-metrics if true, do the followiing

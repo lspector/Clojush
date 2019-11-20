@@ -20,9 +20,9 @@
   (concat (list
            (fn [] (lrand-nth (list true false))) ;Boolean ERC
             ;;; end ERCs
-           (tag-instruction-erc [:integer :boolean :string :exec] 1000)
-           (tagged-instruction-erc 1000)
-           (untag-instruction-erc 1000)
+           ;(tag-instruction-erc [:integer :boolean :string :exec] 1000)
+           ;(tagged-instruction-erc 1000)
+           ;(untag-instruction-erc 1000)
             ;;; end tag ERCs
            'in1
            'in2
@@ -77,54 +77,67 @@
      (the-actual-csl-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
-            local-tagspace (case data-cases
-                             :train (if @global-use-lineage-tagspaces
-                                      (atom (:tagspace individual))
-                                      (atom @global-common-tagspace))
-                             :simplify (atom (:tagspace individual))  ; during simplification, the tagspace should not be changed.
-                             :test (atom (:tagspace individual))
-                             [])
+            ;local-tagspace (case data-cases
+            ;                 :train (if @global-use-lineage-tagspaces
+            ;                          (atom (:tagspace individual))
+            ;                          (atom @global-common-tagspace))
+            ;                 :simplify (atom (:tagspace individual))  ; during simplification, the tagspace should not be changed.
+            ;                 :test (atom (:tagspace individual))
+            ;                 [])
             ; _ (prn "Before:")
             ; _ (prn @local-tagspace)
-            errors (doall
-                    (for [[[input1 input2 input3] correct-output] (case data-cases
-                                                                    :train train-cases
-                                                                    :simplify train-cases                                                                    
-                                                                    :test test-cases
-                                                                    [])]
-                      (let [final-state (run-push (:program individual)
-                                                  (->> (assoc (make-push-state) :tag @local-tagspace)
-                                                       (push-item input3 :input)
-                                                       (push-item input2 :input)
-                                                       (push-item input1 :input)))
-                            result (top-item :boolean final-state)
-                            _ (if (= data-cases :train)
-                                (reset! local-tagspace (get final-state :tag)))]
-                        (when print-outputs
-                          (println (format "Correct output: %5b | Program output: %s" correct-output (str result))))
+            reuse-metric (atom ())
+            repetition-metric (atom ())
+            cases (case data-cases
+                    :train train-cases
+                    :simplify train-cases
+                    :test test-cases
+                    [])
+            errors (let [ran (if (= data-cases :train)
+                               (rand-nth cases)
+                               nil)]
+                     (doall
+                      (for [[[input1 input2 input3] correct-output] cases]
+                        (let [final-state (run-push (:program individual)
+                                                    (->> (assoc (make-push-state) :calculate-mod-metrics (= [[input1 input2 input3] correct-output] ran))
+                                                   ;(assoc (make-push-state) :tag @local-tagspace)
+                                                         (push-item input3 :input)
+                                                         (push-item input2 :input)
+                                                         (push-item input1 :input)))
+                              result (top-item :boolean final-state)
+                           ; _ (if (= data-cases :train)
+                           ;     (reset! local-tagspace (get final-state :tag)))
+                              ]
+                          (when print-outputs
+                            (println (format "Correct output: %5b | Program output: %s" correct-output (str result))))
+                          (if (= [[input1 input2 input3] correct-output] ran)
+                            (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
+                              (do
+                                (swap! reuse-metric conj (first metrics))
+                                (swap! repetition-metric conj (last metrics)))))
                          ; Record the behavior
-                        (swap! behavior conj result)
+                          (swap! behavior conj result)
                          ; Error is boolean error
-                        (if (= result correct-output)
-                          0
-                          1))))
-            _ (if (and (= data-cases :train) (not @global-use-lineage-tagspaces))
-                (if (let [x (vec errors)
-                                      ; _ (prn x)
-                          y (first (:history individual))
-                                       ;_ (prn y)
-                          ]
-                      (if (nil? y)
-                        true
-                      ;(some? (some true? (map #(< %1 %2) x y))))) ; child is better than mom on at least one test case; can be worse on others
-                        (every? true? (map #(<= %1 %2) x y))))
-                  (do
-                    (reset! global-common-tagspace @local-tagspace)
-                                 ;(prn @global-common-tagspace)
-                    )))
+                          (if (= result correct-output)
+                            0
+                            1)))))
+           ; _ (if (and (= data-cases :train) (not @global-use-lineage-tagspaces))
+           ;     (if (let [x (vec errors)
+           ;                           ; _ (prn x)
+           ;               y (first (:history individual))
+           ;                            ;_ (prn y)
+           ;               ]
+           ;           (if (nil? y)
+           ;             true
+           ;           ;(some? (some true? (map #(< %1 %2) x y))))) ; child is better than mom on at least one test case; can be worse on others
+           ;             (every? true? (map #(<= %1 %2) x y))))
+           ;       (do
+           ;         (reset! global-common-tagspace @local-tagspace)
+           ;                      ;(prn @global-common-tagspace)
+           ;         )))
             ]
         (if (or (= data-cases :train) (= data-cases :simplify))
-          (assoc individual :behaviors @behavior :errors errors :tagspace @local-tagspace)
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric); :tagspace @local-tagspace)
           (assoc individual :test-errors errors))))))
   
 (defn get-compare-string-lengths-train-and-test
@@ -179,26 +192,26 @@
    :evalpush-limit 600
    :population-size 1000
    :max-generations 300
-   :parent-selection :lexicase
-   :genetic-operator-probabilities {:uniform-addition-and-deletion 1}
-   :uniform-addition-and-deletion-rate 0.09
-   ;:genetic-operator-probabilities {:alternation 0.2
-   ;                                 :uniform-mutation 0.2
-   ;                                 :uniform-close-mutation 0.1
-   ;                                 [:alternation :uniform-mutation] 0.5
-   ;                                 }
-   ;:alternation-rate 0.01
-   ;:alignment-deviation 10
-   ;:uniform-mutation-rate 0.01
+   :parent-selection :fitness-proportionate
+   ;:genetic-operator-probabilities {:uniform-addition-and-deletion 1}
+   ;:uniform-addition-and-deletion-rate 0.09
+   :genetic-operator-probabilities {:alternation 0.2
+                                    :uniform-mutation 0.2
+                                    :uniform-close-mutation 0.1
+                                    [:alternation :uniform-mutation] 0.5
+                                    }
+   :alternation-rate 0.01
+   :alignment-deviation 10
+   :uniform-mutation-rate 0.01
    :problem-specific-report csl-report
    :problem-specific-initial-report compare-string-lengths-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 1
    ;:use-single-thread true
-   :print-history true
-   :use-lineage-tagspaces true
-   :pop-when-tagging false
-   :tag-enrichment-types [:integer :boolean :vector_integer :exec]
-   :tag-enrichment 50
+   ;:print-history true
+   ;:use-lineage-tagspaces true
+   ;:pop-when-tagging false
+   ;:tag-enrichment-types [:integer :boolean :string :exec]
+   ;:tag-enrichment 50
    })

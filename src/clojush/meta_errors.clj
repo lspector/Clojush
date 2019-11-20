@@ -1,5 +1,5 @@
 (ns clojush.meta-errors
-  (:use [clojush util pushstate random globals individual]
+  (:use [clojush util pushstate random globals individual simplification]
         clojush.pushgp.genetic-operators)
   (:require [clojure.math.numeric-tower :as math]
             [clj-random.core :as random]))
@@ -60,6 +60,19 @@
 (defn repetition-meta-error
   [ind evaluated-population argmap]
   (mean (:repetition-info ind)))
+
+(defn tag-usage-meta-error
+  [ind evaluated-population argmap]
+  (if (> (count (re-seq #"tag" (str (:program ind)))) 0)
+    (let [sim-prog (str (:program (auto-simplify ind (:error-function argmap) 10 false 10)))
+          num-tagged (count (re-seq #"tagged_" sim-prog))
+          num-tag (count (re-seq #" tag_" sim-prog))]
+      (if (> (* num-tag num-tagged) 0)
+        (+ num-tagged num-tag)
+        0
+        ))
+    0
+    ))
 
 
 

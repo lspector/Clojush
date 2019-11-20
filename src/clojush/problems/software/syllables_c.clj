@@ -44,9 +44,9 @@
             (fn [] (lrand-nth (concat [\newline \tab] (map char (range 32 127))))) ;Visible character ERC
             (fn [] (syllables-input (lrand-int 21))) ;String ERC
             ;;; end ERCs
-            (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
-            (tagged-instruction-erc 1000)
-            (registered-for-type "return_")
+            ;(tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
+            ;(tagged-instruction-erc 1000)
+            ;(registered-for-type "return_")
             ;;; end tag ERCs
             'in1
             ;;; end input instructions
@@ -92,32 +92,46 @@
      (the-actual-syllables-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
-            errors (flatten
-                     (doall
-                       (for [[input correct-output] (case data-cases
-                                                      :train train-cases
-                                                      :test test-cases
-                                                      [])]
+            reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
+            repetition-metric (atom ())
+            cases (case data-cases
+                    :train train-cases
+                    :simplify train-cases
+                    :test test-cases
+                    [])
+            errors (let [ran (if (= data-cases :train)
+                               (rand-nth cases)
+                               nil)]
+                     (flatten
+                      (doall
+                       (for [[input correct-output] cases]
                          (let [final-state (run-push (:program individual)
-                                                     (->> (make-push-state)
-                                                       (push-item input :input)
-                                                       (push-item "" :output)))
+                                                     (->> (assoc (make-push-state) :calculate-mod-metrics (= [input correct-output] ran))
+                                                          (push-item input :input)
+                                                          (push-item "" :output)))
                                printed-result (stack-ref :output 0 final-state)]
                            (when print-outputs
                              (println (format "\n| Correct output: %s\n| Program output: %s" (pr-str correct-output) (pr-str printed-result))))
+
+                           (if (= [input correct-output] ran)
+                             (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
+                               (do
+                                 (swap! reuse-metric conj (first metrics))
+                                 (swap! repetition-metric conj (last metrics)))))
+
                            ; Record the behavior
                            (swap! behavior conj printed-result)
                            ; Error is Levenshtein distance and, if ends in an integer, distance from correct integer
                            (vector
-                             (levenshtein-distance correct-output printed-result)
-                             (if-let [num-result (try (Integer/parseInt (last (string/split printed-result #"\s+")))
-                                                   (catch Exception e nil))]
-                               (abs (- (Integer/parseInt (last (string/split correct-output #"\s+")))
-                                       num-result)) ;distance from correct integer
-                               1000)
-                             )))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
+                            (levenshtein-distance correct-output printed-result)
+                            (if-let [num-result (try (Integer/parseInt (last (string/split printed-result #"\s+")))
+                                                     (catch Exception e nil))]
+                              (abs (- (Integer/parseInt (last (string/split correct-output #"\s+")))
+                                      num-result)) ;distance from correct integer
+                              1000)
+                            ))))))]
+        (if (or (= data-cases :train) (= data-cases :simplify))
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric)
           (assoc individual :test-errors errors))))))
 
 (defn get-syllables-train-and-test

@@ -1,5 +1,5 @@
 (ns clojush.simplification
-  (:use [clojush util globals pushstate random individual evaluate translate]))
+  (:use [clojush util globals pushstate random individual translate]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-simplification
@@ -47,7 +47,7 @@
                                        :else 
                                        (recur open-count
                                               close-diff
-                                              (conj program-so-far (first rest-program))
+                                              (conj program-so-far (first rest-program)) 
                                               (next rest-program))))]
           (open-close-sequence-to-list pair-removed-program))))))
 
@@ -66,7 +66,8 @@
         (flush))
       (if (>= step steps)
         (make-individual :program program :errors errors :total-error total-errors 
-                         :history (:history ind) 
+                         :history (:history ind)
+                         :tagspace (:tagspace ind) 
                          :ancestors (if maintain-ancestors
                                       (cons (:program ind) (:ancestors ind))
                                       (:ancestors ind))
@@ -81,8 +82,10 @@
                                        (dec how-many))))
                             ;; remove single paren pair
                             (remove-paren-pair program))
-              new-errors (:errors (error-function {:program new-program} :simplify))
-              new-total-errors (compute-total-error new-errors)] ;simplification bases its decision on raw error; HAH-error could also be used here
+              new-errors (:errors (error-function {:program new-program :tagspace (:tagspace ind)} :simplify))
+              new-total-errors (reduce +' new-errors)
+                  ; (compute-total-error new-errors)
+              ] ;simplification bases its decision on raw error; HAH-error could also be used here
           (if (= new-errors errors) ; only keep the simplified program if its error vector is the same as the original program's error vector
             (recur (inc step) new-program new-errors new-total-errors)
             (recur (inc step) program errors total-errors)))))))
@@ -263,7 +266,8 @@
                                (reverse result)
                                (recur (inc ca) (conj result new-error))))))
 
-            new-total-errors (compute-total-error new-errors)] ;simplification bases its decision on raw error; HAH-error could also be used here
+            new-total-errors (reduce +' new-errors) ;(compute-total-error new-errors)
+            ] ;simplification bases its decision on raw error; HAH-error could also be used here
         (if (= new-errors errors) ; only keep the simplified program if its error vector is the same as the original program's error vector
           (recur (inc step) new-program new-errors new-total-errors)
           (recur (inc step) program errors total-errors))))))

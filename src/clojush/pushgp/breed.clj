@@ -139,7 +139,8 @@
         child (perform-genetic-operator-list operator-vector
                                              (assoc first-parent :parent-uuids (vector (:uuid first-parent)))
                                              population location rand-gen argmap)
-        child (if use-lineage-tagspaces (assoc child :tagspace (:tagspace first-parent)) child)]
+        ;child (if use-lineage-tagspaces (assoc child :tagspace (:tagspace first-parent)) child)
+        ]
     (cond->
         (assoc child :genetic-operators operator)
 

@@ -9,7 +9,8 @@
          tag zip environment input-output genome gtm]
         [clojush.pushgp breed report]
         [clojush.pushgp.selection
-         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty]
+         selection epsilon-lexicase elitegroup-lexicase implicit-fitness-sharing novelty eliteness
+         fitness-proportionate downsampled-lexicase]
         [clojush.experimental.decimation]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -75,11 +76,11 @@
                          (if (pos? num-remaining)
                            (let [new-seeds (repeatedly num-remaining
                                                        #(random/lrand-bytes
-                                                          (:mersennetwister random/*seed-length*)))]
+                                                         (:mersennetwister random/*seed-length*)))]
                              (recur (list-concat seeds (filter ; only add seeds that we do not already have
-                                                         (fn [candidate]
-                                                           (not (some #(random/=byte-array % candidate)
-                                                                      seeds))) new-seeds))))
+                                                        (fn [candidate]
+                                                          (not (some #(random/=byte-array % candidate)
+                                                                     seeds))) new-seeds))))
                            seeds)))]
     {:random-seeds random-seeds
      :rand-gens (vec (doall (for [k (range population-size)]
@@ -179,11 +180,10 @@
       (reset! timer-atom (System/currentTimeMillis))
       (swap! timing-map assoc step (+ current-time-for-step (- @timer-atom start-time))))))
 
-
 (defn process-generation
   "Processes the generation, returning [new novelty archive, return val],
    where new novelty archive will be nil if we are done."
-  [rand-gens pop-agents child-agents generation novelty-archive 
+  [rand-gens pop-agents child-agents generation novelty-archive
    {:keys [population-size use-single-thread] :as argmap}]
   (r/new-generation! generation)
   (println "Processing generation:" generation)
@@ -192,25 +192,60 @@
     :plushy (population-translate-plushy-to-push pop-agents @push-argmap))
   (timer @push-argmap :reproduction)
   (println "Computing errors... ")
+  ; select cases if using downsampled lexicase
+  (when (= (:parent-selection @push-argmap) :downsampled-lexicase)
+    (swap! push-argmap assoc :sub-training-cases
+           (down-sample @push-argmap))
+    (println "Cases for this generation:" (pr-str (:sub-training-cases @push-argmap))))
+  ; compute errors
   (compute-errors pop-agents rand-gens novelty-archive @push-argmap)
   (println "Done computing errors.")
-  (when (:preserve-frontier argmap)
+  (when (and (:preserve-frontier argmap)
+             (or (not (:autoconstructive argmap))
+                 (> generation 0)))
     (println "Preserving frontier... ")
-    (loop [preserved 0
-           new-frontier []
-           candidates (concat @frontier (map deref pop-agents))]
-      (if (= preserved population-size)
+    (let [filtered-candidates
+          (if (:autoconstructive argmap)
+            (let [diversifying-children (filter :diversifying (map deref pop-agents))
+                  diversifying-frontier (filter :diversifying @frontier)
+                  verified-frontier (filter (fn [parent]
+                                              (some (fn [child]
+                                                      (= (:parent1-genome child)
+                                                         (:genome parent)))
+                                                    diversifying-children))
+                                            diversifying-frontier)
+                  diversifying-candidates (concat diversifying-children verified-frontier)]
+              (println "Number of diversifying candidates for frontier preservation:"
+                       (count diversifying-candidates))
+              (if (empty? diversifying-candidates)
+                (map deref pop-agents)
+                (if (< (count diversifying-candidates) (count pop-agents))
+                  (take (count pop-agents) (cycle diversifying-candidates))
+                  diversifying-candidates)))
+            (concat (map deref pop-agents)
+                    @frontier))]
+      (if (= (count filtered-candidates) (count pop-agents))
         (do (dotimes [i population-size]
-              ((if use-single-thread swap! send) (nth pop-agents i) (fn [_] (nth new-frontier i))))
+              ((if use-single-thread swap! send) (nth pop-agents i) (fn [_] (nth filtered-candidates i))))
             (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
-            (reset! frontier new-frontier))
-        (let [to-preserve (select candidates argmap)
-              without-meta-errors (update-in to-preserve
-                                             [:errors]
-                                             #(drop-last (count (:meta-errors to-preserve)) %))]
-          (recur (inc preserved)
-                 (conj new-frontier without-meta-errors)
-                 (remove-one to-preserve candidates))))))
+            (reset! frontier filtered-candidates))
+        (loop [preserved 0
+               new-frontier []
+               candidates filtered-candidates]
+          (if (= preserved population-size)
+            (do (dotimes [i population-size]
+                  ((if use-single-thread swap! send) (nth pop-agents i) (fn [_] (nth new-frontier i))))
+                (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
+                (reset! frontier new-frontier))
+            (let [to-preserve (select candidates argmap)
+                  without-meta-errors (update-in to-preserve
+                                                 [:errors]
+                                                 #(vec (drop-last (count (:meta-errors to-preserve)) %)))]
+              (recur (inc preserved)
+                     (conj new-frontier without-meta-errors)
+                     (if (= (:preserve-frontier argmap) :with-replacement)
+                       candidates
+                       (remove-one to-preserve candidates)))))))))
   (timer @push-argmap :fitness)
   ;; calculate solution rates if necessary for historically-assessed hardness
   (calculate-hah-solution-rates pop-agents @push-argmap)
@@ -221,9 +256,21 @@
   (when (= (:total-error-method @push-argmap) :ifs)
     (calculate-implicit-fitness-sharing pop-agents @push-argmap))
   ;; calculate epsilons for epsilon lexicase selection
-  (when (= (:parent-selection @push-argmap) :epsilon-lexicase)
-    (calculate-epsilons-for-epsilon-lexicase pop-agents @push-argmap))
+  (when (and (= (:parent-selection @push-argmap) :epsilon-lexicase)
+             (= (:epsilon-lexicase-version @push-argmap) :semi-dynamic)
+             (= (:case-batch-size @push-argmap) 1)) ; only do this if case-batch-size is 1, since otherwise need to recalculate for every batch.
+    (let [epsilons (calculate-epsilons-for-epsilon-lexicase (map deref pop-agents) @push-argmap)]
+      (println "Epsilons for epsilon lexicase:" epsilons)
+      (reset! epsilons-for-epsilon-lexicase epsilons)))
+  (when (and (= (:parent-selection @push-argmap) :epsilon-lexicase)
+             (= (:epsilon-lexicase-version @push-argmap) :static))
+    (calculate-fitness-for-static-epsilon-lexicase pop-agents @push-argmap))
+  ;; calculate eliteness when total-error-method necessitates
+  (when (= (:total-error-method @push-argmap) :eliteness)
+    (calculate-eliteness pop-agents @push-argmap))
   (timer @push-argmap :other)
+  (when (= (:parent-selection @push-argmap) :fitness-proportionate)
+    (calculate-fitness-proportionate-probabilities pop-agents @push-argmap))
   ;; report and check for success
   (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
                                                      generation @push-argmap)]
@@ -256,10 +303,10 @@
                                          (fn [_] (select @delay-archive @push-argmap))))
                                       (when-not (:use-single-thread @push-argmap (apply await pop-agents))) ;; SYNCHRONIZE
                                       (reset! delay-archive [])))
+                                  (timer @push-argmap :report)
                                   ;(println "\nUpdating Common Tagspace...")
                                   ;(reset! global-common-tagspace (:tagspace best))
                                   ;(println (pr-str @global-common-tagspace))
-                                  (timer @push-argmap :report)
                                   (println "\nProducing offspring...") (flush)
                                   (produce-new-offspring pop-agents
                                                          child-agents
@@ -272,8 +319,6 @@
                                   (install-next-generation pop-agents child-agents @push-argmap)
                                   [next-novelty-archive nil])
           :else [nil (final-report generation best @push-argmap)])))
-
-
 
 (defn pushgp
   "The top-level routine of pushgp."
@@ -306,4 +351,6 @@
            (if (nil? next-novelty-archive)
              return-val
              (recur (inc generation) next-novelty-archive))))))))
+
+
 

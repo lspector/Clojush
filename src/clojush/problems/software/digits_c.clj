@@ -30,9 +30,9 @@
             ;;; end ERCs
            'end_tag
             ;(tagwrap-instruction-erc 100)
-           (tag-instruction-erc [:integer :boolean :string :char :exec] 1000)
-           (tagged-instruction-erc 1000)
-           (untag-instruction-erc 1000)
+           ;(tag-instruction-erc [:integer :boolean :string :char :exec] 1000)
+           ;(tagged-instruction-erc 1000)
+           ;(untag-instruction-erc 1000)
             ;;; end tag ERCs
            'in1
             ;;; end input instructions
@@ -85,29 +85,35 @@
             ;stacks-depth (atom (zipmap push-types (repeat 0)))
             reuse-metric (atom ())       
             repetition-metric (atom ())            
-            local-tagspace (atom @global-common-tagspace)
+            ;local-tagspace (atom @global-common-tagspace)
             cases (case data-cases
                     :train train-cases
+                    :simplify train-cases
                     :test test-cases
                     [])
-            errors (let [ran nil];(rand-nth cases)]
+            errors (let [ran (if (= data-cases :train)
+                               (rand-nth cases)
+                               nil)]
                      (doall
                       (for [[input1 correct-output] cases]
                         (let [final-state (if (= [input1 correct-output] ran)
-                                            (run-push (:program (auto-simplify-lite individual
-                                                                                    (fn [inp] (dg/make-digits-error-function-from-cases inp nil)) ; error-function per test case
-                                                                                    75
-                                                                                    (first dg/digits-train-and-test-cases) ; cases
-                                                                                    false 100))
+                                            (run-push (:program ;(auto-simplify-lite individual
+                                                                 ;                   (fn [inp] (dg/make-digits-error-function-from-cases inp nil)) ; error-function per test case
+                                                                 ;                   75
+                                                                 ;                   (first dg/digits-train-and-test-cases) ; cases
+                                                                 ;                   false 100)
+                                                       individual)
                                                       (->>  (push-item input1 :input (assoc (make-push-state) :calculate-mod-metrics (= [input1 correct-output] ran)))
                                                             (push-item "" :output)))
                                             (run-push (:program individual)
-                                                      (->> (push-item input1 :input (assoc (make-push-state) :tag @local-tagspace)) 
+                                                      (->> (push-item input1 :input (make-push-state))
+                                                      ;(push-item input1 :input (assoc (make-push-state) :tag @local-tagspace)) 
                                                        ;(push-item input1 :input (make-push-state))
                                                            (push-item "" :output)))
                                             )
                               result (stack-ref :output 0 final-state)
-                              _ (reset! local-tagspace (get final-state :tag))]
+                              ;_ (reset! local-tagspace (get final-state :tag))
+                              ]
                           (when print-outputs
                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
                          ; Update the length of each stack
@@ -123,24 +129,25 @@
                           (swap! behavior conj result)
                          ; Error is Levenshtein distance of printed strings
                           (levenshtein-distance correct-output result)))))
-            _ (if (= data-cases :train)
-               (if (let [x (vec errors)
-                                       ;_ (prn x)
-                        y (first (:history individual))
-                                       ;_ (prn y)
-                        ]
-                    (if (nil? y)
-                      true
-                      ;(some? (some true? (map #(< %1 %2) x y))) ; child is better than mom on at least one test case; can be worse on others
-                      (every? true? (map #(<= %1 %2) x y))
-                      ))
-                (do
-                  (reset! global-common-tagspace @local-tagspace)
-                                 ;(prn @global-common-tagspace)
-                  )))]
+            ;_ (if (= data-cases :train)
+            ;   (if (let [x (vec errors)
+            ;                           ;_ (prn x)
+            ;            y (first (:history individual))
+            ;                           ;_ (prn y)
+            ;            ]
+            ;        (if (nil? y)
+            ;          true
+            ;          ;(some? (some true? (map #(< %1 %2) x y))) ; child is better than mom on at least one test case; can be worse on others
+            ;          (every? true? (map #(<= %1 %2) x y))
+            ;          ))
+            ;    (do
+            ;      (reset! global-common-tagspace @local-tagspace)
+            ;                     ;(prn @global-common-tagspace)
+            ;      )))
+            ]
         ;(assoc individual :stacks-info @stacks-depth)
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @local-tagspace)
+        (if (or (= data-cases :train) (= data-cases :simplify))
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric); :tagspace @local-tagspace)
           (assoc individual :test-errors errors))))))
 
 (defn get-digits-train-and-test
@@ -218,7 +225,7 @@
    :final-report-simplifications 5000
    :max-error 5000
    ;:meta-error-categories [:max-stacks-depth]
-   :use-single-thread true
-   :print-history true
+   ;:use-single-thread true
+   ;:print-history true
    })
 

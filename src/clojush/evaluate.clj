@@ -65,14 +65,19 @@
                           :normalization :none
                           :max-error 1000}))
   ([i error-function rand-gen
-    {:keys [reuse-errors print-history total-error-method normalization max-error]
+    {:keys [reuse-errors print-history total-error-method normalization max-error parent-selection]
      :as argmap}]
     (random/with-rng rand-gen
       (let [p (:program i)
-            evaluated-i (if (or (not reuse-errors)
-                                (nil? (:errors i)))
-                         (error-function i)
-                         i)
+            evaluated-i (cond
+                          (and reuse-errors (not (nil? (:errors i))))
+                          i
+                          ;;
+                          (= parent-selection :downsampled-lexicase)
+                          (error-function i (:sub-training-cases argmap))
+                          ;;
+                          :else
+                          (error-function i))
             raw-errors (:errors evaluated-i)
             e (vec (if (and reuse-errors (not (nil? (:errors i))))
                      (:errors i)
@@ -88,6 +93,7 @@
             we (case total-error-method
                  :sum nil
                  :ifs nil
+                 :eliteness nil ; calculated later
                  :hah (compute-hah-error e)
                  :rmse (compute-root-mean-square-error e)
                  nil)

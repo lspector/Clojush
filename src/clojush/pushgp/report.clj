@@ -352,9 +352,31 @@
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
   (println ";; -*- Report at generation" generation)
   (let [point-evaluations-before-report @point-evaluations-count
+        program-executions-before-report @program-executions-count
         err-fn (if (= total-error-method :rmse) :weighted-error :total-error)
         sorted (sort-by err-fn < population)
-        err-fn-best (first sorted)
+        err-fn-best (if (not= parent-selection :downsampled-lexicase)
+                      (first sorted)
+                      ; This tests each individual that passes current generation's subsampled training
+                      ; cases on all training cases, and only treats it as winner if it
+                      ; passes all of those as well. Otherwise, just returns first individual
+                      ; if none pass all subsampled cases, or random individual that passes
+                      ; all subsampled cases but not all training cases.
+                      (error-function
+                        (loop [sorted-individuals sorted]
+                              (if (empty? (rest sorted-individuals))
+                                (first sorted-individuals)
+                                (if (and (<= (:total-error (first sorted-individuals)) error-threshold)
+                                         (> (apply + (:errors (error-function (first sorted-individuals) :train))) error-threshold)
+                                         (<= (:total-error (second sorted-individuals)) error-threshold))
+                                  (recur (rest sorted-individuals))
+                                  (first sorted-individuals))))
+                        :train))
+        total-error-best (if (not= parent-selection :downsampled-lexicase)
+                           err-fn-best
+                           (assoc err-fn-best
+                                  :total-error
+                                  (apply +' (:errors err-fn-best))))
         psr-best (problem-specific-report err-fn-best 
                                           population 
                                           generation 
@@ -414,7 +436,8 @@
     (when print-errors (println "Errors:" (not-lazy (:errors best))))
     (when (and print-errors (not (empty? meta-error-categories)))
       (println "Meta-Errors:" (not-lazy (:meta-errors best))))
-    (println "Mean Reuse:" (mean (:reuse-info best)))
+    (println "Mean Reuse for all:" (map #(mean (:reuse-info %)) population))
+    (println "Mean Reuse for best:" (mean (:reuse-info best)))
     (println "Total:" (:total-error best))
     (let [mean (r/generation-data! [:best :mean-error] (float (/ (:total-error best)
                                                                  (count (:errors best)))))]
@@ -552,10 +575,14 @@
       (println "Number of random replacements for non-diversifying individuals:"
                (r/generation-data! [:population-report :number-random-replacements]
                                    (count (filter :is-random-replacement population)))))
-    (println "--- Run Statistics ---")
-    (println "Number of program evaluations used so far:" @evaluations-count)
-    (println "Number of point (instruction) evaluations so far:" point-evaluations-before-report)
-    (reset! point-evaluations-count point-evaluations-before-report)
+
+       (println "--- Run Statistics ---")
+       (println "Number of individuals evaluated (running on all training cases counts as 1 evaluation):" @evaluations-count)
+       (println "Number of program executions (running on a single case counts as 1 execution):" program-executions-before-report)
+       (println "Number of point (instruction) evaluations so far:" point-evaluations-before-report)
+       (reset! point-evaluations-count point-evaluations-before-report)
+       (reset! program-executions-count program-executions-before-report)
+
     (println "--- Timings ---")
     (println "Current time:" (System/currentTimeMillis) "milliseconds")
     (when print-timings
@@ -666,5 +693,6 @@
   (let [simplified-best (auto-simplify best error-function final-report-simplifications true 500)]
     (println "\n;;******************************")
     (println ";; Problem-Specific Report of Simplified Solution")
+    (println "Reuse in Simplified Solution:" (:reuse-info (error-function simplified-best)))
     (problem-specific-report simplified-best [] generation error-function report-simplifications)))
 

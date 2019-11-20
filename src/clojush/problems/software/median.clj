@@ -20,15 +20,15 @@
 ; Atom generators
 (def median-atom-generators
   (concat (list
-            (fn [] (- (lrand-int 201) 100))
-            (tag-instruction-erc [:exec :integer :boolean] 1000)
-            (tagged-instruction-erc 1000)
+           (fn [] (- (lrand-int 201) 100))
+           (tag-instruction-erc [:exec :integer :boolean] 1000)
+           (tagged-instruction-erc 1000)
             ;;; end ERCs
-            'in1
-            'in2
-            'in3
+           'in1
+           'in2
+           'in3
             ;;; end input instructions
-            )
+           )
           (registered-for-stacks [:integer :boolean :exec :print])))
 
 ;; A list of data domains for the median problem. Each domain is a vector containing

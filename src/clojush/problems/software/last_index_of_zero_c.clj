@@ -22,9 +22,9 @@
            ^{:generator-label "Random numbers in the range [-50,50]"}
            (fn [] (- (lrand-int 101) 50))
             ;;; end ERCs
-           (tag-instruction-erc [:integer :boolean :vector_integer :exec] 1000)
-           (tagged-instruction-erc 1000)
-           (untag-instruction-erc 1000)
+           ;(tag-instruction-erc [:integer :boolean :vector_integer :exec] 1000)
+           ;(tagged-instruction-erc 1000)
+           ;(untag-instruction-erc 1000)
             ;;; end tag ERCs
            'in1
             ;;; end input instructions
@@ -91,37 +91,44 @@
             reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
             repetition-metric (atom ())
             behavior (atom '())
-            local-tagspace (case data-cases
-                             :train (if global-use-lineage-tagspaces
-                                      (atom (:tagspace individual))
-                                      (atom @global-common-tagspace))
-                             :simplify (atom (:tagspace individual))  ; during simplification, the tagspace should not be changed.                                
-                             :test (atom (:tagspace individual))
-                             [])
+            ;local-tagspace (case data-cases
+            ;                 :train (if global-use-lineage-tagspaces
+            ;                          (atom (:tagspace individual))
+            ;                          (atom @global-common-tagspace))
+            ;                 :simplify (atom (:tagspace individual))  ; during simplification, the tagspace should not be changed.                                
+            ;                 :test (atom (:tagspace individual))
+            ;                 [])
             cases (case data-cases
                     :train train-cases
                     :simplify train-cases
                     :test test-cases
                     [])
-            errors (let [ran nil] ;(rand-nth cases)]
+            errors (let [ran (if (= data-cases :train)
+                               (rand-nth cases)
+                               nil)]
                      (doall
                       (for [[input correct-output] cases]
                         (let [final-state (if (= [input correct-output] ran)
-                                            (run-push (:program (auto-simplify-lite individual
-                                                                                    (fn [inp] (liz/make-last-index-of-zero-error-function-from-cases inp nil)) ; error-function per test case
-                                                                                    75
-                                                                                    (first liz/last-index-of-zero-train-and-test-cases) ; cases
-                                                                                    false 100))
+                                            (run-push (:program 
+                                                       ;(auto-simplify-lite individual
+                                                       ;                    (fn [inp] (liz/make-last-index-of-zero-error-function-from-cases inp nil)) ; error-function per test case
+                                                       ;                    75
+                                                       ;                    (first liz/last-index-of-zero-train-and-test-cases) ; cases
+                                                       ;                    false 100)
+                                                       individual
+                                                       )
                                                       (push-item input :input 
                                                                  (assoc (make-push-state) :calculate-mod-metrics (= [input correct-output] ran))
                                                                  ))
                                             (run-push (:program individual)
-                                                      (->> (assoc (make-push-state) :tag @local-tagspace)
+                                                      (->> (make-push-state)
+                                                       ;(assoc (make-push-state) :tag @local-tagspace)
                                                           ;(make-push-state)
-                                                           (push-item input :input))))
+                                                       (push-item input :input))))
                               result (top-item :integer final-state)
-                              _ (if (= data-cases :train)
-                                  (reset! local-tagspace (get final-state :tag)))]
+                              ;_ (if (= data-cases :train)
+                              ;    (reset! local-tagspace (get final-state :tag)))
+                              ]
                           (when print-outputs
                             (println (format "Correct output: %2d | Program output: %s"
                                              correct-output
@@ -140,22 +147,23 @@
                             (abs (- result correct-output)) ; distance from correct integer
                             1000000) ; penalty for no return value
                           ))))
-            _ (if (and (= data-cases :train) (not global-use-lineage-tagspaces))
-                (if (let [x (vec errors)
-                                      ; _ (prn x)
-                          y (first (:history individual))
-                                      ; _ (prn y)
-                          ]
-                      (if (nil? y)
-                        true
-                      ;(some? (some true? (map #(< %1 %2) x y))) )) ;child is better than mom on at least one test case; can be worse on others
-                        (every? true? (map #(<= %1 %2) x y))))
-                  (do
-                    (reset! global-common-tagspace @local-tagspace)
-                                ; (prn @global-common-tagspace)
-                    )))]
+            ;_ (if (and (= data-cases :train) (not global-use-lineage-tagspaces))
+            ;    (if (let [x (vec errors)
+            ;                          ; _ (prn x)
+            ;              y (first (:history individual))
+            ;                          ; _ (prn y)
+            ;              ]
+            ;          (if (nil? y)
+            ;            true
+            ;          ;(some? (some true? (map #(< %1 %2) x y))) )) ;child is better than mom on at least one test case; can be worse on others
+            ;            (every? true? (map #(<= %1 %2) x y))))
+            ;      (do
+            ;        (reset! global-common-tagspace @local-tagspace)
+            ;                    ; (prn @global-common-tagspace)
+            ;        )))
+            ]
         (if (or (= data-cases :train) (= data-cases :simplify))
-          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @local-tagspace)
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric); :tagspace @local-tagspace)
           (assoc individual :test-errors errors))))))
 
 (defn get-last-index-of-zero-train-and-test
@@ -210,7 +218,9 @@
    :evalpush-limit 600
    :population-size 1000
    :max-generations 300
-   :parent-selection :lexicase
+   :parent-selection :downsampled-lexicase
+   :downsample-factor 0.1
+   :training-cases (first last-index-of-zero-train-and-test-cases)
    :genetic-operator-probabilities {:uniform-addition-and-deletion 1}
    :uniform-addition-and-deletion-rate 0.09
    ;:genetic-operator-probabilities {:alternation 0.2
@@ -228,9 +238,9 @@
    :max-error 1000000
    ;:meta-error-categories [:reuse]
    ;:use-single-thread true
-   :print-history true
-   :use-lineage-tagspaces true
-   :pop-when-tagging false
-   :tag-enrichment-types [:integer :boolean :vector_integer :exec]
-   :tag-enrichment 50
+   ;:print-history true
+   ;:use-lineage-tagspaces true
+   ;:pop-when-tagging false
+   ;:tag-enrichment-types [:integer :boolean :vector_integer :exec]
+   ;:tag-enrichment 50
    })

@@ -587,7 +587,18 @@
          :common-tagspace {}
 
          :use-lineage-tagspaces false  
-         ;; if true, the tagspace of parent witll be trasferred to its child. 
+         ;; if true, the tagspace of parent witll be trasferred to its child.
+
+          :downsample-factor 1
+          ;; Determines the proportion of cases to use when using downsampled lexicase.
+          ;; When set to 1, has no effect. Should be in the range (0, 1].
+
+          :training-cases '()
+          ;; The list of training cases (inputs and outputs). Used for some parent
+          ;; selection methods, such as downsampled lexicase.
+
+          :sub-training-cases '()
+          ;; The subsample of the training cases used for downsampled lexicase.
                 
          )))
 
