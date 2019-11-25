@@ -58,50 +58,50 @@
   "Returns the given individual with errors, total-errors, and weighted-errors,
    computing them if necessary."
   ([i error-function rand-gen]
-    (evaluate-individual i error-function rand-gen
-                         {:reuse-errors true
-                          :print-history false
-                          :total-error-method :sum
-                          :normalization :none
-                          :max-error 1000}))
+   (evaluate-individual i error-function rand-gen
+                        {:reuse-errors true
+                         :print-history false
+                         :total-error-method :sum
+                         :normalization :none
+                         :max-error 1000}))
   ([i error-function rand-gen
-    {:keys [reuse-errors print-history total-error-method normalization max-error parent-selection]
+    {:keys [reuse-errors print-history total-error-method normalization max-error
+            parent-selection]
      :as argmap}]
-    (random/with-rng rand-gen
-      (let [p (:program i)
-            evaluated-i (cond
-                          (and reuse-errors (not (nil? (:errors i))))
-                          i
+   (random/with-rng rand-gen
+     (let [p (:program i)
+           evaluated-i (cond
+                         (and reuse-errors (not (nil? (:errors i))))
+                         i
                           ;;
-                          (= parent-selection :downsampled-lexicase)
-                          (error-function i (:sub-training-cases argmap))
+                         (= parent-selection :downsampled-lexicase)
+                         (error-function i (:sub-training-cases argmap))
                           ;;
-                          :else
-                          (error-function i))
-            raw-errors (:errors evaluated-i)
-            e (vec (if (and reuse-errors (not (nil? (:errors i))))
-                     (:errors i)
-                     (do
-                       (swap! evaluations-count inc)
-                       (normalize-errors raw-errors normalization max-error))))
-            te (if (and reuse-errors (not (nil? (:total-error i))))
-                 (:total-error i)
-                 (compute-total-error raw-errors))
-            ne (if (and reuse-errors (not (nil? (:normalized-error i))))
-                 (:normalized-error i)
-                 (compute-total-error e))
-            we (case total-error-method
-                 :sum nil
-                 :ifs nil
-                 :eliteness nil ; calculated later
-                 :hah (compute-hah-error e)
-                 :rmse (compute-root-mean-square-error e)
-                 nil)
-            new-ind (assoc evaluated-i ; Assign errors and history to i
-                           :errors e
-                           :total-error te
-                           :weighted-error we
-                           :normalized-error ne
-                           :history (if print-history (cons e (:history i)) (:history i)))]
-        new-ind))))
-
+                         :else
+                         (error-function i))
+           raw-errors (:errors evaluated-i)
+           e (vec (if (and reuse-errors (not (nil? (:errors i))))
+                    (:errors i)
+                    (do
+                      (swap! evaluations-count inc)
+                      (normalize-errors raw-errors normalization max-error))))
+           te (if (and reuse-errors (not (nil? (:total-error i))))
+                (:total-error i)
+                (compute-total-error raw-errors))
+           ne (if (and reuse-errors (not (nil? (:normalized-error i))))
+                (:normalized-error i)
+                (compute-total-error e))
+           we (case total-error-method
+                :sum nil
+                :ifs nil ; calculated later
+                :eliteness nil ; calculated later
+                :hah (compute-hah-error e)
+                :rmse (compute-root-mean-square-error e)
+                nil)
+           new-ind (assoc evaluated-i ; Assign errors and history to i
+                          :errors e
+                          :total-error te
+                          :weighted-error we
+                          :normalized-error ne
+                          :history (if print-history (cons e (:history i)) (:history i)))]
+       new-ind))))

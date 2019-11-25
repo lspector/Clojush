@@ -83,6 +83,11 @@
 (def selection-counts (atom {})) 
 ;; Used to store the number of selections for each individual, indexed by UUIDs
 
+(def preselection-counts (atom []))
+;; Used to store the numbers of individuals that survive preselection in each
+;; selection event in the current generation. Does not take into account
+;; one-individual-per-error-vector-for-lexicase.
+
 (def min-age (atom 0))
 (def max-age (atom 0))
 ;; Used for age-mediated-parent-selection

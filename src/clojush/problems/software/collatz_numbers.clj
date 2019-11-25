@@ -81,7 +81,7 @@
                      (for [[input1 correct-output] (case data-cases
                                                      :train train-cases
                                                      :test test-cases
-                                                     [])]
+                                                     data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                         (push-item input1 :input)))
@@ -95,9 +95,9 @@
                            (abs (- result correct-output)) ;distance from correct integer
                            1000000) ;penalty for no return value
                          )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors))))))
 
 (defn get-collatz-numbers-train-and-test
   "Returns the train and test cases."
@@ -145,6 +145,7 @@
 (def argmap
   {:error-function (make-collatz-numbers-error-function-from-cases (first collatz-numbers-train-and-test-cases)
                                                                    (second collatz-numbers-train-and-test-cases))
+   :training-cases (first collatz-numbers-train-and-test-cases)
    :atom-generators collatz-numbers-atom-generators
    :max-points 2400
    :max-genome-size-in-initial-program 300

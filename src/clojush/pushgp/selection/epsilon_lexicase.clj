@@ -73,7 +73,8 @@
                         (= epsilon-lexicase-version :dynamic)
                         (mad (map #(nth (:errors %) ; this calculates epsilon
                                         (first cases))
-                                  survivors)))
+                                  survivors))
+                        )
               min-err-for-case (apply min (map #(nth % (first cases))
                                                (map :errors survivors)))]
           (recur (filter #(<= (nth (:errors %)
@@ -108,10 +109,10 @@
   "Calculates fitness for each individual as 0 if individual is within epsilon of elite, and 1 otherwise."
   [pop-agents elite-errors epsilons use-single-thread]
   (dorun (map #((if use-single-thread swap! send)
-                %
-                calculate-static-epsilon-fitness-of-individual
-                elite-errors
-                epsilons)
+                 %
+                 calculate-static-epsilon-fitness-of-individual
+                 elite-errors
+                 epsilons)
               pop-agents))
   (when-not use-single-thread (apply await pop-agents)))
 

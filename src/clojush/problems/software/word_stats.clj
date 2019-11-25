@@ -204,7 +204,7 @@
                        (for [[input [correct-output sentences words-per-sentence]] (case data-cases
                                                                                      :train train-cases
                                                                                      :test test-cases
-                                                                                     [])]
+                                                                                     data-cases)]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item input :input)
@@ -230,9 +230,9 @@
                                (round-to-n-decimal-places (abs (- result-f words-per-sentence)) 4)
                                10000.0) ;Penalty
                              )))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors))))))
 
 (defn get-word-stats-train-and-test
   "Returns the train and test cases."
@@ -281,6 +281,7 @@
 (def argmap
   {:error-function (make-word-stats-error-function-from-cases (first word-stats-train-and-test-cases)
                                                               (second word-stats-train-and-test-cases))
+   :training-cases (first word-stats-train-and-test-cases)
    :atom-generators word-stats-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400

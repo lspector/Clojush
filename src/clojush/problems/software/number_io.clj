@@ -66,7 +66,7 @@
                        (for [[[in-float in-int] out-float] (case data-cases
                                                              :train train-cases
                                                              :test test-cases
-                                                             [])]
+                                                             data-cases)]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item in-int :input)
@@ -87,9 +87,9 @@
                                        (catch Exception e 1000.0))
                                      4)
                                    (levenshtein-distance printed-result (pr-str (round-to-n-decimal-places out-float 10))))))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors))))))
 
 (defn get-number-io-train-and-test
   "Returns the train and test cases."
@@ -137,6 +137,7 @@
 (def argmap
   {:error-function (make-number-io-error-function-from-cases (first number-io-train-and-test-cases)
                                                              (second number-io-train-and-test-cases))
+   :training-cases (first number-io-train-and-test-cases)
    :atom-generators num-io-atom-generators
    :max-points 800
    :max-genome-size-in-initial-program 100

@@ -348,7 +348,7 @@
   ^{:stack-types [:genome]}
   (fn [state]
     (push-item (if (:autoconstructing state)
-                 (with-meta (vec (:genome (genesis :no-parent @push-argmap)))
+                 (with-meta (vec (:genome (genesis @push-argmap)))
                    {:made-by '([genome_genesis])})
                  [])
                :genome

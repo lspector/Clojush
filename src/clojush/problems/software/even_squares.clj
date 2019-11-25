@@ -70,7 +70,7 @@
                        (for [[input1 [correct-output correct-integers]] (case data-cases
                                                                           :train train-cases
                                                                           :test test-cases
-                                                                          [])]
+                                                                          data-cases)]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item input1 :input)
@@ -106,9 +106,9 @@
                                                     100 ; penalty for not enough lines with parseable integers
                                                     (abs (- cor-int res-int))))
                                                 correct-result-int-pairs)))))))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors))))))
 
 (defn get-even-squares-train-and-test
   "Returns the train and test cases."
@@ -157,6 +157,7 @@
 (def argmap
   {:error-function (make-even-squares-error-function-from-cases (first even-squares-train-and-test-cases)
                                                                 (second even-squares-train-and-test-cases))
+   :training-cases (first even-squares-train-and-test-cases)
    :atom-generators even-squares-atom-generators
    :max-points 1600
    :max-genome-size-in-initial-program 200

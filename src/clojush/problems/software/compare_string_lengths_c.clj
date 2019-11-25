@@ -92,10 +92,11 @@
                     :train train-cases
                     :simplify train-cases
                     :test test-cases
-                    [])
-            errors (let [ran (if (= data-cases :train)
+                    data-cases)
+            errors (let [ran (if (and (not= data-cases :test) (not= data-cases :simplify))
                                (rand-nth cases)
-                               nil)]
+                               nil)
+                         ]
                      (doall
                       (for [[[input1 input2 input3] correct-output] cases]
                         (let [final-state (run-push (:program individual)
@@ -136,9 +137,10 @@
            ;                      ;(prn @global-common-tagspace)
            ;         )))
             ]
-        (if (or (= data-cases :train) (= data-cases :simplify))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
           (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric); :tagspace @local-tagspace)
-          (assoc individual :test-errors errors))))))
+          )))))
   
 (defn get-compare-string-lengths-train-and-test
   "Returns the train and test cases."
@@ -192,17 +194,20 @@
    :evalpush-limit 600
    :population-size 1000
    :max-generations 300
-   :parent-selection :fitness-proportionate
-   ;:genetic-operator-probabilities {:uniform-addition-and-deletion 1}
-   ;:uniform-addition-and-deletion-rate 0.09
-   :genetic-operator-probabilities {:alternation 0.2
-                                    :uniform-mutation 0.2
-                                    :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
-   :alternation-rate 0.01
-   :alignment-deviation 10
-   :uniform-mutation-rate 0.01
+   :parent-selection :downsampled-lexicase
+   :sub-training-cases '()
+   :downsample-factor 1
+   :training-cases (first compare-string-lengths-train-and-test-cases)
+   :genetic-operator-probabilities {:uniform-addition-and-deletion 1}
+   :uniform-addition-and-deletion-rate 0.09
+   ;:genetic-operator-probabilities {:alternation 0.2
+   ;                                 :uniform-mutation 0.2
+   ;                                 :uniform-close-mutation 0.1
+   ;                                 [:alternation :uniform-mutation] 0.5
+   ;                                 }
+   ;:alternation-rate 0.01
+   ;:alignment-deviation 10
+   ;:uniform-mutation-rate 0.01
    :problem-specific-report csl-report
    :problem-specific-initial-report compare-string-lengths-initial-report
    :report-simplifications 0

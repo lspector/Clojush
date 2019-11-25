@@ -134,13 +134,13 @@
    (let [cases (case data-cases
                  :train (first replace-space-with-newline-train-and-test-cases)
                  :test (second replace-space-with-newline-train-and-test-cases)
-                 [])
+                 data-cases)
          behaviors (replace-space-with-newline-evaluate-program-for-behaviors (:program individual)
-                                                                 cases)
+                                                                              cases)
          errors (replace-space-with-newline-errors-from-behaviors behaviors cases)]
-     (cond
-       (= data-cases :train) (assoc individual :behaviors behaviors :errors errors)
-       (= data-cases :test) (assoc individual :test-errors errors)))))
+     (if (= data-cases :test)
+       (assoc individual :test-errors errors)
+       (assoc individual :behaviors behaviors :errors errors)))))
 
 (defn replace-space-with-newline-initial-report
   [argmap]
@@ -185,6 +185,8 @@
 ; Define the argmap
 (def argmap
   {:error-function replace-space-with-newline-error-function
+   :training-cases (first replace-space-with-newline-train-and-test-cases)
+   :sub-training-cases '()
    :atom-generators replace-space-with-newline-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400

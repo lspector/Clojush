@@ -122,7 +122,7 @@
                      (for [[input1 correct-output] (case data-cases
                                                      :train train-cases
                                                      :test test-cases
-                                                     [])]
+                                                     data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input1 :input)))
@@ -136,9 +136,10 @@
                            (abs (- result correct-output)) ;distance from correct integer
                            1000) ;penalty for no return value
                          )))]
-        (if (= data-cases :train)
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
           (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+          )))))
 
 (defn get-scrabble-score-train-and-test
   "Returns the train and test cases."
@@ -187,6 +188,8 @@
 (def argmap
   {:error-function (make-scrabble-score-error-function-from-cases (first scrabble-score-train-and-test-cases)
                                                                   (second scrabble-score-train-and-test-cases))
+   :training-cases (first scrabble-score-train-and-test-cases)
+   :sub-training-cases '()
    :atom-generators scrabble-score-atom-generators
    :max-points 4000
    :max-genome-size-in-initial-program 500

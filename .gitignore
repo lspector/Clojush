@@ -26,3 +26,4 @@ clojush.iml
 /clojush/
 .ipynb_checkpoints/
 .lein-project-checksum
+scratch.clj

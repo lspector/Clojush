@@ -97,6 +97,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random plushy genome generator
 
+; This is the different in max sizes between plushy genomes and plush genomes, which is
+; used when creating random programs.
+(def plushy-max-genome-size-modifier 1.165)
+
 (defn random-plushy-instruction
   "Returns a random Plushy instruction. :close will appear more often than
   other instructions at a rate of :plushy-close-probability"

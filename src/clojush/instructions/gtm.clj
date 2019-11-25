@@ -369,7 +369,7 @@
 
 (define-registered 
   exec_k_when_autoconstructing
-  ^{:stack-types [:exec]
+  ^{:stack-types [:exec :genome]
     :parentheses 2}
   (fn [state]
     (if (and (:autoconstructing state)
@@ -381,7 +381,7 @@
 
 (define-registered 
   exec_s_when_autoconstructing
-  ^{:stack-types [:exec]
+  ^{:stack-types [:exec :genome]
     :parentheses 3}
   (fn [state]
     (if (and (:autoconstructing state)
@@ -405,7 +405,7 @@
 
 (define-registered 
   exec_y_when_autoconstructing
-  ^{:stack-types [:exec]
+  ^{:stack-types [:exec :genome]
     :parentheses 1}
   (fn [state]
     (if (and (:autoconstructing state)

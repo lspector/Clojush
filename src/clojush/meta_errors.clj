@@ -162,17 +162,30 @@
           2
           0)))))
 
+;(defn lineage-redundancy-meta-error
+;  [ind evaluated-population argmap]
+;  (if (not (:print-history argmap))
+;    (throw
+;     (Exception.
+;      ":print-history must be true for :lineage-redundancy"))
+;    (let [hist (:history ind)]
+;      (if (< (count hist) 2)
+;        1/2
+;        (- 1 (/ (count (distinct hist))
+;                (count hist)))))))
+
 (defn lineage-redundancy-meta-error
   [ind evaluated-population argmap]
   (if (not (:print-history argmap))
     (throw
      (Exception.
       ":print-history must be true for :lineage-redundancy"))
-    (let [hist (:history ind)]
-      (if (< (count hist) 2)
-        1/2
-        (- 1 (/ (count (distinct hist))
-                (count hist)))))))
+    (let [hist (if (:lineage-redundancy-window argmap)
+                 (take (:lineage-redundancy-window argmap) (:history ind))
+                 (:history ind))]
+      (/ (- (count hist) 
+            (count (distinct hist)))
+         (count hist)))))
 
 (defn redundant-lineage-meta-error
   [ind evaluated-population argmap]
@@ -186,6 +199,68 @@
         (if (> (/ (count (distinct hist))
                   (count hist))
                1/2)
+          0
+          1)))))
+
+(defn resilience-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :resilience"))
+    (let [hist (take 5 (:history ind))]
+      (if (< (count hist) 2)
+        0
+        (if (> (/ (count (distinct hist))
+                  (count hist))
+               2/5)
+          0
+          1)))))
+
+(defn stasis-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :stasis"))
+    (let [hist (:history ind)]
+      (if (< (count hist) 2)
+        0
+        (if (some (fn [[new-err old-err]]
+                    (and (not (zero? old-err))
+                         (not= new-err old-err)))
+                  (map vector (first hist) (second hist)))
+          0
+          1)))))
+
+(defn case-stasis-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :case-stasis"))
+    (if (empty? (rest (:history ind)))
+      (vec (repeat (count (:errors ind)) 0))
+      (vec (for [case-history (apply map list (:history ind))]
+             (if (or (zero? (first case-history))
+                     (and (not (zero? (second case-history)))
+                          (not (= (first case-history)
+                                  (second case-history)))))
+               0
+               1))))))
+
+(defn non-improvement-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :non-improvement"))
+    (let [hist (:history ind)]
+      (if (< (count hist) 2)
+        0
+        (if (some (fn [[new-err old-err]]
+                    (< new-err old-err))
+                  (map vector (first hist) (second hist)))
           0
           1)))))
 
@@ -353,6 +428,27 @@
         (vec (for [case-history (apply map list (:history ind))]
                (if (zero? (first case-history))
                  (- huge)  ;; solved, improvement doesn't matter
+                 (let [changed? (mapv (fn [[newer-error older-error]]
+                                        (not= newer-error older-error))
+                                      (partition 2 1 case-history))
+                       gens (take-while not changed?)]
+                   (if (= (count gens)
+                          (count changed?))
+                     huge
+                     (count gens))))))))))
+
+(defn gens-since-change-0-if-solved-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+     (Exception.
+      ":print-history must be true for :gens-since-change-0-if-solved"))
+    (let [huge 1000000]
+      (if (empty? (rest (:history ind)))
+        (vec (repeat (count (:errors ind)) huge))
+        (vec (for [case-history (apply map list (:history ind))]
+               (if (zero? (first case-history))
+                 0  ;; solved, error 0
                  (let [changed? (mapv (fn [[newer-error older-error]]
                                         (not= newer-error older-error))
                                       (partition 2 1 case-history))

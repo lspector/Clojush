@@ -91,7 +91,7 @@
                      (for [[input1 correct-output] (case data-cases
                                                      :train train-cases
                                                      :test test-cases
-                                                     [])]
+                                                     data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input1 :input)))
@@ -105,9 +105,10 @@
                            (levenshtein-distance correct-output result)
                            5000) ; penalty for no return value
                          )))]
-        (if (= data-cases :train)
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
           (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+          )))))
 
 (defn get-negative-to-zero-train-and-test
   "Returns the train and test cases."
@@ -155,6 +156,8 @@
 (def argmap
   {:error-function (make-negative-to-zero-error-function-from-cases (first negative-to-zero-train-and-test-cases)
                                                             (second negative-to-zero-train-and-test-cases))
+   :training-cases (first negative-to-zero-train-and-test-cases)
+   :sub-training-cases '()
    :atom-generators negative-to-zero-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
