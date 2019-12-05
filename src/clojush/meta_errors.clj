@@ -345,7 +345,7 @@
       (Exception.
         ":print-history must be true for :case-stagnation"))
     (if (empty? (rest (:history ind)))
-      (vec (repeat (count (:errors ind)) 1000000))
+      (vec (repeat (count (:errors ind)) 0))
       (vec (for [case-history (apply map list (:history ind))]
              (let [improvements (mapv (fn [[newer-error older-error]]
                                         (if (or (< newer-error older-error)
@@ -354,6 +354,30 @@
                                           (if (= newer-error older-error)
                                             -1.0
                                             0.0)))
+                                      (partition 2 1 case-history))
+                   weights (take (count improvements)
+                                 (iterate (partial *
+                                                   (- 1 (:improvement-discount argmap)))
+                                          1))
+                   sum (reduce + (mapv * improvements weights))]
+               (- sum)))))))
+
+(defn case-non-improvement-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :case-non-improvement"))
+    (if (empty? (rest (:history ind)))
+      (vec (repeat (count (:errors ind)) 0))
+      (vec (for [case-history (apply map list (:history ind))]
+             (let [improvements (mapv (fn [[newer-error older-error]]
+                                        (if (or (< newer-error older-error)
+                                                (zero? (first case-history))) ;; solved
+                                          1.0
+                                          (if (= newer-error older-error)
+                                            0.0
+                                            -1.0)))
                                       (partition 2 1 case-history))
                    weights (take (count improvements)
                                  (iterate (partial *
