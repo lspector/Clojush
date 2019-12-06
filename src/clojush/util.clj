@@ -135,6 +135,21 @@
                               (rest remaining)) 
                  (inc total)))))
 
+(defn depth-of-nested-list
+  "Returns the maximum depth of the nested list called tree."
+  [tree]
+  (cond
+    ;; Just an atom, not a list
+    (not (seq? tree))
+    0
+    ;; Empty list
+    (empty? tree)
+    1
+    ;; Non-empty list, recur and increment, and take max between it and recur on rest
+    :else
+    (max (inc (depth-of-nested-list (first tree)))
+         (depth-of-nested-list (rest tree)))))
+
 (defn code-at-point 
   "Returns a subtree of tree indexed by point-index in a depth first traversal."
   [tree point-index]

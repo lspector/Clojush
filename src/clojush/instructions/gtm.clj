@@ -390,7 +390,8 @@
             x (first stk)
             y (first (rest stk))
             z (first (rest (rest stk)))]
-        (if (<= (count-points (list y z)) @global-max-points)
+        (if (and (<= (count-points (list y z)) @global-max-points)
+                 (<= (depth-of-nested-list (list y z)) @global-max-nested-depth))
           (push-item x
                      :exec
                      (push-item z
@@ -411,7 +412,8 @@
     (if (and (:autoconstructing state)
              (not (empty? (:exec state))))
       (let [new-item (list 'exec_y (first (:exec state)))]
-        (if (<= (count-points new-item) @global-max-points)
+        (if (and (<= (count-points new-item) @global-max-points)
+                 (<= (depth-of-nested-list new-item) @global-max-nested-depth))
           (push-item (first (:exec state))
                      :exec
                      (push-item new-item

@@ -112,6 +112,10 @@
 ;; The maximum size of a Push program. Also, the maximum size of code that can appear on
 ;; the exec or code stacks.
 
+(def global-max-nested-depth (atom 200)) 
+;; The maximum depth of nested code on the code or exec stacks. Needs to be small
+;; enough to not run into StackOverflow errors, likely some value < 1000.
+
 (def global-tag-limit (atom 10000)) 
 ;; The size of the tag space
 
