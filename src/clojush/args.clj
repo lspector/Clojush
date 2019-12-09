@@ -59,6 +59,9 @@
           ;; in the program. 1/4 this limit is used as the limit for sizes of
           ;; Plush genomes.
 
+         :max-nested-depth 200
+          ;; Maximum nested depth of push code and other nested objects.
+
          :max-genome-size-in-initial-program 50
           ;; Maximum size of initial Plush genomes in generation 0. Keep in mind
           ;; that genome lengths will otherwise be limited by 1/4 of :max-points.
