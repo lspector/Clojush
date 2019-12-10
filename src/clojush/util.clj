@@ -135,20 +135,22 @@
                               (rest remaining)) 
                  (inc total)))))
 
-(defn depth-of-nested-list
-  "Returns the maximum depth of the nested list called tree."
+(defn height-of-nested-list
+  "Returns the height of the nested list called tree.
+  Borrowed idea from here: https://stackoverflow.com/a/36865180/2023312
+  Works by looking at the path from each node in the tree to the root, and
+  finding the longest one.
+  Note: does not treat an empty list as having any height."
   [tree]
-  (cond
-    ;; Just an atom, not a list
-    (not (seq? tree))
-    0
-    ;; Empty list
-    (empty? tree)
-    1
-    ;; Non-empty list, recur and increment, and take max between it and recur on rest
-    :else
-    (max (inc (depth-of-nested-list (first tree)))
-         (depth-of-nested-list (rest tree)))))
+  (loop [zipper (seq-zip tree)
+         height 0]
+    (if (zip/end? zipper)
+      height
+      (recur (zip/next zipper)
+             (-> zipper
+                 zip/path
+                 count
+                 (max height))))))
 
 (defn code-at-point 
   "Returns a subtree of tree indexed by point-index in a depth first traversal."
