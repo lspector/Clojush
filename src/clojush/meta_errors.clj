@@ -362,6 +362,35 @@
                    sum (reduce + (mapv * improvements weights))]
                (- sum)))))))
 
+(defn case-unsolved-non-improvement-meta-error              ;; requires neutral-lexicase
+  [ind evaluated-population argmap]
+  (cond (not (:print-history argmap))
+        (throw
+          (Exception.
+            ":print-history must be true for :case-unsolved-non-improvement"))
+        ;;
+        (empty? (rest (:history ind)))
+        (vec (repeat (count (:errors ind)) 0))
+        ;;
+        :else
+        (vec (for [case-history (apply map list (:history ind))]
+               (if (zero? (first case-history))
+                 :solved
+                 (let [improvements (mapv (fn [[newer-error older-error]]
+                                            (if (or (< newer-error older-error)
+                                                    (zero? (first case-history))) ;; solved
+                                              1.0
+                                              (if (= newer-error older-error)
+                                                -1.0
+                                                0.0)))
+                                          (partition 2 1 case-history))
+                       weights (take (count improvements)
+                                     (iterate (partial *
+                                                       (- 1 (:improvement-discount argmap)))
+                                              1))
+                       sum (reduce + (mapv * improvements weights))]
+                   (- sum)))))))
+
 (defn case-non-improvement-meta-error
   [ind evaluated-population argmap]
   (if (not (:print-history argmap))

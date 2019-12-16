@@ -417,7 +417,7 @@
     (when (some #{parent-selection}
                 #{:lexicase :elitegroup-lexicase :leaky-lexicase :epsilon-lexicase
                   :random-threshold-lexicase :random-toggle-lexicase
-                  :randomly-truncated-lexicase})
+                  :randomly-truncated-lexicase :neutral-lexicase})
           (lexicase-report population argmap))
     (when (= total-error-method :ifs) (implicit-fitness-sharing-report population argmap))
     (println (format "--- Best Program (%s) Statistics ---" (str "based on " (name err-fn))))
@@ -477,11 +477,11 @@
                                        (map :errors population))))
     (when (and print-errors (not (empty? meta-error-categories)))
       (println "Meta-Error averages by category:"
-               (apply map (fn [& args] (*' 1.0 (mean args)))
-                      (map :meta-errors population)))
+               (apply map (fn [& args] (if (empty? args) 0 (*' 1.0 (mean args))))
+                      (filter number? (map :meta-errors population))))
       (println "Meta-Error minima by category:"
-               (apply map (fn [& args] (apply min args))
-                      (map :meta-errors population))))
+               (apply map (fn [& args] (if (empty? args) 0 (apply min args)))
+                      (filter number? (map :meta-errors population)))))
     (println "Average genome size in population (length):"
           (r/generation-data! [:population-report :mean-genome-size]
              (*' 1.0 (mean (map count (map :genome sorted))))))

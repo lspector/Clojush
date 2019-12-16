@@ -6,7 +6,12 @@
   to represent each error vector."
   [pop {:keys [parent-selection]}]
   (if (some #{parent-selection}
-            #{:lexicase :leaky-lexicase :elitegroup-lexicase})
+            #{:lexicase :leaky-lexicase :elitegroup-lexicase
+              :downsampled-lexicase :random-threshold-lexicase
+              :random-toggle-lexicase :randomly-truncated-lexicase
+              :truncated-lexicase :rarified-lexicase :neutral-lexicase
+              ; :epsilon-lexicase  ;; think maybe can't do if dynamic..?
+              })
     (map lrand-nth (vals (group-by #(:errors %) pop)))
     pop))
 
@@ -36,8 +41,8 @@
   (if (not age-mediated-parent-selection)
     pop
     (let [rand-val (lrand)
-          amps age-mediated-parent-selection ;; just abbreviate
-          invert (> (count amps) 2)] ;; assume any more args are just :invert
+          amps age-mediated-parent-selection                ;; just abbreviate
+          invert (> (count amps) 2)]                        ;; assume any more args are just :invert
       (if (<= rand-val (first amps))
         (let [extreme-age (reduce (if invert max min) (map :age pop))]
           (filter #(= (:age %) extreme-age) pop))
@@ -61,7 +66,7 @@
         (filter (fn [ind] ((if (:reversible random-screen)
                              (lrand-nth [<= >=])
                              <=)
-                           (:grain-size ind) 
+                           (:grain-size ind)
                            grain-size-limit))
                 pop)))))
 
@@ -90,8 +95,8 @@
       pop
       (if (not (:print-history argmap))
         (throw
-         (Exception.
-          ":print-history must be true for :knock-off-chip-off-the-old-block"))
+          (Exception.
+            ":print-history must be true for :knock-off-chip-off-the-old-block"))
         (let [knock-spec (if (= true knock-spec) [2 2] knock-spec)
               min2? (= :min2 (first knock-spec))
               knock-spec (if min2? (rest knock-spec) knock-spec)
@@ -134,7 +139,8 @@
                                (lrand-int outof))))
                       diffs)
               changed (vec (filter (fn [ind]
-                                     (or (< (count (:history ind)) diffs)
+                                     ;;(or (< (count (:history ind)) diffs) ;;; HACK]
+                                     (and (>= (count (:history ind)) diffs) ;;; HACK
                                          (let [hist (filtered-history ind)
                                                case-hists (apply mapv list hist)]
                                            (some (fn [h]
@@ -173,16 +179,16 @@
   to the :errors key."
   [error-indices ind {:keys [case-batch-size total-error-method] :as argmap}]
   (assoc ind :errors
-         (let [ordered-errors (map #(nth (get ind
-                                              (case total-error-method
-                                                :sum :errors
-                                                :eliteness :eliteness
-                                                nil))
-                                         %)
-                                   error-indices)
-               batched-errors (partition case-batch-size ordered-errors)
-               aggregated-batches (map (partial apply +') batched-errors)]
-           aggregated-batches)))
+             (let [ordered-errors (map #(nth (get ind
+                                                  (case total-error-method
+                                                    :sum :errors
+                                                    :eliteness :eliteness
+                                                    nil))
+                                             %)
+                                       error-indices)
+                   batched-errors (partition case-batch-size ordered-errors)
+                   aggregated-batches (map (partial apply +') batched-errors)]
+               aggregated-batches)))
 
 (defn batch-errors
   "Used for batch lexicase (and any other batch-based selection).
