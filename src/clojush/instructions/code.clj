@@ -67,7 +67,7 @@
       (let [new-item (cons (stack-ref :code 1 state)
                            (ensure-list (stack-ref :code 0 state)))]
         (if (and (<= (count-points new-item) @global-max-points)
-                 (<= (depth-of-nested-list new-item) @global-max-nested-depth))
+                 (<= (height-of-nested-list new-item) @global-max-nested-depth))
           (push-item new-item
                      :code
                      (pop-item :code (pop-item :code state)))
@@ -320,7 +320,7 @@
       (let [new-item (list (first (rest (:code state)))
                            (first (:code state)))]
         (if (and (<= (count-points new-item) @global-max-points)
-                 (<= (depth-of-nested-list new-item) @global-max-nested-depth))
+                 (<= (height-of-nested-list new-item) @global-max-nested-depth))
           (push-item new-item
                      :code
                      (pop-item :code (pop-item :code state)))
@@ -334,7 +334,7 @@
     (if (not (empty? (:code state)))
       (let [new-item (list (first (:code state)))]
         (if (and (<= (count-points new-item) @global-max-points)
-                 (<= (depth-of-nested-list new-item) @global-max-nested-depth))
+                 (<= (height-of-nested-list new-item) @global-max-nested-depth))
           (push-item new-item
                      :code
                      (pop-item :code state))
@@ -423,7 +423,7 @@
                                            (first (:integer state))
                                            (second (:code state)))]
         (if (and (<= (count-points new-item) @global-max-points)
-                 (<= (depth-of-nested-list new-item) @global-max-nested-depth))
+                 (<= (height-of-nested-list new-item) @global-max-nested-depth))
           (push-item new-item
                      :code
                      (pop-item :code (pop-item :code (pop-item :integer state))))
@@ -439,7 +439,7 @@
                             (stack-ref :code 1 state)
                             (stack-ref :code 0 state))]
         (if (and (<= (count-points new-item) @global-max-points)
-                 (<= (depth-of-nested-list new-item) @global-max-nested-depth))
+                 (<= (height-of-nested-list new-item) @global-max-nested-depth))
           (push-item new-item
                      :code
                      (pop-item :code (pop-item :code (pop-item :code state))))
@@ -510,7 +510,7 @@
             y (first (rest stk))
             z (first (rest (rest stk)))]
         (if (and (<= (count-points (list y z)) @global-max-points)
-                 (<= (depth-of-nested-list (list y z)) @global-max-nested-depth))
+                 (<= (height-of-nested-list (list y z)) @global-max-nested-depth))
           (push-item x
                      :exec
                      (push-item z
@@ -531,7 +531,7 @@
     (if (not (empty? (:exec state)))
       (let [new-item (list 'exec_y (first (:exec state)))]
         (if (and (<= (count-points new-item) @global-max-points)
-                 (<= (depth-of-nested-list new-item) @global-max-nested-depth))
+                 (<= (height-of-nested-list new-item) @global-max-nested-depth))
           (push-item (first (:exec state))
                      :exec
                      (push-item new-item
