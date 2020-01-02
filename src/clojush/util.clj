@@ -81,6 +81,9 @@
       :else n)
     :else
     (cond
+      (Double/isNaN n) 0.0
+      (= n Double/POSITIVE_INFINITY) (* 1.0 max-number-magnitude)
+      (= n Double/NEGATIVE_INFINITY) (* 1.0 (- max-number-magnitude))
       (> n max-number-magnitude) (* 1.0 max-number-magnitude)
       (< n (- max-number-magnitude)) (* 1.0 (- max-number-magnitude))
       (and (< n min-number-magnitude) (> n (- min-number-magnitude))) 0.0
