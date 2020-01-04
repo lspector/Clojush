@@ -1020,8 +1020,10 @@
                                              (if (:autoconstructive-environments @push-argmap)
                                                [:integer :boolean :exec :float :tag :environment]
                                                [:integer :boolean :exec :float :tag]))
-                                           '(genome_set_addition_rate
-                                              genome_set_deletion_rate)))]
+                                           '(genome_reset_UMAD_rates
+                                              genome_inc_addition_rate
+                                              genome_inc_deletion_rate
+                                              genome_inc_addition_and_deletion_rate)))]
       (when (not (some #{instr} (:atom-generators @push-argmap)))
         (swap! push-argmap assoc :atom-generators (conj (:atom-generators @push-argmap) instr))))
     ;;

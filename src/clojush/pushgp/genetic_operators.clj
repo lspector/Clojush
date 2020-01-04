@@ -1039,10 +1039,15 @@ the resulting top genome."
                                      {:made-by (:trace (:gtm after-gtm))}))
                         (if (= (:autoconstructive-genome-instructions argmap) :umad-cumulative)
                           (let [post-run (run-push program-to-run
-                                                   (assoc (make-push-state) :autoconstructing true))
-                                add-rate (or (get post-run :addition-rate) 0)
-                                delete-rate (or (get post-run :deletion-rate) 0)
-                                ;_ (println "ADD: " add-rate ", DELETE: " delete-rate)
+                                                   (assoc (make-push-state)
+                                                     :autoconstructing true
+                                                     :addition-rate 0
+                                                     :deletion-rate 0
+                                                     :addition-and-deletion-rate 0))
+                                add-rate (get post-run :addition-rate)
+                                delete-rate (get post-run :deletion-rate)
+                                add-and-delete-rate (get post-run :addition-and-deletion-rate)
+                                ;_ (println "ADD: " add-rate ", DELETE: " delete-rate ", A&D: " add-and-delete-rate)
                                 post-add (vec (take (int (/ (:max-points argmap) 4))
                                                     (:genome (uniform-addition
                                                                {:genome parent1-genome
@@ -1053,8 +1058,16 @@ the resulting top genome."
                                 post-delete (vec (:genome (uniform-deletion
                                                             {:genome post-add :dummy true :age -1}
                                                             (merge argmap {:uniform-deletion-rate
-                                                                           delete-rate}))))]
-                            post-delete)
+                                                                           delete-rate}))))
+                                post-add-and-delete
+                                (vec (take (int (/ (:max-points argmap) 4))
+                                                    (:genome (uniform-addition-and-deletion
+                                                               {:genome post-delete
+                                                                :dummy true :age -1}
+                                                               (merge argmap
+                                                                      {:uniform-addition-and-deletion-rate
+                                                                       add-and-delete-rate})))))]
+                            post-add-and-delete)
                           (top-item :genome
                                     (run-push
                                       program-to-run

@@ -1073,19 +1073,40 @@
       (assoc state :offset2 (dec offset2)))))
 
 (define-registered
-  genome_set_addition_rate
+  genome_reset_UMAD_rates
+  ^{:stack-types [:genome]}
+  (fn [state]
+    (-> state
+        (assoc :addition-rate 0)
+        (assoc :deletion-rate 0)
+        (assoc :addition-and-deletion-rate 0))))
+
+(define-registered
+  genome_inc_addition_rate
   ^{:stack-types [:genome :float]}
   (fn [state]
     (if (not (empty? (:float state)))
       (let [rate (mod (first (:float state)) 1.0)]
-        (assoc (pop-item :float state) :addition-rate rate))
+        (update (merge {:addition-rate 0} (pop-item :float state))
+          :addition-rate #(mod (+ % (first (:float state))) 1.0)))
       state)))
 
 (define-registered
-  genome_set_deletion_rate
+  genome_inc_deletion_rate
   ^{:stack-types [:genome :float]}
   (fn [state]
     (if (not (empty? (:float state)))
       (let [rate (mod (first (:float state)) 1.0)]
-        (assoc (pop-item :float state) :deletion-rate rate))
+        (update (merge {:deletion-rate 0} (pop-item :float state))
+                :deletion-rate #(mod (+ % (first (:float state))) 1.0)))
+      state)))
+
+(define-registered
+  genome_inc_addition_and_deletion_rate
+  ^{:stack-types [:genome :float]}
+  (fn [state]
+    (if (not (empty? (:float state)))
+      (let [rate (mod (first (:float state)) 1.0)]
+        (update (merge {:addition-and-deletion-rate 0} (pop-item :float state))
+                :addition-and-deletion-rate #(mod (+ % (first (:float state))) 1.0)))
       state)))
