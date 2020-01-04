@@ -34,6 +34,7 @@
    :uniform-segment-transposition {:fn uniform-segment-transposition :parents 1 :works-with-plushy true :works-with-plush true}
    :uniform-segment-duplication {:fn uniform-segment-duplication :parents 1 :works-with-plushy true :works-with-plush true}
    :uniform-segment-deletion {:fn uniform-segment-deletion :parents 1 :works-with-plushy true :works-with-plush true}
+   :lexicase-uniform-addition-and-deletion {:fn lexicase-uniform-addition-and-deletion :parents 1 :works-with-plushy true :works-with-plush true}
    })
 
 (defn revert-too-big-child
