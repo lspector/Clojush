@@ -478,10 +478,10 @@
     (when (and print-errors (not (empty? meta-error-categories)))
       (println "Meta-Error averages by category:"
                (apply map (fn [& args] (if (empty? args) 0 (*' 1.0 (mean args))))
-                      (filter number? (map :meta-errors population))))
+                      (map #(filter number? (:meta-errors %)) population)))
       (println "Meta-Error minima by category:"
                (apply map (fn [& args] (if (empty? args) 0 (apply min args)))
-                      (filter number? (map :meta-errors population)))))
+                      (map #(filter number? (:meta-errors %)) population))))
     (println "Average genome size in population (length):"
           (r/generation-data! [:population-report :mean-genome-size]
              (*' 1.0 (mean (map count (map :genome sorted))))))
