@@ -38,7 +38,7 @@
    Argument is a push argmap"
   [{:keys [use-single-thread population-size
            max-genome-size-in-initial-program atom-generators genome-representation]
-    :as argmap}]
+    :as   argmap}]
   (let [population-agents (vec (repeatedly population-size
                                            #(genesis argmap)))]
     (mapv #(if use-single-thread
@@ -71,8 +71,8 @@
                                                                       seeds))) new-seeds))))
                            seeds)))]
     {:random-seeds random-seeds
-     :rand-gens (vec (doall (for [k (range population-size)]
-                              (random/make-mersennetwister-rng (nth random-seeds k)))))}))
+     :rand-gens    (vec (doall (for [k (range population-size)]
+                                 (random/make-mersennetwister-rng (nth random-seeds k)))))}))
 
 
 (defn compute-errors
@@ -82,7 +82,7 @@
                 %1 evaluate-individual error-function %2 argmap)
               pop-agents
               rand-gens))
-  (when-not use-single-thread (apply await pop-agents)) ;; SYNCHRONIZE
+  (when-not use-single-thread (apply await pop-agents))     ;; SYNCHRONIZE
   ;; Compute values needed for meta-errors
   ;;
   ;; calculate novelty when novelty-search or novelty meta errors are used
@@ -100,12 +100,12 @@
   (dorun (map #((if use-single-thread swap! send)
                 %1 evaluate-individual-meta-errors (mapv deref pop-agents) argmap)
               pop-agents))
-  (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
+  (when-not use-single-thread (apply await pop-agents)))    ;; SYNCHRONIZE
 
 (defn produce-new-offspring
   [pop-agents child-agents rand-gens
    {:keys [decimation-ratio population-size decimation-tournament-size use-single-thread]
-    :as argmap}]
+    :as   argmap}]
   (let [pop (if (>= decimation-ratio 1)
               (vec (doall (map deref pop-agents)))
               (decimate (vec (doall (map deref pop-agents)))
@@ -119,20 +119,20 @@
        (nth child-agents i)
        breed
        i (nth rand-gens i) pop argmap)))
-  (when-not use-single-thread (apply await child-agents))) ;; SYNCHRONIZE
+  (when-not use-single-thread (apply await child-agents)))  ;; SYNCHRONIZE
 
 (defn install-next-generation
   [pop-agents child-agents {:keys [population-size use-single-thread]}]
   (dotimes [i population-size]
     ((if use-single-thread swap! send)
      (nth pop-agents i) (fn [av] (deref (nth child-agents i)))))
-  (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
+  (when-not use-single-thread (apply await pop-agents)))    ;; SYNCHRONIZE
 
 (defn check-genetic-operator-probabilities-add-to-one
   [argmap]
   (let [prob-map (:genetic-operator-probabilities argmap)]
     (doseq [gen-op (keys prob-map)]
-      (if (sequential? gen-op) ; gen-op will be sequential if it is an operator pipeline
+      (if (sequential? gen-op)                              ; gen-op will be sequential if it is an operator pipeline
         (doseq [g gen-op]
           (assert (contains? genetic-operators g)
                   (str "Unrecognized genetic operator: " g " in " gen-op))
@@ -167,6 +167,24 @@
           current-time-for-step (get @timing-map step)]
       (reset! timer-atom (System/currentTimeMillis))
       (swap! timing-map assoc step (+ current-time-for-step (- @timer-atom start-time))))))
+
+(defn mark-chips-off-the-old-block [pop-agents {:keys [use-single-thread] :as argmap}]
+  (dorun (map (fn [a]
+                ((if use-single-thread swap! send)
+                 a
+                 #_(fn [ind]
+                   (assoc ind
+                     :chip-off-the-old-block
+                     (and (>= (count (:history ind)) 2)
+                          (= (first (:history ind)) (second (:history ind))))))
+                 (fn [ind]
+                   (assoc ind
+                     :chip-off-the-old-block
+                     (let [h (cycle (:history ind))]
+                       (= (first h) (second h)))))
+                 ))
+              pop-agents))
+  (when-not use-single-thread (apply await pop-agents)))
 
 (defn process-generation
   "Processes the generation, returning [new novelty archive, return val],
@@ -246,7 +264,7 @@
   ;; calculate epsilons for epsilon lexicase selection
   (when (and (= (:parent-selection @push-argmap) :epsilon-lexicase)
              (= (:epsilon-lexicase-version @push-argmap) :semi-dynamic)
-             (= (:case-batch-size @push-argmap) 1)) ; only do this if case-batch-size is 1, since otherwise need to recalculate for every batch.
+             (= (:case-batch-size @push-argmap) 1))         ; only do this if case-batch-size is 1, since otherwise need to recalculate for every batch.
     (let [epsilons (calculate-epsilons-for-epsilon-lexicase (map deref pop-agents) @push-argmap)]
       (println "Epsilons for epsilon lexicase:" epsilons)
       (reset! epsilons-for-epsilon-lexicase epsilons)))
@@ -259,6 +277,9 @@
   (timer @push-argmap :other)
   (when (= (:parent-selection @push-argmap) :fitness-proportionate)
     (calculate-fitness-proportionate-probabilities pop-agents @push-argmap))
+  ;; mark chips off the old block
+  (when (:knock-off-chip-off-the-old-block @push-argmap)
+    (mark-chips-off-the-old-block pop-agents @push-argmap))
   ;; report and check for success
   (let [[outcome best] (report-and-check-for-success (vec (doall (map deref pop-agents)))
                                                      generation @push-argmap)]
@@ -276,8 +297,8 @@
           (= outcome :continue) (let [next-novelty-archive
                                       (list-concat novelty-archive
                                                    (select-individuals-for-novelty-archive
-                                                    (map deref pop-agents)
-                                                    @push-argmap))]
+                                                     (map deref pop-agents)
+                                                     @push-argmap))]
                                   (when-let [del (:selection-delay @push-argmap)]
                                     (when-not (:use-single-thread @push-argmap (apply await pop-agents))) ;; SYNCHRONIZE
                                     (swap! delay-archive concat (map deref pop-agents))
@@ -298,7 +319,7 @@
                                                          rand-gens
                                                          (if (:selection-delay @push-argmap)
                                                            (assoc @push-argmap
-                                                                  :parent-selection :uniform)
+                                                             :parent-selection :uniform)
                                                            @push-argmap))
                                   (println "Installing next generation...") (flush)
                                   (install-next-generation pop-agents child-agents @push-argmap)
@@ -314,25 +335,25 @@
    (when (some? (:record-host @push-argmap))
      (r/host! (str (:record-host @push-argmap))))
    (random/with-rng (random/make-mersennetwister-rng (:random-seed @push-argmap))
-     ;; set globals from parameters
-     (reset-globals)
-     (initial-report @push-argmap) ;; Print the inital report
-     (r/uuid! (:run-uuid @push-argmap))
-     (print-params (r/config-data! [:argmap] (dissoc @push-argmap :run-uuid)))
-     (check-genetic-operator-probabilities-add-to-one @push-argmap)
-     (timer @push-argmap :initialization)
-     (when (:print-timings @push-argmap)
-       (r/config-data! [:initialization-ms] (:initialization @timer-atom)))
-     (println "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
-     (println "\nGenerating initial population...") (flush)
-     (let [pop-agents (make-pop-agents @push-argmap)
-           child-agents (make-child-agents @push-argmap)
-           {:keys [rand-gens]} (make-rng @push-argmap)]
-       (loop [generation 0
-              novelty-archive '()]
-         (let [[next-novelty-archive return-val]
-               (process-generation rand-gens pop-agents child-agents
-                                   generation novelty-archive @push-argmap)]
-           (if (nil? next-novelty-archive)
-             return-val
-             (recur (inc generation) next-novelty-archive))))))))
+                    ;; set globals from parameters
+                    (reset-globals)
+                    (initial-report @push-argmap)           ;; Print the inital report
+                    (r/uuid! (:run-uuid @push-argmap))
+                    (print-params (r/config-data! [:argmap] (dissoc @push-argmap :run-uuid)))
+                    (check-genetic-operator-probabilities-add-to-one @push-argmap)
+                    (timer @push-argmap :initialization)
+                    (when (:print-timings @push-argmap)
+                      (r/config-data! [:initialization-ms] (:initialization @timer-atom)))
+                    (println "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
+                    (println "\nGenerating initial population...") (flush)
+                    (let [pop-agents (make-pop-agents @push-argmap)
+                          child-agents (make-child-agents @push-argmap)
+                          {:keys [rand-gens]} (make-rng @push-argmap)]
+                      (loop [generation 0
+                             novelty-archive '()]
+                        (let [[next-novelty-archive return-val]
+                              (process-generation rand-gens pop-agents child-agents
+                                                  generation novelty-archive @push-argmap)]
+                          (if (nil? next-novelty-archive)
+                            return-val
+                            (recur (inc generation) next-novelty-archive))))))))
