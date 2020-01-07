@@ -362,6 +362,46 @@
                    sum (reduce + (mapv * improvements weights))]
                (- sum)))))))
 
+
+(defn bsw-meta-error
+  ;____________________________$\delta(e)_t$
+  ;_________________________better_same___worse
+  ;__________________better_0______2______4
+  ;$\delta(e)_{t-1}$_same___1______8______6
+  ;__________________worse__3______7______5
+  ; and solved = -1
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :bsw meta-error"))
+    (if (< (count (:history ind)) 3)
+      (vec (repeat (count (:errors ind)) 0))
+      (vec (for [case-history (apply map list (:history ind))]
+             (if (zero? (first case-history))               ;; solved
+               -1
+               (let [bsw (fn [[new-error old-error]]
+                           (if (< new-error old-error)
+                             :better
+                             (if (> new-error old-error)
+                               :worse
+                               :same)))
+                     delta-e_t (bsw (take 2 case-history))
+                     delta-e_t-1 (bsw (take 2 (drop 1 case-history)))]
+                 (case delta-e_t
+                   :better (case delta-e_t-1
+                             :better 0
+                             :same 1
+                             :worse 3)
+                   :same (case delta-e_t-1
+                           :better 2
+                           :same 8
+                           :worse 7)
+                   :worse (case delta-e_t-1
+                            :better 4
+                            :same 6
+                            :worse 5)))))))))
+
 (defn case-unsolved-non-improvement-meta-error              ;; requires neutral-lexicase
   [ind evaluated-population argmap]
   (cond (not (:print-history argmap))
