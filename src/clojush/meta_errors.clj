@@ -388,19 +388,38 @@
                                :same)))
                      delta-e_t (bsw (take 2 case-history))
                      delta-e_t-1 (bsw (take 2 (drop 1 case-history)))]
+                 ;(case delta-e_t
+                 ;  :better (case delta-e_t-1
+                 ;            :better 0
+                 ;            :same 1
+                 ;            :worse 3)
+                 ;  :same (case delta-e_t-1
+                 ;          :better 2
+                 ;          :same 8
+                 ;          :worse 7)
+                 ;  :worse (case delta-e_t-1
+                 ;           :better 4
+                 ;           :same 6
+                 ;           :worse 5))
+                 ;____________________________$\delta(e)_t$
+                 ;_________________________better_same___worse
+                 ;__________________better_0______5______2
+                 ;$\delta(e)_{t-1}$_same___4______8______7
+                 ;__________________worse__1______6______3
                  (case delta-e_t
                    :better (case delta-e_t-1
                              :better 0
-                             :same 1
-                             :worse 3)
+                             :same 4
+                             :worse 1)
                    :same (case delta-e_t-1
-                           :better 2
+                           :better 5
                            :same 8
-                           :worse 7)
+                           :worse 6)
                    :worse (case delta-e_t-1
-                            :better 4
-                            :same 6
-                            :worse 5)))))))))
+                            :better 2
+                            :same 7
+                            :worse 3))
+                 )))))))
 
 (defn case-unsolved-non-improvement-meta-error              ;; requires neutral-lexicase
   [ind evaluated-population argmap]
