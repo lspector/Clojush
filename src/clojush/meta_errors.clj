@@ -364,12 +364,6 @@
 
 
 (defn bsw-meta-error
-  ;____________________________$\delta(e)_t$
-  ;_________________________better_same___worse
-  ;__________________better_0______2______4
-  ;$\delta(e)_{t-1}$_same___1______8______6
-  ;__________________worse__3______7______5
-  ; and solved = -1
   [ind evaluated-population argmap]
   (if (not (:print-history argmap))
     (throw
@@ -379,7 +373,7 @@
       (vec (repeat (count (:errors ind)) 0))
       (vec (for [case-history (apply map list (:history ind))]
              (if (zero? (first case-history))               ;; solved
-               -1
+               nil
                (let [bsw (fn [[new-error old-error]]
                            (if (< new-error old-error)
                              :better
@@ -388,6 +382,11 @@
                                :same)))
                      delta-e_t (bsw (take 2 case-history))
                      delta-e_t-1 (bsw (take 2 (drop 1 case-history)))]
+                 ;ORIG________________________$\delta(e)_t$
+                 ;_________________________better_same___worse
+                 ;__________________better_0______2______4
+                 ;$\delta(e)_{t-1}$_same___1______8______6
+                 ;__________________worse__3______7______5
                  ;(case delta-e_t
                  ;  :better (case delta-e_t-1
                  ;            :better 0
@@ -424,19 +423,19 @@
                  ;__________________better_0______2______5
                  ;$\delta(e)_{t-1}$_same___1______3______7
                  ;__________________worse__4______6______8
-                 (case delta-e_t
-                   :better (case delta-e_t-1
-                             :better 0
-                             :same 1
-                             :worse 4)
-                   :same (case delta-e_t-1
-                           :better 2
-                           :same 3
-                           :worse 6)
-                   :worse (case delta-e_t-1
-                            :better 5
-                            :same 7
-                            :worse 8))
+                 ;(case delta-e_t
+                 ;  :better (case delta-e_t-1
+                 ;            :better 0
+                 ;            :same 1
+                 ;            :worse 4)
+                 ;  :same (case delta-e_t-1
+                 ;          :better 2
+                 ;          :same 3
+                 ;          :worse 6)
+                 ;  :worse (case delta-e_t-1
+                 ;           :better 5
+                 ;           :same 7
+                 ;           :worse 8))
                  )))))))
 
 (defn case-unsolved-non-improvement-meta-error              ;; requires neutral-lexicase
