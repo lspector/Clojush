@@ -387,19 +387,19 @@
                  ;__________________better_0______2______4
                  ;$\delta(e)_{t-1}$_same___1______8______6
                  ;__________________worse__3______7______5
-                 ;(case delta-e_t
-                 ;  :better (case delta-e_t-1
-                 ;            :better 0
-                 ;            :same 1
-                 ;            :worse 3)
-                 ;  :same (case delta-e_t-1
-                 ;          :better 2
-                 ;          :same 8
-                 ;          :worse 7)
-                 ;  :worse (case delta-e_t-1
-                 ;           :better 4
-                 ;           :same 6
-                 ;           :worse 5))
+                 (case delta-e_t
+                   :better (case delta-e_t-1
+                             :better 0
+                             :same 1
+                             :worse 3)
+                   :same (case delta-e_t-1
+                           :better 2
+                           :same 8
+                           :worse 7)
+                   :worse (case delta-e_t-1
+                            :better 4
+                            :same 6
+                            :worse 5))
                  ;ALT 1_______________________$\delta(e)_t$
                  ;_________________________better_same___worse
                  ;__________________better_0______5______2
