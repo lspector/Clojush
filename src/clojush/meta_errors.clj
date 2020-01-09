@@ -370,7 +370,7 @@
       (Exception.
         ":print-history must be true for :bsw meta-error"))
     (if (< (count (:history ind)) 3)
-      (vec (repeat (count (:errors ind)) 0))
+      (vec (repeat (count (:errors ind)) nil))
       (vec (for [case-history (apply map list (:history ind))]
              (if (zero? (first case-history))               ;; solved
                nil
