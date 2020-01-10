@@ -405,37 +405,37 @@
                  ;__________________better_0______5______2
                  ;$\delta(e)_{t-1}$_same___4______8______7
                  ;__________________worse__1______6______3
-                 (case delta-e_t
-                   :better (case delta-e_t-1
-                             :better 0
-                             :same 4
-                             :worse 1)
-                   :same (case delta-e_t-1
-                           :better 5
-                           :same 8
-                           :worse 6)
-                   :worse (case delta-e_t-1
-                            :better 2
-                            :same 7
-                            :worse 3))
+                 ;(case delta-e_t
+                 ;  :better (case delta-e_t-1
+                 ;            :better 0
+                 ;            :same 4
+                 ;            :worse 1)
+                 ;  :same (case delta-e_t-1
+                 ;          :better 5
+                 ;          :same 8
+                 ;          :worse 6)
+                 ;  :worse (case delta-e_t-1
+                 ;           :better 2
+                 ;           :same 7
+                 ;           :worse 3))
                  ;ALT 2_______________________$\delta(e)_t$
                  ;_________________________better_same___worse
                  ;__________________better_0______2______5
                  ;$\delta(e)_{t-1}$_same___1______3______7
                  ;__________________worse__4______6______8
-                 ;(case delta-e_t
-                 ;  :better (case delta-e_t-1
-                 ;            :better 0
-                 ;            :same 1
-                 ;            :worse 4)
-                 ;  :same (case delta-e_t-1
-                 ;          :better 2
-                 ;          :same 3
-                 ;          :worse 6)
-                 ;  :worse (case delta-e_t-1
-                 ;           :better 5
-                 ;           :same 7
-                 ;           :worse 8))
+                 (case delta-e_t
+                   :better (case delta-e_t-1
+                             :better 0
+                             :same 1
+                             :worse 4)
+                   :same (case delta-e_t-1
+                           :better 2
+                           :same 3
+                           :worse 6)
+                   :worse (case delta-e_t-1
+                            :better 5
+                            :same 7
+                            :worse 8))
                  )))))))
 
 (defn case-unsolved-non-improvement-meta-error              ;; requires neutral-lexicase
