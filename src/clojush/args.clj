@@ -791,7 +791,7 @@
                                                 genome_close_dec
                                                 genome_new
                                                 genome_parent1
-                                                genome_parent2
+                                                ;genome_parent2
                                                 autoconstructive_integer_rand
                                                 autoconstructive_boolean_rand
                                                 genome_autoconstructing
@@ -847,7 +847,7 @@
                              genome_close_dec
                              genome_new
                              genome_parent1
-                             genome_parent2
+                             ;genome_parent2
                              autoconstructive_integer_rand
                              autoconstructive_boolean_rand
                              genome_autoconstructing
@@ -903,7 +903,7 @@
                              ;;genome_close_dec
                              genome_new
                              genome_parent1
-                             genome_parent2
+                             ;genome_parent2
                              autoconstructive_integer_rand
                              autoconstructive_boolean_rand
                              genome_autoconstructing
