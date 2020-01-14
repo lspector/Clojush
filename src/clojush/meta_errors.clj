@@ -634,13 +634,13 @@
         ":print-history must be true for :dull"))
     (let [huge 1000000]
       (if (empty? (rest (:history ind)))
-        (vec (repeat (* 2 (count (:errors ind))) nil))
+        (vec (repeat (* 1 (count (:errors ind))) nil))
         (vec (for [case-history (apply map list (:history ind))]
                (if (zero? (first case-history))
-                 [nil
+                 [#_nil
                   nil
                   ]
-                 [(let [changed? (mapv (fn [[newer-error older-error]]
+                 [#_(let [changed? (mapv (fn [[newer-error older-error]]
                                          (not= newer-error older-error))
                                        (partition 2 1 case-history))
                         gens (take-while not changed?)]
