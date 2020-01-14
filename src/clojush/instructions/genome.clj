@@ -1010,7 +1010,7 @@
           max-length (int (/ @global-max-points 4))]
       (if (>= (inc length) max-length)                      ;; if too big, do nothing
         state
-        (assoc (->> (pop-item :genomes state)
+        (assoc (->> (pop-item :genome state)
                     (push-item
                       (meta-update [genome]
                                    ['genome_dub1]
@@ -1034,7 +1034,7 @@
           max-length (int (/ @global-max-points 4))]
       (if (>= (inc length) max-length)                      ;; if too big, do nothing
         state
-        (assoc (->> (pop-item :genomes state)
+        (assoc (->> (pop-item :genome state)
                     (push-item
                       (meta-update [genome]
                                    ['genome_dub2]

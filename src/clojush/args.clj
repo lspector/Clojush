@@ -1008,6 +1008,22 @@
                                         autoconstructive_boolean_rand
                                         genome_autoconstructing
                                         genome_if_autoconstructing)))
+                    :dubstep-non-recombinative
+                    (let [by-type (registered-for-stacks
+                                    (if (:autoconstructive-environments @push-argmap)
+                                      [:integer :boolean :exec :float :tag :code :environment]
+                                      [:integer :boolean :exec :float :tag :code]))]
+                      (into by-type
+                            '(genome_dub1
+                               genome_step1
+                               genome_back1
+                               genome_append1_random
+                               genome_length
+                               genome_parent1_length
+                               autoconstructive_integer_rand
+                               autoconstructive_boolean_rand
+                               genome_autoconstructing
+                               genome_if_autoconstructing)))
                     :umad (into (registered-for-stacks
                                   (if (:autoconstructive-environments @push-argmap)
                                     [:integer :boolean :exec :float :tag :environment]
