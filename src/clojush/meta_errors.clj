@@ -641,13 +641,13 @@
                   nil
                   ]
                  [#_(let [changed? (mapv (fn [[newer-error older-error]]
-                                         (not= newer-error older-error))
-                                       (partition 2 1 case-history))
-                        gens (take-while not changed?)]
-                    (if (= (count gens)
-                           (count changed?))
-                      huge
-                      (count gens)))
+                                           (not= newer-error older-error))
+                                         (partition 2 1 case-history))
+                          gens (take-while not changed?)]
+                      (if (= (count gens)
+                             (count changed?))
+                        huge
+                        (count gens)))
                   (let [improved? (mapv (fn [[newer-error older-error]]
                                           (< newer-error older-error))
                                         (partition 2 1 case-history))
@@ -657,6 +657,27 @@
                       huge
                       (count gens)))
                   ])))))))
+
+(defn stale-meta-error
+  [ind evaluated-population argmap]
+  (if (not (:print-history argmap))
+    (throw
+      (Exception.
+        ":print-history must be true for :stale"))
+    (let [huge 1000000]
+      (if (empty? (rest (:history ind)))
+        (vec (repeat (count (:errors ind)) nil))
+        (vec (for [case-history (apply map list (:history ind))]
+               (if (zero? (first case-history))
+                 nil
+                 (let [improved? (mapv (fn [[newer-error older-error]]
+                                         (< newer-error older-error))
+                                       (partition 2 1 case-history))
+                       gens (take-while not improved?)]
+                   (if (= (count gens)
+                          (count improved?))
+                     (count improved?)
+                     (count gens))))))))))
 
 (defn case-sibling-uniformity-meta-error
   [ind evaluated-population argmap]
