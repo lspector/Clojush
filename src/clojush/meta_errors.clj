@@ -673,8 +673,9 @@
                                        (< newer-error older-error))
                                      (partition 2 1 case-history))
                      gens (take-while not improved?)]
-                 (if (= (count gens)
-                        (count improved?))
+                 (if (and (= (count gens)
+                             (count improved?))
+                          (< (count gens) 10))
                    nil
                    (count gens)))))))))
 
