@@ -664,20 +664,19 @@
     (throw
       (Exception.
         ":print-history must be true for :stale"))
-    (let [huge 1000000]
-      (if (empty? (rest (:history ind)))
-        (vec (repeat (count (:errors ind)) nil))
-        (vec (for [case-history (apply map list (:history ind))]
-               (if (zero? (first case-history))
-                 nil
-                 (let [improved? (mapv (fn [[newer-error older-error]]
-                                         (< newer-error older-error))
-                                       (partition 2 1 case-history))
-                       gens (take-while not improved?)]
-                   (if (= (count gens)
-                          (count improved?))
-                     (count improved?)
-                     (count gens))))))))))
+    (if (empty? (rest (:history ind)))
+      (vec (repeat (count (:errors ind)) nil))
+      (vec (for [case-history (apply map list (:history ind))]
+             (if (zero? (first case-history))
+               nil
+               (let [improved? (mapv (fn [[newer-error older-error]]
+                                       (< newer-error older-error))
+                                     (partition 2 1 case-history))
+                     gens (take-while not improved?)]
+                 (if (= (count gens)
+                        (count improved?))
+                   nil
+                   (count gens)))))))))
 
 (defn case-sibling-uniformity-meta-error
   [ind evaluated-population argmap]
