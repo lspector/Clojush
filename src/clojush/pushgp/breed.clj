@@ -87,6 +87,7 @@
      (assoc first-parent ; first-parent, in this case, is the child individual
             :parent-uuids (vec (map :uuid parents))
             :age (cond
+                   (= :newborn (:age first-parent)) 0
                    (empty? parents) 0
                    (= (count parents) 1) (inc (:age (first parents)))
                    (= (count parents) 2) ((age-combining-function argmap)

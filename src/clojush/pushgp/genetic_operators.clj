@@ -1051,7 +1051,7 @@ the resulting top genome."
                                 post-add (vec (take (int (/ (:max-points argmap) 4))
                                                     (:genome (uniform-addition
                                                                {:genome parent1-genome
-                                                                :dummy true :age -1}
+                                                                :dummy  true :age -1}
                                                                (merge argmap
                                                                       {:uniform-addition-rate
                                                                        add-rate})))))
@@ -1061,12 +1061,12 @@ the resulting top genome."
                                                                            delete-rate}))))
                                 post-add-and-delete
                                 (vec (take (int (/ (:max-points argmap) 4))
-                                                    (:genome (uniform-addition-and-deletion
-                                                               {:genome post-delete
-                                                                :dummy true :age -1}
-                                                               (merge argmap
-                                                                      {:uniform-addition-and-deletion-rate
-                                                                       add-and-delete-rate})))))]
+                                           (:genome (uniform-addition-and-deletion
+                                                      {:genome post-delete
+                                                       :dummy  true :age -1}
+                                                      (merge argmap
+                                                             {:uniform-addition-and-deletion-rate
+                                                              add-and-delete-rate})))))]
                             post-add-and-delete)
                           (top-item :genome
                                     (run-push
@@ -2091,7 +2091,6 @@ programs encoded by genomes g1 and g2."
       (assoc (make-individual :genome child-genome
                               :errors (:errors checked)
                               :history (:history parent1)
-                              :age ((age-combining-function argmap) parent1 parent2 child-genome)
                               :grain-size (compute-grain-size child-genome parent1 parent2 argmap)
                               :ancestors (if maintain-ancestors
                                            (cons (:genome parent1) (:ancestors parent1))
@@ -2109,7 +2108,7 @@ programs encoded by genomes g1 and g2."
           (assoc (make-individual :genome new-genome
                                   :errors (:errors new-checked)
                                   :history ()
-                                  :age 0
+                                  :age :newborn
                                   :grain-size (compute-grain-size new-genome argmap)
                                   :ancestors ()
                                   :is-random-replacement true)
@@ -2117,7 +2116,7 @@ programs encoded by genomes g1 and g2."
           (make-individual :genome []
                            :errors nil
                            :history ()
-                           :age 0
+                           :age :newborn
                            :grain-size (compute-grain-size [] argmap)
                            :ancestors ()
                            :is-random-replacement true))))))
