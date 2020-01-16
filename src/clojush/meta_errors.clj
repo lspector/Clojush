@@ -673,10 +673,11 @@
                                        (< newer-error older-error))
                                      (partition 2 1 case-history))
                      gens (take-while not improved?)]
-                 (if (and (= (count gens)
-                             (count improved?))
-                          (< (count gens) 10))
-                   nil
+                 (if (= (count gens) ;; if unchanged
+                        (count improved?))
+                   (if (< (count gens) 10)
+                     nil
+                     1000000)
                    (count gens)))))))))
 
 (defn case-sibling-uniformity-meta-error
