@@ -659,26 +659,48 @@
                   ])))))))
 
 #_(defn stale-meta-error
-  [ind evaluated-population argmap]
-  (if (not (:print-history argmap))
-    (throw
-      (Exception.
-        ":print-history must be true for :stale"))
-    (if (empty? (rest (:history ind)))
-      (vec (repeat (count (:errors ind)) nil))
-      (vec (for [case-history (apply map list (:history ind))]
-             (if (zero? (first case-history))
-               nil
-               (let [improved? (mapv (fn [[newer-error older-error]]
-                                       (< newer-error older-error))
-                                     (partition 2 1 case-history))
-                     gens (take-while not improved?)]
-                 (if (= (count gens) ;; if unchanged
-                        (count improved?))
-                   (if (< (count gens) 10)
-                     nil
-                     1000000)
-                   (count gens)))))))))
+    [ind evaluated-population argmap]
+    (if (not (:print-history argmap))
+      (throw
+        (Exception.
+          ":print-history must be true for :stale"))
+      (if (empty? (rest (:history ind)))
+        (vec (repeat (count (:errors ind)) nil))
+        (vec (for [case-history (apply map list (:history ind))]
+               (if (zero? (first case-history))
+                 nil
+                 (let [improved? (mapv (fn [[newer-error older-error]]
+                                         (< newer-error older-error))
+                                       (partition 2 1 case-history))
+                       gens (take-while not improved?)]
+                   (if (= (count gens)                      ;; if unchanged
+                          (count improved?))
+                     (if (< (count gens) 10)
+                       nil
+                       1000000)
+                     (count gens)))))))))
+
+#_(defn stale-meta-error
+    [ind evaluated-population argmap]
+    (if (not (:print-history argmap))
+      (throw
+        (Exception.
+          ":print-history must be true for :stale"))
+      (if (empty? (rest (:history ind)))
+        (vec (repeat (count (:errors ind)) nil))
+        (vec (for [case-history (apply map list (:history ind))]
+               (if (zero? (first case-history))
+                 nil
+                 (let [changed? (mapv (fn [[newer-error older-error]]
+                                        (not= newer-error older-error))
+                                      (partition 2 1 case-history))
+                       gens (take-while not changed?)]
+                   (if (= (count gens)                      ;; if unchanged
+                          (count changed?))
+                     (if (< (count gens) 10)
+                       nil
+                       1000000)
+                     (count gens)))))))))
 
 (defn stale-meta-error
   [ind evaluated-population argmap]
@@ -688,19 +710,23 @@
         ":print-history must be true for :stale"))
     (if (empty? (rest (:history ind)))
       (vec (repeat (count (:errors ind)) nil))
-      (vec (for [case-history (apply map list (:history ind))]
-             (if (zero? (first case-history))
-               nil
-               (let [changed? (mapv (fn [[newer-error older-error]]
-                                       (not= newer-error older-error))
-                                     (partition 2 1 case-history))
-                     gens (take-while not changed?)]
-                 (if (= (count gens) ;; if unchanged
-                        (count changed?))
-                   (if (< (count gens) 10)
-                     nil
-                     1000000)
-                   (count gens)))))))))
+      (let [raw (for [case-history (apply map list (:history ind))]
+                  (if (zero? (first case-history))
+                    nil
+                    (let [changed? (mapv (fn [[newer-error older-error]]
+                                           (not= newer-error older-error))
+                                         (partition 2 1 case-history))
+                          gens (take-while not changed?)]
+                      (if (= (count gens)                   ;; if unchanged
+                             (count changed?))
+                        (if (< (count gens) 10)
+                          nil
+                          1000000)
+                        (count gens)))))]
+        (vec (if (some #(and (number? %) (> % 20)) raw)
+               (repeat (count raw) 1000000)
+               raw))))))
+
 
 (defn case-sibling-uniformity-meta-error
   [ind evaluated-population argmap]
