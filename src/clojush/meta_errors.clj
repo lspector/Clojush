@@ -658,6 +658,10 @@
                       (count gens)))
                   ])))))))
 
+(defn errors-meta-error
+  [ind evaluated-population argmap]
+  (:errors ind))
+
 (defn stale-meta-error
   [ind evaluated-population argmap]
   (if (not (:print-history argmap))
