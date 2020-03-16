@@ -2,7 +2,8 @@
   (:use [clojush.pushstate]
         [clojush.globals]
         [clojush.random]
-        [clojush.util])
+        [clojush.util]
+        [clojush.instructions.environment])
   (:require [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -76,12 +77,13 @@
           ((if @global-pop-when-tagging pop-item (fn [type state] state))
                source-type
                (assoc state :tag (assoc (or (:tag state) (sorted-map))
-                                        the-tag
-                                        (first (source-type state)))))))
-                                        ;(let [code (str (first (source-type state)))]
-                                        ;  (if (re-find #"return_" code)
-                                        ;    (str "environment_begin " code " return_tagspace environment_end")
-                                        ;    code)))))))
+                                   the-tag
+                                   ;(first (source-type state)))))))
+                                    (let [code (first (source-type state))]
+                                    (if (re-find #"return_" (str code))
+                                     (list 'environment_begin code 'environment_end) ;can optionally add return_tagspace
+                                     code)
+                                   ))))))
       ;; if it's of the form untag_<number>: REMOVE TAG ASSOCIATION
       (= (first iparts) "untag")
       (if (empty? (:tag state))
@@ -105,7 +107,7 @@
                  source-type
                  (push-item item :return state)))))
       ;; if we get here it must be one of the retrieval forms starting with "tagged_", so 
-      ;; we check to see if there are assocations and consider the cases if so
+      ;; we check to see if there are associations and consider the cases if so
           :else
           (if (empty? (:tag state))
             state ;; no-op if no associations

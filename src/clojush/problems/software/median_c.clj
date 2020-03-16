@@ -25,6 +25,7 @@
            (tag-instruction-erc [:exec :integer :boolean] 1000)
            (tagged-instruction-erc 1000)
            (untag-instruction-erc 1000)
+           (registered-for-type "return_")
             ;;; end ERCs
            'in1
            'in2
@@ -68,24 +69,31 @@
     ([individual data-cases] ;; data-cases should be :train or :test
      (the-actual-median-error-function individual data-cases false))
     ([individual data-cases print-outputs]
-      (let [behavior (atom '())
-            ;local-tagspace (atom @global-common-tagspace)
-            reuse-metric (atom ())       ;the lenght will be equal to the number of test cases
-            repetition-metric (atom ())
-            local-tagspace (case data-cases
-                             :train (if global-use-lineage-tagspaces
-                                      (atom (:tagspace individual))
-                                      (atom @global-common-tagspace))
-                             :simplify (atom (:tagspace individual))  ; during simplification, the tagspace should not be changed.                                
-                             :test (atom (:tagspace individual))
-                             [])
-            cases (case data-cases
-                    :train train-cases
-                    :test test-cases
-                    :simplify train-cases
-                    [])
-            errors (let [ran nil];(rand-nth cases)]
-                     (doall
+     (let [behavior (atom '())
+           reuse-metric (atom ())                           ;the length will be equal to the number of test cases
+           repetition-metric (atom ())
+           ;_ (prn @global-common-tagspace)
+           local-tagspace (case data-cases
+                            :train                          ; (if global-use-lineage-tagspaces
+                            ;(atom (:tagspace individual))
+                            (atom @global-common-tagspace)
+                            ;)
+                            :simplify (atom (:tagspace individual)) ; during simplification and testing, the tagspace should not be changed.
+                            :test (atom (:tagspace individual))
+                            ; (if global-use-lineage-tagspaces
+                            ;  (atom (:tagspace individual))
+                            (atom @global-common-tagspace)
+                            ;)
+                            )
+           update? (atom false)
+           cases (case data-cases
+                   :train train-cases
+                   :test test-cases
+                   :simplify train-cases
+                   data-cases
+                   )
+           errors (let [ran nil]                            ;(rand-nth cases)]
+                    (doall
                       (for [[[input1 input2 input3] out-int] cases]
                         (let [final-state (if (= [[input1 input2 input3] out-int] ran)
                                             (run-push (:program (auto-simplify-lite individual
@@ -93,24 +101,24 @@
                                                                                     75
                                                                                     (first med/median-train-and-test-cases) ; cases
                                                                                     false 100))
-                                                      (->>  (assoc (make-push-state) :calculate-mod-metrics (= [[input1 input2 input3] out-int] ran)) 
-                                                            (push-item input3 :input)
-                                                            (push-item input2 :input)
-                                                            (push-item input1 :input)
-                                                            (push-item "" :output)))
+                                                      (->> (assoc (make-push-state) :calculate-mod-metrics (= [[input1 input2 input3] out-int] ran))
+                                                           (push-item input3 :input)
+                                                           (push-item input2 :input)
+                                                           (push-item input1 :input)
+                                                           (push-item "" :output)))
                                             (run-push (:program individual)
-                                                      (->>  (assoc (make-push-state) :tag @local-tagspace)
-                                                            (push-item input3 :input)
-                                                            (push-item input2 :input)
-                                                            (push-item input1 :input)
-                                                            (push-item "" :output))))
+                                                      (->> (assoc (make-push-state) :tag @local-tagspace)
+                                                           (push-item input3 :input)
+                                                           (push-item input2 :input)
+                                                           (push-item input1 :input)
+                                                           (push-item "" :output))))
                               printed-result (stack-ref :output 0 final-state)
-                              _ (if (= data-cases :train)
+                              _ (if (not= data-cases :test) ;(and (not= data-cases :test) (not= data-cases :simplify))
                                   (reset! local-tagspace (get final-state :tag)))
                               ]
                           (when print-outputs
                             (println (format "Correct output: %-19s | Program output: %-19s" (str out-int) printed-result)))
-                          
+
                           (if (= [[input1 input2 input3] out-int] ran)
                             (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
                               (do
@@ -118,30 +126,57 @@
                                 (swap! repetition-metric conj (last metrics)))))
 
 
-                         ; Record the behavior
+                          ; Record the behavior
                           (swap! behavior conj printed-result)
-                         ; Each test case is either right or wrong
+                          ; Each test case is either right or wrong
                           (if (= printed-result (str out-int))
                             0
                             1)))))
-            _ (if (and (= data-cases :train) (not global-use-lineage-tagspaces))
-                (if (let [x (vec errors)
-                                      ; _ (prn x)
-                          y (first (:history individual))
-                                      ; _ (prn y)
+           ;errors-wct (comment                                        ;doall
+           ; (for [[[input1 input2 input3] out-int] cases]
+           ; (let [final-state (run-push (:program individual) ;'(tagged_0)
+           ; (->> (make-push-state)
+           ;     ;(assoc (make-push-state) :tag @local-tagspace)
+           ;     (push-item input3 :input)
+           ;     (push-item input2 :input)
+           ;     (push-item input1 :input)
+           ;     (push-item "" :output)))
+           ;printed-result (stack-ref :output 0 final-state)
+           ;]
+           ; Record the behavior
+           ;(swap! behavior conj printed-result)
+           ; Each test case is either right or wrong
+           ; (if (= printed-result (str out-int))
+           ;  0
+           ;1)                                                    ; penalty for no return value
+           ;)))
+            _ (if (and (not= data-cases :test) (not= data-cases :simplify)) ; (not global-use-lineage-tagspaces)
+                (if (let [x (vec errors)                    ;errors of child
+                          y (first (:history individual))   ;errors of parent
+                          ;y (vec errors-wct)
                           ]
                       (if (nil? y)
                         true
-                    ;    (some? (some true? (map #(< %1 %2) x y))))) ;child is better than mom on at least one test case; can be worse on others
-                         (every? true? (map #(<= %1 %2) x y))))
+                        ;    (some? (some true? (map #(< %1 %2) x y))))) ;child is better than mom on at least one test case; can be worse on others
+                        (every? true? (map #(<= %1 %2) x y))
+                        ;(not= x y)
+                        ;true
+                        ))                                  ;child is as good or better than mom
                   (do
                     (reset! global-common-tagspace @local-tagspace)
-                                ; (prn @global-common-tagspace)
+                    ;(prn @global-common-tagspace)
+                    ;(reset! update? true)
                     )))
             ]
-        (if (or (= data-cases :train) (= data-cases :simplify))
-          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @local-tagspace)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @local-tagspace ; (let [ts (:tagspace individual)]
+                            ; (if true                        ;update?
+                            ;  @local-tagspace
+                            ;  ts))
+                            ;:tagspace-effect (if update? 1 0)
+                            )
+          )))))
 
 (defn get-median-train-and-test
   "Returns the train and test cases."
@@ -212,12 +247,11 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 1
-   ;:meta-error-categories [:reuse]
-   ;:use-single-thread true
-   :print-history true
-   :use-lineage-tagspaces true
-   :pop-when-tagging false
-   :tag-enrichment-types [:integer :boolean :exec]
-   :tag-enrichment 50
    :meta-error-categories [:tag-usage]
+   :use-single-thread true
+   :print-history true
+   ;:use-lineage-tagspaces false
+   :pop-when-tagging false
+   ;:tag-enrichment-types [:integer :boolean :exec]
+   ;:tag-enrichment 50
    })

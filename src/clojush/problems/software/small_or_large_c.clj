@@ -10,12 +10,59 @@
 
 (ns clojush.problems.software.small-or-large-c
   (:use clojush.pushgp.pushgp
-        [clojush pushstate interpreter random util globals simplification]
+        clojush.pushgp.genetic-operators
+        [clojush pushstate interpreter random util globals simplification translate]
         clojush.instructions.tag
         ;clojush.instructions.environment
         [clojure.math numeric-tower]
         )
   (:require [clojush.problems.software.small-or-large :as sol]))
+
+(defn uniform-segment-addition-to-culture
+  "Returns the individual with each segment possibly duplicated. The probability that a
+  segment will be duplicated is given by uniform-duplication-rate. The probability that
+  segmenting will occur at each gene is given by uniform-segmenting-rate.
+  Works with Plushy genomes."
+  [ind local-tagspace uniform-segment-culture-rate uniform-segmenting-rate]
+  (let [segmented (partition-by (fn [_]
+                                  (< (rand)
+                                     (random-element-or-identity-if-not-a-collection
+                                       uniform-segmenting-rate)))
+                                (:genome ind))
+        rate (random-element-or-identity-if-not-a-collection uniform-segment-culture-rate)]
+    (doseq [seg segmented]
+      (if (< (rand) rate)
+        (let [x (rand-int 500)]
+          (if (not (contains? @local-tagspace key))
+            (swap! local-tagspace assoc x (translate-plush-genome-to-push-program {:genome seg} {:max-points @global-max-points}))
+            ))
+        ))))
+
+(defn merge-tagspaces
+  [gts gts-fit lts total-error]
+  (let [lt (into (sorted-map) (map #(vector (first %1) (vector (second %1) total-error)) (apply vector @lts)))
+        gt (if (empty? @gts)
+             lt
+             (merge-with vector @gts @gts-fit))
+        ]
+    (doseq [key (keys lt)]
+      (if (get gt key)
+        (if (> (second (get gt key)) (second (get lt key)))
+          (do
+            (swap! gts assoc key (first (get lt key)))
+            (swap! gts-fit assoc key (second (get lt key))))
+          (do
+            (swap! gts assoc key (first (get gt key)))
+            (swap! gts-fit assoc key (second (get gt key))))
+          )
+        (if (> (second (val (closest-association key {:tag gt}))) (second (get lt key)))
+          (do
+            (swap! gts assoc key (first (get lt key)))
+            (swap! gts-fit assoc key (second (get lt key))))
+          )
+        ))
+    ))
+
 
 ; Atom generators
 (def small-or-large-atom-generators
@@ -25,9 +72,10 @@
             ;;; end constants
            (fn [] (- (lrand-int 20001) 10000)) ;Integer ERC [-10000,10000]
             ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :exec :string] 1000)
-            (tagged-instruction-erc 1000)
-            (untag-instruction-erc 1000)
+            (tag-instruction-erc [:integer :boolean :exec :string] 500)
+            (tagged-instruction-erc 500)
+            (untag-instruction-erc 500)
+           (registered-for-type "return_")
             ;;; end tag ERCs
            'in1
             ;;; end input instructions
@@ -71,17 +119,18 @@
      (the-actual-small-or-large-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
-            ;stacks-depth (atom (zipmap push-types (repeat 0)))
             local-tagspace (case data-cases
                              :train (atom @global-common-tagspace)
+                             :simplify (atom (:tagspace individual)) ; during simplification and testing, the tagspace should not be changed.
                              :test (atom (:tagspace individual))
-                             [])
+                             (atom @global-common-tagspace))
             reuse-metric (atom ())       
             repetition-metric (atom ())            
             cases (case data-cases
                     :train train-cases
+                    :simplify train-cases
                     :test test-cases
-                    [])
+                    data-cases)
             errors (let [ran nil] ;(rand-nth cases)]
                      (doall
                       (for [[input1 correct-output] cases]
@@ -100,12 +149,11 @@
                                                            (push-item "" :output)))
                                             )
                               result (stack-ref :output 0 final-state)
-                              _ (if (= data-cases :train)
-                                  (reset! local-tagspace (get final-state :tag)))
+                              _ (if (not= data-cases :test)
+                                    (reset! local-tagspace (get final-state :tag)))
                               ]
                           (when print-outputs
                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str result))))
-                        ;(doseq [[k v] (:max-stack-depth final-state)] (swap! stacks-depth update k #(max % v)))
                           
                           (if (= [input1 correct-output] ran)
                             (let [metrics (mod-metrics (:trace final-state) (:trace_id final-state))]
@@ -113,13 +161,11 @@
                                 (swap! reuse-metric conj (first metrics))
                                 (swap! repetition-metric conj (last metrics)))))
 
-
-
                         ; Record the behavior
                           (swap! behavior conj result)
                          ; Error is Levenshtein distance of printed strings
                           (levenshtein-distance correct-output result)))))
-            _ (if (= data-cases :train)
+            _ (if (and (not= data-cases :test) (not= data-cases :simplify)) ;(= data-cases :train)
                 (if (let [x (vec errors)
                                        ;_ (prn x)
                           y (first (:history individual))
@@ -127,16 +173,21 @@
                           ]
                       (if (nil? y)
                         true
-                        (some? (some true? (map #(< %1 %2) x y))))) ; child is better than mom on at least one test case; can be worse on others
-                      ;   (every? true? (map #(<= %1 %2) x y))))
+                        ; (some? (some true? (map #(< %1 %2) x y))))) ; child is better than mom on at least one test case; can be worse on others
+                        ;(every? true? (map #(<= %1 %2) x y))
+                        true
+                        ))
                   (do
-                    (reset! global-common-tagspace @local-tagspace)
+                    (uniform-segment-addition-to-culture individual local-tagspace 0.5 0.1)
+                    (merge-tagspaces global-common-tagspace global-common-tagspace-fitness local-tagspace (apply + errors))
+                    ;(reset! global-common-tagspace @local-tagspace)
                                ;(prn @global-common-tagspace)
                     )))
             ]
-        (if (= data-cases :train)
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
           (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @local-tagspace)
-          (assoc individual :test-errors errors))))))
+          )))))
 
 (defn get-small-or-large-train-and-test
   "Returns the train and test cases."
@@ -206,7 +257,8 @@
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000
-   ;:meta-error-categories [:reuse]
+   ;:meta-error-categories [:tag-usage]
    :use-single-thread true
-   :print-history true
+   ;:print-history true
+   :pop-when-tagging false
    })

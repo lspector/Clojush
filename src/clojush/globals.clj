@@ -173,4 +173,8 @@
 ;;  to another.
 
 
+(def global-common-tagspace-fitness (atom {}))
+
 (def global-use-lineage-tagspaces (atom false))
+
+(def global-initial-atom-generators (atom ()))

@@ -7,11 +7,11 @@
 
 (defrecord individual [genome program errors behaviors total-error normalized-error weighted-error
                        novelty meta-errors history ancestors uuid parent-uuids genetic-operators
-                       age grain-size is-random-replacement stacks-info tag-usage mod-val reuse-info repetition-info tagspace])
+                       age grain-size is-random-replacement stacks-info tag-usage mod-val reuse-info repetition-info tagspace tagspace-effect improvement-by-mutation])
 
 (defn make-individual [& {:keys [genome program errors behaviors total-error normalized-error weighted-error
                                  novelty meta-errors history ancestors uuid parent-uuids
-                                 genetic-operators age grain-size is-random-replacement stacks-info tag-usage mod-val reuse-info repetition-info tagspace]
+                                 genetic-operators age grain-size is-random-replacement stacks-info tag-usage mod-val reuse-info repetition-info tagspace tagspace-effect]
                           :or {genome nil
                                program nil
                                errors nil
@@ -35,10 +35,12 @@
                                reuse-info nil
                                repetition-info nil
                                tagspace nil
+                               tagspace-effect nil
+                               improvement-by-mutation nil
                                }}]
   (individual. genome program errors behaviors total-error normalized-error weighted-error novelty
                meta-errors history ancestors uuid parent-uuids genetic-operators age grain-size
-               is-random-replacement stacks-info tag-usage mod-val reuse-info repetition-info tagspace))
+               is-random-replacement stacks-info tag-usage mod-val reuse-info repetition-info tagspace tagspace-effect improvement-by-mutation))
 
 (defn printable [thing]
   (letfn [(unlazy [[head & tail]]
@@ -53,6 +55,6 @@
         (let [k '(:genome :program :errors :behaviors :total-error :normalized-error 
                           :weighted-error :novelty :meta-errors :history :ancestors :uuid 
                           :parent-uuids :genetic-operators :age :grain-size 
-                          :is-random-replacement :stacks-info :tag-usage :mod-val :reuse-info :repetition-info tagspace)]
+                          :is-random-replacement :stacks-info :tag-usage :mod-val :reuse-info :repetition-info :tagspace :tagspace-effect :improvement-by-mutation)]
           (interleave k  (map #(printable (get i %)) k)))))
 

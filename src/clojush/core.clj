@@ -28,17 +28,24 @@
     (:gen-class))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; main function
-  
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; main function
+
+
+  ; (defn -main
+  ; [& args]
+  ;  (main-func (read-string (str/replace (first args) #"ThisIsSingleQuote" "'")))
+  ;)
 
   (defn -main
-    [& args]
-    (main-func (read-string (str/replace (first args) #"ThisIsSingleQuote" "'"))))
+     [& args]
+      (main-func (read-string (first args))))
+
+  )
 
 
 
-)
+
 
 (ns clojush.core
   (:require [clojush.pushgp.record :as r])
@@ -71,4 +78,5 @@
       (println "######################################")
       (pushgp params)
       (shutdown-agents))))
+
 

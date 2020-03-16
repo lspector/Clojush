@@ -670,11 +670,14 @@
           ;; DON'T KNOW HOW TO COMBINE BOTH THE MEASURES
           ;; 
          
-         :common-tagspace {}
+          :common-tagspace {}
+          :common-tagspace-fitness {}
 
          :use-lineage-tagspaces false  
          ;; if true, the tagspace of parent witll be trasferred to its child.
 
+
+          :initial-atom-generators ()
                 
          )))
 
@@ -1097,6 +1100,42 @@
     (swap! push-argmap assoc argkey argval))
   (swap! push-argmap assoc :run-uuid (java.util.UUID/randomUUID))
   (augment-for-autoconstruction)
+  ; (swap! push-argmap assoc :atom-generators (into (:atom-generators @push-argmap)
+  ; (flatten (repeat 50
+  ; '[exec_yankdup
+  ;  exec_y
+  ;  exec_s
+  ;  ;exec_do*vector_integer
+  ;  exec_do*while
+  ;  ;exec_string_iterate
+  ;  exec_dup_items
+  ;  ;exec_empty
+  ;  ;exec_rot
+  ;  exec_dup
+  ;  ;exec_k
+  ;  exec_do*count
+  ;  exec_do*times
+  ;  exec_do*while
+  ;  exec_dup_times
+  ;  ;exec_eq
+  ;  exec_while
+  ;  ;exec_swap
+  ;  exec_do*range
+  ;  exec_if
+  ;  exec_dup_items
+  ;  ;exec_do*vector_string
+  ;  ;exec_pop
+  ;  ;exec_do*vector_float
+  ;  ;exec_s
+  ;  ;exec_fromziprights
+  ;  exec_noop
+  ;  ;exec_yank
+  ;  ;exec_do*vector_boolean
+  ;  ;exec_stackdepth
+  ;  ;exec_flush
+  ;  exec_when
+  ;  ;exec_fromzipchildren
+  ;  ]))))
   (when (> (:tag-enrichment @push-argmap) 0)
     (let [types (:tag-enrichment-types @push-argmap)
           use-type #(some #{%} types)]
@@ -1116,6 +1155,7 @@
                            (if (use-type :string) '[integer_tag_string_instruction] []))]
                (into (:atom-generators @push-argmap)
                      (take (* (:tag-enrichment @push-argmap) (count tag-instructions))
+                     ; (take (- (count (:atom-generators @push-argmap)) (count tag-instructions))
                            (cycle tag-instructions))))))))
 
 (defn reset-globals

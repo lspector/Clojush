@@ -26,6 +26,7 @@
            (tag-instruction-erc [:integer :boolean :exec] 1000)
            (tagged-instruction-erc 1000)
            (untag-instruction-erc 1000)
+           (registered-for-type "return_")
             ;;; end tag ERCs
            'in1
             ;;; end input instructions
@@ -67,17 +68,21 @@
      (the-actual-sum-of-squares-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
-            local-tagspace (atom @global-common-tagspace)
+            local-tagspace (case data-cases
+                             :train (atom @global-common-tagspace)
+                             :test (atom (:tagspace individual))
+                             (atom @global-common-tagspace))
             errors (doall
                     (for [[input1 correct-output] (case data-cases
                                                     :train train-cases
                                                     :test test-cases
-                                                    [])]
+                                                    data-cases)]
                       (let [final-state (run-push (:program individual)
                                                   (->> (assoc (make-push-state) :tag @local-tagspace)
                                                        (push-item input1 :input)))
                             result (stack-ref :integer 0 final-state)
-                            _ (reset! local-tagspace (get final-state :tag))]
+                            _ (if (not= data-cases :test)
+                                (reset! local-tagspace (get final-state :tag)))]
                         (when print-outputs
                           (println (format "Correct output: %6d | Program output: %s" correct-output (str result))))
                          ; Record the behavior
@@ -87,7 +92,7 @@
                           (abs (- result correct-output)) ;distance from correct integer
                           1000000000) ;penalty for no return value
                         )))
-                    _ (if (= data-cases :train)
+                    _ (if (and (not= data-cases :test) (not= data-cases :simplify))
                         (if (let [x (vec errors)
                                        ;_ (prn x)
                                   y (first (:history individual))
@@ -95,15 +100,15 @@
                                   ]
                               (if (nil? y)
                                 true
-                      (some? (some true? (map #(< %1 %2) x y))))) ; child is better than mom on at least one test case; can be worse on others
-                      ;          (every? true? (map #(<= %1 %2) x y))))
+                                ;(some? (some true? (map #(< %1 %2) x y))))) ; child is better than mom on at least one test case; can be worse on others
+                                (every? true? (map #(<= %1 %2) x y))))
                           (do
                             (reset! global-common-tagspace @local-tagspace)
                                  ;(prn @global-common-tagspace)
                             )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors :tagspace @local-tagspace)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors :tagspace @local-tagspace))))))
 
 (defn get-sum-of-squares-train-and-test
   "Returns the train and test cases."
@@ -175,4 +180,6 @@
    :max-error 1000000000
    :use-single-thread true
    :print-history true
+   :meta-error-categories [:tag-usage]
+   :pop-when-tagging false
    })

@@ -15,21 +15,25 @@
         [clojure.math numeric-tower combinatorics]
         ))
 
+(def exec-reuse-instrs '(exec_dup, exec_dup_times, exec_dup_items, exec_yankdup, exec_do*range, exec_do*count,  exec_do*times, exec_while, exec_do*while, exec_s, exec_y, exec_do*vector_integer, exec_do*vector_float, exec_do*vector_boolean, exec_do*vector_string))
+
 ; Atom generators
 (def csl-atom-generators
   (concat (list
-           (fn [] (lrand-nth (list true false))) ;Boolean ERC
+            (fn [] (lrand-nth (list true false)))           ;Boolean ERC
             ;;; end ERCs
-           ;(tag-instruction-erc [:integer :boolean :string :exec] 1000)
-           ;(tagged-instruction-erc 1000)
-           ;(untag-instruction-erc 1000)
+            ;(tag-instruction-erc [:integer :boolean :string :exec] 1000)
+            ;(tagged-instruction-erc 1000)
+            ;(untag-instruction-erc 1000)
             ;;; end tag ERCs
-           'in1
-           'in2
-           'in3
+            'in1
+            'in2
+            'in3
             ;;; end input instructions
-           )
-          (registered-for-stacks [:integer :boolean :string :exec])))
+            )
+          (remove (set exec-reuse-instrs) (registered-for-stacks [:integer :boolean :string :exec]))
+          ;(registered-for-stacks [:integer :boolean :string :exec])
+          ))
 
 
 ;; Define test cases
@@ -193,10 +197,10 @@
    :max-genome-size-in-initial-program 200
    :evalpush-limit 600
    :population-size 1000
-   :max-generations 300
+   :max-generations 600
    :parent-selection :downsampled-lexicase
    :sub-training-cases '()
-   :downsample-factor 1
+   :downsample-factor 0.5
    :training-cases (first compare-string-lengths-train-and-test-cases)
    :genetic-operator-probabilities {:uniform-addition-and-deletion 1}
    :uniform-addition-and-deletion-rate 0.09

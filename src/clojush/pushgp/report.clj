@@ -439,8 +439,8 @@
     (when print-errors (println "Errors:" (not-lazy (:errors best))))
     (when (and print-errors (not (empty? meta-error-categories)))
       (println "Meta-Errors:" (not-lazy (:meta-errors best))))
-    (println "Mean Reuse for all:" (map #(mean (:reuse-info %)) population))
-    (println "Mean Reuse for best:" (mean (:reuse-info best)))
+    ;(println "Mean Reuse for all:" (map #(mean (:reuse-info %)) population))
+    ;(println "Mean Reuse for best:" (mean (:reuse-info best)))
     (println "Total:" (:total-error best))
     (let [mean (r/generation-data! [:best :mean-error] (float (/ (:total-error best)
                                                                  (count (:errors best)))))]
@@ -714,5 +714,5 @@
   (let [simplified-best (auto-simplify best error-function final-report-simplifications true 500)]
     (println "\n;;******************************")
     (println ";; Problem-Specific Report of Simplified Solution")
-    (println "Reuse in Simplified Solution:" (:reuse-info (error-function simplified-best)))
+    ;(println "Reuse in Simplified Solution:" (:reuse-info (error-function simplified-best)))
     (problem-specific-report simplified-best [] generation error-function report-simplifications)))

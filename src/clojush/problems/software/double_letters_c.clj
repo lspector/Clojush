@@ -25,8 +25,8 @@
             ;;; end ERCs
            (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
            (tagged-instruction-erc 1000)
-           ;(untag-instruction-erc 1000)
-            ;(registered-for-type "return_")
+           (untag-instruction-erc 1000)
+            (registered-for-type "return_")
             ;;; end tag ERCs
            'in1
             ;;; end input instructions
@@ -94,20 +94,26 @@
             repetition-metric (atom ())
             ;state-with-tags (tagspace-initialization (str (:program individual)) 1000 (make-push-state)) 
             behavior (atom '())
-            ;local-tagspace (atom @global-common-tagspace)
+            local-tagspace (case data-cases
+                             :train (atom @global-common-tagspace)
+                             :simplify (atom (:tagspace individual)) ; during simplification and testing, the tagspace should not be changed.
+                             :test (atom (:tagspace individual))
+                             (atom @global-common-tagspace))
             cases (case data-cases
                     :train train-cases
+                    :simplify train-cases
                     :test test-cases
                     data-cases)
-            errors (let [ran (rand-nth cases)]
+            errors (let [ran nil                            ;(rand-nth cases)
+                         ]
                      (doall
                       (for [[input correct-output] cases]
                         (let [final-state (run-push (:program individual)
-                                                    (->> (push-item input :input (assoc (make-push-state) :tag @global-common-tagspace))
+                                                    (->> (push-item input :input (assoc (make-push-state) :tag @local-tagspace))
                                                      ;(push-item input :input (assoc (make-push-state) :calculate-mod-metrics (= [input correct-output] ran)))
                                                          (push-item "" :output)) )
                               printed-result (stack-ref :output 0 final-state)
-                              _ (reset! global-common-tagspace (get final-state :tag))]
+                              _ (reset! local-tagspace (get final-state :tag))]
                           (when print-outputs
                             (println (format "| Correct output: %s\n| Program output: %s\n" (pr-str correct-output) (pr-str printed-result))))
                           
@@ -120,10 +126,26 @@
                          ; Record the behavior
                           (swap! behavior conj printed-result)
                          ; Error is Levenshtein distance
-                          (levenshtein-distance correct-output printed-result)))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @global-common-tagspace)
-          (assoc individual :test-errors errors))))))
+                          (levenshtein-distance correct-output printed-result)))))
+            _ (if (and (not= data-cases :test) (not= data-cases :simplify)) ;(= data-cases :train)
+                (if (let [x (vec errors)
+                          ;_ (prn x)
+                          y (first (:history individual))
+                          ;_ (prn y)
+                          ]
+                      (if (nil? y)
+                        true
+                        ; (some? (some true? (map #(< %1 %2) x y))))) ; child is better than mom on at least one test case; can be worse on others
+                        (every? true? (map #(<= %1 %2) x y))))
+                  (do
+                    (reset! global-common-tagspace @local-tagspace)
+                    ;(prn @global-common-tagspace)
+                    )))
+            ]
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual :behaviors @behavior :errors errors :reuse-info @reuse-metric :repetition-info @repetition-metric :tagspace @local-tagspace)
+          )))))
 
 (defn get-double-letters-train-and-test
   "Returns the train and test cases."
@@ -170,29 +192,33 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-double-letters-error-function-from-cases (first double-letters-train-and-test-cases)
-                                                                  (second double-letters-train-and-test-cases))
-   :atom-generators double-letters-atom-generators
-   :max-points 3200
+  {:error-function                     (make-double-letters-error-function-from-cases (first double-letters-train-and-test-cases)
+                                                                                      (second double-letters-train-and-test-cases))
+   :atom-generators                    double-letters-atom-generators
+   :max-points                         3200
    :max-genome-size-in-initial-program 400
-   :evalpush-limit 1600
-   :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase
-   :genetic-operator-probabilities {:alternation 0.2
-                                    :uniform-mutation 0.2
-                                    :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
-   :alternation-rate 0.01
-   :alignment-deviation 10
-   :uniform-mutation-rate 0.01
+   :evalpush-limit                     1600
+   :population-size                    1000
+   :max-generations                    300
+   :parent-selection                   :lexicase
+   :genetic-operator-probabilities     {:uniform-addition-and-deletion 1}
+   :uniform-addition-and-deletion-rate 0.09
+   ;:genetic-operator-probabilities {:alternation                     0.2
+   ; :uniform-mutation                0.2
+   ; :uniform-close-mutation          0.1
+   ; [:alternation :uniform-mutation] 0.5
+   ;}
+   ;                                    :alternation-rate 0.01
+   ;                                    :alignment-deviation 10
+   ;                                    :uniform-mutation-rate 0.01
    :problem-specific-report double-letters-report
    :problem-specific-initial-report double-letters-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 5000
    :use-single-thread true
+   :meta-error-categories [:tag-usage]
+   :print-history true
+   :pop-when-tagging false
    ;:meta-error-categories [:max-stacks-depth]
-   ;:sort-meta-errors-for-lexicase :last
    })
