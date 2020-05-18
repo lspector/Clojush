@@ -659,25 +659,13 @@
           ;; external record
          
          :calculate-mod-metrics false
-          ;; If true, will calculate modularity metrics (reuse and repetition)
-          ;; as the run proceeds.
-         
-         :filter-params false
-          ;; If false, no filtering as part of preseelction. Othersie, should be a map with :features and :thresholds as keys.
-          ;; :features contains a list of design values used in preselection. :thresholds contains the list of correspoding 
-          ;; values of thresholds to ne used in preselection.
-          ;; {:features [reuse] thresholds [.6]}. It means that individuals will be filtered on the basis of reuse.
-          ;; DON'T KNOW HOW TO COMBINE BOTH THE MEASURES
-          ;; 
-         
-          :common-tagspace {}
-          :common-tagspace-fitness {}
+          ;; If true, will calculate modularity metrics (reuse and repetition) as the run proceeds.
+          ;; By default, metrics are calculated on the execution trace for a randomly chosen test case.
 
-         :use-lineage-tagspaces false  
-         ;; if true, the tagspace of parent witll be trasferred to its child.
-
-
-          :initial-atom-generators ()
+          :simplification-steps-for-mod-metrics 0
+          ;; Number of simplification steps applied to a program before calculating mod metrics.
+          ;; 0 implies simplification won't be carried out.
+          ;; WARNING: Keep this value low as every individual in the population will be simplified for this many number of steps
                 
          )))
 
@@ -1100,42 +1088,6 @@
     (swap! push-argmap assoc argkey argval))
   (swap! push-argmap assoc :run-uuid (java.util.UUID/randomUUID))
   (augment-for-autoconstruction)
-  ; (swap! push-argmap assoc :atom-generators (into (:atom-generators @push-argmap)
-  ; (flatten (repeat 50
-  ; '[exec_yankdup
-  ;  exec_y
-  ;  exec_s
-  ;  ;exec_do*vector_integer
-  ;  exec_do*while
-  ;  ;exec_string_iterate
-  ;  exec_dup_items
-  ;  ;exec_empty
-  ;  ;exec_rot
-  ;  exec_dup
-  ;  ;exec_k
-  ;  exec_do*count
-  ;  exec_do*times
-  ;  exec_do*while
-  ;  exec_dup_times
-  ;  ;exec_eq
-  ;  exec_while
-  ;  ;exec_swap
-  ;  exec_do*range
-  ;  exec_if
-  ;  exec_dup_items
-  ;  ;exec_do*vector_string
-  ;  ;exec_pop
-  ;  ;exec_do*vector_float
-  ;  ;exec_s
-  ;  ;exec_fromziprights
-  ;  exec_noop
-  ;  ;exec_yank
-  ;  ;exec_do*vector_boolean
-  ;  ;exec_stackdepth
-  ;  ;exec_flush
-  ;  exec_when
-  ;  ;exec_fromzipchildren
-  ;  ]))))
   (when (> (:tag-enrichment @push-argmap) 0)
     (let [types (:tag-enrichment-types @push-argmap)
           use-type #(some #{%} types)]

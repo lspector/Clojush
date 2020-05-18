@@ -1,5 +1,5 @@
 (ns clojush.evaluate
-  (:use [clojush util pushstate random globals individual meta-errors]
+  (:use [clojush util pushstate random globals individual meta-errors interpreter simplification]
         clojush.pushgp.genetic-operators)
   (:require [clojure.math.numeric-tower :as math]
             [clj-random.core :as random]))
@@ -98,10 +98,28 @@
                 :hah (compute-hah-error e)
                 :rmse (compute-root-mean-square-error e)
                 nil)
+           mm (if (:calculate-mod-metrics argmap)
+                (let [                                      ;i (auto-simplify i error-function (:training-cases argmap) (:simplification-steps-for-mod-metrics argmap) false 0)
+                      rand-inp (first (rand-nth (:training-cases argmap)))
+                      final-state (if (not (sequential? rand-inp))
+                                    (run-push (:program i) (push-item rand-inp :input (assoc (make-push-state) :calculate-mod-metrics true))) ; input is a single element (numbers, string , etc)
+                                    (if (apply = (map #(count (first %)) (:training-cases argmap))) ; multiple inputs, e.g., three strings
+                                      (loop [inp rand-inp
+                                             state (assoc (make-push-state) :calculate-mod-metrics true)]
+                                        (if (empty? inp)
+                                          (run-push (:program i) state)
+                                          (recur (rest inp) (push-item (first inp) :input state))))
+                                      (run-push (:program i) (push-item rand-inp :input (assoc (make-push-state) :calculate-mod-metrics true))) ; input is a vector of varying length
+                                      ))]
+                  (reuse (reverse (remove-ids (:trace final-state) :instr) ) (reverse (remove-ids (:trace final-state) :id)))
+                  ))
            new-ind (assoc evaluated-i ; Assign errors and history to i
                           :errors e
                           :total-error te
                           :weighted-error we
                           :normalized-error ne
-                          :history (if print-history (cons e (:history i)) (:history i)))]
+                          :history (if print-history (cons e (:history i)) (:history i))
+                          :reuse-info (first mm)
+                          :repetition-info (last mm)
+                          )]
        new-ind))))

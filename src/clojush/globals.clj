@@ -156,8 +156,6 @@
 (def global-parent-selection (atom :lexicase)) 
 ;; The type of parent selection used
 
-(def global-calculate-mod-metrics (atom false))
-;; Whether or not to calculate mod metrics while running modularity metics (reuse and repetition)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This atom is used to convey information to clojush.pushgp.visualize, but it cannot be 
 ;; defined there because it must always be available to clojush.pushgp.report, and we don't
@@ -165,16 +163,3 @@
 ;; will require quil.core, which will launch the quil sketch.
 
 (def viz-data-atom (atom {}))
-
-
-
-(def global-common-tagspace (atom {}))
-;; An atom to hold the tagspace values from one individual to another and from one generation
-;;  to another.
-
-
-(def global-common-tagspace-fitness (atom {}))
-
-(def global-use-lineage-tagspaces (atom false))
-
-(def global-initial-atom-generators (atom ()))

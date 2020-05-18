@@ -26,11 +26,10 @@
 
 ;; Providing true as a third argument produces a trace of all stacks as it runs:
 
-(run-push '(exec_dup (exec_swap 1 2))
-          ;(make-push-state)
+(run-push '(exec_dup (integer_add))
           (assoc (make-push-state) :calculate-mod-metrics true)
           true true true
-          )          
+          )
 
 
 (comment
@@ -82,11 +81,10 @@
                           'integer_mult
                           'integer_add
                           'integer_sub)
-   :parent-selection :tournament
    :genetic-operator-probabilities {:alternation 0.5
                                     :uniform-mutation 0.5}
    :max-generations 1
-   :meta-error-categories [:reuse :repetition]
+   :report-simplifications 0
    })
 
 ;(pushgp argmap)

@@ -254,7 +254,8 @@
     (when (> report-simplifications 0)
       (println "Lexicase best partial simplification:"
                (pr-str (not-lazy (:program (auto-simplify lex-best 
-                                                          error-function 
+                                                          error-function
+                                                          (:training-cases argmap)
                                                           report-simplifications 
                                                           false 
                                                           1000))))))
@@ -278,7 +279,8 @@
     (when (> report-simplifications 0)
       (println "Zero cases best partial simplification:"
                (pr-str (not-lazy (:program (auto-simplify most-zero-cases-best 
-                                                          error-function 
+                                                          error-function
+                                                          (:training-cases argmap)
                                                           report-simplifications 
                                                           false 
                                                           1000))))))
@@ -347,7 +349,7 @@
            print-csv-logs print-json-logs csv-log-filename json-log-filename
            log-fitnesses-for-all-cases json-log-program-strings
            print-edn-logs edn-keys edn-log-filename edn-additional-keys
-           visualize]
+           visualize calculate-mod-metrics]
     :as argmap}]
   (r/generation-data! [:population]
     (map #(dissoc % :program) population))
@@ -422,25 +424,22 @@
     (println "Best genome:" (print-genome best argmap))
     (println "Best program:" (pr-str (not-lazy (:program best))))
     (println "Tagspace:" (pr-str (:tagspace best)))
-    (println "Global Tagspace:" (pr-str @global-common-tagspace))
-    ;
-    ;(println "Reuse for all test cases is" (pr-str (:reuse-info best)))
-    ;(println "Repetition for all test cases is" (pr-str (:repetition-info best)))
-    
-    ;
+    (when calculate-mod-metrics
+      (println "Reuse in Best Program:" (pr-str (:reuse-info best)))
+      (println "Repetition in Best Program:" (pr-str (:repetition-info best))))
+
     (when (> report-simplifications 0)
       (println "Partial simplification:"
                (pr-str (not-lazy (:program (r/generation-data! [:best :individual-simplified]
                                             (auto-simplify best
                                                           error-function
+                                                           (:training-cases argmap)
                                                           report-simplifications
                                                           false
                                                           1000)))))))
     (when print-errors (println "Errors:" (not-lazy (:errors best))))
     (when (and print-errors (not (empty? meta-error-categories)))
       (println "Meta-Errors:" (not-lazy (:meta-errors best))))
-    ;(println "Mean Reuse for all:" (map #(mean (:reuse-info %)) population))
-    ;(println "Mean Reuse for best:" (mean (:reuse-info best)))
     (println "Total:" (:total-error best))
     (let [mean (r/generation-data! [:best :mean-error] (float (/ (:total-error best)
                                                                  (count (:errors best)))))]
@@ -702,17 +701,15 @@
   "Prints the final report of a PushGP run if the run is successful."
   [generation best
    {:keys [error-function final-report-simplifications report-simplifications
-           print-ancestors-of-solution problem-specific-report]}]
+           print-ancestors-of-solution problem-specific-report training-cases]}]
   (printf "\n\nSUCCESS at generation %s\nSuccessful program: %s\nErrors: %s\nTotal error: %s\nHistory: %s\nSize: %s\n\n"
           generation (pr-str (not-lazy (:program best))) (not-lazy (:errors best)) (:total-error best)
           (not-lazy (:history best)) (count-points (:program best)))
   (when print-ancestors-of-solution
     (printf "\nAncestors of solution:\n")
     (prn (:ancestors best)))
-  (println "Tagspace:" (pr-str (:tagspace best)))
-  (println "Global Tagspace:" (pr-str @global-common-tagspace))
-  (let [simplified-best (auto-simplify best error-function final-report-simplifications true 500)]
+  (let [simplified-best (auto-simplify best error-function training-cases final-report-simplifications true 500)]
     (println "\n;;******************************")
     (println ";; Problem-Specific Report of Simplified Solution")
-    ;(println "Reuse in Simplified Solution:" (:reuse-info (error-function simplified-best)))
+    (println "Reuse in Simplified Solution:" (:reuse-info (error-function simplified-best)))
     (problem-specific-report simplified-best [] generation error-function report-simplifications)))

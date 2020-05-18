@@ -55,28 +55,17 @@
 ; Meta-errors related to modularity:
 (defn reuse-meta-error
   [ind evaluated-population argmap]
-  (- 0 (mean (:reuse-info ind))))
+  (- 0 (if (seq? (:reuse-info ind))
+         (mean (:reuse-info ind))
+         (:reuse-info ind)
+         )))
 
 (defn repetition-meta-error
   [ind evaluated-population argmap]
-  (mean (:repetition-info ind)))
-
-; (defn tag-usage-meta-error
-;  [ind evaluated-population argmap]
-; (if (> (count (re-seq #"tag" (str (:program ind)))) 0)
-; (let [sim-prog (str (:program (auto-simplify ind (:error-function argmap) 10 false 10)))
-;      num-tagged (count (re-seq #"tagged_" sim-prog))
-;      num-tag (count (re-seq #" tag_" sim-prog))]
-; (if (> (* num-tag num-tagged) 0)
-;  (+ num-tagged num-tag)
-;  0
-;  ) )
-;0
-; ) )
-
-(defn tag-usage-meta-error
-  [ind evaluated-population argmap]
-  (- (+ (* 0.25 (count (re-seq #"[ (]tag_" (str (:program ind)))))   (count (re-seq #"tagged_" (str (:program ind)))))))
+  (if (seq? (:repetition-info ind))
+    (mean (:repetition-info ind))
+    (:repetition-info ind)
+    ))
 
 (defn total-error-meta-error
   [ind evaluated-population argmap]
