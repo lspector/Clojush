@@ -100,10 +100,6 @@
                (printf "\nState after %s steps (last step: %s):\n"
                        iteration (if (seq? exec-top) "(...)" exec-top))
                (state-pretty-print s))
-             (when trace
-               (prn ":trace in correct order = " (reverse (remove-ids (:trace s) :instr) )))
-             (when trace
-               (prn ":trace-id in correct order = " (reverse (remove-ids (:trace s) :id) )))
              (when save-state-sequence
                (swap! saved-state-sequence #(conj % s)))
              (recur (inc iteration) s time-limit))))))))
