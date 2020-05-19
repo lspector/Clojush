@@ -38,13 +38,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; meta-error functions
 
-;; might be useful to add these meta-errors:
-;; 
-;;(= cat :tag-usage) (vals (:stacks-info ind))
-;; (= cat :max-stacks-depth) (vals (:stacks-info ind))
-
-
-
 (defn size-meta-error
   [ind evaluated-population argmap]
   (count (:genome ind)))

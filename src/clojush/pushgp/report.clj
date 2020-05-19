@@ -247,63 +247,64 @@
                                      (:errors ind)))
                               population)
         count-zero-by-case (map #(apply + %) (apply mapv vector pop-zero-by-case))]
-        
-    (println "--- Lexicase Program with Most Elite Cases Statistics ---")
-    (println "Lexicase best genome:" (print-genome lex-best argmap))
-    (println "Lexicase best program:" (pr-str (not-lazy (:program lex-best))))
-    (when (> report-simplifications 0)
-      (println "Lexicase best partial simplification:"
-               (pr-str (not-lazy (:program (auto-simplify lex-best 
-                                                          error-function
-                                                          (:training-cases argmap)
-                                                          report-simplifications 
-                                                          false 
-                                                          1000))))))
-    (when print-errors (println "Lexicase best errors:" (not-lazy (:errors lex-best))))
-    (when (and print-errors (not (empty? meta-error-categories)))
-      (println "Lexicase best meta-errors:" (not-lazy (:meta-errors lex-best))))
-    (println "Lexicase best number of elite cases:" (apply + (map #(if (== %1 %2) 1 0)
-                                                                  (:errors lex-best)
-                                                                  min-error-by-case)))
-    (println "Lexicase best total error:" (:total-error lex-best))
-    (println "Lexicase best mean error:" (float (/ (:total-error lex-best)
-                                                   (count (:errors lex-best)))))
-    ;(when print-history (println "Lexicase best history:" (not-lazy (:history lex-best))))
-    (println "Lexicase best size:" (count-points (:program lex-best)))
-    (printf "Percent parens: %.3f\n" 
-            (double (/ (count-parens (:program lex-best)) 
-                       (count-points (:program lex-best))))) ;Number of (open) parens / points
-    (println "--- Lexicase Program with Most Zero Cases Statistics ---")
-    (println "Zero cases best genome:" (print-genome most-zero-cases-best argmap))
-    (println "Zero cases best program:" (pr-str (not-lazy (:program most-zero-cases-best))))
-    (when (> report-simplifications 0)
-      (println "Zero cases best partial simplification:"
-               (pr-str (not-lazy (:program (auto-simplify most-zero-cases-best 
-                                                          error-function
-                                                          (:training-cases argmap)
-                                                          report-simplifications 
-                                                          false 
-                                                          1000))))))
-    (when print-errors (println "Zero cases best errors:" (not-lazy (:errors most-zero-cases-best))))
-    (when (and print-errors (not (empty? meta-error-categories)))
-      (println "Zero cases best meta-errors:" (not-lazy (:meta-errors most-zero-cases-best))))
-    (println "Zero cases best number of elite cases:" 
-             (apply + (map #(if (== %1 %2) 1 0)
-                           (:errors most-zero-cases-best)
-                           min-error-by-case)))
-    (println "Zero cases best number of zero cases:" 
-             (apply + (map #(if (< %1 min-number-magnitude) 1 0)
-                           (:errors most-zero-cases-best))))
-    (println "Zero cases best total error:" (:total-error most-zero-cases-best))
-    (println "Zero cases best mean error:" 
-             (float (/ (:total-error most-zero-cases-best)
-                       (count (:errors most-zero-cases-best)))))
-    ;(when print-history (println "Zero cases best history:" 
-     ;                            (not-lazy (:history most-zero-cases-best))))
-    (println "Zero cases best size:" (count-points (:program most-zero-cases-best)))
-    (printf "Percent parens: %.3f\n" 
-            (double (/ (count-parens (:program most-zero-cases-best)) 
-                       (count-points (:program most-zero-cases-best))))) ;Number of (open) parens / points
+
+    (when print-lexicase-best-programs
+      (println "--- Lexicase Program with Most Elite Cases Statistics ---")
+      (println "Lexicase best genome:" (print-genome lex-best argmap))
+      (println "Lexicase best program:" (pr-str (not-lazy (:program lex-best))))
+      (when (> report-simplifications 0)
+        (println "Lexicase best partial simplification:"
+                 (pr-str (not-lazy (:program (auto-simplify lex-best
+                                                            error-function
+                                                            report-simplifications
+                                                            false
+                                                            1000))))))
+      (when print-errors (println "Lexicase best errors:" (not-lazy (:errors lex-best))))
+      (when (and print-errors (not (empty? meta-error-categories)))
+        (println "Lexicase best meta-errors:" (not-lazy (:meta-errors lex-best))))
+      (println "Lexicase best number of elite cases:" (apply + (map #(if (== %1 %2) 1 0)
+                                                                    (:errors lex-best)
+                                                                    min-error-by-case)))
+      (println "Lexicase best total error:" (:total-error lex-best))
+      (println "Lexicase best mean error:" (float (/ (:total-error lex-best)
+                                                     (count (:errors lex-best)))))
+      (when print-history (println "Lexicase best history:" (not-lazy (:history lex-best))))
+      (println "Lexicase best size:" (count-points (:program lex-best)))
+      (printf "Percent parens: %.3f\n"
+              (double (/ (count-parens (:program lex-best))
+                         (count-points (:program lex-best))))) ;Number of (open) parens / points
+      (println "--- Lexicase Program with Most Zero Cases Statistics ---")
+      (println "Zero cases best genome:" (print-genome most-zero-cases-best argmap))
+      (println "Zero cases best program:" (pr-str (not-lazy (:program most-zero-cases-best))))
+      (when (> report-simplifications 0)
+        (println "Zero cases best partial simplification:"
+                 (pr-str (not-lazy (:program (auto-simplify most-zero-cases-best
+                                                            error-function
+                                                            report-simplifications
+                                                            false
+                                                            1000))))))
+      (when print-errors (println "Zero cases best errors:" (not-lazy (:errors most-zero-cases-best))))
+      (when (and print-errors (not (empty? meta-error-categories)))
+        (println "Zero cases best meta-errors:" (not-lazy (:meta-errors most-zero-cases-best))))
+      (println "Zero cases best number of elite cases:"
+               (apply + (map #(if (== %1 %2) 1 0)
+                             (:errors most-zero-cases-best)
+                             min-error-by-case)))
+      (println "Zero cases best number of zero cases:"
+               (apply + (map #(if (< %1 min-number-magnitude) 1 0)
+                             (:errors most-zero-cases-best))))
+      (println "Zero cases best total error:" (:total-error most-zero-cases-best))
+      (println "Zero cases best mean error:"
+               (float (/ (:total-error most-zero-cases-best)
+                         (count (:errors most-zero-cases-best)))))
+      (when print-history (println "Zero cases best history:"
+                                   (not-lazy (:history most-zero-cases-best))))
+      (println "Zero cases best size:" (count-points (:program most-zero-cases-best)))
+      (printf "Percent parens: %.3f\n"
+              (double (/ (count-parens (:program most-zero-cases-best))
+                         (count-points (:program most-zero-cases-best))))) ;Number of (open) parens / points
+      )
+
     (println "--- Lexicase Population Statistics ---")
     (println "Count of elite individuals by case:" count-elites-by-case)
     (println (format "Population mean number of elite cases: %.2f"
@@ -423,7 +424,6 @@
     (r/generation-data! [:best :individual] (dissoc best :program))
     (println "Best genome:" (print-genome best argmap))
     (println "Best program:" (pr-str (not-lazy (:program best))))
-    (println "Tagspace:" (pr-str (:tagspace best)))
     (when calculate-mod-metrics
       (println "Reuse in Best Program:" (pr-str (:reuse-info best)))
       (println "Repetition in Best Program:" (pr-str (:repetition-info best))))
@@ -454,7 +454,7 @@
       nil)
     (when (= parent-selection :novelty-search)
       (println "Novelty: " (float (:novelty best))))
-    ;(when print-history (println "History:" (not-lazy (:history best))))
+    (when print-history (println "History:" (not-lazy (:history best))))
     (println "Genome size:" (r/generation-data! [:best :genome-size] (count (:genome best))))
     (println "Size:" (r/generation-data! [:best :program-size] (count-points (:program best))))
     (printf "Percent parens: %.3f\n"

@@ -292,6 +292,7 @@
                                       (when-not (:use-single-thread @push-argmap (apply await pop-agents))) ;; SYNCHRONIZE
                                       (reset! delay-archive [])))
                                   (timer @push-argmap :report)
+                                  (println "\nProducing offspring...") (flush)
                                   (produce-new-offspring pop-agents
                                                          child-agents
                                                          rand-gens

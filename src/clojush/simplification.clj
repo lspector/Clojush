@@ -1,5 +1,5 @@
 (ns clojush.simplification
-  (:use [clojush util globals pushstate random individual translate]))
+  (:use [clojush util globals pushstate random individual evaluate translate]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-simplification

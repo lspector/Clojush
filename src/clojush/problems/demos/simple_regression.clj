@@ -39,4 +39,5 @@
    :epigenetic-markers []
    :parent-selection :tournament
    :genetic-operator-probabilities {:alternation 0.5
-                                    :uniform-mutation 0.5}})
+                                    :uniform-mutation 0.5}
+   })

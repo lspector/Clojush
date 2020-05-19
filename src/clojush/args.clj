@@ -1107,7 +1107,6 @@
                            (if (use-type :string) '[integer_tag_string_instruction] []))]
                (into (:atom-generators @push-argmap)
                      (take (* (:tag-enrichment @push-argmap) (count tag-instructions))
-                     ; (take (- (count (:atom-generators @push-argmap)) (count tag-instructions))
                            (cycle tag-instructions))))))))
 
 (defn reset-globals

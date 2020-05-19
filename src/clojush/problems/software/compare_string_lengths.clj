@@ -154,8 +154,7 @@
    :evalpush-limit 600
    :population-size 1000
    :max-generations 300
-   :parent-selection :downsampled-lexicase
-   :downsample-factor 0.1
+   :parent-selection :lexicase
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1
