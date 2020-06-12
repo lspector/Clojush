@@ -222,7 +222,7 @@
         (make-individual :genome genome :program program :errors errors :total-error (apply + errors)
                          :history (:history ind) :genetic-operators :simplification)
         (let [new-genome (apply-simplification-step-to-genome genome simplification-step-probabilities)
-              new-program (translate-plush-genome-to-push-program (assoc ind :genome new-genome)
+              new-program (translate-plush-genome-to-push-program {:genome new-genome}
                                                                   {:max-points (* 10 (count genome))})
               new-errors (:errors (error-function {:program new-program}))]
           (if (and (= new-errors errors)
