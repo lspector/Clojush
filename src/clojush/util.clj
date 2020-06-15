@@ -437,4 +437,3 @@
             bottom-val (nth sorted bottom)
             top-val (nth sorted halfway)]
            (mean [bottom-val top-val])))))
-

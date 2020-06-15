@@ -1,7 +1,9 @@
 (ns clojush.instructions.tag
   (:use [clojush.pushstate]
         [clojush.globals]
-        [clojush.random])
+        [clojush.random]
+        [clojush.util]
+        [clojush.instructions.environment])
   (:require [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -46,6 +48,7 @@
    closest-matching tag onto the exec stack (or no-op if no boolean
    or no associations).
    "
+
   [i state]
   (let [iparts (string/split (name i) #"_")]
     (cond
@@ -58,8 +61,8 @@
           ((if @global-pop-when-tagging pop-item (fn [type state] state))
                source-type
                (assoc state :tag (assoc (or (:tag state) (sorted-map))
-                                        the-tag 
-                                        (first (source-type state)))))))
+                                   the-tag
+                                   (first (source-type state)))))))
       ;; if it's of the form untag_<number>: REMOVE TAG ASSOCIATION
       (= (first iparts) "untag")
       (if (empty? (:tag state))
@@ -69,23 +72,23 @@
       ;; if it's return_tag_<type>_<number>: Push
       ;; (item_from_<type>_stack tag_<type>_<number>) onto the return stack. Pop the
       ;; item if @global-pop-when-tagging
-      (and (= (first iparts) "return")
-           (= (second iparts) "tag"))
-      (let [source-type (read-string (str ":" (nth iparts 2)))
-            the-tag (read-string (nth iparts 3))
-            new-tag-instr (symbol (subs (name i) (count "return_")))]
-        (if (empty? (source-type state))
-          state
-          (let [item (list (top-item source-type state) new-tag-instr)]
-            ((if @global-pop-when-tagging pop-item (fn [type state] state))
+          (and (= (first iparts) "return")
+               (= (second iparts) "tag"))
+          (let [source-type (read-string (str ":" (nth iparts 2)))
+                the-tag (read-string (nth iparts 3))
+                new-tag-instr (symbol (subs (name i) (count "return_")))]
+            (if (empty? (source-type state))
+              state
+              (let [item (list (top-item source-type state) new-tag-instr)]
+                ((if @global-pop-when-tagging pop-item (fn [type state] state))
                  source-type
                  (push-item item :return state)))))
       ;; if we get here it must be one of the retrieval forms starting with "tagged_", so 
-      ;; we check to see if there are assocations and consider the cases if so
-      :else
-      (if (empty? (:tag state))
-        state ;; no-op if no associations
-        (cond ;; it's tagged_code_<number>
+      ;; we check to see if there are associations and consider the cases if so
+          :else
+          (if (empty? (:tag state))
+            state ;; no-op if no associations
+            (cond ;; it's tagged_code_<number>
               (= (nth iparts 1) "code") 
               (let [the-tag (read-string (nth iparts 2))]
                 (push-item (second (closest-association the-tag state)) :code state))

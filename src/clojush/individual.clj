@@ -7,11 +7,11 @@
 
 (defrecord individual [genome program errors behaviors total-error normalized-error weighted-error
                        novelty meta-errors history ancestors uuid parent-uuids genetic-operators
-                       age grain-size is-random-replacement])
+                       age grain-size is-random-replacement reuse-info repetition-info])
 
 (defn make-individual [& {:keys [genome program errors behaviors total-error normalized-error weighted-error
                                  novelty meta-errors history ancestors uuid parent-uuids
-                                 genetic-operators age grain-size is-random-replacement]
+                                 genetic-operators age grain-size is-random-replacement reuse-info repetition-info]
                           :or {genome nil
                                program nil
                                errors nil
@@ -29,10 +29,12 @@
                                age 0
                                grain-size 1 ; used for random-screen
                                is-random-replacement false
+                               reuse-info nil
+                               repetition-info nil
                                }}]
   (individual. genome program errors behaviors total-error normalized-error weighted-error novelty
                meta-errors history ancestors uuid parent-uuids genetic-operators age grain-size
-               is-random-replacement))
+               is-random-replacement reuse-info repetition-info))
 
 (defn printable [thing]
   (letfn [(unlazy [[head & tail]]
@@ -47,6 +49,6 @@
         (let [k '(:genome :program :errors :behaviors :total-error :normalized-error 
                           :weighted-error :novelty :meta-errors :history :ancestors :uuid 
                           :parent-uuids :genetic-operators :age :grain-size 
-                          :is-random-replacement)]
+                          :is-random-replacement :reuse-info :repetition-info)]
           (interleave k  (map #(printable (get i %)) k)))))
 

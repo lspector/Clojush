@@ -23,7 +23,7 @@
             ;;; end constants
             (fn [] (- (lrand-int 20001) 10000)) ;Integer ERC [-10000,10000]
             ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :exec] 1000)
+            (tag-instruction-erc [:integer :boolean :exec :string] 1000)
             (tagged-instruction-erc 1000)
             ;;; end tag ERCs
             'in1

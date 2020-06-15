@@ -64,11 +64,11 @@
                          (if (pos? num-remaining)
                            (let [new-seeds (repeatedly num-remaining
                                                        #(random/lrand-bytes
-                                                          (:mersennetwister random/*seed-length*)))]
+                                                         (:mersennetwister random/*seed-length*)))]
                              (recur (list-concat seeds (filter ; only add seeds that we do not already have
-                                                         (fn [candidate]
-                                                           (not (some #(random/=byte-array % candidate)
-                                                                      seeds))) new-seeds))))
+                                                        (fn [candidate]
+                                                          (not (some #(random/=byte-array % candidate)
+                                                                     seeds))) new-seeds))))
                            seeds)))]
     {:random-seeds random-seeds
      :rand-gens (vec (doall (for [k (range population-size)]
@@ -336,3 +336,6 @@
            (if (nil? next-novelty-archive)
              return-val
              (recur (inc generation) next-novelty-archive))))))))
+
+
+

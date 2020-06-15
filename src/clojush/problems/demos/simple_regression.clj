@@ -21,13 +21,13 @@
                             (doall
                              (for [input (range 10)]
                                (let [state (run-push (:program individual)
-                                                     (push-item input :input 
-                                                                (push-item input :integer 
+                                                     (push-item input :input
+                                                                (push-item input :integer
                                                                            (make-push-state))))
                                      top-int (top-item :integer state)]
                                  (if (number? top-int)
-                                   (abs (- top-int 
-                                           (- (* input input input) 
+                                   (abs (- top-int
+                                           (- (* input input input)
                                               (* 2 input input) input)))
                                    1000))))))
    :atom-generators (list (fn [] (lrand-int 10))

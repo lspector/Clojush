@@ -1,5 +1,5 @@
 (ns clojush.simplification
-  (:use [clojush util globals pushstate random individual evaluate translate]))
+  (:use [clojush util globals pushstate random individual translate]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-simplification
@@ -47,54 +47,64 @@
                                        :else 
                                        (recur open-count
                                               close-diff
-                                              (conj program-so-far (first rest-program))
+                                              (conj program-so-far (first rest-program)) 
                                               (next rest-program))))]
           (open-close-sequence-to-list pair-removed-program))))))
 
-(defn auto-simplify 
-  "Auto-simplifies the provided individual."
-  ([ind error-function steps print? progress-interval]
-    (auto-simplify ind error-function steps print? progress-interval false))
-  ([ind error-function steps print? progress-interval maintain-ancestors]
-    (when print? (printf "\nAuto-simplifying with starting size: %s" (count-points (:program ind))))
-    (loop [step 0 program (:program ind) errors (:errors ind) total-errors (:total-error ind)]
-      (when (and print? 
-                 (or (>= step steps)
-                     (zero? (mod step progress-interval))))
-        (printf "\nstep: %s\nprogram: %s\nerrors: %s\ntotal: %s\nsize: %s\n" 
-                step (pr-str (not-lazy program)) (not-lazy errors) total-errors (count-points program))
-        (flush))
-      (if (>= step steps)
-        (make-individual :program program :errors errors :total-error total-errors 
-                         :history (:history ind) 
-                         :ancestors (if maintain-ancestors
-                                      (cons (:program ind) (:ancestors ind))
-                                      (:ancestors ind))
-                         :genetic-operators :simplification)
-        (let [new-program (if (< (lrand-int 5) 4)
-                            ;; remove a small number of random things
-                            (loop [p program how-many (inc (lrand-int 2))]
-                              (if (or (zero? how-many)
-                                      (<= (count-points p) 1))
-                                p
-                                (recur (remove-code-at-point p (inc (lrand-int (dec (count-points p)))))
-                                       (dec how-many))))
-                            ;; remove single paren pair
-                            (remove-paren-pair program))
-              new-errors (:errors (error-function {:program new-program}))
-              new-total-errors (compute-total-error new-errors)] ;simplification bases its decision on raw error; HAH-error could also be used here
-          (if (= new-errors errors) ; only keep the simplified program if its error vector is the same as the original program's error vector
-            (recur (inc step) new-program new-errors new-total-errors)
-            (recur (inc step) program errors total-errors)))))))
+(defn auto-simplify
+  "Auto-simplifies the provided individual. Error function should be able to calculate error for a single test case as well.."
+  ([ind error-function cases steps print? progress-interval]
+   (auto-simplify ind error-function cases steps print? progress-interval false))
+  ([ind error-function cases steps print? progress-interval maintain-ancestors]
+   (when print? (printf "\nAuto-simplifying with starting size: %s" (count-points (:program ind))))
+   (loop [step 0 program (:program ind) errors (:errors ind) total-errors (:total-error ind)]
+     (when (and print?
+                (or (>= step steps)
+                    (zero? (mod step progress-interval))))
+       (printf "\nstep: %s\nprogram: %s\nerrors: %s\ntotal: %s\nsize: %s\n"
+               step (pr-str (not-lazy program)) (not-lazy errors) total-errors (count-points program))
+       (flush))
+     (if (>= step steps)
+       (make-individual :program program :errors errors :total-error total-errors
+                        :history (:history ind)
+                        :ancestors (if maintain-ancestors
+                                     (cons (:program ind) (:ancestors ind))
+                                     (:ancestors ind))
+                        :genetic-operators :simplification)
+       (let [new-program (if (< (lrand-int 5) 4)
+                           ;; remove a small number of random things
+                           (loop [p program how-many (inc (lrand-int 2))]
+                             (if (or (zero? how-many)
+                                     (<= (count-points p) 1))
+                               p
+                               (recur (remove-code-at-point p (inc (lrand-int (dec (count-points p)))))
+                                      (dec how-many))))
+                           ;; remove single paren pair
+                           (remove-paren-pair program))
+             new-errors (loop [ca 0 ; ca is the index of the case under consideration
+                               result '()]
+                          (if (>= ca (count cases))
+                            (reverse result)
+                            (let [new-error (first (:errors (error-function {:program new-program} (list (nth cases ca)))))]
+                              (if (not= new-error (nth errors ca))
+                                (reverse result)
+                                (recur (inc ca) (conj result new-error))))))
+
+             new-total-errors (reduce +' new-errors) ;(compute-total-error new-errors)
+             ] ;simplification bases its decision on raw error; HAH-error could also be used here
+         (if (= new-errors errors) ; only keep the simplified program if its error vector is the same as the original program's error vector
+           (recur (inc step) new-program new-errors new-total-errors)
+           (recur (inc step) program errors total-errors)))))))
 
 (defn auto-simplify-from-program
-  [p error-function steps print? progress-interval]
+  [p error-function cases steps print? progress-interval]
   (let [errs (:errors (error-function {:program p}))]
     (auto-simplify (make-individual :program p
                                     :errors errs
                                     :total-error (reduce + errs)
                                     :genetic-operators :simplification)
                    error-function
+                   cases
                    steps
                    print?
                    progress-interval)))
@@ -212,11 +222,10 @@
         (make-individual :genome genome :program program :errors errors :total-error (apply + errors)
                          :history (:history ind) :genetic-operators :simplification)
         (let [new-genome (apply-simplification-step-to-genome genome simplification-step-probabilities)
-              new-program (translate-plush-genome-to-push-program (assoc ind :genome new-genome)
+              new-program (translate-plush-genome-to-push-program {:genome new-genome}
                                                                   {:max-points (* 10 (count genome))})
               new-errors (:errors (error-function {:program new-program}))]
           (if (and (= new-errors errors)
                    (<= (count-points new-program) (count-points program)))
             (recur (inc step) new-genome new-program new-errors)
             (recur (inc step) genome program errors)))))))
-
