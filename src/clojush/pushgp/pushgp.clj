@@ -272,7 +272,8 @@
                                                      (:error-function @push-argmap)
                                                      (:final-report-simplifications @push-argmap)
                                                      true
-                                                     500))])
+                                                     500
+                                                     argmap))])
           (= outcome :continue) (let [next-novelty-archive
                                       (list-concat novelty-archive
                                                    (select-individuals-for-novelty-archive

@@ -258,7 +258,8 @@
                                                             error-function
                                                             report-simplifications
                                                             false
-                                                            1000))))))
+                                                            1000
+                                                            argmap))))))
       (when print-errors (println "Lexicase best errors:" (not-lazy (:errors lex-best))))
       (when (and print-errors (not (empty? meta-error-categories)))
         (println "Lexicase best meta-errors:" (not-lazy (:meta-errors lex-best))))
@@ -282,7 +283,8 @@
                                                             error-function
                                                             report-simplifications
                                                             false
-                                                            1000))))))
+                                                            1000
+                                                            argmap))))))
       (when print-errors (println "Zero cases best errors:" (not-lazy (:errors most-zero-cases-best))))
       (when (and print-errors (not (empty? meta-error-categories)))
         (println "Zero cases best meta-errors:" (not-lazy (:meta-errors most-zero-cases-best))))
@@ -429,14 +431,15 @@
       (println "Repetition in Best Program:" (pr-str (:repetition-info best))))
 
     (when (> report-simplifications 0)
-      (println "Partial simplification:"
-               (pr-str (not-lazy (:program (r/generation-data! [:best :individual-simplified]
-                                            (auto-simplify best
-                                                          error-function
-                                                           (:training-cases argmap)
-                                                          report-simplifications
-                                                          false
-                                                          1000)))))))
+      (let [simplified (not-lazy (:program (r/generation-data! [:best :individual-simplified]
+                                                               (auto-simplify best
+                                                                              error-function
+                                                                              report-simplifications
+                                                                              false
+                                                                              1000
+                                                                              argmap))))]
+        (println "Partial simplification:" (pr-str simplified))
+        (println "Partial simplified size:" (count-points simplified))))
     (when print-errors (println "Errors:" (not-lazy (:errors best))))
     (when (and print-errors (not (empty? meta-error-categories)))
       (println "Meta-Errors:" (not-lazy (:meta-errors best))))
@@ -701,14 +704,14 @@
   "Prints the final report of a PushGP run if the run is successful."
   [generation best
    {:keys [error-function final-report-simplifications report-simplifications
-           print-ancestors-of-solution problem-specific-report training-cases]}]
+           print-ancestors-of-solution problem-specific-report] :as argmap}]
   (printf "\n\nSUCCESS at generation %s\nSuccessful program: %s\nErrors: %s\nTotal error: %s\nHistory: %s\nSize: %s\n\n"
           generation (pr-str (not-lazy (:program best))) (not-lazy (:errors best)) (:total-error best)
           (not-lazy (:history best)) (count-points (:program best)))
   (when print-ancestors-of-solution
     (printf "\nAncestors of solution:\n")
     (prn (:ancestors best)))
-  (let [simplified-best (auto-simplify best error-function training-cases final-report-simplifications true 500)]
+  (let [simplified-best (auto-simplify best error-function final-report-simplifications true 500 argmap)]
     (println "\n;;******************************")
     (println ";; Problem-Specific Report of Simplified Solution")
     (println "Reuse in Simplified Solution:" (:reuse-info (error-function simplified-best)))

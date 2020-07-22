@@ -99,7 +99,7 @@
                 :rmse (compute-root-mean-square-error e)
                 nil)
            mm (if (:calculate-mod-metrics argmap)
-                (let [i (auto-simplify i error-function (:training-cases argmap) (:simplification-steps-for-mod-metrics argmap) false 0)
+                (let [i (auto-simplify i error-function (:simplification-steps-for-mod-metrics argmap) false 0 argmap)
                       rand-inp (first (rand-nth (:training-cases argmap)))
                       final-state (if (not (sequential? rand-inp))
                                     (run-push (:program i) (push-item rand-inp :input (assoc (make-push-state) :calculate-mod-metrics true))) ; input is a single element (numbers, string , etc)
