@@ -562,6 +562,10 @@
           ;; The number of simplification steps that will happen during final report
           ;; simplifications.
 
+         :lazy-automatic-simplification false
+          ;; When true, uses lazy automatic simplification to only run the simplifying
+          ;; program one input at a time until a non-zero error is found.
+
          :problem-specific-initial-report default-problem-specific-initial-report
           ;; A function can be called to provide a problem-specific initial report, which happens
           ;; before the normal initial report is printed.
