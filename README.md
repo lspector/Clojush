@@ -23,7 +23,7 @@ To use this code you must have a Clojure programming environment; see
 http://clojure.org/. The current version of Clojush requires Clojure 1.7.0.
 
 Clojure is available for most OS platforms. [A good starting point for
-obtaining and using Clojure](http://dev.clojure.org/display/doc/Getting+Started).
+obtaining and using Clojure](https://clojure.org/guides/getting_started).
 
 
 Quickstart
