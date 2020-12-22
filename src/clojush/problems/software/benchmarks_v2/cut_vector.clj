@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.cut-vector
+(ns clojush.problems.software.benchmarks-v2.cut-vector
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -36,16 +36,16 @@
 ;; random element of the set.
 (def cut-vector-data-domains
   [[(list [0] [100] [-100] [1000] [-1000]) 5 0] ;; Length-1 vectors
-   [(fn [] (cut-vector-input 1)) 45 500] ;; Random Length-1 vectors
+   [(fn [] (cut-vector-input 1)) 20 250] ;; Random Length-1 vectors
    [(list [2 129]
           [1 -4]
           [999 74]
           [987 995]
           [-788 -812]) 5 0] ;; Length-2 vectors
-   [(fn [] (cut-vector-input 2)) 45 500] ;; Random Length-2 vectors
+   [(fn [] (cut-vector-input 2)) 20 250] ;; Random Length-2 vectors
    [(fn [] (cut-vector-input (+ 3 (lrand-int 3)))) 50 500] ;; Random Length-3, -4, and -5 vectors
    [(fn [] (cut-vector-input 20)) 5 50] ;; Random Length-20 vectors
-   [(fn [] (cut-vector-input (inc (lrand-int 20)))) 95 1000] ;; Random length, random ints
+   [(fn [] (cut-vector-input (inc (lrand-int 20)))) 95 950] ;; Random length, random ints
    ])
 
 ;;Can make Cut Vector test data like this:
@@ -163,8 +163,8 @@
   {:error-function (make-cut-vector-error-function-from-cases (first cut-vector-train-and-test-cases)
                                                                   (second cut-vector-train-and-test-cases))
    :atom-generators cut-vector-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
    :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
@@ -181,5 +181,5 @@
    :problem-specific-initial-report cut-vector-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000000
+   :max-error 1000000
    })

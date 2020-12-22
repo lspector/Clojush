@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.dice-game
+(ns clojush.problems.software.benchmarks-v2.dice-game
   (:require [clojure.math.combinatorics :as combo])
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
@@ -143,9 +143,9 @@
   {:error-function (make-dice-game-error-function-from-cases (first dice-game-train-and-test-cases)
                                                                    (second dice-game-train-and-test-cases))
    :atom-generators dice-game-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
-   :evalpush-limit 1400
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -161,5 +161,5 @@
    :problem-specific-initial-report dice-game-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000
+   :max-error 1000000.0
    })

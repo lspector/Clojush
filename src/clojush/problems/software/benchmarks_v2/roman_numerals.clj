@@ -3,7 +3,7 @@
 ;;
 ;; Problem Source: iJava (http://ijava.cs.umass.edu/)
 
-(ns clojush.problems.software.roman-numerals
+(ns clojush.problems.software.benchmarks-v2.roman-numerals
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -142,7 +142,7 @@
                          ; Error is difference of integers
                          (if (number? result)
                            (abs (- result correct-output)) ;distance from correct integer
-                           100000) ;penalty for no return value
+                           1000000) ;penalty for no return value
                          )))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors)
@@ -195,9 +195,9 @@
   {:error-function (make-roman-numerals-error-function-from-cases (first roman-numerals-train-and-test-cases)
                                                                   (second roman-numerals-train-and-test-cases))
    :atom-generators roman-numerals-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
-   :evalpush-limit 3000
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase

@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.bowling
+(ns clojush.problems.software.benchmarks-v2.bowling
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -196,7 +196,7 @@
                          ; Error is integer distance
                          (if (number? result)
                            (abs (- result correct-output)) ;distance from correct integer
-                           1000000000) ;penalty for no return value
+                           1000000) ;penalty for no return value
                          )))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors)
@@ -249,9 +249,9 @@
   {:error-function (make-bowling-error-function-from-cases (first bowling-train-and-test-cases)
                                                                   (second bowling-train-and-test-cases))
    :atom-generators bowling-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
-   :evalpush-limit 4000
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -267,5 +267,5 @@
    :problem-specific-initial-report bowling-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000000
+   :max-error 1000000
    })

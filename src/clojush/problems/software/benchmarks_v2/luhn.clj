@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.luhn
+(ns clojush.problems.software.benchmarks-v2.luhn
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -85,7 +85,7 @@
                          ; Error is difference of integers
                          (if (number? result)
                            (abs (- result correct-output)) ;distance from correct integer
-                           100000) ;penalty for no return value
+                           1000000) ;penalty for no return value
                            )))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors)
@@ -138,8 +138,8 @@
   {:error-function (make-luhn-error-function-from-cases (first luhn-train-and-test-cases)
                                                                    (second luhn-train-and-test-cases))
    :atom-generators luhn-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
    :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
