@@ -49,7 +49,7 @@
           "f&t"
           "t|f"
           ) 6 0]
-   [(fn [] (solve-boolean-input (inc (lrand-int 25)))) 194 2000]
+   [(fn [] (solve-boolean-input (inc (lrand-int 20)))) 194 2000]
    ])
 
 ;;Can make Solve Boolean test data like this:

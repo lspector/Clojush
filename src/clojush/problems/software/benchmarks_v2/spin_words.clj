@@ -74,7 +74,7 @@
           "couple longer words"
           "onelooooooooongworrrrrrrrrrrrrrrrrrrrrrd"
           "word less than five char") 17 0] ;; "Special" inputs covering some base cases
-   [(fn [] (spin-words-input (inc (lrand-int 25)))) 183 2000]
+   [(fn [] (spin-words-input (inc (lrand-int 20)))) 183 2000]
    ])
 
 ;;Can make Spin Words test data like this:

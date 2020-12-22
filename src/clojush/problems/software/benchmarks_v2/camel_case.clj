@@ -53,7 +53,7 @@
           "all separate words"
           "all-one-word-with-th-dash"
           "saaaaaaaaaaaaaaaaaaaaaame") 7 0] ;; "Special" inputs covering some base cases
-   [(fn [] (camel-case-input (inc (lrand-int 25)))) 193 2000]
+   [(fn [] (camel-case-input (inc (lrand-int 20)))) 193 2000]
    ])
 
 ;;Can make Camel Case test data like this:
