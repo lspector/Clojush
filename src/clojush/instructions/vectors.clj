@@ -478,3 +478,18 @@
 (define-registered exec_do*vector_float (with-meta (iterateer :vector_float :float 'exec_do*vector_float) {:stack-types [:vector_float :float :exec] :parentheses 1}))
 (define-registered exec_do*vector_boolean (with-meta (iterateer :vector_boolean :boolean 'exec_do*vector_boolean) {:stack-types [:vector_boolean :boolean :exec] :parentheses 1}))
 (define-registered exec_do*vector_string (with-meta (iterateer :vector_string :string 'exec_do*vector_string) {:stack-types [:vector_string :string :exec] :parentheses 1}))
+
+(defn sorter
+  "Returns a function that takes a state and sorts the top vector on the stack"
+  [type]
+  (fn [state]
+    (if (not (empty? (type state)))
+      (push-item (vec (sort (top-item type state)))
+                 type
+                 (pop-item type state))
+      state)))
+
+(define-registered vector_integer_sort (with-meta (sorter :vector_integer) {:stack-types [:vector_integer]}))
+(define-registered vector_float_sort (with-meta (sorter :vector_float) {:stack-types [:vector_float]}))
+(define-registered vector_boolean_sort (with-meta (sorter :vector_boolean) {:stack-types [:vector_boolean]}))
+(define-registered vector_string_sort (with-meta (sorter :vector_string) {:stack-types [:vector_string]}))
