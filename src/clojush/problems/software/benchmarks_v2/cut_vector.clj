@@ -9,6 +9,24 @@
         [clojure.math numeric-tower combinatorics]
         ))
 
+(define-registered
+  output_vector_integer1
+  ^{:stack-types [:vector_integer]}
+  (fn [state]
+    (if (empty? (:vector_integer state))
+      state
+      (let [top-int (top-item :vector_integer state)]
+        (stack-assoc top-int :output 0)))))
+
+(define-registered
+  output_vector_integer2
+  ^{:stack-types [:vector_integer]}
+  (fn [state]
+    (if (empty? (:vector_integer state))
+      state
+      (let [top-int (top-item :vector_integer state)]
+        (stack-assoc top-int :output 1)))))
+
 ;; Define test cases
 (defn cut-vector-input
   "Makes a Cut Vector input vector of length len."
@@ -86,10 +104,11 @@
                                                    [])]
                      (let [final-state (run-push (:program individual)
                                                  (->> (make-push-state)
+                                                      (push-item :no-output :output)
+                                                      (push-item :no-output :output)
                                                       (push-item input1 :input)))
-                           result1 (stack-ref :vector_integer 0 final-state)
-                           result2 (try (stack-ref :vector_integer 1 final-state)
-                                        (catch Exception e :no-stack-item))]
+                           result1 (stack-ref :output 0 final-state)
+                           result2 (stack-ref :output 1 final-state)]
                        (when print-outputs
                            (println (format "Correct output: %s %s\n| Program output: %s %s\n" (str correct-output1) (str correct-output2) (str result1) (str result2))))
                        ; Record the behavior
@@ -102,14 +121,14 @@
                                               correct-output1
                                               result1))
                                (*' 10000 (abs (- (count correct-output1) (count result1))))) ; penalty of 10000 times difference in sizes of vectors
-                           1000000000) ; penalty for no return value
+                           1000000) ; penalty for no return value
                          (if (vector? result2)
                            (+' (apply +' (map (fn [cor res]
                                                 (abs (- cor res)))
                                               correct-output2
                                               result2))
                                (*' 10000 (abs (- (count correct-output2) (count result2))))) ; penalty of 10000 times difference in sizes of vectors
-                           1000000000) ; penalty for no return value
+                           1000000) ; penalty for no return value
                        )))))]
        (if (= data-cases :train)
          (assoc individual :behaviors @behavior :errors errors)

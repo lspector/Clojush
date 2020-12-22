@@ -9,6 +9,24 @@
         [clojure.math numeric-tower]
         ))
 
+(define-registered
+  output_integer1
+  ^{:stack-types [:integer]}
+  (fn [state]
+    (if (empty? (:integer state))
+      state
+      (let [top-int (top-item :integer state)]
+        (stack-assoc top-int :output 0)))))
+
+(define-registered
+  output_integer2
+  ^{:stack-types [:integer]}
+  (fn [state]
+    (if (empty? (:integer state))
+      state
+      (let [top-int (top-item :integer state)]
+        (stack-assoc top-int :output 1)))))
+
 ; Atom generators
 (def mastermind-atom-generators
   (concat (list
@@ -94,11 +112,12 @@
                                                      [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
-                                                     (push-item input1 :input)
-                                                     (push-item input2 :input)))
-                             result1 (stack-ref :integer 0 final-state)
-                             result2 (try (stack-ref :integer 1 final-state)
-                                          (catch Exception e :no-stack-item))]
+                                                        (push-item :no-output :output)
+                                                        (push-item :no-output :output)
+                                                        (push-item input1 :input)
+                                                        (push-item input2 :input)))
+                             result1 (stack-ref :output 0 final-state)
+                             result2 (stack-ref :output 1 final-state)]
                          (when print-outputs
                            (println (format "Correct output: %s %s | Program output: %s %s" (str correct-output1) (str correct-output2)
                                                                                             (str result1) (str result2))))

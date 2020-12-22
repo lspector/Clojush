@@ -9,45 +9,41 @@
         [clojure.math numeric-tower]
         ))
 
-; (define-registered
-;  output_integer1
-;  ^{:stack-types [:integer]}
-;  (fn [state]
-;    (if (empty? (:integer state))
-;      state
-;      (let [top-int (top-item :integer state)]
-;        (->> (pop-item :integer state)
-;             (stack-assoc top-int :output 0))))))
-;
-; (define-registered
-;  output_integer2
-;  ^{:stack-types [:integer]}
-;  (fn [state]
-;    (if (empty? (:integer state))
-;      state
-;      (let [top-int (top-item :integer state)]
-;        (->> (pop-item :integer state)
-;             (stack-assoc top-int :output 1))))))
-;
-; (define-registered
-;  output_integer3
-;  ^{:stack-types [:integer]}
-;  (fn [state]
-;    (if (empty? (:integer state))
-;      state
-;      (let [top-int (top-item :integer state)]
-;        (->> (pop-item :integer state)
-;             (stack-assoc top-int :output 2))))))
-;
-; (define-registered
-;  output_integer4
-;  ^{:stack-types [:integer]}
-;  (fn [state]
-;    (if (empty? (:integer state))
-;      state
-;      (let [top-int (top-item :integer state)]
-;        (->> (pop-item :integer state)
-;             (stack-assoc top-int :output 3))))))
+(define-registered
+  output_integer1
+  ^{:stack-types [:integer]}
+  (fn [state]
+    (if (empty? (:integer state))
+      state
+      (let [top-int (top-item :integer state)]
+        (stack-assoc top-int :output 0)))))
+
+(define-registered
+  output_integer2
+  ^{:stack-types [:integer]}
+  (fn [state]
+    (if (empty? (:integer state))
+      state
+      (let [top-int (top-item :integer state)]
+        (stack-assoc top-int :output 1)))))
+
+(define-registered
+  output_integer3
+  ^{:stack-types [:integer]}
+  (fn [state]
+    (if (empty? (:integer state))
+      state
+      (let [top-int (top-item :integer state)]
+        (stack-assoc top-int :output 2)))))
+
+(define-registered
+  output_integer4
+  ^{:stack-types [:integer]}
+  (fn [state]
+    (if (empty? (:integer state))
+      state
+      (let [top-int (top-item :integer state)]
+        (stack-assoc top-int :output 3)))))
 
 ; Atom generators
 (def coin-sums-atom-generators
@@ -119,18 +115,15 @@
                                                                [])]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
-                                                       ; (push-item :no-output :output)
-                                                       ; (push-item :no-output :output)
-                                                       ; (push-item :no-output :output)
-                                                       ; (push-item :no-output :output)
-                                                       (push-item input :input)))
-                               result-pennies (stack-ref :integer 0 final-state)
-                               result-nickles (try (stack-ref :integer 1 final-state)
-                                            (catch Exception e :no-stack-item))
-                               result-dimes (try (stack-ref :integer 2 final-state)
-                                            (catch Exception e :no-stack-item))
-                               result-quarters (try (stack-ref :integer 3 final-state)
-                                            (catch Exception e :no-stack-item))]
+                                                          (push-item :no-output :output)
+                                                          (push-item :no-output :output)
+                                                          (push-item :no-output :output)
+                                                          (push-item :no-output :output)
+                                                          (push-item input :input)))
+                               result-pennies (stack-ref :output 0 final-state)
+                               result-nickles (stack-ref :output 1 final-state)
+                               result-dimes (stack-ref :output 2 final-state)
+                               result-quarters (stack-ref :output 3 final-state)]
                              (when print-outputs
                                (println (format "Correct output: %s %s %s %s \n| Program output: %s %s %s %s"
                                                 (str correct-pennies) (str correct-nickles) (str correct-dimes) (str correct-quarters)
