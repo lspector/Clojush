@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.twitter
+(ns clojush.problems.software.benchmarks-v2.twitter
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -139,8 +139,8 @@
   {:error-function (make-twitter-error-function-from-cases (first twitter-train-and-test-cases)
                                                                   (second twitter-train-and-test-cases))
    :atom-generators twitter-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
    :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
@@ -151,11 +151,11 @@
                                     [:alternation :uniform-mutation] 0.5
                                     }
    :alternation-rate 0.01
-   :alignment-deviation 5
+   :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report twitter-report
    :problem-specific-initial-report twitter-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 5000
+   :max-error 1000000
    })

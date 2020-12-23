@@ -3,7 +3,7 @@
 ;;
 ;; Problem Source: https://practice.geeksforgeeks.org/problems/leaders-in-an-array/0
 
-(ns clojush.problems.software.leaders
+(ns clojush.problems.software.benchmarks-v2.leaders
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -87,8 +87,8 @@
                                                 (abs (- cor res)))
                                               correct-output
                                               result))
-                               (*' 10000 (abs (- (count correct-output) (count result))))) ; penalty of 10000 times difference in sizes of vectors
-                           1000000000) ; penalty for no return value
+                               (*' 1000 (abs (- (count correct-output) (count result))))) ; penalty of 1000 times difference in sizes of vectors
+                           1000000) ; penalty for no return value
                          )))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors)
@@ -141,8 +141,8 @@
   {:error-function (make-leaders-error-function-from-cases (first leaders-train-and-test-cases)
                                                                       (second leaders-train-and-test-cases))
    :atom-generators leaders-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
    :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
@@ -159,5 +159,5 @@
    :problem-specific-initial-report leaders-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000000
+   :max-error 1000000
    })

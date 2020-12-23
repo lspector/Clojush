@@ -3,7 +3,7 @@
 ;;
 ;; Problem Source: https://www.codewars.com/kata/517abf86da9663f1d2000003
 
-(ns clojush.problems.software.camel-case
+(ns clojush.problems.software.benchmarks-v2.camel-case
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -148,9 +148,9 @@
  {:error-function (make-camel-case-error-function-from-cases (first camel-case-train-and-test-cases)
                                                                      (second camel-case-train-and-test-cases))
   :atom-generators camel-case-atom-generators
-  :max-points 1600
-  :max-genome-size-in-initial-program 200
-  :evalpush-limit 1500
+  :max-points 2000
+  :max-genome-size-in-initial-program 250
+  :evalpush-limit 2000
   :population-size 1000
   :max-generations 300
   :parent-selection :lexicase
@@ -166,5 +166,5 @@
   :problem-specific-initial-report camel-case-initial-report
   :report-simplifications 0
   :final-report-simplifications 5000
-  :max-error 100000
+  :max-error 1000000
   })

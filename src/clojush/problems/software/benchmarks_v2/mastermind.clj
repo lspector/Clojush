@@ -2,12 +2,30 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.mastermind
+(ns clojush.problems.software.benchmarks-v2.mastermind
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
         [clojure.math numeric-tower]
         ))
+
+(define-registered
+  output_integer1
+  ^{:stack-types [:integer]}
+  (fn [state]
+    (if (empty? (:integer state))
+      state
+      (let [top-int (top-item :integer state)]
+        (stack-assoc top-int :output 0)))))
+
+(define-registered
+  output_integer2
+  ^{:stack-types [:integer]}
+  (fn [state]
+    (if (empty? (:integer state))
+      state
+      (let [top-int (top-item :integer state)]
+        (stack-assoc top-int :output 1)))))
 
 ; Atom generators
 (def mastermind-atom-generators
@@ -94,11 +112,12 @@
                                                      [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
-                                                     (push-item input1 :input)
-                                                     (push-item input2 :input)))
-                             result1 (stack-ref :integer 0 final-state)
-                             result2 (try (stack-ref :integer 1 final-state)
-                                          (catch Exception e :no-stack-item))]
+                                                        (push-item :no-output :output)
+                                                        (push-item :no-output :output)
+                                                        (push-item input1 :input)
+                                                        (push-item input2 :input)))
+                             result1 (stack-ref :output 0 final-state)
+                             result2 (stack-ref :output 1 final-state)]
                          (when print-outputs
                            (println (format "Correct output: %s %s | Program output: %s %s" (str correct-output1) (str correct-output2)
                                                                                             (str result1) (str result2))))
@@ -108,10 +127,10 @@
                          (vector
                            (if (number? result1)
                                (abs (- result1 correct-output1)) ;distance from correct integer
-                               10000) ;penalty for no return value
+                               1000000) ;penalty for no return value
                            (if (number? result2)
                                (abs (- result2 correct-output2)) ;distance from correct integer
-                               10000) ;penalty for no return value
+                               1000000) ;penalty for no return value
                            )))))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors)
@@ -164,9 +183,9 @@
   {:error-function (make-mastermind-error-function-from-cases (first mastermind-train-and-test-cases)
                                                                   (second mastermind-train-and-test-cases))
    :atom-generators mastermind-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
-   :evalpush-limit 4000
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -182,5 +201,5 @@
    :problem-specific-initial-report mastermind-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 10000
+   :max-error 1000000
    })

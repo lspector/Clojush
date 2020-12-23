@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.bouncing-balls
+(ns clojush.problems.software.benchmarks-v2.bouncing-balls
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -149,9 +149,9 @@
   {:error-function (make-bouncing-balls-error-function-from-cases (first bouncing-balls-train-and-test-cases)
                                                           (second bouncing-balls-train-and-test-cases))
    :atom-generators bouncing-balls-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
-   :evalpush-limit 1500
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -162,11 +162,11 @@
                                     [:alternation :uniform-mutation] 0.5
                                     }
    :alternation-rate 0.01
-   :alignment-deviation 5
+   :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report bouncing-balls-report
    :problem-specific-initial-report bouncing-balls-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000
+   :max-error 1000000.0
    })

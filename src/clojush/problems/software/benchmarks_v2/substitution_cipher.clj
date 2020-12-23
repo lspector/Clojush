@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.substitution-cipher
+(ns clojush.problems.software.benchmarks-v2.substitution-cipher
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -149,9 +149,9 @@
   {:error-function (make-substitution-cipher-error-function-from-cases (first substitution-cipher-train-and-test-cases)
                                                                   (second substitution-cipher-train-and-test-cases))
    :atom-generators substitution-cipher-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
-   :evalpush-limit 4000
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -161,11 +161,11 @@
                                     [:alternation :uniform-mutation] 0.5
                                     }
    :alternation-rate 0.01
-   :alignment-deviation 5
+   :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report substitution-cipher-report
    :problem-specific-initial-report substitution-cipher-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 5000
+   :max-error 1000000
    })

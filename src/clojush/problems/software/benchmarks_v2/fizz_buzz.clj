@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.fizz-buzz
+(ns clojush.problems.software.benchmarks-v2.fizz-buzz
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -155,9 +155,9 @@
   {:error-function (make-fizz-buzz-error-function-from-cases (first fizz-buzz-train-and-test-cases)
                                                                   (second fizz-buzz-train-and-test-cases))
    :atom-generators fizz-buzz-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
-   :evalpush-limit 4000
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
