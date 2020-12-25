@@ -16,7 +16,7 @@
     (if (empty? (:integer state))
       state
       (let [top-int (top-item :integer state)]
-        (stack-assoc top-int :output 0)))))
+        (stack-assoc top-int :output 0 state)))))
 
 (define-registered
   output_integer2
@@ -25,7 +25,7 @@
     (if (empty? (:integer state))
       state
       (let [top-int (top-item :integer state)]
-        (stack-assoc top-int :output 1)))))
+        (stack-assoc top-int :output 1 state)))))
 
 ; Atom generators
 (def mastermind-atom-generators

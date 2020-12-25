@@ -16,7 +16,7 @@
     (if (empty? (:vector_integer state))
       state
       (let [top-int (top-item :vector_integer state)]
-        (stack-assoc top-int :output 0)))))
+        (stack-assoc top-int :output 0 state)))))
 
 (define-registered
   output_vector_integer2
@@ -25,7 +25,7 @@
     (if (empty? (:vector_integer state))
       state
       (let [top-int (top-item :vector_integer state)]
-        (stack-assoc top-int :output 1)))))
+        (stack-assoc top-int :output 1 state)))))
 
 ;; Define test cases
 (defn cut-vector-input
