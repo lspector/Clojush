@@ -11,16 +11,15 @@
 
 ; Atom generators
 (def bouncing-balls-atom-generators
-  (concat (list
-            (tag-instruction-erc [:exec :integer :boolean :float] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end ERCs
-            'in1
-            'in2
-            'in3
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :boolean :exec :float])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :exec :float])
+    (list (tag-instruction-erc [:exec :integer :boolean :float] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1 'in2 'in3) ; inputs
+   (list 0.0 1.0 2.0) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 ;; Define test cases
 (defn bouncing-balls-input

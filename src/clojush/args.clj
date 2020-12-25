@@ -35,7 +35,7 @@
                                  (fn [] (lrand-int 100))
                                  (fn [] (lrand))))
           ;; The instructions that pushgp will use in random code.
-
+         
          :population-size 1000
           ;; Number of individuals in the population.
 
