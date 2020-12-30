@@ -12,17 +12,15 @@
 
 ; Atom generators
 (def dice-game-atom-generators
-  (concat (list
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :exec] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            'in2
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :boolean :exec :float])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :exec :float])
+    (list (tag-instruction-erc [:integer :boolean :exec :float] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1 'in2) ; inputs
+   (list 0.0 1.0) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 (defn dice-game-input
   []
