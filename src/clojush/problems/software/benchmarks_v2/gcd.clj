@@ -11,17 +11,16 @@
 
 ; Atom generators
 (def gcd-atom-generators
-  (concat (list
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :exec] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            'in2
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:boolean :integer :exec])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :exec])
+    (list (tag-instruction-erc [:integer :boolean :exec] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1 'in2) ; inputs
+   (list (fn [] (- (lrand-int 21) 10)) ; integer ERC [-10, 10]
+) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 
 ;; Define test cases
@@ -42,7 +41,7 @@
           [4200 3528]
           [820000 63550]
           [123456 654321]) 6 0]
-   [(fn [] (gcd-input)) 194 2000] ;; Random length, random floats
+   [(fn [] (gcd-input)) 194 2000] ;; Random length, random integers
    ])
 
 ;;Can make GCD test data like this:
@@ -138,7 +137,7 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-gcd-error-function-from-cases (first gcd-train-and-test-cases)
-                                                                  (second gcd-train-and-test-cases))
+                                                       (second gcd-train-and-test-cases))
    :atom-generators gcd-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
