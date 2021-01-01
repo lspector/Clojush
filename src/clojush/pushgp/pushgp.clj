@@ -319,7 +319,7 @@
      (reset-globals)
      (initial-report @push-argmap) ;; Print the inital report
      (r/uuid! (:run-uuid @push-argmap))
-     (print-params (r/config-data! [:argmap] (dissoc @push-argmap :run-uuid)))
+     (print-params (r/config-data! [:argmap] @push-argmap))
      (check-genetic-operator-probabilities-add-to-one @push-argmap)
      (timer @push-argmap :initialization)
      (when (:print-timings @push-argmap)
