@@ -11,21 +11,20 @@
 
 ; Atom generators
 (def atom-generators
-  (concat (list
-           0
-           1
-           2
-           -1
-            ;;; end constants
-           (fn [] (- (lrand-int 2001) 1000)) ;Integer ERC
-           (tag-instruction-erc [:exec :integer :boolean :vector_integer] 1000)
-           (tagged-instruction-erc 1000)
-             ;;; end ERCs
-           'in1
-           'in2
-             ;;; end input instructions
-           )
-          (registered-for-stacks [:integer :vector_integer :boolean :exec])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :vector_integer :boolean :exec])
+    (list (tag-instruction-erc [:integer :vector_integer :boolean :exec] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1 'in2) ; inputs
+   (list 0
+         1
+         2
+         -1
+         (fn [] (- (lrand-int 2001) 1000)) ;Integer ERC
+         ) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 (defn all-pairs-sum-to-target
   "Finds all pairs of numbers in list that sum to target and returns them"
@@ -52,23 +51,6 @@
             (> (count (all-pairs-sum-to-target numbers target)) 2))
       (recur vector-length) ; if bad vector, just make another
       [numbers target])))
-
-(comment
-  (- (lrand-int 3) 1)
-
-  (all-pairs-sum-to-target [1 2 3] 5)
-  (all-pairs-sum-to-target [1 2 3 4 5 6 0] 5)
-  
-  (find-pair-input 15)
-  (find-pair-input 2)
-  
-  (sort (repeatedly 1000 #(count (first (find-pair-input 15)))))
-  
-  (all-pairs-sum-to-target [-60 9527 3954 -5540 -1563 4719 -378 6767 3961 -288 -8128 -6122 -7797 -8900 -9381] -9278)
-  
-  max-number-magnitude
-  
-  )
 
 ;; A list of data domains. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
@@ -106,15 +88,7 @@
    [(fn [] (find-pair-input (+ 2 (lrand-int 19)))) 125 2000] ; random vectors, length [2, 20]
    ])
 
-(comment
-  (+ 410 -777)
-
-  (apply min (repeatedly 1000 #(+ 2 (lrand-int 19))))
-  
-  (test-and-train-data-from-domains data-domains)
-  )
-
-;;Can make bouncing-balls test data like this:
+;;Can make test data like this:
 ;(test-and-train-data-from-domains data-domains)
 
 ; Helper function for error function
