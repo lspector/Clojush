@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.fizz-buzz
+(ns clojush.problems.software.benchmarks-v2.fizz-buzz
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -11,21 +11,20 @@
 
 ; Atom generators
 (def fizz-buzz-atom-generators
-  (concat (list
-            "Fizz"
-            "Buzz"
-            "FizzBuzz"
-            3
-            5
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :exec :boolean :string :char] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :exec :string :boolean])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :exec :string :boolean])
+    (list (tag-instruction-erc [:integer :exec :string :boolean] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1) ; inputs
+   (list "Fizz"
+         "Buzz"
+         "FizzBuzz"
+         0
+         3
+         5) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
@@ -155,9 +154,9 @@
   {:error-function (make-fizz-buzz-error-function-from-cases (first fizz-buzz-train-and-test-cases)
                                                                   (second fizz-buzz-train-and-test-cases))
    :atom-generators fizz-buzz-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
-   :evalpush-limit 4000
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase

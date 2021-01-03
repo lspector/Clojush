@@ -2,38 +2,62 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.mastermind
+(ns clojush.problems.software.benchmarks-v2.mastermind
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
         [clojure.math numeric-tower]
         ))
 
+(define-registered
+  output_integer1
+  ^{:stack-types [:integer]}
+  (fn [state]
+    (if (empty? (:integer state))
+      state
+      (let [top-int (top-item :integer state)]
+        (stack-assoc top-int :output 0 state)))))
+
+(define-registered
+  output_integer2
+  ^{:stack-types [:integer]}
+  (fn [state]
+    (if (empty? (:integer state))
+      state
+      (let [top-int (top-item :integer state)]
+        (stack-assoc top-int :output 1 state)))))
+
 ; Atom generators
 (def mastermind-atom-generators
-  (concat (list
-            \B
-            \R
-            \W
-            \Y
-            \O
-            \G
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :exec :boolean :string :char] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            'in2
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :exec :string :char :boolean])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :exec :boolean :string :char])
+    (list (tag-instruction-erc [:integer :exec :boolean :string :char] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1 'in2) ; inputs
+   (list 0
+         1
+         \B
+         \R
+         \W
+         \Y
+         \O
+         \G) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 ;; Define test cases
+(defn mastermind-one-string
+  "Makes a 4-char mastermind string"
+  []
+  (apply str (repeatedly 4
+                         #(rand-nth "BRWYOG"))))
+
 (defn mastermind-input
   "Makes a mastermind input."
   []
-  (vector (apply str (repeatedly 4 #(rand-nth "BRWYOG"))) (apply str (repeatedly 4 #(rand-nth "BRWYOG")))))
+  (vec (repeatedly 2 mastermind-one-string)))
+
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
@@ -46,8 +70,25 @@
           ["WYYW" "BBOG"]
           ["GGGB" "BGGG"]
           ["BBBB" "OOOO"]
-          ) 5 0]
-   [(fn [] (mastermind-input)) 195 2000]
+          ["BWYG" "YWBG"]
+          ["RGOW" "OGWR"]
+          ["YGGB" "GYGB"]
+          ["YGGB" "GYBG"]
+          ["GOGY" "OGGO"]
+          ["GOGR" "GOYR"]
+          ["YMOO" "YMRG"]
+          ["GROY" "BGOW"]
+          ["GGYG" "BYBB"]
+          ["WWWW" "BYWR"]
+          ["RBYO" "BWBB"]
+          ["RBRB" "ORBY"]
+          ["WORR" "BYOW"]
+          ["YOWW" "YWWR"]
+          ["BRYB" "WOGG"]
+          ) 20 0]
+   [(fn [] (let [s (mastermind-one-string)]
+             [s s])) 10 200] ; all the same
+   [(fn [] (mastermind-input)) 170 1800]
   ])
 
 ;;Can make mastermind test data like this:
@@ -94,11 +135,12 @@
                                                      [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
-                                                     (push-item input1 :input)
-                                                     (push-item input2 :input)))
-                             result1 (stack-ref :integer 0 final-state)
-                             result2 (try (stack-ref :integer 1 final-state)
-                                          (catch Exception e :no-stack-item))]
+                                                        (push-item :no-output :output)
+                                                        (push-item :no-output :output)
+                                                        (push-item input1 :input)
+                                                        (push-item input2 :input)))
+                             result1 (stack-ref :output 0 final-state)
+                             result2 (stack-ref :output 1 final-state)]
                          (when print-outputs
                            (println (format "Correct output: %s %s | Program output: %s %s" (str correct-output1) (str correct-output2)
                                                                                             (str result1) (str result2))))
@@ -108,10 +150,10 @@
                          (vector
                            (if (number? result1)
                                (abs (- result1 correct-output1)) ;distance from correct integer
-                               10000) ;penalty for no return value
+                               1000000) ;penalty for no return value
                            (if (number? result2)
                                (abs (- result2 correct-output2)) ;distance from correct integer
-                               10000) ;penalty for no return value
+                               1000000) ;penalty for no return value
                            )))))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors)
@@ -162,11 +204,11 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-mastermind-error-function-from-cases (first mastermind-train-and-test-cases)
-                                                                  (second mastermind-train-and-test-cases))
+                                                              (second mastermind-train-and-test-cases))
    :atom-generators mastermind-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
-   :evalpush-limit 4000
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -182,5 +224,5 @@
    :problem-specific-initial-report mastermind-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 10000
+   :max-error 1000000
    })

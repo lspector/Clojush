@@ -437,3 +437,32 @@
             bottom-val (nth sorted bottom)
             top-val (nth sorted halfway)]
            (mean [bottom-val top-val])))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Function to produce proportional input and constant instructions
+
+(defn concatenate-until-threshold
+  "Utility function for make-proportional-atom-generators.
+   This repeatedly concatenates coll with itself until
+   it has at least threshold elements in it."
+  [coll threshold]
+  (loop [things coll]
+    (if (>= (count things) threshold)
+      things
+      (recur (concat things coll)))))
+
+(defn make-proportional-atom-generators
+  "Takes lists of one-each-instructions, inputs, and constants,
+   and the proportions of inputs and constants in the final set
+   as a map, and produces the final list of atom generators."
+  [one-each-instructions inputs constants
+   {:keys [proportion-inputs proportion-constants]}]
+  (let [original-instruction-count (count one-each-instructions)
+        proportional-increase (+ proportion-inputs proportion-constants)
+        final-instruction-count (/ original-instruction-count
+                                   (- 1.0 proportional-increase))
+        number-inputs (int (* proportion-inputs final-instruction-count))
+        number-constants (int (* proportion-constants final-instruction-count))
+        inputs-final (concatenate-until-threshold inputs number-inputs)
+        constants-final (concatenate-until-threshold constants number-constants)]
+    (concat one-each-instructions inputs-final constants-final)))

@@ -3,7 +3,7 @@
 ;;
 ;; Problem Source: https://www.codewars.com/kata/517abf86da9663f1d2000003
 
-(ns clojush.problems.software.camel-case
+(ns clojush.problems.software.benchmarks-v2.camel-case
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -20,25 +20,29 @@
                       " "
                       "-")
         word (take len (repeatedly #(rand-nth chars)))]
-          (reduce str word)))
+    (apply str word)))
+
+(comment
+  (camel-case-input 20)
+  
+  (first (test-and-train-data-from-domains camel-case-data-domains))
+  )
 
 ; Atom generators
 (def camel-case-atom-generators
-  (concat (list
-            \-
-            \space
-            ;;; end constants
-            (fn [] (lrand-nth (map char (range 97 122)))) ;Visible character ERC
-            (fn [] (camel-case-input (lrand-int 21))) ;String ERC
-            ;;; end ERCs
-            (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :boolean :string :char :exec :print])))
-
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :string :char :exec :print])
+    (list (tag-instruction-erc [:integer :boolean :string :char :exec] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1) ; inputs
+   (list \-
+         \space
+         (fn [] (lrand-nth (map char (range 97 122)))) ;Visible character ERC
+         (fn [] (camel-case-input (lrand-int 21))) ;String ERC
+         ) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
@@ -148,9 +152,9 @@
  {:error-function (make-camel-case-error-function-from-cases (first camel-case-train-and-test-cases)
                                                                      (second camel-case-train-and-test-cases))
   :atom-generators camel-case-atom-generators
-  :max-points 1600
-  :max-genome-size-in-initial-program 200
-  :evalpush-limit 1500
+  :max-points 2000
+  :max-genome-size-in-initial-program 250
+  :evalpush-limit 2000
   :population-size 1000
   :max-generations 300
   :parent-selection :lexicase
@@ -166,5 +170,5 @@
   :problem-specific-initial-report camel-case-initial-report
   :report-simplifications 0
   :final-report-simplifications 5000
-  :max-error 100000
+  :max-error 1000000
   })

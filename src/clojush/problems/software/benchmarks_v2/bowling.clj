@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.bowling
+(ns clojush.problems.software.benchmarks-v2.bowling
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -30,32 +30,29 @@
 
 ; Atom generators
 (def bowling-atom-generators
-  (concat (list
-            \-
-            \X
-            \/
-            \1
-            \2
-            \3
-            \4
-            \5
-            \6
-            \7
-            \8
-            \9
-            10
-            ;;; end constants
-            (fn [] (- (lrand-int 20) 10)) ; Integer ERC [-10, 10]
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :exec :boolean :string :char] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :exec :string :char :boolean])))
-
-
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :exec :string :char :boolean])
+    (list (tag-instruction-erc [:integer :exec :boolean :string :char] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1) ; inputs
+   (list \-
+         \X
+         \/
+         \1
+         \2
+         \3
+         \4
+         \5
+         \6
+         \7
+         \8
+         \9
+         10
+         (fn [] (- (lrand-int 20) 10)) ; Integer ERC [-10, 10]
+         ) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 (defn convert-game
   "Takes a bowling input as a vector and converts it to a proper string"
@@ -196,7 +193,7 @@
                          ; Error is integer distance
                          (if (number? result)
                            (abs (- result correct-output)) ;distance from correct integer
-                           1000000000) ;penalty for no return value
+                           1000000) ;penalty for no return value
                          )))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors)
@@ -247,19 +244,18 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-bowling-error-function-from-cases (first bowling-train-and-test-cases)
-                                                                  (second bowling-train-and-test-cases))
+                                                           (second bowling-train-and-test-cases))
    :atom-generators bowling-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
-   :evalpush-limit 4000
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
+                                    [:alternation :uniform-mutation] 0.5}
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
@@ -267,5 +263,4 @@
    :problem-specific-initial-report bowling-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000000
-   })
+   :max-error 1000000})

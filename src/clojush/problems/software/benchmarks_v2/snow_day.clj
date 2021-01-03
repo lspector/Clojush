@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.snow-day
+(ns clojush.problems.software.benchmarks-v2.snow-day
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -142,8 +142,8 @@
   {:error-function (make-snow-day-error-function-from-cases (first snow-day-train-and-test-cases)
                                                              (second snow-day-train-and-test-cases))
    :atom-generators snow-day-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
    :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
@@ -156,11 +156,9 @@
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
-   :uniform-mutation-constant-tweak-rate 0.9
    :problem-specific-report snow-day-report
    :problem-specific-initial-report snow-day-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :error-threshold 0.001
    :max-error 1000000.0
    })

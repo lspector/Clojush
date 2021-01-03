@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.luhn
+(ns clojush.problems.software.benchmarks-v2.luhn
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -11,19 +11,20 @@
 
 ; Atom generators
 (def luhn-atom-generators
-  (concat (list
-            2
-            9
-            10
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :exec :vector_integer] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :boolean :exec :vector_integer])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :exec :vector_integer])
+    (list (tag-instruction-erc [:integer :boolean :exec :vector_integer] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1) ; inputs
+   (list 0
+         2
+         9
+         10
+         (fn [] (- (lrand-int 21) 10)) ; integer ERC [-10, 10]
+         ) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 
 ;; A list of data domains for the problem. Each domain is a vector containing
@@ -36,8 +37,24 @@
      [0 1 2 3 4 5 6 7 8 9 8 7 6 5 4 3]
      [9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9]
      [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-     [5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5]) 4 0]
-   [(fn [] (vec (repeatedly 16 #(rand-int 10)))) 196 2000]
+     [5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5]
+     [4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4]
+     [1 0 2 0 4 3 2 1 0 4 1 2 3 4 2 1]
+     [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0]
+     [2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+     [0 0 0 0 0 0 0 0 0 0 0 0 0 0 3 0]
+     [0 0 0 0 0 0 0 0 4 0 0 0 0 0 0 0]
+     [0 0 0 0 0 5 0 0 0 0 0 0 0 0 0 0]
+     [0 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+     [0 0 0 0 0 0 0 0 0 0 0 0 7 0 0 0]
+     [0 0 0 0 0 0 0 0 0 0 8 0 0 0 0 0]
+     [0 0 9 0 0 0 0 0 0 0 0 0 0 0 0 0]
+     [8 0 0 0 0 6 0 0 0 0 9 0 0 0 0 0]
+     [0 0 2 0 0 0 4 0 0 0 0 0 1 0 0 0]
+     [0 5 0 5 0 5 0 5 0 5 0 5 0 5 0 5]
+     [9 9 8 7 6 6 7 8 9 9 8 7 6 5 5 6]
+     [0 0 0 0 0 7 0 0 0 3 0 0 0 0 0 0]) 20 0]
+   [(fn [] (vec (repeatedly 16 #(rand-int 10)))) 180 2000]
    ])
 
 ;;Can make Luhn test data like this:
@@ -85,7 +102,7 @@
                          ; Error is difference of integers
                          (if (number? result)
                            (abs (- result correct-output)) ;distance from correct integer
-                           100000) ;penalty for no return value
+                           1000000) ;penalty for no return value
                            )))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors)
@@ -136,10 +153,10 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-luhn-error-function-from-cases (first luhn-train-and-test-cases)
-                                                                   (second luhn-train-and-test-cases))
+                                                        (second luhn-train-and-test-cases))
    :atom-generators luhn-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
    :evalpush-limit 2000
    :population-size 1000
    :max-generations 300

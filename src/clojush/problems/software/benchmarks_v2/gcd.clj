@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.gcd
+(ns clojush.problems.software.benchmarks-v2.gcd
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -11,17 +11,16 @@
 
 ; Atom generators
 (def gcd-atom-generators
-  (concat (list
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :exec] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            'in2
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:boolean :integer :exec])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :exec])
+    (list (tag-instruction-erc [:integer :boolean :exec] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1 'in2) ; inputs
+   (list (fn [] (- (lrand-int 21) 10)) ; integer ERC [-10, 10]
+) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 
 ;; Define test cases
@@ -42,7 +41,7 @@
           [4200 3528]
           [820000 63550]
           [123456 654321]) 6 0]
-   [(fn [] (gcd-input)) 194 2000] ;; Random length, random floats
+   [(fn [] (gcd-input)) 194 2000] ;; Random length, random integers
    ])
 
 ;;Can make GCD test data like this:
@@ -87,7 +86,7 @@
                        ; Error is integer difference
                        (if (number? result)
                          (abs (- result correct-output)) ; distance from correct integer
-                         10000000) ; penalty for no return value
+                         1000000) ; penalty for no return value
                        )))]
        (if (= data-cases :train)
          (assoc individual :behaviors @behavior :errors errors)
@@ -138,11 +137,11 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-gcd-error-function-from-cases (first gcd-train-and-test-cases)
-                                                                  (second gcd-train-and-test-cases))
+                                                       (second gcd-train-and-test-cases))
    :atom-generators gcd-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
-   :evalpush-limit 4000
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -158,5 +157,5 @@
    :problem-specific-initial-report gcd-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 10000000
+   :max-error 1000000
    })

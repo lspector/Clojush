@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.solve-boolean
+(ns clojush.problems.software.benchmarks-v2.solve-boolean
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -153,9 +153,9 @@
   {:error-function (make-solve-boolean-error-function-from-cases (first solve-boolean-train-and-test-cases)
                                                              (second solve-boolean-train-and-test-cases))
    :atom-generators solve-boolean-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
-   :evalpush-limit 1000
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -167,11 +167,9 @@
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
-   :uniform-mutation-constant-tweak-rate 0.9
    :problem-specific-report solve-boolean-report
    :problem-specific-initial-report solve-boolean-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :error-threshold 0
-   :max-error 1000000.0
+   :max-error 1
    })

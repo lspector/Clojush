@@ -2,7 +2,7 @@
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
 
-(ns clojush.problems.software.dice-game
+(ns clojush.problems.software.benchmarks-v2.dice-game
   (:require [clojure.math.combinatorics :as combo])
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
@@ -12,17 +12,15 @@
 
 ; Atom generators
 (def dice-game-atom-generators
-  (concat (list
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :exec] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            'in2
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :boolean :exec :float])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :exec :float])
+    (list (tag-instruction-erc [:integer :boolean :exec :float] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1 'in2) ; inputs
+   (list 0.0 1.0) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 (defn dice-game-input
   []
@@ -143,9 +141,9 @@
   {:error-function (make-dice-game-error-function-from-cases (first dice-game-train-and-test-cases)
                                                                    (second dice-game-train-and-test-cases))
    :atom-generators dice-game-atom-generators
-   :max-points 1600
-   :max-genome-size-in-initial-program 200
-   :evalpush-limit 1400
+   :max-points 2000
+   :max-genome-size-in-initial-program 250
+   :evalpush-limit 2000
    :population-size 1000
    :max-generations 300
    :parent-selection :lexicase
@@ -161,5 +159,5 @@
    :problem-specific-initial-report dice-game-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000
+   :max-error 1000000.0
    })
