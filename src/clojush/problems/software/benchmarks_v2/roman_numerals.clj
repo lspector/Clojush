@@ -12,58 +12,63 @@
 
 (def roman-numeral-values
   (let [roman-numeral-map {\i 1
-                      \v 5
-                      \x 10
-                      \l, 50
-                      \c 100
-                      \d 500
-                      \m 1000}
+                           \v 5
+                           \x 10
+                           \l 50
+                           \c 100
+                           \d 500
+                           \m 1000}
         visible-chars (map char (range 0 127))]
     (vec (for [c visible-chars]
            (get roman-numeral-map (first (string/lower-case c)) 0)))))
 
 ; Atom generators
 (def roman-numerals-atom-generators
-  (concat (list
-            roman-numeral-values
-            1
-            5
-            10
-            50
-            100
-            500
-            1000
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:string :char :integer :boolean :vector_integer :exec] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:string :char :integer :boolean :vector_integer :exec])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:string :char :integer :boolean :vector_integer :exec])
+    (list (tag-instruction-erc [:string :char :integer :boolean :vector_integer :exec] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1) ; inputs
+   (list roman-numeral-values
+         0
+         1
+         4
+         5
+         9
+         10
+         40
+         50
+         90
+         100
+         400
+         500
+         900
+         1000) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 ;; Define test cases
 (defn roman-numerals-input
  "Makes a Roman Numeral input given a decimal number."
  [num]
  (apply str
-           (loop [roman "" number num]
-             (cond
-               (> number (mod number 1000)) (recur (str roman "M") (- number 1000))
-               (> number (mod number 900)) (recur (str roman "CM") (- number 900))
-               (> number (mod number 500)) (recur (str roman "D") (- number 500))
-               (> number (mod number 400)) (recur (str roman "CD") (- number 400))
-               (> number (mod number 100)) (recur (str roman "C") (- number 100))
-               (> number (mod number 90)) (recur (str roman "XC") (- number 90))
-               (> number (mod number 50)) (recur (str roman "L") (- number 50))
-               (> number (mod number 40)) (recur (str roman "XL") (- number 40))
-               (> number (mod number 10)) (recur (str roman "X") (- number 10))
-               (> number (mod number 9)) (recur (str roman "IX") (- number 9))
-               (> number (mod number 5)) (recur (str roman "V") (- number 5))
-               (> number (mod number 4)) (recur (str roman "IV") (- number 4))
-               (> number (mod number 1)) (recur (str roman "I") (- number 1))
-               :else roman))))
+        (loop [roman "" number num]
+          (cond
+            (> number (mod number 1000)) (recur (str roman "M") (- number 1000))
+            (> number (mod number 900)) (recur (str roman "CM") (- number 900))
+            (> number (mod number 500)) (recur (str roman "D") (- number 500))
+            (> number (mod number 400)) (recur (str roman "CD") (- number 400))
+            (> number (mod number 100)) (recur (str roman "C") (- number 100))
+            (> number (mod number 90)) (recur (str roman "XC") (- number 90))
+            (> number (mod number 50)) (recur (str roman "L") (- number 50))
+            (> number (mod number 40)) (recur (str roman "XL") (- number 40))
+            (> number (mod number 10)) (recur (str roman "X") (- number 10))
+            (> number (mod number 9)) (recur (str roman "IX") (- number 9))
+            (> number (mod number 5)) (recur (str roman "V") (- number 5))
+            (> number (mod number 4)) (recur (str roman "IV") (- number 4))
+            (> number (mod number 1)) (recur (str roman "I") (- number 1))
+            :else roman))))
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
@@ -71,22 +76,69 @@
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
 (def roman-numerals-data-domains
-  [[(list ""
-          "I"
-          "V"
-          "X"
-          "L"
-          "C"
-          "D"
-          "M"
-          "IV"
-          "VI"
-          "IX"
-          "XI"
-          "MMMCMXCIX") 13 0] ; Special edge cases
-    [(fn [] (roman-numerals-input (inc (lrand-int 3999)))) 187 2000]
-   ;[(fn [] (map roman-numerals-input (remove #(contains? #{1 5 10 50 100 500 1000 4 6 9 11 3999} %) (range 1 4000)))) 0 3987] ; The rest of the possible numbers 1-3999
-   ])
+  (let [edge-cases (list ""
+                         "I"
+                         "II"
+                         "III"
+                         "IV"
+                         "V"
+                         "VI"
+                         "VII"
+                         "VIII"
+                         "IX"
+                         "X"
+                         "XI"
+                         "XII"
+                         "XVIII"
+                         "XIX"
+                         "XX"
+                         "XXI"
+                         "XXX"
+                         "XL"
+                         "XLI"
+                         "XLVIII"
+                         "XLIX"
+                         "L"
+                         "LI"
+                         "LIII"
+                         "LIV"
+                         "LXXXVIII"
+                         "LXXXIX"
+                         "XC"
+                         "XCI"
+                         "XCII"
+                         "XCVIII"
+                         "XCIX"
+                         "C"
+                         "CI"
+                         "CIV"
+                         "CXLIX"
+                         "CXCIV"
+                         "CXCIX"
+                         "CC"
+                         "CCC"
+                         "CCCLIX"
+                         "CCCXCVIII"
+                         "CCCXCIX"
+                         "CD"
+                         "CDLXXIII"
+                         "CDXC"
+                         "CDXCIX"
+                         "D"
+                         "DXI"
+                         "DCCCLXXXVIII"
+                         "DCCCXCIX"
+                         "CM"
+                         "CMI"
+                         "CMXCIX"
+                         "M"
+                         "MM"
+                         "MMM"
+                         "MMMCM"
+                         "MMMCMXCIX")]
+    [[edge-cases (count edge-cases) 0] ; Special edge cases
+     [(fn [] (roman-numerals-input (inc (lrand-int 3999)))) 187 2000]
+     ]))
 
 ;;Can make Roman Numeral test data like this:
 ;(test-and-train-data-from-domains roman-numerals-data-domains)
@@ -96,7 +148,6 @@
   "Takes a sequence of inputs and gives IO test cases of the form
    [input output]."
   [inputs]
-  (println inputs)
   (map (fn [in]
           (vector in
               (loop [roman in number 0]
