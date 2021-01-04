@@ -11,21 +11,20 @@
 
 ; Atom generators
 (def twitter-atom-generators
-  (concat (list
-            0
-            140
-            "Too many characters"
-            "You didn't type anything"
-            "Your tweet has "
-            " characters"
-            ;;; end constants
-            (tag-instruction-erc [:integer :boolean :exec] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :boolean :exec :string :char])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :exec :string :char])
+    (list (tag-instruction-erc [:integer :boolean :exec :string :char] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1) ; inputs
+   (list 0
+         140
+         "Too many characters"
+         "You didn't type anything"
+         "Your tweet has "
+         " characters") ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 ;; Define test cases
 (defn twitter-input
@@ -137,7 +136,7 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-twitter-error-function-from-cases (first twitter-train-and-test-cases)
-                                                                  (second twitter-train-and-test-cases))
+                                                           (second twitter-train-and-test-cases))
    :atom-generators twitter-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
