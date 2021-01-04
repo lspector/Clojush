@@ -16,7 +16,7 @@
     (if (empty? (:integer state))
       state
       (let [top-int (top-item :integer state)]
-        (stack-assoc top-int :output 0)))))
+        (stack-assoc top-int :output 0 state)))))
 
 (define-registered
   output_integer2
@@ -25,33 +25,39 @@
     (if (empty? (:integer state))
       state
       (let [top-int (top-item :integer state)]
-        (stack-assoc top-int :output 1)))))
+        (stack-assoc top-int :output 1 state)))))
 
 ; Atom generators
 (def mastermind-atom-generators
-  (concat (list
-            \B
-            \R
-            \W
-            \Y
-            \O
-            \G
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :exec :boolean :string :char] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            'in2
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :exec :string :char :boolean])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :exec :boolean :string :char])
+    (list (tag-instruction-erc [:integer :exec :boolean :string :char] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1 'in2) ; inputs
+   (list 0
+         1
+         \B
+         \R
+         \W
+         \Y
+         \O
+         \G) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 ;; Define test cases
+(defn mastermind-one-string
+  "Makes a 4-char mastermind string"
+  []
+  (apply str (repeatedly 4
+                         #(rand-nth "BRWYOG"))))
+
 (defn mastermind-input
   "Makes a mastermind input."
   []
-  (vector (apply str (repeatedly 4 #(rand-nth "BRWYOG"))) (apply str (repeatedly 4 #(rand-nth "BRWYOG")))))
+  (vec (repeatedly 2 mastermind-one-string)))
+
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
@@ -64,8 +70,25 @@
           ["WYYW" "BBOG"]
           ["GGGB" "BGGG"]
           ["BBBB" "OOOO"]
-          ) 5 0]
-   [(fn [] (mastermind-input)) 195 2000]
+          ["BWYG" "YWBG"]
+          ["RGOW" "OGWR"]
+          ["YGGB" "GYGB"]
+          ["YGGB" "GYBG"]
+          ["GOGY" "OGGO"]
+          ["GOGR" "GOYR"]
+          ["YMOO" "YMRG"]
+          ["GROY" "BGOW"]
+          ["GGYG" "BYBB"]
+          ["WWWW" "BYWR"]
+          ["RBYO" "BWBB"]
+          ["RBRB" "ORBY"]
+          ["WORR" "BYOW"]
+          ["YOWW" "YWWR"]
+          ["BRYB" "WOGG"]
+          ) 20 0]
+   [(fn [] (let [s (mastermind-one-string)]
+             [s s])) 10 200] ; all the same
+   [(fn [] (mastermind-input)) 170 1800]
   ])
 
 ;;Can make mastermind test data like this:
@@ -181,7 +204,7 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-mastermind-error-function-from-cases (first mastermind-train-and-test-cases)
-                                                                  (second mastermind-train-and-test-cases))
+                                                              (second mastermind-train-and-test-cases))
    :atom-generators mastermind-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250

@@ -16,7 +16,7 @@
     (if (empty? (:vector_integer state))
       state
       (let [top-int (top-item :vector_integer state)]
-        (stack-assoc top-int :output 0)))))
+        (stack-assoc top-int :output 0 state)))))
 
 (define-registered
   output_vector_integer2
@@ -25,7 +25,7 @@
     (if (empty? (:vector_integer state))
       state
       (let [top-int (top-item :vector_integer state)]
-        (stack-assoc top-int :output 1)))))
+        (stack-assoc top-int :output 1 state)))))
 
 ;; Define test cases
 (defn cut-vector-input
@@ -35,17 +35,15 @@
 
 ; Atom generators
 (def cut-vector-atom-generators
-  (concat (list
-            ;;; end constants
-            (fn [] (cut-vector-input (inc (lrand-int 20)))) ;Vector ERC
-            ;;; end ERCs
-            (tag-instruction-erc [:vector_integer :integer :boolean :exec] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:vector_integer :integer :boolean :exec])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:vector_integer :integer :boolean :exec])
+    (list (tag-instruction-erc [:vector_integer :integer :boolean :exec] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1) ; inputs
+   (list 0 []) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set

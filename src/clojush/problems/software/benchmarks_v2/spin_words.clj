@@ -35,20 +35,20 @@
 
 ; Atom generators
 (def spin-words-atom-generators
-  (concat (list
-            5
-            \space
-            ;;; end constants
-            (fn [] (lrand-nth (map char (range 97 122)))) ;Visible character ERC
-            (fn [] (spin-words-input (lrand-int 21))) ;String ERC
-            ;;; end ERCs
-            (tag-instruction-erc [:exec :integer :boolean :string :char] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :boolean :string :char :exec])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :string :char :exec])
+    (list (tag-instruction-erc [:integer :boolean :string :char :exec] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1) ; inputs
+   (list 4
+         5
+         \space
+         (fn [] (lrand-nth (map char (range 97 122)))) ;Visible character ERC
+         (fn [] (spin-words-input (lrand-int 21))) ;String ERC
+         ) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 
 ;; A list of data domains for the problem. Each domain is a vector containing
@@ -70,11 +70,25 @@
           "pantry"
           "helpful"
           "disrespectful"
-          "stop spinning my words"
+          "stop spinning these"
           "couple longer words"
-          "onelooooooooongworrrrrrrrrrrrrrrrrrrrrrd"
-          "word less than five char") 17 0] ;; "Special" inputs covering some base cases
-   [(fn [] (spin-words-input (inc (lrand-int 20)))) 183 2000]
+          "oneloongworrrrrrrrrd"
+          "a b c d e f g h i j"
+          "ab cd ef gh ij kl mn"
+          "abc def gef hij klm"
+          "word less than five"
+          "abcde fghij klmno"
+          "abcdef ghijkl mnopqr"
+          "abcdefg hijklmn"
+          "abcdefgh ijklmnop"
+          "abcdefghi jklmnopqrs"
+          "on pineapple island"
+          "maybe this isgood"
+          "racecar palindrome"
+          "ella is a short pali"
+          "science hi"
+          ) 30 0] ;; "Special" inputs covering some base cases
+   [(fn [] (spin-words-input (inc (lrand-int 20)))) 170 2000]
    ])
 
 ;;Can make Spin Words test data like this:
@@ -164,7 +178,7 @@
 ; Define the argmap
 (def argmap
  {:error-function (make-spin-words-error-function-from-cases (first spin-words-train-and-test-cases)
-                                                                     (second spin-words-train-and-test-cases))
+                                                             (second spin-words-train-and-test-cases))
   :atom-generators spin-words-atom-generators
   :max-points 2000
   :max-genome-size-in-initial-program 250

@@ -11,22 +11,23 @@
 
 ; Atom generators
 (def vector-distance-atom-generators
-  (concat (list
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :exec :float :vector_float] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            'in2
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :boolean :exec :float :vector_float])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :exec :float :vector_float])
+    (list (tag-instruction-erc [:integer :boolean :exec :float :vector_float] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1
+         'in2) ; inputs
+   (list []
+         0) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 (defn vector-distance-input
   "Makes a Vector Distance input vector of length len."
   [len]
-  (vector (vec (repeatedly len #(- (* (rand) 200) 100))) (vec (repeatedly len #(- (* (rand) 200) 100)))))
+  (vector (vec (repeatedly len #(- (* (rand) 200) 100))) 
+          (vec (repeatedly len #(- (* (rand) 200) 100)))))
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set

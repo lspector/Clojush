@@ -11,22 +11,20 @@
 
 ; Atom generators
 (def solve-boolean-atom-generators
-  (concat (list
-            true
-            false
-            "t"
-            "f"
-            "&"
-            "|"
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :exec] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :boolean :exec :string :char])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :exec :string :char])
+    (list (tag-instruction-erc [:integer :boolean :exec :string :char] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1) ; inputs
+   (list true
+         false
+         \t
+         \f
+         \&
+         \|) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 (defn solve-boolean-input
   [terms]
@@ -45,12 +43,16 @@
   [[(list "t"
           "f"
           "f&f"
-          "t&t"
           "f&t"
+          "t&f"
+          "t&t"
+          "f|f"
+          "f|t"
           "t|f"
-          ) 6 0]
-   [(fn [] (solve-boolean-input (inc (lrand-int 20)))) 194 2000]
+          "t|t") 10 0]
+   [(fn [] (solve-boolean-input (+ 2 (lrand-int 19)))) 190 2000]
    ])
+
 
 ;;Can make Solve Boolean test data like this:
 ; (map sort (test-and-train-data-from-domains solve-boolean-data-domains))
@@ -151,7 +153,7 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-solve-boolean-error-function-from-cases (first solve-boolean-train-and-test-cases)
-                                                             (second solve-boolean-train-and-test-cases))
+                                                                 (second solve-boolean-train-and-test-cases))
    :atom-generators solve-boolean-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250

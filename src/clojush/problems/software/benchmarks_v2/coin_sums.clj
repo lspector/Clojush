@@ -16,7 +16,7 @@
     (if (empty? (:integer state))
       state
       (let [top-int (top-item :integer state)]
-        (stack-assoc top-int :output 0)))))
+        (stack-assoc top-int :output 0 state)))))
 
 (define-registered
   output_integer2
@@ -25,7 +25,7 @@
     (if (empty? (:integer state))
       state
       (let [top-int (top-item :integer state)]
-        (stack-assoc top-int :output 1)))))
+        (stack-assoc top-int :output 1 state)))))
 
 (define-registered
   output_integer3
@@ -34,7 +34,7 @@
     (if (empty? (:integer state))
       state
       (let [top-int (top-item :integer state)]
-        (stack-assoc top-int :output 2)))))
+        (stack-assoc top-int :output 2 state)))))
 
 (define-registered
   output_integer4
@@ -43,24 +43,23 @@
     (if (empty? (:integer state))
       state
       (let [top-int (top-item :integer state)]
-        (stack-assoc top-int :output 3)))))
+        (stack-assoc top-int :output 3 state)))))
 
 ; Atom generators
 (def coin-sums-atom-generators
-  (concat (list
-            1
-            5
-            10
-            25
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :exec] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :boolean :exec])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :exec])
+    (list (tag-instruction-erc [:integer :boolean :exec] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1) ; inputs
+   (list 0
+         1
+         5
+         10
+         25) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
@@ -68,15 +67,13 @@
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
 (def coin-sums-data-domains
-  [[(list 1
-          5
-          10
-          25 ; Basic inputs
+  [[(range 1 31) 30 0] ; first 30 integers
+   [(list 35
           41
           109 ; Interesting inputs
           10000 ; Max input
-          ) 7 0]
-   [(fn [] (inc (rand-int 10000))) 193 2000]])
+          ) 4 0]
+   [(fn [] (inc (rand-int 10000))) 166 2000]])
 
 ;;Can make Coin Sums test data like this:
 ; (map sort (test-and-train-data-from-domains coin-sums-data-domains))
@@ -125,7 +122,7 @@
                                result-dimes (stack-ref :output 2 final-state)
                                result-quarters (stack-ref :output 3 final-state)]
                              (when print-outputs
-                               (println (format "Correct output: %s %s %s %s \n| Program output: %s %s %s %s"
+                               (println (format "Correct output: %s %s %s %s \nProgram output: %s %s %s %s\n"
                                                 (str correct-pennies) (str correct-nickles) (str correct-dimes) (str correct-quarters)
                                                 (str result-pennies) (str result-nickles) (str result-dimes) (str result-quarters))))
                            ; Record the behavior

@@ -11,18 +11,18 @@
 
 ; Atom generators
 (def substitution-cipher-atom-generators
-  (concat (list
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :boolean :exec :string :char] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            'in2
-            'in3
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :boolean :exec :char :string])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :exec :char :string])
+    (list (tag-instruction-erc [:integer :boolean :exec :char :string] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1
+         'in2
+         'in3) ; inputs
+   (list ""
+         0) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 ;; Define test cases
 (defn substitution-cipher-input
@@ -54,7 +54,8 @@
           ["abcdefghijklmnopqrstuvwxyz" "cdqutzayxshgfenjowrkvmpbil" "thequickbrownfxjmpsvlazydg"]
           ["otghvwmkclidzryxsfqeapnjbu" "alpebhxmnrcyiosvtgzjwuqdfk" "aaabbbccc"]
           ) 10 0] ;; "Special" inputs covering most base cases.
-   [(fn [] (substitution-cipher-input (inc (lrand-int 26)) (inc (rand-int 26)))) 190 2000]
+   [(fn [] (substitution-cipher-input (inc (lrand-int 26))
+                                      (rand-int 27))) 190 2000]
    ])
 
 ;;Can make substitution-cipher test data like this:
@@ -67,7 +68,8 @@
   [inputs]
   (map (fn [[in1 in2 in3]]
          (vector [in1 in2 in3]
-           (apply str (map (zipmap in1 in2) (map char in3)))))
+           (apply str (map (zipmap in1 in2)
+                           (map char in3)))))
        inputs))
 
 (defn make-substitution-cipher-error-function-from-cases
@@ -147,7 +149,7 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-substitution-cipher-error-function-from-cases (first substitution-cipher-train-and-test-cases)
-                                                                  (second substitution-cipher-train-and-test-cases))
+                                                                       (second substitution-cipher-train-and-test-cases))
    :atom-generators substitution-cipher-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
