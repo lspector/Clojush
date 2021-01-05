@@ -11,19 +11,23 @@
 
 ; Atom generators
 (def snow-day-atom-generators
-  (concat (list
-            ;;; end constants
-            ;;; end ERCs
-            (tag-instruction-erc [:integer :float :boolean :exec] 1000)
-            (tagged-instruction-erc 1000)
-            ;;; end tag ERCs
-            'in1
-            'in2
-            'in3
-            'in4
-            ;;; end input instructions
-            )
-          (registered-for-stacks [:integer :float :boolean :exec])))
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :float :boolean :exec])
+    (list (tag-instruction-erc [:integer :float :boolean :exec] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1
+         'in2
+         'in3
+         'in4) ; inputs
+   (list 0
+         0.0
+         1
+         1.0
+         -1
+         -1.0) ; constants
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 
 ;; A list of data domains for the problem. Each domain is a vector containing
@@ -35,11 +39,17 @@
   [[(list [0 0.0 0.0 0.0]   ; min size
           [15 15.0 15.0 0.15]   ; same number
           [20 19.99 9.999 0.999]    ; max size
+          [20 19.99 9.999 0.0]    ; max snow
+          [10 0.0 1.0 0.0]
+          [8 10.0 2.0 0.0]
+          [13 0.0 0.0 0.0]
+          [15 14.56 0.0 0.0]
+          [16 18.19 0.0 0.05]
           [8 11.3 0.5 0.3]
           [5 1.3 1.5 0.05]
           [10 0.0 2.0 0.0]
-          ) 6 0]
-   [(fn [] (vector (inc (rand-int 20)) (rand 20) (rand 10) (rand))) 194 2000] ; Random cases [13,197]
+          ) 12 0]
+   [(fn [] (vector (rand-int 21) (rand 20) (rand 10) (rand))) 188 2000] ; Random cases
    ])
 
 ;;Can make Snow Day test data like this:
@@ -51,9 +61,13 @@
    [[input1 input2 input3 input4] output]."
   [inputs]
   (map #(vector %
-    (loop [time (first %) total (second %)]
-      (if (= time 0) total
-                     (recur (dec time) (+ (* total (- 1 (last %))) (nth % 2))))))
+    (loop [time (first %)
+           total (second %)]
+      (if (= time 0)
+        total
+        (recur (dec time)
+               (+ (* total (- 1 (last %))) 
+                  (nth % 2))))))
        inputs))
 
 (defn make-snow-day-error-function-from-cases
@@ -72,10 +86,10 @@
                                                                                [])]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
-                                                       (push-item input4 :input)
-                                                       (push-item input3 :input)
-                                                       (push-item input2 :input)
-                                                       (push-item input1 :input)))
+                                                          (push-item input4 :input)
+                                                          (push-item input3 :input)
+                                                          (push-item input2 :input)
+                                                          (push-item input1 :input)))
                                result (top-item :float final-state)]
                            (when print-outputs
                              (let [res-str (if (float? result)
@@ -87,10 +101,9 @@
                            ; Error is float error rounded to 3 decimal places
                            (round-to-n-decimal-places
                             (if (number? result)
-                              (abs (- result correct-output)) ; distance from correct integer
+                              (abs (- result correct-output)) ; distance from correct float
                               1000000.0) ; penalty for no return value
-                            3)
-                             )))]
+                            3))))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors)
           (assoc individual :test-errors errors))))))
@@ -99,7 +112,7 @@
   "Returns the train and test cases."
   [data-domains]
   (map snow-day-test-cases
-          (test-and-train-data-from-domains data-domains)))
+       (test-and-train-data-from-domains data-domains)))
 
 ; Define train and test cases
 (def snow-day-train-and-test-cases
@@ -140,7 +153,7 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-snow-day-error-function-from-cases (first snow-day-train-and-test-cases)
-                                                             (second snow-day-train-and-test-cases))
+                                                            (second snow-day-train-and-test-cases))
    :atom-generators snow-day-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
