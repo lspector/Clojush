@@ -9,6 +9,24 @@
         clojush.instructions.tag)
   (:require [clojure.math.numeric-tower :as nt]))
 
+(define-registered
+  output_integer1
+  ^{:stack-types [:integer]}
+  (fn [state]
+    (if (empty? (:integer state))
+      state
+      (let [top-int (top-item :integer state)]
+        (stack-assoc top-int :output 0 state)))))
+
+(define-registered
+  output_integer2
+  ^{:stack-types [:integer]}
+  (fn [state]
+    (if (empty? (:integer state))
+      state
+      (let [top-int (top-item :integer state)]
+        (stack-assoc top-int :output 1 state)))))
+
 ; Atom generators
 (def atom-generators
   (make-proportional-atom-generators
@@ -98,9 +116,7 @@
   [inputs]
   (map (fn [[in1 in2]]
           (vector [in1 in2]
-                  (apply * 
-                         (first 
-                          (all-pairs-sum-to-target in1 in2)))))
+                  (first (all-pairs-sum-to-target in1 in2))))
        inputs))
 
 (defn make-error-function-from-cases
@@ -113,25 +129,35 @@
      (the-actual-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
-            errors (doall
-                     (for [[[input1 input2] correct-output] (case data-cases
-                                                              :train train-cases
-                                                              :test test-cases
-                                                              [])]
+            errors (flatten
+                    (doall
+                     (for [[[input1 input2] [correct-output1 correct-output2]] (case data-cases
+                                                                                 :train train-cases
+                                                                                 :test test-cases
+                                                                                 [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
+                                                        (push-item :no-output :output)
+                                                        (push-item :no-output :output)
                                                         (push-item input2 :input)
                                                         (push-item input1 :input)))
-                             result (top-item :integer final-state)]
+                             result1 (stack-ref :output 0 final-state)
+                             result2 (stack-ref :output 1 final-state)]
                          (when print-outputs
-                           (println (format "Correct output: %9d | Program output: %s" correct-output (str result))))
+                           (println (format "Correct output: %s %s | Program output: %s %s"
+                                            (str correct-output1) (str correct-output2)
+                                            (str result1) (str result2))))
                          ; Record the behavior
-                         (swap! behavior conj result)
-                         ; Error is integer difference
-                         (if (number? result)
-                           (nt/abs (- result correct-output)) ; distance from correct integer
-                           max-number-magnitude) ; penalty for no return value
-                         )))]
+                         (swap! behavior conj result1 result2)
+                         ; Error is integer distance
+                         (vector
+                          (if (number? result1)
+                            (nt/abs (- result1 correct-output1)) ;distance from correct integer
+                            1000000) ;penalty for no return value
+                          (if (number? result2)
+                            (nt/abs (- result2 correct-output2)) ;distance from correct integer
+                            1000000) ;penalty for no return value
+                          )))))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors)
           (assoc individual :test-errors errors))))))
@@ -195,4 +221,4 @@
    :problem-specific-initial-report initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error max-number-magnitude})
+   :max-error 1000000})
