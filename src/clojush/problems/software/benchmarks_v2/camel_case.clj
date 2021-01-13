@@ -10,23 +10,33 @@
         clojure.math.numeric-tower)
     (:require [clojure.string :as str]))
 
+(defn word-generator
+  "Generates words at a nice distribution for Camel Case
+   All words will have length [1, 5]."
+  []
+  (let [chars-between #(map char (range (int %1) (inc (int %2))))
+        chars (chars-between \a \z)
+        word-len (inc (rand-int 5))]
+    (apply str (repeatedly word-len #(rand-nth chars)))))
+
+(defn cleanup-length
+  [string len]
+  (let [result (take len string)]
+    (if (or (= (last result) \space)
+            (= (last result) \-))
+      (apply str (butlast result))
+      (apply str result))))
+
 ;; Define test cases
 (defn camel-case-input
   "Makes a Camel Case input of length len."
-  ; Code found from https://stackoverflow.com/questions/27053726/how-to-generate-random-password-with-the-fixed-length-in-clojure
   [len]
-  (let [chars-between #(map char (range (int %1) (inc (int %2))))
-        chars (concat (chars-between \a \z)
-                      " "
-                      "-")
-        word (take len (repeatedly #(rand-nth chars)))]
-    (apply str word)))
-
-(comment
-  (camel-case-input 20)
-  
-  (first (test-and-train-data-from-domains camel-case-data-domains))
-  )
+  (loop [result-string (word-generator)]
+    (if (>= (count result-string) len)
+      (cleanup-length result-string len)
+      (recur (str result-string
+                  (if (< (lrand) 0.5) \- \space)
+                  (word-generator))))))
 
 ; Atom generators
 (def camel-case-atom-generators
@@ -51,17 +61,21 @@
 ;; random element of the set.
 (def camel-case-data-domains
   [[(list ""
-          "oneword"
+          "nospaceordash"
           "two-words"
-          "two-words and-a-space"
+          "two words"
           "all separate words"
-          "all-one-word-with-th-dash"
-          "saaaaaaaaaaaaaaaaaaaaaame") 7 0] ;; "Special" inputs covering some base cases
-   [(fn [] (camel-case-input (inc (lrand-int 20)))) 193 2000]
+          "all-one-word-dashed"
+          "loooooong-wooooords"
+          "loooooong wooooords"
+          "a-b-c-d-e-f-g-h-i-j"
+          "a b c d e f g h i j"
+          "saaaaaaaaaaaaaaaaame") 11 0] ;; "Special" inputs covering some base cases
+   [(fn [] (camel-case-input (inc (lrand-int 20)))) 189 2000]
    ])
 
 ;;Can make Camel Case test data like this:
-;(test-and-train-data-from-domains camel-case-data-domains)
+(comment (test-and-train-data-from-domains camel-case-data-domains))
 
 ; Helper function for error function
 (defn camel-case-test-cases
@@ -101,9 +115,8 @@
                                                     [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
-                                                     (push-item input :input)
-                                                     (push-item "" :output)))
-                             result (stack-ref :output 0 final-state)]
+                                                        (push-item input :input)))
+                             result (stack-ref :string 0 final-state)]
                          (when print-outputs
                            (println (format "\n| Correct output: %s\n| Program output: %s" (pr-str correct-output) (pr-str result))))
                          ; Record the behavior
@@ -150,7 +163,7 @@
 ; Define the argmap
 (def argmap
  {:error-function (make-camel-case-error-function-from-cases (first camel-case-train-and-test-cases)
-                                                                     (second camel-case-train-and-test-cases))
+                                                             (second camel-case-train-and-test-cases))
   :atom-generators camel-case-atom-generators
   :max-points 2000
   :max-genome-size-in-initial-program 250
