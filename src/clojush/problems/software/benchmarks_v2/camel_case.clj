@@ -29,13 +29,14 @@
 
 ;; Define test cases
 (defn camel-case-input
-  "Makes a Camel Case input of length len."
+  "Makes a Camel Case input of length len.
+   Note that 2/3 of spaces/dashes are dashes."
   [len]
   (loop [result-string (word-generator)]
     (if (>= (count result-string) len)
       (cleanup-length result-string len)
       (recur (str result-string
-                  (if (< (lrand) 0.5) \- \space)
+                  (if (< (lrand) 0.66) \- \space)
                   (word-generator))))))
 
 ; Atom generators
@@ -122,7 +123,7 @@
                          ; Record the behavior
                          (swap! behavior conj result)
                          ; Error is Levenshtein distance for printed string
-                         (levenshtein-distance correct-output result)
+                         (levenshtein-distance correct-output (str result))
                          )))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors)
