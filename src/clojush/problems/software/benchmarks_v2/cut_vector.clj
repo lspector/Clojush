@@ -31,7 +31,7 @@
 (defn cut-vector-input
   "Makes a Cut Vector input vector of length len."
   [len]
-  (vec (repeatedly len #(rand-int 10000))))
+  (vec (repeatedly len #(rand-int 10001))))
 
 ; Atom generators
 (def cut-vector-atom-generators
@@ -51,13 +51,13 @@
 ;; inputs is either a list or a function that, when called, will create a
 ;; random element of the set.
 (def cut-vector-data-domains
-  [[(list [0] [100] [-100] [1000] [-1000]) 5 0] ;; Length-1 vectors
+  [[(list [0] [10] [100] [1000] [10000]) 5 0] ;; Length-1 vectors
    [(fn [] (cut-vector-input 1)) 20 250] ;; Random Length-1 vectors
    [(list [2 129]
-          [1 -4]
-          [999 74]
-          [987 995]
-          [-788 -812]) 5 0] ;; Length-2 vectors
+          [0 40]
+          [9999 74]
+          [9879 9950]
+          [9225 9994]) 5 0] ;; Length-2 vectors
    [(fn [] (cut-vector-input 2)) 20 250] ;; Random Length-2 vectors
    [(fn [] (cut-vector-input (+ 3 (lrand-int 3)))) 50 500] ;; Random Length-3, -4, and -5 vectors
    [(fn [] (cut-vector-input 20)) 5 50] ;; Random Length-20 vectors
