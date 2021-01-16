@@ -136,8 +136,10 @@
                            (println (format "\n| Correct output: %s\n| Program output: %s" (str correct-output) (str result))))
                          ; Record the behavior
                          (swap! behavior conj result)
-                         ; Error is Levenshtein distance for string
-                         (levenshtein-distance correct-output (str result))
+                         ; Error is Levenshtein distance
+                         (if (string? result)
+                            (levenshtein-distance correct-output (str result))
+                            10000) ; penalty for no return value
                          )))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors)
@@ -198,5 +200,5 @@
   :problem-specific-initial-report spin-words-initial-report
   :report-simplifications 0
   :final-report-simplifications 5000
-  :max-error 1000000
+  :max-error 10000
   })

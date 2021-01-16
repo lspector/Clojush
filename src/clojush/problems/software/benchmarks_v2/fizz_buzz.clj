@@ -101,7 +101,9 @@
                          ; Record the behavior
                          (swap! behavior conj result)
                          ; Error is Levenshtein distance
-                         (levenshtein-distance correct-output (str result))
+                         (if (string? result)
+                            (levenshtein-distance correct-output (str result))
+                            10000) ; penalty for no return value
                          )))]
         (if (= data-cases :train)
           (assoc individual :behaviors @behavior :errors errors)
@@ -172,5 +174,5 @@
    :problem-specific-initial-report fizz-buzz-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000
+   :max-error 10000
    })
