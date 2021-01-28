@@ -38,10 +38,12 @@
    Each string is of length [0, 10]"
   [len]
   (let [repeated-string (random-string (lrand-int 11))
-        the-vec (vec (repeat len repeated-string))]
+        the-vec (vec (repeat len repeated-string))
+        unique-string (first (filter #(not= % repeated-string)
+                                     (repeatedly #(random-string (lrand-int 11)))))]
     (assoc the-vec
            (lrand-int len)
-           (random-string (lrand-int 11)))))
+           unique-string)))
 
 ;; A list of data domains. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
@@ -79,9 +81,13 @@
                         (second vec-of-str)) (first vec-of-str)
                      (= (first vec-of-str)
                         (nth vec-of-str 2)) (first vec-of-str)
-                     :else (second vec-of-str))]
-    (first (filter #(not= % the-repeat)
-                   vec-of-str))))
+                     :else (second vec-of-str))
+        answer (first (filter #(not= % the-repeat)
+                              vec-of-str))]
+    (if (nil? answer)
+      (throw (Exception. (str "The following input vector to the Unique String
+problem does not seem to have a unique string in it:" vec-of-str)))
+      answer)))
 
 ; Helper function for error function
 (defn test-cases
