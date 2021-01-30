@@ -95,7 +95,7 @@
                                                       (push-item input1 :input)))
                            result (top-item :string final-state)]
                        (when print-outputs
-                         (println (format "Correct output: %s\nProgram output: %s\n\n" correct-output (str result))))
+                         (println (format "Correct output: %s\nProgram output: %s\n" correct-output (str result))))
                          ; Record the behavior
                        (swap! behavior conj result)
                          ; Error is Levenshtein distance
