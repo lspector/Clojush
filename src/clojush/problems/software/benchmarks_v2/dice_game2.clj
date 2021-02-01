@@ -23,8 +23,8 @@
 
 (defn dice-game-input
   []
-  (let [die1 (inc (rand-int 100))
-        die2 (inc (rand-int 100))]
+  (let [die1 (inc (rand-int 1000))
+        die2 (inc (rand-int 1000))]
     [die1 die2]))
 
 ;; A list of data domains for the problem. Each domain is a vector containing
@@ -35,21 +35,21 @@
 (def dice-game-data-domains
   [[(list [1 2]
           [2 1]
-          [99 100]
-          [100 99]
-          [1 100]
-          [100 1]
+          [999 1000]
+          [1000 999]
+          [1 1000]
+          [1000 1]
           [3 4]
           [4 3]
           [4 6]
           [6 4]
           [49 50]
-          [50 49]
+          [500 493]
           [1 1]
-          [50 50]
-          [100 100]
+          [500 500]
+          [1000 1000]
           ) 15 0] ; Small and large cases that have n < m, n = m, and n > m
-   [(fn [] (let [x (inc (rand-int 100))]
+   [(fn [] (let [x (inc (rand-int 1000))]
              [x x])) 10 100] ; 10 cases with n = m
    [(fn [] (dice-game-input)) 175 1900] ; Random cases
    ])
