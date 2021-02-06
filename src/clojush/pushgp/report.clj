@@ -355,7 +355,7 @@
            visualize calculate-mod-metrics]
     :as argmap}]
   (r/generation-data! [:population]
-    (map #(dissoc % :program) population))
+                      (map #(dissoc % :program) population))
 
   (println)
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
