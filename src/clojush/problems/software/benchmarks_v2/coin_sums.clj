@@ -195,6 +195,7 @@
   {:error-function (make-coin-sums-error-function-from-cases (first coin-sums-train-and-test-cases)
                                                              (second coin-sums-train-and-test-cases))
    :training-cases (first coin-sums-train-and-test-cases)
+   :atom-generators coin-sums-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
    :evalpush-limit 2000
@@ -204,8 +205,7 @@
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
+                                    [:alternation :uniform-mutation] 0.5}
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
@@ -213,5 +213,4 @@
    :problem-specific-initial-report coin-sums-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000
-   })
+   :max-error 1000000})
