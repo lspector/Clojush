@@ -97,9 +97,9 @@
               (flatten
                 (doall
                    (for [[input1 [correct-output1 correct-output2]] (case data-cases
-                                                   :train train-cases
-                                                   :test test-cases
-                                                   [])]
+                                                                      :train train-cases
+                                                                      :test test-cases
+                                                                      data-cases)]
                      (let [final-state (run-push (:program individual)
                                                  (->> (make-push-state)
                                                       (push-item :no-output :output)
@@ -128,9 +128,11 @@
                                (*' 10000 (abs (- (count correct-output2) (count result2))))) ; penalty of 10000 times difference in sizes of vectors
                            1000000) ; penalty for no return value
                        )))))]
-       (if (= data-cases :train)
-         (assoc individual :behaviors @behavior :errors errors)
-         (assoc individual :test-errors errors))))))
+       (if (= data-cases :test)
+         (assoc individual :test-errors errors)
+         (assoc individual
+                :behaviors (reverse @behavior)
+                :errors errors))))))
 
 (defn get-cut-vector-train-and-test
   "Returns the train and test cases."
@@ -178,7 +180,8 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-cut-vector-error-function-from-cases (first cut-vector-train-and-test-cases)
-                                                                  (second cut-vector-train-and-test-cases))
+                                                              (second cut-vector-train-and-test-cases))
+   :training-cases (first cut-vector-train-and-test-cases)
    :atom-generators cut-vector-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
@@ -189,8 +192,7 @@
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
+                                    [:alternation :uniform-mutation] 0.5}
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
@@ -198,5 +200,4 @@
    :problem-specific-initial-report cut-vector-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000
-   })
+   :max-error 1000000})

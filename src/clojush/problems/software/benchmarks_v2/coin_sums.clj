@@ -107,9 +107,9 @@
                   (doall
                        (for [[input [correct-pennies correct-nickles correct-dimes correct-quarters]]
                                                               (case data-cases
-                                                               :train train-cases
-                                                               :test test-cases
-                                                               [])]
+                                                                :train train-cases
+                                                                :test test-cases
+                                                                data-cases)]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                           (push-item :no-output :output)
@@ -142,9 +142,11 @@
                                  (abs (- result-quarters correct-quarters)) ;distance from correct integer
                                  100000) ;penalty for no return value
                              )))))] ; penalty for no return value
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual
+                 :behaviors (reverse @behavior)
+                 :errors errors))))))
 
 (defn get-coin-sums-train-and-test
   "Returns the train and test cases."
@@ -192,7 +194,7 @@
 (def argmap
   {:error-function (make-coin-sums-error-function-from-cases (first coin-sums-train-and-test-cases)
                                                              (second coin-sums-train-and-test-cases))
-   :atom-generators coin-sums-atom-generators
+   :training-cases (first coin-sums-train-and-test-cases)
    :max-points 2000
    :max-genome-size-in-initial-program 250
    :evalpush-limit 2000

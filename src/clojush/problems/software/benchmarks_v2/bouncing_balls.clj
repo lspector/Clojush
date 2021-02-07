@@ -75,9 +75,9 @@
       (let [behavior (atom '())
             errors (doall
                      (for [[[input1 input2 input3] correct-output] (case data-cases
-                                                                    :train train-cases
-                                                                    :test test-cases
-                                                                    [])]
+                                                                     :train train-cases
+                                                                     :test test-cases
+                                                                     data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input3 :input)
@@ -97,9 +97,11 @@
                             (abs (- result correct-output)) ; distance from correct integer
                             1000000.0) ; penalty for no return value
                           3))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual
+                 :behaviors (reverse @behavior)
+                 :errors errors))))))
 
 (defn get-bouncing-balls-train-and-test
   "Returns the train and test cases."
@@ -146,7 +148,8 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-bouncing-balls-error-function-from-cases (first bouncing-balls-train-and-test-cases)
-                                                          (second bouncing-balls-train-and-test-cases))
+                                                                  (second bouncing-balls-train-and-test-cases))
+   :training-cases (first bouncing-balls-train-and-test-cases)
    :atom-generators bouncing-balls-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
@@ -158,8 +161,7 @@
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
+                                    [:alternation :uniform-mutation] 0.5}
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
@@ -167,5 +169,4 @@
    :problem-specific-initial-report bouncing-balls-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000.0
-   })
+   :max-error 1000000.0})

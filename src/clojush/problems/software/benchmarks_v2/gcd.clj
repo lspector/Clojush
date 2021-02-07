@@ -71,9 +71,9 @@
      (let [behavior (atom '())
            errors (doall
                    (for [[[input1 input2] correct-output] (case data-cases
-                                                           :train train-cases
-                                                           :test test-cases
-                                                           [])]
+                                                            :train train-cases
+                                                            :test test-cases
+                                                            data-cases)]
                      (let [final-state (run-push (:program individual)
                                                  (->> (make-push-state)
                                                       (push-item input1 :input)
@@ -88,9 +88,11 @@
                          (abs (- result correct-output)) ; distance from correct integer
                          1000000) ; penalty for no return value
                        )))]
-       (if (= data-cases :train)
-         (assoc individual :behaviors @behavior :errors errors)
-         (assoc individual :test-errors errors))))))
+       (if (= data-cases :test)
+         (assoc individual :test-errors errors)
+         (assoc individual
+                :behaviors (reverse @behavior)
+                :errors errors))))))
 
 (defn get-gcd-train-and-test
   "Returns the train and test cases."
@@ -138,6 +140,7 @@
 (def argmap
   {:error-function (make-gcd-error-function-from-cases (first gcd-train-and-test-cases)
                                                        (second gcd-train-and-test-cases))
+   :training-cases (first gcd-train-and-test-cases)
    :atom-generators gcd-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
@@ -148,8 +151,7 @@
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
+                                    [:alternation :uniform-mutation] 0.5}
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
@@ -157,5 +159,4 @@
    :problem-specific-initial-report gcd-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000
-   })
+   :max-error 1000000})

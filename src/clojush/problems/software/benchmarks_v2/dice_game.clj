@@ -3,7 +3,6 @@
 ;;
 
 (ns clojush.problems.software.benchmarks-v2.dice-game
-  (:require [clojure.math.combinatorics :as combo])
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
@@ -24,12 +23,9 @@
 
 (defn dice-game-input
   []
-  (let [die1 (inc (rand-int 100))
-        die2 (inc (rand-int 100))]
-      (cond
-        (> die1 die2) [die2 die1]
-        (< die1 die2) [die1 die2]
-        :else [die1 (inc die2)])))
+  (let [die1 (inc (rand-int 1000))
+        die2 (inc (rand-int 1000))]
+    [die1 die2]))
 
 ;; A list of data domains for the problem. Each domain is a vector containing
 ;; a "set" of inputs and two integers representing how many cases from the set
@@ -38,12 +34,24 @@
 ;; random element of the set.
 (def dice-game-data-domains
   [[(list [1 2]
-          [99 100]
+          [2 1]
+          [999 1000]
+          [1000 999]
+          [1 1000]
+          [1000 1]
           [3 4]
+          [4 3]
           [4 6]
+          [6 4]
           [49 50]
-          ) 5 0] ; Small and large cases
-   [(fn [] (dice-game-input)) 195 2000] ; Random cases
+          [500 493]
+          [1 1]
+          [500 500]
+          [1000 1000]
+          ) 15 0] ; Small and large cases that have n < m, n = m, and n > m
+   [(fn [] (let [x (inc (rand-int 1000))]
+             [x x])) 10 100] ; 10 cases with n = m
+   [(fn [] (dice-game-input)) 175 1900] ; Random cases
    ])
 
 ;;Can make Dice Game test data like this:
@@ -53,11 +61,14 @@
   "Takes a sequence of inputs and gives IO test cases of the form
    [input output]."
   [inputs]
-  (map (fn [[in1 in2]]
-         (vector [in1 in2]
-           (let [all-rolls (combo/cartesian-product (range 1 (inc in1)) (range 1 (inc in2)))]
-             (float (/ (count (filter true? (map #(> (first %) (second %)) all-rolls)))
-                       (count all-rolls))))))
+  (map (fn [[n m]]
+         (vector [n m]
+                 ; Mathed this solution
+                 (if (<= n m)
+                   (float (/ (dec n) (* 2 m)))
+                   (float (- 1
+                             (/ (inc m)
+                                (* 2 n)))))))
        inputs))
 
 (defn make-dice-game-error-function-from-cases
@@ -73,7 +84,7 @@
                      (for [[[input1 input2] correct-output] (case data-cases
                                                      :train train-cases
                                                      :test test-cases
-                                                     [])]
+                                                     data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                         (push-item input2 :input)
@@ -90,9 +101,11 @@
                             1000000.0) ; penalty for no return value
                           3)
                          )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual
+                 :behaviors (reverse @behavior)
+                 :errors errors))))))
 
 (defn get-dice-game-train-and-test
   "Returns the train and test cases."
@@ -139,7 +152,8 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-dice-game-error-function-from-cases (first dice-game-train-and-test-cases)
-                                                                   (second dice-game-train-and-test-cases))
+                                                             (second dice-game-train-and-test-cases))
+   :training-cases (first dice-game-train-and-test-cases)
    :atom-generators dice-game-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
@@ -150,8 +164,7 @@
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
+                                    [:alternation :uniform-mutation] 0.5}
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
@@ -159,5 +172,4 @@
    :problem-specific-initial-report dice-game-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000.0
-   })
+   :max-error 1000000.0})

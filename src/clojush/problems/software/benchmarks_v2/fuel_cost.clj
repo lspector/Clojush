@@ -94,7 +94,7 @@
                      (for [[input1 correct-output] (case data-cases
                                                               :train train-cases
                                                               :test test-cases
-                                                              [])]
+                                                              data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                         (push-item input1 :input)))
@@ -108,9 +108,11 @@
                            (nt/abs (- result correct-output)) ; distance from correct integer
                            max-number-magnitude) ; penalty for no return value
                          )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual
+                 :behaviors (reverse @behavior)
+                 :errors errors))))))
 
 (defn get-train-and-test
   "Returns the train and test cases."
@@ -158,6 +160,7 @@
 (def argmap
   {:error-function (make-error-function-from-cases (first train-and-test-cases)
                                                    (second train-and-test-cases))
+   :training-cases (first train-and-test-cases)
    :atom-generators atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
