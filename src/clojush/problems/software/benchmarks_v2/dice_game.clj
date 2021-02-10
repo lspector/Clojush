@@ -91,7 +91,10 @@
                                                         (push-item input1 :input)))
                              result (stack-ref :float 0 final-state)]
                          (when print-outputs
-                           (println (format "Correct output: %.3f | Program output: %.3f" correct-output result)))
+                           (let [result-str (if (float? result)
+                                              (format "%.3f" result)
+                                              (str result))]
+                             (println (format "Correct output: %.3f | Program output: %s" correct-output result-str))))
                          ; Record the behavior
                          (swap! behavior conj result)
                          ; Error is float error rounded to 3 decimal places
