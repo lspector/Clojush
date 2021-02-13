@@ -87,26 +87,28 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
-                     (for [[input1 correct-output] (case data-cases
-                                                     :train train-cases
-                                                     :test test-cases
-                                                     [])]
-                       (let [final-state (run-push (:program individual)
-                                                   (->> (make-push-state)
-                                                        (push-item input1 :input)))
-                             result (top-item :integer final-state)]
-                         (when print-outputs
-                           (println (format "Correct output: %s | Program output: %s" correct-output result)))
+                    (for [[input1 correct-output] (case data-cases
+                                                    :train train-cases
+                                                    :test test-cases
+                                                    data-cases)]
+                      (let [final-state (run-push (:program individual)
+                                                  (->> (make-push-state)
+                                                       (push-item input1 :input)))
+                            result (top-item :integer final-state)]
+                        (when print-outputs
+                          (println (format "Correct output: %s | Program output: %s" correct-output result)))
                          ; Record the behavior
-                         (swap! behavior conj result)
+                        (swap! behavior conj result)
                          ; Error is difference of integers
-                         (if (number? result)
-                           (abs (- result correct-output)) ;distance from correct integer
-                           1000000) ;penalty for no return value
-                           )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+                        (if (number? result)
+                          (abs (- result correct-output)) ;distance from correct integer
+                          1000000) ;penalty for no return value
+                        )))]
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual
+                 :behaviors (reverse @behavior)
+                 :errors errors))))))
 
 (defn get-luhn-train-and-test
   "Returns the train and test cases."
@@ -154,6 +156,7 @@
 (def argmap
   {:error-function (make-luhn-error-function-from-cases (first luhn-train-and-test-cases)
                                                         (second luhn-train-and-test-cases))
+   :training-cases (first luhn-train-and-test-cases)
    :atom-generators luhn-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
@@ -164,8 +167,7 @@
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
+                                    [:alternation :uniform-mutation] 0.5}
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
@@ -173,5 +175,4 @@
    :problem-specific-initial-report luhn-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000
-   })
+   :max-error 1000000})

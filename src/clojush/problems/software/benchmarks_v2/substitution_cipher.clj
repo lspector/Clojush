@@ -82,29 +82,31 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (flatten
-                      (doall
-                       (for [[[input1 input2 input3] correct-output] (case data-cases
+                    (doall
+                     (for [[[input1 input2 input3] correct-output] (case data-cases
                                                                      :train train-cases
                                                                      :test test-cases
-                                                                     [])]
-                         (let [final-state (run-push (:program individual)
-                                                     (->> (make-push-state)
-                                                       (push-item input1 :input)
-                                                       (push-item input2 :input)
-                                                       (push-item input3 :input)))
-                               result (top-item :string final-state)]
-                           (when print-outputs
-                             (println (format "| Correct output: %s\n| Program output: %s\n" correct-output (str result))))
+                                                                     data-cases)]
+                       (let [final-state (run-push (:program individual)
+                                                   (->> (make-push-state)
+                                                        (push-item input1 :input)
+                                                        (push-item input2 :input)
+                                                        (push-item input3 :input)))
+                             result (top-item :string final-state)]
+                         (when print-outputs
+                           (println (format "| Correct output: %s\n| Program output: %s\n" correct-output (str result))))
                            ; Record the behavior
-                           (swap! behavior conj result)
+                         (swap! behavior conj result)
                            ; Error is Levenshtein distance
-                          (if (string? result)
-                              (levenshtein-distance correct-output (str result))
-                              10000) ; penalty for no return value
-                       ))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+                         (if (string? result)
+                           (levenshtein-distance correct-output (str result))
+                           10000) ; penalty for no return value
+                         ))))]
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual
+                 :behaviors (reverse @behavior)
+                 :errors errors))))))
 
 (defn get-substitution-cipher-train-and-test
   "Returns the train and test cases."
@@ -152,6 +154,7 @@
 (def argmap
   {:error-function (make-substitution-cipher-error-function-from-cases (first substitution-cipher-train-and-test-cases)
                                                                        (second substitution-cipher-train-and-test-cases))
+   :training-cases (first substitution-cipher-train-and-test-cases)
    :atom-generators substitution-cipher-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250

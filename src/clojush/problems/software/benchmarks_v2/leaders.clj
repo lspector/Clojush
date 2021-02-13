@@ -72,30 +72,32 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
-                     (for [[input correct-output] (case data-cases
-                                                                    :train train-cases
-                                                                    :test test-cases
-                                                                    [])]
-                       (let [final-state (run-push (:program individual)
-                                                   (->> (make-push-state)
-                                                     (push-item input :input)))
-                             result (top-item :vector_integer final-state)]
-                         (when print-outputs
-                           (println (format "Correct output: %2s | Program output: %s" (str correct-output) (str result))))
+                    (for [[input correct-output] (case data-cases
+                                                   :train train-cases
+                                                   :test test-cases
+                                                   data-cases)]
+                      (let [final-state (run-push (:program individual)
+                                                  (->> (make-push-state)
+                                                       (push-item input :input)))
+                            result (top-item :vector_integer final-state)]
+                        (when print-outputs
+                          (println (format "Correct output: %2s | Program output: %s" (str correct-output) (str result))))
                          ; Record the behavior
-                         (swap! behavior conj result)
+                        (swap! behavior conj result)
                          ; Error is integer error at each position in the vectors, with additional penalties for incorrect size vector
-                         (if (vector? result)
-                           (+' (apply +' (map (fn [cor res]
-                                                (abs (- cor res)))
-                                              correct-output
-                                              result))
-                               (*' 1000 (abs (- (count correct-output) (count result))))) ; penalty of 1000 times difference in sizes of vectors
-                           1000000) ; penalty for no return value
-                         )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+                        (if (vector? result)
+                          (+' (apply +' (map (fn [cor res]
+                                               (abs (- cor res)))
+                                             correct-output
+                                             result))
+                              (*' 1000 (abs (- (count correct-output) (count result))))) ; penalty of 1000 times difference in sizes of vectors
+                          1000000) ; penalty for no return value
+                        )))]
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual
+                 :behaviors (reverse @behavior)
+                 :errors errors))))))
 
 (defn get-leaders-train-and-test
   "Returns the train and test cases."
@@ -143,6 +145,7 @@
 (def argmap
   {:error-function (make-leaders-error-function-from-cases (first leaders-train-and-test-cases)
                                                            (second leaders-train-and-test-cases))
+   :training-cases (first leaders-train-and-test-cases)
    :atom-generators leaders-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
@@ -153,8 +156,7 @@
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
+                                    [:alternation :uniform-mutation] 0.5}
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
@@ -162,5 +164,4 @@
    :problem-specific-initial-report leaders-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000
-   })
+   :max-error 1000000})

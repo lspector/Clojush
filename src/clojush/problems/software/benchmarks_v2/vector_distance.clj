@@ -79,32 +79,33 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
-                     (for [[[input1 input2] correct-output] (case data-cases
-                                                                   :train train-cases
-                                                                   :test test-cases
-                                                                   [])]
-                       (let [final-state (run-push (:program individual)
-                                                   (->> (make-push-state)
-                                                   (push-item input2 :input)
-                                                   (push-item input1 :input)))
-                             result (top-item :float final-state)]
-                             (when print-outputs
-                               (let [res-str (if (float? result)
-                                               (format "%.3f" result)
-                                               (str result))]
-                                 (println (format "Correct output: %.3f | Program output: %s" (float correct-output) res-str))))
+                    (for [[[input1 input2] correct-output] (case data-cases
+                                                             :train train-cases
+                                                             :test test-cases
+                                                             data-cases)]
+                      (let [final-state (run-push (:program individual)
+                                                  (->> (make-push-state)
+                                                       (push-item input2 :input)
+                                                       (push-item input1 :input)))
+                            result (top-item :float final-state)]
+                        (when print-outputs
+                          (let [res-str (if (float? result)
+                                          (format "%.3f" result)
+                                          (str result))]
+                            (println (format "Correct output: %.3f | Program output: %s" (float correct-output) res-str))))
                          ; Record the behavior
-                         (swap! behavior conj result)
+                        (swap! behavior conj result)
                          ; Error is float error rounded to 3 decimal places
-                         (round-to-n-decimal-places
-                          (if (number? result)
-                            (abs (- result correct-output)) ; distance from correct integer
-                            1000000.0) ; penalty for no return value
-                          3)
-                           )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+                        (round-to-n-decimal-places
+                         (if (number? result)
+                           (abs (- result correct-output)) ; distance from correct integer
+                           1000000.0) ; penalty for no return value
+                         3))))]
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual
+                 :behaviors (reverse @behavior)
+                 :errors errors))))))
 
 (defn get-vector-distance-train-and-test
   "Returns the train and test cases."
@@ -152,6 +153,7 @@
 (def argmap
   {:error-function (make-vector-distance-error-function-from-cases (first vector-distance-train-and-test-cases)
                                                                    (second vector-distance-train-and-test-cases))
+   :training-cases (first vector-distance-train-and-test-cases)
    :atom-generators vector-distance-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250

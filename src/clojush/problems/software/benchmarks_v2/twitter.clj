@@ -73,26 +73,28 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
-                     (for [[input1 correct-output] (case data-cases
-                                                     :train train-cases
-                                                     :test test-cases
-                                                     [])]
-                       (let [final-state (run-push (:program individual)
-                                                   (->> (make-push-state)
-                                                     (push-item input1 :input)))
-                             result (top-item :string final-state)]
-                         (when print-outputs
-                           (println (format "| Correct output: %s\n| Program output: %s\n" (str correct-output) (str result))))
+                    (for [[input1 correct-output] (case data-cases
+                                                    :train train-cases
+                                                    :test test-cases
+                                                    data-cases)]
+                      (let [final-state (run-push (:program individual)
+                                                  (->> (make-push-state)
+                                                       (push-item input1 :input)))
+                            result (top-item :string final-state)]
+                        (when print-outputs
+                          (println (format "| Correct output: %s\n| Program output: %s\n" (str correct-output) (str result))))
                          ; Record the behavior
-                         (swap! behavior conj result)
+                        (swap! behavior conj result)
                          ; Error is Levenshtein distance
-                         (if (string? result)
-                            (levenshtein-distance correct-output (str result))
-                            10000) ; penalty for no return value
-                         )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+                        (if (string? result)
+                          (levenshtein-distance correct-output (str result))
+                          10000) ; penalty for no return value
+                        )))]
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual
+                 :behaviors (reverse @behavior)
+                 :errors errors))))))
 
 (defn get-twitter-train-and-test
   "Returns the train and test cases."
@@ -140,6 +142,7 @@
 (def argmap
   {:error-function (make-twitter-error-function-from-cases (first twitter-train-and-test-cases)
                                                            (second twitter-train-and-test-cases))
+   :training-cases (first twitter-train-and-test-cases)
    :atom-generators twitter-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250

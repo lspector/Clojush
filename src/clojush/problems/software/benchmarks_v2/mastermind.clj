@@ -130,9 +130,9 @@
                     (doall
                      (for [[[input1 input2] [correct-output1 correct-output2]]
                                                      (case data-cases
-                                                     :train train-cases
-                                                     :test test-cases
-                                                     [])]
+                                                       :train train-cases
+                                                       :test test-cases
+                                                       data-cases)]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                         (push-item :no-output :output)
@@ -155,9 +155,11 @@
                                (abs (- result2 correct-output2)) ;distance from correct integer
                                1000000) ;penalty for no return value
                            )))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (if (= data-cases :test)
+          (assoc individual :test-errors errors)
+          (assoc individual
+                 :behaviors (reverse @behavior)
+                 :errors errors))))))
 
 (defn get-mastermind-train-and-test
   "Returns the train and test cases."
@@ -205,6 +207,7 @@
 (def argmap
   {:error-function (make-mastermind-error-function-from-cases (first mastermind-train-and-test-cases)
                                                               (second mastermind-train-and-test-cases))
+   :training-cases (first mastermind-train-and-test-cases)
    :atom-generators mastermind-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
@@ -215,8 +218,7 @@
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
-                                    }
+                                    [:alternation :uniform-mutation] 0.5}
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
@@ -224,5 +226,4 @@
    :problem-specific-initial-report mastermind-initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
-   :max-error 1000000
-   })
+   :max-error 1000000})
