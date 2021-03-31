@@ -1,7 +1,7 @@
 ;; snow_day.clj
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
-;; Problem inspired by our introductory level program languages course
+;; Problem inspired by our introductory level programming course
 
 (ns clojush.problems.software.benchmarks-v2.snow-day
   (:use clojush.pushgp.pushgp
