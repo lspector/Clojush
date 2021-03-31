@@ -10,22 +10,6 @@
         clojure.math.numeric-tower)
   (:require [clojure.string :as str]))
 
-; Atom generators
-(def atom-generators
-  (make-proportional-atom-generators
-   (concat
-    (registered-for-stacks [:integer :boolean :string :char :exec]) ; stacks
-    (list (tag-instruction-erc [:integer :boolean :string :char :exec] 1000) ; tags
-          (tagged-instruction-erc 1000)))
-   (list 'in1) ; inputs
-   (list 4
-         5
-         \space ; constants
-         (fn [] (lrand-nth (map char (range 97 122)))) ; visible character ERC
-         (fn [] (spin-words-input (lrand-int 21)))) ; string ERC
-   {:proportion-inputs 0.15
-    :proportion-constants 0.05}))
-
 (defn word-generator
   "Generates words at a nice distribution for Spin Words
    80% of the time word will have length in range [1, 8].
@@ -50,6 +34,22 @@
     (if (not= (last words) \space)
       words
       (apply str (butlast words)))))
+
+; Atom generators
+(def atom-generators
+  (make-proportional-atom-generators
+   (concat
+    (registered-for-stacks [:integer :boolean :string :char :exec]) ; stacks
+    (list (tag-instruction-erc [:integer :boolean :string :char :exec] 1000) ; tags
+          (tagged-instruction-erc 1000)))
+   (list 'in1) ; inputs
+   (list 4
+         5
+         \space ; constants
+         (fn [] (lrand-nth (map char (range 97 122)))) ; visible character ERC
+         (fn [] (spin-words-input (lrand-int 21)))) ; string ERC
+   {:proportion-inputs 0.15
+    :proportion-constants 0.05}))
 
 ; A list of data domains for the problem. Each domain is a vector containing
 ; a "set" of inputs and two integers representing how many cases from the set

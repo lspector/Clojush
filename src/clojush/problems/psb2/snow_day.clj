@@ -3,7 +3,7 @@
 ;;
 ;; Problem inspired by our introductory level programming course
 
-(ns clojush.problems.software.benchmarks-v2.snow-day
+(ns clojush.problems.psb2.snow-day
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
