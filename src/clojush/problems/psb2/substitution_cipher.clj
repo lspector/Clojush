@@ -1,23 +1,22 @@
 ;; substitution_cipher.clj
 ;; Peter Kelly, pxkelly@hamilton.edu
 ;;
+;; Problem inspired by: https://www.codewars.com/kata/52eb114b2d55f0e69800078d
 
-(ns clojush.problems.software.benchmarks-v2.substitution-cipher
+(ns clojush.problems.psb2.substitution-cipher
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
         [clojure.math numeric-tower]))
 
 ; Atom generators
-(def substitution-cipher-atom-generators
+(def atom-generators
   (make-proportional-atom-generators
    (concat
-    (registered-for-stacks [:integer :boolean :exec :char :string])
+    (registered-for-stacks [:integer :boolean :exec :char :string]) ; stacks
     (list (tag-instruction-erc [:integer :boolean :exec :char :string] 1000) ; tags
           (tagged-instruction-erc 1000)))
-   (list 'in1
-         'in2
-         'in3) ; inputs
+   (list 'in1 'in2 'in3) ; inputs
    (list ""
          0) ; constants
    {:proportion-inputs 0.15
@@ -36,12 +35,12 @@
      (apply str map2)
      (apply str (repeatedly len-code #(rand-nth map1))))))
 
-;; A list of data domains for the problem. Each domain is a vector containing
-;; a "set" of inputs and two integers representing how many cases from the set
-;; should be used as training and testing cases respectively. Each "set" of
-;; inputs is either a list or a function that, when called, will create a
-;; random element of the set.
-(def substitution-cipher-data-domains
+; A list of data domains for the problem. Each domain is a vector containing
+; a "set" of inputs and two integers representing how many cases from the set
+; should be used as training and testing cases respectively. Each "set" of
+; inputs is either a list or a function that, when called, will create a
+; random element of the set.
+(def data-domains
   [[(list ["" "" ""]
           ["a" "a" "a"]
           ["j" "h" "j"]
@@ -51,17 +50,14 @@
           ["o" "z" "oooooooooooooooooooooooooo"]
           ["abcdefghijklmnopqrstuvwxyz" "zyxwvutsrqponmlkjihgfedcba" "bvafvuqgjkkbeccipwdfqttgzl"]
           ["abcdefghijklmnopqrstuvwxyz" "cdqutzayxshgfenjowrkvmpbil" "thequickbrownfxjmpsvlazydg"]
-          ["otghvwmkclidzryxsfqeapnjbu" "alpebhxmnrcyiosvtgzjwuqdfk" "aaabbbccc"]) 10 0] ;; "Special" inputs covering most base cases.
+          ["otghvwmkclidzryxsfqeapnjbu" "alpebhxmnrcyiosvtgzjwuqdfk" "aaabbbccc"]) 10 0] ; "Special" inputs covering most base cases.
    [(fn [] (substitution-cipher-input (inc (lrand-int 26))
                                       (rand-int 27))) 190 2000]])
 
-;;Can make substitution-cipher test data like this:
-;(test-and-train-data-from-domains substitution-cipher-data-domains)
-
 ; Helper function for error function
-(defn substitution-cipher-test-cases
+(defn create-test-cases
   "Takes a sequence of inputs and gives IO test cases of the form
-   [input output]."
+   [[input1 input2 input3] output]."
   [inputs]
   (map (fn [[in1 in2 in3]]
          (vector [in1 in2 in3]
@@ -69,13 +65,14 @@
                                  (map char in3)))))
        inputs))
 
-(defn make-substitution-cipher-error-function-from-cases
+(defn make-error-function-from-cases
+  "Creates and returns the error function based on the train/test cases."
   [train-cases test-cases]
-  (fn the-actual-substitution-cipher-error-function
+  (fn the-actual-error-function
     ([individual]
-     (the-actual-substitution-cipher-error-function individual :train))
-    ([individual data-cases] ;; data-cases should be :train or :test
-     (the-actual-substitution-cipher-error-function individual data-cases false))
+     (the-actual-error-function individual :train))
+    ([individual data-cases] ; data-cases should be :train or :test
+     (the-actual-error-function individual data-cases false))
     ([individual data-cases print-outputs]
      (let [behavior (atom '())
            errors (flatten
@@ -105,26 +102,26 @@
                 :behaviors (reverse @behavior)
                 :errors errors))))))
 
-(defn get-substitution-cipher-train-and-test
+(defn get-train-and-test
   "Returns the train and test cases."
   [data-domains]
-  (map sort (map substitution-cipher-test-cases
+  (map sort (map create-test-cases
                  (test-and-train-data-from-domains data-domains))))
 
 ; Define train and test cases
-(def substitution-cipher-train-and-test-cases
-  (get-substitution-cipher-train-and-test substitution-cipher-data-domains))
+(def train-and-test-cases
+  (get-train-and-test data-domains))
 
-(defn substitution-cipher-initial-report
+(defn initial-report
   [argmap]
   (println "Train and test cases:")
-  (doseq [[i case] (map vector (range) (first substitution-cipher-train-and-test-cases))]
+  (doseq [[i case] (map vector (range) (first train-and-test-cases))]
     (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-  (doseq [[i case] (map vector (range) (second substitution-cipher-train-and-test-cases))]
+  (doseq [[i case] (map vector (range) (second train-and-test-cases))]
     (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
   (println ";;******************************"))
 
-(defn substitution-cipher-report
+(defn custom-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
   (let [best-test-errors (:test-errors (error-function best :test))
@@ -141,17 +138,18 @@
     (println ";;------------------------------")
     (println "Outputs of best individual on training cases:")
     (error-function best :train true)
-    (println ";;******************************"))) ;; To do validation, could have this function return an altered best individual
-       ;; with total-error > 0 if it had error of zero on train but not on validation
-       ;; set. Would need a third category of data cases, or a defined split of training cases.
+    (println ";;******************************")
+    )) ; To do validation, could have this function return an altered best individual
+       ; with total-error > 0 if it had error of zero on train but not on validation
+       ; set. Would need a third category of data cases, or a defined split of training cases.
 
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-substitution-cipher-error-function-from-cases (first substitution-cipher-train-and-test-cases)
-                                                                       (second substitution-cipher-train-and-test-cases))
-   :training-cases (first substitution-cipher-train-and-test-cases)
-   :atom-generators substitution-cipher-atom-generators
+  {:error-function (make-error-function-from-cases (first train-and-test-cases)
+                                                                       (second train-and-test-cases))
+   :training-cases (first train-and-test-cases)
+   :atom-generators atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
    :evalpush-limit 2000
@@ -165,8 +163,8 @@
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
-   :problem-specific-report substitution-cipher-report
-   :problem-specific-initial-report substitution-cipher-initial-report
+   :problem-specific-report custom-report
+   :problem-specific-initial-report initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 10000})

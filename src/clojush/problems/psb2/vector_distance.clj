@@ -1,38 +1,39 @@
 ;; vector_distance.clj
 ;; Peter Kelly, pxkelly@hamilton.edu
-;;
+;; 
+;; Problem inspired by: https://www.codewars.com/kata/5a0b72484bebaefe60001867
 
-(ns clojush.problems.software.benchmarks-v2.vector-distance
+(ns clojush.problems.psb2.vector-distance
   (:use clojush.pushgp.pushgp
         [clojush pushstate interpreter random util globals]
         clojush.instructions.tag
         [clojure.math numeric-tower]))
 
 ; Atom generators
-(def vector-distance-atom-generators
+(def atom-generators
   (make-proportional-atom-generators
    (concat
-    (registered-for-stacks [:integer :boolean :exec :float :vector_float])
+    (registered-for-stacks [:integer :boolean :exec :float :vector_float]) ; stacks
     (list (tag-instruction-erc [:integer :boolean :exec :float :vector_float] 1000) ; tags
           (tagged-instruction-erc 1000)))
-   (list 'in1
-         'in2) ; inputs
+   (list 'in1 'in2) ; inputs
    (list []
          0) ; constants
    {:proportion-inputs 0.15
     :proportion-constants 0.05}))
 
 (defn vector-distance-input
-  "Makes a Vector Distance input vector of length len."
+  "Makes two vectors of length len made up of integers in the range [-100, 100] for
+   the Vector Distance input"
   [len]
   (vector (vec (repeatedly len #(- (* (rand) 200) 100)))
           (vec (repeatedly len #(- (* (rand) 200) 100)))))
 
-;; A list of data domains for the problem. Each domain is a vector containing
-;; a "set" of inputs and two integers representing how many cases from the set
-;; should be used as training and testing cases respectively. Each "set" of
-;; inputs is either a list or a function that, when called, will create a
-;; random element of the set.
+; A list of data domains for the problem. Each domain is a vector containing
+; a "set" of inputs and two integers representing how many cases from the set
+; should be used as training and testing cases respectively. Each "set" of
+; inputs is either a list or a function that, when called, will create a
+; random element of the set.
 (def vector-distance-data-domains
   [[(list [[-100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0 -100.0]
            [100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0 100.0]]
@@ -41,7 +42,7 @@
           [[42.91283] [-22.1340]]
           [[1.5 2.87 3.3324 4.654 5.123 6.867 7.5324 8.534 9.4132 10.43]
            [-1.534 -2.543 -3.423 -4.13427 -5.714 -6.713 -7.4328 -8.43 -9.73 -10.752]]
-          [[0.4378 0.634 0.1234 0.764 0.243] [-0.254 -0.1223 -0.19582 -0.8971 -0.8743]]) 5 0]
+          [[0.4378 0.634 0.1234 0.764 0.243] [-0.254 -0.1223 -0.19582 -0.8971 -0.8743]]) 5 0] ; "Special" inputs covering base cases
    [(fn [] (vector-distance-input 1)) 5 50] ; Size 1 inputs
    [(fn [] (vector-distance-input 2)) 30 300] ; Size 2 inputs
    [(fn [] (vector-distance-input 3)) 30 300] ; Size 3 inputs
@@ -49,31 +50,29 @@
    [(fn [] (vector-distance-input 5)) 10 100] ; Size 5 inputs
    [(fn [] (vector-distance-input (+ (lrand-int 15) 6))) 100 1050]])
 
-;;Can make Vector Distance test data like this:
-;(test-and-train-data-from-domains vector-distance-data-domains)
-
-; Helper function for error function
 (defn euclidean-distance
   "Calculates the Euclidean squared distance between two points x and y."
   [x y]
   (expt (- x y) 2))
 
-(defn vector-distance-test-cases
+; Helper function for error function
+(defn create-test-cases
   "Takes a sequence of inputs and gives IO test cases of the form
-   [input output]."
+   [[input1 input2] output]."
   [inputs]
   (map (fn [[in1 in2]]
          (vector [in1 in2]
                  (sqrt (reduce + (map euclidean-distance in1 in2)))))
        inputs))
 
-(defn make-vector-distance-error-function-from-cases
+(defn make-error-function-from-cases
+  "Creates and returns the error function based on the train/test cases."
   [train-cases test-cases]
-  (fn the-actual-vector-distance-error-function
+  (fn the-actual-error-function
     ([individual]
-     (the-actual-vector-distance-error-function individual :train))
-    ([individual data-cases] ;; data-cases should be :train or :test
-     (the-actual-vector-distance-error-function individual data-cases false))
+     (the-actual-error-function individual :train))
+    ([individual data-cases] ; data-cases should be :train or :test
+     (the-actual-error-function individual data-cases false))
     ([individual data-cases print-outputs]
      (let [behavior (atom '())
            errors (doall
@@ -105,26 +104,26 @@
                 :behaviors (reverse @behavior)
                 :errors errors))))))
 
-(defn get-vector-distance-train-and-test
+(defn get-train-and-test
   "Returns the train and test cases."
   [data-domains]
-  (map vector-distance-test-cases
+  (map create-test-cases
        (test-and-train-data-from-domains data-domains)))
 
 ; Define train and test cases
-(def vector-distance-train-and-test-cases
-  (get-vector-distance-train-and-test vector-distance-data-domains))
+(def train-and-test-cases
+  (get-train-and-test vector-distance-data-domains))
 
-(defn vector-distance-initial-report
+(defn initial-report
   [argmap]
   (println "Train and test cases:")
-  (doseq [[i case] (map vector (range) (first vector-distance-train-and-test-cases))]
+  (doseq [[i case] (map vector (range) (first train-and-test-cases))]
     (println (format "Train Case: %3d | Input/Output: %s" i (str case))))
-  (doseq [[i case] (map vector (range) (second vector-distance-train-and-test-cases))]
+  (doseq [[i case] (map vector (range) (second train-and-test-cases))]
     (println (format "Test Case: %3d | Input/Output: %s" i (str case))))
   (println ";;******************************"))
 
-(defn vector-distance-report
+(defn custom-report
   "Custom generational report."
   [best population generation error-function report-simplifications]
   (let [best-test-errors (:test-errors (error-function best :test))
@@ -141,17 +140,18 @@
     (println ";;------------------------------")
     (println "Outputs of best individual on training cases:")
     (error-function best :train true)
-    (println ";;******************************"))) ;; To do validation, could have this function return an altered best individual
-       ;; with total-error > 0 if it had error of zero on train but not on validation
-       ;; set. Would need a third category of data cases, or a defined split of training cases.
+    (println ";;******************************")
+    )) ; To do validation, could have this function return an altered best individual
+       ; with total-error > 0 if it had error of zero on train but not on validation
+       ; set. Would need a third category of data cases, or a defined split of training cases.
 
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-vector-distance-error-function-from-cases (first vector-distance-train-and-test-cases)
-                                                                   (second vector-distance-train-and-test-cases))
-   :training-cases (first vector-distance-train-and-test-cases)
-   :atom-generators vector-distance-atom-generators
+  {:error-function (make-error-function-from-cases (first train-and-test-cases)
+                                                                   (second train-and-test-cases))
+   :training-cases (first train-and-test-cases)
+   :atom-generators atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
    :evalpush-limit 2000
@@ -165,8 +165,8 @@
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
-   :problem-specific-report vector-distance-report
-   :problem-specific-initial-report vector-distance-initial-report
+   :problem-specific-report custom-report
+   :problem-specific-initial-report initial-report
    :report-simplifications 0
    :final-report-simplifications 5000
    :max-error 1000000.0})
