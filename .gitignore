@@ -28,3 +28,5 @@ clojush.iml
 .lein-project-checksum
 scratch.clj
 .calva/
+.clj-kondo/
+.lsp
