@@ -267,6 +267,33 @@
 (define-registered string_yankdup (with-meta (yankduper :string) {:stack-types [:string :integer]}))
 (define-registered char_yankdup (with-meta (yankduper :char) {:stack-types [:char :integer]}))
 
+(defn deepduper
+  "Returns a function that yanks a copy of an item from deep in the specified stack,
+   using the top integer to indicate how deep, indexing from the bottom of the stack."
+  [type]
+  (fn [state]
+    (if (or (and (= type :integer)
+                 (not (empty? (rest (type state)))))
+            (and (not (= type :integer))
+                 (not (empty? (type state)))
+                 (not (empty? (:integer state)))))
+      (let [raw-index (stack-ref :integer 0 state)
+            with-index-popped (pop-item :integer state)
+            max-index (dec (count (type with-index-popped)))
+            actual-index (- max-index (max 0 (min raw-index max-index)))
+            item (stack-ref type actual-index with-index-popped)]
+        (push-item item type with-index-popped))
+      state)))
+
+(define-registered exec_deepdup (with-meta (deepduper :exec) {:stack-types [:exec :integer] :parentheses 0}))
+(define-registered integer_deepdup (with-meta (deepduper :integer) {:stack-types [:integer]}))
+(define-registered float_deepdup (with-meta (deepduper :float) {:stack-types [:float :integer]}))
+(define-registered code_deepdup (with-meta (deepduper :code) {:stack-types [:code :integer]}))
+(define-registered boolean_deepdup (with-meta (deepduper :boolean) {:stack-types [:boolean :integer]}))
+(define-registered zip_deepdup (with-meta (deepduper :zip) {:stack-types [:zip :integer]}))
+(define-registered string_deepdup (with-meta (deepduper :string) {:stack-types [:string :integer]}))
+(define-registered char_deepdup (with-meta (deepduper :char) {:stack-types [:char :integer]}))
+
 (defn shover
   "Returns a function that shoves an item deep in the specified stack, using the top
    integer to indicate how deep."

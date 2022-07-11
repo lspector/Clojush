@@ -1,31 +1,47 @@
-*~
-.DS_Store
+# Clojure / leiningen files
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+/lib/
+/classes/
+/target/
+/checkouts/
 .lein-deps-sum
 .lein-repl-history
+.lein-plugins/
+.lein-failures
 .nrepl-port
-/pom.xml
-/pom.xml.asc
-/clojush*.jar
-classes/
-target/
+.cpcache/
+.lein-project-checksum
+
+# Editor and backup files
+*~
+.idea
+.gorilla-port
+.ipynb_checkpoints/
+.calva/
+.clj-kondo/
+.lsp
+
+# OS Files
+.DS_Store
+
+# Results and data directories
 results/
+/data/
+logs/
+
+# Unknown / Other
 .classpath
 .project
 .settings/ccw.repl.cmdhistory.prefs
-/data/
-logs/
-lib/
 /bin
-.lein-failures
 doc/
 cov/*
 out
-.idea
 clojush.iml
-.gorilla-port
 /clojush/
-.ipynb_checkpoints/
-.lein-project-checksum
 scratch.clj
 .calva/
 .clj-kondo/
