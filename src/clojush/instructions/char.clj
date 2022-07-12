@@ -72,3 +72,31 @@
                             (= item \tab))
                         :boolean)))
       state)))
+
+(define-registered
+  char_uppercase
+  ^{:stack-types [:char]}
+  (fn [state]
+    (if (not (empty? (:char state)))
+      (let [cha (stack-ref :char 0 state)]
+        (->> (pop-item :char state)
+             (push-item
+              (if (and (>= (int cha) 97) (<= (int cha) 122))
+                (char (- (int cha) 32))
+                cha)
+              :char)))
+      state)))
+
+(define-registered
+  char_lowercase
+  ^{:stack-types [:char]}
+  (fn [state]
+    (if (not (empty? (:char state)))
+      (let [cha (stack-ref :char 0 state)]
+        (->> (pop-item :char state)
+             (push-item
+              (if (and (>= (int cha) 65) (<= (int cha) 90))
+                (char (+ (int cha) 32))
+                cha)
+              :char)))
+      state)))

@@ -43,3 +43,6 @@ out
 clojush.iml
 /clojush/
 scratch.clj
+.calva/
+.clj-kondo/
+.lsp/
