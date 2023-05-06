@@ -216,21 +216,6 @@
                    (pop-item :string state))))))
 
 (define-registered
-  string_contains ;;true if top string is a substring of second string; false otherwise
-  ^{:stack-types [:string :boolean]}
-  (fn [state]
-    (if (empty? (rest (:string state)))
-      state
-      (let [sub (top-item :string state)
-            full (stack-ref :string 1 state)
-            result-boolean (if (<= 0 (.indexOf full sub))
-                             true
-                             false)]
-        (push-item result-boolean
-                   :boolean
-                   (pop-item :string (pop-item :string state)))))))
-
-(define-registered
   string_containschar ; true if the top char is in the top string
   ^{:stack-types [:string :boolean :char]}
   (fn [state]
